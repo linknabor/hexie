@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/icon.css">
+    <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/easyui.validate.js"></script>
+    <script type="text/javascript" src="../../index.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/customer.css">
+    <title>现金券种子列表</title>
+</head>
+<body id="bodyId">
+<!-- 正中间panel -->
+	<div region="center" title="功能区" >
+	
+			<div id="dlg" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+			     closed="true" buttons="#dlg-buttons">
+			     <div class="ftitle">编辑</div>
+			    <form id="my_form"  method="post">
+			        <div class="fitem" id="form_id">
+			            <label>ID:</label>
+			            <input name="id" class="easyui-textbox" editable="false">
+			        </div>
+			        <div class="fitem" id="form_id">
+			            <label>现金券标题:</label>
+			            <input name="title" class="easyui-textbox">
+			        </div>
+			        <div class="fitem">
+			        	<label>现金券类型:</label>
+			            <select id="seedType" name="seedType"  class="easyui-combobox"  style="width:120px" style="width:500px"   editable="false">
+			                    <option value="1">订单分裂</option>
+			                    <option value="2">用户注册（唯一）</option>
+			                    <option value="3">关注现金券（唯一）</option>
+			                    <option value="4">活动发布</option>
+			                    <option value="5">订单分裂（模板）（唯一）</option>
+			            </select>
+			            <label>概率:</label>
+			            <input name="rate" style="width:100px" required="true" type="text">
+			        </div>
+			        <div class="fitem">
+			            <label>生效时间:</label>
+			            <input name="startDate" required="true" class="easyui-datetimebox" style="width:160px" editable="false"> 
+			           	至<input name="endDate" required="true" class="easyui-datetimebox" style="width:160px" editable="false">
+			        </div>
+			        <div class="fitem">
+			            <label>现金券描述:</label>
+			            <textarea class="easyui-validatebox" id="description" name="description" style="width:640px"></textarea>
+			        </div>
+			        <div class="fitem">
+			            <label>现金券图片:</label>
+			            <input class="easyui-validatebox" id="seedImg" name="seedImg" style="width:340px"></textarea>
+			        </div>
+			        <div class="fitem">
+			            <label>现金券规则:</label>
+			            <textarea class="easyui-validatebox" id="ruleDescription" name="ruleDescription" style="width:640px"></textarea>
+			        </div>
+			    </form>
+			</div>
+			<div id="dlg-buttons">
+			    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">提交</a>
+			    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+			</div>
+			
+			
+			
+<div id="ruleEditor" class="easyui-dialog" style="padding:10px 20px;top:100px" resizable="true" maximizable="true"
+     closed="true" buttons="#ruleEditor-buttons">
+    <form id="ruleEditor_form"  method="post">
+	 	 <div class="fitem">
+            <label>现金券种子ID:</label>
+            <input name="seedId" id="rule_seedId" class="easyui-textbox" style="width:50px" editable="false">
+            <label>现金券标题:</label>
+            <input  id="rule_seedName" class="easyui-textbox" style="width:180px" editable="false">
+         </div>
+         <div class="fitem">
+            <label>现金券模板ID:</label>
+            <input name="typeId" id="rule_typeId" class="easyui-textbox" style="width:50px"  editable="false">
+            <label>现金券模板:</label>
+            <input id="rule_typeName" name="typeName"" class="easyui-textbox" style="width:180px" editable="false">
+         </div>
+         <div class="fitem">
+         	<label>规则标题:</label>
+            <input name="title" style="width:100px" class="easyui-textbox"/>
+         </div>
+         <div class="fitem">
+         	<label>发放个数:</label>
+            <input id="totalCount" name="totalCount" style="width:100px" class="easyui-textbox">
+            <label>超时天数:</label>
+            <input id="expiredDays" name="expiredDays" style="width:100px" class="easyui-textbox">
+         </div>
+         <div class="fitem">
+            <label>可用时间（超时天数为0时有效）:</label>
+            <input name="useStartDate" required="true" class="easyui-datetimebox" style="width:160px" editable="false"> 
+           	至<input name="useEndDate" required="true" class="easyui-datetimebox" style="width:160px" editable="false">
+         </div>
+         <div class="fitem">
+            <label>发放时间:</label>
+            <input name="startDate" required="true" class="easyui-datetimebox" style="width:160px" editable="false"> 
+           	至<input name="endDate" required="true" class="easyui-datetimebox" style="width:160px" editable="false">
+         </div>
+    </form>
+</div>
+<div id="ruleEditor-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="addRuleSubmit()">添加</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#ruleEditor').dialog('close')">取消</a>
+</div>
+			
+
+			 <div id="toolbar">
+			     <div>
+				     <form id="queryForm" method="post">
+				     ID:<input name="id" class="easyui-textbox" >
+				     名字:<input name="name" class="easyui-validatebox">
+				     <a href="#" class="easyui-linkbutton"  plain="true" iconCls="icon-search" onclick="query()">查询</a>
+					</form>
+				
+					
+			    <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
+			    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="myedit()">编辑</a>
+			    <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="showRule()">查看规则</a>
+			    <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="downloadExcel()">导出</a>
+			    </div>
+			</div>
+			<table id="myGrid" title="xx" height="300px">
+			</table>
+	</div>
+	<div id="rules_dialog"  class="easyui-dialog" 
+		style=""  resizable="true" maximizable="true" closed="true"
+		data-options="title:'相关规则',toolbar:'#rules_dialog_tb',modal:true">
+		<div id="rules_dialog_content" class="easyui-layout" style="width:100%;height:300px">
+			<div data-options="region:'east',title:'现金券类型',split:true" style="width:80%;">
+				<table id="couponTypeGrid">
+				</table>
+			</div>
+		    <div data-options="region:'center',title:'现金券规则'" style="background:#eee;">
+		    	<table id="rulesGrid" style="height:250px" >
+				</table>
+		    </div>
+		    <div data-options="region:'north'" style="background:#ddd;">
+		    	现金券活动：<span id="seed_title"  style="color:red;font-style:bold"></span>
+		    	 活动ID：<span id="seed_id" style="color:red;font-style:bold"></span>
+		    	
+		    </div>
+		</div>
+			
+	</div>
+	<div id="rules_dialog_tb">
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true"/>
+		<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-help',plain:true"/>
+	</div>
+<script type="text/javascript" src="list.js"></script>
+</body>
+</html>

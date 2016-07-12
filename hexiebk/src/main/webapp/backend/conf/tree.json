@@ -1,0 +1,89 @@
+[
+    {
+        "id": 8,
+        "text": "后台管理",
+        "state": "closed",
+        "children": [
+            {"id": 81, "text": "管理员列表", "attributes": { "url": "page/backendUser/list.html" }},
+            {"id": 82, "text": "菜单列表", "attributes": { "url": "page/backendMenu/list.html" }},
+            {"id": 83,"text": "角色管理","attributes": {"url": "page/backendRole/list.html"}}
+        ]
+	},{
+        "id": 1,
+        "text": "用户管理",
+        "state": "closed",
+        "children": [
+            {"id": 11, "text": "用户列表", "attributes": { "url": "page/user/list.html" }},
+            {"id": 12,"text": "用户地址管理","attributes": {"url": "page/address/list.html"}},
+			{"id": 13,"text": "短信列表","attributes": {"url": "page/smsHis/list.html"}},
+			{"id": 14,"text": "用户消息","attributes": {"url": "page/userNotice/list.html"}},
+            {"id": 15,"text": "用户反馈(暂时没用)", "attributes": {"url":"page/feedback/list.html"}},
+            {"id": 16,"text": "操作记录","attributes": {"url": "page/operation/list.html"}}
+        ]
+	},
+	{   
+        "id": 2,
+        "text": "区域管理",
+        "state": "closed",
+        "children": [
+            {"id": 21,"text": "区域","attributes": {"url": "page/region/list.html"}},
+			{"id": 24,"text": "消息","attributes": {"url": "page/message/list.html"}}
+        ]
+    },
+    
+    {
+        "id": 3,
+        "text": "商品管理",
+        "state": "closed",
+        "children": [
+        	 {"id":30,"text": "商户","attributes": {"url": "page/merchant/list.html"}},
+             {"id": 31,"text": "商品管理","attributes": {"url": "page/product/list.html"}},
+             {"id": 32,"text": "商品支持区域管理","attributes": {"url": "page/serviceAreaItem/list.html"}}
+        ]
+    },
+    {
+        "id": 6,
+        "text": "销售方案",
+        "state": "closed",
+        "children": [
+			{"id": 61,"text": "拼单规则（暂停）", "attributes": {"url": "page/groupBuyRule/list.html"}},
+            {"id": 62,"text": "特卖规则","attributes": {"url": "page/onSaleRule/list.html"}},
+            {"id": 63,"text": "团购规则","attributes": {"url": "page/rgroupRule/list.html"}},
+            {"id": 64,"text": "到家服务规则","attributes": {"url": "page/yuyueRule/list.html"}}
+        ]
+    },
+    {
+        "id": 7,
+        "text": "商品上架",
+        "state": "closed",
+        "children": [
+            {"id": 71,"text": "拼单上架", "attributes": {"url": "page/ruleAreaItem/list.html"}},
+            {"id": 72,"text": "特卖上架","attributes": {"url": "page/onSaleAreaItem/list.html"}},
+            {"id": 73,"text": "团购上架","attributes": {"url": "page/rgroupAreaItem/list.html"}},
+            {"id": 74,"text": "到家服务上架","attributes": {"url": "page/yuyueAreaItem/list.html"}},
+            {"id": 75,"text": "到家服务配置","attributes": {"url": "page/homeService/list.html"}}
+        ]
+    },
+    {
+        "id": 4,
+        "text": "拼单管理",
+        "state": "closed",
+        "children": [
+            {"id": 42,"text": "团购拼单","attributes": {"url": "page/groupBuyGroup/list.html"}},
+            {"id": 43,"text": "订单管理","attributes": {"url": "page/serviceOrder/list.html"}},
+            {"id": 44,"text": "参团用户列表","attributes": {"url": "page/groupUser/list.html"}},
+        	{"id": 45,"text": "支付记录","attributes": {"url": "page/paymentOrder/list.html"}},
+            {"id":46,"text": "退款记录","attributes": {"url": "page/refundOrder/list.html"}}
+        ]
+    },{
+        "id": 5,
+        "text": "预约管理",
+        "state": "closed",
+        "children": [
+        	 {"id":50,"text": "预约单","attributes": {"url": "page/yuyueOrder/list.html"}},
+             {"id": 51,"text": "阿姨来了","attributes": {"url": "page/ayiServiceOrder/list.html"}},
+             {"id": 52,"text": "尚匠汽车","attributes": {"url": "page/fasuperOrder/list.html"}}
+        ]
+    }
+            
+]

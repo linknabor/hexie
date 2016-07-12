@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/icon.css">
+    
+    <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/easyui.validate.js"></script>
+    <script type="text/javascript" src="../../index.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/customer.css">
+	    <script src="../../lib/ckeditor/ckeditor.js"></script>
+    <script src="../../lib/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript" src="../fileUpload.js"></script>
+    <title>用户列表</title>
+</head>
+<body>
+
+
+<!-- 编辑页面 -->
+<div id="dlg" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#dlg-buttons">
+     <div class="ftitle">编辑</div>
+    <form id="my_form"  method="post">
+	 	 <div class="fitem" id="form_id">
+           <label>id:</label>
+            <input name="id" class="easyui-textbox" editable="false">
+         </div>
+	
+	  <div class="fitem">
+            <label>团号:</label>
+            <input id="groupId"  name="groupId" class="easyui-textbox" >
+        </div>
+	 
+	 
+	
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">提交</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+
+<!-- 快递页面 -->
+<div id="sendGood" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#send-buttons">
+    <form id="send_form"  method="post">
+	 	 <div class="fitem">
+            <label>订单ID:</label>
+            <input name="orderId" id="send_orderId" class="easyui-textbox" style="width:180px" editable="false">
+            <label>订单号:</label>
+            <input  id="send_orderNo" class="easyui-textbox" style="width:180px" editable="false">
+         </div>
+         <div class="fitem">
+            <label>快递公司:</label>
+            <input name="logisticsName" id="send_logisticsName" class="easyui-textbox" >
+         </div>
+         <div class="fitem">
+            <label>快递单号:</label>
+            <input name="logisticsNo"  id="send_"logisticsNo"" class="easyui-textbox">
+         </div>
+    </form>
+</div>
+
+<div id="send-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="sendGood()">发送</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#sendGood').dialog('close')">取消</a>
+</div>
+<!-- 退货页面 -->
+<div id="returnGood" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#return-buttons">
+    <form id="return_form"  method="post">
+	 	 <div class="fitem">
+            <label>订单ID:</label>
+            <input name="orderId" id="return_orderId" class="easyui-textbox" style="width:180px" editable="false">
+            <label>订单号:</label>
+            <input  id="return_orderNo" class="easyui-textbox" style="width:180px" editable="false">
+         </div>
+         <div class="fitem">
+            <label>退货原因备注:</label>
+            <input name="memo" id="return_memo" class="easyui-textbox" >
+         </div>
+    </form>
+</div>
+<div id="return-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="returnGood()">确认已退货</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#returnGood').dialog('close')">取消</a>
+</div>
+
+
+ <div id="toolbar">
+     <form id="queryForm" method="post">
+	    <div>
+	           <table>
+       <tr>
+	<td>Id:</td><td> <input name="id" class="easyui-textbox" style="width:40px" ></td>
+	<td>产品ID:</td><td><input id="productId"  name="productId" style="width:40px"></td>
+	<td>订单号:</td><td> <input id="orderNo"  name="orderNo" class="easyui-validatebox"   style="width:100px" ></td>
+	<td>手机号:</td><td> <input id="tel"  name="tel" class="easyui-validatebox"   style="width:100px" ></td>
+	<td>状态:</td>
+	<td><select id="status" name="status"  class="easyui-combobox"  panelHeight="62px"
+                editable="false">
+                <option value="12" selected>全部订单</option>
+                    <option value="0">待付款</option>
+                    <option value="1"> 已支付</option>
+					 <option value="2">已取消</option>
+<!-- 					<option value="3">待退款</option> -->
+					<option value="4">退款中</option>
+					<option value="5">已使用/已发货</option>
+					<option value="6">已签收</option>
+					<option value="9">配货中</option>
+					<option value="10">已退货</option>
+					<option value="11">已退款</option>
+            </select>
+	</td>
+	
+	<td> <a href="#" class="easyui-linkbutton"  plain="true" iconCls="icon-search" onclick="query()">查询</a>  </td>
+   </tr>
+    </table>
+		</div>
+    </form>
+	     <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
+<!-- 	    <a href="#" class="easyui-linkbutton" iconCls="icon-clear" plain="true" onclick="refund()">退款</a> -->
+<!-- 	    <a href="#" class="easyui-linkbutton" iconCls="icon-cut" plain="true" onclick="toReturn()">已退货</a> -->
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="async()">已同步商户</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-man" plain="true" onclick="toSend()">发货</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="downloadExcel()">导出</a>
+    </div>
+<table id="myGrid" title="xx"/>
+<div id="tb">
+</div>
+</table>
+<script type="text/javascript" src="list.js"></script>
+</body>
+</html>

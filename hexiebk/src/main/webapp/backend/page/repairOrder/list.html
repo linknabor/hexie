@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/icon.css">
+    <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/easyui.validate.js"></script>
+    <script type="text/javascript" src="../../index.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/customer.css">
+    <title>维修单列表</title>
+</head>
+<body>
+<!-- 编辑页面 -->
+<div id="dlg" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#dlg-buttons">
+     <div class="ftitle">编辑</div>
+    <form id="my_form"  method="post">
+        <div class="fitem" id="form_id">
+            <label>ID:</label>
+            <input name="id" class="easyui-textbox" editable="false">
+        </div>
+        <div class="fitem">
+            <label>名字:</label>
+            <input name="name" class="easyui-validatebox">
+        </div>
+        <div class="fitem"><label>xiaoquName:</label><input name="xiaoquName" class="easyui-textbox"></div>
+        <div class="fitem"><label>paySuccessTime:</label><input name="paySuccessTime" class="easyui-textbox"></div>
+        <div class="fitem"><label>memo:</label><input name="memo" class="easyui-textbox"></div>
+        <div class="fitem"><label>operatorId:</label><input name="operatorId" class="easyui-textbox"></div>
+        <div class="fitem"><label>requireDate:</label><input name="requireDate" class="easyui-textbox"></div>
+        <div class="fitem"><label>tel:</label><input name="tel" class="easyui-textbox"></div>
+        <div class="fitem"><label>assignType:</label><input name="assignType" class="easyui-textbox"></div>
+        <div class="fitem"><label>projectId:</label><input name="projectId" class="easyui-textbox"></div>
+        <div class="fitem"><label>operatorUserId:</label><input name="operatorUserId" class="easyui-textbox"></div>
+        <div class="fitem"><label>cancelReason:</label><input name="cancelReason" class="easyui-textbox"></div>
+        <div class="fitem"><label>addressId:</label><input name="addressId" class="easyui-textbox"></div>
+        <div class="fitem"><label>amount:</label><input name="amount" class="easyui-textbox"></div>
+        <div class="fitem"><label>commentService:</label><input name="commentService" class="easyui-textbox"></div>
+        <div class="fitem"><label>operatorTel:</label><input name="operatorTel" class="easyui-textbox"></div>
+        <div class="fitem"><label>userId:</label><input name="userId" class="easyui-textbox"></div>
+        <div class="fitem"><label>receiverName:</label><input name="receiverName" class="easyui-textbox"></div>
+        <div class="fitem"><label>finishTime:</label><input name="finishTime" class="easyui-textbox"></div>
+        <div class="fitem"><label>payReqTime:</label><input name="payReqTime" class="easyui-textbox"></div>
+        <div class="fitem"><label>repairType:</label><input name="repairType" class="easyui-textbox"></div>
+        <div class="fitem"><label>orderId:</label><input name="orderId" class="easyui-textbox"></div>
+        <div class="fitem"><label>commentAttitude:</label><input name="commentAttitude" class="easyui-textbox"></div>
+        <div class="fitem"><label>commentQuality:</label><input name="commentQuality" class="easyui-textbox"></div>
+        <div class="fitem"><label>cancelTime:</label><input name="cancelTime" class="easyui-textbox"></div>
+        <div class="fitem"><label>finishByUser:</label><input name="finishByUser" class="easyui-textbox"></div>
+        <div class="fitem"><label>status:</label><input name="status" class="easyui-textbox"></div>
+        <div class="fitem"><label>commentStatus:</label><input name="commentStatus" class="easyui-textbox"></div>
+        <div class="fitem"><label>operatorDeleted:</label><input name="operatorDeleted" class="easyui-textbox"></div>
+        <div class="fitem"><label>operatorCompanyName:</label><input name="operatorCompanyName" class="easyui-textbox"></div>
+        <div class="fitem"><label>commentImgUrls:</label><input name="commentImgUrls" class="easyui-textbox"></div>
+        <div class="fitem"><label>imgUrls:</label><input name="imgUrls" class="easyui-textbox"></div>
+        <div class="fitem"><label>userDeleted:</label><input name="userDeleted" class="easyui-textbox"></div>
+        <div class="fitem"><label>operatorName:</label><input name="operatorName" class="easyui-textbox"></div>
+        <div class="fitem"><label>address:</label><input name="address" class="easyui-textbox"></div>
+        <div class="fitem"><label>publicProject:</label><input name="publicProject" class="easyui-textbox"></div>
+        <div class="fitem"><label>cancelReasonType:</label><input name="cancelReasonType" class="easyui-textbox"></div>
+        <div class="fitem"><label>payType:</label><input name="payType" class="easyui-textbox"></div>
+        <div class="fitem"><label>comment:</label><input name="comment" class="easyui-textbox"></div>
+        <div class="fitem"><label>projectName:</label><input name="projectName" class="easyui-textbox"></div>
+        <div class="fitem"><label>openId:</label><input name="openId" class="easyui-textbox"></div>
+
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">提交</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+
+
+
+
+ <div id="toolbar">
+     <form id="queryForm" method="post">
+	    <div>
+	     <table>
+           <tr> 
+ 			<td>ID:</td>
+            <td> <input name="id" class="easyui-textbox" ></td>
+            <td>名字:</td>
+            <td><input name="name" class="easyui-validatebox"></td>
+		 	<td><a href="#" class="easyui-linkbutton"  plain="true" iconCls="icon-search" onclick="query()">查询</a></td>
+           </tr>
+         </table>
+		</div>
+    </form>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroy()">删除</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="downloadExcel()">导出</a>
+</div>
+<table id="myGrid" title="xx"/>
+<div id="tb">
+</div>
+</table>
+<script type="text/javascript" src="list.js"></script>
+</body>
+</html>

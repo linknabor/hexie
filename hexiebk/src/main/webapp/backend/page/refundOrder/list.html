@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/icon.css">
+    
+    <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/easyui.validate.js"></script>
+    <script type="text/javascript" src="../../index.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/customer.css">
+	    <script src="../../lib/ckeditor/ckeditor.js"></script>
+    <script src="../../lib/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript" src="../fileUpload.js"></script>
+    <title>XXX</title>
+</head>
+<body>
+
+
+<!-- 锟洁辑页锟斤拷 -->
+<div id="dlg" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#dlg-buttons">
+     <div class="ftitle">退款单</div>
+    <form id="my_form"  method="post">
+	 	      <div class="fitem" id="form_id">
+           <label>Id:</label>
+            <input name="id" class="easyui-textbox" editable="false">
+         </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="mysave()">提交</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+
+ <div id="toolbar">
+     <form id="queryForm" method="post">
+	    <div>
+	           <table>
+       <tr>
+	  
+	<td>Id:</td>
+            <td> <input name="id" class="easyui-textbox" >
+        </td>
+        </tr>
+		
+
+	   
+       
+    </table>
+		</div>
+    </form>
+    <td> <a href="#" class="easyui-linkbutton"  plain="true" iconCls="icon-search" onclick="query()">查询</a>  </td>
+	     <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="sync()">同步微信退款状态</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="downloadExcel()">导出</a>
+    </div>
+<table id="myGrid" title="xx"/>
+<div id="tb">
+</div>
+</table>
+
+
+
+
+
+
+<script type="text/javascript" src="list.js"></script>
+
+
+</body>
+</html>

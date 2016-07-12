@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/icon.css">
+    <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery.easyui.min.js"></script>
+
+    <script type="text/javascript" src="../../index.js"></script>
+    <script src="../../lib/ckeditor/ckeditor.js"></script>
+    <script src="../../lib/ckeditor/adapters/jquery.js"></script>
+    <script type="text/javascript" src="../fileUpload.js"></script>
+    <title>文章列表</title>
+</head>
+<body>
+<table id="articleGrid" title="文章列表" class="easyui-datagrid" style="width:100%;"
+       url=BASEURL+"/wechat/backend/content/query.json"
+       toolbar="#toolbar"
+       method='POST'  
+       page="1"
+       pageSize="20"
+       rownumbers="true" fitColumns="false" singleSelect="true"  pagination="true">
+    <thead>
+    <tr>
+        <th field="id" width="50">ID</th>
+        <th field="title">标题</th>
+        <th field="author">作者</th>
+        <th field="subCategoryId" formatter="catFormatter">子分类</th>
+        <th field="coverUrl">封面</th>
+        <th field="url">Url</th>
+        <th field="createDate" width="120" formatter="dateFormatter">创建日期</th>
+    </tr>
+    </thead>
+</table>
+<div id="toolbar">
+    <table>
+        <tr>
+            <td>Id:</td>
+            <td><input id="articleId" name="articleId" class="f1 easyui-numberbox"/></td>
+            <td>类型:</td>
+            <td><input id="queryCategoryId"  class="easyui-combobox"  style="width:100px"
+                       valueField="id" textField="name" groupField="pName">
+                </input></td>
+            <td>创建开始日期：</td>
+            <td><input id="createFrom" name="createFrom" class="f1 easyui-datebox"/></td>
+            <td>创建结束日期：</td>
+            <td><input id="createTo" name="createTo" class="f1 easyui-datebox"/></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td> <a href="#" class="easyui-linkbutton"  plain="true" iconCls="icon-search" onclick="query()">查询</a>  </td>
+            <td colspan="5"></td>
+        </tr>
+    </table>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newContent()">添加文章</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editContent()">编辑文章</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="deleteContent()">删除文章</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-redo" plain="true" onclick="initContent()">旧后台迁移文章</a>
+</div>
+
+<!-- 编辑页面 -->
+<div id="dlg" class="easyui-dialog" style="width:600px;height:300px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#dlg-buttons">
+    <form id="content_form"  method="post">
+        <div class="fitem">
+            <label>ID:</label>
+            <input name="id" style="width:400px" class="easyui-textbox" editable="false">
+        </div>
+        <div class="fitem">
+            <label>标题:</label>
+            <input name="title" style="width:400px" class="easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label>作者:</label>
+            <input name="author" style="width:400px" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label>来源:</label>
+            <input name="source">`
+        </div>
+        <div class="fitem">
+            <label>内容:</label>
+            <textarea class="easyui-validatebox" id="content_content" style="width:1024px"></textarea>
+            <input id="content" name="content" type="hidden"/>
+        </div>
+        <div class="fitem">
+            <label>图片:</label>
+            <input id="file"  style="width:400px" type="file">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-save"  onclick="ajaxFileUpload()">上传</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-save"  onclick="ajaxFileUploadWithCover()">上传并设为封面</a>
+        </div>
+        <div class="fitem">
+            <label>封面URL:</label>
+            <input name="coverUrl" name="coverUrl">
+        </div>
+        <div class="fitem">
+            <label>类型:</label>
+            <input id="categorySelect" class="easyui-combobox"  style="width:100px"
+                   onSelect=chooseCategory
+                   valueField="id" textField="name" groupField="pName">
+            </input>
+            <input id="subCategoryId" name="subCategoryId" type="hidden"/>
+            <input id="categoryId" name="categoryId" type="hidden"/>
+        </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveContent()">提交文章</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+
+<script type="text/javascript" src="list.js"></script>
+</body>
+</html>

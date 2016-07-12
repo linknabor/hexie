@@ -1,0 +1,119 @@
+package com.yumu.hexie.backend.web;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.yumu.hexie.backend.web.dto.BaseResult;
+import com.yumu.hexie.backend.web.dto.PageResult;
+import com.yumu.hexie.backend.web.req.PageReq;
+import com.yumu.hexie.common.config.ViewExcel;
+import com.yumu.hexie.common.config.ViewExcel.RowProcessor;
+import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.model.common.#MODEL#;
+import com.yumu.hexie.model.common.#MODEL#Repository;
+
+@Controller(value = "#model#Manager")
+public class #MODEL#Manager extends BaseController {
+	private static final Logger Log = LoggerFactory
+			.getLogger(#MODEL#Manager.class);
+
+	private static final String MODEL = "#model#";
+	private static final String MODEL_NAME = "#name#";
+	@Inject
+	private #MODEL#Repository #model#Repository;
+
+	@RequestMapping(value = "/backend/"+MODEL + "List", method = RequestMethod.POST)
+	@ResponseBody
+	public PageResult<#MODEL#> query(PageReq pageReq,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		PageResult<#MODEL#> r = new PageResult<#MODEL#>();
+		if (pageReq != null) {
+			Page<#MODEL#> l = #model#Repository.findAll(new PageRequest(pageReq
+					.getPage() - 1, pageReq.getRows(), new Sort(Direction.DESC,
+					"id")));
+			r.setRows(l.getContent());
+			r.setTotal(l.getTotalElements());
+		}
+		return r;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/backend/"+MODEL + "/delete/{id}", method = RequestMethod.GET)
+	public BaseResult<String> delete(@PathVariable Long id) throws Exception {
+		#model#Repository.delete(id);
+		return BaseResult.successResult("删除成功");
+	}
+
+	@RequestMapping(value = "/all" + MODEL + "", method = RequestMethod.POST)
+	@ResponseBody
+	public List<#MODEL#> getAll() throws Exception {
+
+		List<#MODEL#> l = #model#Repository.findAll(new Sort(Direction.DESC,
+				"id"));
+		return l;
+	}
+
+	@RequestMapping(value = "/backend/"+MODEL, method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<#MODEL#> create(#MODEL# #model#) throws Exception {
+		#MODEL# s = #model#Repository.save(#model#);
+		return BaseResult.successResult(s);
+	}
+
+	@RequestMapping(value = "/backend/"+MODEL + "/excel", method = RequestMethod.GET)
+	public ModelAndView #model#Excel() throws Exception {
+		final List<#MODEL#> l = #model#Repository.findAll(new Sort(
+				Direction.DESC, "id"));
+		ModelAndView mv = new ModelAndView(new ViewExcel<#MODEL#>(MODEL_NAME
+				+ "列表.xls", MODEL_NAME + "短信列表", initExcelTitle(), l,
+				new RowProcessor<#MODEL#>() {
+					@Override
+					public void process(List<#MODEL#> t, HSSFSheet sheet) {
+						int rowNum = 1;
+						for (#MODEL# o : t) {
+							HSSFRow row = sheet.createRow(rowNum++);
+							fillContent(o, row);
+						}
+					}
+				}));
+		return mv;
+	}
+
+	private void fillContent(#MODEL# o, HSSFRow row) {
+		row.createCell(0, HSSFCell.CELL_TYPE_STRING).setCellValue(o.getId());
+		
+		row.createCell(10, HSSFCell.CELL_TYPE_STRING).setCellValue(
+				DateUtil.dtFormat(o.getCreateDate(), "yyyy-MM-dd HH:mm"));
+
+	}
+
+	private List<String> initExcelTitle() {
+		List<String> titles = new ArrayList<String>();
+		titles.add("ID");
+		titles.add("创建时间");
+		return titles;
+	}
+
+}

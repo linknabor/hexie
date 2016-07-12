@@ -1,0 +1,12 @@
+/common/target
+/hexie/target
+/hexiebk/target
+/common/.settings
+.classpath
+.project
+/hexie/.settings
+/hexiebk/logs
+/hexiebk/.settings
+/hexiebk/.classpath
+/hexiebk/.project
+/hexie/bin

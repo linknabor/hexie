@@ -1,0 +1,32 @@
+/**
+ * Yumu.com Inc.
+ * Copyright (c) 2014-2016 All Rights Reserved.
+ */
+package com.yumu.hexie.service.common;
+
+import java.util.Set;
+
+import com.yumu.hexie.integration.wechat.entity.AccessToken;
+
+/**
+ * <pre>
+ * 系统参数统一获取
+ * </pre>
+ *
+ * @author tongqian.ni
+ * @version $Id: SystemConfigService.java, v 0.1 2016年3月30日 上午11:51:34  Exp $
+ */
+public interface SystemConfigService {
+
+    public int querySmsChannel();
+    
+    public void saveAccessTokenInfo(AccessToken at);
+    public void saveJsToken(String jsToken);
+    public String queryJsTickets();
+    public AccessToken queryWXAccToken();
+    
+    public String[] queryActPeriod();
+    public Set<String> getUnCouponItems();
+
+	String queryValueByKey(String key);
+}

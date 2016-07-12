@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/icon.css">
+    <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/easyui.validate.js"></script>
+    <script type="text/javascript" src="../../index.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/customer.css">
+    <title>后台用户角色列表</title>
+</head>
+<body>
+<!-- 编辑页面 -->
+<div id="dlg" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#dlg-buttons">
+     <div class="ftitle">编辑</div>
+    <form id="my_form"  method="post">
+        <div class="fitem" id="form_id">
+            <label>ID:</label>
+            <input name="id" class="easyui-textbox" editable="false">
+        </div>
+        <div class="fitem">
+            <label>角色名:</label>
+            <input name="name" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label>权限:</label>
+            <input name="permissions" class="easyui-validatebox">
+        </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">提交</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+
+
+
+
+ <div id="toolbar">
+     <form id="queryForm" method="post">
+	    <div>
+	     <table>
+           <tr> 
+ 			<td>ID:</td>
+            <td> <input name="id" class="easyui-textbox" ></td>
+            <td>名字:</td>
+            <td><input name="name" class="easyui-validatebox"></td>
+		 	<td><a href="#" class="easyui-linkbutton"  plain="true" iconCls="icon-search" onclick="query()">查询</a></td>
+           </tr>
+         </table>
+		</div>
+    </form>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroy()">编辑</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="downloadExcel()">导出</a>
+</div>
+<table id="myGrid" title="xx"/>
+<div id="tb">
+</div>
+</table>
+<script type="text/javascript" src="list.js"></script>
+</body>
+</html>

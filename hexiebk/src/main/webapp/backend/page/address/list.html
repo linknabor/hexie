@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/bootstrap/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../../lib/themes/icon.css">
+    
+     
+    <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+    <script type="text/javascript" src="../../lib/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="../../lib/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="../../lib/easyui.validate.js"></script>
+
+    <script type="text/javascript" src="../../index.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../css/customer.css">
+    <title>地址列表</title>
+</head>
+<body>
+
+
+<!-- 编辑页面 -->
+<div id="dlg" class="easyui-dialog" style="padding:10px 20px;top:20px" resizable="true" maximizable="true"
+     closed="true" buttons="#dlg-buttons">
+     <div class="ftitle">编辑</div>
+    <form id="my_form"  method="post">
+        <div class="fitem" id="form_id">
+            <label>ID:</label>
+            <input name="id" class="easyui-textbox" editable="false">
+        </div>
+        <div class="fitem">
+            <label>用户:</label>
+            <input id="userId" name="userId" required="required">
+        </div>
+        <div class="fitem" >
+            <label>详细地址:</label>
+            <input id="detailAddress" name="detailAddress" required="true">
+        </div>
+        <div class="fitem" >
+            <label>收货人姓名:</label>
+            <input id="receiveName" name="receiveName" required="true">
+        </div>
+        <div class="fitem">
+            <label>关联电话:</label>
+          <input id="tel" name="tel" class="easyui-validatebox" required="true" validtype="mobile">
+        </div>
+        <div class="fitem">
+            <label>是否默认地址:</label>
+            <input name="main" value="true" type="radio">是
+            <input name="main" value="false" type="radio">否
+        </div>
+        <div class="fitem" id="formHide"style="display: none;">
+         <input name="xiaoquName" id="xiaoquName" class="easyui-textbox"  />
+         <input name="userName" id="userName" class="easyui-textbox"  />
+         <!--   wait -->
+         </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="mysave()">提交</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+ <div id="toolbar">
+     <form id="queryForm" method="post">
+	    <div>
+	           <table>
+        <tr>
+            <td>ID:</td>
+            <td>
+            <input id="id" name="id" class="f1 easyui-numberbox"/>
+            </td>
+           <td>城市:</td>
+            <td>
+            
+            <input name="cityId"  id="cityId"  >
+         </td>            
+           <td>小区:</td>
+            <td>
+            
+            <input name="xiaoquId"  id="xiaoquId" >
+         </td>
+         <td>用户:</td>
+            <td> 
+            <input id="userId"  name="userId"  >
+            </td>
+           <td>详细地址:</td>
+            <td> <input id="detailAddress" name="detailAddress" class="f1 easyui-textbox"  ></td>
+           <td>收货人姓名:</td>
+            <td> <input id="receiveName" name="receiveName" class="f1 easyui-textbox"  ></td>
+           <td colspan="1"> &nbsp;  </td>
+            </tr>
+		 <tr>
+		  <td>关联电话:</td>
+		    <td>  <input id="tel" name="tel" class="easyui-validatebox"  validtype="mobile"></td>
+		   <td>是否默认地址:</td>
+		   <td><input  name="main" value="true" type="radio">是
+            <input name="main" value="false" type="radio">否</td>
+			<td colspan="4">&nbsp;</td>
+			<td> <a href="#" class="easyui-linkbutton"  plain="true" iconCls="icon-search" onclick="query()">查询</a>  </td>
+
+		   </tr>
+       
+    </table>
+		</div>
+    </form>
+    
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="add()">添加</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">编辑</a>
+	    <a href="#" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="downloadExcel()">导出</a>
+    </div>
+<table id="myGrid" title="xx"/>
+<div id="tb">
+</div>
+</table>
+
+
+
+<script type="text/javascript" src="list.js"></script>
+</body>
+</html>
