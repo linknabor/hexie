@@ -222,7 +222,7 @@ public class BaojieServiceImpl implements BaojieService {
 
     private void notify2Operators(BaojieBill bill){
         gotongService.sendCommonYuyueBillMsg(HomeServiceConstant.SERVICE_TYPE_BAOJIE,
-                "你有一条新的保洁订单",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "");    
+                "您有一条新的订单消息",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "");    
     }
 
     /** 
