@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -14,7 +13,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
@@ -339,10 +337,21 @@ public class CouponServiceImpl implements CouponService {
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, new PageRequest(0,200));
+		
 		Integer onsaleType = !(salePlan instanceof OnSaleRule) ? null : ((OnSaleRule)salePlan).getProductType();
+		if (onsaleType==null) {
+			onsaleType = 0;
+		}
+		
+		Long orderType = 3l;
+		if (ModelConstant.ORDER_TYPE_RGROUP==salePlan.getSalePlanType()) {
+			orderType = Long.valueOf(ModelConstant.ORDER_TYPE_RGROUP);
+		}
+		
 		for(Coupon coupon : coupons) {
+			
 			if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_MARKET, 
-			    new Long(ModelConstant.ORDER_TYPE_ONSALE), new Long(onsaleType), salePlan.getProductId(), null, coupon,false)){
+					orderType, new Long(onsaleType), salePlan.getProductId(), null, coupon,false)){
 				result.add(coupon);
 			}
 		}
@@ -385,43 +394,127 @@ public class CouponServiceImpl implements CouponService {
                 return false;
             }
         }
-	   
 
-	    String typeStr = itemType + "-" + subItemType + "-" + serviceType + "-" + productId;
+//	    String typeStr = itemType + "-" + subItemType + "-" + serviceType + "-" + productId;
         if(StringUtil.isNotEmpty(coupon.getPassTypePrefix())) {
-            if(!typeStr.startsWith(coupon.getPassTypePrefix())) {
-                //正向验证
-                log.warn("不可用（正向验证）");
-                return false;
-            }
+            
+        	int cItemType = coupon.getItemType();
+        	long cSubItemType = coupon.getSubItemType();
+        	long cServiceType = coupon.getServiceType();
+        	long cProductId = coupon.getProductId();
+        	
+        	if (cItemType!=itemType) {
+        		log.warn("itemType 不可用");
+        		return false;
+			}
+        	
+        	if (cSubItemType!=0 && cSubItemType!=subItemType) {
+        		log.warn("subItemType 不可用");
+        		return false;
+			}
+        	
+        	if (cServiceType!=0 && cServiceType!=serviceType) {
+        		log.warn("serviceType 不可用");
+        		return false;
+			}
+        	
+        	if (cProductId!=0 && cProductId!=productId) {
+        		log.warn("productId 不可用");
+        		return false;
+			}
+        	
         }
 	    
         if(StringUtil.isNotEmpty(coupon.getUnPassTypePrefix())) {
-            if(typeStr.startsWith(coupon.getUnPassTypePrefix())) {
-                //反向验证
-                log.warn("不可用（反向验证）");
-                return false;
-            }
+        	
+            //反向验证
+        	int uItemType = coupon.getuItemType();
+        	long uSubItemType = coupon.getuSubItemType();
+        	long uServiceType = coupon.getuServiceType();
+        	long uProductId = coupon.getuProductId();
+        	
+        	if (uItemType == itemType) {
+        		
+        		if (uSubItemType == 0) {
+        			
+        			if (uProductId==productId) {
+        				log.warn("productId:"+uProductId+"不可用");
+                		return false;
+					}else if(uProductId==0) {
+						log.warn("subItemType:"+uSubItemType+"不可用");
+	            		return false;
+					}
+        			
+				}
+        		
+        		if (uSubItemType == subItemType) {
+        			
+        			if (uServiceType == 0) {
+        				
+        				if (uProductId==productId) {
+            				log.warn("productId:"+uProductId+"不可用");
+                    		return false;
+    					}else if(uProductId==0) {
+    						log.warn("serviceType:"+uServiceType+"不可用");
+    	            		return false;
+    					}
+        				
+    				}
+        			
+        			if (uServiceType == serviceType) {
+						
+        				if (uProductId==productId) {
+            				log.warn("productId:"+uProductId+"不可用");
+                    		return false;
+    					}else if(uProductId==0) {
+    						log.warn("serviceType:"+uServiceType+"不可用");
+    	            		return false;
+    					}
+        				
+					}
+        			
+        			
+				}
+        		
+        		
+			}
+        	
+        	
         }
 
+        /*可用商户校验*/
 		if(coupon.getMerchantId() != null && coupon.getMerchantId() != 0 ){
 		    Long merchantId = getMerchatId(new Long(itemType), serviceType, productId);
+		    log.error("merchantId:" + merchantId);
 		    if(merchantId == null || merchantId != coupon.getMerchantId()) {
-                log.warn("不可用（商户验证）");
+                log.warn("不可用（商户正向验证）");
                 return false;
 		    }
 		}
-
+		
+		/*不可用商户校验*/
+		if(coupon.getuMerchantId() != null && coupon.getuMerchantId() != 0 ){
+		    Long merchantId = getMerchatId(new Long(itemType), serviceType, productId);
+		    log.error("merchantId:" + merchantId);
+		    if(merchantId == coupon.getuMerchantId()) {
+                log.warn("不可用（商户逆向验证）");
+                return false;
+		    }
+		}
+		
         log.warn("可以用（全部通过）");
 		return true;
 	}
-	
+
+	//itemType:1, serviceType:-0, productId:10
 	public Long getMerchatId(Long mainType, Long subType, Long itemId) {
-        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_MARKET) == mainType && itemId != null && itemId != 0){
+		
+		log.error("mainType:"+mainType+",subType:"+subType+",itemId:"+itemId);
+        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_MARKET).equals(mainType) && itemId != null && !itemId.equals(0)){
             Product product = productRepository.findOne(itemId);
             return product == null ? 0 : product.getMerchantId();
         }
-        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_SERVICE) == mainType && subType != null && subType != 0) {
+        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_SERVICE).equals(mainType) && subType != null && !subType.equals(0)) {
             ServiceType type = homeItemService.queryTypeById(subType);
             return type == null ? 0 : type.getMerchantId();
         }
@@ -706,4 +799,12 @@ public class CouponServiceImpl implements CouponService {
 		return couponRepository.findTimeoutCouponByDate(fromDate, toDate, new PageRequest(0, 10000));
 	
 	}
+	
+	
+	public static void main(String[] args) {
+		
+		System.out.println(new Long(0) == 0);
+		
+	}
+	
 }

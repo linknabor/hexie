@@ -90,8 +90,7 @@ public class BaojieServiceImpl implements BaojieService {
         m.setId(type.getMerchantId());
         HomeBillItem item = new HomeBillItem();
         
-        item.setBillType(HomeServiceConstant.SERVICE_TYPE_BAOJIE);
-        item.setParentType(type.getId());
+        item.setBillType(type.getId());
         item.setCount(req.getCount());
         item.setLogo(type.getTypeIcon());
         item.setPrice(sItem.getPrice());
@@ -112,6 +111,7 @@ public class BaojieServiceImpl implements BaojieService {
         }
         ob.getBill().setTotalAmount(ob.getBill().getRealAmount());
         ob.getBill().setTypeName(type.getTypeName());
+        ob.getBill().setItemType(type.getId());
         BaojieBill bill =  baojieBillRepository.save(ob.getBill());
         for(HomeBillItem i : ob.getBill().getItems()) {
             ServiceType t = homeItemService.findTypeByItem(item.getServiceId());
@@ -222,7 +222,7 @@ public class BaojieServiceImpl implements BaojieService {
 
     private void notify2Operators(BaojieBill bill){
         gotongService.sendCommonYuyueBillMsg(HomeServiceConstant.SERVICE_TYPE_BAOJIE,
-                "你有一条新的订单",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "");    
+                "你有一条新的保洁订单",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "");    
     }
 
     /** 

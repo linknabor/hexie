@@ -117,6 +117,7 @@ public class XiyiServiceImpl implements XiyiService {
         m.setId(baseType.getMerchantId());
         ob.merchant(m);
         
+        ob.getBill().setItemType(cart.getItemType());
         YunXiyiBill bill = yunXiyiBillRepository.save(ob.getBill());
         for(HomeBillItem item : ob.getBill().getItems()) {
             ServiceType type = homeItemService.findTypeByItem(item.getServiceId());
@@ -159,7 +160,7 @@ public class XiyiServiceImpl implements XiyiService {
 
     private void notify2Operators(YunXiyiBill bill){
         gotongService.sendCommonYuyueBillMsg(HomeServiceConstant.SERVICE_TYPE_XIYI,
-                "你有一条新的订单",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "");    
+                "你有一条新的保洁订单",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "");    
     }
     /** 
      * @param payment
