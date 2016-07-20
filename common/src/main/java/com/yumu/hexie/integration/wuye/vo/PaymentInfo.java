@@ -15,10 +15,24 @@ public class PaymentInfo implements Serializable {
 	private String bill_tran_amt;
 	private String sect_name;
 	private String paymethod;
+	private String mianBill;
+	private String mianAmt;
 	private List<PaymentData> fee_data;
 	@Transient
 	public String getPaymethodStr(){
 		return KeyToNameUtil.keyToName(KeyToNameUtil.PAYMETHOD_TYPE, paymethod);
+	}
+	public String getMianBill() {
+		return mianBill;
+	}
+	public void setMianBill(String mianBill) {
+		this.mianBill = mianBill;
+	}
+	public String getMianAmt() {
+		return mianAmt;
+	}
+	public void setMianAmt(String mianAmt) {
+		this.mianAmt = mianAmt;
 	}
 	public String getTran_time() {
 		return tran_time;
