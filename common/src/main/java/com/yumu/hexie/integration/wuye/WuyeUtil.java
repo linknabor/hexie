@@ -1,4 +1,4 @@
-﻿package com.yumu.hexie.integration.wuye;
+package com.yumu.hexie.integration.wuye;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
