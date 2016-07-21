@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 
 public class WuyeUtil {
 
+	
 	private static String REQUEST_ADDRESS = "http://test.e-shequ.com/mobileInterface/mobile/";
 	
 	private static String SYSTEM_NAME;
