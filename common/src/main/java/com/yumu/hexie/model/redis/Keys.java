@@ -14,4 +14,8 @@ public final class Keys {
     public static String systemConfigKey(String key) {
         return String.format("systemConfig:%s:", key);
     }
+    
+    public static String orderCarInfoKey(long uid) {
+    	return String.format("uid:%d:orderCarInfo", uid);
+    }
 }

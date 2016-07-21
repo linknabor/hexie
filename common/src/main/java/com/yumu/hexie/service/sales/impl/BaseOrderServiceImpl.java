@@ -32,6 +32,7 @@ import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.car.CarService;
 import com.yumu.hexie.service.comment.CommentService;
 import com.yumu.hexie.service.common.ShareService;
 import com.yumu.hexie.service.common.WechatCoreService;
@@ -71,6 +72,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	
 	@Inject
 	private SalePlanService salePlanService;
+	
+	@Inject
+	private CarService carService;
 
     @Value(value = "${testMode}")
     private boolean testMode;
@@ -155,7 +159,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			item.setUserId(o.getUserId());
 			orderItemRepository.save(item);
 		}
-
+		//3.1保存车辆信息 20160721 车大大的车辆服务
+		carService.saveOrderCarInfo(o);
+		
         log.warn("[Create]订单创建OrderNo:" + o.getOrderNo());
 		//4. 订单后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
