@@ -196,11 +196,11 @@ public class WuyeController extends BaseController {
 	public BaseResult<WechatPayInfo> getPrePayInfo(@ModelAttribute(Constants.USER)User user,
 			@RequestParam(required=false) String billId,@RequestParam(required=false) String stmtId,
 			@RequestParam(required=false) String couponUnit, @RequestParam(required=false) String couponNum,
-			@RequestParam(required=false) String couponId,@RequestParam(required=false) String mainBill,@RequestParam(required=false) String mainAmt)
+			@RequestParam(required=false) String couponId,@RequestParam(required=false) String mianBill,@RequestParam(required=false) String mianAmt)
 			throws Exception {
 		WechatPayInfo result;
 		try {
-			result = wuyeService.getPrePayInfo(user.getWuyeId(), billId, stmtId, user.getOpenid(), couponUnit, couponNum, couponId,mainBill,mainAmt);
+			result = wuyeService.getPrePayInfo(user.getWuyeId(), billId, stmtId, user.getOpenid(), couponUnit, couponNum, couponId,mianBill,mianAmt);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
