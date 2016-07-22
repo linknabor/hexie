@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 public class BillInfo implements Serializable {
 
-	private static final long serialVersionUID = -5293315620093787139L;
-
+	private static final long serialVersionUID = 5796510662394309434L;
+	
 	//{"bill_id":"BI150603800005948478","is_onlinepay":"true","service_fee_name":"物业管理费","pay_cell_addr":"普陀区123路123弄1号202室",
 	//"service_fee_cycle":"2015年3月","pay_status":"02","fee_price":"0.10"}
 	private String bill_id;

@@ -196,11 +196,11 @@ public class WuyeController extends BaseController {
 	public BaseResult<WechatPayInfo> getPrePayInfo(@ModelAttribute(Constants.USER)User user,
 			@RequestParam(required=false) String billId,@RequestParam(required=false) String stmtId,
 			@RequestParam(required=false) String couponUnit, @RequestParam(required=false) String couponNum,
-			@RequestParam(required=false) String couponId)
+			@RequestParam(required=false) String couponId,@RequestParam(required=false) String mianBill,@RequestParam(required=false) String mianAmt)
 			throws Exception {
 		WechatPayInfo result;
 		try {
-			result = wuyeService.getPrePayInfo(user.getWuyeId(), billId, stmtId, user.getOpenid(), couponUnit, couponNum, couponId);
+			result = wuyeService.getPrePayInfo(user.getWuyeId(), billId, stmtId, user.getOpenid(), couponUnit, couponNum, couponId,mianBill,mianAmt);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -443,7 +443,7 @@ public class WuyeController extends BaseController {
 				user.setXiaoquName("宜川一村");
 				user.setXiaoquId(169);
 				user.setCountyId(27);
-				user.setWuyeId("CM150821400000009761");
+				user.setWuyeId("130428400000000013");
 				user.setHeadimgurl("http://wx.qlogo.cn/mmopen/ajNVdqHZLLBIY2Jial97RCIIyq0P4L8dhGicoYDlbNXqW5GJytxmkRDFdFlX9GScrsvo7vBuJuaEoMZeiaBPnb6AA/0");
 			}else {
 				if (!StringUtil.isEmpty(userId)) {
