@@ -29,7 +29,6 @@ public class OrderCarInfo  extends BaseModel{
 	private long serviceOrderId; //商品订单ID
 	private Date requireDate; //预约服务时间
 	
-	@Transient
 	private String inputCarStyle;//手动输入的其他车型
 	
 	public String getInputCarStyle() {
