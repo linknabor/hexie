@@ -28,9 +28,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 
 public class WuyeUtil {
 
-	
-	private static String REQUEST_ADDRESS = "http://test.e-shequ.com/mobileInterface/mobile/";
-	
+	private static String REQUEST_ADDRESS = "http://www.e-shequ.com/mobileInterface/mobile/";
 	private static String SYSTEM_NAME;
 	private static Properties props = new Properties();
 	
@@ -209,9 +207,14 @@ public class WuyeUtil {
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
 	public static void main(String args[]) throws JSONException {
-		String url = "http://127.0.0.1/community/mobileInterface/mobile/getBillInfoMSDO.do?user_id=160408400000032032&stmt_id=160718718724418218&bill_id=160715800009899535,";
-		System.out.println((BaseResult<PaymentInfo>)httpGet(url,PaymentInfo.class));
-	
+		String resp = "{\"result\":\"00\",\"data\":{\"trade_water_id\":\"20160112175644955015\",\"merger_status\":\"02\",\"package\":\"wx20160112175645c1930803540408946371\"}}";
+
+		try {
+			BaseResult v =jsonToBeanResult(resp, PayResult.class);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	
 	}
 }

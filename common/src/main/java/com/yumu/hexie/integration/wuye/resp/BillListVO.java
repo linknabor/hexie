@@ -7,8 +7,8 @@ import com.yumu.hexie.integration.wuye.vo.BillInfo;
 
 public class BillListVO implements Serializable {
 
-	private static final long serialVersionUID = -3218697946940987315L;
-	
+	private static final long serialVersionUID = 1592900991660863594L;
+
 	private int total_count;
 	private List<BillInfo> bill_info;
 	private List<BillInfo> car_bill_info;
