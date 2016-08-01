@@ -8,11 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
@@ -38,7 +36,6 @@ import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.payment.RefundOrder;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.WechatException;
 import com.yumu.hexie.service.user.CouponService;
@@ -50,8 +47,6 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	public AccessToken at;
 	public String jsTicket = "";
 	private static final Logger LOGGER = LoggerFactory.getLogger(WechatCoreServiceImpl.class);
-	@Inject
-	private SystemConfigService systemConfigService;
 	@Inject
 	private com.yumu.hexie.service.user.UserService userService;
 	
@@ -146,65 +141,6 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 		return respMessage;
 	}
 
-	@Scheduled(cron = "0 1/30 * * * ?")
-	public void executeAccessTokenJob() {
-    	if(!ConstantWeChat.isMainServer()){
-    		return;
-    	}
-    	SCHEDULE_LOG.error("--------------------refresh token[B]-------------------");
-		AccessToken at = WeixinUtil.getAccessToken();
-		if (at == null) {
-			SCHEDULE_LOG.error("获取token失败----------------------------------------------！！！！！！！！！！！");
-			return;
-		}
-	    systemConfigService.saveAccessTokenInfo(at);
-		getAccessTokenFromDB();
-		SCHEDULE_LOG.error("--------------------refresh token[E]-------------------");
-	}
-
-    
-
-	@Scheduled(cron = "0 1/3 * * * ?")
-	public void getAccessTokenFromDB() {
-		SCHEDULE_LOG.error("--------------------refresh getAccessTokenFromDB[B]-------------------");
-		AccessToken token = systemConfigService.queryWXAccToken();
-		if(token != null){
-		    WeixinUtil.setAccessToken(token);
-		}
-
-		SCHEDULE_LOG.error("--------------------refresh getAccessTokenFromDB[E]-------------------");
-	}
-
-    
-
-	@Scheduled(cron = "0 1/3 * * * ?")
-	public void getJsTokenFromDB() {
-		SCHEDULE_LOG.error("--------------------refresh getJsTokenFromDB[B]-------------------");
-		String tickets = systemConfigService.queryJsTickets();
-		if(StringUtil.isNotEmpty(tickets)) {
-		    WeixinUtil.setJsTicket(tickets);
-		}
-		SCHEDULE_LOG.error("--------------------refresh getJsTokenFromDB[E]-------------------");
-	}
-
-
-	@Scheduled(cron = "0 1/30 * * * ?")
-	public void executeJsTokenJob() {
-    	if(!ConstantWeChat.isMainServer()){
-    		return;
-    	}
-    	SCHEDULE_LOG.error("--------------------refresh ticket-------------------");
-		String jsToken = WeixinUtil.getRefreshJsTicket();
-		if (StringUtil.isNotEmpty(jsToken)) {
-		    systemConfigService.saveJsToken(jsToken);
-			getJsTokenFromDB();
-		} else {
-			SCHEDULE_LOG.error("获取ticket失败----------------------------------------------！！！！！！！！！！！");
-		}
-		SCHEDULE_LOG.error("--------------------refresh ticket-------------------");
-	}
-
-    
 
 	@Override
 	public JsSign getPrepareSign(String prepay_id) {
@@ -219,11 +155,7 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	private void processError(Exception e) {
 		LOGGER.error("微信异常----------------------------------------------！！！！！！！！！！！", e);
 		if (e instanceof WechatException) {
-			if (((WechatException) e).getErrorCode() == 1) {
-				executeJsTokenJob();
-			} else if (((WechatException) e).getErrorCode() == 2) {
-				executeAccessTokenJob();
-			}
+			SCHEDULE_LOG.error("process error" , e);
 		}
 	}
 

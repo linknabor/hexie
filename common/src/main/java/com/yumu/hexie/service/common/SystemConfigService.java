@@ -19,9 +19,6 @@ import com.yumu.hexie.integration.wechat.entity.AccessToken;
 public interface SystemConfigService {
 
     public int querySmsChannel();
-    
-    public void saveAccessTokenInfo(AccessToken at);
-    public void saveJsToken(String jsToken);
     public String queryJsTickets();
     public AccessToken queryWXAccToken();
     
