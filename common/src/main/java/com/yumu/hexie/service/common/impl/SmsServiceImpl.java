@@ -59,8 +59,9 @@ public class SmsServiceImpl implements SmsService {
         sms.setUserId(userId);
         sms = smsHisRepository.save(sms);
         
-        boolean ret = false;
-        if(testMode==null||!"true".equals(testMode)){
+		String sendMsg = systemConfigService.queryValueByKey("SEND_MSG");        
+		boolean ret = false;
+        if(!"0".equals(sendMsg)){
         	if (systemConfigService.querySmsChannel()==0) {
         		ret = YimeiUtil.sendMessage(mobilePhone, message, sms.getId());//.sendBatchMessage(account, password, mobilePhone, message);
 			}else {
@@ -105,7 +106,9 @@ public class SmsServiceImpl implements SmsService {
 		String sign = getMsgSignature();
 		msg = sign.concat(msg);
 		try{
-			if(testMode==null||!"true".equals(testMode)){
+			
+			String sendMsg = systemConfigService.queryValueByKey("SEND_MSG");
+			if(!"0".equals(sendMsg)){
 			    if (systemConfigService.querySmsChannel()==0) {
 	                res = YimeiUtil.sendMessage(mobile, msg, id);//.sendBatchMessage(account, password, mobilePhone, message);
 	            }else {
