@@ -20,7 +20,7 @@ public interface SystemConfigService {
 
     public int querySmsChannel();
     public String queryJsTickets();
-    public AccessToken queryWXAccToken();
+    public String queryWXAToken();
     
     public String[] queryActPeriod();
     public Set<String> getUnCouponItems();

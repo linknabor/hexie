@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.common.Openids;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
@@ -31,22 +29,18 @@ public class UserService {
 	 */
 	public static String GET_USER_OPENID_LIST = "https://api.weixin.qq.com/cgi-bin/user/get?access_token=ACCESS_TOKEN&next_openid=NEXT_OPENID";
 
-	public static void main(String[] args) throws JSONException {
-		System.out.println(JacksonJsonUtil.beanToJson(getUserInfo("asd")));
-	}
-	
 	/**
 	 * 获取用户详细信息
 	 * 
 	 * @param openid
 	 * @return UserWeiXin 用户详细信息
 	 */
-	public static UserWeiXin getUserInfo(String openid) {
+	public static UserWeiXin getUserInfo(String openid, String accessToekn) {
 
 		UserWeiXin user = null;
 
 		String url = GET_USER_INFO.replace( "OPENID", openid);
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null, accessToekn);
 
 		if (null != jsonObject) {
 			if (StringUtil.isNotEmpty(jsonObject.getErrcode())
@@ -80,9 +74,9 @@ public class UserService {
 	 * 
 	 * @return List<String> 关注者openID列表
 	 */
-	public static List<String> getUserOpenIdList() {
+	public static List<String> getUserOpenIdList(String accessToken) {
 		String url = GET_USER_OPENID_LIST.replace("NEXT_OPENID", "");
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null, accessToken);
 		if (null != jsonObject) {
 			Openids data = jsonObject.getData();
 			return data.getOpenid();
@@ -96,15 +90,15 @@ public class UserService {
 	 * 
 	 * @return List<UserWeiXin> 关注者列表信息
 	 */
-	public static List<UserWeiXin> getUserList() {
+	public static List<UserWeiXin> getUserList(String accessToken) {
 		List<UserWeiXin> list = new ArrayList<UserWeiXin>();
 
 		// 获取关注用户openid列表
-		List<String> listStr = getUserOpenIdList();
+		List<String> listStr = getUserOpenIdList(accessToken);
 
 		for (int i = 0; i < listStr.size(); i++) {
 			// 根据openid查询用户信息
-			UserWeiXin user = getUserInfo(listStr.get(i));
+			UserWeiXin user = getUserInfo(listStr.get(i), accessToken);
 			if (user != null) {
 				list.add(user);
 			}

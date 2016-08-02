@@ -23,8 +23,6 @@ import com.yumu.hexie.integration.wechat.util.WeixinUtil;
  */
 public class CustomService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CustomService.class);
-
 	private static String CUSTOME_URL = "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=ACCESS_TOKEN";
 
 	public static Map<String, CustomerBaseMessage> bulidMessageMap = new HashMap<String, CustomerBaseMessage>();
@@ -43,7 +41,7 @@ public class CustomService {
 	 * @param obj	消息对象
 	 * @return 是否发送成功
 	 */
-	public static boolean sendCustomerMessage(Object obj) {
+	public static boolean sendCustomerMessage(Object obj, String accessToken) {
 		boolean bo = false;
 		String jsonStr;
 		try {
@@ -52,7 +50,7 @@ public class CustomService {
 			e.printStackTrace();
 			return false;
 		}
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(CUSTOME_URL, "POST", jsonStr);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(CUSTOME_URL, "POST", jsonStr, accessToken);
 		if (null != jsonObject&&jsonObject.getErrcode()==0) {
 			bo = true;
 		}

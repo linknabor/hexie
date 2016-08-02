@@ -93,11 +93,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     
     }
     
-    public AccessToken queryWXAccToken() {
+    public String queryWXAToken() {
     	SystemConfig config = getConfigFromCache(ACC_TOKEN);
         if (config != null) {
             try {
-                return (AccessToken) JacksonJsonUtil.jsonToBean(config.getSysValue(), AccessToken.class);
+                AccessToken at = (AccessToken) JacksonJsonUtil.jsonToBean(config.getSysValue(), AccessToken.class);
+                return at.getToken();
             } catch (JSONException e) {
                log.error("queryWXAccToken failed :", e);
             }

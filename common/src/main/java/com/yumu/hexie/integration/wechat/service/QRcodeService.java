@@ -45,12 +45,12 @@ public class QRcodeService {
 	 *            场景值ID，临时二维码时为32位非0整型，永久二维码时最大值为100000（目前参数只支持1--100000）
 	 * @return ticket
 	 */
-	public static String getTicket(String actionName, int sceneId) {
+	public static String getTicket(String actionName, int sceneId, String accessToken) {
 		String qrdata = "{\"action_name\": \"" + actionName
 				+ "\", \"action_info\": {\"scene\": {\"scene_id\": " + sceneId
 				+ "}}}";
 
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(QRCODE_ACTION, "POST", qrdata);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(QRCODE_ACTION, "POST", qrdata, accessToken);
 		if (null != jsonObject&&jsonObject.getErrcode() == 0) {
 			return jsonObject.getTicket();
 				

@@ -304,7 +304,7 @@ public class WuyeController extends BaseController {
 	
 	@Async
 	private void sendRegTemplateMsg(User user){
-		TemplateMsgService.sendRegisterSuccessMsg(user);
+		TemplateMsgService.sendRegisterSuccessMsg(user, systemConfigService.queryWXAToken());
 	}
 	
 	/**
@@ -413,7 +413,7 @@ public class WuyeController extends BaseController {
 	@Async
 	private void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice){
 		
-		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice);
+		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken());
 	}
 	
 	

@@ -51,13 +51,13 @@ public class UserGroupService {
 	 *            分组名称
 	 * @return 分组ID
 	 */
-	public static String createGroup(String groupName) {
+	public static String createGroup(String groupName, String accessToekn) {
 
 		String id = null;
 
 		String data = "{\"group\":{\"name\":\"" + groupName + "\"}}";
 
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(CREATE_GROUP_URL, "POST", data);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(CREATE_GROUP_URL, "POST", data, accessToekn);
 
 		if (null != jsonObject&&jsonObject.getErrcode() == 0
 				&&jsonObject.getGroup()!=null) {
@@ -75,10 +75,10 @@ public class UserGroupService {
 	 * 
 	 * @return 分组列表
 	 */
-	public static List<UserGroup> getGroup() {
+	public static List<UserGroup> getGroup(String accessToekn) {
 
 		List<UserGroup> list = new ArrayList<UserGroup>();
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(GET_GROUP_URL, "POST", null);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(GET_GROUP_URL, "POST", null, accessToekn);
 		if (null != jsonObject && jsonObject.getErrcode() == 0
 				&& jsonObject.getGroups() != null) {
 			for (UserGroup group : jsonObject.getGroups()) {
@@ -99,9 +99,9 @@ public class UserGroupService {
 	 *            用户openid
 	 * @return 分组id
 	 */
-	public static String getGroupByOpenid(String openid) {
+	public static String getGroupByOpenid(String openid, String accessToken) {
 		String data = "{\"openid\":\"" + openid + "\"}";
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(GET_USER_GOUP, "POST", data);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(GET_USER_GOUP, "POST", data, accessToken);
 
 		if (null != jsonObject && jsonObject.getErrcode() == 0) {
 			return jsonObject.getGroupid();
@@ -123,13 +123,13 @@ public class UserGroupService {
 	 *            分组name
 	 * @return 是否成功
 	 */
-	public static boolean updateGroupName(int id, String name) {
+	public static boolean updateGroupName(int id, String name, String accessToken) {
 
 
 		String data = "{\"group\":{\"id\":" + id + ",\"name\":\"" + name
 				+ "\"}}";
 
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(UPDATE_GROUP_NAME, "POST", data);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(UPDATE_GROUP_NAME, "POST", data, accessToken);
 
 		return (null != jsonObject && jsonObject.getErrcode() == 0);
 	}
@@ -140,10 +140,10 @@ public class UserGroupService {
 	 * @param groupId	分组id
 	 * @return	是否成功
 	 */
-	public static boolean moveUserToGroup(String openid, int groupId) {
+	public static boolean moveUserToGroup(String openid, int groupId, String accessToken) {
 		String data = "{\"openid\":\"" + openid + "\",\"to_groupid\":"
 				+ groupId + "}";
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(MOVE_USER_TO_GROUP, "POST", data);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(MOVE_USER_TO_GROUP, "POST", data, accessToken);
 		return (null != jsonObject && jsonObject.getErrcode() == 0);
 	}
 }

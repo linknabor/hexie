@@ -36,6 +36,7 @@ import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.payment.RefundOrder;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.WechatException;
 import com.yumu.hexie.service.user.CouponService;
@@ -49,7 +50,8 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WechatCoreServiceImpl.class);
 	@Inject
 	private com.yumu.hexie.service.user.UserService userService;
-	
+	@Inject
+	private SystemConfigService systemConfigService;
 	@Inject 
 	private CouponService couponService;
 
@@ -119,7 +121,7 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 					tm.setText(new Text("有用户扫码："
 							+ JacksonJsonUtil.beanToJson(requestMap
 									.getScanCodeInfo())));
-					CustomService.sendCustomerMessage(tm);
+					CustomService.sendCustomerMessage(tm, systemConfigService.queryWXAToken());
 					LOGGER.error("用户扫码：发送完毕");
 					break;
 				}
@@ -182,7 +184,7 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	@Override
 	public UserWeiXin getUserInfo(String openid) {
 		try {
-			return UserService.getUserInfo(openid);
+			return UserService.getUserInfo(openid, systemConfigService.queryWXAToken());
 		} catch (Exception e) {
 			processError(e);
 		}
@@ -191,7 +193,7 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	@Override
 	public List<UserWeiXin> getUserList() {
 		try {
-			return UserService.getUserList();
+			return UserService.getUserList(systemConfigService.queryWXAToken());
 		} catch (Exception e) {
 			LOGGER.error("获取用户列表失败",e);
 			processError(e);
