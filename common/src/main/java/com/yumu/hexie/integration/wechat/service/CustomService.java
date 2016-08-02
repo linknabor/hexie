@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;

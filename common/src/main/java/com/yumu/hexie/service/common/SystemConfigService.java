@@ -6,8 +6,6 @@ package com.yumu.hexie.service.common;
 
 import java.util.Set;
 
-import com.yumu.hexie.integration.wechat.entity.AccessToken;
-
 /**
  * <pre>
  * 系统参数统一获取
