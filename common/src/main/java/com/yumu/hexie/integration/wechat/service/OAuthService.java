@@ -68,7 +68,7 @@ public class OAuthService {
 				.replace("SECRET", ConstantWeChat.APPSECRET)
 				.replace("CODE", code);
 
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null);
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null, null);
 
 		AccessTokenOAuth accessTokenOAuth = null;
 
@@ -97,7 +97,7 @@ public class OAuthService {
 			String url = GET_USER_INFO_OAUTH.replace("ACCESS_TOKEN", token)
 					.replace("OPENID", openid);
 
-			WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null);
+			WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null, null);
 
 			if (null != jsonObject&&jsonObject.getErrcode() == 0){
 				user = new UserWeiXin();

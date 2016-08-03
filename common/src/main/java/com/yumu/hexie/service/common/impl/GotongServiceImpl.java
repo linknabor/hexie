@@ -21,13 +21,13 @@ import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.user.UserService;
 
@@ -60,12 +60,15 @@ public class GotongServiceImpl implements GotongService {
     private UserService  userService;
     @Inject
     private OperatorService  operatorService;
+    @Inject
+    private SystemConfigService systemConfigService;
 
     @Async
     @Override
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
         ServiceOperator op = serviceOperatorRepository.findOne(opId);
-        TemplateMsgService.sendRepairAssignMsg(order, op);
+        String accessToken = systemConfigService.queryWXAToken();
+        TemplateMsgService.sendRepairAssignMsg(order, op, accessToken);
     }
     @Async
     @Override
@@ -80,7 +83,8 @@ public class GotongServiceImpl implements GotongService {
         NewsMessage msg = new NewsMessage(news);
         msg.setTouser(user.getOpenid());
         msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        CustomService.sendCustomerMessage(msg);
+        String accessToken = systemConfigService.queryWXAToken();
+        CustomService.sendCustomerMessage(msg, accessToken);
     }
     
     @Async
@@ -97,7 +101,8 @@ public class GotongServiceImpl implements GotongService {
          NewsMessage msg = new NewsMessage(news);
          msg.setTouser(user.getOpenid());
          msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-         CustomService.sendCustomerMessage(msg);
+         String accessToken = systemConfigService.queryWXAToken();
+         CustomService.sendCustomerMessage(msg, accessToken);
 	}
 
     /** 
@@ -118,7 +123,8 @@ public class GotongServiceImpl implements GotongService {
         NewsMessage msg = new NewsMessage(news);
         msg.setTouser(op.getOpenId());
         msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        CustomService.sendCustomerMessage(msg);
+        String accessToken = systemConfigService.queryWXAToken();
+        CustomService.sendCustomerMessage(msg, accessToken);
     }
     /** 
      * @param count
@@ -132,9 +138,10 @@ public class GotongServiceImpl implements GotongService {
     public void sendCommonYuyueBillMsg(int serviceType,String title, String billName, String requireTime, String url) {
         LOG.error("发送预约通知！["+serviceType+"]" + billName + " -- " + requireTime);
         List<ServiceOperator> ops = operatorService.findByType(serviceType);
+        String accessToken = systemConfigService.queryWXAToken();
         for(ServiceOperator op: ops) {
             LOG.error("发送到操作员！["+serviceType+"]" + billName + " -- " + op.getName() + "--" + op.getId());
-            TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url);    
+            TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken);    
         }
         
     }

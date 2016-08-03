@@ -6,8 +6,6 @@ package com.yumu.hexie.service.common;
 
 import java.util.Set;
 
-import com.yumu.hexie.integration.wechat.entity.AccessToken;
-
 /**
  * <pre>
  * 系统参数统一获取
@@ -19,11 +17,8 @@ import com.yumu.hexie.integration.wechat.entity.AccessToken;
 public interface SystemConfigService {
 
     public int querySmsChannel();
-    
-    public void saveAccessTokenInfo(AccessToken at);
-    public void saveJsToken(String jsToken);
     public String queryJsTickets();
-    public AccessToken queryWXAccToken();
+    public String queryWXAToken();
     
     public String[] queryActPeriod();
     public Set<String> getUnCouponItems();

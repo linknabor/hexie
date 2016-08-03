@@ -39,15 +39,16 @@ public class TemplateMsgService {
 	public static String REPAIR_ASSIGN_TEMPLATE = ConfigUtil.get("reapirAssginTemplate");
 	
 	public static String YUYUE_ASSIGN_TEMPLATE = ConfigUtil.get("yuyueNoticeTemplate");
+	
 	/**
 	 * 模板消息发送
 	 */
 	public static String TEMPLATE_MSG = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
-	private static boolean sendMsg(TemplateMsg< ? > msg) {
+	private static boolean sendMsg(TemplateMsg< ? > msg, String accessToken) {
         log.error("发送模板消息------");
 		WechatResponse jsonObject;
 		try {
-			jsonObject = WeixinUtil.httpsRequest(TEMPLATE_MSG, "POST", JacksonJsonUtil.beanToJson(msg));
+			jsonObject = WeixinUtil.httpsRequest(TEMPLATE_MSG, "POST", JacksonJsonUtil.beanToJson(msg), accessToken);
 			if(jsonObject.getErrcode() == 0) {
 				return true;
 			}
@@ -57,7 +58,7 @@ public class TemplateMsgService {
 		return false;
 	}
 	
-	public static void sendPaySuccessMsg(ServiceOrder order) {
+	public static void sendPaySuccessMsg(ServiceOrder order, String accessToken) {
 		log.error("发送模板消息！！！！！！！！！！！！！！！" + order.getOrderNo());
 		PaySuccessVO vo = new PaySuccessVO();
 		vo.setFirst(new TemplateItem("您的订单：("+order.getOrderNo()+")已支付成功"));
@@ -77,34 +78,14 @@ public class TemplateMsgService {
 		msg.setTemplate_id(SUCCESS_MSG_TEMPLATE);
 		msg.setUrl(SUCCESS_URL.replace("ORDER_ID", ""+order.getId()).replace("ORDER_TYPE", ""+order.getOrderType()));
 		msg.setTouser(order.getOpenId());
-		sendMsg(msg);
-	}
-	
-	public static void main(String[] args) {
-		
-		User user = new User();
-		user.setCity("上海市");
-		user.setCityId(20);	//20
-		user.setProvince("上海");
-		user.setProvinceId(19);
-		user.setId(99999);	//10
-		user.setOpenid("o_3DlwdnCLCz3AbTrZqj4HtKeQYY");	//
-		user.setName("yiming"); 
-		user.setNickname("yiming");
-		user.setXiaoquName("宜川一村");
-		user.setXiaoquId(12119);
-		user.setCountyId(27);
-		user.setWuyeId("CM150123400000001419");
-		user.setHeadimgurl("http://wx.qlogo.cn/mmopen/ajNVdqHZLLBIY2Jial97RCIIyq0P4L8dhGicoYDlbNXqW5GJytxmkRDFdFlX9GScrsvo7vBuJuaEoMZeiaBPnb6AA/0");
-		
-		sendRegisterSuccessMsg(user);
+		sendMsg(msg, accessToken);
 	}
 	
 	/**
 	 * 发送注册成功后的模版消息
 	 * @param user
 	 */
-	public static void sendRegisterSuccessMsg(User user){
+	public static void sendRegisterSuccessMsg(User user, String accessToken){
 		
 		log.error("用户注册成功，发送模版消息："+user.getId()+",openid: " + user.getOpenid());
 		
@@ -121,7 +102,7 @@ public class TemplateMsgService {
 		msg.setTemplate_id(REG_SUCCESS_MSG_TEMPLATE);
 		msg.setUrl(REG_SUCCESS_URL);
 		msg.setTouser(user.getOpenid());
-		sendMsg(msg);
+		sendMsg(msg, accessToken);
 	
 	}
 	
@@ -129,7 +110,7 @@ public class TemplateMsgService {
 	 * 发送注册成功后的模版消息
 	 * @param user
 	 */
-	public static void sendWuYePaySuccessMsg(User user, String tradeWaterId, String feePrice){
+	public static void sendWuYePaySuccessMsg(User user, String tradeWaterId, String feePrice, String accessToken){
 		
 		log.error("用户支付物业费成功，发送模版消息："+user.getId()+",openid: " + user.getOpenid());
 		
@@ -150,7 +131,7 @@ public class TemplateMsgService {
 		msg.setTemplate_id(WUYE_PAY_SUCCESS_MSG_TEMPLATE);
 		msg.setUrl(REG_SUCCESS_URL);
 		msg.setTouser(user.getOpenid());
-		sendMsg(msg);
+		sendMsg(msg, accessToken);
 	
 	}
 
@@ -159,7 +140,7 @@ public class TemplateMsgService {
 	 * @param seed
 	 * @param ro
 	 */
-    public static void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op) {
+    public static void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op, String accessToken) {
     	
     	log.error("发送维修单分配模版消息#########" + ", order id: " + ro.getId() + "operator id : " + op.getId());
 
@@ -177,10 +158,11 @@ public class TemplateMsgService {
     	msg.setTemplate_id(REPAIR_ASSIGN_TEMPLATE);
     	msg.setUrl(GotongServiceImpl.WEIXIU_NOTICE+ro.getId());
     	msg.setTouser(op.getOpenId());
-    	TemplateMsgService.sendMsg(msg);
+    	TemplateMsgService.sendMsg(msg, accessToken);
     	
     }
-    public static void sendYuyueBillMsg(String openId,String title,String billName, String requireTime, String url) {
+    public static void sendYuyueBillMsg(String openId,String title,String billName, 
+    			String requireTime, String url, String accessToken) {
 
         //更改为使用模版消息发送
         YuyueOrderVO vo = new YuyueOrderVO();
@@ -194,7 +176,7 @@ public class TemplateMsgService {
         msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
         msg.setUrl(url);
         msg.setTouser(openId);
-        TemplateMsgService.sendMsg(msg);
+        TemplateMsgService.sendMsg(msg, accessToken);
         
     }
 

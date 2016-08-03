@@ -71,9 +71,9 @@ public class WeixinUtil {
 	public static AccessToken at;
 	public static String jsTicket="";
 	
-	public static String getRefreshJsTicket() {
+	public static String getRefreshJsTicket(String accessToken) {
 		if(!ConstantWeChat.isMainServer())return jsTicket;
-		WechatResponse jsonObject = httpsRequest(JS_TICKET, "GET", null);
+		WechatResponse jsonObject = httpsRequest(JS_TICKET, "GET", null, accessToken);
 		// 如果请求成功
 		if (null != jsonObject && StringUtil.isNotEmpty(jsonObject.getTicket())) {
 			return jsonObject.getTicket();
@@ -95,7 +95,7 @@ public class WeixinUtil {
 
 		String requestUrl = ACCESS_TOKEN.replace("APPID", ConstantWeChat.APPID).replace(
 				"APPSECRET", ConstantWeChat.APPSECRET);
-		WechatResponse jsonObject = httpsRequest(requestUrl, "GET", null,false);
+		WechatResponse jsonObject = httpsRequest(requestUrl, "GET", null, null);
 		// 如果请求成功
 		if (null != jsonObject && StringUtil.isNotEmpty(jsonObject.getAccess_token())) {
 			accessToken = new AccessToken();
@@ -119,10 +119,9 @@ public class WeixinUtil {
 		return jsTicket;
 	}
 	
-	public static JsSign getJsSign(String url) {
-		String ticket = getJsTicket();
+	public static JsSign getJsSign(String url, String jsTicket) {
 		long timestamp = new Date().getTime();
-		String param = JS_T_PARAM.replace("JS_TICKET",ticket).replace("TIMESTAMP", ""+timestamp).replace("URL", url);
+		String param = JS_T_PARAM.replace("JS_TICKET",jsTicket).replace("TIMESTAMP", ""+timestamp).replace("URL", url);
 		JsSign r = new JsSign();
 		r.setAppId(ConstantWeChat.APPID);
 		r.setNonceStr(NONCESTR);
@@ -158,25 +157,10 @@ public class WeixinUtil {
 	 * @return token
 	 */
 	
-	/**
-	 * 发起https请求并获取结果
-	 * 
-	 * @param requestUrl
-	 *            请求地址
-	 * @param requestMethod
-	 *            请求方式（GET、POST）
-	 * @param outputStr
-	 *            提交的数据
-	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)
-	 */
 	public static WechatResponse httpsRequest(String requestUrl,
-              String requestMethod, String outputStr) {
-        return httpsRequest(requestUrl, requestMethod, outputStr, true);
-    }
-	public static WechatResponse httpsRequest(String requestUrl,
-			String requestMethod, String outputStr,boolean withToken) {
-	    if(withToken){
-	        requestUrl = requestUrl.replace("ACCESS_TOKEN", WeixinUtil.getToken());
+			String requestMethod, String outputStr, String accessToken) {
+		if(StringUtil.isNotEmpty(accessToken)){
+	        requestUrl = requestUrl.replace("ACCESS_TOKEN", accessToken);
 	    }
 		WechatResponse jsonObject = null;
 		try {

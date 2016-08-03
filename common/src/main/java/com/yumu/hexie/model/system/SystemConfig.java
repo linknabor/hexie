@@ -11,6 +11,8 @@ public class SystemConfig  extends BaseModel{
 	
 	private String sysKey;
 	private String sysValue;
+	private String remark;
+	
 	public SystemConfig(){}
 	public SystemConfig(String sysKey,String sysValue){
 		this.sysKey = sysKey;
@@ -28,4 +30,11 @@ public class SystemConfig  extends BaseModel{
 	public void setSysValue(String sysValue) {
 		this.sysValue = sysValue;
 	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+	
 }

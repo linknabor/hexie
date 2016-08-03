@@ -35,6 +35,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.car.CarService;
 import com.yumu.hexie.service.comment.CommentService;
 import com.yumu.hexie.service.common.ShareService;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.payment.PaymentService;
@@ -75,6 +76,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	
 	@Inject
 	private CarService carService;
+	
+	@Inject
+	private SystemConfigService systemconfigservice;
 
     @Value(value = "${testMode}")
     private boolean testMode;
@@ -185,7 +189,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				User user = userService.getById(order.getUserId());//短信发送号码修改为用户注册号码 20160120
 				userNoticeService.orderSuccess(order.getUserId(), user.getTel(),order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
 			}
-			TemplateMsgService.sendPaySuccessMsg(order);
+			String token = systemconfigservice.queryWXAToken();
+			TemplateMsgService.sendPaySuccessMsg(order, token);
 		} else if(orderOp == ModelConstant.ORDER_OP_SEND){
 			userNoticeService.orderSend(order.getUserId(), order.getTel(),order.getId(), order.getOrderNo(), order.getLogisticName(), order.getLogisticNo());
 		}

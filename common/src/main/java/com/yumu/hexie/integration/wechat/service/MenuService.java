@@ -38,8 +38,8 @@ public class MenuService {
 	 *            json格式
 	 * @return 状态 0 表示成功、其他表示失败
 	 */
-	public static Integer createMenu(String jsonMenu) {
-		WechatResponse jsonObject = WeixinUtil.httpsRequest(MENU_CREATE, "POST", jsonMenu);
+	public static Integer createMenu(String jsonMenu, String accessToken) {
+		WechatResponse jsonObject = WeixinUtil.httpsRequest(MENU_CREATE, "POST", jsonMenu, accessToken);
 		if(null != jsonObject)
 			return jsonObject.getErrcode();
 		return 1;
@@ -52,9 +52,9 @@ public class MenuService {
 	 *            菜单实例
 	 * @return 0表示成功，其他值表示失败
 	 */
-	public static Integer createMenu(Menu menu) {
+	public static Integer createMenu(Menu menu, String accessToken) {
 		try {
-			return createMenu(JacksonJsonUtil.beanToJson(menu));//JSONObject.valueToString(menu));
+			return createMenu(JacksonJsonUtil.beanToJson(menu), accessToken);//JSONObject.valueToString(menu));
 		} catch (Exception e) {
 			e.printStackTrace();
 			return 1;
@@ -67,8 +67,8 @@ public class MenuService {
 	 * 
 	 * @return 菜单结构json字符串
 	 */
-	public static WechatResponse getMenuJson() {
-		return WeixinUtil.httpsRequest(MENU_GET, "GET", null);
+	public static WechatResponse getMenuJson(String accessToken) {
+		return WeixinUtil.httpsRequest(MENU_GET, "GET", null, accessToken);
 	}
 
 	/**
@@ -76,16 +76,16 @@ public class MenuService {
 	 * 
 	 * @return 菜单结构json字符串
 	 */
-	public static WechatResponse deleteMenuJson() {
-		return WeixinUtil.httpsRequest(MENU_DELETE, "GET", null);
+	public static WechatResponse deleteMenuJson(String accessToken) {
+		return WeixinUtil.httpsRequest(MENU_DELETE, "GET", null, accessToken);
 	}
 	
 	/**
 	 * 查询菜单
 	 * @return Menu 菜单对象
 	 */
-	public static Menu getMenu() {
-		Menu menu =  getMenuJson().getMenu();
+	public static Menu getMenu(String accessToken) {
+		Menu menu =  getMenuJson(accessToken).getMenu();
 		return menu;
 	}
 
@@ -123,7 +123,7 @@ public class MenuService {
 //}
 	
 
-	private static void bingquan() {
+	private static void bingquan(String accessToken) {
 		Button sb11 = new Button("我的房子", "view", null,
 				"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx89c743b2fa762a2c"
 				+ "&redirect_uri="
@@ -152,7 +152,7 @@ public class MenuService {
 		Button btn3 = new Button("我要缴费", "click", null, null, null,new Button[] {sb31,sb32});
 
 		Menu menu = new Menu(new Button[] {btn1, btn2, btn3});
-		createMenu(menu);
+		createMenu(menu, accessToken);
 	}
 	
 //	private static void old() {
@@ -172,7 +172,7 @@ public class MenuService {
 //		Menu menu = new Menu(new Button[] {btn3, btn2, btn1});
 //		createMenu(menu);
 //	}
-	private static void kelebao() {
+	private static void kelebao(String accessToken) {
 		Button sb1 = new Button("输单号", "view", null, "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxea2a087a5eb8258b"
 				+ "&redirect_uri=http://klb.shango2o.com/wechat/queryLogistic?response_type=code&scope=snsapi_base&state=1#wechat_redirect",null, null);
 		Button sb2 = new Button("扫条码", "scancode_waitmsg", "rselfmenu_0_1", null, null,null);
@@ -200,6 +200,6 @@ public class MenuService {
 				sb3,sb4,sb5,sb6 });
 
 		Menu menu = new Menu(new Button[] { btn1, btn2, btn3 });
-		createMenu(menu);
+		createMenu(menu, accessToken);
 	}
 }
