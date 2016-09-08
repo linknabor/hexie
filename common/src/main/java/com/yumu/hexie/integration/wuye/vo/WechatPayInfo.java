@@ -14,6 +14,7 @@ public class WechatPayInfo implements Serializable {
 	private String paysign;
 	private String user_pay_type;	//用户支付情况，0表示新用户首次支付，1表示老用户首次支付，2表示老用户非首次支付，返回值为空表示活动已结束
 	private String packageId;
+	private String token_id;
 	
 	public String getAppid() {
 		return appid;
@@ -72,6 +73,12 @@ public class WechatPayInfo implements Serializable {
 	}
 	public String getPackageId() {
 		return packageId;
+	}
+	public String getToken_id() {
+		return token_id;
+	}
+	public void setToken_id(String token_id) {
+		this.token_id = token_id;
 	}
 
 	
