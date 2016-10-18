@@ -29,10 +29,10 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public HexieUser bindHouse(String userId, String stmtId, String houseId) {
 		BaseResult<HexieUser> r= WuyeUtil.bindHouse(userId, stmtId, houseId);
-		if(r.getResult() == "04"){
+		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
-		if (r.getResult() == "05") {
+		if ("05".equals(r.getResult())) {
 			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
 		}
 		return r.getData();
