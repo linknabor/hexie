@@ -32,6 +32,9 @@ public class WuyeServiceImpl implements WuyeService {
 		if(r.getResult() == "04"){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
+		if (r.getResult() == "05") {
+			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
+		}
 		return r.getData();
 	}
 
