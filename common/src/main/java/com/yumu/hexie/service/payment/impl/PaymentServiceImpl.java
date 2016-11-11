@@ -189,6 +189,9 @@ public class PaymentServiceImpl implements PaymentService {
             throw new BizValidateException(po.getOrderId(),"该订单已支付成功，无法取消！").setError();
         }
         CloseOrderResp c = wechatCoreService.closeOrder(po);
+		if (c==null) {
+			throw new BizValidateException(po.getOrderId(), "网络异常，无法查询支付状态！").setError();
+		}
         if(!c.isCloseSuccess()){
             throw new BizValidateException(po.getOrderId(),"该订单支付中，无法取消！").setError();
         } else if(c.isOrderPayed()) {
