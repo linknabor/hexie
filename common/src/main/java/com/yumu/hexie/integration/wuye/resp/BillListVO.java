@@ -82,5 +82,12 @@ public class BillListVO implements Serializable {
 	public void setPay_least_month(String pay_least_month) {
 		this.pay_least_month = pay_least_month;
 	}
+	public String getReduce_mode() {
+		return reduce_mode;
+	}
+	public void setReduce_mode(String reduce_mode) {
+		this.reduce_mode = reduce_mode;
+	}
+	
 	
 }
