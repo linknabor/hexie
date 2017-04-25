@@ -18,6 +18,7 @@ public class BillListVO implements Serializable {
 	private int park_discount_rule_conf;
 	private String park_discount_rule;
 	private String pay_least_month;
+	private String reduce_mode;	//减免模式，记账时总金额四舍五入，0表示没有此功能，1表示四舍五入至元，2表示四舍五入至角，3表示自由调价
 	private int bills_size;
 
 	public int getPark_discount_rule_conf() {

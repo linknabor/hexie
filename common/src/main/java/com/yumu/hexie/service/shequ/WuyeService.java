@@ -36,7 +36,8 @@ public interface WuyeService {
 	public PaymentInfo getBillDetail(String userId,String stmtId,String anotherbillIds);
 	// 10.缴费
 	public WechatPayInfo getPrePayInfo(String userId,String billId,String stmtId, 
-				String openId, String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt) throws ValidationException;
+				String openId, String couponUnit, String couponNum, 
+				String couponId,String mianBill,String mianAmt, String reduceAmt) throws ValidationException;
 	// 11.通知已支付
 	public PayResult noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId);
 	// 12.查询是否已经用过红包
