@@ -19,7 +19,15 @@ public class SimpleRegisterReq implements Serializable{
     private String mobile;
     private String yzm;
     private String name;
-    public String getMobile() {
+    private String sn;	//充电桩设备号
+    
+	public String getSn() {
+		return sn;
+	}
+	public void setSn(String sn) {
+		this.sn = sn;
+	}
+	public String getMobile() {
         return mobile;
     }
     public void setMobile(String mobile) {

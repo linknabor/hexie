@@ -26,6 +26,7 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.charger.ChargerService;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -66,6 +67,8 @@ public class UserController extends BaseController{
     @Inject
     private SystemConfigService systemConfigService;
     
+    @Inject
+	private ChargerService chargerService;
 
     @Value(value = "${testMode}")
     private String testMode;
@@ -234,6 +237,14 @@ public class UserController extends BaseController{
             
             user.setRegisterDate(System.currentTimeMillis());
             session.setAttribute(Constants.USER, userService.save(user));
+            
+            if(!StringUtil.isNotEmpty(req.getSn()))
+            {
+            	//添加云充账户
+                boolean istrue = chargerService.saveChargerUser(user.getOpenid(), user.getTel(), req.getSn());
+            	if(!istrue)
+            		return new BaseResult<UserInfo>().failMsg("创建账户失败！");
+            }
             return new BaseResult<UserInfo>().success(new UserInfo(user));
         }
     }
