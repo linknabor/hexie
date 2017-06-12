@@ -20,7 +20,14 @@ public class SimpleRegisterReq implements Serializable{
     private String yzm;
     private String name;
     private String sn;	//充电桩设备号
+    private String sectId;//充电设备所在小区ID servplat
     
+	public String getSectId() {
+		return sectId;
+	}
+	public void setSectId(String sectId) {
+		this.sectId = sectId;
+	}
 	public String getSn() {
 		return sn;
 	}

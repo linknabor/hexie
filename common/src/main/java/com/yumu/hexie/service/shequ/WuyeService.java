@@ -42,5 +42,7 @@ public interface WuyeService {
 	public PayResult noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId);
 	// 12.查询是否已经用过红包
 	public String queryCouponIsUsed(String userId);
+	//13.更新电子发票抬头信息
+	public String updateInvoice(String mobile, String invoice_title, String trade_water_id);
 	
 }

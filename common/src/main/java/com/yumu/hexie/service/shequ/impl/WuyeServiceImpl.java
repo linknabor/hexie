@@ -101,6 +101,12 @@ public class WuyeServiceImpl implements WuyeService {
 		BaseResult<String> r = WuyeUtil.couponUseQuery(userId);
 		return r.getResult();
 	}
+
+	@Override
+	public String updateInvoice(String mobile, String invoice_title, String trade_water_id) {
+		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, trade_water_id);
+		return r.getResult();
+	}
 	
 	
 
