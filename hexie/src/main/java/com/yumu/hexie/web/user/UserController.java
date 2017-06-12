@@ -193,6 +193,16 @@ public class UserController extends BaseController{
 		}
 	    return  new BaseResult<String>().success("验证码发送成功");
     }
+	
+	@RequestMapping(value = "/getyzm1", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<String> getYzm1(@RequestBody MobileYzm yzm) throws Exception {
+		boolean result = smsService.sendVerificationCode(12345, yzm.getMobile());
+		if(result) {
+		    return new BaseResult<String>().failMsg("发送验证码失败");
+		}
+	    return  new BaseResult<String>().success("验证码发送成功");
+    }
 
 
 	@RequestMapping(value = "/savePersonInfo/{captcha}", method = RequestMethod.POST)
@@ -238,10 +248,11 @@ public class UserController extends BaseController{
             user.setRegisterDate(System.currentTimeMillis());
             session.setAttribute(Constants.USER, userService.save(user));
             
+            //如果sn不为空，则说明是从充电桩的二维码扫码进来的用户
             if(!StringUtil.isNotEmpty(req.getSn()))
             {
             	//添加云充账户
-                boolean istrue = chargerService.saveChargerUser(user.getOpenid(), user.getTel(), req.getSn());
+                boolean istrue = chargerService.saveChargerUser(user.getOpenid(), user.getTel(), req.getSn(),req.getSectId());
             	if(!istrue)
             		return new BaseResult<UserInfo>().failMsg("创建账户失败！");
             }

@@ -418,6 +418,17 @@ public class WuyeController extends BaseController {
 		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken());
 	}
 	
+	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult applyInvoice(@RequestParam(required=false) String mobile,@RequestParam(required=false) String invoice_title,
+			@RequestParam(required=false) String yzm, @RequestParam(required=false) String trade_water_id)
+	{
+		String result = wuyeService.updateInvoice(mobile, invoice_title, trade_water_id);
+		if ("99".equals(result)) {
+			return BaseResult.fail("网络异常，请刷新后重试");
+		}
+		return BaseResult.successResult("succeeded");
+	}
 	
 	@SuppressWarnings({ "rawtypes" })
 	@RequestMapping(value = "initSession4Test/{userId}", method = RequestMethod.GET)
