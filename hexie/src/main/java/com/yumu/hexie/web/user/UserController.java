@@ -256,7 +256,7 @@ public class UserController extends BaseController{
             user.setRegisterDate(System.currentTimeMillis());
             session.setAttribute(Constants.USER, userService.save(user));
             
-            //如果sn不为空，则说明是从充电桩的二维码扫码进来的用户
+/*            //如果sn不为空，则说明是从充电桩的二维码扫码进来的用户
             if(!StringUtil.isNotEmpty(req.getSn()))
             {
             	//添加云充账户
@@ -264,7 +264,7 @@ public class UserController extends BaseController{
             	if(!istrue)
             		return new BaseResult<UserInfo>().failMsg("创建账户失败！");
             }
-            return new BaseResult<UserInfo>().success(new UserInfo(user));
+*/            return new BaseResult<UserInfo>().success(new UserInfo(user));
         }
     }
 }
