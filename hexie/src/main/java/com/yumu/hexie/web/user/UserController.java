@@ -198,7 +198,7 @@ public class UserController extends BaseController{
 	@ResponseBody
     public BaseResult<String> getYzm1(@RequestBody MobileYzm yzm) throws Exception {
 		boolean result = smsService.sendVerificationCode(12345, yzm.getMobile());
-		if(result) {
+		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
 	    return  new BaseResult<String>().success("验证码发送成功");

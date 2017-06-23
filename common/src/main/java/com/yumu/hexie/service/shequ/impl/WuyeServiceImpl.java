@@ -11,6 +11,7 @@ import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
+import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -80,8 +81,10 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public WechatPayInfo getPrePayInfo(String userId, String billId,
 			String stmtId, String openId, String couponUnit, String couponNum, 
-			String couponId,String mianBill,String mianAmt, String reduceAmt) throws ValidationException {
-		return WuyeUtil.getPrePayInfo(userId, billId, stmtId, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt)
+			String couponId,String mianBill,String mianAmt, String reduceAmt, 
+			String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		return WuyeUtil.getPrePayInfo(userId, billId, stmtId, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+				invoice_title_type, credit_code, mobile, invoice_title)
 				.getData();
 	}
 
@@ -103,11 +106,13 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public String updateInvoice(String mobile, String invoice_title, String trade_water_id) {
-		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, trade_water_id);
+	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 		return r.getResult();
 	}
-	
-	
 
+	@Override
+	public InvoiceInfo getInvoiceByTradeId(String trade_water_id) {
+		return WuyeUtil.getInvoiceInfo(trade_water_id).getData();
+	}
 }

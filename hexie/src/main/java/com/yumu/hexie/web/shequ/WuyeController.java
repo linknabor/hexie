@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
+import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
@@ -44,6 +45,7 @@ import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
+import com.yumu.hexie.web.user.resp.UserInfo;
 
 @Controller(value = "wuyeController")
 public class WuyeController extends BaseController {
@@ -197,12 +199,14 @@ public class WuyeController extends BaseController {
 			@RequestParam(required=false) String billId,@RequestParam(required=false) String stmtId,
 			@RequestParam(required=false) String couponUnit, @RequestParam(required=false) String couponNum,
 			@RequestParam(required=false) String couponId, @RequestParam(required=false) String mianBill,
-			@RequestParam(required=false) String mianAmt, @RequestParam(required=false) String reduceAmt)
+			@RequestParam(required=false) String mianAmt, @RequestParam(required=false) String reduceAmt,
+			@RequestParam(required=false) String invoice_title_type, @RequestParam(required=false) String credit_code,
+			@RequestParam(required=false) String invoice_title)
 			throws Exception {
 		WechatPayInfo result;
 		try {
 			result = wuyeService.getPrePayInfo(user.getWuyeId(), billId, stmtId, user.getOpenid(), 
-						couponUnit, couponNum, couponId, mianBill, mianAmt, reduceAmt);
+						couponUnit, couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(), invoice_title);
 		} catch (Exception e) {
 			
 			e.printStackTrace();
@@ -421,13 +425,34 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult applyInvoice(@RequestParam(required=false) String mobile,@RequestParam(required=false) String invoice_title,
-			@RequestParam(required=false) String yzm, @RequestParam(required=false) String trade_water_id)
+			@RequestParam(required=false) String yzm, @RequestParam(required=false) String trade_water_id, @RequestParam(required=false) String invoice_title_type,
+			@RequestParam(required=false) String credit_code)
 	{
-		String result = wuyeService.updateInvoice(mobile, invoice_title, trade_water_id);
-		if ("99".equals(result)) {
-			return BaseResult.fail("网络异常，请刷新后重试");
+		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);
+		if(!isCheck)
+		{
+			return new BaseResult<UserInfo>().failMsg("校验失败！");
+		}else
+		{
+			String result = wuyeService.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
+			if ("99".equals(result)) {
+				return BaseResult.fail("网络异常，请刷新后重试");
+			}
+			return BaseResult.successResult("succeeded");
 		}
-		return BaseResult.successResult("succeeded");
+	}
+	
+	@RequestMapping(value = "/getInvoice", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required=false) String trade_water_id)
+	{
+		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(trade_water_id);
+		
+		if(invoice != null) {
+			return BaseResult.successResult(invoice);
+		} else {
+			return BaseResult.successResult(null);
+		}
 	}
 	
 	@SuppressWarnings({ "rawtypes" })

@@ -24,6 +24,7 @@ import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
+import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -60,11 +61,12 @@ public class WuyeUtil {
 	private static final String QUICK_PAY_URL = "quickPaySDO.do?stmt_id=%s&curr_page=%s&total_count=%s"; // 快捷支付
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do?user_id=%s&bill_id=%s&stmt_id=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
-			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s"; // 微信支付请求
+			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&bill_id=%s&stmt_id=%s&trade_water_id=%s&package=%s"; // 微信支付返回
 	//private static final String GET_LOCATION_URL = "getGeographicalPositionSDO.do"; // 用户地理位置
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
-	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&trade_water_id=%s";
+	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s";
+	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
@@ -131,9 +133,11 @@ public class WuyeUtil {
 	}
 	// 10.缴费
 	public static BaseResult<WechatPayInfo> getPrePayInfo(String userId,String billId,String stmtId,String openId,
-		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt) throws ValidationException {
+		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
+		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		invoice_title = URLEncoder.encode(invoice_title,"GBK");
 		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
-					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt);
+					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		if (!baseResult.isSuccess()) {
@@ -157,18 +161,24 @@ public class WuyeUtil {
 	}
 	
 	// 13.更新电子发票抬头
-	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String trade_water_id)
+	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id)
 	{
 		try {
 			invoice_title = URLEncoder.encode(invoice_title,"GBK");
-			String url = REQUEST_ADDRESS + String.format(APPLY_INVOICE_URL, mobile, invoice_title, trade_water_id);
+			String url = REQUEST_ADDRESS + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 			return (BaseResult<String>)httpGet(url,String.class);
 		} catch (UnsupportedEncodingException e) {
 			BaseResult r= new BaseResult();
 			r.setResult("99");
 			return r;
 		}
-		
+	}
+	
+	// 14.根据交易ID查询对应房屋的发票信息
+	public static BaseResult<InvoiceInfo> getInvoiceInfo(String trade_water_id)
+	{
+		String url = REQUEST_ADDRESS + String.format(INVOICE_INFO_TO_TRADE, trade_water_id);
+		return (BaseResult<InvoiceInfo>)httpGet(url,InvoiceInfo.class);
 	}
 	
 	private static BaseResult httpGet(String reqUrl, Class c){
