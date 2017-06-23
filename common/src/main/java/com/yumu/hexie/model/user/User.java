@@ -16,6 +16,7 @@ import com.yumu.hexie.model.BaseModel;
 @Entity
 public class User extends BaseModel{
 
+
 	private static final long serialVersionUID = 4808669460780339640L;
 	private String realName;
 	private String name;
@@ -368,6 +369,17 @@ public class User extends BaseModel{
 		this.newRegiste = isNewRegiste;
 	}
 
+	@Override
+	public String toString() {
+		
+		return "realName : " + realName + ",name : " + name+",tel : "+tel+", provinceId :" + province + ",cityId : "+ cityId 
+				+ ", countyId : " + countyId + ", xiaoquId : "+ xiaoquId + ", county :" + county + ", xiaoquName :" + xiaoquName
+				+ ", currentAddrId :" + currentAddrId + ", wuyeId :" + wuyeId + ", openid: " + openid + ", tel: " + tel 
+				+ ", subscribe : " + subscribe + ", nickname : " + nickname + ", city :" + city + ", country : " + country
+				+ ", province : " + province + ", headimgurl : " + headimgurl + ", registerDate : " + registerDate
+				+ ", couponCount : " + couponCount + ", shareCode: " + shareCode + ", newRegiste : " + newRegiste;
+		
+	}
 	
 	
 }

@@ -102,6 +102,8 @@ public class UserController extends BaseController{
 	@ResponseBody
     public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code) throws Exception {
 		
+		log.error("code is : " + code);
+		
 		User userAccount = null;
 		if (StringUtil.isNotEmpty(code)) {
 		    if("true".equals(testMode)) {
@@ -113,6 +115,10 @@ public class UserController extends BaseController{
 		    if(userAccount == null) {
 		        userAccount = userService.getOrSubscibeUserByCode(code);
 		    }
+		    
+		    if (userAccount != null) {
+				log.error(" userAccount is : " + userAccount.toString());
+			}
 		    
 			pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
 			wuyeService.userLogin(userAccount.getOpenid());
