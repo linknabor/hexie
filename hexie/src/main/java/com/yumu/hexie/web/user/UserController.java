@@ -242,6 +242,8 @@ public class UserController extends BaseController{
         if(StringUtil.isEmpty(req.getMobile()) || StringUtil.isEmpty(req.getYzm())){
             return new BaseResult<UserInfo>().failMsg("信息请填写完整！");
         }
+        
+        log.error("req is :" + req.toString());
         boolean result = smsService.checkVerificationCode(req.getMobile(), req.getYzm());
         if(!result){
             return new BaseResult<UserInfo>().failMsg("校验失败！");
