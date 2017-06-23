@@ -52,5 +52,12 @@ public class SimpleRegisterReq implements Serializable{
     public void setName(String name) {
         this.name = name;
     }
+	@Override
+	public String toString() {
+		return "SimpleRegisterReq [mobile=" + mobile + ", yzm=" + yzm
+				+ ", name=" + name + ", sn=" + sn + ", sectId=" + sectId + "]";
+	}
+    
+    
     
 }
