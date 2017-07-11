@@ -26,7 +26,6 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.charger.ChargerService;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -67,8 +66,6 @@ public class UserController extends BaseController{
     @Inject
     private SystemConfigService systemConfigService;
     
-    @Inject
-	private ChargerService chargerService;
 
     @Value(value = "${testMode}")
     private String testMode;
@@ -102,8 +99,6 @@ public class UserController extends BaseController{
 	@ResponseBody
     public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code) throws Exception {
 		
-		log.error("code is : " + code);
-		
 		User userAccount = null;
 		if (StringUtil.isNotEmpty(code)) {
 		    if("true".equals(testMode)) {
@@ -115,10 +110,6 @@ public class UserController extends BaseController{
 		    if(userAccount == null) {
 		        userAccount = userService.getOrSubscibeUserByCode(code);
 		    }
-		    
-		    if (userAccount != null) {
-				log.error(" userAccount is : " + userAccount.toString());
-			}
 		    
 			pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
 			wuyeService.userLogin(userAccount.getOpenid());
@@ -242,8 +233,6 @@ public class UserController extends BaseController{
         if(StringUtil.isEmpty(req.getMobile()) || StringUtil.isEmpty(req.getYzm())){
             return new BaseResult<UserInfo>().failMsg("信息请填写完整！");
         }
-        
-        log.error("req is :" + req.toString());
         boolean result = smsService.checkVerificationCode(req.getMobile(), req.getYzm());
         if(!result){
             return new BaseResult<UserInfo>().failMsg("校验失败！");
@@ -255,16 +244,7 @@ public class UserController extends BaseController{
             
             user.setRegisterDate(System.currentTimeMillis());
             session.setAttribute(Constants.USER, userService.save(user));
-            
-/*            //如果sn不为空，则说明是从充电桩的二维码扫码进来的用户
-            if(!StringUtil.isNotEmpty(req.getSn()))
-            {
-            	//添加云充账户
-                boolean istrue = chargerService.saveChargerUser(user.getOpenid(), user.getTel(), req.getSn(),req.getSectId());
-            	if(!istrue)
-            		return new BaseResult<UserInfo>().failMsg("创建账户失败！");
-            }
-*/            return new BaseResult<UserInfo>().success(new UserInfo(user));
+            return new BaseResult<UserInfo>().success(new UserInfo(user));
         }
     }
 }
