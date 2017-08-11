@@ -86,7 +86,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentOrder queryPaymentOrder(int orderType, long orderId) {
         List<PaymentOrder> pos = paymentOrderRepository.findByOrderTypeAndOrderId(orderType, orderId);
-        if(pos == null || pos.size() > 0){
+        if(pos.size() > 0){
             for(PaymentOrder p : pos) {
                 if(p.getStatus() != PaymentConstant.PAYMENT_STATUS_FAIL){
                     return p;
@@ -156,7 +156,10 @@ public class PaymentServiceImpl implements PaymentService {
             return payment;
         }
         PaymentOrderResult poResult = wechatCoreService.queryOrder(payment.getPaymentNo());
-        
+        if(poResult==null)
+        {
+        	return payment;
+        }
         if(poResult.isPaying()) {//1. 支付中
             log.warn("[Payment-refreshStatus]isPaying["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
             return payment;
@@ -186,7 +189,9 @@ public class PaymentServiceImpl implements PaymentService {
         if(po.getStatus() == PaymentConstant.PAYMENT_STATUS_SUCCESS
                 ||po.getStatus() == PaymentConstant.PAYMENT_STATUS_REFUNDING
                 ||po.getStatus() == PaymentConstant.PAYMENT_STATUS_REFUNDED) {
-            throw new BizValidateException(po.getOrderId(),"该订单已支付成功，无法取消！").setError();
+        	log.warn("[Payment-cancelPayment]begin["+orderType+"]["+orderId+"],该订单已支付成功，无法取消！");
+        	return null;
+            //throw new BizValidateException(po.getOrderId(),"该订单已支付成功，无法取消！").setError();
         }
         CloseOrderResp c = wechatCoreService.closeOrder(po);
 		if (c==null) {
