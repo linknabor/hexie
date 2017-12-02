@@ -7,6 +7,7 @@ public class InvoiceInfo {
 	private String invoice_title;
 	private String credit_code;
 	private String showcom;
+	private String csp_invoice_title;
 	
 	public String getMobile() {
 		return mobile;
@@ -38,5 +39,10 @@ public class InvoiceInfo {
 	public void setShowcom(String showcom) {
 		this.showcom = showcom;
 	}
-	
+	public String getCsp_invoice_title() {
+		return csp_invoice_title;
+	}
+	public void setCsp_invoice_title(String csp_invoice_title) {
+		this.csp_invoice_title = csp_invoice_title;
+	}
 }
