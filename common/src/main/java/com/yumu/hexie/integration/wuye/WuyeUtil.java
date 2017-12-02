@@ -163,15 +163,8 @@ public class WuyeUtil {
 	// 13.更新电子发票抬头
 	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id)
 	{
-		try {
-			invoice_title = URLEncoder.encode(invoice_title,"GBK");
-			String url = REQUEST_ADDRESS + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
-			return (BaseResult<String>)httpGet(url,String.class);
-		} catch (UnsupportedEncodingException e) {
-			BaseResult r= new BaseResult();
-			r.setResult("99");
-			return r;
-		}
+		String url = REQUEST_ADDRESS + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
+		return (BaseResult<String>)httpGet(url,String.class);
 	}
 	
 	// 14.根据交易ID查询对应房屋的发票信息
