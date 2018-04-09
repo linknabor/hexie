@@ -1,12 +1,19 @@
 package com.yumu.hexie.web.shequ;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -17,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
@@ -426,14 +432,11 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult applyInvoice(@RequestParam(required=false) String mobile,@RequestParam(required=false) String invoice_title,
 			@RequestParam(required=false) String yzm, @RequestParam(required=false) String trade_water_id, @RequestParam(required=false) String invoice_title_type,
-			@RequestParam(required=false) String credit_code)
-	{
+			@RequestParam(required=false) String credit_code) {
 		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);
-		if(!isCheck)
-		{
+		if(!isCheck) {
 			return new BaseResult<UserInfo>().failMsg("校验失败！");
-		}else
-		{
+		} else {
 			String result = wuyeService.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 			if ("99".equals(result)) {
 				return BaseResult.fail("网络异常，请刷新后重试");
@@ -444,8 +447,7 @@ public class WuyeController extends BaseController {
 	
 	@RequestMapping(value = "/getInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required=false) String trade_water_id)
-	{
+	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required=false) String trade_water_id) {
 		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(trade_water_id);
 		
 		if(invoice != null) {
@@ -454,6 +456,42 @@ public class WuyeController extends BaseController {
 			return BaseResult.successResult(null);
 		}
 	}
+	
+	@RequestMapping(value = "/showPDF/{pdfAddr}", method = RequestMethod.GET)
+	@ResponseBody
+	public void showPDF(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false) String pdfAddr) {
+		BufferedInputStream bis = null;
+		OutputStream os = null;
+		try {
+			Base64 base64 = new Base64();
+			String u = new String(base64.decode(pdfAddr.getBytes("GBK")));
+			response.setContentType("text/html; charset=UTF-8");  
+			response.setContentType("application/pdf");  
+			URL url = new URL(u);
+			bis = new BufferedInputStream(url.openStream());  
+			os = response.getOutputStream();  
+			int count = 0;  
+			byte[] buffer = new byte[1024 * 1024];  
+			while ((count =bis.read(buffer)) != -1){  
+				os.write(buffer, 0,count);  
+			}  
+			os.flush(); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}finally {  
+			try {
+				if (os !=null){
+					os.close();
+				}
+				if (bis !=null){  
+					bis.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}  
+		}
+	}
+	
 	
 	@SuppressWarnings({ "rawtypes" })
 	@RequestMapping(value = "initSession4Test/{userId}", method = RequestMethod.GET)
