@@ -2,8 +2,11 @@ package com.yumu.hexie.web.shequ;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
@@ -457,39 +461,26 @@ public class WuyeController extends BaseController {
 		}
 	}
 	
-	@RequestMapping(value = "/showPDF/{pdfAddr}", method = RequestMethod.GET)
+	@RequestMapping(value = "/showPDF", method = RequestMethod.GET)
 	@ResponseBody
-	public void showPDF(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false) String pdfAddr) {
-		BufferedInputStream bis = null;
-		OutputStream os = null;
+	public InputStream showPDF(HttpServletRequest request, HttpServletResponse response) {
+		InputStream inputStream = null;
+		String pdfAddr = request.getParameter("pdfAddr");
 		try {
 			Base64 base64 = new Base64();
 			String u = new String(base64.decode(pdfAddr.getBytes("GBK")));
-			response.setContentType("text/html; charset=UTF-8");  
-			response.setContentType("application/pdf");  
 			URL url = new URL(u);
-			bis = new BufferedInputStream(url.openStream());  
-			os = response.getOutputStream();  
-			int count = 0;  
-			byte[] buffer = new byte[1024 * 1024];  
-			while ((count =bis.read(buffer)) != -1){  
-				os.write(buffer, 0,count);  
-			}  
-			os.flush(); 
+			//打开请求连接
+            URLConnection connection = url.openConnection();
+            HttpURLConnection httpURLConnection=(HttpURLConnection) connection;
+            httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+            inputStream = httpURLConnection.getInputStream();
+            
 		} catch (Exception e) {
 			e.printStackTrace();
-		}finally {  
-			try {
-				if (os !=null){
-					os.close();
-				}
-				if (bis !=null){  
-					bis.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}  
+			inputStream = null;
 		}
+		return inputStream;
 	}
 	
 	
