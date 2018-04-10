@@ -1,22 +1,12 @@
 package com.yumu.hexie.web.shequ;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -460,29 +450,6 @@ public class WuyeController extends BaseController {
 			return BaseResult.successResult(null);
 		}
 	}
-	
-	@RequestMapping(value = "/showPDF", method = RequestMethod.GET)
-	@ResponseBody
-	public InputStream showPDF(HttpServletRequest request, HttpServletResponse response) {
-		InputStream inputStream = null;
-		String pdfAddr = request.getParameter("pdfAddr");
-		try {
-			Base64 base64 = new Base64();
-			String u = new String(base64.decode(pdfAddr.getBytes("GBK")));
-			URL url = new URL(u);
-			//打开请求连接
-            URLConnection connection = url.openConnection();
-            HttpURLConnection httpURLConnection=(HttpURLConnection) connection;
-            httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-            inputStream = httpURLConnection.getInputStream();
-            
-		} catch (Exception e) {
-			e.printStackTrace();
-			inputStream = null;
-		}
-		return inputStream;
-	}
-	
 	
 	@SuppressWarnings({ "rawtypes" })
 	@RequestMapping(value = "initSession4Test/{userId}", method = RequestMethod.GET)
