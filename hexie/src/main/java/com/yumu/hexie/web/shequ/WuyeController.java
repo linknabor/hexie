@@ -426,11 +426,14 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult applyInvoice(@RequestParam(required=false) String mobile,@RequestParam(required=false) String invoice_title,
 			@RequestParam(required=false) String yzm, @RequestParam(required=false) String trade_water_id, @RequestParam(required=false) String invoice_title_type,
-			@RequestParam(required=false) String credit_code) {
+			@RequestParam(required=false) String credit_code)
+	{
 		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);
-		if(!isCheck) {
+		if(!isCheck)
+		{
 			return new BaseResult<UserInfo>().failMsg("校验失败！");
-		} else {
+		}else
+		{
 			String result = wuyeService.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 			if ("99".equals(result)) {
 				return BaseResult.fail("网络异常，请刷新后重试");
@@ -441,7 +444,8 @@ public class WuyeController extends BaseController {
 	
 	@RequestMapping(value = "/getInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required=false) String trade_water_id) {
+	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required=false) String trade_water_id)
+	{
 		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(trade_water_id);
 		
 		if(invoice != null) {

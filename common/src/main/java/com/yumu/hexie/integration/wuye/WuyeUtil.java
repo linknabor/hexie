@@ -14,7 +14,6 @@ import org.hibernate.bytecode.buildtime.spi.ExecutionException;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ObjectUtils;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -136,6 +135,7 @@ public class WuyeUtil {
 	public static BaseResult<WechatPayInfo> getPrePayInfo(String userId,String billId,String stmtId,String openId,
 		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
 		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		invoice_title = URLEncoder.encode(invoice_title,"GBK");
 		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
 					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
 	
@@ -161,7 +161,8 @@ public class WuyeUtil {
 	}
 	
 	// 13.更新电子发票抬头
-	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id)
+	{
 		String url = REQUEST_ADDRESS + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 		return (BaseResult<String>)httpGet(url,String.class);
 	}
