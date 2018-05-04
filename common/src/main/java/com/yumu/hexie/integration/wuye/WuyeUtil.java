@@ -143,7 +143,7 @@ public class WuyeUtil {
 		if (!baseResult.isSuccess()) {
 			throw new ValidationException(baseResult.getData().toString());
 		}
-		return (BaseResult<WechatPayInfo>)httpGet(url,WechatPayInfo.class);
+		return (BaseResult<WechatPayInfo>)baseResult;
 	}
 	
 	// 11.通知已支付
@@ -161,8 +161,7 @@ public class WuyeUtil {
 	}
 	
 	// 13.更新电子发票抬头
-	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id)
-	{
+	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
 		try {
 			invoice_title = URLEncoder.encode(invoice_title,"GBK");
 			String url = REQUEST_ADDRESS + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
