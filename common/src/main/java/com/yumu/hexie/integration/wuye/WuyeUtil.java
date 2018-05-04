@@ -135,6 +135,7 @@ public class WuyeUtil {
 	public static BaseResult<WechatPayInfo> getPrePayInfo(String userId,String billId,String stmtId,String openId,
 		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
 		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		invoice_title = URLEncoder.encode(invoice_title,"GBK");
 		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
 					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
 	
