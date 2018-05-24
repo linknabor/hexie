@@ -113,7 +113,7 @@ public class WuyeController extends BaseController {
 				stmtId));
 	}
 
-	@RequestMapping(value = "/addhexiehouse/{stmtId}/{houseId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
 			@PathVariable String stmtId,
