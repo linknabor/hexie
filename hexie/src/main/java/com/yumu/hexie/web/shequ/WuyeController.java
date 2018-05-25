@@ -100,10 +100,10 @@ public class WuyeController extends BaseController {
 		}
 	}
 	
-	@RequestMapping(value = "/hexiehouse/{stmtId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/hexiehouse", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<HexieHouse> hexiehouses(@ModelAttribute(Constants.USER)User user,
-			@PathVariable String stmtId) throws Exception {
+			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String house_id) throws Exception {
 
 		if(StringUtil.isEmpty(user.getWuyeId())){
 			//FIXME 后续可调转绑定房子页面
