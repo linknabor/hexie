@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -100,10 +101,10 @@ public class WuyeController extends BaseController {
 		}
 	}
 	
-	@RequestMapping(value = "/hexiehouse/{stmtId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/hexiehouse", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<HexieHouse> hexiehouses(@ModelAttribute(Constants.USER)User user,
-			@PathVariable String stmtId) throws Exception {
+			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String house_id) throws Exception {
 
 		if(StringUtil.isEmpty(user.getWuyeId())){
 			//FIXME 后续可调转绑定房子页面
@@ -113,11 +114,10 @@ public class WuyeController extends BaseController {
 				stmtId));
 	}
 
-	@RequestMapping(value = "/addhexiehouse/{stmtId}/{houseId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
-			@PathVariable String stmtId,
-			@PathVariable String houseId) throws Exception {
+			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId, @RequestBody HexieHouse house) throws Exception {
 		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
 		if(u != null) {
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
