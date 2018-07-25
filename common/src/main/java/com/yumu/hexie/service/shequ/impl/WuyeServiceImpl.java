@@ -138,8 +138,7 @@ public class WuyeServiceImpl implements WuyeService {
 		try {
 			return WuyeUtil.getVagueSectByName(sect_name).getData();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("123456:"+e);
 		}
 		return null;
 	}
