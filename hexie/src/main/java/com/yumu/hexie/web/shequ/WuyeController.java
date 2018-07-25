@@ -542,4 +542,13 @@ public class WuyeController extends BaseController {
 			return BaseResult.successResult(new ArrayList<CellVO>());
 		}
 	}
+	
+	
+	@RequestMapping(value = "/yayayayaceshi", method = RequestMethod.GET)
+	@ResponseBody
+	public String ceshi()throws Exception {
+		log.info("ceshi");
+		
+		return "yayayayaceshi";
+	}
 }
