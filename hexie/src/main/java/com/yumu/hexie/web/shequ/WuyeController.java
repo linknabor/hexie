@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +26,8 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.CellListVO;
+import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
@@ -67,6 +70,27 @@ public class WuyeController extends BaseController {
     
     @Inject
 	private SystemConfigService systemConfigService;
+    
+////模拟用户信息
+//@ModelAttribute
+//public void init01(Model model)
+//{
+//	User user = new User();
+//	user.setProvinceId(1);
+//	user.setCityId(0);
+//	user.setCountyId(0);
+//	user.setXiaoquId(0);
+////	provinceId, long cityId, long countyId, long xiaoquId
+//	model.addAttribute("sessionUser", user);
+//    System.out.println("创建了一个sessionUser");
+//}
+    
+    @RequestMapping(value = "/ttt", method = RequestMethod.GET)
+	@ResponseBody
+	public String ttt(){
+    	
+    	return "asdfdasf";
+    }
 
 	/*****************[BEGIN]房产********************/
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
@@ -496,5 +520,30 @@ public class WuyeController extends BaseController {
 		
 	    return BaseResult.successResult("succeeded");
 		
+	}
+	
+	//根据ID查询指定类型的合协社区物业信息
+	@RequestMapping(value = "/getHeXieCellById", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_name, 
+			@RequestParam(required=false) String build_id, @RequestParam(required=false) String unit_id, @RequestParam(required=false) String data_type)throws Exception {
+		CellListVO cellMng = wuyeService.querySectHeXieList(sect_name, build_id, unit_id, data_type);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
+	}
+	
+	//根据名称模糊查询合协社区小区列表
+	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_name)throws Exception {
+		CellListVO cellMng = wuyeService.getVagueSectByName(sect_name);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
 	}
 }

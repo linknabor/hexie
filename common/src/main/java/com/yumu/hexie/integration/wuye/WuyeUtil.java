@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -16,10 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JavaType;
+import com.yumu.hexie.common.util.HttpUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
@@ -67,6 +70,10 @@ public class WuyeUtil {
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
 	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s";
 	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
+	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do";
+//	+ "?sect_name=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
+	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";
+//	+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
@@ -178,6 +185,50 @@ public class WuyeUtil {
 	{
 		String url = REQUEST_ADDRESS + String.format(INVOICE_INFO_TO_TRADE, trade_water_id);
 		return (BaseResult<InvoiceInfo>)httpGet(url,InvoiceInfo.class);
+	}
+	
+	//15.根据ID查询指定类型的合协社区物业信息
+	public static BaseResult<CellListVO> getMngHeXieList(String sect_name, String build_id, String unit_id, String data_type) throws Exception{
+		//中文打码
+		sect_name = URLEncoder.encode(sect_name, "gbk");
+		Map<String, String>map = new HashMap<String, String>();
+		map.put("sect_name", sect_name);
+		map.put("build_id", build_id);
+		map.put("unit_id", unit_id);
+		map.put("data_type", data_type);
+		String response = "";
+		//请求
+		response = HttpUtil.doPostMap(REQUEST_ADDRESS+MNG_HEXIE_LIST_URL, map, "gbk");
+		BaseResult v = new BaseResult<CellListVO>();
+		try {
+			v =jsonToBeanResult(response, CellListVO.class);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return v;
+	}
+	
+	//20.根据名称模糊查询合协社区小区列表
+	public static BaseResult<CellListVO> getVagueSectByName(String sect_name) throws Exception{
+//		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
+//		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
+		
+		//中文打码
+		sect_name = URLEncoder.encode(sect_name, "gbk");
+		Map<String, String>map = new HashMap<String, String>();
+		map.put("sect_name", sect_name);
+		String response = "";
+		//请求
+		response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL, map, "gbk");
+		
+		BaseResult v = new BaseResult<CellListVO>();
+		try {
+			v = jsonToBeanResult(response, CellListVO.class);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return v;
 	}
 	
 	private static BaseResult httpGet(String reqUrl, Class c){

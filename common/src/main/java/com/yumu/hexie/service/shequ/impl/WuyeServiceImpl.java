@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
@@ -114,5 +115,29 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public InvoiceInfo getInvoiceByTradeId(String trade_water_id) {
 		return WuyeUtil.getInvoiceInfo(trade_water_id).getData();
+	}
+	
+	@Override
+	public CellListVO querySectHeXieList(String sect_name, String build_id,
+			String unit_id, String data_type) {
+		try {
+			return WuyeUtil.getMngHeXieList(sect_name, build_id, unit_id, data_type).getData();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	//根据名称模糊查询合协社区小区列表
+	@Override
+	public CellListVO getVagueSectByName(String sect_name) {
+		try {
+			return WuyeUtil.getVagueSectByName(sect_name).getData();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
