@@ -85,12 +85,6 @@ public class WuyeController extends BaseController {
 //    System.out.println("创建了一个sessionUser");
 //}
     
-    @RequestMapping(value = "/ttt", method = RequestMethod.GET)
-	@ResponseBody
-	public String ttt(){
-    	
-    	return "asdfdasf";
-    }
 
 	/*****************[BEGIN]房产********************/
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
