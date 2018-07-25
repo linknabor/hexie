@@ -211,25 +211,14 @@ public class WuyeUtil {
 	
 	//20.根据名称模糊查询合协社区小区列表
 	public static BaseResult<CellListVO> getVagueSectByName(String sect_name) throws Exception{
-//		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
-//		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 		log.error("ceshi2");
+		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
 		//中文打码
 		sect_name = URLEncoder.encode(sect_name, "gbk");
 		Map<String, String>map = new HashMap<String, String>();
 		map.put("sect_name", sect_name);
-		String response = "";
-		//请求
-		response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL, map, "gbk");
-		log.error("ceshi3 :::"+response);
-		BaseResult v = new BaseResult<CellListVO>();
-		try {
-			v = jsonToBeanResult(response, CellListVO.class);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return v;
+		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL, map, "gbk");
+		return jsonToBeanResult(response, CellListVO.class);
 	}
 	
 	private static BaseResult httpGet(String reqUrl, Class c){

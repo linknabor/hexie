@@ -136,6 +136,10 @@ public class WuyeServiceImpl implements WuyeService {
 	public CellListVO getVagueSectByName(String sect_name) {
 		log.error("ceshi1");
 		try {
+			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name);
+			
+			log.error("222");
+			log.error(s.getResult());
 			return WuyeUtil.getVagueSectByName(sect_name).getData();
 		} catch (Exception e) {
 			log.error("123456:"+e);
