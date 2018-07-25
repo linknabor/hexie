@@ -2,6 +2,8 @@ package com.yumu.hexie.service.shequ.impl;
 
 import javax.xml.bind.ValidationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -21,7 +23,7 @@ import com.yumu.hexie.service.shequ.WuyeService;
 
 @Service("wuyeService")
 public class WuyeServiceImpl implements WuyeService {
-
+	private static final Logger log = LoggerFactory.getLogger(WuyeServiceImpl.class);
 	
 	@Override
 	public HouseListVO queryHouse(String userId) {
@@ -132,6 +134,7 @@ public class WuyeServiceImpl implements WuyeService {
 	//根据名称模糊查询合协社区小区列表
 	@Override
 	public CellListVO getVagueSectByName(String sect_name) {
+		log.error("ceshi1");
 		try {
 			return WuyeUtil.getVagueSectByName(sect_name).getData();
 		} catch (Exception e) {

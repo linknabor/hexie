@@ -533,7 +533,7 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_name)throws Exception {
-		log.info("ceshi");
+		log.error("ceshi");
 		
 		CellListVO cellMng = wuyeService.getVagueSectByName(sect_name);
 		if (cellMng != null) {

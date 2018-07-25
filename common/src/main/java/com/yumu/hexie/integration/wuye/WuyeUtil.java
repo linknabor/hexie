@@ -33,6 +33,7 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 
 public class WuyeUtil {
+	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
 
 	private static String REQUEST_ADDRESS = "http://www.e-shequ.com/mobileInterface/mobile/";
 	private static String SYSTEM_NAME;
@@ -212,7 +213,7 @@ public class WuyeUtil {
 	public static BaseResult<CellListVO> getVagueSectByName(String sect_name) throws Exception{
 //		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
 //		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
-		
+		log.error("ceshi2");
 		//中文打码
 		sect_name = URLEncoder.encode(sect_name, "gbk");
 		Map<String, String>map = new HashMap<String, String>();
@@ -220,7 +221,7 @@ public class WuyeUtil {
 		String response = "";
 		//请求
 		response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL, map, "gbk");
-		
+		log.error("ceshi3 :::"+response);
 		BaseResult v = new BaseResult<CellListVO>();
 		try {
 			v = jsonToBeanResult(response, CellListVO.class);
