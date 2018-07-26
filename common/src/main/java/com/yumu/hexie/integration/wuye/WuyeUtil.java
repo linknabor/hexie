@@ -73,8 +73,7 @@ public class WuyeUtil {
 	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do";
 //	+ "?sect_name=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
-	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";
-//	+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
+	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
@@ -211,16 +210,19 @@ public class WuyeUtil {
 	
 	//20.根据名称模糊查询合协社区小区列表
 	public static BaseResult<CellListVO> getVagueSectByName(String sect_name) throws Exception{
-		log.error("ceshi2");
-		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
-		//中文打码
-		String nname = sect_name;
-		sect_name = URLEncoder.encode(sect_name, "gbk");
-		Map<String, String>map = new HashMap<String, String>();
-		map.put("sect_name", sect_name);
-		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name="+nname, null, "gbk");
-		log.error("【response】:"+response);
-		return jsonToBeanResult(response, CellListVO.class);
+//		log.error("ceshi2");
+//		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
+//		//中文打码
+//		String nname = sect_name;
+//		sect_name = URLEncoder.encode(sect_name, "gbk");
+//		Map<String, String>map = new HashMap<String, String>();
+//		map.put("sect_name", sect_name);
+//		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name="+nname, null, "gbk");
+//		log.error("【response】:"+response);
+//		return jsonToBeanResult(response, CellListVO.class);
+		
+		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
+		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
 	private static BaseResult httpGet(String reqUrl, Class c){
