@@ -214,10 +214,11 @@ public class WuyeUtil {
 		log.error("ceshi2");
 		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
 		//中文打码
+		String nname = sect_name;
 		sect_name = URLEncoder.encode(sect_name, "gbk");
 		Map<String, String>map = new HashMap<String, String>();
 		map.put("sect_name", sect_name);
-		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name=南", null, "gbk");
+		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name="+nname, null, "gbk");
 		log.error("【response】:"+response);
 		return jsonToBeanResult(response, CellListVO.class);
 	}
