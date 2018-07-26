@@ -218,6 +218,7 @@ public class WuyeUtil {
 		Map<String, String>map = new HashMap<String, String>();
 		map.put("sect_name", sect_name);
 		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL, map, "gbk");
+		log.error("【response】:"+response);
 		return jsonToBeanResult(response, CellListVO.class);
 	}
 	
