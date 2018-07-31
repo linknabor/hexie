@@ -1,7 +1,5 @@
 package com.yumu.hexie.service.shequ.impl;
 
-import javax.xml.bind.ValidationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -71,8 +69,8 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public BillListVO queryBillList(String userId, String payStatus,
-			String startDate, String endDate,String currentPage, String totalCount) {
-		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount).getData();
+			String startDate, String endDate,String currentPage, String totalCount,String house_id) {
+		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id).getData();
 	}
 
 	@Override
@@ -125,7 +123,7 @@ public class WuyeServiceImpl implements WuyeService {
 		try {
 			return WuyeUtil.getMngHeXieList(sect_name, build_id, unit_id, data_type).getData();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			log.error("异常捕获信息:"+e);
 			e.printStackTrace();
 		}
 		return null;
@@ -134,16 +132,14 @@ public class WuyeServiceImpl implements WuyeService {
 	//根据名称模糊查询合协社区小区列表
 	@Override
 	public CellListVO getVagueSectByName(String sect_name) {
-		log.error("ceshi1");
 		try {
 			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name);
-			
-			log.error("222");
 			log.error(s.getResult());
 			return WuyeUtil.getVagueSectByName(sect_name).getData();
 		} catch (Exception e) {
-			log.error("123456:"+e);
+			log.error("异常捕获信息:"+e);
 		}
 		return null;
 	}
+	
 }
