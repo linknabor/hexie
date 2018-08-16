@@ -71,26 +71,20 @@ public class WuyeController extends BaseController {
     @Inject
 	private SystemConfigService systemConfigService;
     
-//模拟用户信息
-@ModelAttribute
-public void init01(Model model)
-{
-	User user = new User();
-	user.setProvinceId(1);
-	user.setCityId(0);
-	user.setCountyId(0);
-	user.setXiaoquId(0);
-//	provinceId, long cityId, long countyId, long xiaoquId
-	model.addAttribute("sessionUser", user);
-    System.out.println("创建了一个sessionUser");
-}
+////模拟用户信息
+//@ModelAttribute
+//public void init01(Model model)
+//{
+//	User user = new User();
+//	user.setProvinceId(1);
+//	user.setCityId(0);
+//	user.setCountyId(0);
+//	user.setXiaoquId(0);
+////	provinceId, long cityId, long countyId, long xiaoquId
+//	model.addAttribute("sessionUser", user);
+//    System.out.println("创建了一个sessionUser");
+//}
     
-    @RequestMapping(value = "/ttt", method = RequestMethod.GET)
-	@ResponseBody
-	public String ttt(){
-    	
-    	return "asdfdasf";
-    }
 
 	/*****************[BEGIN]房产********************/
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
@@ -195,9 +189,10 @@ public void init01(Model model)
 			@RequestParam(required=false) String startDate,
 			@RequestParam(required=false) String endDate,
 			@RequestParam(required=false) String currentPage,
-			@RequestParam(required=false) String totalCount)
+			@RequestParam(required=false) String totalCount,
+			@RequestParam(required=false) String house_id)
 			throws Exception {
-		BillListVO  listVo = wuyeService.queryBillList(user.getWuyeId(), payStatus, startDate, endDate, currentPage, totalCount);
+		BillListVO  listVo = wuyeService.queryBillList(user.getWuyeId(), payStatus, startDate, endDate, currentPage, totalCount, house_id);
 		if (listVo != null && listVo.getBill_info() != null) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -539,11 +534,22 @@ public void init01(Model model)
 	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_name)throws Exception {
+		log.error("ceshi");
+		
 		CellListVO cellMng = wuyeService.getVagueSectByName(sect_name);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
 			return BaseResult.successResult(new ArrayList<CellVO>());
 		}
+	}
+	
+	
+	@RequestMapping(value = "/yayayayaceshi", method = RequestMethod.GET)
+	@ResponseBody
+	public String ceshi()throws Exception {
+		log.info("ceshi");
+		
+		return "yayayayaceshi";
 	}
 }
