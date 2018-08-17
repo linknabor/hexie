@@ -189,7 +189,7 @@ public class WuyeUtil {
 	//15.根据ID查询指定类型的合协社区物业信息
 	public static BaseResult<CellListVO> getMngHeXieList(String sect_name, String build_id, String unit_id, String data_type) throws Exception{
 //		//中文打码
-//		sect_name = URLEncoder.encode(sect_name, "gbk");
+		sect_name = URLEncoder.encode(sect_name, "GBK");
 //		Map<String, String>map = new HashMap<String, String>();
 //		map.put("sect_name", sect_name);
 //		map.put("build_id", build_id);
@@ -205,8 +205,7 @@ public class WuyeUtil {
 //			e.printStackTrace();
 //		}
 //		return v;
-		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_name,build_id,unit_id,data_type);
-		log.error("【url】:"+url);
+		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_name, build_id, unit_id, data_type);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
@@ -216,7 +215,7 @@ public class WuyeUtil {
 //		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
 //		//中文打码
 //		String nname = sect_name;
-//		sect_name = URLEncoder.encode(sect_name, "gbk");
+		sect_name = URLEncoder.encode(sect_name, "GBK");
 //		Map<String, String>map = new HashMap<String, String>();
 //		map.put("sect_name", sect_name);
 //		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name="+nname, null, "gbk");
@@ -224,7 +223,6 @@ public class WuyeUtil {
 //		return jsonToBeanResult(response, CellListVO.class);
 		
 		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
-		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
