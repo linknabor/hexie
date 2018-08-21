@@ -234,6 +234,24 @@ public class WuyeController extends BaseController {
 	    return BaseResult.successResult(result);
 	}	
 	
+	//stmtId在快捷支付的时候会用到
+	@RequestMapping(value = "/getPrePayInfoo", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<WechatPayInfo> getPrePayInfoo(@ModelAttribute(Constants.USER)User user,
+			@RequestParam(required=false) String billId)
+			throws Exception {
+		WechatPayInfo result;
+		try {
+			System.out.println("try");
+		} catch (Exception e) {
+			System.out.println("catch");
+			e.printStackTrace();
+			return BaseResult.fail(e.getMessage());
+		}
+		System.out.println("no try catch");
+	    return BaseResult.successResult(null);
+	}
+	
 	/**
 	 * 通知支付成功，并获取支付查询的返回结果
 	 * @param user
@@ -520,9 +538,9 @@ public class WuyeController extends BaseController {
 	//根据ID查询指定类型的合协社区物业信息
 	@RequestMapping(value = "/getHeXieCellById", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_name, 
+	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_id, 
 			@RequestParam(required=false) String build_id, @RequestParam(required=false) String unit_id, @RequestParam(required=false) String data_type)throws Exception {
-		CellListVO cellMng = wuyeService.querySectHeXieList(sect_name, build_id, unit_id, data_type);
+		CellListVO cellMng = wuyeService.querySectHeXieList(sect_id, build_id, unit_id, data_type);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {

@@ -52,7 +52,7 @@ public interface WuyeService {
 	public InvoiceInfo getInvoiceByTradeId(String trade_water_id);
 	
 	//15.根据数据类型查询指定的合协社区物业单元信息
-	public CellListVO querySectHeXieList(String sect_name, String build_id, String unit_id, String data_type);
+	public CellListVO querySectHeXieList(String sect_id, String build_id, String unit_id, String data_type);
 	
 	//16.根据名称模糊查询合协社区小区列表
 	public CellListVO getVagueSectByName(String sect_name);

@@ -71,7 +71,7 @@ public class WuyeUtil {
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
 	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s";
 	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
-	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"+ "?sect_name=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
+	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"+ "?sect_id=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
@@ -187,7 +187,7 @@ public class WuyeUtil {
 	}
 	
 	//15.根据ID查询指定类型的合协社区物业信息
-	public static BaseResult<CellListVO> getMngHeXieList(String sect_name, String build_id, String unit_id, String data_type) throws Exception{
+	public static BaseResult<CellListVO> getMngHeXieList(String sect_id, String build_id, String unit_id, String data_type) throws Exception{
 //		//中文打码
 //		sect_name = URLEncoder.encode(sect_name, "gbk");
 //		Map<String, String>map = new HashMap<String, String>();
@@ -205,7 +205,7 @@ public class WuyeUtil {
 //			e.printStackTrace();
 //		}
 //		return v;
-		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_name,build_id,unit_id,data_type);
+		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
