@@ -205,6 +205,7 @@ public class WuyeUtil {
 //			e.printStackTrace();
 //		}
 //		return v;
+
 		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
@@ -217,6 +218,7 @@ public class WuyeUtil {
 //		//中文打码
 //		String nname = sect_name;
 //		sect_name = URLEncoder.encode(sect_name, "gbk");
+
 //		Map<String, String>map = new HashMap<String, String>();
 //		map.put("sect_name", sect_name);
 //		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name="+nname, null, "gbk");
