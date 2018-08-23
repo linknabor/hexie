@@ -118,10 +118,10 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public CellListVO querySectHeXieList(String sect_name, String build_id,
+	public CellListVO querySectHeXieList(String sect_id, String build_id,
 			String unit_id, String data_type) {
 		try {
-			return WuyeUtil.getMngHeXieList(sect_name, build_id, unit_id, data_type).getData();
+			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type).getData();
 		} catch (Exception e) {
 			log.error("异常捕获信息:"+e);
 			e.printStackTrace();
