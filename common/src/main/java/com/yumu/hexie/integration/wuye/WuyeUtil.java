@@ -217,7 +217,7 @@ public class WuyeUtil {
 //		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
 //		//中文打码
 //		String nname = sect_name;
-//		sect_name = URLEncoder.encode(sect_name, "gbk");
+		sect_name = URLEncoder.encode(sect_name, "gbk");
 
 //		Map<String, String>map = new HashMap<String, String>();
 //		map.put("sect_name", sect_name);
