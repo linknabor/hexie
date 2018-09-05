@@ -193,6 +193,7 @@ public class ModelConstant {
 	public static final int YUYUE_PRODUCT_TYPE_JIUYE = 10;//九曳
 	public static final int YUYUE_PRODUCT_TYPE_BAOJIE = 11;//保洁服务
 	public static final int YUYUE_PRODUCT_TYPE_AIXIANGBAN = 12;//爱相伴服务
+	public static final int YUYUE_PRODUCT_TYPE_HAOJIAAN = 13;//好家安
 	//增加服务类型
 	public static final int YUYUE_SERVICE_TYPE_CAR = 0;//汽车
 	public static final int YUYUE_SERVICE_TYPE_FLOWER = 1;//鲜花
