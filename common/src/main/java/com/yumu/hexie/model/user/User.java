@@ -70,8 +70,17 @@ public class User extends BaseModel{
 	private String shareCode;
 	
 	private boolean newRegiste = true;
+	private String officeTel;
 	
 	
+	public String getOfficeTel() {
+		return officeTel;
+	}
+
+	public void setOfficeTel(String officeTel) {
+		this.officeTel = officeTel;
+	}
+
 	public long getCurrentAddrId() {
 		return currentAddrId;
 	}
