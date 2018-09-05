@@ -141,15 +141,15 @@ public class WuyeController extends BaseController {
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
 			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId) throws Exception {
 		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
-		log.info("HexieUser u = "+u);
+		log.error("HexieUser u = "+u);
 		if(u != null) {
 			
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
 			//添加电话到user表
-			log.info("保存电话到user表==》开始");
+			log.error("保存电话到user表==》开始");
 			user.setOfficeTel(u.getOffice_tel());
 			userService.save(user);
-			log.info("保存电话到user表==》成功");
+			log.error("保存电话到user表==》成功");
 		}
 		return BaseResult.successResult(u);
 	}
