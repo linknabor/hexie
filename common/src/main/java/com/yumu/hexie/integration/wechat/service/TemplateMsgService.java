@@ -13,6 +13,7 @@ import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
@@ -22,6 +23,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
@@ -178,6 +180,22 @@ public class TemplateMsgService {
         msg.setTouser(openId);
         TemplateMsgService.sendMsg(msg, accessToken);
         
+    }
+    
+   
+    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, String openId, String accessToken ) {
+    	HaoJiaAnOrderVO vo = new HaoJiaAnOrderVO();
+    	vo.setTitle(new TemplateItem("有新的预约服务"));
+    	vo.setAppointmentDate(new TemplateItem("预约日期：" + hOrder.getExpectedTime()));
+    	vo.setAppointmentContent(new TemplateItem("预约内容：" + hOrder.getServiceTypeName()));
+    	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()));
+    	
+    	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
+    	msg.setUrl(GotongServiceImpl.WEIXIU_NOTICE + hOrder.getId());
+    	msg.setTouser(openId);
+    	TemplateMsgService.sendMsg(msg, accessToken);
     }
 
 }
