@@ -106,16 +106,6 @@ public class WuyeController extends BaseController {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
 	}
-	
-	//检查当前用户是否绑定房屋
-	public BaseResult<List<HexieHouse>> checkBindHouse(@ModelAttribute(Constants.USER)User user){
-		if(StringUtil.isEmpty(user)){
-			//FIXME 后续可调转绑定房子页面
-			return BaseResult.successResult(new ArrayList<HexieHouse>());
-		}
-		wuyeService.queryUserHouse(user.getId());
-		return null;
-	}
 
 
 	@RequestMapping(value = "/hexiehouse/delete/{houseId}", method = RequestMethod.GET)
