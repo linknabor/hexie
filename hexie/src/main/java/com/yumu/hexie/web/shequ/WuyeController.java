@@ -47,6 +47,7 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.UserInfo;
@@ -64,6 +65,9 @@ public class WuyeController extends BaseController {
 	protected SmsService smsService;
     @Inject
     protected CouponService couponService;
+    
+    @Inject
+    protected UserService userService;
     
     @Inject
     protected UserRepository userRepository;
@@ -135,10 +139,17 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
-			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId, @RequestBody HexieHouse house) throws Exception {
+			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId) throws Exception {
 		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
+		log.info("HexieUser u = "+u);
 		if(u != null) {
+			
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
+			//添加电话到user表
+			log.info("保存电话到user表==》开始");
+			user.setOfficeTel(u.getOffice_tel());
+			userService.save(user);
+			log.info("保存电话到user表==》成功");
 		}
 		return BaseResult.successResult(u);
 	}
@@ -498,7 +509,6 @@ public class WuyeController extends BaseController {
 	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId){
 		
 		User user = (User)session.getAttribute(Constants.USER);
-		
 		if (session != null) {
 			
 			if (user == null) {

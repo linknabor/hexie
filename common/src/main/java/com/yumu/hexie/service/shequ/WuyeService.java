@@ -56,4 +56,6 @@ public interface WuyeService {
 	
 	//16.根据名称模糊查询合协社区小区列表
 	public CellListVO getVagueSectByName(String sect_name);
+	
+	
 }
