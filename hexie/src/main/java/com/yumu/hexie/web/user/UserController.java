@@ -76,6 +76,7 @@ public class UserController extends BaseController{
         user = userService.getById(user.getId());
         if(user != null){
             session.setAttribute(Constants.USER, user);
+            log.error("user.getOfficeTel = "+ user.getOfficeTel());
             return new BaseResult<UserInfo>().success(new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId())));
         } else {
             return new BaseResult<UserInfo>().success(null);
