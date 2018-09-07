@@ -88,6 +88,7 @@ public class WuyeUtil {
 	// 2.绑定房产
 	public static BaseResult<HexieUser> bindHouse(String userId,String stmtId,String houseId) {
 		String url = REQUEST_ADDRESS + String.format(ADD_HOUSE_URL, userId,stmtId,houseId);
+		log.error("【绑定房产url】="+url);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
 	// 3.删除房产
