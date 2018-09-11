@@ -186,8 +186,8 @@ public class TemplateMsgService {
     public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, String openId, String accessToken ) {
     	HaoJiaAnOrderVO vo = new HaoJiaAnOrderVO();
     	vo.setTitle(new TemplateItem("有新的预约服务"));
-    	vo.setAppointmentDate(new TemplateItem("预约日期：" + hOrder.getExpectedTime()));
-    	vo.setAppointmentContent(new TemplateItem("预约内容：" + hOrder.getServiceTypeName()));
+    	vo.setAppointmentDate(new TemplateItem(hOrder.getExpectedTime()));
+    	vo.setAppointmentContent(new TemplateItem(hOrder.getServiceTypeName()));
     	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()));
     	
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
