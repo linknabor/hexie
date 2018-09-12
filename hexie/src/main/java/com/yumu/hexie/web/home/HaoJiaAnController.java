@@ -29,8 +29,13 @@ public class HaoJiaAnController extends BaseController{
 	
 	@RequestMapping(value = "/haojiaan/createHaoJiaAnYuyueOrder/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<YuyueOrder> createHaoJiaAnYuyueOrder(HaoJiaAnReq haojiaanReq,@ModelAttribute(Constants.USER)User user, @PathVariable long addressId) throws Exception {
+	public BaseResult<Long> createHaoJiaAnYuyueOrder(HaoJiaAnReq haojiaanReq,@ModelAttribute(Constants.USER)User user, @PathVariable long addressId) throws Exception {
 		System.out.println("");
-		return BaseResult.successResult(haoJiaAnService.addNoNeedPayOrder(user, haojiaanReq, addressId));
+		Long oId = haoJiaAnService.addNoNeedPayOrder(user, haojiaanReq, addressId);
+		if(oId!=null){
+            return new BaseResult<Long>().success(oId);
+        } else {
+            return new BaseResult<Long>().failMsg("好家安预约订单提交失败，请稍后再试");
+        }
     }
 }

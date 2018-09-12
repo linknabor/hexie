@@ -6,6 +6,6 @@ import com.yumu.hexie.model.user.User;
 
 public interface HaoJiaAnService {
 
-	public YuyueOrder addNoNeedPayOrder(User user, HaoJiaAnReq haoJiaAnReq,
+	public Long addNoNeedPayOrder(User user, HaoJiaAnReq haoJiaAnReq,
 			long addressId);
 }
