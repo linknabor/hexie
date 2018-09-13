@@ -19,6 +19,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.home.HaoJiaAnService;
 import com.yumu.hexie.service.user.UserNoticeService;
+import com.yumu.hexie.vo.YuyueQueryOrder;
 @Service("haoJiaAnService")
 public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	@Inject 
@@ -80,6 +81,21 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 		String accessToken = systemConfigService.queryWXAToken();
 		TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user.getOpenid(), accessToken);//发送模板消息
 		return yOrder.getId();
+	}
+
+	@Override
+	public YuyueQueryOrder queryYuYueOrder(User user, long orderId) {
+
+		YuyueOrder yuyueOrder = yuyueOrderRepository.findOne(orderId);
+		YuyueQueryOrder yuyueQueryOrder = new YuyueQueryOrder();
+		yuyueQueryOrder.setOrderId(yuyueOrder.getId());
+		yuyueQueryOrder.setAddress(yuyueOrder.getAddress());
+		yuyueQueryOrder.setMemo(yuyueOrder.getMemo());
+		yuyueQueryOrder.setReceiverName(yuyueOrder.getReceiverName());
+		yuyueQueryOrder.setServiceTypeName(yuyueOrder.getProductName());
+		yuyueQueryOrder.setTel(yuyueOrder.getTel());
+		yuyueQueryOrder.setWorkTime(yuyueOrder.getWorkTime());
+		return yuyueQueryOrder;
 	}
 	
 }
