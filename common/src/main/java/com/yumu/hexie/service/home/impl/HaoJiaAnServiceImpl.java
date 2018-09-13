@@ -2,6 +2,8 @@ package com.yumu.hexie.service.home.impl;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.integration.daojia.haojiaan.HaoJiaAnReq;
@@ -23,6 +25,8 @@ import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.vo.YuyueQueryOrder;
 @Service("haoJiaAnService")
 public class HaoJiaAnServiceImpl implements HaoJiaAnService{
+	
+	private static final Logger log = LoggerFactory.getLogger(HaoJiaAnServiceImpl.class);
 	@Inject 
 	private AddressRepository addressRepository;
 	@Inject
@@ -86,11 +90,18 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 
 	@Override
 	public YuyueQueryOrder queryYuYueOrder(User user, long orderId) {
-
+		
 		YuyueOrder yuyueOrder = yuyueOrderRepository.findOne(orderId);
 		if (yuyueOrder==null) {
 			return null;
 		}
+		
+		if (user != null) {
+			log.error("userId : " + user.getId());
+			log.error("orderUserid:" + yuyueOrder.getUserId());
+			log.error(String.valueOf(user.getId() == yuyueOrder.getUserId()));
+		}
+		
 		if (yuyueOrder.getUserId()!=orderId) {
 			throw new BizValidateException("当前用户没有查看订单权限。");
 		}
