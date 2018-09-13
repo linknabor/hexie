@@ -2,6 +2,8 @@ package com.yumu.hexie.web.home;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,9 +18,12 @@ import com.yumu.hexie.service.home.HaoJiaAnService;
 import com.yumu.hexie.vo.YuyueQueryOrder;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
+import com.yumu.hexie.web.shequ.WuyeController;
 
 @Controller(value = "haoJiaAnController")
 public class HaoJiaAnController extends BaseController{
+	
+	private static final Logger log = LoggerFactory.getLogger(HaoJiaAnController.class);
 	
 	@Inject
 	private HaoJiaAnService haoJiaAnService;
@@ -39,6 +44,10 @@ public class HaoJiaAnController extends BaseController{
 	@RequestMapping(value = "/haojiaan/queryOrder/{orderId}", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<YuyueQueryOrder> queryHaoJiaAnYuyueOrder(@ModelAttribute(Constants.USER)User user, @PathVariable long orderId) throws Exception {
+		
+		if (user != null) {
+			log.error("userId : " + user.getId());
+		}
 		
 		YuyueQueryOrder order = haoJiaAnService.queryYuYueOrder(user, orderId);
 		if(order!=null){
