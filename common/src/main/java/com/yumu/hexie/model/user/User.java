@@ -70,8 +70,17 @@ public class User extends BaseModel{
 	private String shareCode;
 	
 	private boolean newRegiste = true;
+	private String officeTel;
 	
 	
+	public String getOfficeTel() {
+		return officeTel;
+	}
+
+	public void setOfficeTel(String officeTel) {
+		this.officeTel = officeTel;
+	}
+
 	public long getCurrentAddrId() {
 		return currentAddrId;
 	}
@@ -371,15 +380,18 @@ public class User extends BaseModel{
 
 	@Override
 	public String toString() {
-		
-		return "realName : " + realName + ",name : " + name+",tel : "+tel+", provinceId :" + province + ",cityId : "+ cityId 
-				+ ", countyId : " + countyId + ", xiaoquId : "+ xiaoquId + ", county :" + county + ", xiaoquName :" + xiaoquName
-				+ ", currentAddrId :" + currentAddrId + ", wuyeId :" + wuyeId + ", openid: " + openid + ", tel: " + tel 
-				+ ", subscribe : " + subscribe + ", nickname : " + nickname + ", city :" + city + ", country : " + country
-				+ ", province : " + province + ", headimgurl : " + headimgurl + ", registerDate : " + registerDate
-				+ ", couponCount : " + couponCount + ", shareCode: " + shareCode + ", newRegiste : " + newRegiste;
-		
+		return "User [realName=" + realName + ", name=" + name + ", tel=" + tel + ", provinceId=" + provinceId
+				+ ", cityId=" + cityId + ", countyId=" + countyId + ", xiaoquId=" + xiaoquId + ", county=" + county
+				+ ", xiaoquName=" + xiaoquName + ", longitude=" + longitude + ", latitude=" + latitude
+				+ ", currentAddrId=" + currentAddrId + ", wuyeId=" + wuyeId + ", openid=" + openid + ", memo=" + memo
+				+ ", subscribe=" + subscribe + ", status=" + status + ", nickname=" + nickname + ", sex=" + sex
+				+ ", age=" + age + ", city=" + city + ", country=" + country + ", province=" + province + ", language="
+				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", registerDate="
+				+ registerDate + ", identityCard=" + identityCard + ", zhima=" + zhima + ", lvdou=" + lvdou
+				+ ", couponCount=" + couponCount + ", shareCode=" + shareCode + ", newRegiste=" + newRegiste
+				+ ", officeTel=" + officeTel + "]";
 	}
+
 	
 	
 }

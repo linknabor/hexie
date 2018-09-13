@@ -23,7 +23,7 @@ public interface WuyeService {
 	// 2.绑定房产
 	public HexieUser bindHouse(String userId,String stmtId,String houseId);
 	// 3.删除房产
-	public boolean deleteHouse(String userId,String houseId);
+	public BaseResult<String> deleteHouse(String userId,String houseId);
 	// 4.根据订单查询房产信息
 	public HexieHouse getHouse(String userId,String stmtId);
 	// 5.用户登录
@@ -52,8 +52,10 @@ public interface WuyeService {
 	public InvoiceInfo getInvoiceByTradeId(String trade_water_id);
 	
 	//15.根据数据类型查询指定的合协社区物业单元信息
-	public CellListVO querySectHeXieList(String sect_name, String build_id, String unit_id, String data_type);
+	public CellListVO querySectHeXieList(String sect_id, String build_id, String unit_id, String data_type);
 	
 	//16.根据名称模糊查询合协社区小区列表
 	public CellListVO getVagueSectByName(String sect_name);
+	
+	
 }

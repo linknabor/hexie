@@ -47,6 +47,7 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.UserInfo;
@@ -64,6 +65,9 @@ public class WuyeController extends BaseController {
 	protected SmsService smsService;
     @Inject
     protected CouponService couponService;
+    
+    @Inject
+    protected UserService userService;
     
     @Inject
     protected UserRepository userRepository;
@@ -111,8 +115,15 @@ public class WuyeController extends BaseController {
 		if(StringUtil.isEmpty(user.getWuyeId())){
 			return BaseResult.fail("删除房子失败！请重新访问页面并操作！");
 		}
-		boolean r = wuyeService.deleteHouse(user.getWuyeId(), houseId);
-		if (r) {
+		com.yumu.hexie.integration.wuye.resp.BaseResult<String> r  = wuyeService.deleteHouse(user.getWuyeId(), houseId);
+//		boolean r = wuyeService.deleteHouse(user.getWuyeId(), houseId);
+		if ((boolean)r.isSuccess()) {
+			//添加电话到user表
+			log.error("这里是删除房子后保存的电话");
+			log.error("保存电话到user表==》开始");
+			user.setOfficeTel(r.getData());
+			userService.save(user);
+			log.error("保存电话到user表==》成功");
 			return BaseResult.successResult("删除房子成功！");
 		} else {
 			return BaseResult.fail("删除房子失败！");
@@ -135,10 +146,18 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
-			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId, @RequestBody HexieHouse house) throws Exception {
+			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId) throws Exception {
 		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
+		log.error("HexieUser u = "+u);
 		if(u != null) {
+			
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
+			//添加电话到user表
+			log.error("这里是添加房子后保存的电话");
+			log.error("保存电话到user表==》开始");
+			user.setOfficeTel(u.getOffice_tel());
+			userService.save(user);
+			log.error("保存电话到user表==》成功");
 		}
 		return BaseResult.successResult(u);
 	}
@@ -233,6 +252,24 @@ public class WuyeController extends BaseController {
 		}
 	    return BaseResult.successResult(result);
 	}	
+	
+	//stmtId在快捷支付的时候会用到
+	@RequestMapping(value = "/getPrePayInfoo", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<WechatPayInfo> getPrePayInfoo(@ModelAttribute(Constants.USER)User user,
+			@RequestParam(required=false) String billId)
+			throws Exception {
+		WechatPayInfo result;
+		try {
+			System.out.println("try");
+		} catch (Exception e) {
+			System.out.println("catch");
+			e.printStackTrace();
+			return BaseResult.fail(e.getMessage());
+		}
+		System.out.println("no try catch");
+	    return BaseResult.successResult(null);
+	}
 	
 	/**
 	 * 通知支付成功，并获取支付查询的返回结果
@@ -480,7 +517,6 @@ public class WuyeController extends BaseController {
 	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId){
 		
 		User user = (User)session.getAttribute(Constants.USER);
-		
 		if (session != null) {
 			
 			if (user == null) {
@@ -520,9 +556,9 @@ public class WuyeController extends BaseController {
 	//根据ID查询指定类型的合协社区物业信息
 	@RequestMapping(value = "/getHeXieCellById", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_name, 
+	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER)User user, @RequestParam(required=false) String sect_id, 
 			@RequestParam(required=false) String build_id, @RequestParam(required=false) String unit_id, @RequestParam(required=false) String data_type)throws Exception {
-		CellListVO cellMng = wuyeService.querySectHeXieList(sect_name, build_id, unit_id, data_type);
+		CellListVO cellMng = wuyeService.querySectHeXieList(sect_id, build_id, unit_id, data_type);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
