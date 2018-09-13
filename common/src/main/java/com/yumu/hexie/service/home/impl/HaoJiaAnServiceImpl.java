@@ -99,10 +99,9 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 		if (user != null) {
 			log.error("userId : " + user.getId());
 			log.error("orderUserid:" + yuyueOrder.getUserId());
-			log.error(String.valueOf(user.getId() == yuyueOrder.getUserId()));
 		}
 		
-		if (yuyueOrder.getUserId()!=orderId) {
+		if (yuyueOrder.getUserId()!= user.getId()) {
 			throw new BizValidateException("当前用户没有查看订单权限。");
 		}
 		
