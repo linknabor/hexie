@@ -44,6 +44,8 @@ public class GotongServiceImpl implements GotongService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GotongServiceImpl.class);
     
+    public static String YUYUE_NOTICE = ConfigUtil.get("yuyueNotice");
+    
     public static String WEIXIU_NOTICE = ConfigUtil.get("weixiuNotice");
 
     public static String XIYI_NOTICE = ConfigUtil.get("weixiuNotice");
