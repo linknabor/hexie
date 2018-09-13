@@ -17,6 +17,7 @@ import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.home.HaoJiaAnService;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.vo.YuyueQueryOrder;
@@ -87,6 +88,13 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	public YuyueQueryOrder queryYuYueOrder(User user, long orderId) {
 
 		YuyueOrder yuyueOrder = yuyueOrderRepository.findOne(orderId);
+		if (yuyueOrder==null) {
+			return null;
+		}
+		if (yuyueOrder.getUserId()!=orderId) {
+			throw new BizValidateException("当前用户没有查看订单权限。");
+		}
+		
 		YuyueQueryOrder yuyueQueryOrder = new YuyueQueryOrder();
 		yuyueQueryOrder.setOrderId(yuyueOrder.getId());
 		yuyueQueryOrder.setAddress(yuyueOrder.getAddress());
