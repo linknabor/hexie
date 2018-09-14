@@ -84,7 +84,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 		
 		userNoticeService.yuyueSuccess(user.getId(), yOrder.getTel(), yOrder.getReceiverName(), yOrder.getId(), yOrder.getProductName(), ModelConstant.YUYUE_PAYMENT_TYPE_OFFLINE, 0);
 		String accessToken = systemConfigService.queryWXAToken();
-		TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user.getOpenid(), accessToken);//发送模板消息
+		TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken);//发送模板消息
 		return yOrder.getId();
 	}
 

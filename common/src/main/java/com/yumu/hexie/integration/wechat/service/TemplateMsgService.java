@@ -183,18 +183,20 @@ public class TemplateMsgService {
     }
     
    
-    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, String openId, String accessToken ) {
+    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken ) {
     	HaoJiaAnOrderVO vo = new HaoJiaAnOrderVO();
     	vo.setTitle(new TemplateItem("有新的预约服务"));
     	vo.setAppointmentDate(new TemplateItem(hOrder.getExpectedTime()));
     	vo.setAppointmentContent(new TemplateItem(hOrder.getServiceTypeName()));
-    	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()));
+    	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()+" "+user.getName()+" "+(user.getTel()==null?"":user.getTel())));
+    	System.out.println(user.getTel()==null?"":user.getTel());
+    	vo.setMemo(hOrder.getMemo());
     	
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
     	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getId());
-    	msg.setTouser(openId);
+    	msg.setTouser(user.getOpenid());
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
 
