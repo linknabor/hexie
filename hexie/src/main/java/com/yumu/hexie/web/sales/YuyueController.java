@@ -121,7 +121,7 @@ public class YuyueController extends BaseController{
     @RequestMapping(value = "yuyueOrders/{orderId}", method = RequestMethod.GET )
     @ResponseBody
     public BaseResult<YuyueOrder> yuyueOrdersById (@ModelAttribute(Constants.USER)User user, @PathVariable long orderId) throws Exception {
-
+    	log.error("yuyueController的orderId="+orderId+"");
          YuyueOrder order = yuyueOrderRepository.findOne(orderId);
          log.error("order.getUserId()="+order.getUserId()+"");
          log.error("user.getId()"+user.getId()+"");
