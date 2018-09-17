@@ -195,7 +195,7 @@ public class TemplateMsgService {
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
-    	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getId());
+    	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getsOrderId());
     	msg.setTouser(user.getOpenid());
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
