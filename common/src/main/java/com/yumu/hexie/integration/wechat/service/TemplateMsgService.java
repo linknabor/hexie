@@ -190,10 +190,8 @@ public class TemplateMsgService {
     	vo.setAppointmentContent(new TemplateItem(hOrder.getServiceTypeName()));
     	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()+" "+user.getName()+" "+(user.getTel()==null?"":user.getTel())));
     	vo.setMemo("备注：" +(hOrder.getMemo()==null?"":hOrder.getMemo()));
-    	
-    	log.error("user.getTel()="+user.getTel());
-    	log.error("user.getId()="+user.getId()+"");
-    	log.error("user.getOpenid()="+user.getOpenid());
+
+    	log.error("预约服务的user="+user+"");
     	
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
     	msg.setData(vo);

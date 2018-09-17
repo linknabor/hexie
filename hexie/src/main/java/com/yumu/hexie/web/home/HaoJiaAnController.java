@@ -26,7 +26,6 @@ public class HaoJiaAnController extends BaseController{
 	@RequestMapping(value = "/haojiaan/createHaoJiaAnYuyueOrder/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<Long> createHaoJiaAnYuyueOrder(HaoJiaAnReq haojiaanReq,@ModelAttribute(Constants.USER)User user, @PathVariable long addressId) throws Exception {
-
 		Long oId = haoJiaAnService.addNoNeedPayOrder(user, haojiaanReq, addressId);
 		if(oId!=null){
             return new BaseResult<Long>().success(oId);
