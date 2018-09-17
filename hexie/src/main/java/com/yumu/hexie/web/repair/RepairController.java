@@ -179,6 +179,7 @@ public class RepairController extends BaseController{
         repairService.accept(repairOrderId, user);
         return new BaseResult<String>().success("接单成功");
     }
+    
     //查询
     @RequestMapping(value="operator/repair/query/repairId/{repairOrderId}", method = RequestMethod.GET)
     @ResponseBody
@@ -191,6 +192,7 @@ public class RepairController extends BaseController{
         }
         return new BaseResult<RepairDetailItem>().success(RepairDetailItem.fromOrder(order));
     }
+    
     //操作员结束
     @RequestMapping(value="operator/repair/finish/{repairOrderId}", method = RequestMethod.GET)
     @ResponseBody
