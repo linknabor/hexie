@@ -218,6 +218,7 @@ public class TemplateMsgService {
     	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
+//    	msg.setTemplate_id("uqHDS8IYg_yWycLIVAO-xE7J120mPhoi4wrNyWIn-zQ");
     	msg.setUrl("www.baidu.com");
 //    	msg.setTouser(user.getOpenid());
     	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");
