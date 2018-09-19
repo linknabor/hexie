@@ -219,7 +219,8 @@ public class TemplateMsgService {
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
     	msg.setUrl("www.baidu.com");
 //    	msg.setTouser(user.getOpenid());
-    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");
+    	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");
+    	
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
 
