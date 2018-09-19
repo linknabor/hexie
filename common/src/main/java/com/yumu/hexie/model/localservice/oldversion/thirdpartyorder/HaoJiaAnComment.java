@@ -15,7 +15,9 @@ public class HaoJiaAnComment extends BaseModel{
 
 	private Long commentUserId;//评论人or投诉人
 	
-	private String commentUserName;//评论人
+	private String commentUserName;//评论人姓名
+	
+	private String commentUserTel;//评论人电话
 	
 	private String commentContent;//评论内容
 	
@@ -131,6 +133,14 @@ public class HaoJiaAnComment extends BaseModel{
 
 	public void setFeedBack(String feedBack) {
 		this.feedBack = feedBack;
+	}
+
+	public String getCommentUserTel() {
+		return commentUserTel;
+	}
+
+	public void setCommentUserTel(String commentUserTel) {
+		this.commentUserTel = commentUserTel;
 	}
 
 	

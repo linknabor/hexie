@@ -20,14 +20,14 @@ public class HaoJiaAnOrderVO implements Serializable{
 	private TemplateItem address;	//服务地址
 	
 	@JsonProperty("memo")
-	private String memo;	//备注
+	private TemplateItem memo;	//备注
 
 	
-	public String getMemo() {
+	public TemplateItem getMemo() {
 		return memo;
 	}
 
-	public void setMemo(String memo) {
+	public void setMemo(TemplateItem memo) {
 		this.memo = memo;
 	}
 

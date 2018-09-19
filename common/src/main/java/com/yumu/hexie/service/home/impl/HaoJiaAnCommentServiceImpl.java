@@ -31,6 +31,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		comment.setCommentUserId(user.getId());//评论人
 		comment.setYuyueOrderNo(comment.getYuyueOrderNo());//预约订单编号
 		comment.setServiceName(comment.getServiceName());//服务名称
+		comment.setCommentUserTel(user.getTel());//用户电话
 		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.save(comment);
 		String accessToken = systemConfigService.queryWXAToken();//微信token
 		//1评论 2投诉，如果是投诉发送短信模板给商家，确认是否承认投诉

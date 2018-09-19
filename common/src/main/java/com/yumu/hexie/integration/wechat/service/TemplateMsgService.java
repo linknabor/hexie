@@ -191,7 +191,7 @@ public class TemplateMsgService {
     	vo.setAppointmentDate(new TemplateItem(hOrder.getExpectedTime()));
     	vo.setAppointmentContent(new TemplateItem(hOrder.getServiceTypeName()));
     	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()+" "+hOrder.getStrName()+" "+(hOrder.getStrMobile()==null?"":hOrder.getStrMobile())));
-    	vo.setMemo("备注：" +(hOrder.getMemo()==null?"":hOrder.getMemo()));
+    	vo.setMemo(new TemplateItem("备注：" +(hOrder.getMemo()==null?"":hOrder.getMemo())));
     	log.error("预约服务的userId="+user.getId()+"");
     	log.error("预约服务的user="+user+""); 	
     	
@@ -207,16 +207,17 @@ public class TemplateMsgService {
     //投诉模板，发送给商家
     public static void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken ) {
     	HaoJiaAnCommentVO vo = new HaoJiaAnCommentVO();
-    	vo.setTitle(new TemplateItem("客户投诉"));//标题
-    	vo.setComplainTime(new TemplateItem(comment.getCreateDate().toString()));//投诉时间
-    	vo.setContent(new TemplateItem(comment.getCommentContent()));//投诉内容
-    	vo.setServiceName(new TemplateItem(comment.getServiceName()+""));//投诉服务
-    	vo.setFromName(new TemplateItem(comment.getCommentUserName()+""));;//投诉人
+    	vo.setTitle(new TemplateItem("用户投诉"));//标题
+    	vo.setUserName(new TemplateItem(comment.getCommentUserName()));//用户姓名
+    	vo.setUserTel(new TemplateItem(comment.getCommentUserTel()));//用户电话
+    	vo.setReason(new TemplateItem(comment.getCommentContent()));//投诉事由
+    	vo.setOrderNo(new TemplateItem(comment.getYuyueOrderNo()+""));;//订单编号
+    	vo.setMemo(new TemplateItem("用户对您的服务有投诉，请尽快联系用户处理。"));//备注（固定内容）
     	log.error("投诉的userId="+user.getId()+"");
     	log.error("投诉的user="+user+""); 
     	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
+    	msg.setTemplate_id("uqHDS8IYg_yWycLIVAO-xE7J120mPhoi4wrNyWIn-zQ");
     	msg.setUrl("www.baidu.com");
 //    	msg.setTouser(user.getOpenid());
     	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");
