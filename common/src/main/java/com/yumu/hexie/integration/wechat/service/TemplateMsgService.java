@@ -13,6 +13,7 @@ import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
@@ -23,6 +24,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -197,6 +199,25 @@ public class TemplateMsgService {
     	msg.setData(vo);
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
     	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId());
+//    	msg.setTouser(user.getOpenid());
+    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");
+    	TemplateMsgService.sendMsg(msg, accessToken);
+    }
+    
+    //投诉模板，发送给商家
+    public static void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken ) {
+    	HaoJiaAnCommentVO vo = new HaoJiaAnCommentVO();
+    	vo.setTitle(new TemplateItem("客户投诉"));//标题
+    	vo.setComplainTime(new TemplateItem(comment.getCreateDate().toString()));//投诉时间
+    	vo.setContent(new TemplateItem(comment.getCommentContent()));//投诉内容
+    	vo.setServiceName(new TemplateItem(comment.getServiceName()+""));//投诉服务
+    	vo.setFromName(new TemplateItem(comment.getCommentUserName()+""));;//投诉人
+    	log.error("投诉的userId="+user.getId()+"");
+    	log.error("投诉的user="+user+""); 
+    	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
+    	msg.setUrl("www.baidu.com");
 //    	msg.setTouser(user.getOpenid());
     	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");
     	TemplateMsgService.sendMsg(msg, accessToken);
