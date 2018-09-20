@@ -38,7 +38,7 @@ public class HaoJiaAnComment extends BaseModel{
 	private String serviceName;//服务名称（此订单的服务名称） ★
 	
 	private String feedBack;//拒绝投诉后的反馈内容（预留字段，暂无用处）
-
+	
 	public Long getCommentUserId() {
 		return commentUserId;
 	}

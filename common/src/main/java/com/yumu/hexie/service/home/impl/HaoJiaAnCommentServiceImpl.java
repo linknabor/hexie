@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnCommentRepository;
@@ -40,11 +41,11 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		comment.setCommentUserId(user.getId());//评论人
 		comment.setCommentUserTel(user.getTel());//用户电话
 		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.save(comment);
-		String accessToken = systemConfigService.queryWXAToken();//微信token
-		//1评论 2投诉，如果是投诉发送短信模板给商家，确认是否承认投诉
-		if(comment.getCommentType() == ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
-			TemplateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken);//发送模板消息
-		}
+//		String accessToken = systemConfigService.queryWXAToken();//微信token
+//		//1评论 2投诉，如果是投诉发送短信模板给商家，确认是否承认投诉
+//		if(comment.getCommentType() == ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
+//			TemplateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken);//发送模板消息
+//		}
 		//不为空表示保存成功
 		if(haoJiaAnComment!=null) {
 			return count = 1;
@@ -67,6 +68,13 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 			count = 1;
 		}
 		return count;
+	}
+
+	//根据订单id和评论类型查看当前订单是否有被评论和投诉
+	@Override
+	public HaoJiaAnComment getCommentByOrderNoAndType(String yuyueOrderNo, int commentType) {
+		HaoJiaAnComment hjac = haoJiaAnCommentRepository.getCommentByOrderNoAndType(yuyueOrderNo, commentType);
+		return hjac;
 	}
 
 }
