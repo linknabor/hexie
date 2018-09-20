@@ -9,13 +9,13 @@ public class HaoJiaAnCommentVO implements Serializable{
 	private TemplateItem title;//标题
 	
 	@JsonProperty("keyword1")
-	private TemplateItem userName;//投诉时间
+	private TemplateItem userName;//投诉人
 	
 	@JsonProperty("keyword2")
-	private TemplateItem userTel;//投诉内容
+	private TemplateItem userTel;//投诉电话
 	
 	@JsonProperty("keyword3")
-	private TemplateItem reason;//投诉服务
+	private TemplateItem reason;//投诉事由
 	
 	@JsonProperty("keyword4")
 	private TemplateItem orderNo;//订单编号

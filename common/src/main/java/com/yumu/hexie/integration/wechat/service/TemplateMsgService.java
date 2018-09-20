@@ -206,6 +206,7 @@ public class TemplateMsgService {
     
     //投诉模板，发送给商家
     public static void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken ) {
+    	log.error("sendHaoJiaAnCommentMsg的用户电话="+comment.getCommentUserTel());
     	HaoJiaAnCommentVO vo = new HaoJiaAnCommentVO();
     	vo.setTitle(new TemplateItem("用户投诉"));//标题
     	vo.setUserName(new TemplateItem(comment.getCommentUserName()));//用户姓名

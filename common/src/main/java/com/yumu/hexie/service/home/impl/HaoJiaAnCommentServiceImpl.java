@@ -6,6 +6,9 @@ import java.util.Date;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
@@ -15,6 +18,7 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.home.HaoJiaAnCommentService;
 
 public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
+	private static final Logger log = LoggerFactory.getLogger(HaoJiaAnCommentServiceImpl.class);
 	@Inject
 	private HaoJiaAnCommentRepository haoJiaAnCommentRepository;
 	@Inject
@@ -24,6 +28,8 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	@Override
 	@Transactional
 	public int saveComment(User user,HaoJiaAnComment comment) {
+		log.error("saveComment的用户="+user);
+		log.error("saveComment的用户电话="+user.getTel());
 		int count = 0;
 		comment.setCreateDate(System.currentTimeMillis());
 		comment.setComplainStatus(0);//0待确认 1已确认 2拒绝
