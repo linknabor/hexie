@@ -29,8 +29,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public HexieUser bindHouse(String userId, String stmtId, String houseId) {
-		BaseResult<HexieUser> r= WuyeUtil.bindHouse(userId, stmtId, houseId);
+	public HexieUser bindHouse(String userId, String stmtId, String houseId, String area) {
+		BaseResult<HexieUser> r= WuyeUtil.bindHouse(userId, stmtId, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
