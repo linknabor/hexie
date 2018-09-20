@@ -43,7 +43,7 @@ public class TemplateMsgService {
 	public static String REPAIR_ASSIGN_TEMPLATE = ConfigUtil.get("reapirAssginTemplate");
 	
 	public static String YUYUE_ASSIGN_TEMPLATE = ConfigUtil.get("yuyueNoticeTemplate");
-	
+	public static String COMPLAIN_TEMPLATE = ConfigUtil.get("complainTemplate");
 	/**
 	 * 模板消息发送
 	 */
@@ -218,8 +218,8 @@ public class TemplateMsgService {
     	log.error("投诉的user="+user+""); 
     	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id("uqHDS8IYg_yWycLlVAO-xE7J120mPhoi4wrNyWln-zQ");
-//    	msg.setTemplate_id("uqHDS8IYg_yWycLIVAO-xE7J120mPhoi4wrNyWIn-zQ");
+    	msg.setTemplate_id(COMPLAIN_TEMPLATE);
+//    	msg.setTemplate_id("uqHDS8IYg_yWycLlVAO-xE7J120mPhoi4wrNyWln-zQ");
     	msg.setUrl("www.baidu.com");
 //    	msg.setTouser(user.getOpenid());
     	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");
