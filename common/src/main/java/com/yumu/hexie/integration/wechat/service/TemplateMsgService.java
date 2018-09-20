@@ -220,7 +220,7 @@ public class TemplateMsgService {
     	msg.setData(vo);
     	msg.setTemplate_id(COMPLAIN_TEMPLATE);
 //    	msg.setTemplate_id("uqHDS8IYg_yWycLlVAO-xE7J120mPhoi4wrNyWln-zQ");
-    	msg.setUrl("www.baidu.com");
+    	msg.setUrl("www.baidu.com?commentId="+comment.getId());
 //    	msg.setTouser(user.getOpenid());
     	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");
     	

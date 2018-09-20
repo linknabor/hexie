@@ -530,6 +530,7 @@ public class WuyeController extends BaseController {
 				}else {
 					user.setId(10);
 				}
+				user.setTel("1383838438");
 				user.setOpenid("o_3DlwdnCLCz3AbTrZqj4HtKeQYY");
 				user.setName("yiming");
 				user.setNickname("yiming");

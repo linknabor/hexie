@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
@@ -33,7 +34,7 @@ public class CommentController extends BaseController{
 	
 	//处理投诉
 	@RequestMapping(value = "/solveComplain", method = RequestMethod.GET)
-	public BaseResult<?> solveComplain(@ModelAttribute(Constants.USER) User user,String feedBack,int complainStatus,long commentId) {
+	public BaseResult<?> solveComplain(@ModelAttribute(Constants.USER) User user,String feedBack,@RequestParam(required = false, defaultValue = "1")int complainStatus,long commentId) {
 		int count = haoJiaAnCommentService.solveComplain(user, feedBack, complainStatus, commentId);
 		if (count == 1) {
 			return BaseResult.successResult("处理投诉成功！");

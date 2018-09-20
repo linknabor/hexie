@@ -15,29 +15,29 @@ public class HaoJiaAnComment extends BaseModel{
 
 	private Long commentUserId;//评论人or投诉人
 	
-	private String commentUserName;//评论人姓名
+	private String commentUserName;//评论或投诉人姓名 
 	
-	private String commentUserTel;//评论人电话
+	private String commentUserTel;//评论或投诉人电话
 	
-	private String commentContent;//评论内容
+	private String commentContent;//评论或投诉内容  ★
 	
-	private Integer commentType;//评论类型 评论和投诉
+	private Integer commentType;//评论类型 评论1和投诉2  ★
 	
-	private Integer commentLevel;//评论等级（5星最高，仅评论类型有效，投诉无效）
+	private Integer commentLevel;//评论等级（5星最高，仅对评论有效，投诉无视此字段） ★
 	
-	private Integer complainStatus;//确认投诉（商家确认投诉是否属实）
+	private Integer complainStatus;//确认投诉（商家确认投诉是否属实，0为待确认，1为已确认，2为拒绝）
 	
-	private Long complainTime;//确认投诉时间
+	private Long complainTime;//确认投诉的时间
 	
-	private Long processUserId;//处理投诉人Id
+	private Long processUserId;//处理投诉的人的Id
 	
-	private String processUserName;//处理人姓名
+	private String processUserName;//处理投诉的人的姓名
 	
-	private Long yuyueOrderNo;//预约订单编号（对此订单作评价）
+	private Long yuyueOrderNo;//预约订单编号（对此订单作评价） ★
 	
-	private String serviceName;//服务名称
+	private String serviceName;//服务名称（此订单的服务名称） ★
 	
-	private String feedBack;//投诉反馈内容
+	private String feedBack;//拒绝投诉后的反馈内容（预留字段，暂无用处）
 
 	public Long getCommentUserId() {
 		return commentUserId;
