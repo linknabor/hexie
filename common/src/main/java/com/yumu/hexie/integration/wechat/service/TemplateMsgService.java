@@ -212,7 +212,7 @@ public class TemplateMsgService {
     	vo.setUserName(new TemplateItem(comment.getCommentUserName()));//用户姓名
     	vo.setUserTel(new TemplateItem(comment.getCommentUserTel()));//用户电话
     	vo.setReason(new TemplateItem(comment.getCommentContent()));//投诉事由
-    	vo.setOrderNo(new TemplateItem(comment.getYuyueOrderNo()+""));;//订单编号
+    	vo.setOrderNo(new TemplateItem(comment.getYuyueOrderNo()));;//订单编号
     	vo.setMemo(new TemplateItem("用户对您的服务有投诉，请尽快联系用户处理。"));//备注（固定内容）
     	log.error("投诉的userId="+user.getId()+"");
     	log.error("投诉的user="+user+""); 

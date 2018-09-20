@@ -33,7 +33,7 @@ public class HaoJiaAnComment extends BaseModel{
 	
 	private String processUserName;//处理投诉的人的姓名
 	
-	private Long yuyueOrderNo;//预约订单编号（对此订单作评价） ★
+	private String yuyueOrderNo;//预约订单编号（对此订单作评价） ★
 	
 	private String serviceName;//服务名称（此订单的服务名称） ★
 	
@@ -111,11 +111,11 @@ public class HaoJiaAnComment extends BaseModel{
 		this.processUserName = processUserName;
 	}
 
-	public Long getYuyueOrderNo() {
+	public String getYuyueOrderNo() {
 		return yuyueOrderNo;
 	}
 
-	public void setYuyueOrderNo(Long yuyueOrderNo) {
+	public void setYuyueOrderNo(String yuyueOrderNo) {
 		this.yuyueOrderNo = yuyueOrderNo;
 	}
 
