@@ -29,6 +29,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	@Transactional
 	public int saveComment(User user,HaoJiaAnComment comment) {
 		log.error("saveComment的用户="+user);
+		log.error("saveComment的用户id="+user.getId());
 		log.error("saveComment的用户电话="+user.getTel());
 		int count = 0;
 		comment.setCreateDate(System.currentTimeMillis());
