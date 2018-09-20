@@ -32,8 +32,10 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		log.error("saveComment的用户id="+user.getId());
 		log.error("saveComment的用户电话="+user.getTel());
 		int count = 0;
+		if(comment.getCommentType()==ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
+			comment.setComplainStatus(0);//0待确认 1已确认 2拒绝
+		}
 		comment.setCreateDate(System.currentTimeMillis());
-		comment.setComplainStatus(0);//0待确认 1已确认 2拒绝
 		comment.setCommentUserName(user.getName());//真实姓名
 		comment.setCommentUserId(user.getId());//评论人
 		comment.setCommentUserTel(user.getTel());//用户电话

@@ -200,7 +200,7 @@ public class TemplateMsgService {
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
     	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId());
 //    	msg.setTouser(user.getOpenid());
-    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");
+    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");//马克西的openId
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
     
@@ -222,7 +222,7 @@ public class TemplateMsgService {
 //    	msg.setTemplate_id("uqHDS8IYg_yWycLlVAO-xE7J120mPhoi4wrNyWln-zQ");
     	msg.setUrl("www.baidu.com?commentId="+comment.getId());
 //    	msg.setTouser(user.getOpenid());
-    	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");
+    	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");//肖强的openId
     	
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
