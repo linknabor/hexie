@@ -13,6 +13,7 @@ import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
@@ -23,6 +24,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -41,7 +43,7 @@ public class TemplateMsgService {
 	public static String REPAIR_ASSIGN_TEMPLATE = ConfigUtil.get("reapirAssginTemplate");
 	
 	public static String YUYUE_ASSIGN_TEMPLATE = ConfigUtil.get("yuyueNoticeTemplate");
-	
+	public static String COMPLAIN_TEMPLATE = ConfigUtil.get("complainTemplate");
 	/**
 	 * 模板消息发送
 	 */
@@ -183,18 +185,45 @@ public class TemplateMsgService {
     }
     
    
-    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, String openId, String accessToken ) {
+    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken ) {
     	HaoJiaAnOrderVO vo = new HaoJiaAnOrderVO();
     	vo.setTitle(new TemplateItem("有新的预约服务"));
     	vo.setAppointmentDate(new TemplateItem(hOrder.getExpectedTime()));
     	vo.setAppointmentContent(new TemplateItem(hOrder.getServiceTypeName()));
-    	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()));
+    	vo.setAddress(new TemplateItem("预约地址：" + hOrder.getStrWorkAddr()+" "+hOrder.getStrName()+" "+(hOrder.getStrMobile()==null?"":hOrder.getStrMobile())));
+    	vo.setMemo(new TemplateItem("备注：" +(hOrder.getMemo()==null?"":hOrder.getMemo())));
+    	log.error("预约服务的userId="+user.getId()+"");
+    	log.error("预约服务的user="+user+""); 	
     	
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
-    	msg.setUrl(GotongServiceImpl.WEIXIU_NOTICE + hOrder.getId());
-    	msg.setTouser(openId);
+    	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId());
+//    	msg.setTouser(user.getOpenid());
+    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");
+    	TemplateMsgService.sendMsg(msg, accessToken);
+    }
+    
+    //投诉模板，发送给商家
+    public static void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken ) {
+    	log.error("sendHaoJiaAnCommentMsg的用户电话="+comment.getCommentUserTel());
+    	HaoJiaAnCommentVO vo = new HaoJiaAnCommentVO();
+    	vo.setTitle(new TemplateItem("用户投诉"));//标题
+    	vo.setUserName(new TemplateItem(comment.getCommentUserName()));//用户姓名
+    	vo.setUserTel(new TemplateItem(comment.getCommentUserTel()));//用户电话
+    	vo.setReason(new TemplateItem(comment.getCommentContent()));//投诉事由
+    	vo.setOrderNo(new TemplateItem(comment.getYuyueOrderNo()+""));;//订单编号
+    	vo.setMemo(new TemplateItem("用户对您的服务有投诉，请尽快联系用户处理。"));//备注（固定内容）
+    	log.error("投诉的userId="+user.getId()+"");
+    	log.error("投诉的user="+user+""); 
+    	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(COMPLAIN_TEMPLATE);
+//    	msg.setTemplate_id("uqHDS8IYg_yWycLlVAO-xE7J120mPhoi4wrNyWln-zQ");
+    	msg.setUrl("www.baidu.com");
+//    	msg.setTouser(user.getOpenid());
+    	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");
+    	
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
 
