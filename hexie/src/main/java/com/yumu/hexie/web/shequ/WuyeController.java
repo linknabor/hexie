@@ -146,8 +146,8 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
-			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId) throws Exception {
-		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
+			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId, @RequestParam(required=false) String area) throws Exception {
+		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId, area);
 		log.error("HexieUser u = "+u);
 		if(u != null) {
 			
