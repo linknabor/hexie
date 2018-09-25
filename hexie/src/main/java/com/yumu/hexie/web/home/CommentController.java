@@ -1,5 +1,7 @@
 package com.yumu.hexie.web.home;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -30,6 +32,12 @@ public class CommentController extends BaseController{
 		return BaseResult.successResult("保存评论成功！");
 		}
 		return BaseResult.fail(500, "保存评论失败！");
+	}
+	
+	//投诉详情页
+	@RequestMapping(value = "/getComplainDetail", method = RequestMethod.GET)
+	public Map<String,Object> getComplainDetail (long commentId) {
+		return haoJiaAnCommentService.getComplainDetail(commentId);
 	}
 	
 	//处理投诉
