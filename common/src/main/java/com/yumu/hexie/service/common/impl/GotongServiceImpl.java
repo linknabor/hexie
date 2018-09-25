@@ -46,6 +46,8 @@ public class GotongServiceImpl implements GotongService {
     
     public static String YUYUE_NOTICE = ConfigUtil.get("yuyueNotice");
     
+    public static String COMPLAIN_DETAIL = ConfigUtil.get("complainDetail");
+    
     public static String WEIXIU_NOTICE = ConfigUtil.get("weixiuNotice");
 
     public static String XIYI_NOTICE = ConfigUtil.get("weixiuNotice");

@@ -219,8 +219,7 @@ public class TemplateMsgService {
     	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(COMPLAIN_TEMPLATE);
-//    	msg.setTemplate_id("uqHDS8IYg_yWycLlVAO-xE7J120mPhoi4wrNyWln-zQ");
-    	msg.setUrl("www.baidu.com?commentId="+comment.getId());
+    	msg.setUrl(GotongServiceImpl.COMPLAIN_DETAIL + comment.getId());
 //    	msg.setTouser(user.getOpenid());
     	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");//肖强的openId
     	
