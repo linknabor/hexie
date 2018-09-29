@@ -19,6 +19,7 @@ public class HaoJiaAnOrderVO implements Serializable{
 	@JsonProperty("remark")
 	private TemplateItem address;	//服务地址
 
+	
 	public TemplateItem getTitle() {
 		return title;
 	}

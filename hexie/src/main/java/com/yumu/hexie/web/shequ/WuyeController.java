@@ -75,20 +75,6 @@ public class WuyeController extends BaseController {
     @Inject
 	private SystemConfigService systemConfigService;
     
-////模拟用户信息
-//@ModelAttribute
-//public void init01(Model model)
-//{
-//	User user = new User();
-//	user.setProvinceId(1);
-//	user.setCityId(0);
-//	user.setCountyId(0);
-//	user.setXiaoquId(0);
-////	provinceId, long cityId, long countyId, long xiaoquId
-//	model.addAttribute("sessionUser", user);
-//    System.out.println("创建了一个sessionUser");
-//}
-    
 
 	/*****************[BEGIN]房产********************/
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
@@ -146,8 +132,8 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
-			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId) throws Exception {
-		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
+			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId, @RequestParam(required=false) String area) throws Exception {
+		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId, area);
 		log.error("HexieUser u = "+u);
 		if(u != null) {
 			
@@ -530,6 +516,7 @@ public class WuyeController extends BaseController {
 				}else {
 					user.setId(10);
 				}
+				user.setTel("1383838438");
 				user.setOpenid("o_3DlwdnCLCz3AbTrZqj4HtKeQYY");
 				user.setName("yiming");
 				user.setNickname("yiming");

@@ -64,7 +64,10 @@ public class AppConfig {
     private String redisHost;
     @Value(value = "${redis.port}")
     private String redisPort;
-    
+    @Value(value = "${redis.password}")
+    private String redisPassword;
+    @Value(value = "${redis.database}")
+    private int redisDatabase;
     public static void main(String[] args) {
         SpringApplication.run(AppConfig.class, args);
     }
@@ -124,6 +127,8 @@ public class AppConfig {
         JedisConnectionFactory connectionFactory = new JedisConnectionFactory();
         connectionFactory.setHostName(redisHost);
         connectionFactory.setPort(Integer.valueOf(redisPort));
+        connectionFactory.setPassword(redisPassword);
+        connectionFactory.setDatabase(redisDatabase);
         //connectionFactory.setPassword(redisPassword);
         connectionFactory.setUsePool(true);
         return connectionFactory;

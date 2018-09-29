@@ -2,6 +2,8 @@ package com.yumu.hexie.service.home.impl;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.integration.daojia.haojiaan.HaoJiaAnReq;
@@ -17,10 +19,14 @@ import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.home.HaoJiaAnService;
 import com.yumu.hexie.service.user.UserNoticeService;
+import com.yumu.hexie.vo.YuyueQueryOrder;
 @Service("haoJiaAnService")
 public class HaoJiaAnServiceImpl implements HaoJiaAnService{
+	
+	private static final Logger log = LoggerFactory.getLogger(HaoJiaAnServiceImpl.class);
 	@Inject 
 	private AddressRepository addressRepository;
 	@Inject
@@ -78,8 +84,36 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 		
 		userNoticeService.yuyueSuccess(user.getId(), yOrder.getTel(), yOrder.getReceiverName(), yOrder.getId(), yOrder.getProductName(), ModelConstant.YUYUE_PAYMENT_TYPE_OFFLINE, 0);
 		String accessToken = systemConfigService.queryWXAToken();
-		TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user.getOpenid(), accessToken);//发送模板消息
+		TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken);//发送模板消息
 		return yOrder.getId();
+	}
+
+	@Override
+	public YuyueQueryOrder queryYuYueOrder(User user, long orderId) {
+		
+		YuyueOrder yuyueOrder = yuyueOrderRepository.findOne(orderId);
+		if (yuyueOrder==null) {
+			return null;
+		}
+		
+		if (user != null) {
+			log.error("userId : " + user.getId());
+			log.error("orderUserid:" + yuyueOrder.getUserId());
+		}
+		
+		if (yuyueOrder.getUserId()!= user.getId()) {
+			throw new BizValidateException("当前用户没有查看订单权限。");
+		}
+		
+		YuyueQueryOrder yuyueQueryOrder = new YuyueQueryOrder();
+		yuyueQueryOrder.setOrderId(yuyueOrder.getId());
+		yuyueQueryOrder.setAddress(yuyueOrder.getAddress());
+		yuyueQueryOrder.setMemo(yuyueOrder.getMemo());
+		yuyueQueryOrder.setReceiverName(yuyueOrder.getReceiverName());
+		yuyueQueryOrder.setServiceTypeName(yuyueOrder.getProductName());
+		yuyueQueryOrder.setTel(yuyueOrder.getTel());
+		yuyueQueryOrder.setWorkTime(yuyueOrder.getWorkTime());
+		return yuyueQueryOrder;
 	}
 	
 }
