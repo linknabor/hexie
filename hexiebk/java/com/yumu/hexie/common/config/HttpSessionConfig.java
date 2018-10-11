@@ -19,12 +19,18 @@ public class HttpSessionConfig {
     private String host;
     @Value(value = "${redis.port}")
     private Integer port;
+    @Value(value = "${redis.password}")
+    private String redisPassword;
+    @Value(value = "${redis.database}")
+    private int redisDatabase;
     @Bean
     public JedisConnectionFactory connectionFactory() {
     	LOGGER.error("JedisConnectionFactory connectionFactory()");
         JedisConnectionFactory factory = new JedisConnectionFactory();
         factory.setHostName(host);
         factory.setPort(port);
+        factory.setPassword(redisPassword);
+        factory.setDatabase(redisDatabase);
         //factory.setPassword(redisPassword);
         return factory;
     }
