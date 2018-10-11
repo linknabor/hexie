@@ -161,7 +161,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
         regionIds.add(address.getCountyId());
         regionIds.add(address.getXiaoquId());
         List<ServiceOperator> ops = null;
-        List<Long> userIds = null; //拥有当前订单查看权限的用户
+        List<Long> userIds = new ArrayList<Long>(); //拥有当前订单查看权限的用户
         userIds.add(yorder.getUserId());//创建订单的用户
         //查找对应服务类型和服务区的操作员
         List<Long> operatorIds = serviceRegionRepository.findByOrderTypeAndRegionIds(HomeServiceConstant.SERVICE_TYPE_BAOJIE,regionIds);
