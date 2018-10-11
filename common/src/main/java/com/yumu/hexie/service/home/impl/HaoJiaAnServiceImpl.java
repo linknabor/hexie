@@ -151,6 +151,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	//订单访问权限
 	@Override
 	public List<Long> orderAccessAuthority(long orderId) {
+		log.error("进来了");
 		YuyueOrder yorder = yuyueOrderRepository.findOne(orderId);
 		Address address = addressRepository.findOne(yorder.getAddressId());
 		List<Long> regionIds = new ArrayList<Long>();
