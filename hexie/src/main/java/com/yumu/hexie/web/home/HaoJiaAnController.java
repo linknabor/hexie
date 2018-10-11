@@ -55,7 +55,7 @@ public class HaoJiaAnController extends BaseController{
     }
 	
 	//订单访问权限
-	@RequestMapping(value = "/haojiaan/orderAccessAuthority/{orderId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/haojiaan/orderAccessAuthority/{orderId}", method = RequestMethod.POST)
 	@ResponseBody
 	public List<Long> orderAccessAuthority(@ModelAttribute(Constants.USER)User user, @PathVariable long orderId) throws Exception {
 		log.error("进入订单访问权限接口");
