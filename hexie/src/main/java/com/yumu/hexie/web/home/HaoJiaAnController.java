@@ -47,4 +47,17 @@ public class HaoJiaAnController extends BaseController{
         }
     }
 	
+	//订单访问权限
+	@RequestMapping(value = "/haojiaan/orderAccessAuthority/{orderId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<YuyueQueryOrder> orderAccessAuthority(@ModelAttribute(Constants.USER)User user, @PathVariable long orderId) throws Exception {
+		
+		YuyueQueryOrder order = haoJiaAnService.queryYuYueOrder(user, orderId);
+		if(order!=null){
+            return new BaseResult<YuyueQueryOrder>().success(order);
+        } else {
+            return new BaseResult<YuyueQueryOrder>().failMsg("未查询到预约订单。");
+        }
+    }
+	
 }
