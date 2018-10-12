@@ -114,9 +114,11 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
             ops = serviceOperatorRepository.findOperators(operatorIds);
             for (ServiceOperator op : ops) {
             	//循环发送短信模板
-            	TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,op.getOpenId());//发送模板消息
+            	 log.error("发送短信给" + op.getName()+",userId为"+op.getUserId());
+            	TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,op.getOpenId());//发送模板消息给操作员
 			}
         }
+        TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,user.getOpenid());//发送模板消息给用户自己
 		return yOrder.getId();
 	}
 
