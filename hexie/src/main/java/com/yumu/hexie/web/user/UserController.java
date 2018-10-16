@@ -84,6 +84,16 @@ public class UserController extends BaseController{
             return new BaseResult<UserInfo>().success(null);
         }
     }
+	
+	//检查当前用户是否注册，注册标准参考电话是否为有值。
+	@RequestMapping(value = "/checkTell", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<?> checkTell(@ModelAttribute(Constants.USER)User user){
+		if(user.getTel() != null && !user.getTel().equals("")) {
+			 return BaseResult.successResult("用户已注册");
+		}
+		return BaseResult.fail("用户未注册");
+	}
 
 	@RequestMapping(value = "/profile", method = RequestMethod.GET)
 	@ResponseBody

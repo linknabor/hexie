@@ -51,6 +51,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.home.impl.HaoJiaAnServiceImpl;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
+import com.yumu.hexie.web.home.HaoJiaAnController;
 
 /**
  * <pre>
@@ -87,7 +88,8 @@ public class YuyueController extends BaseController{
     private BaojieOrderRepository baojieOrderRepository;
     @Inject
     private AixiangbanOrderRepository aixiangbanOrderRepository;
-
+    @Inject
+    private HaoJiaAnController haoJiaAnController;
     @Inject
     private YuyueOrderRepository yuyueOrderRepository;
     
@@ -125,10 +127,13 @@ public class YuyueController extends BaseController{
          YuyueOrder order = yuyueOrderRepository.findOne(orderId);
          log.error("order.getUserId()="+order.getUserId()+"");
          log.error("user.getId()"+user.getId()+"");
-        if(order.getUserId() != user.getId()){
-            return new BaseResult<YuyueOrder>().failMsg("你没有权限查看该预约单！");
-        }
-         return new BaseResult<YuyueOrder>().success(order);
+         List<Long> userIds = haoJiaAnController.orderAccessAuthority(user, orderId);
+         for (Long id : userIds) {
+			if(user.getId() == id) {
+				return new BaseResult<YuyueOrder>().success(order);
+			}
+		}
+         return new BaseResult<YuyueOrder>().failMsg("你没有权限查看该预约单！");
     }
     @RequestMapping(value = "yuyueOrders/{productType}/{orderId}", method = RequestMethod.GET )
     @ResponseBody

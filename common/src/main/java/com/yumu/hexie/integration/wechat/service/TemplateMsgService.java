@@ -185,7 +185,7 @@ public class TemplateMsgService {
     }
     
    
-    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken ) {
+    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken,String openId ) {
     	HaoJiaAnOrderVO vo = new HaoJiaAnOrderVO();
     	vo.setTitle(new TemplateItem("有新的预约服务"));
     	vo.setAppointmentDate(new TemplateItem(hOrder.getExpectedTime()));
@@ -199,8 +199,8 @@ public class TemplateMsgService {
     	msg.setData(vo);
     	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
     	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId());
-//    	msg.setTouser(user.getOpenid());
-    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");//马克西的openId
+    	msg.setTouser(openId);
+//    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");//朱衍伟的openId
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
     
