@@ -37,6 +37,9 @@ public class WuyeServiceImpl implements WuyeService {
 		if ("05".equals(r.getResult())) {
 			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
 		}
+		if("01".equals(r.getResult())) {
+			throw new BizValidateException("账户不存在！");
+		}
 		return r.getData();
 	}
 
