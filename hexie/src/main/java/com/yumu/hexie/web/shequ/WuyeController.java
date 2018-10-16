@@ -81,6 +81,7 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER)User user)
 			throws Exception {
+		log.error("User的物业id是："+user.getWuyeId());
 		if(StringUtil.isEmpty(user.getWuyeId())){
 			//FIXME 后续可调转绑定房子页面
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
