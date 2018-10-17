@@ -21,7 +21,9 @@ public interface WuyeService {
 	// 1.房产列表
 	public HouseListVO queryHouse(String userId);
 	// 2.绑定房产
-	public HexieUser bindHouse(String userId,String stmtId,String houseId, String area);
+	public HexieUser bindHouse(String userId,String stmtId,String houseId);
+	//无账单绑定
+	public HexieUser bindHouseNoStmt(String userId,String houseId, String area);
 	// 3.删除房产
 	public BaseResult<String> deleteHouse(String userId,String houseId);
 	// 4.根据订单查询房产信息

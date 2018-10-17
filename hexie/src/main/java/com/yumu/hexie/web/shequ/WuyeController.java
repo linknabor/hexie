@@ -129,12 +129,45 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(wuyeService.getHouse(user.getWuyeId(),
 				stmtId));
 	}
+	
+	@RequestMapping(value = "/hexiehouse2", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<HexieHouse> hexiehouses2(@ModelAttribute(Constants.USER)User user,
+			@RequestParam(required=false) String house_id) throws Exception {
+
+		if(StringUtil.isEmpty(user.getWuyeId())){
+			//FIXME 后续可调转绑定房子页面
+			return BaseResult.successResult(null);
+		}
+		return BaseResult.successResult(wuyeService.getHouse(user.getWuyeId(),
+				house_id));
+	}
 
 	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER)User user,
 			@RequestParam(required=false) String stmtId, @RequestParam(required=false) String houseId, @RequestParam(required=false) String area) throws Exception {
-		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId, area);
+		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
+		log.error("HexieUser u = "+u);
+		if(u != null) {
+			
+			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
+			//添加电话到user表
+			log.error("这里是添加房子后保存的电话");
+			log.error("保存电话到user表==》开始");
+			user.setOfficeTel(u.getOffice_tel());
+			userService.save(user);
+			log.error("保存电话到user表==》成功");
+		}
+		return BaseResult.successResult(u);
+	}
+	
+	//无账单绑定
+	@RequestMapping(value = "/addhexiehouse2", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<HexieHouse> addhousesnostmt(@ModelAttribute(Constants.USER)User user,
+			@RequestParam(required=false) String houseId, @RequestParam(required=false) String area) throws Exception {
+		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
 		log.error("HexieUser u = "+u);
 		if(u != null) {
 			
