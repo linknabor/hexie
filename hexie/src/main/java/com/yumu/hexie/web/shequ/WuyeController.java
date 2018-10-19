@@ -168,7 +168,7 @@ public class WuyeController extends BaseController {
 	public BaseResult<HexieHouse> addhousesnostmt(@ModelAttribute(Constants.USER)User user,
 			@RequestParam(required=false) String houseId, @RequestParam(required=false) String area) throws Exception {
 		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
-		log.error("HexieUser u = "+u);
+		log.error("HexieUser2 u = "+u);
 		if(u != null) {
 			
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
