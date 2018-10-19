@@ -157,6 +157,9 @@ public class WuyeServiceImpl implements WuyeService {
 		if("01".equals(r.getResult())) {
 			throw new BizValidateException("账户不存在！");
 		}
+		if("06".equals(r.getResult())) {
+			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
+		}
 		return r.getData();
 	}
 
