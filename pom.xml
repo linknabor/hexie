@@ -260,13 +260,12 @@
 				<artifactId>jackson-datatype-hibernate4</artifactId>
 				<version>2.2.3</version>
 			</dependency>
-			<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml -->
+			<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.dataformat</groupId>
-				<artifactId>jackson-dataformat-yaml</artifactId>
+				<artifactId>jackson-dataformat-xml</artifactId>
 				<version>2.9.0</version>
 			</dependency>
-
 			<dependency>
 				<groupId>com.qiniu</groupId>
 				<artifactId>qiniu-java-sdk</artifactId>
