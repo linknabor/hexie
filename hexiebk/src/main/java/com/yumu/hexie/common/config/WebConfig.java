@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.xml.transform.Source;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,7 +24,6 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -39,7 +36,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ComponentScan({"com.yumu.hexie.backend.web"})
 public class WebConfig extends WebMvcConfigurationSupport {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(WebConfig.class);
     private static final String PROP_FILE_ENCODING = "UTF-8";
 
     @Bean
@@ -49,11 +45,6 @@ public class WebConfig extends WebMvcConfigurationSupport {
         return handlerMapping;
     }
 
-    @Override
-    @Bean
-    public HandlerMapping resourceHandlerMapping() {
-        return super.resourceHandlerMapping();
-    }
     protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
     	converters.clear();
     	MappingJackson2HttpMessageConverter c = new MappingJackson2HttpMessageConverter(){
