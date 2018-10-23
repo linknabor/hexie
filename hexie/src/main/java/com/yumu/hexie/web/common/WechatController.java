@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,8 +36,6 @@ import com.yumu.hexie.web.common.req.UrlSignReq;
 @Controller(value = "wechatController")
 public class WechatController extends BaseController{
 	private static final Logger LOGGER = LoggerFactory.getLogger(WechatController.class);
-    @Value(value = "${content.prefix}")
-    private String articlePrefix;
 
     @Inject
     private WechatCoreService wechatCoreService;
