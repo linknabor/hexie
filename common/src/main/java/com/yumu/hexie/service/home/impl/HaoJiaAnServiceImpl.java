@@ -118,7 +118,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
             	TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,op.getOpenId());//发送模板消息给操作员
 			}
         }
-        TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,user.getOpenid());//发送模板消息给用户自己
+//        TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,user.getOpenid());//发送模板消息给用户自己
 		return yOrder.getId();
 	}
 
