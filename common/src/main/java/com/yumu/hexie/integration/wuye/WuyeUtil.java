@@ -55,7 +55,8 @@ public class WuyeUtil {
 
 	// 接口地址
 	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s"; // 房屋详情地址
-	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s&area=%s"; // 添加房子
+	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s"; // 添加房子
+	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s"; // 无账单添加房子
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s"; // 获取账单列表
@@ -86,8 +87,14 @@ public class WuyeUtil {
 	}
 	
 	// 2.绑定房产
-	public static BaseResult<HexieUser> bindHouse(String userId,String stmtId,String houseId, String area) {
-		String url = REQUEST_ADDRESS + String.format(ADD_HOUSE_URL, userId,stmtId,houseId,area);
+	public static BaseResult<HexieUser> bindHouse(String userId,String stmtId,String houseId) {
+		String url = REQUEST_ADDRESS + String.format(ADD_HOUSE_URL, userId,stmtId,houseId);
+		log.error("【绑定房产url】="+url);
+		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
+	}
+	//无账单绑定房产
+	public static BaseResult<HexieUser> bindHouseNoStmt(String userId,String houseId, String area) {
+		String url = REQUEST_ADDRESS + String.format(ADD_HOUSENOSTMT_URL, userId,houseId,area);
 		log.error("【绑定房产url】="+url);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
@@ -218,7 +225,7 @@ public class WuyeUtil {
 //		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
 //		//中文打码
 //		String nname = sect_name;
-		sect_name = URLEncoder.encode(sect_name, "gbk");
+		//sect_name = URLEncoder.encode(sect_name, "gbk");
 
 //		Map<String, String>map = new HashMap<String, String>();
 //		map.put("sect_name", sect_name);

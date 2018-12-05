@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.home.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -15,10 +16,16 @@ import org.slf4j.LoggerFactory;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.ServiceRegionRepository;
+import com.yumu.hexie.model.localservice.HomeServiceConstant;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.oldversion.YuyueOrder;
 import com.yumu.hexie.model.localservice.oldversion.YuyueOrderRepository;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnCommentRepository;
+import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.home.HaoJiaAnCommentService;
@@ -29,6 +36,14 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	private HaoJiaAnCommentRepository haoJiaAnCommentRepository;
 	@Inject
 	private SystemConfigService systemConfigService;
+	@Inject
+    private ServiceRegionRepository serviceRegionRepository;
+	@Inject
+	private YuyueOrderRepository yuyueOrderRepository;
+	@Inject 
+	private AddressRepository addressRepository;
+	@Inject
+    private ServiceOperatorRepository serviceOperatorRepository;
 	
 	//保存评论或投诉
 	@Override
@@ -47,9 +62,31 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		comment.setCommentUserTel(user.getTel());//用户电话
 		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.save(comment);
 		String accessToken = systemConfigService.queryWXAToken();//微信token
+        
 		//1评论 2投诉，如果是投诉发送短信模板给商家，确认是否承认投诉
 		if(comment.getCommentType() == ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
-			TemplateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken);//发送模板消息
+			YuyueOrder yuyueOrder =yuyueOrderRepository.findByOrderNo(comment.getYuyueOrderNo());//投诉的订单
+			log.error("投诉的预约订单Id为："+yuyueOrder.getId());
+			Address address = addressRepository.findOne(yuyueOrder.getAddressId());
+			List<ServiceOperator> ops = null;
+			List<Long> regionIds = new ArrayList<Long>();
+	        regionIds.add(1l);
+	        regionIds.add(address.getProvinceId());
+	        regionIds.add(address.getCityId());
+	        regionIds.add(address.getCountyId());
+	        regionIds.add(address.getXiaoquId());
+			//查找对应服务类型和服务区的操作员
+	        List<Long> operatorIds = serviceRegionRepository.findByOrderTypeAndRegionIds(HomeServiceConstant.SERVICE_TYPE_BAOJIE,regionIds);
+	        log.error("预约订单对应操作员数量" + operatorIds.size());
+	        if(operatorIds != null && operatorIds.size() > 0) {
+	        	//查找操作员的基础信息
+	            ops = serviceOperatorRepository.findOperators(operatorIds);
+	            for (ServiceOperator op : ops) {
+	            	//循环发送短信模板
+	            	 log.error("发送短信给" + op.getName()+",userId为"+op.getUserId());
+	            	 TemplateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken,op.getOpenId());//发送模板消息
+				}
+	        }
 		}
 		//不为空表示保存成功
 		if(haoJiaAnComment!=null) {

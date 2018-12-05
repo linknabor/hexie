@@ -27,7 +27,6 @@ import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -52,11 +51,6 @@ public class WebConfig extends WebMvcConfigurationSupport {
         return handlerMapping;
     }
 
-    @Override
-    @Bean
-    public HandlerMapping resourceHandlerMapping() {
-        return super.resourceHandlerMapping();
-    }
     protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
     	converters.clear();
     	MappingJackson2HttpMessageConverter c = new MappingJackson2HttpMessageConverter(){
