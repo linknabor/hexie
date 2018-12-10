@@ -224,7 +224,7 @@ public class WuyeUtil {
 //		log.error("ceshi2");
 //		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
 //		//中文打码
-//		String nname = sect_name;
+		String nname = sect_name;
 		//sect_name = URLEncoder.encode(sect_name, "gbk");
 
 //		Map<String, String>map = new HashMap<String, String>();
@@ -233,6 +233,7 @@ public class WuyeUtil {
 //		log.error("【response】:"+response);
 //		return jsonToBeanResult(response, CellListVO.class);
 		
+		sect_name = URLEncoder.encode(sect_name,"GBK");
 		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
