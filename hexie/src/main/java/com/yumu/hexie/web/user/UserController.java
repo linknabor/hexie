@@ -260,4 +260,29 @@ public class UserController extends BaseController{
             return new BaseResult<UserInfo>().success(new UserInfo(user));
         }
     }
+    
+    @RequestMapping(value = "/cancelSubscribe", method = RequestMethod.GET)
+	@ResponseBody
+    public BaseResult<String> cancelSubscribe(String weixin_id){
+    	User  user=userService.getByOpenId(weixin_id);
+    	if(user != null){
+    		user.setSubscribe(0);
+    		userService.save(user);
+    		 return  new BaseResult<String>().success("关注被取消"); 
+    	}
+    	 return  new BaseResult<String>().failMsg("未找到该用户"); 
+    }
+    
+    @RequestMapping(value = "/saveLocation", method = RequestMethod.GET)
+   	@ResponseBody
+       public BaseResult<String> saveLocation(String weixin_id,String Latitude,String Longitude){
+       	User  user=userService.getByOpenId(weixin_id);
+       	if(user != null){
+       		user.setLatitude(Double.parseDouble(Latitude));//纬度
+       		user.setLongitude(Double.parseDouble(Longitude));//经度
+       		userService.save(user);
+       		 return  new BaseResult<String>().success("地理位置保存成功!"); 
+       	}
+       	 return  new BaseResult<String>().failMsg("未找到该用户!"); 
+       }
 }
