@@ -109,6 +109,25 @@ public interface CommunityService {
 	public List<Thread> getThreadListByUserId(long userId, Sort sort);
 	
 	/**
+	 * 9.获取我的发布
+	 * @param userSectId	用户ID
+	 * @param sort	排序
+	 * @param page 	分页
+	 * @return
+	 */
+	public List<Thread> getThreadListByUserId(long userId, Pageable page);
+	
+	/**
+	 * 9.1.获取我的发布,按分类
+	 * @param userSectId	用户ID
+	 * @param sort	排序
+	 * @param page 	分页
+	 * @return
+	 */
+	public List<Thread> getThreadListByUserId(long userId, String category, Pageable page);
+	
+	
+	/**
 	 * 10.获取社区百事通信息
 	 */
 	public List<CommunityInfo> getCommunityInfoBySectId(long sectId, Sort sort);
@@ -166,5 +185,16 @@ public interface CommunityService {
 	 * @return
 	 */
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page);
+	
+	/**
+	 * 根据用户ID获取帖子列表
+	 * @param category
+	 * @param userId
+	 * @param page
+	 * @return
+	 */
+	public List<Thread> getThreadListByUserId(String category, long userId, Pageable page);
+
+	public void updateThreadComment(ThreadComment thread);
 	
 }

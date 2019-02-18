@@ -5,10 +5,15 @@
 package com.yumu.hexie.service.common.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -17,10 +22,17 @@ import org.springframework.stereotype.Service;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
+import com.yumu.hexie.integration.wechat.entity.customer.DataJsonVo;
+import com.yumu.hexie.integration.wechat.entity.customer.DataVo;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
+import com.yumu.hexie.integration.wechat.entity.customer.Template;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.model.community.Staffing;
+import com.yumu.hexie.model.community.StaffingRepository;
+import com.yumu.hexie.model.community.ThreadOperator;
+import com.yumu.hexie.model.community.ThreadOperatorRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
@@ -44,10 +56,6 @@ public class GotongServiceImpl implements GotongService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GotongServiceImpl.class);
     
-    public static String YUYUE_NOTICE = ConfigUtil.get("yuyueNotice");
-    
-    public static String COMPLAIN_DETAIL = ConfigUtil.get("complainDetail");
-    
     public static String WEIXIU_NOTICE = ConfigUtil.get("weixiuNotice");
 
     public static String XIYI_NOTICE = ConfigUtil.get("weixiuNotice");
@@ -58,6 +66,26 @@ public class GotongServiceImpl implements GotongService {
     
     public static String SUBSCRIBE_DETAIL = ConfigUtil.get("subscribeDetail");
     
+    public static String THREAD_NOTICE_URL = ConfigUtil.get("threadUrl");
+    
+    public static String TEMPLATE_NOTICE_URL = ConfigUtil.get("templateUrl");
+    
+    public static String TEMPLATE_NOTICE_ID = ConfigUtil.get("templateId");
+    
+    public static String THREAD_NOTICE_DESC = "业主姓名：NAME\r联系方式：TEL\r业主地址：CELL_ADDR\r消息类型：CATEGORY\r消息内容：CONTENT";
+    
+    public static Map<String, String>categoryMap;
+    
+    @PostConstruct   
+    public void init(){
+    	
+    	categoryMap = new HashMap<String, String>();
+    	categoryMap.put("0", "服务需求");
+    	categoryMap.put("1", "意见建议");
+    	categoryMap.put("2", "报修");
+    
+    }
+    
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
     @Inject
@@ -66,7 +94,11 @@ public class GotongServiceImpl implements GotongService {
     private OperatorService  operatorService;
     @Inject
     private SystemConfigService systemConfigService;
-
+    @Inject
+    private ThreadOperatorRepository threadOperatorRepository;
+    @Inject
+    private  StaffingRepository staffingRepository;
+    
     @Async
     @Override
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
@@ -149,4 +181,67 @@ public class GotongServiceImpl implements GotongService {
         }
         
     }
+    
+    /**
+     * 发送模板消息
+     */
+    @Async
+	@Override
+	public void sendThreadPubNotify(User user, com.yumu.hexie.model.community.Thread thread) {
+    	String sect_id = user.getSect_id();
+    	List<Staffing> list = staffingRepository.getStaffing(sect_id);
+    	for (int i = 0; i < list.size(); i++) {
+    		User useropenId = userService.getById(Long.parseLong(list.get(i).getStaffing_userid()));
+    		pushweixin(useropenId.getOpenid(),TEMPLATE_NOTICE_URL+Long.toString(thread.getThreadId()),TEMPLATE_NOTICE_ID, "您好，您有新的消息", Long.toString(thread.getThreadId()), user.getName(), user.getTel(), user.getCell_addr(), "请点击查看具体信息");
+		}
+    }
+    
+    public static void main(String[] args) {
+    	System.out.println(THREAD_NOTICE_URL);
+    }
+    
+	@Override
+    public void pushweixin(String openId,String threadid,String template,String firstval,String keyword1val,String keyword2val,String keyword3val,String keyword4val,String remarkval) {
+    	Template msg = new Template();
+    	msg.setTouser(openId);//openID  wywOpenId:og0nw09cdaJZjwQlg8ICnsSCclTE 测试推送使用
+    	msg.setUrl(threadid);//跳转地址
+    	msg.setTemplate_id(template);//模板id
+		DataVo data = new DataVo();
+		
+		DataJsonVo first = new DataJsonVo();
+		first.setValue(firstval); //标题
+		first.setColor("#173177");
+		data.setFirst(first);
+		
+		DataJsonVo keyword1 = new DataJsonVo();
+		keyword1.setValue(keyword1val);//内容1
+		keyword1.setColor("#173177"); 
+		data.setKeyword1(keyword1);
+		
+		DataJsonVo keyword2 = new DataJsonVo();
+		keyword2.setValue(keyword2val);//内容2
+		keyword2.setColor("#173177");
+		data.setKeyword2(keyword2);
+		
+		DataJsonVo keyword3 = new DataJsonVo();
+		keyword3.setValue(keyword3val);//内容3
+		keyword3.setColor("#173177");
+		data.setKeyword3(keyword3);
+		
+		DataJsonVo keyword4 = new DataJsonVo();
+		keyword4.setValue(keyword4val);//内容4
+		keyword4.setColor("#173177");
+		data.setKeyword4(keyword4);
+		
+		DataJsonVo remark = new DataJsonVo();
+		remark.setValue(remarkval);//结尾
+		remark.setColor("#173177");
+		data.setRemark(remark);
+		
+		msg.setData(data);
+		String accessToken = systemConfigService.queryWXAToken();
+//		String accessToken = "";
+		CustomService.sendCustomerMessage(msg, accessToken);
+    }
+    
 }

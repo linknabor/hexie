@@ -3,6 +3,7 @@
  */
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,8 +22,10 @@ import com.yumu.hexie.model.community.CommunityInfoRepository;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.community.ThreadCommentRepository;
+import com.yumu.hexie.model.community.ThreadOperatorRepository;
 import com.yumu.hexie.model.community.ThreadRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.CommunityService;
 
@@ -40,6 +43,8 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Inject
 	private AnnoucementRepository annoucementRepository;
+	
+	@Inject GotongService gotongService;
 	
 	@Override
 	public List<Thread> getThreadList(long userSectId, Pageable page) {
@@ -81,6 +86,8 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setStickPriority("0");	//默认优先级0，为最低
 		threadRepository.save(thread);
 		
+		gotongService.sendThreadPubNotify(user, thread);
+		
 		return thread;
 	}
 
@@ -114,6 +121,16 @@ public class CommunityServiceImpl implements CommunityService {
 		threadRepository.save(thread);
 	}
 
+	@Override
+	public void updateThreadComment(ThreadComment thread) {
+
+		ThreadComment t = threadCommentRepository.findOne(thread.getCommentId());
+		if (t == null) {
+			throw new BizValidateException("帖子不存在。");
+		}
+		threadCommentRepository.save(thread);
+	}
+	
 	@Override
 	public ThreadComment addComment(User user, ThreadComment comment) {
 	
@@ -223,6 +240,35 @@ public class CommunityServiceImpl implements CommunityService {
 
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
 	}
+
+	@Override
+	public List<Thread> getThreadListByUserId(String category, long userId,
+			Pageable page) {
+
+		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
+	}
+
+	@Override
+	public List<Thread> getThreadListByUserId(long userId, Pageable page) {
+
+		return threadRepository.findByThreadStatusAndUserId(ModelConstant.THREAD_STATUS_NORMAL, userId, page);
+	}
+
+	@Override
+	public List<Thread> getThreadListByUserId(long userId, String category, Pageable page) {
+		if("2".equals(category))
+		{
+			List<String> list = new ArrayList<String>();
+			list.add("2");
+			list.add("3");
+			return threadRepository.findByThreadStatusAndUserIdAndThreadCategory(ModelConstant.THREAD_STATUS_NORMAL, userId, list, page);
+		}else
+		{
+			return threadRepository.findByThreadStatusAndUserIdAndThreadCategory(ModelConstant.THREAD_STATUS_NORMAL, userId, category, page);
+		}
+	}
+	
+	
 	
 	
 }
