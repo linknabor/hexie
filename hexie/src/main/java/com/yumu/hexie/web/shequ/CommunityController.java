@@ -299,19 +299,6 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
 		Long threadId = thread.getThreadId();
 		
 		if (StringUtil.isEmpty(threadId)) {
@@ -571,10 +558,6 @@ public class CommunityController extends BaseController{
 			return BaseResult.successResult(new ArrayList<Thread>());
 		}
 		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
 		
 		//更新帖子回复数量及最后评论时间
 		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
@@ -588,6 +571,9 @@ public class CommunityController extends BaseController{
 		comment.setToUserReaded("false");
 		
 		ThreadComment retComment = communityService.addComment(user, comment);	//添加评论
+		
+		log.error("图片路径："+retComment.getAttachmentUrl());
+		log.error("图片id："+retComment.getUploadPicId());
 		
 		moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
 		
