@@ -409,6 +409,8 @@ public class CommunityController extends BaseController{
 			PutExtra extra = new PutExtra();
 			File img = null;
 			
+			String accessToken = systemConfigService.queryWXAToken();
+			
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
 					
@@ -416,7 +418,7 @@ public class CommunityController extends BaseController{
 					int imgcounter = 0;
 					inputStream = null;
 					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId);		//下载图片
+						inputStream = FileService.downloadFile(uploadId,accessToken);		//下载图片
 						if (inputStream==null) {
 							log.error("获取图片附件失败。");
 						}
@@ -633,6 +635,8 @@ public class CommunityController extends BaseController{
 			PutExtra extra = new PutExtra();
 			File img = null;
 			
+			String accessToken = systemConfigService.queryWXAToken();
+			
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
 					
@@ -640,7 +644,7 @@ public class CommunityController extends BaseController{
 					int imgcounter = 0;
 					inputStream = null;
 					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId);		//下载图片
+						inputStream = FileService.downloadFile(uploadId,accessToken);		//下载图片
 						if (inputStream==null) {
 							log.error("获取图片附件失败。");
 						}
