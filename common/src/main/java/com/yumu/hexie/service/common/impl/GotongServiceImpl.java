@@ -202,7 +202,9 @@ public class GotongServiceImpl implements GotongService {
     
 	@Override
     public void pushweixin(String openId,String threadid,String template,String firstval,String keyword1val,String keyword2val,String keyword3val,String keyword4val,String remarkval) {
-    	Template msg = new Template();
+    	LOG.error("openId:"+openId+"threadid:"+threadid+"template:"+template+"firstval:"+firstval+"keyword1val:"+keyword1val+"keyword2val:"+keyword2val+"keyword3val:"+keyword3val+"keyword4val:"+keyword4val+"remarkval:"+remarkval);
+		
+		Template msg = new Template();
     	msg.setTouser(openId);//openID  wywOpenId:og0nw09cdaJZjwQlg8ICnsSCclTE 测试推送使用
     	msg.setUrl(threadid);//跳转地址
     	msg.setTemplate_id(template);//模板id
