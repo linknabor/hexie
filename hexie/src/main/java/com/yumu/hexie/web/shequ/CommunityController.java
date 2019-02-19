@@ -843,9 +843,9 @@ public class CommunityController extends BaseController{
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/thread/getImgDetail/{threadId}/{index}", method = RequestMethod.GET)
+	@RequestMapping(value = "/thread/getImgDetail/{threadId}/{index}/{type}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult getImgDetail(HttpSession session, @PathVariable long threadId, @PathVariable int index){
+	public BaseResult getImgDetail(HttpSession session, @PathVariable long threadId, @PathVariable int index, @PathVariable int type){
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
@@ -862,10 +862,21 @@ public class CommunityController extends BaseController{
 			return BaseResult.successResult(new ArrayList<Thread>());
 		}
 		
+
+		
 		Thread ret = communityService.getThreadByTreadId(threadId);
 		String attachmentUrl = ret.getAttachmentUrl();
 		String imgHeight = ret.getImgHeight();
 		String imgWidth = ret.getImgWidth();
+
+		
+		if(type==1) {
+			ThreadComment retcomment = communityService.getThreadCommentByTreadId(threadId);
+			attachmentUrl = retcomment.getAttachmentUrl();
+			imgHeight = retcomment.getImgHeight();
+			imgWidth = retcomment.getImgWidth();
+		}
+		
 		String[]imgUrls = attachmentUrl.split(",");
 		String[]heights = imgHeight.split(",");
 		String[]widths = imgWidth.split(",");

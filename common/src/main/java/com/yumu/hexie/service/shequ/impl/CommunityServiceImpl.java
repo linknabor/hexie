@@ -246,6 +246,12 @@ public class CommunityServiceImpl implements CommunityService {
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
 	}
 
+	@Override
+	public ThreadComment getThreadCommentByTreadId(long threadCommentId) {
+		// TODO Auto-generated method stub
+		return threadCommentRepository.findOne(threadCommentId);
+	}
+
 	
 	
 }
