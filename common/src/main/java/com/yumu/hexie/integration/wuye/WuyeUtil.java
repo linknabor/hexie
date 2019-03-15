@@ -35,7 +35,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
 
-	private static String REQUEST_ADDRESS = "http://www.e-shequ.com/mobileInterface/mobile/";
+	private static String REQUEST_ADDRESS = "http://test.e-shequ.com/mobileInterface/mobile/";
 	private static String SYSTEM_NAME;
 	private static Properties props = new Properties();
 	
