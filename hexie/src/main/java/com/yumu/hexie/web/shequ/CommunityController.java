@@ -42,6 +42,7 @@ import com.yumu.hexie.model.community.CommunityInfo;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
@@ -66,6 +67,9 @@ public class CommunityController extends BaseController{
 	
 	@Inject
 	private UserService userService;
+	
+	@Inject
+	private SystemConfigService systemConfigService;
 	
 	/*****************[BEGIN]帖子********************/
 	
@@ -295,19 +299,6 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
 		Long threadId = thread.getThreadId();
 		
 		if (StringUtil.isEmpty(threadId)) {
@@ -350,6 +341,22 @@ public class CommunityController extends BaseController{
 				tc.setIsCommentOwner("true");
 			}else {
 				tc.setIsCommentOwner("false");
+			}
+			
+			String tcAttachmentUrl = tc.getAttachmentUrl();
+			if (!StringUtil.isEmpty(tcAttachmentUrl)) {
+				
+				String[]urls = tcAttachmentUrl.split(",");
+				
+				List<String> previewLinkList = new ArrayList<String>();
+				
+				for (int j = 0; j < urls.length; j++) {
+					
+					String urlKey = urls[j];
+					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					
+				}
+				tc.setPreviewLink(previewLinkList);
 			}
 			
 		}
@@ -402,6 +409,8 @@ public class CommunityController extends BaseController{
 			PutExtra extra = new PutExtra();
 			File img = null;
 			
+			String accessToken = systemConfigService.queryWXAToken();
+			
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
 					
@@ -409,7 +418,7 @@ public class CommunityController extends BaseController{
 					int imgcounter = 0;
 					inputStream = null;
 					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId);		//下载图片
+						inputStream = FileService.downloadFile(uploadId,accessToken);		//下载图片
 						if (inputStream==null) {
 							log.error("获取图片附件失败。");
 						}
@@ -551,10 +560,6 @@ public class CommunityController extends BaseController{
 			return BaseResult.successResult(new ArrayList<Thread>());
 		}
 		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
 		
 		//更新帖子回复数量及最后评论时间
 		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
@@ -569,10 +574,200 @@ public class CommunityController extends BaseController{
 		
 		ThreadComment retComment = communityService.addComment(user, comment);	//添加评论
 		
+		log.error("图片路径："+retComment.getAttachmentUrl());
+		log.error("图片id："+retComment.getUploadPicId());
+		
+		moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
+		
+		String tcAttachmentUrl = retComment.getAttachmentUrl();
+		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
+			
+			String[]urls = tcAttachmentUrl.split(",");
+			
+			List<String> previewLinkList = new ArrayList<String>();
+			
+			for (int j = 0; j < urls.length; j++) {
+				
+				String urlKey = urls[j];
+				previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+				
+			}
+			retComment.setPreviewLink(previewLinkList);
+		}
+		
 		
 		return BaseResult.successResult(retComment);
 		
 	}
+	
+	
+	/**
+	 * 上传图片到七牛服务器
+	 * @param ret
+	 * @param inputStream
+	 * @param uploadIds
+	 */
+	@SuppressWarnings("rawtypes")
+	private void upload2Qiniu(ThreadComment ret, String uploadIds ){
+		
+		InputStream inputStream = null;
+		if (!StringUtil.isEmpty(uploadIds)) {
+			
+			uploadIds = uploadIds.substring(0, uploadIds.length()-1);	//截掉最后一个逗号
+			String[]uploadIdArr = uploadIds.split(",");
+			
+			String uptoken = QiniuUtil.getInstance().getUpToken();	//获取qiniu上传文件的token
+			
+			log.error("qiniu token :" + uptoken);
+			
+			String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
+			String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
+			String tmpPathRoot = tmpFileRoot+File.separator+currDate+File.separator;
+			
+			File file = new File(tmpPathRoot);
+			if (!file.exists()||!file.isDirectory()) {
+				file.mkdirs();
+			}
+			String keyListStr = "";
+			String imgHeight = "";
+			String imgWidth = "";
+			
+			PutExtra extra = new PutExtra();
+			File img = null;
+			
+			String accessToken = systemConfigService.queryWXAToken();
+			
+			try {
+				for (int i = 0; i < uploadIdArr.length; i++) {
+					
+					String uploadId = uploadIdArr[i];
+					int imgcounter = 0;
+					inputStream = null;
+					while(inputStream==null&&imgcounter<3) {
+						inputStream = FileService.downloadFile(uploadId,accessToken);		//下载图片
+						if (inputStream==null) {
+							log.error("获取图片附件失败。");
+						}
+						imgcounter++;
+					}
+					
+					if (inputStream==null) {
+						log.error("多次从腾讯获取图片失败。");
+						return;
+					}
+					String tmpPath = tmpPathRoot+currTime+"_"+ret.getCommentId()+"_"+i;
+					FileService.inputStream2File(inputStream, tmpPath);
+					String key = currDate+"_"+currTime+"_"+ret.getCommentId()+"_"+i;
+					img = new File(tmpPath);
+					
+					if (img.exists() && img.getTotalSpace()>0) {
+
+						PutRet putRet = IoApi.putFile(uptoken, key, img, extra);
+						log.error("ret msg is : " + putRet.getException());
+						log.error("putRet is : " + putRet.toString());
+						
+						while (putRet.getException()!=null) {
+							putRet = IoApi.putFile(uptoken, key, img, extra);
+							java.lang.Thread.sleep(100);
+						}
+						
+						boolean isUploaded = false;
+						int counter = 0;
+						Map map = null;
+						while (!isUploaded && counter <3 ) {
+
+							map = QiniuUtil.getInstance().getImgs(domain+key);
+							Object error = map.get("error");
+							if (error != null) {
+								log.error((String)error);
+								log.error("start to re-upload ...");
+								putRet = IoApi.putFile(uptoken, key, img, extra);
+								java.lang.Thread.sleep(100);
+							}else {
+								isUploaded = true;
+								break;
+							}
+							
+							counter++;
+						}
+						
+						if (isUploaded) {
+							
+							keyListStr+=domain+key;
+							
+							Integer width = (Integer)map.get("width");
+							Integer height = (Integer)map.get("height");
+							
+							imgWidth+=width;
+							imgHeight+=height;
+							
+							if (i!=uploadIdArr.length-1) {
+								keyListStr+=",";
+								imgWidth+=",";
+								imgHeight+=",";
+							}
+						}
+						
+					
+					}
+					
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				log.error(e.getMessage());
+			}finally{
+				if (inputStream!=null) {
+					try {
+						inputStream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+						log.error(e.getMessage());
+					}
+				}
+			}
+		
+			ret.setAttachmentUrl(keyListStr);
+			ret.setImgHeight(imgHeight);
+			ret.setImgWidth(imgWidth);
+			communityService.updateThreadComment(ret);	//更新上传文件路径
+		
+		}
+		
+		
+	}
+	
+	private void moveImgsFromTencent2Qiniu(ThreadComment ret){
+		
+		//从腾讯下载用户上传的图片。并放到图片服务器上。
+		String uploadIds = ret.getUploadPicId();
+		String attachmentUrls = ret.getAttachmentUrl();
+		
+		if (StringUtil.isEmpty(attachmentUrls)) {
+			
+			upload2Qiniu(ret, uploadIds);
+			
+		}else {
+		
+			if (!StringUtil.isEmpty(uploadIds)) {
+				
+				if (attachmentUrls.endsWith(",")) {
+					attachmentUrls = attachmentUrls.substring(0, attachmentUrls.length()-1);
+				}
+				String[]uploadIdArr = uploadIds.split(",");
+				String[]urlArr = attachmentUrls.split(",");
+				
+				if (uploadIdArr.length!=urlArr.length) {
+					upload2Qiniu(ret, uploadIds);
+				}
+			}
+		}
+		
+	}
+	
+	
+	
+	
+	
 	
 	/**
 	 * 删除评论
@@ -648,9 +843,9 @@ public class CommunityController extends BaseController{
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/thread/getImgDetail/{threadId}/{index}", method = RequestMethod.GET)
+	@RequestMapping(value = "/thread/getImgDetail/{threadId}/{index}/{type}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult getImgDetail(HttpSession session, @PathVariable long threadId, @PathVariable int index){
+	public BaseResult getImgDetail(HttpSession session, @PathVariable long threadId, @PathVariable int index, @PathVariable int type){
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
@@ -667,10 +862,21 @@ public class CommunityController extends BaseController{
 			return BaseResult.successResult(new ArrayList<Thread>());
 		}
 		
+
+		
 		Thread ret = communityService.getThreadByTreadId(threadId);
 		String attachmentUrl = ret.getAttachmentUrl();
 		String imgHeight = ret.getImgHeight();
 		String imgWidth = ret.getImgWidth();
+
+		
+		if(type==1) {
+			ThreadComment retcomment = communityService.getThreadCommentByTreadId(threadId);
+			attachmentUrl = retcomment.getAttachmentUrl();
+			imgHeight = retcomment.getImgHeight();
+			imgWidth = retcomment.getImgWidth();
+		}
+		
 		String[]imgUrls = attachmentUrl.split(",");
 		String[]heights = imgHeight.split(",");
 		String[]widths = imgWidth.split(",");
