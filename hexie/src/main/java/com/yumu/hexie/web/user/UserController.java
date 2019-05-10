@@ -29,6 +29,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
@@ -73,16 +74,26 @@ public class UserController extends BaseController{
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
 	@ResponseBody
     public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user) throws Exception {
-		log.error("进入userInfo接口");
-		user = userService.getById(user.getId());
-        log.error("userInfo的user "+ user);
-        if(user != null){
-            session.setAttribute(Constants.USER, user);
-            log.error("user.getOfficeTel = "+ user.getOfficeTel());
-            return new BaseResult<UserInfo>().success(new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId())));
-        } else {
-            return new BaseResult<UserInfo>().success(null);
-        }
+		
+		try {
+			log.error("进入userInfo接口");
+			user = userService.getById(user.getId());
+			log.error("userInfo的user "+ user);
+			if(user != null){
+			    session.setAttribute(Constants.USER, user);
+			    log.error("user.getOfficeTel = "+ user.getOfficeTel());
+			    return new BaseResult<UserInfo>().success(new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId())));
+			} else {
+			    return new BaseResult<UserInfo>().success(null);
+			}
+		} catch (Exception e) {
+			
+			if (e instanceof BizValidateException) {
+				throw (BizValidateException)e;
+			}else {
+				throw new Exception(e);
+			}
+		}
     }
 	
 	//检查当前用户是否注册，注册标准参考电话是否为有值。
@@ -113,37 +124,46 @@ public class UserController extends BaseController{
     public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code) throws Exception {
 		
 		User userAccount = null;
-		if (StringUtil.isNotEmpty(code)) {
-		    if("true".equals(testMode)) {
-		        try{
-    		        Long id = Long.valueOf(code);
-    		    	userAccount = userService.getById(id);
-		        }catch(Throwable t){}
-		    }
-		    if(userAccount == null) {
-		        userAccount = userService.getOrSubscibeUserByCode(code);
-		    }
-		    
-			pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
-			wuyeService.userLogin(userAccount.getOpenid());
-			
-			/*判断用户是否关注公众号*/
-			UserWeiXin u = userService.getOrSubscibeUserByOpenId(userAccount.getOpenid());
-			
-			updateWeUserInfo(userAccount, u);
-			
-			if(StringUtil.isEmpty(userAccount.getShareCode())) {
-				userAccount.generateShareCode();
-				userService.save(userAccount);
+		try {
+			if (StringUtil.isNotEmpty(code)) {
+			    if("true".equals(testMode)) {
+			        try{
+				        Long id = Long.valueOf(code);
+				    	userAccount = userService.getById(id);
+			        }catch(Throwable t){}
+			    }
+			    if(userAccount == null) {
+			        userAccount = userService.getOrSubscibeUserByCode(code);
+			    }
+			    
+				pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
+				wuyeService.userLogin(userAccount.getOpenid());
+				
+				/*判断用户是否关注公众号*/
+				UserWeiXin u = userService.getOrSubscibeUserByOpenId(userAccount.getOpenid());
+				
+				updateWeUserInfo(userAccount, u);
+				
+				if(StringUtil.isEmpty(userAccount.getShareCode())) {
+					userAccount.generateShareCode();
+					userService.save(userAccount);
+				}
+				session.setAttribute(Constants.USER, userAccount);
 			}
-			session.setAttribute(Constants.USER, userAccount);
-		}
-		if(userAccount == null) {
-            return new BaseResult<UserInfo>().failMsg("用户不存在！");
-		}
+			if(userAccount == null) {
+			    return new BaseResult<UserInfo>().failMsg("用户不存在！");
+			}
 
-        return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
-            operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+			return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
+			    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+		} catch (Exception e) {
+			
+			if (e instanceof BizValidateException) {
+				throw (BizValidateException)e;
+			}else {
+				throw new Exception(e);
+			}
+		}
     }
 	
 	private void updateWeUserInfo(User userAccount, UserWeiXin newUser) {
