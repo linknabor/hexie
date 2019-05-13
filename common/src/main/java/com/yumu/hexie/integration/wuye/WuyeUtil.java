@@ -35,7 +35,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
 
-	private static String REQUEST_ADDRESS = "http://test.e-shequ.com/mobileInterface/mobile/";
+	private static String REQUEST_ADDRESS = "http://www.e-shequ.com/mobileInterface/mobile/";
 	private static String SYSTEM_NAME;
 	private static Properties props = new Properties();
 	
@@ -233,7 +233,7 @@ public class WuyeUtil {
 //		log.error("【response】:"+response);
 //		return jsonToBeanResult(response, CellListVO.class);
 		
-//		sect_name = URLEncoder.encode(sect_name,"GBK");
+		sect_name = URLEncoder.encode(sect_name,"GBK");
 		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);

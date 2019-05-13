@@ -89,8 +89,6 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 			int ret = SystemConfigUtil.notifyRefreshing(key);
 			log.error("notify refreshing the cache : " + ret);
     	}
-    	log.error("systemConfig:"+systemConfig.getSysKey()+"===="+systemConfig.getSysValue());
-    	
     	return systemConfig;
     
     }

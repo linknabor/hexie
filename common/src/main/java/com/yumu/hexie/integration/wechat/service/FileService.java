@@ -121,9 +121,9 @@ public class FileService {
 	 * 下载文件
 	 * @param mediaId
 	 */
-	public static InputStream downloadFile(String mediaId,String accessToken){
+	public static InputStream downloadFile(String mediaId){
 		
-		String requestUrl = dwonloadFileURL.replace("ACCESS_TOKEN", accessToken).replace("MEDIA_ID", mediaId);
+		String requestUrl = dwonloadFileURL.replace("ACCESS_TOKEN", WeixinUtil.getToken()).replace("MEDIA_ID", mediaId);
 		try {
 			HttpGet httpGet = new HttpGet(requestUrl);
 			HttpClient httpclient = HttpClients.createDefault();
@@ -227,6 +227,7 @@ public class FileService {
 	
 	public static void main(String[] args) {
 		
+		FileService.downloadFile("pZZB0c3HyotJMkEW1--JZQ0T7Ku5TR3EX8bnIX3h0pPyBstFh7xZSpsU_GSIImJj,PZl7lcvC8ag6qaaTbqkNt3G2a6PI101VYJl5i5OSVGe185T3Z7YikRFk-TRnhKhL");
 		
 	}
 

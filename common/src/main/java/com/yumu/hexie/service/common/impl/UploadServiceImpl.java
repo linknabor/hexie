@@ -27,7 +27,6 @@ import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.wechat.service.FileService;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
-import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.UploadService;
 
 /**
@@ -50,9 +49,6 @@ public class UploadServiceImpl implements UploadService {
     
     @Inject
     private RepairOrderRepository repairOrderRepository;
-    
-	@Inject
-	private SystemConfigService systemConfigService;
     /** 
      * @param order
      * @see com.yumu.hexie.service.common.UploadService#updateRepairImg(com.yumu.hexie.model.localservice.repair.RepairOrder)
@@ -135,8 +131,7 @@ public class UploadServiceImpl implements UploadService {
             int imgcounter = 0;
             inputStream = null;
             while (inputStream == null && imgcounter < 3) {
-            	String accessToken = systemConfigService.queryWXAToken();
-                inputStream = FileService.downloadFile(mediaId,accessToken); //重试3次
+                inputStream = FileService.downloadFile(mediaId); //重试3次
                 if (inputStream == null) {
                     log.error("获取图片附件失败。" + mediaId);
                 }

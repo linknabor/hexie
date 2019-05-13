@@ -108,7 +108,6 @@ public interface CommunityService {
 	 */
 	public List<Thread> getThreadListByUserId(long userId, Sort sort);
 	
-	
 	/**
 	 * 10.获取社区百事通信息
 	 */
@@ -167,24 +166,5 @@ public interface CommunityService {
 	 * @return
 	 */
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page);
-	
-	/**
-	 * 根据用户ID获取帖子列表
-	 * @param category
-	 * @param userId
-	 * @param page
-	 * @return
-	 */
-	public List<Thread> getThreadListByUserId(String category, long userId, Pageable page);
-
-	public void updateThreadComment(ThreadComment thread);
-	
-	/**
-	 * 根据帖子回复信息ID获取具体的帖子信息
-	 * @param user
-	 * @param ThreadId
-	 * @return
-	 */
-	public ThreadComment getThreadCommentByTreadId(long threadCommentId);
 	
 }
