@@ -100,8 +100,14 @@ public class WechatController extends BaseController{
   //用于唤起扫码
     @ResponseBody
     @RequestMapping(value = "/getUrlJsSign", method = RequestMethod.POST )
-    public BaseResult<JsSign> getUrlJsSign(@RequestBody UrlSignReq urlReq) {
-    	JsSign s = wechatCoreService.getJsSign(urlReq.getUrl());
+    public BaseResult<JsSign> getUrlJsSign(@RequestBody UrlSignReq urlReq) throws Exception {
+    	
+    	JsSign s = null;
+		try {
+			s = wechatCoreService.getJsSign(urlReq.getUrl());
+		} catch (Exception e) {
+			throw new Exception(e);
+		}
     	if(s != null) {
     		return new BaseResult<JsSign>().success(s);
     	} else {
