@@ -5,43 +5,73 @@
             </pattern>
         </encoder>
     </appender>
-    <appender name="COMMONERROR" class="ch.qos.logback.core.FileAppender">
-        <file>logs/bk/common-error.log</file>
+    <appender name="COMMONERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/hexie/common-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        	<FileNamePattern>logs/hexie/common-error.%d{yyyy-MM-dd}.log</FileNamePattern>
+      		<!-- keep 30 days' worth of history -->
+      		<maxHistory>30</maxHistory>
+   		</rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
-    <appender name="INTEGRATION" class="ch.qos.logback.core.FileAppender">
-        <file>logs/bk/common-integration.log</file>
+    <appender name="INTEGRATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/hexie/common-integration.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        	<FileNamePattern>logs/hexie/common-integration.%d{yyyy-MM-dd}.log</FileNamePattern>
+      		<!-- keep 30 days' worth of history -->
+      		<maxHistory>30</maxHistory>
+   		</rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
-    <appender name="ORDER" class="ch.qos.logback.core.FileAppender">
-        <file>logs/bk/common-biz.log</file>
+    <appender name="ORDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/hexie/common-biz.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        	<FileNamePattern>logs/hexie/common-biz.%d{yyyy-MM-dd}.log</FileNamePattern>
+      		<!-- keep 30 days' worth of history -->
+      		<maxHistory>30</maxHistory>
+   		</rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
-    <appender name="SCHEDUE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/bk/common-schedue.log</file>
+    <appender name="SCHEDUE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/hexie/common-schedue.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        	<FileNamePattern>logs/hexie/common-schedue.%d{yyyy-MM-dd}.log</FileNamePattern>
+      		<!-- keep 30 days' worth of history -->
+      		<maxHistory>30</maxHistory>
+   		</rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
-    <appender name="SPRING" class="ch.qos.logback.core.FileAppender">
-        <file>logs/bk/common-spring.log</file>
+    <appender name="SPRING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/hexie/common-spring.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        	<FileNamePattern>logs/hexie/common-spring.%d{yyyy-MM-dd}.log</FileNamePattern>
+      		<!-- keep 30 days' worth of history -->
+      		<maxHistory>30</maxHistory>
+   		</rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>
-    <appender name="HIBERNATE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/bk/common-db.log</file>
+    <appender name="HIBERNATE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/hexie/common-db.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        	<FileNamePattern>logs/hexie/common-db.%d{yyyy-MM-dd}.log</FileNamePattern>
+      		<!-- keep 30 days' worth of history -->
+      		<maxHistory>30</maxHistory>
+   		</rollingPolicy>
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
@@ -52,13 +82,13 @@
     <logger name="org.springframework"  level="INFO" additivity="false">  
 	    <appender-ref ref="SPRING"/>  
 	</logger>
-    <logger name="com.yumu.hexie"  level="WARN" additivity="false">  
+    <logger name="com.yumu.hexie"  level="INFO" additivity="false">  
 	    <appender-ref ref="COMMONERROR"/>  
 	</logger>
     <logger name="com.yumu.hexie.integration"  level="INFO" additivity="false">  
 	    <appender-ref ref="INTEGRATION"/>  
 	</logger>
-    <logger name="org.hibernate"  level="WARN" additivity="false">  
+    <logger name="org.hibernate"  level="DEBUG" additivity="false">  
 	    <appender-ref ref="HIBERNATE"/>  
 	</logger>
     <logger name="com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl"  level="INFO" additivity="false">  
@@ -67,10 +97,11 @@
     <logger name="com.yumu.hexie.service.payment.impl.PaymentServiceImpl"  level="INFO" additivity="false">  
 	    <appender-ref ref="ORDER"/>  
 	</logger>
+	
     <logger name="com.yumu.hexie.schedule"  level="INFO" additivity="false">  
 	    <appender-ref ref="SCHEDUE"/>  
 	</logger>
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="COMMONERROR"/>
     </root>

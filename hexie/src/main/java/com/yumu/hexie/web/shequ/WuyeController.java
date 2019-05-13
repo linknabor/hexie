@@ -439,6 +439,9 @@ public class WuyeController extends BaseController {
 		}
 		
 		User user = (User)session.getAttribute(Constants.USER);
+		if (user == null) {
+			return BaseResult.fail("user is null ...");
+		}
 		List<Coupon>list = couponService.findAvaibleCouponForWuye(user.getId());
 		
 		if (list.size()>0) {
