@@ -123,7 +123,7 @@ public class FileService {
 	 */
 	public static InputStream downloadFile(String mediaId,String accessToken){
 		
-		String requestUrl = dwonloadFileURL.replace("ACCESS_TOKEN", WeixinUtil.getToken()).replace("MEDIA_ID", mediaId);
+		String requestUrl = dwonloadFileURL.replace("ACCESS_TOKEN", accessToken).replace("MEDIA_ID", mediaId);
 		try {
 			HttpGet httpGet = new HttpGet(requestUrl);
 			HttpClient httpclient = HttpClients.createDefault();
