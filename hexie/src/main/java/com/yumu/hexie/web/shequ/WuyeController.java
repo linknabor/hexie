@@ -40,11 +40,14 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
+import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
@@ -70,10 +73,16 @@ public class WuyeController extends BaseController {
     protected UserService userService;
     
     @Inject
+    protected AddressService addressService;
+    
+    @Inject
     protected UserRepository userRepository;
     
     @Inject
 	private SystemConfigService systemConfigService;
+    
+    @Inject
+    private AddressRepository addressRepository;
     
 
 	/*****************[BEGIN]房产********************/
@@ -150,7 +159,7 @@ public class WuyeController extends BaseController {
 		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
 		log.error("HexieUser u = "+u);
 		if(u != null) {
-			
+			setDefaultAddress(user,u.getCell_addr());
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
 			//添加电话到user表
 			log.error("这里是添加房子后保存的电话");
@@ -170,7 +179,7 @@ public class WuyeController extends BaseController {
 		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
 		log.error("HexieUser2 u = "+u);
 		if(u != null) {
-			
+			setDefaultAddress(user,u.getCell_addr());
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
 			//添加电话到user表
 			log.error("这里是添加房子后保存的电话");
@@ -181,6 +190,18 @@ public class WuyeController extends BaseController {
 		}
 		return BaseResult.successResult(u);
 	}
+	
+	
+	    //支付完成后设置默认地址
+		@RequestMapping(value = "/setDefaultAdressByBill", method = RequestMethod.POST)
+		@ResponseBody
+		public BaseResult<String> setDefaultAdressByBill(@ModelAttribute(Constants.USER)User user,
+				@RequestParam(required=false) String billId) throws Exception {
+			   String address=wuyeService.getAddressByBill(billId);
+			   setDefaultAddress(user,address);
+			return BaseResult.successResult("");
+		}
+	
 	/*****************[END]房产********************/
 
 	
@@ -611,5 +632,42 @@ public class WuyeController extends BaseController {
 		log.info("ceshi");
 		
 		return "yayayayaceshi";
+	}
+	
+	public void setDefaultAddress(User user,String cell_address){
+		boolean result=true;
+		List<Address> list=addressService.getAddressByuserIdAndAddress(user.getId(),cell_address);
+		for (Address address : list) {
+			if(address.isMain()){
+				result=false;
+				break;
+			}
+		}
+		if(result){
+			Address a=addressService.getAddressByMain(user.getId(),true);
+			if(a != null){
+				a.setMain(false);
+				addressRepository.save(a);
+			}
+				Address add=new Address();
+				add.setMain(true);
+				add.setReceiveName(user.getNickname());
+				add.setTel(user.getTel());
+				add.setUserId(user.getId());
+				add.setCreateDate(System.currentTimeMillis());
+				add.setXiaoquId(user.getXiaoquId());
+				add.setXiaoquName(user.getXiaoquName());
+				add.setDetailAddress(cell_address);
+				add.setCity(user.getCity());
+				add.setCityId(user.getCityId());
+				add.setCounty(user.getCountry());
+				add.setCountyId(user.getCountyId());
+				add.setProvince(user.getProvince());
+				add.setProvinceId(user.getProvinceId());
+				add.setLatitude(user.getLatitude());
+				add.setLongitude(user.getLongitude());
+				addressRepository.save(add);
+		}
+		
 	}
 }

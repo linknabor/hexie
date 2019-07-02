@@ -163,6 +163,12 @@ public class WuyeServiceImpl implements WuyeService {
 		return r.getData();
 	}
 
+	@Override
+	public String getAddressByBill(String billId) {
+		
+		return (String) WuyeUtil.getAddressByBill(billId).getData();
+	}
+
 
 	
 }
