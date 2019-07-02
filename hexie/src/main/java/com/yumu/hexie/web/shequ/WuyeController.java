@@ -625,6 +625,18 @@ public class WuyeController extends BaseController {
 		}
 	}
 	
+	    //根据名称模糊查询合协社区小区列表
+		@RequestMapping(value = "/setHasHouseUserDefaultAddr", method = RequestMethod.GET)
+		@ResponseBody
+		public BaseResult<String> setHasHouseUserDefaultAddr(@ModelAttribute(Constants.USER)User user)throws Exception {
+			List<User> list=userService.getBindHouseUser();
+			for (User u : list) {
+				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
+				setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
+			}
+			return BaseResult.successResult("");
+		}
+	
 	
 	@RequestMapping(value = "/yayayayaceshi", method = RequestMethod.GET)
 	@ResponseBody
@@ -649,7 +661,10 @@ public class WuyeController extends BaseController {
 				a.setMain(false);
 				addressRepository.save(a);
 			}
-				Address add=new Address();
+			Address add=new Address();
+			if(list.size()>0){
+				add=list.get(0);	
+			}else{
 				add.setMain(true);
 				add.setReceiveName(user.getNickname());
 				add.setTel(user.getTel());
@@ -666,6 +681,7 @@ public class WuyeController extends BaseController {
 				add.setProvinceId(user.getProvinceId());
 				add.setLatitude(user.getLatitude());
 				add.setLongitude(user.getLongitude());
+			}
 				addressRepository.save(add);
 		}
 		

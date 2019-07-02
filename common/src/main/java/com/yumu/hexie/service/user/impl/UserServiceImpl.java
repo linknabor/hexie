@@ -157,5 +157,9 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findByShareCode(code);
         return users.size() > 0 ? users.get(0) : null;
     }
+	@Override
+	public List<User> getBindHouseUser() {
+		return userRepository.getBindHouseUser();
+	}
 
 }

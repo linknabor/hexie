@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.user;
 
+import java.util.List;
+
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.user.User;
 
@@ -21,4 +23,7 @@ public interface UserService {
     public User bindPhone(User user,String phone);
 	
 	public User queryByShareCode(String code);
+	
+	//获取绑定过房子的用户
+	public List<User> getBindHouseUser();
 }

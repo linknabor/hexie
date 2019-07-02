@@ -72,7 +72,17 @@ public class User extends BaseModel{
 	private boolean newRegiste = true;
 	private String officeTel;
 	
+	private Integer totalBind;
 	
+	
+	public Integer getTotalBind() {
+		return totalBind;
+	}
+
+	public void setTotalBind(Integer totalBind) {
+		this.totalBind = totalBind;
+	}
+
 	public String getOfficeTel() {
 		return officeTel;
 	}
