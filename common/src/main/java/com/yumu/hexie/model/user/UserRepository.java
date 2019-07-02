@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserRepository extends JpaRepository<User, Long> {
 	public User findByOpenid(String openid);
 	public List<User> findByShareCode(String shareCode);
-	@Query("from User a where a.totalBind > 0")
+	@Query("from User a where a.total_bind > 0")
 	public List<User> getBindHouseUser();
 }

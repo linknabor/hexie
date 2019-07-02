@@ -632,7 +632,11 @@ public class WuyeController extends BaseController {
 			List<User> list=userService.getBindHouseUser();
 			for (User u : list) {
 				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
-				setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
+				if(listVo != null && listVo.getHou_info().size()>0){
+					setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
+					log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
+
+				}
 			}
 			return BaseResult.successResult("");
 		}
