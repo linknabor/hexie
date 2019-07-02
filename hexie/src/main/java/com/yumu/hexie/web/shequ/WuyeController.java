@@ -625,7 +625,7 @@ public class WuyeController extends BaseController {
 		}
 	}
 	
-	    //根据名称模糊查询合协社区小区列表
+	    //已绑定房子的用户设置默认地址
 		@RequestMapping(value = "/setHasHouseUserDefaultAddr", method = RequestMethod.GET)
 		@ResponseBody
 		public BaseResult<String> setHasHouseUserDefaultAddr(@ModelAttribute(Constants.USER)User user)throws Exception {
@@ -663,9 +663,8 @@ public class WuyeController extends BaseController {
 			}
 			Address add=new Address();
 			if(list.size()>0){
-				add=list.get(0);	
+				add=list.get(0);
 			}else{
-				add.setMain(true);
 				add.setReceiveName(user.getNickname());
 				add.setTel(user.getTel());
 				add.setUserId(user.getId());
@@ -682,7 +681,8 @@ public class WuyeController extends BaseController {
 				add.setLatitude(user.getLatitude());
 				add.setLongitude(user.getLongitude());
 			}
-				addressRepository.save(add);
+			add.setMain(true);
+			addressRepository.save(add);
 		}
 		
 	}
