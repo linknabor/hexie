@@ -632,6 +632,8 @@ public class WuyeController extends BaseController {
 			int pageNum=0;
 			int pageSize=1000;
 			setDefaultAddr(pageNum,pageSize);
+			
+			log.error("默认地址设置完成11111111");
 			return BaseResult.successResult("");
 		}
 	
@@ -700,10 +702,11 @@ public class WuyeController extends BaseController {
 		for (User u : list) {
 			if(u.getWuyeId() != null){
 				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
-				if(listVo != null && listVo.getHou_info().size()>0){
-					setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
-					log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
-
+				if(listVo != null ){
+					if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
+						setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
+						log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
+					}
 				}
 			}
 		}
