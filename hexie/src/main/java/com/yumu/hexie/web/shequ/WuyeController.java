@@ -628,13 +628,18 @@ public class WuyeController extends BaseController {
 	    //已绑定房子的用户设置默认地址
 		@RequestMapping(value = "/setHasHouseUserDefaultAddr", method = RequestMethod.GET)
 		@ResponseBody
-		public BaseResult<String> setHasHouseUserDefaultAddr(@ModelAttribute(Constants.USER)User user)throws Exception {
-			int pageNum=0;
-			int pageSize=1000;
-			setDefaultAddr(pageNum,pageSize);
+		public BaseResult<String> setHasHouseUserDefaultAddr(@RequestParam String code)throws Exception {
+			if("hexieCode".equals(code)){
+				int pageNum=0;
+				int pageSize=1000;
+				setDefaultAddr(pageNum,pageSize);
+				
+				log.error("默认地址设置完成11111111");
+				return BaseResult.successResult("");
+			}else{
+				return BaseResult.fail("请求错误！！！");	
+			}
 			
-			log.error("默认地址设置完成11111111");
-			return BaseResult.successResult("");
 		}
 	
 	
