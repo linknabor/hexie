@@ -2,6 +2,10 @@ package com.yumu.hexie.integration.wuye.vo;
 
 import java.io.Serializable;
 
+/**
+ * @author Administrator
+ *
+ */
 public class HexieUser implements Serializable {
 
 	private static final long serialVersionUID = -8863855555160105591L;
@@ -21,6 +25,14 @@ public class HexieUser implements Serializable {
 	private String is_house;//房屋数
 	private String office_tel;//小区电话
 	private String cell_addr;//小区地址
+	private String sect_name;//小区名字
+	
+	public String getSect_name() {
+		return sect_name;
+	}
+	public void setSect_name(String sect_name) {
+		this.sect_name = sect_name;
+	}
 	public String getUser_id() {
 		return user_id;
 	}

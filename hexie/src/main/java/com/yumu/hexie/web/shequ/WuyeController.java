@@ -159,7 +159,7 @@ public class WuyeController extends BaseController {
 		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
 		log.error("HexieUser u = "+u);
 		if(u != null) {
-			setDefaultAddress(user,u.getCell_addr());
+			setDefaultAddress(user,u.getCell_addr(),u.getSect_name());
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
 			//添加电话到user表
 			log.error("这里是添加房子后保存的电话");
@@ -179,7 +179,7 @@ public class WuyeController extends BaseController {
 		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
 		log.error("HexieUser2 u = "+u);
 		if(u != null) {
-			setDefaultAddress(user,u.getCell_addr());
+			setDefaultAddress(user,u.getCell_addr(),u.getSect_name());
 			pointService.addZhima(user, 1000, "zhima-house-"+user.getId()+"-"+houseId);
 			//添加电话到user表
 			log.error("这里是添加房子后保存的电话");
@@ -198,7 +198,7 @@ public class WuyeController extends BaseController {
 		public BaseResult<String> setDefaultAdressByBill(@ModelAttribute(Constants.USER)User user,
 				@RequestParam(required=false) String billId) throws Exception {
 			   String address=wuyeService.getAddressByBill(billId);
-			   setDefaultAddress(user,address);
+			   setDefaultAddress(user,address,"");
 			return BaseResult.successResult("");
 		}
 	
@@ -651,7 +651,7 @@ public class WuyeController extends BaseController {
 		return "yayayayaceshi";
 	}
 	
-	public void setDefaultAddress(User user,String cell_address){
+	public void setDefaultAddress(User user,String cell_address,String sect_name){
 		boolean result=true;
 		List<Address> list=addressService.getAddressByuserIdAndAddress(user.getId(),cell_address);
 		for (Address address : list) {
@@ -675,7 +675,7 @@ public class WuyeController extends BaseController {
 				add.setUserId(user.getId());
 				add.setCreateDate(System.currentTimeMillis());
 				add.setXiaoquId(user.getXiaoquId());
-				add.setXiaoquName(user.getXiaoquName());
+				add.setXiaoquName(sect_name);
 				add.setDetailAddress(cell_address);
 				add.setCity(user.getCity());
 				add.setCityId(user.getCityId());
@@ -709,7 +709,7 @@ public class WuyeController extends BaseController {
 				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
 				if(listVo != null ){
 					if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
-						setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
+						setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr(),listVo.getHou_info().get(0).getSect_name());
 						log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
 					}
 				}
