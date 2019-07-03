@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface UserRepository extends JpaRepository<User, Long> {
 	public User findByOpenid(String openid);
 	public List<User> findByShareCode(String shareCode);
-	@Query("from User a")
-	public List<User> getBindHouseUser();
+	@Query(nativeQuery=true ,value="select *  from User a limit ?1,?2")
+	public List<User> getBindHouseUser(int pageNum,int pageSise);
 }

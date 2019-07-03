@@ -629,15 +629,9 @@ public class WuyeController extends BaseController {
 		@RequestMapping(value = "/setHasHouseUserDefaultAddr", method = RequestMethod.GET)
 		@ResponseBody
 		public BaseResult<String> setHasHouseUserDefaultAddr(@ModelAttribute(Constants.USER)User user)throws Exception {
-			List<User> list=userService.getBindHouseUser();
-			for (User u : list) {
-				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
-				if(listVo != null && listVo.getHou_info().size()>0){
-					setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
-					log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
-
-				}
-			}
+			int pageNum=0;
+			int pageSize=1000;
+			setDefaultAddr(pageNum,pageSize);
 			return BaseResult.successResult("");
 		}
 	
@@ -697,6 +691,25 @@ public class WuyeController extends BaseController {
 			}
 			add.setMain(true);
 			addressRepository.save(add);
+		}
+		
+	}
+	
+	public void setDefaultAddr(int pageNum,int pageSize){
+		List<User> list=userService.getBindHouseUser(pageNum,pageSize);
+		for (User u : list) {
+			if(u.getWuyeId() != null){
+				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
+				if(listVo != null && listVo.getHou_info().size()>0){
+					setDefaultAddress(u,listVo.getHou_info().get(0).getCell_addr());
+					log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
+
+				}
+			}
+		}
+		pageNum+=pageSize;
+		if(list.size()>0){
+			setDefaultAddr(pageNum,pageSize);
 		}
 		
 	}

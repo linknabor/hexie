@@ -25,5 +25,5 @@ public interface UserService {
 	public User queryByShareCode(String code);
 	
 	//获取绑定过房子的用户
-	public List<User> getBindHouseUser();
+	public List<User> getBindHouseUser(int pageNum,int pageSize);
 }

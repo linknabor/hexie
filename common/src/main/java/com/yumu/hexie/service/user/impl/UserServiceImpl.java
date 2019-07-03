@@ -158,8 +158,8 @@ public class UserServiceImpl implements UserService {
         return users.size() > 0 ? users.get(0) : null;
     }
 	@Override
-	public List<User> getBindHouseUser() {
-		return userRepository.getBindHouseUser();
+	public List<User> getBindHouseUser(int pageNum,int pageSize) {
+		return userRepository.getBindHouseUser(pageNum,pageSize);
 	}
 
 }
