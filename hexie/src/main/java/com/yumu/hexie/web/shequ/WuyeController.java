@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -198,7 +199,13 @@ public class WuyeController extends BaseController {
 		public BaseResult<String> setDefaultAdressByBill(@ModelAttribute(Constants.USER)User user,
 				@RequestParam(required=false) String billId) throws Exception {
 			   String address=wuyeService.getAddressByBill(billId);
-			   setDefaultAddress(user,address,"");
+			   String[] result=address.split(",");
+			   if(result.length>1){
+				   setDefaultAddress(user,result[0],result[1]);
+			   }else{
+				   setDefaultAddress(user,result[0],"");
+			   }
+			  
 			return BaseResult.successResult("");
 		}
 	
