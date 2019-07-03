@@ -682,8 +682,18 @@ public class WuyeController extends BaseController {
 				add.setCountyId(user.getCountyId());
 				add.setProvince(user.getProvince());
 				add.setProvinceId(user.getProvinceId());
-				add.setLatitude(user.getLatitude());
-				add.setLongitude(user.getLongitude());
+				double latitude=0;
+				double longitude=0;
+				if(user.getLatitude()!=null ){
+					latitude=user.getLatitude();
+				}
+				
+				if(user.getLongitude()!=null){
+					longitude=user.getLongitude();
+				}
+				add.setLatitude(latitude);
+				add.setLongitude(longitude);
+				
 			}
 			add.setMain(true);
 			addressRepository.save(add);
