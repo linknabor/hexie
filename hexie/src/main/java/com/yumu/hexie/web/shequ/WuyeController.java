@@ -653,7 +653,7 @@ public class WuyeController extends BaseController {
 	}
 
 	// 已绑定房子的用户设置默认地址
-	@RequestMapping(value = "/setHasHouseUserDefaultAddr1", method = RequestMethod.GET)
+	/*@RequestMapping(value = "/setHasHouseUserDefaultAddr1", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<String> setHasHouseUserDefaultAddr1(@RequestParam String code) throws Exception {
 		if ("hexieCode".equals(code)) {
@@ -689,7 +689,7 @@ public class WuyeController extends BaseController {
 			return BaseResult.fail("请求错误！！！");
 		}
 
-	}
+	}*/
 
 	@RequestMapping(value = "/yayayayaceshi", method = RequestMethod.GET)
 	@ResponseBody
@@ -714,6 +714,22 @@ public class WuyeController extends BaseController {
 				a.setMain(false);
 				addressRepository.save(a);
 			}
+			Region re=regionService.getRegionInfoByName(u.getSect_name());
+			if (re == null) {
+				String regionName=u.getRegion_name();
+				if(regionName.indexOf("(")>0){
+					regionName=regionName.substring(0, regionName.indexOf("("));
+				}
+				Region region = regionService.getRegionInfoByName(regionName);
+				Region r = new Region();
+				r.setCreateDate(System.currentTimeMillis());
+				r.setName(u.getSect_name());
+				r.setParentId(region.getId());
+				r.setParentName(region.getName());
+				r.setName(u.getSect_name());
+				r.setRegionType(4);
+				re=regionService.saveRegion(r);
+			}
 			Address add = new Address();
 			if (list.size() > 0) {
 				add = list.get(0);
@@ -722,7 +738,7 @@ public class WuyeController extends BaseController {
 				add.setTel(user.getTel());
 				add.setUserId(user.getId());
 				add.setCreateDate(System.currentTimeMillis());
-				add.setXiaoquId(user.getXiaoquId());
+				add.setXiaoquId(re.getId());
 				add.setXiaoquName(u.getSect_name());
 				add.setDetailAddress(u.getCell_addr());
 				add.setCity(u.getCity_name());
@@ -749,18 +765,10 @@ public class WuyeController extends BaseController {
 			user.setProvince(u.getProvince_name());
 			user.setCity(u.getCity_name());
 			user.setCounty(u.getRegion_name());
+			user.setXiaoquId(re.getId());
+			user.setXiaoquName(u.getSect_name());
+			
 			userService.save(user);
-			if (regionService.getRegionInfoByName(u.getSect_name()) == null) {
-				Region region = regionService.getRegionInfoByName(u.getRegion_name());
-				Region r = new Region();
-				r.setCreateDate(System.currentTimeMillis());
-				r.setName(u.getSect_name());
-				r.setParentId(region.getId());
-				r.setParentName(region.getName());
-				r.setName(u.getSect_name());
-				r.setRegionType(4);
-				regionService.saveRegion(r);
-			}
 		}
 
 	}
