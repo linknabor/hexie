@@ -3,19 +3,20 @@ package com.yumu.hexie.web.shequ;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -39,9 +41,13 @@ import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
+import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.TempUser;
+import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -50,6 +56,7 @@ import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -80,6 +87,12 @@ public class WuyeController extends BaseController {
 
 	@Inject
 	private SystemConfigService systemConfigService;
+
+	@Inject
+	private AddressRepository addressRepository;
+
+	@Inject
+	private RegionService regionService;
 
 	/***************** [BEGIN]房产 ********************/
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
@@ -160,7 +173,7 @@ public class WuyeController extends BaseController {
 			user.setOfficeTel(u.getOffice_tel());
 			// userService.save(user);
 			log.error("保存电话到user表==》成功");
-			wuyeService.setDefaultAddress(user, u);
+			setDefaultAddress(user, u);
 		}
 		return BaseResult.successResult(u);
 	}
@@ -174,7 +187,7 @@ public class WuyeController extends BaseController {
 		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
 		log.error("HexieUser2 u = " + u);
 		if (u != null) {
-			wuyeService.setDefaultAddress(user, u);
+			setDefaultAddress(user, u);
 			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
 			// 添加电话到user表
 			log.error("这里是添加房子后保存的电话");
@@ -192,7 +205,7 @@ public class WuyeController extends BaseController {
 	public BaseResult<String> setDefaultAdressByBill(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String billId) throws Exception {
 		HexieUser u = wuyeService.getAddressByBill(billId);
-		wuyeService.setDefaultAddress(user, u);
+		setDefaultAddress(user, u);
 		return BaseResult.successResult("");
 	}
 
@@ -686,21 +699,115 @@ public class WuyeController extends BaseController {
 		return "yayayayaceshi";
 	}
 
-	public void setDefaultAddr(int pageNum, int pageSize) throws InterruptedException {
-		
+	public void setDefaultAddress(User user, HexieUser u) {
+		boolean result = true;
+		List<Address> list = addressService.getAddressByuserIdAndAddress(user.getId(), u.getCell_addr());
+		for (Address address : list) {
+			if (address.isMain()) {
+				result = false;
+				break;
+			}
+		}
+		if (result) {
+			Address a = addressService.getAddressByMain(user.getId(), true);
+			if (a != null) {
+				a.setMain(false);
+				addressRepository.save(a);
+			}
+			Region re=regionService.getRegionInfoByName(u.getSect_name());
+			if (re == null) {
+				String regionName=u.getRegion_name();
+				if(regionName.indexOf("(")>0){
+					regionName=regionName.substring(0, regionName.indexOf("("));
+				}
+				Region region = regionService.getRegionInfoByName(regionName);
+				Region r = new Region();
+				r.setCreateDate(System.currentTimeMillis());
+				r.setName(u.getSect_name());
+				r.setParentId(region.getId());
+				r.setParentName(region.getName());
+				r.setName(u.getSect_name());
+				r.setRegionType(4);
+				re=regionService.saveRegion(r);
+			}
+			Address add = new Address();
+			if (list.size() > 0) {
+				add = list.get(0);
+			} else {
+				add.setReceiveName(user.getNickname());
+				add.setTel(user.getTel());
+				add.setUserId(user.getId());
+				add.setCreateDate(System.currentTimeMillis());
+				add.setXiaoquId(re.getId());
+				add.setXiaoquName(u.getSect_name());
+				add.setDetailAddress(u.getCell_addr());
+				add.setCity(u.getCity_name());
+				add.setCityId(u.getCity_id());
+				add.setCounty(u.getRegion_name());
+				add.setCountyId(u.getRegion_id());
+				add.setProvince(u.getProvince_name());
+				add.setProvinceId(u.getProvince_id());
+				double latitude = 0;
+				double longitude = 0;
+				if (user.getLatitude() != null) {
+					latitude = user.getLatitude();
+				}
+
+				if (user.getLongitude() != null) {
+					longitude = user.getLongitude();
+				}
+				add.setLatitude(latitude);
+				add.setLongitude(longitude);
+
+			}
+			add.setMain(true);
+			addressRepository.save(add);
+			user.setProvince(u.getProvince_name());
+			user.setCity(u.getCity_name());
+			user.setCounty(u.getRegion_name());
+			user.setXiaoquId(re.getId());
+			user.setXiaoquName(u.getSect_name());
+			
+			userService.save(user);
+		}
+
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Autowired
+	private TransactionUtil transactionUtil;
+
+	public void setDefaultAddr(int pageNum, int pageSize) {
+		HexieUser hexieUser = new HexieUser();
+		// List<User> list=userService.getBindHous.eUser(pageNum,pageSize);
 		List<TempUser> tempList = userService.getTempUser();
-		
-		ExecutorService pool = Executors.newFixedThreadPool(3);
-		
 		for (TempUser tempUser : tempList) {
-			AddressWorker worker = new AddressWorker(tempUser);
-			pool.execute(worker);
+			try {
+				List<User> userList = userService.getByTel(tempUser.getTel());
+				if (userList == null || userList.size()==0) {
+					continue;
+				}
+				User u = userList.get(0);
+				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
+				if (listVo != null) {
+					if (listVo.getHou_info() != null && listVo.getHou_info().size() > 0) {
+						hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
+						hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
+						hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
+						hexieUser.setProvince_name(listVo.getHou_info().get(0).getProvince_name());
+						hexieUser.setRegion_id(listVo.getHou_info().get(0).getRegion_id());
+						hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
+						hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
+						hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
+						transactionUtil.transact(s->setDefaultAddress(u, hexieUser));
+						log.info("cell_adress:" + listVo.getHou_info().get(0).getCell_addr());
+					}
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
 		}
-		
-		pool.shutdown();
-		while(!pool.awaitTermination(30l, TimeUnit.SECONDS)){
-		}
-		log.error("默认地址设置完成#####################################");
+
 		// for (User u : list) {
 		// if(u.getWuyeId() != null){
 		// HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
