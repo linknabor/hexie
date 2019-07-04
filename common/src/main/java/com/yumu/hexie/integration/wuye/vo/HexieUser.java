@@ -2,6 +2,10 @@ package com.yumu.hexie.integration.wuye.vo;
 
 import java.io.Serializable;
 
+/**
+ * @author Administrator
+ *
+ */
 public class HexieUser implements Serializable {
 
 	private static final long serialVersionUID = -8863855555160105591L;
@@ -20,6 +24,60 @@ public class HexieUser implements Serializable {
 	private String user_tel;
 	private String is_house;//房屋数
 	private String office_tel;//小区电话
+	private String cell_addr;//小区地址
+	private String sect_name;//小区名字
+	private long province_id;//省id
+	private String province_name;//省名
+	private long city_id;//城市ID
+	private String city_name;//城市名称
+	private long region_id;//区域ID
+	private String region_name;//区域名
+	
+	
+	
+
+	public long getProvince_id() {
+		return province_id;
+	}
+	public void setProvince_id(long province_id) {
+		this.province_id = province_id;
+	}
+	public String getProvince_name() {
+		return province_name;
+	}
+	public void setProvince_name(String province_name) {
+		this.province_name = province_name;
+	}
+	public long getCity_id() {
+		return city_id;
+	}
+	public void setCity_id(long city_id) {
+		this.city_id = city_id;
+	}
+	public String getCity_name() {
+		return city_name;
+	}
+	public void setCity_name(String city_name) {
+		this.city_name = city_name;
+	}
+	public long getRegion_id() {
+		return region_id;
+	}
+	public void setRegion_id(long region_id) {
+		this.region_id = region_id;
+	}
+	public String getRegion_name() {
+		return region_name;
+	}
+	public void setRegion_name(String region_name) {
+		this.region_name = region_name;
+	}
+	public String getSect_name() {
+		return sect_name;
+	}
+	public void setSect_name(String sect_name) {
+		this.sect_name = sect_name;
+	}
 	public String getUser_id() {
 		return user_id;
 	}
@@ -74,4 +132,11 @@ public class HexieUser implements Serializable {
 	public void setOffice_tel(String office_tel) {
 		this.office_tel = office_tel;
 	}
+	public String getCell_addr() {
+		return cell_addr;
+	}
+	public void setCell_addr(String cell_addr) {
+		this.cell_addr = cell_addr;
+	}
+	
 }

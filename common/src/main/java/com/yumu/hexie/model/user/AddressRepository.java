@@ -17,4 +17,10 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 	public List<Address> findAllByUserId(long userId);
 	
 	public List<Address> findByXiaoquId(long xiaoquId);
+	
+	@Query("from Address a where a.userId = ?1 and a.detailAddress=?2")
+	public List<Address> getAddressByuserIdAndAddress(long userId,String cell_addr);
+	
+	@Query("from Address a where a.userId = ?1 and a.main=?2")
+	public Address getAddressByMain(long userId,boolean main);
 }
