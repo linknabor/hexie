@@ -12,14 +12,10 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,7 +24,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -44,13 +39,9 @@ import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
-import com.yumu.hexie.model.user.Address;
-import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.TempUser;
-import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -59,7 +50,6 @@ import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
-import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -90,12 +80,6 @@ public class WuyeController extends BaseController {
 
 	@Inject
 	private SystemConfigService systemConfigService;
-
-	@Inject
-	private AddressRepository addressRepository;
-
-	@Inject
-	private RegionService regionService;
 
 	/***************** [BEGIN]房产 ********************/
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)

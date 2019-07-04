@@ -30,6 +30,11 @@ public class AddressWorker implements Runnable {
 	
 	private TempUser tempUser;
 	
+	
+	public AddressWorker() {
+		super();
+	}
+
 	public AddressWorker(TempUser tempUser) {
 		super();
 		this.tempUser = tempUser;
