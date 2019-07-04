@@ -174,7 +174,7 @@ public class UserServiceImpl implements UserService {
 		return tempUserRepository.findAll();
 	}
 	@Override
-	public User getByTel(String tel) {
+	public List<User> getByTel(String tel) {
 		return userRepository.findByTel(tel);
 	}
 	

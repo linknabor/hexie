@@ -14,7 +14,7 @@ public interface UserService {
 
     public User getById(long uId);
     public User getByOpenId(String openId);
-    public User getByTel(String tel);
+    public List<User> getByTel(String tel);
 	//获取用户信息
 	public User getOrSubscibeUserByCode(String code);
     public UserWeiXin getOrSubscibeUserByOpenId(String openid);

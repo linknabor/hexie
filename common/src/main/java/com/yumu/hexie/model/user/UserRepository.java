@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 	public User findByOpenid(String openid);
-	public User findByTel(String tel);
+	public List<User> findByTel(String tel);
 	
 	public List<User> findByShareCode(String shareCode);
 	@Query(nativeQuery=true ,value="select *  from User a limit ?1,?2")
