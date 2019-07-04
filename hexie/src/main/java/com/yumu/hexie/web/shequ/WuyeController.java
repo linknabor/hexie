@@ -170,7 +170,7 @@ public class WuyeController extends BaseController {
 			log.error("这里是添加房子后保存的电话");
 			log.error("保存电话到user表==》开始");
 			user.setOfficeTel(u.getOffice_tel());
-			userService.save(user);
+			//userService.save(user);
 			log.error("保存电话到user表==》成功");
 			setDefaultAddress(user,u);
 		}
@@ -191,7 +191,7 @@ public class WuyeController extends BaseController {
 			log.error("这里是添加房子后保存的电话");
 			log.error("保存电话到user表==》开始");
 			user.setOfficeTel(u.getOffice_tel());
-			userService.save(user);
+			//userService.save(user);
 			log.error("保存电话到user表==》成功");
 		}
 		return BaseResult.successResult(u);
@@ -639,7 +639,7 @@ public class WuyeController extends BaseController {
 				int pageNum=0;
 				int pageSize=1000;
 				setDefaultAddr(pageNum,pageSize);
-				
+			
 				log.error("默认地址设置完成11111111");
 				return BaseResult.successResult("");
 			}else{
@@ -647,6 +647,45 @@ public class WuyeController extends BaseController {
 			}
 			
 		}
+		
+		//已绑定房子的用户设置默认地址
+				@RequestMapping(value = "/setHasHouseUserDefaultAddr1", method = RequestMethod.GET)
+				@ResponseBody
+				public BaseResult<String> setHasHouseUserDefaultAddr1(@RequestParam String code)throws Exception {
+					if("hexieCode".equals(code)){
+						int pageNum=0;
+						int pageSize=1000;
+						HexieUser hexieUser=new HexieUser();
+						User u=new User();
+						u.setId(15144);
+						u.setTel("15901785430");
+						u.setXiaoquId(12312);
+						u.setNickname("Maxim");
+						u.setWuyeId("150822400000014430");
+							if(u.getWuyeId() != null){
+								HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
+								if(listVo != null ){
+									if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
+										hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
+										hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
+										hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
+										hexieUser.setProvince_name(listVo.getHou_info().get(0).getProvince_name());
+										hexieUser.setRegion_id(listVo.getHou_info().get(0).getRegion_id());
+										hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
+										hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
+										hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
+										setDefaultAddress(u,hexieUser);
+										log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
+									}
+								}
+							}
+						log.error("默认地址设置完成11111111");
+						return BaseResult.successResult("");
+					}else{
+						return BaseResult.fail("请求错误！！！");	
+					}
+					
+				}
 	
 	
 	@RequestMapping(value = "/yayayayaceshi", method = RequestMethod.GET)
@@ -704,6 +743,10 @@ public class WuyeController extends BaseController {
 			}
 			add.setMain(true);
 			addressRepository.save(add);
+			user.setProvince(u.getProvince_name());
+			user.setCity(u.getCity_name());
+			user.setCounty(u.getRegion_name());
+			userService.save(user);
 			if(regionService.getRegionInfoByName(u.getSect_name())==null){
 				Region region=regionService.getRegionInfoByName(u.getRegion_name());
 				Region r=new Region();
