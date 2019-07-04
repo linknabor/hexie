@@ -776,7 +776,7 @@ public class WuyeController extends BaseController {
 		for (TempUser tempUser : tempList) {
 			try {
 				List<User> userList = userService.getByTel(tempUser.getTel());
-				if (userList == null) {
+				if (userList == null || userList.size()==0) {
 					continue;
 				}
 				User u = userList.get(0);
