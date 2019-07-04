@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,6 +45,8 @@ import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
+import com.yumu.hexie.model.user.TempUser;
+import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -764,10 +767,11 @@ public class WuyeController extends BaseController {
 	
 	public void setDefaultAddr(int pageNum,int pageSize){
 		HexieUser hexieUser=new HexieUser();
-		List<User> list=userService.getBindHouseUser(pageNum,pageSize);
-		for (User u : list) {
-			if(u.getWuyeId() != null){
-				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
+//		List<User> list=userService.getBindHous.eUser(pageNum,pageSize);
+		List<TempUser> tempList = userService.getTempUser();
+		for (TempUser tempUser : tempList) {
+			 User u = userService.getByTel(tempUser.getTel());
+			 HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
 				if(listVo != null ){
 					if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
 						hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
@@ -782,12 +786,31 @@ public class WuyeController extends BaseController {
 						log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
 					}
 				}
-			}
 		}
-		pageNum+=pageSize;
-		if(list.size()>0){
-			setDefaultAddr(pageNum,pageSize);
-		}
+		
+//		for (User u : list) {
+//			if(u.getWuyeId() != null){
+//				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
+//				if(listVo != null ){
+//					if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
+//						hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
+//						hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
+//						hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
+//						hexieUser.setProvince_name(listVo.getHou_info().get(0).getProvince_name());
+//						hexieUser.setRegion_id(listVo.getHou_info().get(0).getRegion_id());
+//						hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
+//						hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
+//						hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
+//						setDefaultAddress(u,hexieUser);
+//						log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
+//					}
+//				}
+//			}
+//		}
+//		pageNum+=pageSize;
+//		if(list.size()>0){
+//			setDefaultAddr(pageNum,pageSize);
+//		}
 		
 	}
 }

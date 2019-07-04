@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
@@ -12,6 +13,8 @@ import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.user.TempUser;
+import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.WechatCoreService;
@@ -161,5 +164,16 @@ public class UserServiceImpl implements UserService {
 	public List<User> getBindHouseUser(int pageNum,int pageSize) {
 		return userRepository.getBindHouseUser(pageNum,pageSize);
 	}
+	
+	@Autowired
+	private TempUserRepository tempUserRepository;
+	
+	@Override
+	public List<TempUser> getTempUser() {
+
+		return tempUserRepository.findAll();
+	}
+	
+	
 
 }

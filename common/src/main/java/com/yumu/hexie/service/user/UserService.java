@@ -3,6 +3,7 @@ package com.yumu.hexie.service.user;
 import java.util.List;
 
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.user.TempUser;
 import com.yumu.hexie.model.user.User;
 
 
@@ -13,6 +14,7 @@ public interface UserService {
 
     public User getById(long uId);
     public User getByOpenId(String openId);
+    public User getByTel(String tel);
 	//获取用户信息
 	public User getOrSubscibeUserByCode(String code);
     public UserWeiXin getOrSubscibeUserByOpenId(String openid);
@@ -26,4 +28,6 @@ public interface UserService {
 	
 	//获取绑定过房子的用户
 	public List<User> getBindHouseUser(int pageNum,int pageSize);
+	
+	public List<TempUser> getTempUser();
 }
