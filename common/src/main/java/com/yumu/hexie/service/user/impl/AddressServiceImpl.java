@@ -249,7 +249,7 @@ public class AddressServiceImpl implements AddressService {
 	}
 
 	@Override
-	public Address getAddressByMain(long id,boolean main) {
+	public List<Address> getAddressByMain(long id,boolean main) {
 		return addressRepository.getAddressByMain(id,main);
 	}
 }

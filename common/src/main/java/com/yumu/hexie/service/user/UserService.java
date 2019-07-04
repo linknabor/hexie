@@ -30,4 +30,6 @@ public interface UserService {
 	public List<User> getBindHouseUser(int pageNum,int pageSize);
 	
 	public List<TempUser> getTempUser();
+	
+	public List<TempUser> getTemp();
 }

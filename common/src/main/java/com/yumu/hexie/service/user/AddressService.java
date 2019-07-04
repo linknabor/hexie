@@ -40,6 +40,6 @@ public interface AddressService {
 
 	public List<Address> getAddressByuserIdAndAddress(long id, String cell_addr);
 	
-	public Address getAddressByMain(long id,boolean main);
+	public List<Address> getAddressByMain(long id,boolean main);
 	
 }

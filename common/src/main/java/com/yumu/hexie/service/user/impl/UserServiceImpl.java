@@ -177,6 +177,12 @@ public class UserServiceImpl implements UserService {
 	public List<User> getByTel(String tel) {
 		return userRepository.findByTel(tel);
 	}
+	@Override
+	public List<TempUser> getTemp() {
+	
+		
+		return tempUserRepository.findBySectid("161223100120926240");
+	}
 	
 	
 
