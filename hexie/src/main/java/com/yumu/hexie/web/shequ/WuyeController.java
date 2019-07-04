@@ -3,7 +3,6 @@ package com.yumu.hexie.web.shequ;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
-import com.yumu.hexie.common.util.InitRegionInfo;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -91,9 +89,6 @@ public class WuyeController extends BaseController {
     
     @Inject
     private RegionService regionService;
-    
-    @Inject
-    private InitRegionInfo initRegionInfo;
     
 
 	/*****************[BEGIN]房产********************/
@@ -672,7 +667,6 @@ public class WuyeController extends BaseController {
 			}
 		}
 		if(result){
-			Map<String,Long> map=initRegionInfo.initRegionParam();
 			Address a=addressService.getAddressByMain(user.getId(),true);
 			if(a != null){
 				a.setMain(false);
@@ -689,25 +683,12 @@ public class WuyeController extends BaseController {
 				add.setXiaoquId(user.getXiaoquId());
 				add.setXiaoquName(u.getSect_name());
 				add.setDetailAddress(u.getCell_addr());
-			
-				Long provinceID=map.get(u.getProvince_name());
-				Long cityID=map.get(u.getCity_name());
-				Long regionID=map.get(u.getRegion_name());
-				if(provinceID==null){
-					provinceID=u.getProvince_id();
-				}
-				if(cityID==null){
-					cityID=u.getCity_id();
-				}
-				if(regionID==null){
-					regionID=u.getRegion_id();
-				}
-				add.setCityId(cityID);
-				add.setCountyId(regionID);
-				add.setProvinceId(provinceID);
-				add.setCounty(u.getRegion_name());
 				add.setCity(u.getCity_name());
+				add.setCityId(u.getCity_id());
+				add.setCounty(u.getRegion_name());
+				add.setCountyId(u.getRegion_id());
 				add.setProvince(u.getProvince_name());
+				add.setProvinceId(u.getProvince_id());
 				double latitude=0;
 				double longitude=0;
 				if(user.getLatitude()!=null ){
@@ -723,16 +704,13 @@ public class WuyeController extends BaseController {
 			}
 			add.setMain(true);
 			addressRepository.save(add);
-			if(StringUtils.isEmpty(map.get(u.getSect_name()))){
+			if(regionService.getRegionInfoByName(u.getSect_name())==null){
+				Region region=regionService.getRegionInfoByName(u.getRegion_name());
 				Region r=new Region();
 				r.setCreateDate(System.currentTimeMillis());
 				r.setName(u.getSect_name());
-			    Long regionId=map.get(u.getRegion_name());
-			    if(regionId == null){
-			    	regionId=u.getRegion_id();
-			    }
-				r.setParentId(regionId);
-				r.setParentName(u.getRegion_name());
+				r.setParentId(region.getId());
+				r.setParentName(region.getName());
 				r.setName(u.getSect_name());
 				r.setRegionType(4);
 				regionService.saveRegion(r);
