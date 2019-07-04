@@ -60,7 +60,7 @@ public interface WuyeService {
 	public CellListVO getVagueSectByName(String sect_name);
 	
 	//根据账单查询地址
-	public String getAddressByBill(String billId);
+	public HexieUser getAddressByBill(String billId);
 	
 	
 }

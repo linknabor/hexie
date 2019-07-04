@@ -241,9 +241,9 @@ public class WuyeUtil {
 	}
 	
 	//21 根据账单查询地址
-    public static BaseResult getAddressByBill(String billId){
+    public static BaseResult<HexieUser> getAddressByBill(String billId){
     	String url = REQUEST_ADDRESS + String.format(BILL_PAY_ADDRESS_URL,billId);
-		return (BaseResult<String>)httpGet(url,String.class);
+		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
     };
 	
 	private static BaseResult httpGet(String reqUrl, Class c){
