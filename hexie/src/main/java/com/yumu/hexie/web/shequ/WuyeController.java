@@ -703,13 +703,13 @@ public class WuyeController extends BaseController {
 	}
 
 	public void setDefaultAddr(int pageNum, int pageSize) throws InterruptedException {
-		HexieUser hexieUser = new HexieUser();
+		
 		List<TempUser> tempList = userService.getTempUser();
 		
 		ExecutorService pool = Executors.newFixedThreadPool(3);
 		
 		for (TempUser tempUser : tempList) {
-			AddressWorker worker = new AddressWorker(hexieUser, tempUser);
+			AddressWorker worker = new AddressWorker(tempUser);
 			pool.execute(worker);
 		}
 		

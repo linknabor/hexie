@@ -28,12 +28,10 @@ public class AddressWorker implements Runnable {
 	@Autowired
 	private TransactionUtil transactionUtil;
 	
-	private HexieUser hexieUser;
 	private TempUser tempUser;
 	
-	public AddressWorker(HexieUser hexieUser, TempUser tempUser) {
+	public AddressWorker(TempUser tempUser) {
 		super();
-		this.hexieUser = hexieUser;
 		this.tempUser = tempUser;
 	}
 
@@ -54,6 +52,7 @@ public class AddressWorker implements Runnable {
 			HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
 			if (listVo != null) {
 				if (listVo.getHou_info() != null && listVo.getHou_info().size() > 0) {
+					HexieUser hexieUser = new HexieUser();
 					hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
 					hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
 					hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
