@@ -3,6 +3,9 @@ package com.yumu.hexie.web.shequ;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -173,7 +176,7 @@ public class WuyeController extends BaseController {
 			user.setOfficeTel(u.getOffice_tel());
 			// userService.save(user);
 			log.error("保存电话到user表==》成功");
-			setDefaultAddress(user, u);
+			wuyeService.setDefaultAddress(user, u);
 		}
 		return BaseResult.successResult(u);
 	}
@@ -187,7 +190,7 @@ public class WuyeController extends BaseController {
 		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
 		log.error("HexieUser2 u = " + u);
 		if (u != null) {
-			setDefaultAddress(user, u);
+			wuyeService.setDefaultAddress(user, u);
 			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
 			// 添加电话到user表
 			log.error("这里是添加房子后保存的电话");
@@ -205,7 +208,7 @@ public class WuyeController extends BaseController {
 	public BaseResult<String> setDefaultAdressByBill(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String billId) throws Exception {
 		HexieUser u = wuyeService.getAddressByBill(billId);
-		setDefaultAddress(user, u);
+		wuyeService.setDefaultAddress(user, u);
 		return BaseResult.successResult("");
 	}
 
@@ -699,115 +702,21 @@ public class WuyeController extends BaseController {
 		return "yayayayaceshi";
 	}
 
-	public void setDefaultAddress(User user, HexieUser u) {
-		boolean result = true;
-		List<Address> list = addressService.getAddressByuserIdAndAddress(user.getId(), u.getCell_addr());
-		for (Address address : list) {
-			if (address.isMain()) {
-				result = false;
-				break;
-			}
-		}
-		if (result) {
-			Address a = addressService.getAddressByMain(user.getId(), true);
-			if (a != null) {
-				a.setMain(false);
-				addressRepository.save(a);
-			}
-			Region re=regionService.getRegionInfoByName(u.getSect_name());
-			if (re == null) {
-				String regionName=u.getRegion_name();
-				if(regionName.indexOf("(")>0){
-					regionName=regionName.substring(0, regionName.indexOf("("));
-				}
-				Region region = regionService.getRegionInfoByName(regionName);
-				Region r = new Region();
-				r.setCreateDate(System.currentTimeMillis());
-				r.setName(u.getSect_name());
-				r.setParentId(region.getId());
-				r.setParentName(region.getName());
-				r.setName(u.getSect_name());
-				r.setRegionType(4);
-				re=regionService.saveRegion(r);
-			}
-			Address add = new Address();
-			if (list.size() > 0) {
-				add = list.get(0);
-			} else {
-				add.setReceiveName(user.getNickname());
-				add.setTel(user.getTel());
-				add.setUserId(user.getId());
-				add.setCreateDate(System.currentTimeMillis());
-				add.setXiaoquId(re.getId());
-				add.setXiaoquName(u.getSect_name());
-				add.setDetailAddress(u.getCell_addr());
-				add.setCity(u.getCity_name());
-				add.setCityId(u.getCity_id());
-				add.setCounty(u.getRegion_name());
-				add.setCountyId(u.getRegion_id());
-				add.setProvince(u.getProvince_name());
-				add.setProvinceId(u.getProvince_id());
-				double latitude = 0;
-				double longitude = 0;
-				if (user.getLatitude() != null) {
-					latitude = user.getLatitude();
-				}
-
-				if (user.getLongitude() != null) {
-					longitude = user.getLongitude();
-				}
-				add.setLatitude(latitude);
-				add.setLongitude(longitude);
-
-			}
-			add.setMain(true);
-			addressRepository.save(add);
-			user.setProvince(u.getProvince_name());
-			user.setCity(u.getCity_name());
-			user.setCounty(u.getRegion_name());
-			user.setXiaoquId(re.getId());
-			user.setXiaoquName(u.getSect_name());
-			
-			userService.save(user);
-		}
-
-	}
-	
-	@SuppressWarnings("rawtypes")
-	@Autowired
-	private TransactionUtil transactionUtil;
-
-	public void setDefaultAddr(int pageNum, int pageSize) {
+	public void setDefaultAddr(int pageNum, int pageSize) throws InterruptedException {
 		HexieUser hexieUser = new HexieUser();
-		// List<User> list=userService.getBindHous.eUser(pageNum,pageSize);
 		List<TempUser> tempList = userService.getTempUser();
+		
+		ExecutorService pool = Executors.newFixedThreadPool(3);
+		
 		for (TempUser tempUser : tempList) {
-			try {
-				List<User> userList = userService.getByTel(tempUser.getTel());
-				if (userList == null || userList.size()==0) {
-					continue;
-				}
-				User u = userList.get(0);
-				HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
-				if (listVo != null) {
-					if (listVo.getHou_info() != null && listVo.getHou_info().size() > 0) {
-						hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
-						hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
-						hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
-						hexieUser.setProvince_name(listVo.getHou_info().get(0).getProvince_name());
-						hexieUser.setRegion_id(listVo.getHou_info().get(0).getRegion_id());
-						hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
-						hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
-						hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
-						transactionUtil.transact(s->setDefaultAddress(u, hexieUser));
-						log.info("cell_adress:" + listVo.getHou_info().get(0).getCell_addr());
-					}
-				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
+			AddressWorker worker = new AddressWorker(hexieUser, tempUser);
+			pool.execute(worker);
 		}
-
+		
+		pool.shutdown();
+		while(!pool.awaitTermination(30l, TimeUnit.SECONDS)){
+		}
+		log.error("默认地址设置完成#####################################");
 		// for (User u : list) {
 		// if(u.getWuyeId() != null){
 		// HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
