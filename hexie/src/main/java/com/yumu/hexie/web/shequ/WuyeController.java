@@ -771,21 +771,24 @@ public class WuyeController extends BaseController {
 		List<TempUser> tempList = userService.getTempUser();
 		for (TempUser tempUser : tempList) {
 			 User u = userService.getByTel(tempUser.getTel());
-			 HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
-				if(listVo != null ){
-					if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
-						hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
-						hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
-						hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
-						hexieUser.setProvince_name(listVo.getHou_info().get(0).getProvince_name());
-						hexieUser.setRegion_id(listVo.getHou_info().get(0).getRegion_id());
-						hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
-						hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
-						hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
-						setDefaultAddress(u,hexieUser);
-						log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
-					}
+			 if (u == null) {
+				continue;
+			}
+			HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
+			if(listVo != null ){
+				if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
+					hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
+					hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
+					hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
+					hexieUser.setProvince_name(listVo.getHou_info().get(0).getProvince_name());
+					hexieUser.setRegion_id(listVo.getHou_info().get(0).getRegion_id());
+					hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
+					hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
+					hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
+					setDefaultAddress(u,hexieUser);
+					log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
 				}
+			}
 		}
 		
 //		for (User u : list) {
