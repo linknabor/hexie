@@ -174,6 +174,7 @@ public class WuyeController extends BaseController {
 			// userService.save(user);
 			log.error("保存电话到user表==》成功");
 			wuyeService.setDefaultAddress(user, u);
+			wuyeService.saveRegion(u);
 		}
 		return BaseResult.successResult(u);
 	}
@@ -195,6 +196,7 @@ public class WuyeController extends BaseController {
 			// userService.save(user);
 			log.error("保存电话到user表==》成功");
 			wuyeService.setDefaultAddress(user, u);
+			wuyeService.saveRegion(u);
 		}
 		return BaseResult.successResult(u);
 	}
@@ -206,6 +208,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String billId) throws Exception {
 		HexieUser u = wuyeService.getAddressByBill(billId);
 		wuyeService.setDefaultAddress(user, u);
+		wuyeService.saveRegion(u);
 		return BaseResult.successResult("");
 	}
 

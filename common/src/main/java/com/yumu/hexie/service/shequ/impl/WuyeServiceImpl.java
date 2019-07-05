@@ -321,6 +321,23 @@ public class WuyeServiceImpl implements WuyeService {
 		
 	}
 
+	@Override
+	public void saveRegion(HexieUser u) {
+		Region re=regionRepository.findByName(u.getSect_name());
+		if(re == null){
+			Region region = regionRepository.findByNameAndRegionType(u.getRegion_name(), 3);
+			Region r = new Region();
+			r.setCreateDate(System.currentTimeMillis());
+			r.setName(u.getSect_name());
+			r.setParentId(region.getId());
+			r.setParentName(region.getName());
+			r.setRegionType(4);
+			r.setLatitude(0.0);
+			r.setLongitude(0.0);
+			re=regionService.saveRegion(r);
+		}
+	}
+
 
 	
 }

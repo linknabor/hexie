@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.shequ;
 
-import javax.xml.bind.ValidationException;
 
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -69,6 +68,8 @@ public interface WuyeService {
 	public void addDefaultAddressAndUser() throws InterruptedException;
 	
 	public void setDefaultAddress(User user,HexieUser u);
+	
+	public void saveRegion(HexieUser u);
 	
 	
 }
