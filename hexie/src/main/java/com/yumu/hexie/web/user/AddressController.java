@@ -65,7 +65,11 @@ public class AddressController extends BaseController{
 	@RequestMapping(value = "/addresses", method = RequestMethod.GET)
 	@ResponseBody
     public BaseResult<List<Address>> queryAddressList(@ModelAttribute(Constants.USER)User user) throws Exception {
-		List<Address> addresses = addressService.queryAddressByUser(user.getId());
+		List<Address> addresses = addressService.getAddressByMain(user.getId(), true);
+		if (addresses == null || addresses.size() ==0) {
+			addresses = addressService.queryAddressByUser(user.getId());
+		}
+		
 		BaseResult<List<Address>> r = BaseResult.successResult(addresses);
 		return r;
     }
