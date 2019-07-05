@@ -69,7 +69,9 @@ public class AddressController extends BaseController{
 		if (addresses == null || addresses.size() ==0) {
 			addresses = addressService.queryAddressByUser(user.getId());
 		}
-		
+		if (addresses == null || addresses.size() ==0) {
+			addresses = new ArrayList<>();
+		}
 		BaseResult<List<Address>> r = BaseResult.successResult(addresses);
 		return r;
     }
