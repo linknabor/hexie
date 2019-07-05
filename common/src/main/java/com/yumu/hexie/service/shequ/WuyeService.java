@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.shequ;
 
-import javax.xml.bind.ValidationException;
 
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -13,6 +12,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
 
@@ -61,6 +61,15 @@ public interface WuyeService {
 	
 	//根据账单查询地址
 	public HexieUser getAddressByBill(String billId);
+	
+	
+	public void addSectToRegion();
+	
+	public void addDefaultAddressAndUser() throws InterruptedException;
+	
+	public void setDefaultAddress(User user,HexieUser u);
+	
+	public void saveRegion(HexieUser u);
 	
 	
 }

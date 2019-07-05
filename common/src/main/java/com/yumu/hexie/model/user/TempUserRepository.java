@@ -8,6 +8,10 @@ public interface TempUserRepository extends JpaRepository<TempUser, Long>{
 	
 	public List<TempUser> findByType(String type);
 	
-
+	public List<TempUser> findById(Long id);
+	
+	public List<TempUser> findBySectid(String sectid);
+	
+	
 	
 }

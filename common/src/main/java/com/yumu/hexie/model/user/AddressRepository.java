@@ -22,5 +22,5 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 	public List<Address> getAddressByuserIdAndAddress(long userId,String cell_addr);
 	
 	@Query("from Address a where a.userId = ?1 and a.main=?2")
-	public Address getAddressByMain(long userId,boolean main);
+	public List<Address> getAddressByMain(long userId,boolean main);
 }

@@ -16,4 +16,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     public List<Region> findByAmapId(long amapId);
     
     public Region findByName(String name);
+    
+    public Region findByNameAndRegionType(String name,int regionType);
 }
