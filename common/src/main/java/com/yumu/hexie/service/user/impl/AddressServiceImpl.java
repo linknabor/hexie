@@ -252,4 +252,9 @@ public class AddressServiceImpl implements AddressService {
 	public List<Address> getAddressByMain(long id,boolean main) {
 		return addressRepository.getAddressByMain(id,main);
 	}
+
+	@Override
+	public List<Address> getAddressByShareCode(String shareCode) {
+		return addressRepository.getAddressByShareCode(shareCode);
+	}
 }
