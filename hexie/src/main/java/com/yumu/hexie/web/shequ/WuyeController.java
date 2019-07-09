@@ -9,14 +9,10 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -41,13 +36,8 @@ import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
-import com.yumu.hexie.model.user.Address;
-import com.yumu.hexie.model.user.AddressRepository;
-import com.yumu.hexie.model.user.TempUser;
-import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -56,7 +46,6 @@ import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
-import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -87,12 +76,6 @@ public class WuyeController extends BaseController {
 
 	@Inject
 	private SystemConfigService systemConfigService;
-
-	@Inject
-	private AddressRepository addressRepository;
-
-	@Inject
-	private RegionService regionService;
 
 	/***************** [BEGIN]房产 ********************/
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
@@ -583,14 +566,14 @@ public class WuyeController extends BaseController {
 				} else {
 					user.setId(10);
 				}
-				user.setTel("1383838438");
-				user.setOpenid("o_3DlwdnCLCz3AbTrZqj4HtKeQYY");
+				user.setTel("18116419486");
+				user.setOpenid("ofDNH0o8JD8qC1n2P9KU5qq0UeWc");
 				user.setName("yiming");
 				user.setNickname("yiming");
-				user.setXiaoquName("宜川一村");
-				user.setXiaoquId(169);
-				user.setCountyId(27);
-				user.setWuyeId("130428400000000013");
+				user.setXiaoquName("西部花苑");
+				user.setXiaoquId(26387);
+				user.setCountyId(0);
+				user.setWuyeId("180613400000291915");
 				user.setHeadimgurl(
 						"http://wx.qlogo.cn/mmopen/ajNVdqHZLLBIY2Jial97RCIIyq0P4L8dhGicoYDlbNXqW5GJytxmkRDFdFlX9GScrsvo7vBuJuaEoMZeiaBPnb6AA/0");
 			} else {
@@ -656,11 +639,11 @@ public class WuyeController extends BaseController {
 	}
 	
 	// 已绑定房子的用户设置默认地址
-	@RequestMapping(value = "/updataAddr", method = RequestMethod.GET)
+	@RequestMapping(value = "/updateAddr", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<String> updataAddr(@RequestParam String code) throws Exception {
+	public BaseResult<String> updateAddr(@RequestParam String code) throws Exception {
 		if ("hexieCode".equals(code)) {
-		     wuyeService.updataAddr();
+		     wuyeService.updateAddr();
 			log.error("操作完成!!!");
 			return BaseResult.successResult("");
 		} else {
@@ -668,22 +651,6 @@ public class WuyeController extends BaseController {
 		}
 
 	}
-
-	
-
-	@RequestMapping(value = "/yayayayaceshi", method = RequestMethod.GET)
-	@ResponseBody
-	public String ceshi() throws Exception {
-		log.info("ceshi");
-
-		return "yayayayaceshi";
-	}
-
-	
-	@SuppressWarnings("rawtypes")
-	@Autowired
-	private TransactionUtil transactionUtil;
-
 
 		// for (User u : list) {
 		// if(u.getWuyeId() != null){
