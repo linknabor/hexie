@@ -24,6 +24,7 @@ public class Address  extends BaseModel{
 	
 	private long xiaoquId;
 	private String xiaoquName;
+	private String xiaoquAddress;
 
 	private double longitude;
     private double latitude;
@@ -161,6 +162,14 @@ public class Address  extends BaseModel{
 	}
 	public void setAmapDetailAddr(String amapDetailAddr) {
 		this.amapDetailAddr = amapDetailAddr;
+	}
+
+	public String getXiaoquAddress() {
+		return xiaoquAddress;
+	}
+
+	public void setXiaoquAddress(String xiaoquAddress) {
+		this.xiaoquAddress = xiaoquAddress;
 	}
 	
 }
