@@ -69,6 +69,7 @@ public class AddressWorker implements Runnable {
 						hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
 						hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
 						hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
+						hexieUser.setSect_addr(listVo.getHou_info().get(0).getSect_addr());
 						transactionUtil.transact(s -> wuyeService.setDefaultAddress(u, hexieUser));
 						log.info("cell_adress:" + listVo.getHou_info().get(0).getCell_addr());
 					}

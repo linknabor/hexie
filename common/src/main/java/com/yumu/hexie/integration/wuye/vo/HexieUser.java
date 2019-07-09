@@ -32,10 +32,14 @@ public class HexieUser implements Serializable {
 	private String city_name;//城市名称
 	private long region_id;//区域ID
 	private String region_name;//区域名
+	private String sect_addr;
 	
-	
-	
-
+	public String getSect_addr() {
+		return sect_addr;
+	}
+	public void setSect_addr(String sect_addr) {
+		this.sect_addr = sect_addr;
+	}
 	public long getProvince_id() {
 		return province_id;
 	}

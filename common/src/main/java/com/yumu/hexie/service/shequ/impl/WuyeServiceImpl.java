@@ -286,6 +286,9 @@ public class WuyeServiceImpl implements WuyeService {
 			if (list.size() > 0) {
 				add = list.get(0);
 			} else {
+				if(map==null){
+					getNeedRegion();
+				}
 				add.setReceiveName(user.getNickname());
 				add.setTel(user.getTel());
 				add.setUserId(user.getId());
@@ -294,11 +297,12 @@ public class WuyeServiceImpl implements WuyeService {
 				add.setXiaoquName(u.getSect_name());
 				add.setDetailAddress(u.getCell_addr());
 				add.setCity(u.getCity_name());
-				add.setCityId(u.getCity_id());
+				add.setCityId(map.get(u.getCity_name()));
 				add.setCounty(u.getRegion_name());
-				add.setCountyId(u.getRegion_id());
+				add.setCountyId(map.get(u.getRegion_name()));
 				add.setProvince(u.getProvince_name());
-				add.setProvinceId(u.getProvince_id());
+				add.setProvinceId(map.get(u.getProvince_name()));
+				add.setXiaoquAddress(u.getSect_addr());
 				double latitude = 0;
 				double longitude = 0;
 				if (user.getLatitude() != null) {
