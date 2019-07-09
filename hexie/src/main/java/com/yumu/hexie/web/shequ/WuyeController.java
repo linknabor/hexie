@@ -654,6 +654,20 @@ public class WuyeController extends BaseController {
 		}
 
 	}
+	
+	// 已绑定房子的用户设置默认地址
+	@RequestMapping(value = "/updataAddr", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> updataAddr(@RequestParam String code) throws Exception {
+		if ("hexieCode".equals(code)) {
+		     wuyeService.updataAddr();
+			log.error("操作完成!!!");
+			return BaseResult.successResult("");
+		} else {
+			return BaseResult.fail("请求错误！！！");
+		}
+
+	}
 
 	
 

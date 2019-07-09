@@ -1,6 +1,8 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +44,8 @@ import com.yumu.hexie.service.user.UserService;
 @Service("wuyeService")
 public class WuyeServiceImpl implements WuyeService {
 	private static final Logger log = LoggerFactory.getLogger(WuyeServiceImpl.class);
+	
+	private static Map<String,Long> map=null;
 	
 	@Autowired
 	private TempSectRepository tempSectRepository;
@@ -338,6 +342,41 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 	}
 
+	@Override
+	public void updataAddr() {
+		List<Address>  addressList=addressRepository.getNeedAddress();
+		getNeedRegion();
+		for (Address address : addressList) {
+			Long provinceId=map.get(address.getProvince());
+			Long cityId=map.get(address.getCity());
+			Long countyId=map.get(address.getCounty());
+			
+			if(provinceId ==null ){
+				provinceId=0l;
+			}
+			if(cityId ==null ){
+				cityId=0l;
+			}
+			if(countyId ==null ){
+				countyId=0l;
+			}
+			address.setProvinceId(provinceId);
+			address.setCityId(cityId);
+			address.setCountyId(countyId);
+			addressRepository.save(address);
+		}
+		
+	}
+    
+	public void getNeedRegion(){
+		if(map==null){
+			map=new HashMap<>();
+			List<Region>  regionList=regionRepository.findNeedRegion();
+			for (Region region : regionList) {
+				map.put(region.getName(), region.getId());
+			}
+		}
+	}
 
 	
 }
