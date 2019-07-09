@@ -27,6 +27,7 @@ import com.yumu.hexie.service.user.req.AddressReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.RegionInfo;
+import com.yumu.hexie.web.user.resp.SharedVo;
 
 @Controller(value = "addressController")
 public class AddressController extends BaseController{
@@ -82,6 +83,9 @@ public class AddressController extends BaseController{
 			return new BaseResult<Address>().failMsg("请检查真实姓名和手机号码是否正确");
 		}
 		address.setUserId(user.getId());
+		if (StringUtil.isEmpty(address.getAmapId())) {
+			address.setAmapId(0l);
+		}
 		Address addr = addressService.addAddress(address);
 		//本方法内调用无法异步
 		addressService.fillAmapInfo(addr);
@@ -119,5 +123,21 @@ public class AddressController extends BaseController{
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAround(@PathVariable double longitude, @PathVariable double latitude){
 		return BaseResult.successResult(addressService.queryAroundByCoordinate(longitude, latitude));
+	}
+	
+	@RequestMapping(value = "/getAddressByShareCode/{shareCode}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<SharedVo> queryAddrByShareCode(HttpSession session, @ModelAttribute(Constants.USER)User user,@PathVariable String shareCode) {
+		Address address = new Address();
+		if(!StringUtil.isEmpty(shareCode)){
+			List<Address> list = addressService.getAddressByShareCode(shareCode);
+			if (list != null && list.size() > 0) {
+				address = list.get(0);
+			}
+		}
+		SharedVo vo = new SharedVo();
+		vo.setAddress(address);
+		vo.setBuyer(user);
+		return new BaseResult<SharedVo>().successResult(vo);
 	}
 }

@@ -42,4 +42,6 @@ public interface AddressService {
 	
 	public List<Address> getAddressByMain(long id,boolean main);
 	
+	public List<Address> getAddressByShareCode(String shareCode);
+	
 }
