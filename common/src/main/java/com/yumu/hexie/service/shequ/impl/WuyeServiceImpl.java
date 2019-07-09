@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -347,7 +348,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public void updataAddr() {
+	@Transactional
+	public void updateAddr() {
 		List<Address>  addressList=addressRepository.getNeedAddress();
 		getNeedRegion();
 		for (Address address : addressList) {
@@ -356,13 +358,13 @@ public class WuyeServiceImpl implements WuyeService {
 			Long countyId=map.get(address.getCounty());
 			
 			if(provinceId ==null ){
-				provinceId=0l;
+				continue;
 			}
 			if(cityId ==null ){
-				cityId=0l;
+				continue;
 			}
 			if(countyId ==null ){
-				countyId=0l;
+				continue;
 			}
 			address.setProvinceId(provinceId);
 			address.setCityId(cityId);
