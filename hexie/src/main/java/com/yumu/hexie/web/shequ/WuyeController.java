@@ -638,7 +638,7 @@ public class WuyeController extends BaseController {
 
 	}
 	
-	// 已绑定房子的用户设置默认地址
+	// 更改默认地址
 	@RequestMapping(value = "/updateAddr", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<String> updateAddr(@RequestParam String code) throws Exception {
@@ -649,6 +649,34 @@ public class WuyeController extends BaseController {
 		} else {
 			return BaseResult.fail("请求错误！！！");
 		}
+
+	}
+	
+	    // 设置用户shareCode
+		@RequestMapping(value = "/updateRepeatUserShareCode", method = RequestMethod.GET)
+		@ResponseBody
+		public BaseResult<String> updateRepeatUserShareCode(@RequestParam String code) throws Exception {
+			if ("hexieCode".equals(code)) {
+			     wuyeService.updateRepeatUserShareCode();
+				log.error("操作完成!!!");
+				return BaseResult.successResult("");
+			} else {
+				return BaseResult.fail("请求错误！！！");
+			}
+
+		}
+		
+		// 设置用户shareCode
+		@RequestMapping(value = "/updateUserShareCode", method = RequestMethod.GET)
+		@ResponseBody
+		public BaseResult<String> updateUserShareCode(@RequestParam String code) throws Exception {
+					if ("hexieCode".equals(code)) {
+					     wuyeService.updateUserShareCode();
+						log.error("操作完成!!!");
+						return BaseResult.successResult("");
+					} else {
+						return BaseResult.fail("请求错误！！！");
+					}
 
 	}
 
