@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -143,11 +144,6 @@ public class UserController extends BaseController{
 				UserWeiXin u = userService.getOrSubscibeUserByOpenId(userAccount.getOpenid());
 				
 				updateWeUserInfo(userAccount, u);
-				
-				if(StringUtil.isEmpty(userAccount.getShareCode())) {
-					userAccount.generateShareCode();
-					userService.save(userAccount);
-				}
 				session.setAttribute(Constants.USER, userAccount);
 			}
 			if(userAccount == null) {
@@ -174,6 +170,7 @@ public class UserController extends BaseController{
             }
             userAccount.setSubscribe(newUser.getSubscribe());
             userAccount.setSubscribe_time(newUser.getSubscribe_time());
+            userAccount.setShareCode(DigestUtils.md5Hex("UID["+userAccount.getId()+"]"));
             userService.save(userAccount);
         }
     }

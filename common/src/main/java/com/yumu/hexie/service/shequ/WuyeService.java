@@ -71,5 +71,11 @@ public interface WuyeService {
 	
 	public void saveRegion(HexieUser u);
 	
+	public void updateAddr();
+	
+	public void updateUserShareCode();
+	
+	public void updateRepeatUserShareCode();
+	
 	
 }

@@ -15,4 +15,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	@Query(nativeQuery=true ,value="select *  from tempuser a limit ?1,?2")
 	public List<User>  getBindHouseUser(int pageNum,int pageSise);
+	
+	@Query(nativeQuery=true ,value="select *  from user where shareCode is null")
+	public List<User> getShareCodeIsNull();
+	
+	@Query(nativeQuery=true ,value="SELECT shareCode from user group by shareCode having count(1) > 1")
+	public List<String> getRepeatShareCodeUser();
+	
+	@Query(nativeQuery=true ,value="SELECT * from user where shareCode = ?")
+    public List<User> getUserByShareCode(String shareCode);
+	
 }

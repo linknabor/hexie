@@ -8,6 +8,8 @@ public interface RegionService {
 	
 	public Region getRegionInfoByName(String name);
 	
+	public Region getRegionInfoById(long id);
+	
 	public Region saveRegion(Region r);
 	
 	public List<Region> getRegionAll();

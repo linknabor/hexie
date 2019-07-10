@@ -16,17 +16,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.RegionInfo;
+import com.yumu.hexie.web.user.resp.SharedVo;
 
 @Controller(value = "addressController")
 public class AddressController extends BaseController{
@@ -37,6 +41,10 @@ public class AddressController extends BaseController{
     private UserService userService;
 	@Inject
 	private PointService pointService;
+	@Inject
+	private RegionService regionService;
+	@Inject
+	private RgroupAreaItemRepository rgroupAreaItemRepository;
 
 	@RequestMapping(value = "/address/delete/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
@@ -82,6 +90,9 @@ public class AddressController extends BaseController{
 			return new BaseResult<Address>().failMsg("请检查真实姓名和手机号码是否正确");
 		}
 		address.setUserId(user.getId());
+		if (StringUtil.isEmpty(address.getAmapId())) {
+			address.setAmapId(0l);
+		}
 		Address addr = addressService.addAddress(address);
 		//本方法内调用无法异步
 		addressService.fillAmapInfo(addr);
@@ -119,5 +130,42 @@ public class AddressController extends BaseController{
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAround(@PathVariable double longitude, @PathVariable double latitude){
 		return BaseResult.successResult(addressService.queryAroundByCoordinate(longitude, latitude));
+	}
+	
+	@RequestMapping(value = "/getRegionByRuleId/{ruleId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<SharedVo> queryAddrByShareCode(HttpSession session, @ModelAttribute(Constants.USER)User user,@PathVariable String ruleId) {
+		Address address = new Address();
+		if(!StringUtil.isEmpty(ruleId)){
+			
+			List<RgroupAreaItem> list = rgroupAreaItemRepository.findByRuleId(Long.valueOf(ruleId));
+			if (list != null && list.size() > 0) {
+				
+				RgroupAreaItem item = list.get(0);
+				
+				Region sect = regionService.getRegionInfoById(item.getRegionId());
+				address.setXiaoquId(sect.getId());
+				address.setXiaoquName(sect.getName());
+				address.setXiaoquAddress(sect.getXiaoquAddress());
+				
+				Region dist = regionService.getRegionInfoById(sect.getParentId());
+				address.setCounty(dist.getName());
+				address.setCountyId(dist.getId());
+				
+				Region city = regionService.getRegionInfoById(dist.getParentId());
+				address.setCity(city.getName());
+				address.setCityId(city.getId());
+				
+				Region province = regionService.getRegionInfoById(city.getParentId());
+				address.setProvince(province.getName());
+				address.setProvinceId(province.getId());
+				
+			}
+			
+		}
+		SharedVo vo = new SharedVo();
+		vo.setAddress(address);
+		vo.setBuyer(user);
+		return new BaseResult<SharedVo>().successResult(vo);
 	}
 }

@@ -1,14 +1,18 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -42,6 +46,8 @@ import com.yumu.hexie.service.user.UserService;
 @Service("wuyeService")
 public class WuyeServiceImpl implements WuyeService {
 	private static final Logger log = LoggerFactory.getLogger(WuyeServiceImpl.class);
+	
+	private static Map<String,Long> map=null;
 	
 	@Autowired
 	private TempSectRepository tempSectRepository;
@@ -258,7 +264,9 @@ public class WuyeServiceImpl implements WuyeService {
 		boolean result = true;
 		List<Address> list = addressService.getAddressByuserIdAndAddress(user.getId(), u.getCell_addr());
 		for (Address address : list) {
+			log.error("存在重复地址:"+address.getDetailAddress()+"---id:"+address.getId());
 			if (address.isMain()) {
+				log.error("存在重复默认地址:"+address.getDetailAddress()+"---id:"+address.getId());
 				result = false;
 				break;
 			}
@@ -269,6 +277,7 @@ public class WuyeServiceImpl implements WuyeService {
 				if (address != null) {
 					address.setMain(false);
 					addressRepository.save(address);
+					log.error("默认地址设置为不是默认:"+address.getDetailAddress()+"---id:"+address.getId());
 				}
 			}
 			
@@ -281,6 +290,10 @@ public class WuyeServiceImpl implements WuyeService {
 			if (list.size() > 0) {
 				add = list.get(0);
 			} else {
+				if(map==null){
+					getNeedRegion();
+				}
+				log.error("获取城市id："+map.get(u.getCity_name()));
 				add.setReceiveName(user.getNickname());
 				add.setTel(user.getTel());
 				add.setUserId(user.getId());
@@ -289,11 +302,12 @@ public class WuyeServiceImpl implements WuyeService {
 				add.setXiaoquName(u.getSect_name());
 				add.setDetailAddress(u.getCell_addr());
 				add.setCity(u.getCity_name());
-				add.setCityId(u.getCity_id());
+				add.setCityId(map.get(u.getCity_name()));
 				add.setCounty(u.getRegion_name());
-				add.setCountyId(u.getRegion_id());
+				add.setCountyId(map.get(u.getRegion_name()));
 				add.setProvince(u.getProvince_name());
-				add.setProvinceId(u.getProvince_id());
+				add.setProvinceId(map.get(u.getProvince_name()));
+				//add.setXiaoquAddress(u.getSect_addr());
 				double latitude = 0;
 				double longitude = 0;
 				if (user.getLatitude() != null) {
@@ -309,12 +323,14 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 			add.setMain(true);
 			addressRepository.save(add);
+			log.error("保存默认地址成功！！！"+add.getDetailAddress()+"---id:"+add.getId());
 			user.setProvince(u.getProvince_name());
 			user.setCity(u.getCity_name());
 			user.setCounty(u.getRegion_name());
 			user.setXiaoquId(re.getId());
 			user.setXiaoquName(u.getSect_name());
 			userService.save(user);
+			log.error("保存用户成功！！！");
 		}
 
 	
@@ -323,6 +339,7 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public void saveRegion(HexieUser u) {
+		log.error("进入保存region！！！");
 		Region re=regionRepository.findByName(u.getSect_name());
 		if(re == null){
 			Region region = regionRepository.findByNameAndRegionType(u.getRegion_name(), 3);
@@ -334,10 +351,81 @@ public class WuyeServiceImpl implements WuyeService {
 			r.setRegionType(4);
 			r.setLatitude(0.0);
 			r.setLongitude(0.0);
+			r.setXiaoquAddress(u.getSect_addr());
 			re=regionService.saveRegion(r);
+			log.error("保存region完成！！！");
 		}
 	}
 
+	@Override
+	@Transactional
+	public void updateAddr() {
+		List<Address>  addressList=addressRepository.getNeedAddress();
+		getNeedRegion();
+		for (Address address : addressList) {
+			Long provinceId=map.get(address.getProvince());
+			Long cityId=map.get(address.getCity());
+			Long countyId=map.get(address.getCounty());
+			
+			if(provinceId ==null ){
+				continue;
+			}
+			if(cityId ==null ){
+				continue;
+			}
+			if(countyId ==null ){
+				continue;
+			}
+			address.setProvinceId(provinceId);
+			address.setCityId(cityId);
+			address.setCountyId(countyId);
+			addressRepository.save(address);
+		}
+		
+	}
+    
+	public void getNeedRegion(){
+		if(map==null){
+			map=new HashMap<>();
+			List<Region>  regionList=regionRepository.findNeedRegion();
+			for (Region region : regionList) {
+				map.put(region.getName(), region.getId());
+			}
+		}
+	}
+
+	@Override
+	public void updateUserShareCode() {
+		List<User> list=userService.getShareCodeIsNull();
+		for (User user : list) {
+			try {
+				String  shareCode=DigestUtils.md5Hex("UID["+user.getId()+"]");
+				user.setShareCode(shareCode);
+				userService.save(user);
+			} catch (Exception e) {
+				log.error("user保存失败："+user.getId());
+			}
+		}
+		
+	}
+
+	@Override
+	public void updateRepeatUserShareCode() {
+		List<String> repeatUserList=userService.getRepeatShareCodeUser();
+		for (String string : repeatUserList) {
+			List<User>  uList=userService.getUserByShareCode(string);
+			for (User user2 : uList) {
+				try {
+					String  shareCode=DigestUtils.md5Hex("UID["+user2.getId()+"]");
+					user2.setShareCode(shareCode);
+					userService.save(user2);
+				} catch (Exception e) {
+					log.error("user保存失败："+user2.getId());
+				}
+			}
+		}
+		
+	}
 
 	
 }
