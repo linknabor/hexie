@@ -146,6 +146,7 @@ public class AddressController extends BaseController{
 				Region sect = regionService.getRegionInfoById(item.getRegionId());
 				address.setXiaoquId(sect.getId());
 				address.setXiaoquName(sect.getName());
+				address.setXiaoquAddress(sect.getXiaoquAddress());
 				
 				Region dist = regionService.getRegionInfoById(sect.getParentId());
 				address.setCounty(dist.getName());
