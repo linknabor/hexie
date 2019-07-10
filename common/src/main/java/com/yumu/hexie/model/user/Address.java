@@ -3,6 +3,7 @@ package com.yumu.hexie.model.user;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 
@@ -46,7 +47,10 @@ public class Address  extends BaseModel{
 	@Transient
 	public String getRegionStr(){
 		String province = getProvince();
-		if(getProvince().indexOf("上海")>=0
+		if (StringUtil.isEmpty(province)) {
+			province = "";
+		}
+		if(province.indexOf("上海")>=0
 				||getProvince().indexOf("北京")>=0
 				||getProvince().indexOf("重庆")>=0
 				||getProvince().indexOf("天津")>=0){

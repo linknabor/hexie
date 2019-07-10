@@ -16,12 +16,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
 import com.yumu.hexie.web.BaseController;
@@ -38,6 +41,10 @@ public class AddressController extends BaseController{
     private UserService userService;
 	@Inject
 	private PointService pointService;
+	@Inject
+	private RegionService regionService;
+	@Inject
+	private RgroupAreaItemRepository rgroupAreaItemRepository;
 
 	@RequestMapping(value = "/address/delete/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
@@ -125,15 +132,35 @@ public class AddressController extends BaseController{
 		return BaseResult.successResult(addressService.queryAroundByCoordinate(longitude, latitude));
 	}
 	
-	@RequestMapping(value = "/getAddressByShareCode/{shareCode}", method = RequestMethod.GET)
+	@RequestMapping(value = "/getRegionByRuleId/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<SharedVo> queryAddrByShareCode(HttpSession session, @ModelAttribute(Constants.USER)User user,@PathVariable String shareCode) {
+	public BaseResult<SharedVo> queryAddrByShareCode(HttpSession session, @ModelAttribute(Constants.USER)User user,@PathVariable String ruleId) {
 		Address address = new Address();
-		if(!StringUtil.isEmpty(shareCode)){
-			List<Address> list = addressService.getAddressByShareCode(shareCode);
+		if(!StringUtil.isEmpty(ruleId)){
+			
+			List<RgroupAreaItem> list = rgroupAreaItemRepository.findByRuleId(Long.valueOf(ruleId));
 			if (list != null && list.size() > 0) {
-				address = list.get(0);
+				
+				RgroupAreaItem item = list.get(0);
+				
+				Region sect = regionService.getRegionInfoById(item.getRegionId());
+				address.setXiaoquId(sect.getId());
+				address.setXiaoquName(sect.getName());
+				
+				Region dist = regionService.getRegionInfoById(sect.getParentId());
+				address.setCounty(dist.getName());
+				address.setCountyId(dist.getId());
+				
+				Region city = regionService.getRegionInfoById(dist.getParentId());
+				address.setCity(city.getName());
+				address.setCityId(city.getId());
+				
+				Region province = regionService.getRegionInfoById(city.getParentId());
+				address.setProvince(province.getName());
+				address.setProvinceId(province.getId());
+				
 			}
+			
 		}
 		SharedVo vo = new SharedVo();
 		vo.setAddress(address);
