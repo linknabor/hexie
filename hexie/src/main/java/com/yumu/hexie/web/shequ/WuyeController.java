@@ -653,11 +653,11 @@ public class WuyeController extends BaseController {
 	}
 	
 	    // 设置用户shareCode
-		@RequestMapping(value = "/updateUserShareCode", method = RequestMethod.GET)
+		@RequestMapping(value = "/updateRepeatUserShareCode", method = RequestMethod.GET)
 		@ResponseBody
-		public BaseResult<String> updateUserShareCode(@RequestParam String code) throws Exception {
+		public BaseResult<String> updateRepeatUserShareCode(@RequestParam String code) throws Exception {
 			if ("hexieCode".equals(code)) {
-			     wuyeService.updateUserShareCode();
+			     wuyeService.updateRepeatUserShareCode();
 				log.error("操作完成!!!");
 				return BaseResult.successResult("");
 			} else {
@@ -665,6 +665,20 @@ public class WuyeController extends BaseController {
 			}
 
 		}
+		
+		// 设置用户shareCode
+		@RequestMapping(value = "/updateUserShareCode", method = RequestMethod.GET)
+		@ResponseBody
+		public BaseResult<String> updateUserShareCode(@RequestParam String code) throws Exception {
+					if ("hexieCode".equals(code)) {
+					     wuyeService.updateUserShareCode();
+						log.error("操作完成!!!");
+						return BaseResult.successResult("");
+					} else {
+						return BaseResult.fail("请求错误！！！");
+					}
+
+	}
 
 		// for (User u : list) {
 		// if(u.getWuyeId() != null){

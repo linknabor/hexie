@@ -399,6 +399,10 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		
+	}
+
+	@Override
+	public void updateRepeatUserShareCode() {
 		List<String> repeatUserList=userService.getRepeatShareCodeUser();
 		for (String string : repeatUserList) {
 			List<User>  uList=userService.getUserByShareCode(string);

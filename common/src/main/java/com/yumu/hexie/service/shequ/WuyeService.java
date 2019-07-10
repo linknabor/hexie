@@ -75,5 +75,7 @@ public interface WuyeService {
 	
 	public void updateUserShareCode();
 	
+	public void updateRepeatUserShareCode();
+	
 	
 }
