@@ -302,7 +302,7 @@ public class WuyeServiceImpl implements WuyeService {
 				add.setCountyId(map.get(u.getRegion_name()));
 				add.setProvince(u.getProvince_name());
 				add.setProvinceId(map.get(u.getProvince_name()));
-				add.setXiaoquAddress(u.getSect_addr());
+				//add.setXiaoquAddress(u.getSect_addr());
 				double latitude = 0;
 				double longitude = 0;
 				if (user.getLatitude() != null) {
@@ -343,6 +343,7 @@ public class WuyeServiceImpl implements WuyeService {
 			r.setRegionType(4);
 			r.setLatitude(0.0);
 			r.setLongitude(0.0);
+			r.setXiaoquAddress(u.getSect_addr());
 			re=regionService.saveRegion(r);
 		}
 	}
