@@ -183,7 +183,21 @@ public class UserServiceImpl implements UserService {
 		
 		return tempUserRepository.findBySectid("161223100120926240");
 	}
+	@Override
+	public List<String> getRepeatShareCodeUser() {
+		
+		return userRepository.getRepeatShareCodeUser();
+	}
+	@Override
+	public List<User> getShareCodeIsNull() {
+		
+		return userRepository.getShareCodeIsNull();
+	}
+	@Override
+	public List<User> getUserByShareCode(String shareCode) {
+		return userRepository.getUserByShareCode(shareCode);
+	}
 	
 	
-
+   
 }

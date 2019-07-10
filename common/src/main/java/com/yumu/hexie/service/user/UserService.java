@@ -32,4 +32,10 @@ public interface UserService {
 	public List<TempUser> getTempUser();
 	
 	public List<TempUser> getTemp();
+	
+	public List<String> getRepeatShareCodeUser();
+	
+	public List<User> getShareCodeIsNull();
+	
+	public List<User> getUserByShareCode(String shareCode);
 }

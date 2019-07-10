@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,7 +303,7 @@ public class WuyeServiceImpl implements WuyeService {
 				add.setCountyId(map.get(u.getRegion_name()));
 				add.setProvince(u.getProvince_name());
 				add.setProvinceId(map.get(u.getProvince_name()));
-				add.setXiaoquAddress(u.getSect_addr());
+				//add.setXiaoquAddress(u.getSect_addr());
 				double latitude = 0;
 				double longitude = 0;
 				if (user.getLatitude() != null) {
@@ -343,6 +344,7 @@ public class WuyeServiceImpl implements WuyeService {
 			r.setRegionType(4);
 			r.setLatitude(0.0);
 			r.setLongitude(0.0);
+			r.setXiaoquAddress(u.getSect_addr());
 			re=regionService.saveRegion(r);
 		}
 	}
@@ -382,6 +384,35 @@ public class WuyeServiceImpl implements WuyeService {
 				map.put(region.getName(), region.getId());
 			}
 		}
+	}
+
+	@Override
+	public void updateUserShareCode() {
+		List<User> list=userService.getShareCodeIsNull();
+		for (User user : list) {
+			try {
+				String  shareCode=DigestUtils.md5Hex("UID["+user.getId()+"]");
+				user.setShareCode(shareCode);
+				userService.save(user);
+			} catch (Exception e) {
+				log.error("user保存失败："+user.getId());
+			}
+		}
+		
+		List<String> repeatUserList=userService.getRepeatShareCodeUser();
+		for (String string : repeatUserList) {
+			List<User>  uList=userService.getUserByShareCode(string);
+			for (User user2 : uList) {
+				try {
+					String  shareCode=DigestUtils.md5Hex("UID["+user2.getId()+"]");
+					user2.setShareCode(shareCode);
+					userService.save(user2);
+				} catch (Exception e) {
+					log.error("user保存失败："+user2.getId());
+				}
+			}
+		}
+		
 	}
 
 	
