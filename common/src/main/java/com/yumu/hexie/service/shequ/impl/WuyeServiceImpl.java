@@ -32,11 +32,14 @@ import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.AddressWorker;
+import com.yumu.hexie.model.user.TempHouse;
+import com.yumu.hexie.model.user.TempHouseRepository;
+import com.yumu.hexie.model.user.TempHouseWorker;
 import com.yumu.hexie.model.user.TempSect;
 import com.yumu.hexie.model.user.TempSectRepository;
-import com.yumu.hexie.model.user.TempUser;
 import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
@@ -73,6 +76,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private WuyeService wuyeService;
 	
+	@SuppressWarnings("rawtypes")
 	@Autowired
 	private TransactionUtil transactionUtil;
 	
@@ -264,7 +268,6 @@ public class WuyeServiceImpl implements WuyeService {
 		boolean result = true;
 		List<Address> list = addressService.getAddressByuserIdAndAddress(user.getId(), u.getCell_addr());
 		for (Address address : list) {
-			log.error("存在重复地址:"+address.getDetailAddress()+"---id:"+address.getId());
 			if (address.isMain()) {
 				log.error("存在重复默认地址:"+address.getDetailAddress()+"---id:"+address.getId());
 				result = false;
@@ -293,7 +296,6 @@ public class WuyeServiceImpl implements WuyeService {
 				if(map==null){
 					getNeedRegion();
 				}
-				log.error("获取城市id："+map.get(u.getCity_name()));
 				add.setReceiveName(user.getNickname());
 				add.setTel(user.getTel());
 				add.setUserId(user.getId());
@@ -323,7 +325,6 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 			add.setMain(true);
 			addressRepository.save(add);
-			log.error("保存默认地址成功！！！"+add.getDetailAddress()+"---id:"+add.getId());
 			user.setProvince(u.getProvince_name());
 			user.setCity(u.getCity_name());
 			user.setCounty(u.getRegion_name());
@@ -424,6 +425,27 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 		}
+		
+	}
+	
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private TempHouseRepository tempHouseRepository;
+
+	@Override
+	public void updateNonBindUser() throws InterruptedException {
+
+		List<TempHouse> list = tempHouseRepository.findAll();
+		ExecutorService service = Executors.newFixedThreadPool(10);
+		for (TempHouse tempHouse : list) {
+			TempHouseWorker tempHouseWorker = new TempHouseWorker(tempHouse, wuyeService, 
+					userRepository, transactionUtil);
+			service.execute(tempHouseWorker);
+		}
+		service.shutdown();
+		while(!service.awaitTermination(30l, TimeUnit.SECONDS)){
+		};
 		
 	}
 

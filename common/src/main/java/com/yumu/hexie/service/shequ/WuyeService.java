@@ -77,5 +77,11 @@ public interface WuyeService {
 	
 	public void updateRepeatUserShareCode();
 	
+	/**
+	 * 更新未绑定房屋的地址及用户信息
+	 * @throws InterruptedException 
+	 */
+	public void updateNonBindUser() throws InterruptedException;
+	
 	
 }
