@@ -2,11 +2,16 @@ package com.yumu.hexie.model.user;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.service.shequ.WuyeService;
 
 public class TempHouseWorker implements Runnable {
+	
+	private static final Logger log = LoggerFactory.getLogger(TempHouseWorker.class);
 	
 	private TempHouse tempHouse;
 	private UserRepository userRepository;
@@ -36,6 +41,9 @@ public class TempHouseWorker implements Runnable {
 	public void deal() {
 		
 		List<User> userList = userRepository.findByWuyeId(tempHouse.getWuyeId());
+		log.error("start to add address, wuyeId : " + tempHouse.getWuyeId() + ", hou count : " + userList.size());
+		int successCount = 0;
+		int failCount=0;
 		for (User user : userList) {	//这里理论上应该只会出现一条
 			
 			HexieUser hexieUser = new HexieUser();
@@ -45,8 +53,15 @@ public class TempHouseWorker implements Runnable {
 			hexieUser.setCity_name(tempHouse.getCityName());
 			hexieUser.setRegion_name(tempHouse.getRegionName());
 			hexieUser.setProvince_name(tempHouse.getProvinceName());
-			transactionUtil.transact(s -> wuyeService.setDefaultAddress(user, hexieUser));
+			boolean result=transactionUtil.transact(s -> wuyeService.setDefaultAddress(user, hexieUser));
+		    if(!result){
+		    	failCount++;
+		    }else{
+		    	 successCount++;
+		    }
 		}
+		log.error("物业Id:"+tempHouse.getWuyeId() + ", 成功更新" + successCount + "户。");
+		log.error("物业Id:"+tempHouse.getWuyeId() + ", 更新失败" + failCount + "户。");
 		
 	}
 

@@ -680,6 +680,20 @@ public class WuyeController extends BaseController {
 
 	}
 
+   // 设置用户shareCode
+	@RequestMapping(value = "/updateNonBindUser", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> updateNonBindUser(@RequestParam String code) throws Exception {
+					if ("hexieCode".equals(code)) {
+					     wuyeService.updateNonBindUser();
+						log.error("操作完成!!!");
+						return BaseResult.successResult("");
+					} else {
+						return BaseResult.fail("请求错误！！！");
+					}
+
+	} 
+
 		// for (User u : list) {
 		// if(u.getWuyeId() != null){
 		// HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
