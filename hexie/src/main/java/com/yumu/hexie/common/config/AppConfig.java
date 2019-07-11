@@ -1,12 +1,9 @@
 package com.yumu.hexie.common.config;
 
 import java.beans.PropertyVetoException;
-import java.io.File;
 
 import javax.sql.DataSource;
 
-import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.Http11NioProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,26 +80,8 @@ public class AppConfig {
     public EmbeddedServletContainerFactory EmbeddedServletContainerFactory(){
         TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
         factory.setPort(86);
-//        factory.addAdditionalTomcatConnectors(createSslConnector());
+        factory.addConnectorCustomizers(new AppTomcatConnectorCustomizer());
         return factory;
-    }
-    
-    private Connector createSslConnector() {
-        Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
-        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
-        try {
-            File truststore = new File("F:/keystore/server.jks");
-            connector.setScheme("https");
-            protocol.setSSLEnabled(true);
-            connector.setSecure(true);
-            connector.setPort(8444);
-            protocol.setKeystoreFile(truststore.getAbsolutePath());
-            protocol.setKeystorePass("hongzhitech20130110");
-//            protocol.setKeyAlias("springboot");
-            return connector;
-        } catch (Exception ex) {
-            throw new IllegalStateException("cant access keystore: [" + "keystore" + "]  ", ex);
-        }
     }
     
     
@@ -127,8 +106,8 @@ public class AppConfig {
         dataSource.setPassword(password);
         try {
             dataSource.setDriverClass(driverClassName);
-            dataSource.setMaxPoolSize(2);
-            dataSource.setMinPoolSize(0);
+            dataSource.setMaxPoolSize(450);
+            dataSource.setMinPoolSize(5);
             dataSource.setMaxIdleTime(1200);
         } catch (PropertyVetoException e) {
             LOGGER.error("Can not create Data source.");
