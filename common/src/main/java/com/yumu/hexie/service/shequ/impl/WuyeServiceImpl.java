@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +85,13 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public HouseListVO queryHouse(String userId) {
 		return WuyeUtil.queryHouse(userId).getData();
+	}
+
+	@PostConstruct
+	public void init() {
+		if(map==null){
+			getNeedRegion();
+		}
 	}
 
 	@Override
@@ -293,9 +302,7 @@ public class WuyeServiceImpl implements WuyeService {
 			if (list.size() > 0) {
 				add = list.get(0);
 			} else {
-				if(map==null){
-					getNeedRegion();
-				}
+				
 				add.setReceiveName(user.getNickname());
 				add.setTel(user.getTel());
 				add.setUserId(user.getId());
@@ -386,6 +393,7 @@ public class WuyeServiceImpl implements WuyeService {
 	}
     
 	public void getNeedRegion(){
+		
 		if(map==null){
 			map=new HashMap<>();
 			List<Region>  regionList=regionRepository.findNeedRegion();
