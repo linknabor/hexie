@@ -6,7 +6,7 @@ import com.yumu.hexie.model.distribution.region.Region;
 
 public interface RegionService {
 	
-	public Region getRegionInfoByName(String name);
+	public List<Region> findByNameAndParentId(String name,Long parentId);
 	
 	public Region getRegionInfoById(long id);
 	

@@ -293,8 +293,8 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 			
-			Region re=regionService.getRegionInfoByName(u.getSect_name());
-			if(re == null ){
+			List<Region> re=regionService.findByNameAndParentId(u.getSect_name(),map.get(u.getRegion_name()));
+			if(re.size()==0){
 				log.error("未查询到小区！"+u.getSect_name());
 				return;
 			}
@@ -307,7 +307,7 @@ public class WuyeServiceImpl implements WuyeService {
 				add.setTel(user.getTel());
 				add.setUserId(user.getId());
 				add.setCreateDate(System.currentTimeMillis());
-				add.setXiaoquId(re.getId());
+				add.setXiaoquId(re.get(0).getId());
 				add.setXiaoquName(u.getSect_name());
 				add.setDetailAddress(u.getCell_addr());
 				add.setCity(u.getCity_name());
@@ -335,7 +335,7 @@ public class WuyeServiceImpl implements WuyeService {
 			user.setProvince(u.getProvince_name());
 			user.setCity(u.getCity_name());
 			user.setCounty(u.getRegion_name());
-			user.setXiaoquId(re.getId());
+			user.setXiaoquId(re.get(0).getId());
 			user.setXiaoquName(u.getSect_name());
 			userService.save(user);
 			log.error("保存用户成功！！！");

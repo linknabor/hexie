@@ -16,8 +16,8 @@ public class RegionServiceImpl implements RegionService{
 	RegionRepository regionRepository;
 
 	@Override
-	public Region getRegionInfoByName(String name) {
-		return regionRepository.findByName(name);
+	public List<Region> findByNameAndParentId(String name,Long parentId) {
+		return regionRepository.findAllByParentIdAndName(parentId, name);
 	}
 
 	@Override
