@@ -239,8 +239,8 @@ public class WuyeServiceImpl implements WuyeService {
 	public void addSectToRegion() {
 		List<TempSect> list=tempSectRepository.findAll();
 		for (TempSect tempSect : list) {
-			Region re=regionRepository.findByName(tempSect.getSectName());
-			if(re == null){
+			List<Region> regionList=regionRepository.findAllByNameAndParentName(tempSect.getSectName(), tempSect.getRegionName());
+			if(regionList.size()==0){
 				Region region = regionRepository.findByNameAndRegionType(tempSect.getRegionName(), 3);
 				Region r = new Region();
 				r.setCreateDate(System.currentTimeMillis());
@@ -250,7 +250,7 @@ public class WuyeServiceImpl implements WuyeService {
 				r.setRegionType(4);
 				r.setLatitude(0.0);
 				r.setLongitude(0.0);
-				re=regionService.saveRegion(r);
+				regionService.saveRegion(r);
 			}
 		}
 		

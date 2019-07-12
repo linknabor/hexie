@@ -18,6 +18,8 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     
     public Region findByName(String name);
     
+    public List<Region> findAllByNameAndParentName(String name,String parentName);
+    
     public Region findByNameAndRegionType(String name,int regionType);
     
     @Query(" from Region  where regionType < 4")
