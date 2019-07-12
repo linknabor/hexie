@@ -353,19 +353,21 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public void saveRegion(HexieUser u) {
 		log.error("进入保存region！！！");
-		Region re=regionRepository.findByName(u.getSect_name());
-		if(re == null){
+		List<Region> regionList=regionRepository.findAllByNameAndParentName(u.getSect_name(), u.getRegion_name());
+		if(regionList.size()==0){
 			Region region = regionRepository.findByNameAndRegionType(u.getRegion_name(), 3);
-			Region r = new Region();
-			r.setCreateDate(System.currentTimeMillis());
-			r.setName(u.getSect_name());
-			r.setParentId(region.getId());
-			r.setParentName(region.getName());
-			r.setRegionType(4);
-			r.setLatitude(0.0);
-			r.setLongitude(0.0);
-			r.setXiaoquAddress(u.getSect_addr());
-			re=regionService.saveRegion(r);
+			if(region!=null){
+				Region r = new Region();
+				r.setCreateDate(System.currentTimeMillis());
+				r.setName(u.getSect_name());
+				r.setParentId(region.getId());
+				r.setParentName(region.getName());
+				r.setRegionType(4);
+				r.setLatitude(0.0);
+				r.setLongitude(0.0);
+				r.setXiaoquAddress(u.getSect_addr());
+				regionService.saveRegion(r);
+			}
 			log.error("保存region完成！！！");
 		}
 	}
