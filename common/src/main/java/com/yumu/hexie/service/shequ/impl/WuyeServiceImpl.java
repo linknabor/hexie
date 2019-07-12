@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
@@ -242,6 +243,10 @@ public class WuyeServiceImpl implements WuyeService {
 			List<Region> regionList=regionRepository.findAllByNameAndParentName(tempSect.getSectName(), tempSect.getRegionName());
 			if(regionList.size()==0){
 				Region region = regionRepository.findByNameAndRegionType(tempSect.getRegionName(), 3);
+				if(region==null){
+					log.error("外地小区，区名："+tempSect.getRegionName()+"小区名"+tempSect.getSectName());
+					continue;
+				}
 				Region r = new Region();
 				r.setCreateDate(System.currentTimeMillis());
 				r.setName(tempSect.getSectName());
@@ -446,16 +451,19 @@ public class WuyeServiceImpl implements WuyeService {
 
 		List<TempHouse> list = tempHouseRepository.findAll();
 		ExecutorService service = Executors.newFixedThreadPool(10);
+		//统计成功失败数
+		AtomicInteger success = new AtomicInteger(0);
+		AtomicInteger fail = new AtomicInteger(0);
 		for (TempHouse tempHouse : list) {
 			TempHouseWorker tempHouseWorker = new TempHouseWorker(tempHouse, wuyeService, 
-					userRepository, transactionUtil);
+					userRepository, transactionUtil,success,fail);
 			service.execute(tempHouseWorker);
 		}
 		service.shutdown();
 		while(!service.awaitTermination(30l, TimeUnit.SECONDS)){
 		};
-		
+		log.error("成功更新" + success.get() + "户。");
+		log.error("更新失败" + fail.get() + "户。");
 	}
-
 	
 }

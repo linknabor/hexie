@@ -1,6 +1,7 @@
 package com.yumu.hexie.model.user;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +20,24 @@ public class TempHouseWorker implements Runnable {
 	@SuppressWarnings("rawtypes")
 	private TransactionUtil transactionUtil;
 	
+    private AtomicInteger success;
+    
+    private AtomicInteger fail;
+	
 	public TempHouseWorker() {
 		super();
 	}
+	
 
 	public TempHouseWorker(TempHouse tempHouse, WuyeService wuyeService, 
-			UserRepository userRepository, @SuppressWarnings("rawtypes") TransactionUtil transactionUtil) {
+			UserRepository userRepository, @SuppressWarnings("rawtypes") TransactionUtil transactionUtil,AtomicInteger success,AtomicInteger fail) {
 		super();
 		this.tempHouse = tempHouse;
 		this.userRepository = userRepository;
 		this.wuyeService = wuyeService;
 		this.transactionUtil = transactionUtil;
+		this.success=success;
+		this.fail=fail;
 	}
 
 	@Override
@@ -42,10 +50,7 @@ public class TempHouseWorker implements Runnable {
 		
 		List<User> userList = userRepository.findByWuyeId(tempHouse.getWuyeId());
 		log.error("start to add address, wuyeId : " + tempHouse.getWuyeId() + ", hou count : " + userList.size());
-		int successCount = 0;
-		int failCount=0;
 		for (User user : userList) {	//这里理论上应该只会出现一条
-			
 			HexieUser hexieUser = new HexieUser();
 			hexieUser.setUser_id(tempHouse.getWuyeId());
 			hexieUser.setCell_addr(tempHouse.getCellAddr());
@@ -55,14 +60,12 @@ public class TempHouseWorker implements Runnable {
 			hexieUser.setProvince_name(tempHouse.getProvinceName());
 			boolean result=transactionUtil.transact(s -> wuyeService.setDefaultAddress(user, hexieUser));
 		    if(!result){
-		    	failCount++;
+		    	fail.incrementAndGet();
+		    	log.error("失败物业Id: " + tempHouse.getWuyeId());
 		    }else{
-		    	 successCount++;
+		        success.incrementAndGet();
 		    }
 		}
-		log.error("物业Id:"+tempHouse.getWuyeId() + ", 成功更新" + successCount + "户。");
-		log.error("物业Id:"+tempHouse.getWuyeId() + ", 更新失败" + failCount + "户。");
-		
 	}
 
 }
