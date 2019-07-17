@@ -20,6 +20,7 @@ import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
 import com.yumu.hexie.integration.wechat.entity.common.PrePaymentOrder;
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -119,13 +120,15 @@ public class PaymentServiceImpl implements PaymentService {
         validatePayRequest(pay);
         log.warn("[Payment-req]["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
         //支付然后没继续的情景=----校验所需时间较长，是否需要如此操作
-        if(checkPaySuccess(pay.getPaymentNo())){
-            throw new BizValidateException(pay.getId(),"订单已支付成功，勿重复提交！").setError();
-        }
 
-        DecimalFormat decimalFormat=new DecimalFormat("0");
-        String price = decimalFormat.format(pay.getPrice()*100);
         try {
+        	
+            if(checkPaySuccess(pay.getPaymentNo())){
+                throw new BizValidateException(pay.getId(),"订单已支付成功，勿重复提交！").setError();
+            }
+            DecimalFormat decimalFormat=new DecimalFormat("0");
+            String price = decimalFormat.format(pay.getPrice()*100);
+        	
         	WechatPayInfo payinfo = WuyeUtil.getPrePayInfo("", Long.parseLong(pay.getPaymentNo()), price, pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
         	JsSign sign = new JsSign();
         	sign.setAppId(payinfo.getAppid());
@@ -163,10 +166,11 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    private boolean checkPaySuccess(String paymentNo){
+    private boolean checkPaySuccess(String paymentNo) throws Exception{
         log.warn("[Payment-check]begin["+paymentNo+"]");
-        PaymentOrderResult poResult = wechatCoreService.queryOrder(paymentNo);
-        return poResult.isSuccess()&&poResult.isPaySuccess();
+        
+        BaseResult baseResult = WuyeUtil.queryOrderInfo(paymentNo);
+        return baseResult.getResult().equals("SUCCESS");
     }
     /** 
      * @param payment

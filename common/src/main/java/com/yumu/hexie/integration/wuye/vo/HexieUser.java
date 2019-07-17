@@ -34,6 +34,28 @@ public class HexieUser implements Serializable {
 	private String region_name;//区域名
 	private String sect_addr;
 	
+	private String sect_id;//小区id
+	private String csp_id;//公司
+	private String center_id;//中心管理id
+	
+	public String getSect_id() {
+		return sect_id;
+	}
+	public void setSect_id(String sect_id) {
+		this.sect_id = sect_id;
+	}
+	public String getCsp_id() {
+		return csp_id;
+	}
+	public void setCsp_id(String csp_id) {
+		this.csp_id = csp_id;
+	}
+	public String getCenter_id() {
+		return center_id;
+	}
+	public void setCenter_id(String center_id) {
+		this.center_id = center_id;
+	}
 	public String getSect_addr() {
 		return sect_addr;
 	}

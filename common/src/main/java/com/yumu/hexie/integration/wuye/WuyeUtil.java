@@ -68,6 +68,7 @@ public class WuyeUtil {
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do?user_id=%s&bill_id=%s&stmt_id=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
 			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String MEMBER_WX_PAY_URL = "memberPayRequestSDO.do?user_id=%s&bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
+	private static final String MEMBER_WX_Query_URL = "memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&bill_id=%s&stmt_id=%s&trade_water_id=%s&package=%s"; // 微信支付返回
 	//private static final String GET_LOCATION_URL = "getGeographicalPositionSDO.do"; // 用户地理位置
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
@@ -254,6 +255,15 @@ public class WuyeUtil {
 		if (!baseResult.isSuccess()) {
 			throw new ValidationException(baseResult.getData().toString());
 		}
+		return (BaseResult<WechatPayInfo>)baseResult;
+	}
+	
+    // 22.查询
+	public static BaseResult<WechatPayInfo> queryOrderInfo(String paymentNo) throws Exception {
+
+		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_Query_URL, paymentNo);
+
+		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		return (BaseResult<WechatPayInfo>)baseResult;
 	}
 	
