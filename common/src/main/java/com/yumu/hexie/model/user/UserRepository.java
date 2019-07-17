@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserRepository extends JpaRepository<User, Long> {
 	public User findByOpenid(String openid);
 	public List<User> findByShareCode(String shareCode);
+	public User findById(long id);
 }

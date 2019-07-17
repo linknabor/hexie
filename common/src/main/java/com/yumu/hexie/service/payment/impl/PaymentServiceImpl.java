@@ -4,6 +4,7 @@
  */
 package com.yumu.hexie.service.payment.impl;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,11 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.common.CloseOrderResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
 import com.yumu.hexie.integration.wechat.entity.common.PrePaymentOrder;
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
+import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.payment.PaymentConstant;
@@ -27,6 +31,7 @@ import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.payment.RefundService;
+import com.yumu.hexie.service.user.req.MemberVo;
 
 /**
  * <pre>
@@ -119,12 +124,30 @@ public class PaymentServiceImpl implements PaymentService {
         }
         PrePaymentOrder preWechatOrder = wechatCoreService.createOrder(pay);
         pay.setPrepayId(preWechatOrder.getPrepay_id());
-        paymentOrderRepository.save(pay);
-        log.warn("[Payment-req]Saved["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
-        //3. 从微信获取签名
-        JsSign sign = wechatCoreService.getPrepareSign(preWechatOrder.getPrepay_id());
-        log.warn("[Payment-req]sign["+sign.getSignature()+"]");
-        return sign;
+        DecimalFormat decimalFormat=new DecimalFormat("0");
+        String price = decimalFormat.format(pay.getPrice()*100);
+        try {
+        	WechatPayInfo payinfo = WuyeUtil.getPrePayInfo("", Long.parseLong(pay.getPaymentNo()), price, pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
+        	JsSign sign = new JsSign();
+        	sign.setAppId(payinfo.getAppid());
+        	sign.setNonceStr(payinfo.getNoncestr());
+        	sign.setPkgStr(payinfo.getPackageValue());
+        	sign.setSignature(payinfo.getPaysign());
+        	sign.setTimestamp(payinfo.getTimestamp());
+        	return sign;
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//        paymentOrderRepository.save(pay);
+//        log.warn("[Payment-req]Saved["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
+//        //3. 从微信获取签名
+//        JsSign sign = wechatCoreService.getPrepareSign(preWechatOrder.getPrepay_id());
+//        log.warn("[Payment-req]sign["+sign.getSignature()+"]");
+        return null;
     }
     
     private void validatePayRequest(PaymentOrder pay) {

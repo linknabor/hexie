@@ -1,0 +1,83 @@
+package com.yumu.hexie.model.user;
+
+import java.io.Serializable;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+@Entity
+public class MemberBill implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8890242631230858623L;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long memberbillid;//会员账单id
+	
+	private String trandate;//交易日期
+	
+	private String startdate;//交易开始日期
+	
+	private String enddate;//交易结束日期
+	
+	private String price;//交易金额
+	
+	private String status;//交易状态
+	
+	private String paymethod;//支付渠道
+	
+	private long userid;
+	
+	public long getUserid() {
+		return userid;
+	}
+	public void setUserid(long userid) {
+		this.userid = userid;
+	}
+	public long getMemberbillid() {
+		return memberbillid;
+	}
+	public void setMemberbillid(long memberbillid) {
+		this.memberbillid = memberbillid;
+	}
+	public String getTrandate() {
+		return trandate;
+	}
+	public void setTrandate(String trandate) {
+		this.trandate = trandate;
+	}
+	public String getStartdate() {
+		return startdate;
+	}
+	public void setStartdate(String startdate) {
+		this.startdate = startdate;
+	}
+	public String getEnddate() {
+		return enddate;
+	}
+	public void setEnddate(String enddate) {
+		this.enddate = enddate;
+	}
+	public String getPrice() {
+		return price;
+	}
+	public void setPrice(String price) {
+		this.price = price;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	public String getPaymethod() {
+		return paymethod;
+	}
+	public void setPaymethod(String paymethod) {
+		this.paymethod = paymethod;
+	}
+	
+	
+}

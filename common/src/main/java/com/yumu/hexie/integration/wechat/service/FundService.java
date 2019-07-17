@@ -1,13 +1,23 @@
 package com.yumu.hexie.integration.wechat.service;
 
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.UnionUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.common.CloseOrderResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
@@ -16,6 +26,11 @@ import com.yumu.hexie.integration.wechat.entity.common.PrePaymentOrder;
 import com.yumu.hexie.integration.wechat.util.MessageUtil;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.payment.PaymentOrder;
+import com.yumu.hexie.model.user.Member;
+import com.yumu.hexie.model.user.MemberBill;
+import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.user.req.MemberVo;
 
 public class FundService {
 	
@@ -74,6 +89,41 @@ public class FundService {
 				UNIPAY_URL,  "POST", requestXml,PrePaymentOrder.class);
 		return r; 
 	}
+	
+	
+	public static String getNotify(HttpServletRequest request, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		ServletInputStream sis = null;
+		try {
+			sis = request.getInputStream();
+			byte [] bytes = new byte[4096];	//TODO大小可能要改
+			sis.read(bytes);
+			
+			String requestStr = new String(bytes, "UTF-8");
+			requestStr = requestStr.trim();
+			requestStr = URLDecoder.decode(requestStr, "utf-8");
+			Map<String, String> mapResp = UnionUtil.pullRespToMap(requestStr);
+			requestStr = UnionUtil.mapToStr(mapResp);
+			
+			boolean signFlag = UnionUtil.verferSignData(requestStr);
+			
+			if (!signFlag) {
+				//验签失败
+				return "FAIL";
+			}
+			
+			String respCode = (String)mapResp.get("respCode");
+			if("0000".equals(respCode)) {
+				return (String)mapResp.get("orderNo");
+			}
+			
+		} catch (Exception e) {
+			throw new BizValidateException("回调验签出错");
+		} 
+		
+		return "FAIL";
+	}
+	
 	
 	/**
 	 * 订单查询接口
