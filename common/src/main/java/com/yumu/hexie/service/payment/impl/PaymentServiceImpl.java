@@ -170,6 +170,7 @@ public class PaymentServiceImpl implements PaymentService {
         log.warn("[Payment-check]begin["+paymentNo+"]");
         
         BaseResult baseResult = WuyeUtil.queryOrderInfo(paymentNo);
+        log.warn("baseResult:"+baseResult.getResult());
         return baseResult.getResult().equals("SUCCESS");
     }
     /** 
