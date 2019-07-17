@@ -42,6 +42,7 @@ import com.yumu.hexie.model.community.CommunityInfo;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
@@ -66,6 +67,9 @@ public class CommunityController extends BaseController{
 	
 	@Inject
 	private UserService userService;
+	
+	@Inject
+	private SystemConfigService systemConfigService;
 	
 	/*****************[BEGIN]帖子********************/
 	
@@ -401,7 +405,7 @@ public class CommunityController extends BaseController{
 			
 			PutExtra extra = new PutExtra();
 			File img = null;
-			
+			String accessToken=systemConfigService.queryWXAToken();
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
 					
@@ -409,7 +413,7 @@ public class CommunityController extends BaseController{
 					int imgcounter = 0;
 					inputStream = null;
 					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId);		//下载图片
+						inputStream = FileService.downloadFile(uploadId,accessToken);		//下载图片
 						if (inputStream==null) {
 							log.error("获取图片附件失败。");
 						}

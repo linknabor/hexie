@@ -75,6 +75,7 @@ public class WuyeUtil {
 	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"+ "?sect_id=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
+	private static final String BILL_PAY_ADDRESS_URL = "getBillAddressSDO.do"+ "?bill_id=%s";//查询账单地址
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
@@ -240,11 +241,14 @@ public class WuyeUtil {
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
-	// 21.缴费
+    public static BaseResult<HexieUser> getAddressByBill(String billId){
+    	String url = REQUEST_ADDRESS + String.format(BILL_PAY_ADDRESS_URL,billId);
+		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
+    };	// 21.缴费
 	public static BaseResult<WechatPayInfo> getPrePayInfo(String userId,long billId,String totalPrice,String openId,String notifyUrl) throws Exception {
 
 		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_PAY_URL, userId,billId,openId,totalPrice,notifyUrl);
-	
+
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		if (!baseResult.isSuccess()) {
 			throw new ValidationException(baseResult.getData().toString());

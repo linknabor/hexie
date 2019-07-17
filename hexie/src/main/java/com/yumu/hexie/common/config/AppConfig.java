@@ -83,7 +83,8 @@ public class AppConfig {
     public EmbeddedServletContainerFactory EmbeddedServletContainerFactory(){
         TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
         factory.setPort(86);
-//        factory.addAdditionalTomcatConnectors(createSslConnector());
+        factory.addConnectorCustomizers(new AppTomcatConnectorCustomizer());
+        factory.addAdditionalTomcatConnectors(createSslConnector());
         return factory;
     }
     
@@ -104,7 +105,6 @@ public class AppConfig {
             throw new IllegalStateException("cant access keystore: [" + "keystore" + "]  ", ex);
         }
     }
-    
     
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
@@ -127,8 +127,8 @@ public class AppConfig {
         dataSource.setPassword(password);
         try {
             dataSource.setDriverClass(driverClassName);
-            dataSource.setMaxPoolSize(2);
-            dataSource.setMinPoolSize(0);
+            dataSource.setMaxPoolSize(450);
+            dataSource.setMinPoolSize(5);
             dataSource.setMaxIdleTime(1200);
         } catch (PropertyVetoException e) {
             LOGGER.error("Can not create Data source.");

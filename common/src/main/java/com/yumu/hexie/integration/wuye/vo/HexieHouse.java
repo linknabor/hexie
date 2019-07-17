@@ -14,6 +14,50 @@ public class HexieHouse implements Serializable {
 	private String cnst_area;
 	private String ver_no;
 	private List<ParkInfo> park_inf;
+	
+	private long province_id;//省id
+	private String province_name;//省名
+	private long city_id;//城市ID
+	private long region_id;//区域ID
+	private String region_name;//区域名
+	private String sect_addr;
+	
+	public String getSect_addr() {
+		return sect_addr;
+	}
+	public void setSect_addr(String sect_addr) {
+		this.sect_addr = sect_addr;
+	}
+	public long getProvince_id() {
+		return province_id;
+	}
+	public void setProvince_id(long province_id) {
+		this.province_id = province_id;
+	}
+	public String getProvince_name() {
+		return province_name;
+	}
+	public void setProvince_name(String province_name) {
+		this.province_name = province_name;
+	}
+	public long getCity_id() {
+		return city_id;
+	}
+	public void setCity_id(long city_id) {
+		this.city_id = city_id;
+	}
+	public long getRegion_id() {
+		return region_id;
+	}
+	public void setRegion_id(long region_id) {
+		this.region_id = region_id;
+	}
+	public String getRegion_name() {
+		return region_name;
+	}
+	public void setRegion_name(String region_name) {
+		this.region_name = region_name;
+	}
 	public String getMng_cell_id() {
 		return mng_cell_id;
 	}

@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.shequ;
 
-import javax.xml.bind.ValidationException;
 
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -13,6 +12,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
 
@@ -58,6 +58,30 @@ public interface WuyeService {
 	
 	//16.根据名称模糊查询合协社区小区列表
 	public CellListVO getVagueSectByName(String sect_name);
+	
+	//根据账单查询地址
+	public HexieUser getAddressByBill(String billId);
+	
+	
+	public void addSectToRegion();
+	
+	public void addDefaultAddressAndUser() throws InterruptedException;
+	
+	public void setDefaultAddress(User user,HexieUser u);
+	
+	public void saveRegion(HexieUser u);
+	
+	public void updateAddr();
+	
+	public void updateUserShareCode();
+	
+	public void updateRepeatUserShareCode();
+	
+	/**
+	 * 更新未绑定房屋的地址及用户信息
+	 * @throws InterruptedException 
+	 */
+	public void updateNonBindUser() throws InterruptedException;
 	
 	
 }

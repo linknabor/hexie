@@ -242,4 +242,19 @@ public class AddressServiceImpl implements AddressService {
             return null;
         }
     }
+
+	@Override
+	public List<Address> getAddressByuserIdAndAddress(long id, String cell_addr) {
+		return addressRepository.getAddressByuserIdAndAddress(id, cell_addr);
+	}
+
+	@Override
+	public List<Address> getAddressByMain(long id,boolean main) {
+		return addressRepository.getAddressByMain(id,main);
+	}
+
+	@Override
+	public List<Address> getAddressByShareCode(String shareCode) {
+		return addressRepository.getAddressByShareCode(shareCode);
+	}
 }

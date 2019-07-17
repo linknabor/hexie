@@ -37,5 +37,11 @@ public interface AddressService {
 	public DataCreateResp addAmapYuntuDataCreate(DataCreateReq newAddr);
 	
 	public List<AmapAddress> queryAroundByCoordinate(double longitude, double latitude);
+
+	public List<Address> getAddressByuserIdAndAddress(long id, String cell_addr);
+	
+	public List<Address> getAddressByMain(long id,boolean main);
+	
+	public List<Address> getAddressByShareCode(String shareCode);
 	
 }
