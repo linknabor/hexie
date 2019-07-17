@@ -70,7 +70,7 @@ public class MemberServiceImpl implements MemberService{
 		bill.setUserid(user.getId());
 		bill = memberBillRepository.save(bill);
 		try {
-			return WuyeUtil.getPrePayInfo(user.getWuyeId(), bill.getMemberbillid(), bill.getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
+			return WuyeUtil.getPrePayInfo(bill.getMemberbillid(), bill.getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
