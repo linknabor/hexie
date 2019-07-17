@@ -122,8 +122,7 @@ public class PaymentServiceImpl implements PaymentService {
         if(checkPaySuccess(pay.getPaymentNo())){
             throw new BizValidateException(pay.getId(),"订单已支付成功，勿重复提交！").setError();
         }
-        PrePaymentOrder preWechatOrder = wechatCoreService.createOrder(pay);
-        pay.setPrepayId(preWechatOrder.getPrepay_id());
+
         DecimalFormat decimalFormat=new DecimalFormat("0");
         String price = decimalFormat.format(pay.getPrice()*100);
         try {
@@ -142,6 +141,8 @@ public class PaymentServiceImpl implements PaymentService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+//      PrePaymentOrder preWechatOrder = wechatCoreService.createOrder(pay);
+//      pay.setPrepayId(preWechatOrder.getPrepay_id());
 //        paymentOrderRepository.save(pay);
 //        log.warn("[Payment-req]Saved["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
 //        //3. 从微信获取签名
