@@ -108,6 +108,8 @@ public class WuyeController extends BaseController {
 			log.error("这里是删除房子后保存的电话");
 			log.error("保存电话到user表==》开始");
 			user.setOfficeTel(r.getData());
+			user.setSect_id("0");
+			user.setCsp_id("0");
 			userService.save(user);
 			log.error("保存电话到user表==》成功");
 			return BaseResult.successResult("删除房子成功！");
@@ -693,6 +695,20 @@ public class WuyeController extends BaseController {
 					}
 
 	} 
+	
+	//用户设置小区id公司id
+	@RequestMapping(value = "/setHasHouseUserSectId", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> setHasHouseUserSectId(@RequestParam String code) throws Exception {
+		if ("hexieCode".equals(code)) {
+		     wuyeService.setHasHouseUserSectId();
+			log.error("用户设置完成!!!");
+			return BaseResult.successResult("");
+		} else {
+			return BaseResult.fail("请求错误！！！");
+		}
+
+	}
 
 		// for (User u : list) {
 		// if(u.getWuyeId() != null){

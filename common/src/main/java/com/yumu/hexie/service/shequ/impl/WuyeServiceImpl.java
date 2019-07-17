@@ -32,6 +32,7 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.user.AddUserSectIdWorker;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.AddressWorker;
@@ -342,6 +343,9 @@ public class WuyeServiceImpl implements WuyeService {
 			user.setCounty(u.getRegion_name());
 			user.setXiaoquId(re.get(0).getId());
 			user.setXiaoquName(u.getSect_name());
+			user.setSect_id(u.getSect_id());	
+			user.setCenter_id(u.getCenter_id());
+			user.setCsp_id(u.getCsp_id());
 			userService.save(user);
 			log.error("保存用户成功！！！");
 		}
@@ -466,6 +470,34 @@ public class WuyeServiceImpl implements WuyeService {
 		};
 		log.error("成功更新" + success.get() + "户。");
 		log.error("更新失败" + fail.get() + "户。");
+	}
+
+	@Override
+	public void setHasHouseUserSectId() throws InterruptedException {
+		List<User> userList=userRepository.findAll();
+		ExecutorService service = Executors.newFixedThreadPool(10);
+		//统计成功失败数
+		AtomicInteger success = new AtomicInteger(0);
+		AtomicInteger fail = new AtomicInteger(0);
+		log.error("开始更新" + userList.size() + "户。");
+		for (User user : userList) {
+			AddUserSectIdWorker addUserSectIdWorker=new AddUserSectIdWorker(user,userRepository,wuyeService, transactionUtil,success,fail);
+			service.execute(addUserSectIdWorker);
+		}
+		service.shutdown();
+		while(!service.awaitTermination(30l, TimeUnit.SECONDS)){
+			
+		}
+		log.error("成功更新" + success.get() + "户。");
+		log.error("更新失败" + fail.get() + "户。");
+	}
+
+	@Override
+	public void setUserSectid(User user, HexieUser u) {
+		user.setSect_id(u.getSect_id());	
+		user.setCenter_id(u.getCenter_id());
+		user.setCsp_id(u.getCsp_id());
+		userRepository.save(user);
 	}
 	
 }
