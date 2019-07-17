@@ -247,9 +247,9 @@ public class WuyeUtil {
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
     };	
     // 21.缴费
-	public static BaseResult<WechatPayInfo> getPrePayInfo(long billId,String totalPrice,String openId,String notifyUrl) throws Exception {
+	public static BaseResult<WechatPayInfo> getMemberPrePayInfo(String billId,String totalPrice,String openId,String notifyUrl) throws Exception {
 
-		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_PAY_URL, billId,openId,totalPrice,notifyUrl);
+		String url = "https://test.e-shequ.com/mobileInterface/mobile/" + String.format(MEMBER_WX_PAY_URL, billId,openId,totalPrice,notifyUrl);
 
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		if (!baseResult.isSuccess()) {
@@ -322,10 +322,8 @@ public class WuyeUtil {
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
 	public static void main(String args[]) throws JSONException {
-		String resp = "{\"result\":\"00\",\"data\":{\"trade_water_id\":\"20160112175644955015\",\"merger_status\":\"02\",\"package\":\"wx20160112175645c1930803540408946371\"}}";
-
 		try {
-			BaseResult v =jsonToBeanResult(resp, PayResult.class);
+			getMemberPrePayInfo("999999999","ofDNH0rOvxMbSZAMNHMadzGQIZU4","1","www.baidu.com");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

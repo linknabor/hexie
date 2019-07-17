@@ -129,7 +129,7 @@ public class PaymentServiceImpl implements PaymentService {
             DecimalFormat decimalFormat=new DecimalFormat("0");
             String price = decimalFormat.format(pay.getPrice()*100);
             log.warn("获取预支付id前——————————前：");
-        	WechatPayInfo payinfo = WuyeUtil.getPrePayInfo(Long.parseLong(pay.getPaymentNo()), price, pay.getOpenId(),"weixinorder").getData();
+        	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(pay.getPaymentNo(), price, pay.getOpenId(),"weixinorder").getData();
         	log.warn("获取预支付id后——————————后：");
         	JsSign sign = new JsSign();
         	sign.setAppId(payinfo.getAppid());
