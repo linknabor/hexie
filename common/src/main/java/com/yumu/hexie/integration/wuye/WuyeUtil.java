@@ -249,7 +249,7 @@ public class WuyeUtil {
     // 21.缴费
 	public static BaseResult<WechatPayInfo> getMemberPrePayInfo(String billId,String totalPrice,String openId,String notifyUrl) throws Exception {
 
-		String url = "https://test.e-shequ.com/mobileInterface/mobile/" + String.format(MEMBER_WX_PAY_URL, billId,openId,totalPrice,notifyUrl);
+		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_PAY_URL, billId,openId,totalPrice,notifyUrl);
 
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		if (!baseResult.isSuccess()) {
@@ -323,7 +323,7 @@ public class WuyeUtil {
 	
 	public static void main(String args[]) throws JSONException {
 		try {
-			getMemberPrePayInfo("999999999","ofDNH0rOvxMbSZAMNHMadzGQIZU4","1","www.baidu.com");
+			getMemberPrePayInfo("201907171826P80471","1","o_3DlwWzqY176xwmAzIIjY7fSGBQ","www.baidu.com");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
