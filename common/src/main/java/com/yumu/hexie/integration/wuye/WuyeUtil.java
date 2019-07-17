@@ -252,9 +252,7 @@ public class WuyeUtil {
 		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_PAY_URL, billId,openId,totalPrice,notifyUrl);
 
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
-		if (!baseResult.isSuccess()) {
-			throw new ValidationException(baseResult.getData().toString());
-		}
+
 		return (BaseResult<WechatPayInfo>)baseResult;
 	}
 	
@@ -323,7 +321,12 @@ public class WuyeUtil {
 	
 	public static void main(String args[]) throws JSONException {
 		try {
-			getMemberPrePayInfo("201907171826P80471","1","o_3DlwWzqY176xwmAzIIjY7fSGBQ","www.baidu.com");
+
+			BaseResult v =jsonToBeanResult("{\"result\":\"USERPAYING\",\"data\":{\"packageValue\":\"prepay_id=wx17200917723531c72b8b31ba1759562900\",\"trade_water_id\":\"201907172009P36403\",\"appid\":\"wx8c0072a9504288f3\",\"signtype\":\"RSA\",\"paysign\":\"qbdUGEUIzkUMQ4rczjmty5qQKYl6pmGLrOF2fNFgSqwjUx1ODGI7sqfOj/q9burYid7ssVXIiNPNpiR3aK/yNvDlqkEW1MbCD9q6KxtbJFAKzydyBoJSuEkT23B0D07HGhbTBmzmb/KnwbfJ7uySW6P4v5KtL4j8ZDpGRHlWjg8d9K5vS9gD8JV3mmntG0pKpoMaiAPPIBV7M/KqC+ROr153FiTpsnNK64c/tjgLFsjQkQ1wUx+YZhVsjuRyy2MNK28fNqnZlCjT4+2Ax46ismyg6ipGkxskUm4Ydw/r1HGgk030lHFI/iOY6jI/6zmbSiKUdvyE5HSvKuAyQWzdKw\",\"noncestr\":\"70ba31fc859649af95b0bb1e2c08f325\",\"timestamp\":\"1563365357\"}}", WechatPayInfo.class);
+			BaseResult<WechatPayInfo> aaa =(BaseResult<WechatPayInfo>)v;
+			WechatPayInfo a1 = aaa.getData();
+			System.out.println(a1.getAppid());;
+//			getMemberPrePayInfo("201907171826P80471","1","o_3DlwWzqY176xwmAzIIjY7fSGBQ","www.baidu.com");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
