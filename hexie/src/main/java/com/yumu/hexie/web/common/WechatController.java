@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
+import com.yumu.hexie.integration.wechat.service.FundService;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.service.common.WechatCoreService;
@@ -75,20 +76,21 @@ public class WechatController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST,produces="text/plain;charset=UTF-8" )
-    public String orderNotify(PaymentOrderResult paymentOrderResult) throws Exception {
-    	LOGGER.error("orderNotify:（"+paymentOrderResult.isSuccess()+"）" + JacksonJsonUtil.beanToJson(paymentOrderResult));
-    	if(paymentOrderResult.isSuccess()) {
-			PaymentOrder payment = paymentService.findByPaymentNo(paymentOrderResult.getOut_trade_no());
-			payment = paymentService.refreshStatus(payment);
-			if(payment.getOrderType() == PaymentConstant.TYPE_MARKET_ORDER){
-	            baseOrderService.update4Payment(payment);
-			} else if(payment.getOrderType() == PaymentConstant.TYPE_XIYI_ORDER) {
-                xiyiService.update4Payment(payment);
-            } else if(payment.getOrderType() == PaymentConstant.TYPE_BAOJIE_ORDER) {
-                baojieService.update4Payment(payment);
-            }
+    public String orderNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    	String is = FundService.getNotify(request, response);
+    	if("FAIL".equals(is)) {
+    		return "FAIL";
     	}
-    	return "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>";
+		PaymentOrder payment = paymentService.findByPaymentNo(is);//获取billID
+		payment = paymentService.refreshStatus(payment);
+		if(payment.getOrderType() == PaymentConstant.TYPE_MARKET_ORDER){
+            baseOrderService.update4Payment(payment);
+		} else if(payment.getOrderType() == PaymentConstant.TYPE_XIYI_ORDER) {
+            xiyiService.update4Payment(payment);
+        } else if(payment.getOrderType() == PaymentConstant.TYPE_BAOJIE_ORDER) {
+            baojieService.update4Payment(payment);
+        }
+    	return "SUCCESS";
     }
     //用于唤起扫码
     @ResponseBody

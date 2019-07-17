@@ -17,8 +17,11 @@ import org.springframework.stereotype.Service;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
+import com.yumu.hexie.integration.wechat.entity.customer.DataJsonVo;
+import com.yumu.hexie.integration.wechat.entity.customer.DataVo;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
+import com.yumu.hexie.integration.wechat.entity.customer.Template;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -26,6 +29,7 @@ import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.o2o.OperatorService;
@@ -66,6 +70,8 @@ public class GotongServiceImpl implements GotongService {
     private OperatorService  operatorService;
     @Inject
     private SystemConfigService systemConfigService;
+    @Inject
+    private UserRepository userRepository;
 
     @Async
     @Override
@@ -148,5 +154,28 @@ public class GotongServiceImpl implements GotongService {
             TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken);    
         }
         
+    }
+    
+    @Override
+    public void pushweixinAll() {
+		List<User> useropenId = userRepository.findAll();
+		for (int i = 0; i < useropenId.size(); i++) {
+			
+			Template msg = new Template();
+	    	msg.setTouser(useropenId.get(i).getOpenid());
+	    	msg.setUrl("");//跳转地址 threadid
+	    	msg.setTemplate_id("");//模板id template
+			DataVo data = new DataVo();
+			data.setFirst(new DataJsonVo(""));
+			data.setKeyword1(new DataJsonVo(""));
+			data.setKeyword2(new DataJsonVo(""));
+			data.setKeyword3(new DataJsonVo(""));
+			data.setKeyword4(new DataJsonVo(""));
+			data.setRemark(new DataJsonVo(""));
+			msg.setData(data);
+			String accessToken = systemConfigService.queryWXAToken();
+			CustomService.sendCustomerMessage(msg, accessToken);
+		}
+		
     }
 }
