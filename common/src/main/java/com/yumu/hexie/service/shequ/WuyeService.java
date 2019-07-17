@@ -69,6 +69,8 @@ public interface WuyeService {
 	
 	public void setDefaultAddress(User user,HexieUser u);
 	
+	public void setUserSectid(User user,HexieUser u);
+	
 	public void saveRegion(HexieUser u);
 	
 	public void updateAddr();
@@ -82,6 +84,9 @@ public interface WuyeService {
 	 * @throws InterruptedException 
 	 */
 	public void updateNonBindUser() throws InterruptedException;
+	
+	
+	public void setHasHouseUserSectId() throws InterruptedException;
 	
 	
 }
