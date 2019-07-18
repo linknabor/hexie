@@ -7,7 +7,9 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -222,6 +224,48 @@ public class CommunityServiceImpl implements CommunityService {
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page) {
 
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
+	}
+
+	@Override
+	public List<Object> getThreadList(String nickName, String createDate, String[] sectIds,int pageNum,int pageSize) {
+		return threadRepository.getThreadList(nickName,createDate,sectIds,pageNum,pageSize);
+	}
+
+	@Override
+	public int getThreadListCount(String nickName, String createDate, String[] sectIds) {
+		return threadRepository.getThreadListCount(nickName, createDate, sectIds);
+	}
+
+	@Override
+	@Transactional
+	public void deleteThread(String[] threadIds) {
+		threadRepository.deleteThread(threadIds);
+	}
+
+	@Override
+	@Transactional
+	public void saveThreadComment(Long threadId, String content, Long userId, String userName) {
+		Thread thread=threadRepository.findOne(threadId);
+		Long toUserId =thread.getUserId();
+		String toUserName=thread.getUserName();
+		
+		ThreadComment comment=new ThreadComment();
+		comment.setCommentDateTime(System.currentTimeMillis());
+		comment.setCommentDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
+		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
+		comment.setToUserId(toUserId);
+		comment.setToUserName(toUserName);
+		comment.setCommentUserId(userId);
+		comment.setCommentUserName(userName);
+		comment.setThreadId(threadId);
+		comment.setCommentContent(content);
+		threadCommentRepository.save(comment);
+		
+		thread.setCommentsCount(thread.getCommentsCount()+1); 
+		thread.setHasUnreadComment("true");
+		thread.setLastCommentTime(System.currentTimeMillis());
+		threadRepository.save(thread);
+		
 	}
 	
 	
