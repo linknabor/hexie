@@ -49,7 +49,7 @@ public class MemberServiceImpl implements MemberService{
 	private MemberBillRepository memberBillRepository;
 	@Inject
 	private UserRepository userRepository;
-	
+	@Inject
 	private CouponServiceImpl couponServiceImpl;
 	
 	@Override
