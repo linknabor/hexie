@@ -37,7 +37,7 @@ public class MemberController extends BaseController{
 	@RequestMapping(value="/getMember",method = RequestMethod.GET)
 	@ResponseBody
 	public List<Member> getMember(@ModelAttribute(Constants.USER) User user){
-		
+		log.info("获取用户会员：手机号"+user.getTel());;
 		return memberServiceImpl.getMember(user);
 	}
 	
@@ -50,7 +50,7 @@ public class MemberController extends BaseController{
 	@RequestMapping(value="/getMemberPayinfo",method = RequestMethod.GET)
 	@ResponseBody
 	public WechatPayInfo getMemberPayinfo(@ModelAttribute(Constants.USER) User user){
-		
+		log.info("会员支付接口：手机号"+user.getTel());;
 		return memberServiceImpl.getPayInfo(user);
 	}
 	
