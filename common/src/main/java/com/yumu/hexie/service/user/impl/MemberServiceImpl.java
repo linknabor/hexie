@@ -61,6 +61,8 @@ public class MemberServiceImpl implements MemberService{
 	@Override
 	public WechatPayInfo getPayInfo(User user) {
 		// TODO Auto-generated method stub
+		
+		log.info("会员支付接口：UserId:"+user.getId());;
 		MemberBill bill = new MemberBill();
 		bill.setPrice(MemberVo.PRICE);//支付金额 98
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
