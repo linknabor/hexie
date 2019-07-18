@@ -2,6 +2,7 @@ package com.yumu.hexie.web.user;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,7 +27,7 @@ import com.yumu.hexie.web.BaseController;
 public class MemberController extends BaseController{
 	
 	private static final Logger log = LoggerFactory.getLogger(MemberController.class);
-	
+	@Inject
 	private MemberServiceImpl memberServiceImpl;
 	
 	/**
