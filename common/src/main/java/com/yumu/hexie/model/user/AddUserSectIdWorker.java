@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -45,25 +46,17 @@ public class AddUserSectIdWorker implements Runnable{
 	}
 	@SuppressWarnings("unchecked")
 	public void deal(){
-		List<User> userList = userRepository.findByWuyeId(user.getWuyeId());
-		for (User user : userList) {
-			HouseListVO listVo = wuyeService.queryHouse(user.getWuyeId());
-			if (listVo != null) {
-				if (listVo.getHou_info() != null && listVo.getHou_info().size() > 0) {
-					HexieUser hexieUser = new HexieUser();
-					hexieUser.setSect_id(listVo.getHou_info().get(0).getSect_id());
-					hexieUser.setCsp_id(listVo.getHou_info().get(0).getCsp_id());
-					hexieUser.setCenter_id(listVo.getHou_info().get(0).getCenter_id());
-					boolean isSuccess = transactionUtil.transact(s -> wuyeService.setUserSectid(user, hexieUser));
-				    if(!isSuccess){
-				    	fail.incrementAndGet();
-				    	log.error("失败用户Id: " + user.getId());
-				    }else{
-				        success.incrementAndGet();
-				    }
-				}
+		if(StringUtil.isEmpty(user.getSect_id())){
+			HexieUser hexieUser = wuyeService.queryPayUserAndBindHouse(user.getWuyeId());
+			if(hexieUser != null){
+				boolean isSuccess = transactionUtil.transact(s -> wuyeService.setDefaultAddress(user, hexieUser));	
+				if(!isSuccess){
+			    	fail.incrementAndGet();
+			    	log.error("失败用户Id: " + user.getId());
+			    }else{
+			        success.incrementAndGet();
+			    }	
 			}
-		}
+		 }
 	}
-
 }

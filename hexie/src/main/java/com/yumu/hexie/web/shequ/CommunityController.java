@@ -222,7 +222,8 @@ public class CommunityController extends BaseController{
 		
 		Long sect_id = null;
 		try {
-			sect_id = user.getXiaoquId();
+			//sect_id = user.getXiaoquId();
+			sect_id =Long.parseLong(user.getSect_id());
 		} catch (Exception e) {
 			
 			return BaseResult.fail("用户没有注册小区。");

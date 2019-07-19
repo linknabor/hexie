@@ -472,14 +472,30 @@ public class WuyeServiceImpl implements WuyeService {
 		log.error("更新失败" + fail.get() + "户。");
 	}
 
+	
 	@Override
 	public void setHasHouseUserSectId() throws InterruptedException {
-		List<User> userList=userRepository.findAll();
+		int pageSize=10000;
+		int pageNum=0;
+		getUserList(pageNum,pageSize,null);		
+		
+	}
+	
+	
+	public void getUserList(int pageNum,int pageSize,List<User> userList) throws InterruptedException{
+		userList=userRepository.getUserList(pageNum,pageSize);
+		excuteWorker(userList,pageNum);
+		pageNum+=pageSize;
+		if(userList.size()>0){
+			getUserList(pageNum,pageSize,userList);
+		}
+	}
+	public void excuteWorker(List<User> userList,int pageNum) throws InterruptedException{
 		ExecutorService service = Executors.newFixedThreadPool(10);
 		//统计成功失败数
 		AtomicInteger success = new AtomicInteger(0);
 		AtomicInteger fail = new AtomicInteger(0);
-		log.error("开始更新" + userList.size() + "户。");
+		log.error("开始更新" + "第"+pageNum+"页,共" +userList.size() + "户。");
 		for (User user : userList) {
 			AddUserSectIdWorker addUserSectIdWorker=new AddUserSectIdWorker(user,userRepository,wuyeService, transactionUtil,success,fail);
 			service.execute(addUserSectIdWorker);
@@ -488,8 +504,8 @@ public class WuyeServiceImpl implements WuyeService {
 		while(!service.awaitTermination(30l, TimeUnit.SECONDS)){
 			
 		}
-		log.error("成功更新" + success.get() + "户。");
-		log.error("更新失败" + fail.get() + "户。");
+		log.error("成功更新" + "第"+pageNum+"页,共"+success.get() + "户。");
+		log.error("更新失败" + "第"+pageNum+"页,共"+fail.get() + "户。");
 	}
 
 	@Override
@@ -498,6 +514,12 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setCenter_id(u.getCenter_id());
 		user.setCsp_id(u.getCsp_id());
 		userRepository.save(user);
+	}
+
+	@Override
+	public HexieUser queryPayUserAndBindHouse(String wuyeId) {
+		
+		return WuyeUtil.queryPayUserAndBindHouse(wuyeId).getData();
 	}
 	
 }

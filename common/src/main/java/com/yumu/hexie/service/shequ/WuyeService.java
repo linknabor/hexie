@@ -89,4 +89,7 @@ public interface WuyeService {
 	public void setHasHouseUserSectId() throws InterruptedException;
 	
 	
+	public HexieUser queryPayUserAndBindHouse(String wuyeId);
+	
+	
 }

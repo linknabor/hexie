@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 /**
@@ -49,6 +50,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " and thread.userSectId in ?3",nativeQuery = true)
 	public int getThreadListCount(String nickName, String createDate,String[] sectIds);
 	
+	@Modifying
 	@Query(nativeQuery = true,value="update thread set threadStatus=1 where threadId in ?1")
 	public int deleteThread(String[] threadIds);
 }

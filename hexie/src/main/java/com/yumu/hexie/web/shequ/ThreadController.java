@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.shequ.CommunityService;
+import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
@@ -33,6 +35,9 @@ public class ThreadController extends BaseController {
 
 	@Inject
 	private CommunityService communityService;
+	
+	@Inject
+	private UserService userService;
     
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/servplat/thread/getThreadList", method = RequestMethod.GET,produces = "application/json")
@@ -56,8 +61,8 @@ public class ThreadController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/servplat/thread/deleteThread", method = RequestMethod.GET,produces = "application/json")
 	@ResponseBody
-	public BaseResult<String> deleteThread(@RequestParam String thredaIds) {
-		String[] threda_ids=thredaIds.split(",");
+	public BaseResult<String> deleteThread(@RequestParam String threadIds) {
+		String[] threda_ids=threadIds.split(",");
 		communityService.deleteThread(threda_ids);
 		return BaseResult.successResult("");
 	}
@@ -80,6 +85,16 @@ public class ThreadController extends BaseController {
 	public BaseResult<String> saveThreadComment(@RequestParam(required = false)String threadId,@RequestParam(required = false)String content,@RequestParam(required = false) String userId,@RequestParam(required = false) String userName) {
 		communityService.saveThreadComment(Long.parseLong(threadId),content,Long.parseLong(userId),userName);
 		return BaseResult.successResult("");
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/servplat/thread/getUserInfo", method = RequestMethod.GET,produces = "application/json")
+	@ResponseBody
+	public BaseResult<Map<String,Object>> getUserInfo(@RequestParam String userId) {
+		User user=userService.getById(Long.parseLong(userId));
+		Map<String,Object> map=new HashMap<>();
+		map.put("userInfo", user);
+		return BaseResult.successResult(map);
 	}
 
 }
