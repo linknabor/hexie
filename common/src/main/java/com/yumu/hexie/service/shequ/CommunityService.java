@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -167,4 +168,13 @@ public interface CommunityService {
 	 */
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page);
 	
+	
+	public List<Object> getThreadList(String nickName, String createDate,String[] sectIds,int pageNum,int pageSize);
+	
+	public int getThreadListCount(String nickName, String createDate,String[] sectIds);
+	
+	
+	public void deleteThread(String[] threadIds);
+	
+	public void saveThreadComment(Long threadId,String content,Long userId,String userName);
 }

@@ -13,5 +13,7 @@ public interface RegionService {
 	public Region saveRegion(Region r);
 	
 	public List<Region> getRegionAll();
+	
+	public List<Region> findAllBySectId(String sectId);
 
 }
