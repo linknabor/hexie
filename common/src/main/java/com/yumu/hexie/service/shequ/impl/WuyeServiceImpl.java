@@ -32,6 +32,7 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.user.AddRegionSectIdWorker;
 import com.yumu.hexie.model.user.AddUserSectIdWorker;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
@@ -256,6 +257,7 @@ public class WuyeServiceImpl implements WuyeService {
 				r.setRegionType(4);
 				r.setLatitude(0.0);
 				r.setLongitude(0.0);
+				r.setSectId(tempSect.getSectId());
 				regionService.saveRegion(r);
 			}
 		}
@@ -299,7 +301,7 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 			
-			List<Region> re=regionService.findByNameAndParentId(u.getSect_name(),map.get(u.getRegion_name()));
+			List<Region> re=regionService.findAllBySectId(u.getSect_id());
 			if(re.size()==0){
 				log.error("未查询到小区！"+u.getSect_name());
 				return;
@@ -357,7 +359,8 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public void saveRegion(HexieUser u) {
 		log.error("进入保存region！！！");
-		List<Region> regionList=regionRepository.findAllByNameAndParentName(u.getSect_name(), u.getRegion_name());
+	//	List<Region> regionList=regionRepository.findAllByNameAndParentName(u.getSect_name(), u.getRegion_name());
+		List<Region> regionList=regionRepository.findAllBySectId(u.getSect_id());
 		if(regionList.size()==0){
 			Region region = regionRepository.findByNameAndRegionType(u.getRegion_name(), 3);
 			if(region!=null){
@@ -369,6 +372,7 @@ public class WuyeServiceImpl implements WuyeService {
 				r.setRegionType(4);
 				r.setLatitude(0.0);
 				r.setLongitude(0.0);
+				r.setSectId(u.getSect_id());
 				r.setXiaoquAddress(u.getSect_addr());
 				regionService.saveRegion(r);
 			}
@@ -520,6 +524,39 @@ public class WuyeServiceImpl implements WuyeService {
 	public HexieUser queryPayUserAndBindHouse(String wuyeId) {
 		
 		return WuyeUtil.queryPayUserAndBindHouse(wuyeId).getData();
+	}
+
+	@Override
+	public void addSectIdToRegion() throws InterruptedException {
+		List<Region>  list=regionRepository.getRegionList();
+		ExecutorService service = Executors.newFixedThreadPool(10);
+		//统计成功失败数
+		AtomicInteger success = new AtomicInteger(0);
+		AtomicInteger fail = new AtomicInteger(0);
+		log.error("开始更新" + list.size() + "小区。");
+		for (Region region : list) {
+			AddRegionSectIdWorker addRegionSectIdWorker=new AddRegionSectIdWorker(region,wuyeService, transactionUtil,success,fail);
+			service.execute(addRegionSectIdWorker);
+		}
+		
+		service.shutdown();
+		while(!service.awaitTermination(30l, TimeUnit.SECONDS)){
+			
+		}
+		
+		log.error("成功更新" + success.get() + "小区。");
+		log.error("更新失败" + fail.get() + "小区。");
+	}
+
+	@Override
+	public void saveRegionSectId(Region region, String sectId) {
+		region.setSectId(sectId);
+		regionRepository.save(region);
+	}
+
+	@Override
+	public String getSectIdByRegionName(String regionName) {
+		return WuyeUtil.querySectIdByName(regionName).getData();
 	}
 	
 }

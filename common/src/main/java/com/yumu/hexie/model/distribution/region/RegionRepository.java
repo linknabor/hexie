@@ -24,4 +24,9 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     
     @Query(" from Region  where regionType < 4")
     public List<Region> findNeedRegion();
+    
+    public List<Region> findAllBySectId(String sectId);
+    
+    @Query(" from Region  where regionType = 4 and sectId is null ")
+    public List<Region> getRegionList();
 }

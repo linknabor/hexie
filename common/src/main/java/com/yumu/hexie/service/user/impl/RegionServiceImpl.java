@@ -37,5 +37,10 @@ public class RegionServiceImpl implements RegionService{
 		return regionRepository.findOne(id);
 	}
 
+	@Override
+	public List<Region> findAllBySectId(String sectId) {
+		return regionRepository.findAllBySectId(sectId);
+	}
+
 
 }

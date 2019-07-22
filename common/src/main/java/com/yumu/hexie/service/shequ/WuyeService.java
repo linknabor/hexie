@@ -12,6 +12,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
@@ -91,5 +92,13 @@ public interface WuyeService {
 	
 	public HexieUser queryPayUserAndBindHouse(String wuyeId);
 	
+	//添加区域region表字段sectId
+	public void addSectIdToRegion() throws InterruptedException;
+	
+	//保存region表sectId
+	public void saveRegionSectId(Region region,String sectId);
+	
+	//根据regionName去community查询sectId
+	public String getSectIdByRegionName(String regionName);
 	
 }
