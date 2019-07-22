@@ -62,16 +62,25 @@ public class MemberServiceImpl implements MemberService{
 	public WechatPayInfo getPayInfo(User user) {
 		// TODO Auto-generated method stub
 		
-		log.info("会员支付接口：UserId:"+user.getId());;
-		MemberBill bill = new MemberBill();
-		bill.setPrice(MemberVo.PRICE);//支付金额 98
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-		bill.setStartdate(df.format(new Date()));//交易时间
-		bill.setTrandate(df.format(new Date()).substring(0, 10));//交易日期
-		bill.setStatus(MemberVo.MIDDLE);//交易状态
-		bill.setUserid(user.getId());
-		bill = memberBillRepository.save(bill);
+		log.info("会员支付接口：UserId:"+user.getId());
 		try {
+			List<MemberBill> listbill = memberBillRepository.findByUserid(user.getId());
+			if(!listbill.isEmpty()) {
+				if(listbill.size()>0) {
+					if(MemberVo.MIDDLE.equals(listbill.get(0).getStatus())) {//如果已有账单 并且状态是支付中
+						return WuyeUtil.getMemberPrePayInfo(String.valueOf(listbill.get(0).getMemberbillid()), listbill.get(0).getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
+					}
+				}
+			}
+			MemberBill bill = new MemberBill();
+			bill.setPrice(MemberVo.PRICE);//支付金额 98
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+			bill.setStartdate(df.format(new Date()));//交易时间
+			bill.setTrandate(df.format(new Date()).substring(0, 10));//交易日期
+			bill.setStatus(MemberVo.MIDDLE);//交易状态
+			bill.setUserid(user.getId());
+			bill = memberBillRepository.save(bill);
+			
 			return WuyeUtil.getMemberPrePayInfo(String.valueOf(bill.getMemberbillid()), bill.getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -17,5 +17,6 @@ public interface ScheduleService {
     public void executeCouponTimeoutJob();
     //7.优惠券到期提醒
     public void executeCoupinTimeoutHintJob();
-   
+    //会员定时 订单状态查询  及会员日期判断
+    public void executeMemberTimtout();
 }

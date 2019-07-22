@@ -137,6 +137,7 @@ public class PaymentServiceImpl implements PaymentService {
         	sign.setPkgStr(payinfo.getPackageValue());
         	sign.setSignature(payinfo.getPaysign());
         	sign.setTimestamp(payinfo.getTimestamp());
+        	sign.setSignType(payinfo.getSigntype());
         	return sign;
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
@@ -172,7 +173,7 @@ public class PaymentServiceImpl implements PaymentService {
         
         BaseResult baseResult = WuyeUtil.queryOrderInfo(paymentNo);
         log.warn("baseResult:"+baseResult.getResult());
-        return baseResult.getResult().equals("SUCCESS");
+        return baseResult.getResult().equals("SUCCESS");//表示交易成功
     }
     /** 
      * @param payment
