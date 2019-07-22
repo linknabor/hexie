@@ -709,6 +709,36 @@ public class WuyeController extends BaseController {
 		}
 
 	}
+	
+	
+	//region表添加sectId
+	@RequestMapping(value = "/addSectIdToRegion", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> addSectIdToRegion(@RequestParam String code) throws Exception {
+		if ("hexieCode".equals(code)) {
+		     wuyeService.addSectIdToRegion();
+			log.error("用户设置完成!!!");
+			return BaseResult.successResult("");
+		} else {
+			return BaseResult.fail("请求错误！！！");
+		}
+
+	}
+	
+	//region表添加tempsect表的区域
+	@RequestMapping(value = "/addTempSectToRegion", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> addTempSectToRegion(@RequestParam String code) throws Exception {
+		if ("hexieCode".equals(code)) {
+			  wuyeService.addSectToRegion();
+			log.error("添加完成!!!");
+			return BaseResult.successResult("");
+		} else {
+			return BaseResult.fail("请求错误！！！");
+		}
+
+	}
+	
 
 		// for (User u : list) {
 		// if(u.getWuyeId() != null){

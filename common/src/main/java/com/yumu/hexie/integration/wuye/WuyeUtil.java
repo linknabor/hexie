@@ -54,6 +54,8 @@ public class WuyeUtil {
 	}
 
 	// 接口地址
+	private static final String QUERY_SECTID_BY_SECTNAME = "querySectIdByNameSDO.do?regionName=%s"; // 
+	private static final String PAY_USER_BIND_HOUSE_URL = "payUserBindHouseSDO.do?wuyeId=%s"; // 
 	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s"; // 房屋详情地址
 	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s"; // 添加房子
 	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s"; // 无账单添加房子
@@ -81,6 +83,22 @@ public class WuyeUtil {
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
+	}
+	//根据wuyeId查询缴费用户并绑定房子
+	public static BaseResult<HexieUser> queryPayUserAndBindHouse(String wuyeId){
+		String url = REQUEST_ADDRESS + String.format(PAY_USER_BIND_HOUSE_URL, wuyeId);
+		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
+	}
+	
+	//根据sectName得到sectid
+	public static BaseResult<String> querySectIdByName(String regionName){
+		/*try {
+			regionName = URLEncoder.encode(regionName,"GBK");
+		} catch (UnsupportedEncodingException e) {
+			log.error("字符转换错误："+regionName);
+		}*/
+		String url = REQUEST_ADDRESS + String.format(QUERY_SECTID_BY_SECTNAME, regionName);
+		return (BaseResult<String>)httpGet(url,String.class);
 	}
 	
 	// 1.房产列表

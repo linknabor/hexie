@@ -126,7 +126,7 @@ public class ScheduleServiceImpl implements ScheduleService{
    //4. 团购团超时
     @Scheduled(cron = "11 2/5 * * * ?")
     public void executeRGroupTimeoutJob() {
-    	SCHEDULE_LOG.debug("--------------------executeGroupTimeoutJob[B][R]-------------------");
+    	SCHEDULE_LOG.error("--------------------executeGroupTimeoutJob[B][R]-------------------");
     	List<RgroupRule> rules = rgroupRuleRepository.findTimeoutGroup(new Date());
     	if(rules.size() == 0) {
     		SCHEDULE_LOG.error("**************executeRGroupTimeoutJob没有记录");
@@ -141,7 +141,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     	
     	for(RgroupRule rule : rules) {
     		try{
-    	    	SCHEDULE_LOG.debug("refreshGroupStatus:" + rule.getId());
+    	    	SCHEDULE_LOG.error("refreshGroupStatus:" + rule.getId());
     	    	rgroupService.refreshGroupStatus(rule);
     		} catch(Exception e){
     			SCHEDULE_LOG.error("超时订单更新失败"+ rule.getId(),e);
