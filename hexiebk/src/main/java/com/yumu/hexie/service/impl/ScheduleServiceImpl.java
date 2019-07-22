@@ -2,6 +2,7 @@ package com.yumu.hexie.service.impl;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,6 +17,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.bill.BaojieBill;
 import com.yumu.hexie.model.localservice.bill.BaojieBillRepository;
@@ -34,6 +37,10 @@ import com.yumu.hexie.model.payment.RefundOrderRepository;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.system.BizError;
 import com.yumu.hexie.model.system.BizErrorRepository;
+import com.yumu.hexie.model.user.Member;
+import com.yumu.hexie.model.user.MemberBill;
+import com.yumu.hexie.model.user.MemberBillRepository;
+import com.yumu.hexie.model.user.MemberRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.ScheduleService;
@@ -45,6 +52,8 @@ import com.yumu.hexie.service.o2o.XiyiService;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.impl.CouponServiceImpl;
+import com.yumu.hexie.service.user.req.MemberVo;
 
 @Service("scheduleService")
 public class ScheduleServiceImpl implements ScheduleService{
@@ -88,6 +97,15 @@ public class ScheduleServiceImpl implements ScheduleService{
     
     @Inject
     private SmsService smsService;
+    
+	@Inject
+	private MemberBillRepository memberBillRepository;
+	
+	@Inject
+	private MemberRepository memberRepository;
+	
+	@Inject
+	private CouponServiceImpl couponServiceImpl;
 	
 	//1. 订单超时
     @Scheduled(cron = "50 1/3 * * * ?")
@@ -108,7 +126,7 @@ public class ScheduleServiceImpl implements ScheduleService{
    //4. 团购团超时
     @Scheduled(cron = "11 2/5 * * * ?")
     public void executeRGroupTimeoutJob() {
-    	SCHEDULE_LOG.debug("--------------------executeGroupTimeoutJob[B][R]-------------------");
+    	SCHEDULE_LOG.error("--------------------executeGroupTimeoutJob[B][R]-------------------");
     	List<RgroupRule> rules = rgroupRuleRepository.findTimeoutGroup(new Date());
     	if(rules.size() == 0) {
     		SCHEDULE_LOG.error("**************executeRGroupTimeoutJob没有记录");
@@ -123,7 +141,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     	
     	for(RgroupRule rule : rules) {
     		try{
-    	    	SCHEDULE_LOG.debug("refreshGroupStatus:" + rule.getId());
+    	    	SCHEDULE_LOG.error("refreshGroupStatus:" + rule.getId());
     	    	rgroupService.refreshGroupStatus(rule);
     		} catch(Exception e){
     			SCHEDULE_LOG.error("超时订单更新失败"+ rule.getId(),e);
@@ -404,6 +422,66 @@ public class ScheduleServiceImpl implements ScheduleService{
 		}
 		SCHEDULE_LOG.debug("--------------------end executeCouponHintJob-------------------");
 	}
+	
+	
+	
+	@Override
+	@Scheduled(cron = "0 */20 * * * ?")
+	public void executeMemberTimtout() {
+		// TODO Auto-generated method stub
+		SCHEDULE_LOG.debug("--------------------会员支付定时开始：-------------------");
+		try {
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+			//———————————————————————————————————————————————————会员是否到期轮询↓—————————————————————————————————————————————————————————————
+			List<Member> listMb = memberRepository.getAllEndDate(df.format(new Date()).substring(0, 10));//查询结束日期已经到了的会员
+			for (int i = 0; i < listMb.size(); i++) {
+				Member member = listMb.get(i);
+				member.setStatus(MemberVo.MEMBER_NO);//状态调整
+				memberRepository.save(member);
+			}
+			
+			//—————————————————————————————————————————————————————会员支付轮询↓—————————————————————————————————————————————————————————————
+			List<MemberBill> listbill = memberBillRepository.findByStatus(MemberVo.MIDDLE);
+			for (int i = 0; i < listbill.size(); i++) {
+				MemberBill bill = listbill.get(i);
+				BaseResult baseResult = WuyeUtil.queryOrderInfo(String.valueOf(bill.getMemberbillid()));
+				if("SUCCESS".equals(baseResult.getResult())) {
+					bill.setEnddate(df.format(new Date()));
+					bill.setStatus(MemberVo.SUCCESS);
+					User user = userRepository.findById(bill.getUserid());
+					if(user == null) {
+						throw new BizValidateException("账单userid没有查询到用户");
+					}
+					memberBillRepository.save(bill);//账单完成
+					List<Member> memberis = memberRepository.findByUserid(user.getId());
+					Member member = new Member();
+					member.setUserid(user.getId());
+					Calendar c = Calendar.getInstance();
+					if(memberis.isEmpty()) {
+						c.setTime(new Date());
+						c.add(Calendar.DAY_OF_MONTH, 365);
+						member.setStartdate(df.format(new Date()).substring(0, 10));//获取当前日期
+						member.setEnddate(df.format(c.getTime()).substring(0, 10));//当前日期加1年
+					}else {
+						String enddate = memberis.get(0).getEnddate();
+						Date date = df.parse(enddate);
+						c.setTime(date);
+						c.add(Calendar.DAY_OF_MONTH, 365);
+						member.setEnddate(df.format(c.getTime()).substring(0, 10));//根据之前日期加日期加1年
+					}
+					member.setStatus(MemberVo.MEMBER_YES);
+					memberRepository.save(member);//保存会员
+					couponServiceImpl.addCoupon4Member(user);//发放会员优惠卷
+				}
+				
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		SCHEDULE_LOG.debug("--------------------会员支付定时结束：-------------------");
+	}
+	
 	
 	
 }

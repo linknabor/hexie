@@ -51,6 +51,7 @@ import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.entity.common.WxRefundResp;
 import com.yumu.hexie.service.exception.WechatException;
 
 /**
@@ -250,6 +251,11 @@ public class WeixinUtil {
 		return jsonObject;
 	}
 	
+	public static void main(String[] args) {
+	
+		httpsRequestXmlWithStore("https://api.mch.weixin.qq.com/secapi/pay/refund", "POST", "NONE", WxRefundResp.class);
+	}
+	
 
 	public static Object httpsRequestXmlWithStore(String requestUrl,
 			String requestMethod, String outputStr,Class c) {
@@ -275,6 +281,7 @@ public class WeixinUtil {
 		
 		try {
 			keyStore  = KeyStore.getInstance("PKCS12");
+			log.error("cert path is : " + ConstantWeChat.KEYSTORE);
 			instream = new FileInputStream(new File(ConstantWeChat.KEYSTORE));
 			keyStore.load(instream, ConstantWeChat.MERCHANTID.toCharArray());
 			
@@ -306,7 +313,8 @@ public class WeixinUtil {
                 responseStr = responseStr.trim();
             }
 		}catch(Exception e) {
-			e.printStackTrace();
+
+			log.error(e.getMessage(), e);
 		}
 		return responseStr;
             
