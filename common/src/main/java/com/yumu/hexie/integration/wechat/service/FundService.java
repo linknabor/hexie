@@ -29,6 +29,7 @@ import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
 import com.yumu.hexie.integration.wechat.entity.common.PrePaymentOrder;
 import com.yumu.hexie.integration.wechat.util.MessageUtil;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
+import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.Member;
 import com.yumu.hexie.model.user.MemberBill;
@@ -98,24 +99,11 @@ public class FundService {
 	}
 	
 	
-	public static String getNotify(HttpServletRequest request, HttpServletResponse response) {
+	public static String getNotify(UnionPayVO unionpayvo) {
 		// TODO Auto-generated method stub
-		ServletInputStream sis = null;
 		try {
-			sis = request.getInputStream();
-			byte [] bytes = new byte[4096];	//TODO大小可能要改
-			sis.read(bytes);
-			log.info("银联返回结果bytes1："+bytes.length);
-			List list = Arrays.asList(bytes);
-			log.info("银联返回结果bytes2:"+JacksonJsonUtil.getMapperInstance(false).writeValueAsString(list));
-			String requestStr = new String(bytes, "UTF-8");
-			log.info("银联返回结果bytes3:"+requestStr);
-//			requestStr = requestStr.trim();
-//			log.info("银联返回结果bytes4:"+requestStr);
-			requestStr = URLDecoder.decode(requestStr, "utf-8");
-			log.info("银联返回结果1："+requestStr);
-			Map<String, String> mapResp = UnionUtil.pullRespToMap(requestStr);
-			requestStr = UnionUtil.mapToStr(mapResp);
+			
+			String requestStr = unionpayvo.getUnionPayStr();
 			log.info("银联返回结果2："+requestStr);
 			boolean signFlag = UnionUtil.verferSignData(requestStr);
 			
@@ -123,12 +111,9 @@ public class FundService {
 				//验签失败
 				return "FAIL";
 			}
-			
-			String respCode = (String)mapResp.get("respCode");
-			if("0000".equals(respCode)) {
-				return (String)mapResp.get("orderNo");
+			if("0000".equals(unionpayvo.getRespCode())) {
+				return unionpayvo.getOrderNo();
 			}
-			
 		} catch (Exception e) {
 			throw new BizValidateException("银联回调报错");
 		} 
