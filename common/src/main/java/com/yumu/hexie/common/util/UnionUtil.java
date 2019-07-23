@@ -18,7 +18,7 @@ public class UnionUtil {
             }
         }
         String signatureStr = buf.substring(0, buf.length() - 1);
-        return RSAUtil.verifyByKeyPath(signatureStr, signature, "f:/keys/unionpay/100000001254_pub.pem", "UTF-8");
+        return RSAUtil.verifyByKeyPath(signatureStr, signature, "f:/keys/unionpay/888290059501308_pub.pem", "UTF-8");
     }
 	
 	public static Map<String, String> pullRespToMap(String str) {
