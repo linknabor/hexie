@@ -22,7 +22,7 @@ public class MemberBill implements Serializable {
 	
 	private String enddate;//交易结束日期
 	
-	private String price;//交易金额
+	private float price;//交易金额
 	
 	private String status;//交易状态 01交易中   02交易成功   03交易失败（唤起没有支付的订单）
 	
@@ -60,10 +60,10 @@ public class MemberBill implements Serializable {
 	public void setEnddate(String enddate) {
 		this.enddate = enddate;
 	}
-	public String getPrice() {
+	public float getPrice() {
 		return price;
 	}
-	public void setPrice(String price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
 	public String getStatus() {
