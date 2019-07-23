@@ -24,7 +24,7 @@ public class MemberBill implements Serializable {
 	
 	private String price;//交易金额
 	
-	private String status;//交易状态
+	private String status;//交易状态 01交易中   02交易成功   03交易失败（唤起没有支付的订单）
 	
 	private String paymethod;//支付渠道
 	
