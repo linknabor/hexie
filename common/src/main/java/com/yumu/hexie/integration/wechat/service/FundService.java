@@ -108,9 +108,10 @@ public class FundService {
 			String requestStr = new String(bytes, "UTF-8");
 			requestStr = requestStr.trim();
 			requestStr = URLDecoder.decode(requestStr, "utf-8");
+			log.info("银联返回结果1："+requestStr);
 			Map<String, String> mapResp = UnionUtil.pullRespToMap(requestStr);
 			requestStr = UnionUtil.mapToStr(mapResp);
-			log.info("银联返回结果："+requestStr);
+			log.info("银联返回结果2："+requestStr);
 			boolean signFlag = UnionUtil.verferSignData(requestStr);
 			
 			if (!signFlag) {
@@ -124,7 +125,7 @@ public class FundService {
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new BizValidateException("银联回调报错");
 		} 
 		
 		return "FAIL";
