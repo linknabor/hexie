@@ -265,7 +265,7 @@ public class WuyeUtil {
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
     };	
     // 21.缴费
-	public static BaseResult<WechatPayInfo> getMemberPrePayInfo(String billId,String totalPrice,String openId,String notifyUrl) throws Exception {
+	public static BaseResult<WechatPayInfo> getMemberPrePayInfo(String billId,float totalPrice,String openId,String notifyUrl) throws Exception {
 
 		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_PAY_URL, billId,openId,totalPrice,notifyUrl);
 

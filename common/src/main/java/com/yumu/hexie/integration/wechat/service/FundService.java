@@ -16,6 +16,9 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.UnionUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -30,9 +33,12 @@ import com.yumu.hexie.model.user.Member;
 import com.yumu.hexie.model.user.MemberBill;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.user.impl.MemberServiceImpl;
 import com.yumu.hexie.service.user.req.MemberVo;
 
 public class FundService {
+	
+	private static final Logger log = LoggerFactory.getLogger(FundService.class);
 	
 	private static final String UNIPAY_URL = "https://api.mch.weixin.qq.com/pay/unifiedorder";
 	
@@ -104,7 +110,7 @@ public class FundService {
 			requestStr = URLDecoder.decode(requestStr, "utf-8");
 			Map<String, String> mapResp = UnionUtil.pullRespToMap(requestStr);
 			requestStr = UnionUtil.mapToStr(mapResp);
-			
+			log.info("银联返回结果："+requestStr);
 			boolean signFlag = UnionUtil.verferSignData(requestStr);
 			
 			if (!signFlag) {

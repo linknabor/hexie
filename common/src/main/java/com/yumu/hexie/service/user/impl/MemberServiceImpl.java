@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.net.URLDecoder;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -144,11 +145,19 @@ public class MemberServiceImpl implements MemberService{
 					member.setStartdate(df.format(new Date()).substring(0, 10));//获取当前日期
 					member.setEnddate(df.format(c.getTime()).substring(0, 10));//当前日期加1年
 				}else {
-					String enddate = memberis.get(0).getEnddate();
-					Date date = df.parse(enddate);
-					c.setTime(date);
-					c.add(Calendar.DAY_OF_MONTH, 365);
-					member.setEnddate(df.format(c.getTime()).substring(0, 10));//根据之前日期加日期加1年
+					member = memberis.get(0);
+					if("0".equals(memberis.get(0).getStatus())) {
+						String enddate = memberis.get(0).getEnddate();
+						Date date = df.parse(enddate);
+						c.setTime(date);
+						c.add(Calendar.DAY_OF_MONTH, 365);
+						member.setEnddate(df.format(c.getTime()).substring(0, 10));//根据之前日期加日期加1年
+					}else {
+						c.setTime(new Date());
+						c.add(Calendar.DAY_OF_MONTH, 365);
+						member.setStartdate(df.format(new Date()).substring(0, 10));//获取当前日期
+						member.setEnddate(df.format(c.getTime()).substring(0, 10));//当前日期加1年
+					}
 				}
 				member.setStatus(MemberVo.MEMBER_YES);
 				
@@ -167,17 +176,7 @@ public class MemberServiceImpl implements MemberService{
 	
 	
 	public static void main(String[] args) throws ParseException {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
-		System.out.println(df.format(new Date()).substring(0, 10));// new Date()为获取当前系统时间
-		Calendar c = Calendar.getInstance();
-		c.setTime(new Date());
-		c.add(Calendar.DAY_OF_MONTH, 365);
-		System.out.println(df.format(c.getTime()).substring(0, 10));// new Date()为获取当前系统时间
-		String enddate = "2020-07-04";
-		Date date = df.parse(enddate);
-		c.setTime(date);
-		c.add(Calendar.DAY_OF_MONTH, 365);
-		System.out.println(df.format(c.getTime()).substring(0, 10));// new Date()为获取当前系统时间
+	
 	}
 
 }

@@ -126,10 +126,8 @@ public class PaymentServiceImpl implements PaymentService {
             if(checkPaySuccess(pay.getPaymentNo())){
                 throw new BizValidateException(pay.getId(),"订单已支付成功，勿重复提交！").setError();
             }
-            DecimalFormat decimalFormat=new DecimalFormat("0");
-            String price = decimalFormat.format(pay.getPrice());
             log.warn("获取预支付id前——————————前：");
-        	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(pay.getPaymentNo(), price, pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
+        	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(pay.getPaymentNo(), pay.getPrice(), pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
         	log.warn("获取预支付id后——————————后：");
         	JsSign sign = new JsSign();
         	sign.setAppId(payinfo.getAppid());

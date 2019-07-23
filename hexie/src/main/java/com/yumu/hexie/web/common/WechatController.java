@@ -77,6 +77,7 @@ public class WechatController extends BaseController{
     @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST,produces="text/plain;charset=UTF-8" )
     public String orderNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    	LOGGER.info("银联回调进入：");
     	String is = FundService.getNotify(request, response);
     	if("FAIL".equals(is)) {
     		return "FAIL";
