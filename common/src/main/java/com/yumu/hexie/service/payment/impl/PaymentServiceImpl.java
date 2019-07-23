@@ -126,6 +126,7 @@ public class PaymentServiceImpl implements PaymentService {
             if(checkPaySuccess(pay.getPaymentNo())){
                 throw new BizValidateException(pay.getId(),"订单已支付成功，勿重复提交！").setError();
             }
+            paymentOrderRepository.save(pay);
             log.warn("获取预支付id前——————————前：");
         	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(pay.getPaymentNo(), pay.getPrice(), pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
         	log.warn("获取预支付id后——————————后：");
