@@ -65,7 +65,20 @@ public class MemberController extends BaseController{
 	 */
 	@RequestMapping(value="/memberReturn",method = RequestMethod.GET)
 	@ResponseBody
-	public String memberReturn(@RequestParam UnionPayVO unionpayvo){
+	public String memberReturn(@RequestParam String bankType,@RequestParam String merNo,@RequestParam String orderDate,@RequestParam String orderNo,
+    		@RequestParam String productId,@RequestParam String respCode,@RequestParam String respDesc,@RequestParam String signature,
+    		@RequestParam String transAmt,@RequestParam String transId){
+    	UnionPayVO unionpayvo = new UnionPayVO();
+    	unionpayvo.setBankType(bankType);
+    	unionpayvo.setMerNo(merNo);
+    	unionpayvo.setOrderDate(orderDate);
+    	unionpayvo.setOrderNo(orderNo);
+    	unionpayvo.setProductId(productId);
+    	unionpayvo.setRespCode(respCode);
+    	unionpayvo.setRespDesc(respDesc);
+    	unionpayvo.setSignature(signature);
+    	unionpayvo.setTransAmt(transAmt);
+    	unionpayvo.setTransId(transId);
 		log.info("回调进入：532858859");//数字方便搜素日志
 		return memberServiceImpl.getNotify(unionpayvo);
 	}

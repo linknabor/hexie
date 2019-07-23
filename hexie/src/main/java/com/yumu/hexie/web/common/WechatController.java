@@ -77,7 +77,20 @@ public class WechatController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST )
-    public String orderNotify(@RequestParam UnionPayVO unionpayvo) throws Exception {
+    public String orderNotify(@RequestParam String bankType,@RequestParam String merNo,@RequestParam String orderDate,@RequestParam String orderNo,
+    		@RequestParam String productId,@RequestParam String respCode,@RequestParam String respDesc,@RequestParam String signature,
+    		@RequestParam String transAmt,@RequestParam String transId) throws Exception {
+    	UnionPayVO unionpayvo = new UnionPayVO();
+    	unionpayvo.setBankType(bankType);
+    	unionpayvo.setMerNo(merNo);
+    	unionpayvo.setOrderDate(orderDate);
+    	unionpayvo.setOrderNo(orderNo);
+    	unionpayvo.setProductId(productId);
+    	unionpayvo.setRespCode(respCode);
+    	unionpayvo.setRespDesc(respDesc);
+    	unionpayvo.setSignature(signature);
+    	unionpayvo.setTransAmt(transAmt);
+    	unionpayvo.setTransId(transId);
     	LOGGER.info("银联回调进入：");
     	String is = FundService.getNotify(unionpayvo);
     	if("FAIL".equals(is)) {
