@@ -110,8 +110,8 @@ public class FundService {
 			log.info("银联返回结果bytes2:"+JacksonJsonUtil.getMapperInstance(false).writeValueAsString(list));
 			String requestStr = new String(bytes, "UTF-8");
 			log.info("银联返回结果bytes3:"+requestStr);
-			requestStr = requestStr.trim();
-			log.info("银联返回结果bytes4:"+requestStr);
+//			requestStr = requestStr.trim();
+//			log.info("银联返回结果bytes4:"+requestStr);
 			requestStr = URLDecoder.decode(requestStr, "utf-8");
 			log.info("银联返回结果1："+requestStr);
 			Map<String, String> mapResp = UnionUtil.pullRespToMap(requestStr);
