@@ -63,7 +63,7 @@ public class MemberController extends BaseController{
 	 * @param user
 	 * @return
 	 */
-	@RequestMapping(value="/memberReturn",method = RequestMethod.GET)
+	@RequestMapping(value="/memberReturn",method = RequestMethod.POST)
 	@ResponseBody
 	public String memberReturn(@RequestParam String bankType,@RequestParam String merNo,@RequestParam String orderDate,@RequestParam String orderNo,
     		@RequestParam String productId,@RequestParam String respCode,@RequestParam String respDesc,@RequestParam String signature,
