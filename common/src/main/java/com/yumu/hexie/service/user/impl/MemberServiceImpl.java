@@ -94,19 +94,11 @@ public class MemberServiceImpl implements MemberService{
 	}
 	
 	@Override
-	public String getNotify(HttpServletRequest request, HttpServletResponse response) {
+	public String getNotify(UnionPayVO unionpayvo) {
 		// TODO Auto-generated method stub
-		ServletInputStream sis = null;
 		try {
-			sis = request.getInputStream();
-			byte [] bytes = new byte[4096];	//TODO大小可能要改
-			sis.read(bytes);
 			
-			String requestStr = new String(bytes, "UTF-8");
-			requestStr = requestStr.trim();
-			requestStr = URLDecoder.decode(requestStr, "utf-8");
-			Map<String, String> mapResp = UnionUtil.pullRespToMap(requestStr);
-			requestStr = UnionUtil.mapToStr(mapResp);
+			String requestStr = unionpayvo.getUnionPayStr();
 			
 			log.info("接受银联响应数据：" + requestStr);
 			
@@ -118,10 +110,9 @@ public class MemberServiceImpl implements MemberService{
 				return "FAIL";
 			} 
 			
-			String respCode = (String)mapResp.get("respCode");
-			log.info("银联返回状态："+respCode);
-			if("0000".equals(respCode)) {
-				String billid = (String)mapResp.get("orderNo");
+			log.info("银联返回状态："+unionpayvo.getRespCode());
+			if("0000".equals(unionpayvo.getRespCode())) {
+				String billid = unionpayvo.getOrderNo();
 				MemberBill mem = memberBillRepository.findByMemberbillid(Long.parseLong(billid));//根据账单id查询
 				if(mem == null) {
 					throw new BizValidateException("返回billID没有查询到账单");
@@ -191,6 +182,12 @@ public class MemberServiceImpl implements MemberService{
 		System.out.println(vo.getUnionPayStr());
 		String requestStr = UnionUtil.mapToStr(mapResp);
 		System.out.println("银联返回结果2："+requestStr);
+	}
+
+	@Override
+	public String getNotify(HttpServletRequest request, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
