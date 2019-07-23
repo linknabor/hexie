@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
@@ -64,7 +65,7 @@ public class MemberController extends BaseController{
 	 */
 	@RequestMapping(value="/memberReturn",method = RequestMethod.GET)
 	@ResponseBody
-	public String memberReturn(@RequestBody UnionPayVO unionpayvo){
+	public String memberReturn(@RequestParam UnionPayVO unionpayvo){
 		log.info("回调进入：532858859");//数字方便搜素日志
 		return memberServiceImpl.getNotify(unionpayvo);
 	}

@@ -77,7 +77,7 @@ public class WechatController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST )
-    public String orderNotify(@RequestBody UnionPayVO unionpayvo) throws Exception {
+    public String orderNotify(@RequestParam UnionPayVO unionpayvo) throws Exception {
     	LOGGER.info("银联回调进入：");
     	String is = FundService.getNotify(unionpayvo);
     	if("FAIL".equals(is)) {
