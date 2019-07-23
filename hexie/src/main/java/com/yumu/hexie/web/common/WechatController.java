@@ -18,6 +18,7 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
 import com.yumu.hexie.integration.wechat.service.FundService;
+import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.service.common.WechatCoreService;
@@ -76,9 +77,9 @@ public class WechatController extends BaseController{
 
     @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST,produces="text/plain;charset=UTF-8" )
-    public String orderNotify(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public String orderNotify(@RequestBody UnionPayVO unionpayvo) throws Exception {
     	LOGGER.info("银联回调进入：");
-    	String is = FundService.getNotify(request, response);
+    	String is = FundService.getNotify(unionpayvo);
     	if("FAIL".equals(is)) {
     		return "FAIL";
     	}
