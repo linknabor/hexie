@@ -124,7 +124,7 @@ public class FundService {
 			}
 			
 		} catch (Exception e) {
-			throw new BizValidateException("回调验签出错");
+			e.printStackTrace();
 		} 
 		
 		return "FAIL";
