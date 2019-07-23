@@ -68,14 +68,6 @@ public class MemberServiceImpl implements MemberService{
 		
 		log.info("会员支付接口：UserId:"+user.getId());
 		try {
-			List<MemberBill> listbill = memberBillRepository.findByUserid(user.getId());
-			if(!listbill.isEmpty()) {
-				if(listbill.size()>0) {
-					if(MemberVo.MIDDLE.equals(listbill.get(0).getStatus())) {//如果已有账单 并且状态是支付中
-						return WuyeUtil.getMemberPrePayInfo(String.valueOf(listbill.get(0).getMemberbillid()), listbill.get(0).getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
-					}
-				}
-			}
 			MemberBill bill = new MemberBill();
 			bill.setPrice(MemberVo.PRICE);//支付金额 98
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
