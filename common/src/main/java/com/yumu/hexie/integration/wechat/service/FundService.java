@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -104,7 +105,9 @@ public class FundService {
 			sis = request.getInputStream();
 			byte [] bytes = new byte[4096];	//TODO大小可能要改
 			sis.read(bytes);
-			
+			log.info("银联返回结果bytes1："+bytes.length);
+			List list = Arrays.asList(bytes);
+			log.info("银联返回结果bytes2:"+JacksonJsonUtil.getMapperInstance(false).writeValueAsString(list));
 			String requestStr = new String(bytes, "UTF-8");
 			requestStr = requestStr.trim();
 			requestStr = URLDecoder.decode(requestStr, "utf-8");
