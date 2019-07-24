@@ -111,7 +111,7 @@ public class MemberServiceImpl implements MemberService{
 				if(mem == null) {
 					throw new BizValidateException("返回billID没有查询到账单");
 				}
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 				mem.setEnddate(df.format(new Date()));
 				mem.setStatus(MemberVo.SUCCESS);
 				
