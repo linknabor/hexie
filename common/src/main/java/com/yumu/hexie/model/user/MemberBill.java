@@ -1,18 +1,16 @@
 package com.yumu.hexie.model.user;
 
-import java.io.Serializable;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+
+import com.yumu.hexie.model.BaseModel;
 @Entity
-public class MemberBill implements Serializable {
+public class MemberBill extends BaseModel {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8890242631230858623L;
-	@Id
+	
 	private String memberbillid;//会员账单id
 	
 	private String trandate;//交易日期
