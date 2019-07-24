@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.mysql.fabric.xmlrpc.base.Data;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.common.util.RSAUtil;
 import com.yumu.hexie.common.util.UnionUtil;
 import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
@@ -69,6 +70,7 @@ public class MemberServiceImpl implements MemberService{
 		log.info("会员支付接口：UserId:"+user.getId());
 		try {
 			MemberBill bill = new MemberBill();
+			bill.setMemberbillid(OrderNoUtil.generateServiceOrderNo());
 			bill.setPrice(MemberVo.PRICE);//支付金额 98
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 			bill.setStartdate(df.format(new Date()));//交易时间
@@ -105,7 +107,7 @@ public class MemberServiceImpl implements MemberService{
 			log.info("银联返回状态："+unionpayvo.getRespCode());
 			if("0000".equals(unionpayvo.getRespCode())) {
 				String billid = unionpayvo.getOrderNo();
-				MemberBill mem = memberBillRepository.findByMemberbillid(Long.parseLong(billid));//根据账单id查询
+				MemberBill mem = memberBillRepository.findByMemberbillid(billid);//根据账单id查询
 				if(mem == null) {
 					throw new BizValidateException("返回billID没有查询到账单");
 				}
@@ -162,18 +164,18 @@ public class MemberServiceImpl implements MemberService{
 	
 	
 	public static void main(String[] args) throws ParseException {
-		String a  = "respCode=0000&orderNo=201907231633P94777&transId=10&orderDate=20190723&bankType=CFT&respDesc=交易成功&transAmt=1&signature=VBJmtX5It6Gp6scyk/FfT+ydI+N8ogfpJ58e1xrkYAAQOfK5D0AF1JRUC2JMLB//ikW5Rzak0FZNS257Q4nt3yuA3nGRXwJ6PAD4pw7/lhIjM9EhUG6D6KxmyUw7lMG/IajQQQaHUUzy/IKt5bc3wsAVg9oERmOw6NS/DARa7U8bAhnbPObJ/NS3J3jacYHERI2DFuq3l7TaK1UYkPY4xOzwj/gIA4JRQ3W6KyZNMJPeenQ7ZCXtAk4yW6VDdKcEcHNxJF8/ZdA9MYfp85Wz6xvV7hLl3ILb28rjxi/CXlRAYRZFyBlRcsHhmc/K0lMEd29dNWAIM4889vrEvMmRGA==&merNo=888290059501308&productId=0105";
-		Map<String, String> mapResp = UnionUtil.pullRespToMap(a);
-		
-		for (String string : mapResp.keySet()) {
-			System.out.println("keys:"+string+"----value:"+mapResp.get(string));
-		}
-		UnionPayVO vo = new UnionPayVO();
-		vo.setBankType("123");
-		vo.setOrderDate("123");
-		System.out.println(vo.getUnionPayStr());
-		String requestStr = UnionUtil.mapToStr(mapResp);
-		System.out.println("银联返回结果2："+requestStr);
+//		String a  = "respCode=0000&orderNo=201907231633P94777&transId=10&orderDate=20190723&bankType=CFT&respDesc=交易成功&transAmt=1&signature=VBJmtX5It6Gp6scyk/FfT+ydI+N8ogfpJ58e1xrkYAAQOfK5D0AF1JRUC2JMLB//ikW5Rzak0FZNS257Q4nt3yuA3nGRXwJ6PAD4pw7/lhIjM9EhUG6D6KxmyUw7lMG/IajQQQaHUUzy/IKt5bc3wsAVg9oERmOw6NS/DARa7U8bAhnbPObJ/NS3J3jacYHERI2DFuq3l7TaK1UYkPY4xOzwj/gIA4JRQ3W6KyZNMJPeenQ7ZCXtAk4yW6VDdKcEcHNxJF8/ZdA9MYfp85Wz6xvV7hLl3ILb28rjxi/CXlRAYRZFyBlRcsHhmc/K0lMEd29dNWAIM4889vrEvMmRGA==&merNo=888290059501308&productId=0105";
+//		Map<String, String> mapResp = UnionUtil.pullRespToMap(a);
+//		
+//		for (String string : mapResp.keySet()) {
+//			System.out.println("keys:"+string+"----value:"+mapResp.get(string));
+//		}
+//		UnionPayVO vo = new UnionPayVO();
+//		vo.setBankType("123");
+//		vo.setOrderDate("123");
+//		System.out.println(vo.getUnionPayStr());
+//		String requestStr = UnionUtil.mapToStr(mapResp);
+//		System.out.println("银联返回结果2："+requestStr);
 	}
 
 	@Override

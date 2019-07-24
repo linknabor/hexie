@@ -13,8 +13,7 @@ public class MemberBill implements Serializable {
 	 */
 	private static final long serialVersionUID = -8890242631230858623L;
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long memberbillid;//会员账单id
+	private String memberbillid;//会员账单id
 	
 	private String trandate;//交易日期
 	
@@ -36,10 +35,10 @@ public class MemberBill implements Serializable {
 	public void setUserid(long userid) {
 		this.userid = userid;
 	}
-	public long getMemberbillid() {
+	public String getMemberbillid() {
 		return memberbillid;
 	}
-	public void setMemberbillid(long memberbillid) {
+	public void setMemberbillid(String memberbillid) {
 		this.memberbillid = memberbillid;
 	}
 	public String getTrandate() {
