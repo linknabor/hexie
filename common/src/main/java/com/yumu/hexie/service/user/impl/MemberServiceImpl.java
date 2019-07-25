@@ -110,6 +110,10 @@ public class MemberServiceImpl implements MemberService{
 				MemberBill mem = memberBillRepository.findByMemberbillid(billid);//根据账单id查询
 				if(mem == null) {
 					throw new BizValidateException("返回billID没有查询到账单");
+				}else {
+					if(MemberVo.SUCCESS.equals(mem.getStatus())) {
+						return "SUCCESS";//对方发起多次回调 才会进入此处
+					}
 				}
 				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 				mem.setEnddate(df.format(new Date()));
@@ -127,6 +131,7 @@ public class MemberServiceImpl implements MemberService{
 				Member member = new Member();
 				member.setUserid(user.getId());
 				Calendar c = Calendar.getInstance();
+				df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
 				if(memberis.isEmpty()) {
 					c.setTime(new Date());
 					c.add(Calendar.DAY_OF_MONTH, 365);
@@ -166,16 +171,6 @@ public class MemberServiceImpl implements MemberService{
 	public static void main(String[] args) throws ParseException {
 //		String a  = "respCode=0000&orderNo=201907231633P94777&transId=10&orderDate=20190723&bankType=CFT&respDesc=交易成功&transAmt=1&signature=VBJmtX5It6Gp6scyk/FfT+ydI+N8ogfpJ58e1xrkYAAQOfK5D0AF1JRUC2JMLB//ikW5Rzak0FZNS257Q4nt3yuA3nGRXwJ6PAD4pw7/lhIjM9EhUG6D6KxmyUw7lMG/IajQQQaHUUzy/IKt5bc3wsAVg9oERmOw6NS/DARa7U8bAhnbPObJ/NS3J3jacYHERI2DFuq3l7TaK1UYkPY4xOzwj/gIA4JRQ3W6KyZNMJPeenQ7ZCXtAk4yW6VDdKcEcHNxJF8/ZdA9MYfp85Wz6xvV7hLl3ILb28rjxi/CXlRAYRZFyBlRcsHhmc/K0lMEd29dNWAIM4889vrEvMmRGA==&merNo=888290059501308&productId=0105";
 //		Map<String, String> mapResp = UnionUtil.pullRespToMap(a);
-//		
-//		for (String string : mapResp.keySet()) {
-//			System.out.println("keys:"+string+"----value:"+mapResp.get(string));
-//		}
-//		UnionPayVO vo = new UnionPayVO();
-//		vo.setBankType("123");
-//		vo.setOrderDate("123");
-//		System.out.println(vo.getUnionPayStr());
-//		String requestStr = UnionUtil.mapToStr(mapResp);
-//		System.out.println("银联返回结果2："+requestStr);
 	}
 
 	@Override
