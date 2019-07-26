@@ -29,4 +29,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     
     @Query(" from Region  where regionType = 4 and sectId is null ")
     public List<Region> getRegionList();
+    
+    @Query(nativeQuery=true,value="select id from region  where  sectId in ?1")
+	public List<String> getRegionBySectid(List<String> sect_ids);
 }
