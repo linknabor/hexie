@@ -11,6 +11,7 @@ public class BaseRequestDTO<T> extends BaseQuery {
 	 */
 	private static final long serialVersionUID = -6339566615468136284L;
 	
+	private String requestId;	//请求ID
 	private String oatype;	//公众号类型
 	private List<String> sectList;	//小区id
 	private String beginDate;	//查询开始日期
@@ -19,6 +20,12 @@ public class BaseRequestDTO<T> extends BaseQuery {
 	
 	private T data;	//数据
 	
+	public String getRequestId() {
+		return requestId;
+	}
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
+	}
 	public String getOatype() {
 		return oatype;
 	}
@@ -54,6 +61,11 @@ public class BaseRequestDTO<T> extends BaseQuery {
 	}
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
+	}
+	@Override
+	public String toString() {
+		return "BaseRequestDTO [requestId=" + requestId + ", oatype=" + oatype + ", sectList=" + sectList
+				+ ", beginDate=" + beginDate + ", endDate=" + endDate + ", sign=" + sign + ", data=" + data + "]";
 	}
 	
 	
