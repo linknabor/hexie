@@ -167,9 +167,6 @@ public class CouponServiceImpl implements CouponService {
 			return null;
 		}
 		Coupon coupon  = findCouponBySeedAndUser(seed.getId(), user.getId());
-		if(coupon != null) {
-			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"你已领取过该现金券！");
-		}
 		
 		List<CouponRule> rules = couponRuleRepository.findBySeedIdAndStatusDuration(
 				seed.getId(), ModelConstant.COUPON_RULE_STATUS_AVAILABLE,new Date(), new Date());
@@ -240,15 +237,11 @@ public class CouponServiceImpl implements CouponService {
 	 */
 	@Override
 	public Coupon addCoupon4Member(User user) {
-		if(couponRepository.countByUserAndSeedType(user.getId(), ModelConstant.COUPON_SEED_MEMBER) > 0){
-			return null;
-		}
 		List<CouponSeed> cs = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_MEMBER);
 		for(CouponSeed c:cs){
 			Coupon coupon = addCouponFromSeed(c, user);
 			if(coupon != null) {
 	            log.warn("添加会员红包 User["+user.getId()+"]Coupon["+coupon.getId()+"]");
-				return coupon;
 			}
 		}
 		return null;
