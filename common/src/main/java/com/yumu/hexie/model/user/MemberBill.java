@@ -1,20 +1,17 @@
 package com.yumu.hexie.model.user;
 
-import java.io.Serializable;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+
+import com.yumu.hexie.model.BaseModel;
 @Entity
-public class MemberBill implements Serializable {
+public class MemberBill extends BaseModel {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8890242631230858623L;
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long memberbillid;//会员账单id
+	
+	private String memberbillid;//会员账单id
 	
 	private String trandate;//交易日期
 	
@@ -22,7 +19,7 @@ public class MemberBill implements Serializable {
 	
 	private String enddate;//交易结束日期
 	
-	private String price;//交易金额
+	private float price;//交易金额
 	
 	private String status;//交易状态 01交易中   02交易成功   03交易失败（唤起没有支付的订单）
 	
@@ -36,10 +33,10 @@ public class MemberBill implements Serializable {
 	public void setUserid(long userid) {
 		this.userid = userid;
 	}
-	public long getMemberbillid() {
+	public String getMemberbillid() {
 		return memberbillid;
 	}
-	public void setMemberbillid(long memberbillid) {
+	public void setMemberbillid(String memberbillid) {
 		this.memberbillid = memberbillid;
 	}
 	public String getTrandate() {
@@ -60,10 +57,10 @@ public class MemberBill implements Serializable {
 	public void setEnddate(String enddate) {
 		this.enddate = enddate;
 	}
-	public String getPrice() {
+	public float getPrice() {
 		return price;
 	}
-	public void setPrice(String price) {
+	public void setPrice(float price) {
 		this.price = price;
 	}
 	public String getStatus() {

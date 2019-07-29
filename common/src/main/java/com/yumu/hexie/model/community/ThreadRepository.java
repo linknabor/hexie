@@ -37,18 +37,17 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 	
 	public List<Thread> findByThreadStatusAndUserId(String threadStatus, long userId, Sort sort);
 	
-	@Query(value="select thread.*,FROM_UNIXTIME(thread.createDateTime / 1000,'%Y-%m-%d %H:%i:%s') create_DateTime,"
-			+ "user.nickname from thread join user on thread.userId = user.id where threadStatus = 0 " 
-			+ " and IF (?1!='', user.nickName like CONCAT('%',?1,'%'), 1=1)"
-			+ " and IF (?2!='', thread.createDate = ?2, 1=1)"
-			+ " and thread.userSectId in ?3 order by thread.stickPriority desc,thread.threadId desc  limit ?4,?5",nativeQuery = true)
-	public List<Object> getThreadList(String nickName, String createDate,String[] sectIds,int pageNum,int pageSize);
-	
-	@Query(value="select count(*) from thread join user on thread.userId = user.id where threadStatus = 0 " 
-			+ " and IF (?1!='', user.nickName like CONCAT('%',?1,'%'), 1=1)"
-			+ " and IF (?2!='', thread.createDate = ?2, 1=1)"
-			+ " and thread.userSectId in ?3",nativeQuery = true)
-	public int getThreadListCount(String nickName, String createDate,String[] sectIds);
+	@Query(value="select thread.* from thread"
+			+ " where threadStatus = 0 " 
+			+ " and IF (?1!='', userName like CONCAT('%',?1,'%'), 1=1)"
+			+ " and IF (?2!='', createDate = ?2, 1=1)"
+			+ " and userSectId in ?3 \n#pageable\n",
+			countQuery="select count(*) from thread  where threadStatus = 0 " 
+			+ " and IF (?1!='', userName like CONCAT('%',?1,'%'), 1=1)"
+			+ " and IF (?2!='', createDate = ?2, 1=1)"
+			+ " and userSectId in ?3"
+			,nativeQuery = true)
+	public Page<Thread> getThreadList(String nickName, String createDate,List<String> sectIds,Pageable pageable);
 	
 	@Modifying
 	@Query(nativeQuery = true,value="update thread set threadStatus=1 where threadId in ?1")

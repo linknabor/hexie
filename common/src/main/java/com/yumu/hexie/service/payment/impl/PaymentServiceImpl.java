@@ -126,10 +126,9 @@ public class PaymentServiceImpl implements PaymentService {
             if(checkPaySuccess(pay.getPaymentNo())){
                 throw new BizValidateException(pay.getId(),"订单已支付成功，勿重复提交！").setError();
             }
-            DecimalFormat decimalFormat=new DecimalFormat("0");
-            String price = decimalFormat.format(pay.getPrice()*100);
+            paymentOrderRepository.save(pay);
             log.warn("获取预支付id前——————————前：");
-        	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(pay.getPaymentNo(), price, pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
+        	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(pay.getPaymentNo(), pay.getPrice(), pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
         	log.warn("获取预支付id后——————————后：");
         	JsSign sign = new JsSign();
         	sign.setAppId(payinfo.getAppid());
@@ -148,11 +147,11 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 //      PrePaymentOrder preWechatOrder = wechatCoreService.createOrder(pay);
 //      pay.setPrepayId(preWechatOrder.getPrepay_id());
-//        paymentOrderRepository.save(pay);
-//        log.warn("[Payment-req]Saved["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
-//        //3. 从微信获取签名
-//        JsSign sign = wechatCoreService.getPrepareSign(preWechatOrder.getPrepay_id());
-//        log.warn("[Payment-req]sign["+sign.getSignature()+"]");
+//      paymentOrderRepository.save(pay);
+//      log.warn("[Payment-req]Saved["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
+//      //3. 从微信获取签名
+//      JsSign sign = wechatCoreService.getPrepareSign(preWechatOrder.getPrepay_id());
+//      log.warn("[Payment-req]sign["+sign.getSignature()+"]");
         return null;
     }
     
@@ -186,27 +185,27 @@ public class PaymentServiceImpl implements PaymentService {
         if(payment.getStatus() != PaymentConstant.PAYMENT_STATUS_INIT){
             return payment;
         }
-        PaymentOrderResult poResult = wechatCoreService.queryOrder(payment.getPaymentNo());
-        if(poResult==null)
-        {
-        	return payment;
-        }
-        if(poResult.isPaying()) {//1. 支付中
-            log.warn("[Payment-refreshStatus]isPaying["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
-            return payment;
-        } else if(poResult.isPayFail()) {//2. 失败
-            log.warn("[Payment-refreshStatus]isPayFail["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
-            payment.fail();
-        } else if(poResult.isClose()) {//3. 关闭
-            log.warn("[Payment-refreshStatus]isClose["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
-            payment.cancel();
-        } else if(poResult.isRefunding()) {//4. 退款中
-            log.warn("[Payment-refreshStatus]isRefunding["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
-            payment.refunding();
-        } else if (poResult.isPaySuccess()) {//5. 成功
-            log.warn("[Payment-refreshStatus]isPaySuccess["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
-            payment.paySuccess(poResult.getTransaction_id());
-        }
+        try {
+			BaseResult baseResult = WuyeUtil.queryOrderInfo(payment.getPaymentNo());
+//	        PaymentOrderResult poResult = wechatCoreService.queryOrder(payment.getPaymentNo());
+//	        if(poResult==null)
+//	        {
+//	        	return payment;
+//	        }
+	        if("USERPAYING".equals(baseResult.getResult())) {//1. 支付中
+	            log.warn("[Payment-refreshStatus]isPaying["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
+	            return payment;
+	        } else if("FAIL".equals(baseResult.getResult())) {//2. 失败
+	            log.warn("[Payment-refreshStatus]isPayFail["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
+	            payment.fail();
+	        } else if ("SUCCESS".equals(baseResult.getResult())) {//5. 成功
+	            log.warn("[Payment-refreshStatus]isPaySuccess["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
+	            payment.paySuccess("532858859");//没有此id
+	        }
+        } catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return paymentOrderRepository.save(payment);
     }
 

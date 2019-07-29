@@ -1,6 +1,8 @@
 package com.yumu.hexie.service.user.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,8 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.mysql.fabric.xmlrpc.base.Data;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.common.util.RSAUtil;
 import com.yumu.hexie.common.util.UnionUtil;
+import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.user.Member;
@@ -64,15 +69,8 @@ public class MemberServiceImpl implements MemberService{
 		
 		log.info("会员支付接口：UserId:"+user.getId());
 		try {
-			List<MemberBill> listbill = memberBillRepository.findByUserid(user.getId());
-			if(!listbill.isEmpty()) {
-				if(listbill.size()>0) {
-					if(MemberVo.MIDDLE.equals(listbill.get(0).getStatus())) {//如果已有账单 并且状态是支付中
-						return WuyeUtil.getMemberPrePayInfo(String.valueOf(listbill.get(0).getMemberbillid()), listbill.get(0).getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
-					}
-				}
-			}
 			MemberBill bill = new MemberBill();
+			bill.setMemberbillid(OrderNoUtil.generateServiceOrderNo());
 			bill.setPrice(MemberVo.PRICE);//支付金额 98
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 			bill.setStartdate(df.format(new Date()));//交易时间
@@ -90,19 +88,11 @@ public class MemberServiceImpl implements MemberService{
 	}
 	
 	@Override
-	public String getNotify(HttpServletRequest request, HttpServletResponse response) {
+	public String getNotify(UnionPayVO unionpayvo) {
 		// TODO Auto-generated method stub
-		ServletInputStream sis = null;
 		try {
-			sis = request.getInputStream();
-			byte [] bytes = new byte[4096];	//TODO大小可能要改
-			sis.read(bytes);
 			
-			String requestStr = new String(bytes, "UTF-8");
-			requestStr = requestStr.trim();
-			requestStr = URLDecoder.decode(requestStr, "utf-8");
-			Map<String, String> mapResp = UnionUtil.pullRespToMap(requestStr);
-			requestStr = UnionUtil.mapToStr(mapResp);
+			String requestStr = unionpayvo.getUnionPayStr();
 			
 			log.info("接受银联响应数据：" + requestStr);
 			
@@ -114,15 +104,18 @@ public class MemberServiceImpl implements MemberService{
 				return "FAIL";
 			} 
 			
-			String respCode = (String)mapResp.get("respCode");
-			log.info("银联返回状态："+respCode);
-			if("0000".equals(respCode)) {
-				String billid = (String)mapResp.get("orderNo");
-				MemberBill mem = memberBillRepository.findByMemberbillid(Long.parseLong(billid));//根据账单id查询
+			log.info("银联返回状态："+unionpayvo.getRespCode());
+			if("0000".equals(unionpayvo.getRespCode())) {
+				String billid = unionpayvo.getOrderNo();
+				MemberBill mem = memberBillRepository.findByMemberbillid(billid);//根据账单id查询
 				if(mem == null) {
 					throw new BizValidateException("返回billID没有查询到账单");
+				}else {
+					if(MemberVo.SUCCESS.equals(mem.getStatus())) {
+						return "SUCCESS";//对方发起多次回调 才会进入此处
+					}
 				}
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 				mem.setEnddate(df.format(new Date()));
 				mem.setStatus(MemberVo.SUCCESS);
 				
@@ -138,17 +131,26 @@ public class MemberServiceImpl implements MemberService{
 				Member member = new Member();
 				member.setUserid(user.getId());
 				Calendar c = Calendar.getInstance();
+				df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
 				if(memberis.isEmpty()) {
 					c.setTime(new Date());
 					c.add(Calendar.DAY_OF_MONTH, 365);
 					member.setStartdate(df.format(new Date()).substring(0, 10));//获取当前日期
 					member.setEnddate(df.format(c.getTime()).substring(0, 10));//当前日期加1年
 				}else {
-					String enddate = memberis.get(0).getEnddate();
-					Date date = df.parse(enddate);
-					c.setTime(date);
-					c.add(Calendar.DAY_OF_MONTH, 365);
-					member.setEnddate(df.format(c.getTime()).substring(0, 10));//根据之前日期加日期加1年
+					member = memberis.get(0);
+					if("0".equals(memberis.get(0).getStatus())) {
+						String enddate = memberis.get(0).getEnddate();
+						Date date = df.parse(enddate);
+						c.setTime(date);
+						c.add(Calendar.DAY_OF_MONTH, 365);
+						member.setEnddate(df.format(c.getTime()).substring(0, 10));//根据之前日期加日期加1年
+					}else {
+						c.setTime(new Date());
+						c.add(Calendar.DAY_OF_MONTH, 365);
+						member.setStartdate(df.format(new Date()).substring(0, 10));//获取当前日期
+						member.setEnddate(df.format(c.getTime()).substring(0, 10));//当前日期加1年
+					}
 				}
 				member.setStatus(MemberVo.MEMBER_YES);
 				
@@ -167,17 +169,14 @@ public class MemberServiceImpl implements MemberService{
 	
 	
 	public static void main(String[] args) throws ParseException {
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
-		System.out.println(df.format(new Date()).substring(0, 10));// new Date()为获取当前系统时间
-		Calendar c = Calendar.getInstance();
-		c.setTime(new Date());
-		c.add(Calendar.DAY_OF_MONTH, 365);
-		System.out.println(df.format(c.getTime()).substring(0, 10));// new Date()为获取当前系统时间
-		String enddate = "2020-07-04";
-		Date date = df.parse(enddate);
-		c.setTime(date);
-		c.add(Calendar.DAY_OF_MONTH, 365);
-		System.out.println(df.format(c.getTime()).substring(0, 10));// new Date()为获取当前系统时间
+//		String a  = "respCode=0000&orderNo=201907231633P94777&transId=10&orderDate=20190723&bankType=CFT&respDesc=交易成功&transAmt=1&signature=VBJmtX5It6Gp6scyk/FfT+ydI+N8ogfpJ58e1xrkYAAQOfK5D0AF1JRUC2JMLB//ikW5Rzak0FZNS257Q4nt3yuA3nGRXwJ6PAD4pw7/lhIjM9EhUG6D6KxmyUw7lMG/IajQQQaHUUzy/IKt5bc3wsAVg9oERmOw6NS/DARa7U8bAhnbPObJ/NS3J3jacYHERI2DFuq3l7TaK1UYkPY4xOzwj/gIA4JRQ3W6KyZNMJPeenQ7ZCXtAk4yW6VDdKcEcHNxJF8/ZdA9MYfp85Wz6xvV7hLl3ILb28rjxi/CXlRAYRZFyBlRcsHhmc/K0lMEd29dNWAIM4889vrEvMmRGA==&merNo=888290059501308&productId=0105";
+//		Map<String, String> mapResp = UnionUtil.pullRespToMap(a);
+	}
+
+	@Override
+	public String getNotify(HttpServletRequest request, HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
