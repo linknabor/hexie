@@ -6,6 +6,7 @@ package com.yumu.hexie.model.localservice.repair;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,46 @@ public interface RepairOrderRepository  extends JpaRepository<RepairOrder, Long>
     
     @Query("FROM RepairOrder ro where ro.userId = ?1 and ro.userDeleted = false order by ro.id desc")
     public List<RepairOrder> queryByUser(long userId,Pageable page);
+    
+	@Query(value="SELECT o.*,a.xiaoquId regionid,a.xiaoquName FROM repairorder o "
+			+"join address a on o.addressid = a.id where "
+			+ " IF (?1!='', o.payType = ?1, 1=1)" 
+			+ " and IF (?2!='', o.status = ?2, 1=1)"
+			+ " and IF (?3!='', o.finishByUser = ?3, 1=1)"
+			+ " and IF (?4!='', o.finishByOperator = ?4, 1=1)"
+			+ " and IF (?5!='', o.address like CONCAT('%',?5,'%'), 1=1)"
+			+ " and IF (?6!='', o.tel like CONCAT('%',?6,'%'), 1=1)"
+			+ " and IF (?7!='', o.operatorName like CONCAT('%',?7,'%'), 1=1)"
+			+ " and IF (?8!='', o.operatorTel like CONCAT('%',?8,'%'), 1=1)"
+			+ " and a.xiaoquId  in ?9 \n#pageable\n",
+			countQuery="SELECT count(*) FROM repairorder o "
+			+"join address a on o.addressid = a.id where "
+			+ " IF (?1!='', o.payType = ?1, 1=1)" 
+			+ " and IF (?2!='', o.status = ?2, 1=1)"
+			+ " and IF (?3!='', o.finishByUser = ?3, 1=1)"
+			+ " and IF (?4!='', o.finishByOperator = ?4, 1=1)"
+			+ " and IF (?5!='', o.address like CONCAT('%',?5,'%'), 1=1)"
+			+ " and IF (?6!='', o.tel like CONCAT('%',?6,'%'), 1=1)"
+			+ " and IF (?7!='', o.operatorName like CONCAT('%',?7,'%'), 1=1)"
+			+ " and IF (?8!='', o.operatorTel like CONCAT('%',?8,'%'), 1=1)"
+			+ " and a.xiaoquId  in ?9 "
+			,nativeQuery = true)
+	 public Page<RepairOrder> getRepairOderList(String payType, String status, String finishByUser, String finishByOpeator,
+			String address, String tel, String operatorName, String operatorTel,List<String> regionIds,Pageable pageable);
+    
+	
+	@Query(value="SELECT count(*) FROM repairorder o "
+			+"join address a on o.addressid = a.id where "
+			+ " IF (?1!='', o.payType = ?1, 1=1)" 
+			+ " and IF (?2!='', o.status = ?2, 1=1)"
+			+ " and IF (?3!='', o.finishByUser = ?3, 1=1)"
+			+ " and IF (?4!='', o.finishByOperator = ?4, 1=1)"
+			+ " and IF (?5!='', o.address like CONCAT('%',?5,'%'), 1=1)"
+			+ " and IF (?6!='', o.tel like CONCAT('%',?6,'%'), 1=1)"
+			+ " and IF (?7!='', o.operatorName like CONCAT('%',?7,'%'), 1=1)"
+			+ " and IF (?8!='', o.operatorTel like CONCAT('%',?8,'%'), 1=1)"
+			+ " and a.xiaoquId in ?9 ",nativeQuery = true)
+	public int getRepairOderCount(int payType, int status, boolean finishByUser,
+			boolean finishByOpeator, String address, String tel, String operatorName, String operatorTel,
+			List<String> regionList);
 }

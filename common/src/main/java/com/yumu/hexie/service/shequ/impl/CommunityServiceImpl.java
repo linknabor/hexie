@@ -78,7 +78,7 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserHead(user.getHeadimgurl());
 		thread.setUserId(user.getId());
 		thread.setUserName(user.getNickname());
-		thread.setUserSectId(user.getXiaoquId());
+		thread.setUserSectId(Long.parseLong(user.getSect_id()));
 		thread.setUserSectName(user.getXiaoquName());
 		thread.setStickPriority("0");	//默认优先级0，为最低
 		threadRepository.save(thread);
@@ -227,13 +227,8 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Object> getThreadList(String nickName, String createDate, String[] sectIds,int pageNum,int pageSize) {
-		return threadRepository.getThreadList(nickName,createDate,sectIds,pageNum,pageSize);
-	}
-
-	@Override
-	public int getThreadListCount(String nickName, String createDate, String[] sectIds) {
-		return threadRepository.getThreadListCount(nickName, createDate, sectIds);
+	public Page<Thread> getThreadList(String nickName, String createDate, List<String> sectIds,Pageable pageable) {
+		return threadRepository.getThreadList(nickName,createDate,sectIds,pageable);
 	}
 
 	@Override
