@@ -160,7 +160,7 @@ public interface CommunityService {
 	public List<Thread> getThreadListByNewCategory(String category, long userSectId, Pageable page);
 	
 	/**
-	 * 获取帖子列表，全部小区（新分类:即叽歪和二手）
+	 * 获取帖子列表
 	 * @param category
 	 * @param userSectId
 	 * @param sort
@@ -169,10 +169,7 @@ public interface CommunityService {
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page);
 	
 	
-	public List<Object> getThreadList(String nickName, String createDate,String[] sectIds,int pageNum,int pageSize);
-	
-	public int getThreadListCount(String nickName, String createDate,String[] sectIds);
-	
+	public Page<Thread> getThreadList(String nickName, String createDate,List<String> sectIds,Pageable pageable);
 	
 	public void deleteThread(String[] threadIds);
 	

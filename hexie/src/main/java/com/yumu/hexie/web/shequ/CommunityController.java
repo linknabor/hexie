@@ -110,7 +110,8 @@ public class CommunityController extends BaseController{
 			
 			//查看本小区的
 			if ("y".equals(filter)) {
-				list = communityService.getThreadList(user.getXiaoquId(), page);
+			//	list = communityService.getThreadList(user.getXiaoquId(), page);
+				list = communityService.getThreadList(Long.parseLong(user.getSect_id()), page);
 			}else {
 				list = communityService.getThreadList(page);
 			}

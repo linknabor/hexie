@@ -6,14 +6,22 @@ package com.yumu.hexie.service.repair.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
+import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.repair.RepairConstant;
@@ -68,7 +76,10 @@ public class RepairServiceImpl implements RepairService {
 
     @Inject
     private RepairAssignService repairAssignService;
-    /** 
+    
+    @Inject
+    private RegionRepository  regionRepository;
+    /**  
      * @param repairType
      * @return
      * @see com.yumu.hexie.service.repair.RepairService#queryProject(int)
@@ -327,6 +338,37 @@ public class RepairServiceImpl implements RepairService {
 		RepairOrder order = queryById(orderId);
 		repairAssignService.assignOrder(order);
         return order.getId();
+	}
+
+	@Override
+	public Page<RepairOrder> getRepairOderList(BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		Map<String,String> map=baseRequestDTO.getData();
+		Sort sort = new Sort(Direction.DESC , "id");
+		int currPage=baseRequestDTO.getCurr_page();
+		int pageSize=baseRequestDTO.getPage_size();
+		Pageable pageable = new PageRequest(currPage, pageSize, sort);
+	    List<String> regionList=getRegoinIds(baseRequestDTO.getSectList());
+	    
+		String payType=map.get("payType");
+		String  status=map.get("status");
+		String finishByUser=map.get("finishByUser");
+		String finishByOpeator=map.get("finishByOperator");
+		String address=map.get("address");
+		String tel=map.get("tel");
+		String operatorName=map.get("operatorName");
+		String operatorTel=map.get("operatorTel");
+		if(regionList.size()<=0){
+			regionList.add(",");
+		}
+		Page<RepairOrder>	repariList=repairOrderRepository.getRepairOderList(payType,status,finishByUser,
+	    		finishByOpeator,address,tel,operatorName,operatorTel,regionList,pageable);
+		return repariList;
+	}
+
+
+	
+	public List<String> getRegoinIds(List<String> sect_ids){
+		return regionRepository.getRegionBySectid(sect_ids);
 	}
 
 }

@@ -82,6 +82,7 @@ public class RepairController extends BaseController{
     @ResponseBody
     public BaseResult<Long> repair(@ModelAttribute(Constants.USER)User user,@RequestBody RepairOrderReq req){
         req.setRequireDate(DateUtil.parse(req.getRequireDateStr(), "yyyy-MM-dd HH:mm"));
+        req.setRequireDateStr("2019-07-19 13:00");
         Long oId = repairService.repair(req, user);
         if(oId!=null){
             return new BaseResult<Long>().success(oId);
