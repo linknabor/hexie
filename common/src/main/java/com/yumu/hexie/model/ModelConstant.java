@@ -6,6 +6,8 @@ public class ModelConstant {
 	//消息类型
 	public static final int MESSAGE_GONGGAO = 0;
 	public static final int MESSAGE_ZIXUN = 1;
+	public static final int MESSAGE_STATUS_VALID = 0;
+	public static final int MESSAGE_STATUS_INVALID = 1;
 
 	//资讯子类型
 	public static final int MESSAGE_SUB_TYPE_HEATH = 1;

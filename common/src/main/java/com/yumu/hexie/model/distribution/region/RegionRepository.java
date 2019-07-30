@@ -32,4 +32,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     
     @Query(nativeQuery=true,value="select id from region  where  sectId in ?1")
 	public List<String> getRegionBySectid(List<String> sect_ids);
+    
+    public List<Region> findBySectIdIn(List<String> sectId);
+    
 }

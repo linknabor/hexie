@@ -1,5 +1,7 @@
 package com.yumu.hexie.integration.wuye.resp;
 
+import java.util.List;
+
 import com.yumu.hexie.integration.wuye.base.BaseQuery;
 
 public class BaseResponseDTO<T> extends BaseQuery {
@@ -14,6 +16,7 @@ public class BaseResponseDTO<T> extends BaseQuery {
 	private String returnMessage;	//返回提示语
 	private String sign;	//签名
 	private T data;	//数据
+	private List<String> sectList;	//小区id
 	
 	public String getRequestId() {
 		return requestId;
@@ -45,10 +48,17 @@ public class BaseResponseDTO<T> extends BaseQuery {
 	public void setData(T data) {
 		this.data = data;
 	}
+	
+	public List<String> getSectList() {
+		return sectList;
+	}
+	public void setSectList(List<String> sectList) {
+		this.sectList = sectList;
+	}
 	@Override
 	public String toString() {
 		return "BaseResponseDTO [requestId=" + requestId + ", returnCode=" + returnCode + ", returnMessage="
-				+ returnMessage + ", sign=" + sign + ", data=" + data + "]";
+				+ returnMessage + ", sign=" + sign + ", data=" + data + ", sectList=" + sectList + "]";
 	}
 	
 	
