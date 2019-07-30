@@ -347,8 +347,8 @@ public class RepairServiceImpl implements RepairService {
 		int currPage=baseRequestDTO.getCurr_page();
 		int pageSize=baseRequestDTO.getPage_size();
 		Pageable pageable = new PageRequest(currPage, pageSize, sort);
-	    List<String> regionList=getRegoinIds(baseRequestDTO.getSectList());
 	    
+	    List<String> sectList=baseRequestDTO.getSectList();
 		String payType=map.get("payType");
 		String  status=map.get("status");
 		String finishByUser=map.get("finishByUser");
@@ -357,11 +357,8 @@ public class RepairServiceImpl implements RepairService {
 		String tel=map.get("tel");
 		String operatorName=map.get("operatorName");
 		String operatorTel=map.get("operatorTel");
-		if(regionList.size()<=0){
-			regionList.add(",");
-		}
 		Page<RepairOrder>	repariList=repairOrderRepository.getRepairOderList(payType,status,finishByUser,
-	    		finishByOpeator,address,tel,operatorName,operatorTel,regionList,pageable);
+	    		finishByOpeator,address,tel,operatorName,operatorTel,sectList,pageable);
 		return repariList;
 	}
 
