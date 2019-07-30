@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -100,6 +101,11 @@ public class RepairServiceImpl implements RepairService {
         RepairProject project = repairProjectRepository.findOne(req.getProjectId());
         Address address = addressRepository.findOne(req.getAddressId());
         
+        //查询region 
+        Region region=regionRepository.findOne(address.getXiaoquId());
+        if(region != null && StringUtil.isNotEmpty(region.getSectId())){
+        	user.setSect_id(region.getSectId());
+        }
         RepairOrder order = new RepairOrder(req, user, project, address);
         order = repairOrderRepository.save(order);
         uploadService.updateRepairImg(order);
