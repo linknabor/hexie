@@ -227,8 +227,8 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public Page<Thread> getThreadList(String nickName, String createDate, List<String> sectIds,Pageable pageable) {
-		return threadRepository.getThreadList(nickName,createDate,sectIds,pageable);
+	public Page<Thread> getThreadList(String nickName, String createDate,String sectId, List<String> sectIds,Pageable pageable) {
+		return threadRepository.getThreadList(nickName,createDate,sectId,sectIds,pageable);
 	}
 
 	@Override

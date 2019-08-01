@@ -169,7 +169,7 @@ public interface CommunityService {
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page);
 	
 	
-	public Page<Thread> getThreadList(String nickName, String createDate,List<String> sectIds,Pageable pageable);
+	public Page<Thread> getThreadList(String nickName, String createDate,String sectId,List<String> sectIds,Pageable pageable);
 	
 	public void deleteThread(String[] threadIds);
 	

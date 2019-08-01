@@ -373,8 +373,9 @@ public class RepairServiceImpl implements RepairService {
 		String tel=map.get("tel");
 		String operatorName=map.get("operatorName");
 		String operatorTel=map.get("operatorTel");
+		String sectId=map.get("sectIds");
 		Page<RepairOrder>	repariList=repairOrderRepository.getRepairOderList(payType,status,finishByUser,
-	    		finishByOpeator,address,tel,operatorName,operatorTel,sectList,pageable);
+	    		finishByOpeator,address,tel,operatorName,operatorTel,sectId,sectList,pageable);
 		return repariList;
 	}
 
@@ -395,7 +396,8 @@ public class RepairServiceImpl implements RepairService {
 	    List<String> sectList=baseRequestDTO.getSectList();
 		String name=map.get("name");
 		String tel=map.get("tel");
-		Page<Object> list=serviceOperatorRepository.getServiceoperator(name,tel,sectList,pageable);
+		String sectId=map.get("sectIds");
+		Page<Object> list=serviceOperatorRepository.getServiceoperator(name,tel,sectId,sectList,pageable);
 		return list;
 	}
 
