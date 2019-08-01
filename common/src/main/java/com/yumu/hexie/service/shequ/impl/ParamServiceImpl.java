@@ -66,7 +66,7 @@ public class ParamServiceImpl implements ParamService {
 	@Override
 	public Map<String, String> getParamByUser(User user) {
 
-		String cspId = user.getCsp_id();
+		String cspId = user.getCspId();
 		if (StringUtil.isEmpty(cspId)) {
 			return new HashMap<String, String>();
 		}
