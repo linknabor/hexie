@@ -29,6 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	public User findById(long id);
 	
-	@Query(nativeQuery=true ,value="select *  from user where sect_id is null  limit ?1,?2")
+	@Query(nativeQuery=true ,value="select *  from user where sectId is null  limit ?1,?2")
 	public List<User> getUserList(int pageSize,int pageNum);
 }
