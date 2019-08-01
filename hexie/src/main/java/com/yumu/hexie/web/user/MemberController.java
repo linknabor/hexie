@@ -89,6 +89,6 @@ public class MemberController extends BaseController{
 	@ResponseBody
 	public List<Member> getMemberBillS(@ModelAttribute(Constants.USER) User user){
 		
-		return null;
+		return memberServiceImpl.getMemberBillS(user);
 	}
 }
