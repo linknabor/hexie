@@ -169,9 +169,19 @@ public interface CommunityService {
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page);
 	
 	
-	public Page<Thread> getThreadList(String nickName, String createDate,List<String> sectIds,Pageable pageable);
+	public Page<Thread> getThreadList(String nickName, String createDate,String sectId,List<String> sectIds,Pageable pageable);
 	
 	public void deleteThread(String[] threadIds);
 	
 	public void saveThreadComment(Long threadId,String content,Long userId,String userName);
+	
+	/**
+	 * 根据帖子回复信息ID获取具体的帖子信息
+	 * @param user
+	 * @param ThreadId
+	 * @return
+	 */
+	public ThreadComment getThreadCommentByTreadId(long threadCommentId);
+	
+	public void updateThreadComment(ThreadComment thread);
 }

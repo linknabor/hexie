@@ -108,7 +108,7 @@ public class RepairOrder extends BaseModel {
         setProjectName(project.getName());
         setPublicProject(project.isPublicProject());
         setOpenId(user.getOpenid());
-        setSectId(user.getSect_id());
+        setSectId(user.getSectId());
         setOrderNo(OrderNoUtil.generateRepairOrderNo());
     }
 

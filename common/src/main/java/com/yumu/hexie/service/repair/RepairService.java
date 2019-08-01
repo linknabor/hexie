@@ -52,4 +52,13 @@ public interface RepairService {
     
     public Long reassgin(long orderId, User user);
 	public Page<RepairOrder> getRepairOderList(BaseRequestDTO<Map<String,String>> baseRequestDTO);
+	
+	public Page<Object> getServiceoperator(BaseRequestDTO<Map<String,String>> baseRequestDTO);
+	
+	//保存维修工
+	public int saveRepiorOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO);
+	//根据维修工id获取信息
+	public Map<String, Object> operatorInfo(BaseRequestDTO<String> baseRequestDTO);
+	//删除维修工信息
+	public void deleteOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO);
 }

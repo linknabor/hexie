@@ -38,7 +38,8 @@ public interface RepairOrderRepository  extends JpaRepository<RepairOrder, Long>
 			+ " and IF (?6!='', o.tel like CONCAT('%',?6,'%'), 1=1)"
 			+ " and IF (?7!='', o.operatorName like CONCAT('%',?7,'%'), 1=1)"
 			+ " and IF (?8!='', o.operatorTel like CONCAT('%',?8,'%'), 1=1)"
-			+ " and o.sectId  in ?9 \n#pageable\n",
+			+ " and IF (?9!='', o.sectId = ?9, 1=1)"
+			+ " and o.sectId  in ?10 \n#pageable\n",
 			countQuery="SELECT count(*) FROM repairorder o where "
 			+ " IF (?1!='', o.payType = ?1, 1=1)" 
 			+ " and IF (?2!='', o.status = ?2, 1=1)"
@@ -48,10 +49,11 @@ public interface RepairOrderRepository  extends JpaRepository<RepairOrder, Long>
 			+ " and IF (?6!='', o.tel like CONCAT('%',?6,'%'), 1=1)"
 			+ " and IF (?7!='', o.operatorName like CONCAT('%',?7,'%'), 1=1)"
 			+ " and IF (?8!='', o.operatorTel like CONCAT('%',?8,'%'), 1=1)"
-			+ " and o.sectId  in ?9 "
+			+ " and IF (?9!='', o.sectId = ?9, 1=1)"
+			+ " and o.sectId  in ?10 "
 			,nativeQuery = true)
 	 public Page<RepairOrder> getRepairOderList(String payType, String status, String finishByUser, String finishByOpeator,
-			String address, String tel, String operatorName, String operatorTel,List<String> sectIds,Pageable pageable);
+			String address, String tel, String operatorName, String operatorTel,String sectId,List<String> sectIds,Pageable pageable);
     
 	
 }
