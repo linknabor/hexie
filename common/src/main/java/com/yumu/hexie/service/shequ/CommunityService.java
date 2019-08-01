@@ -174,4 +174,14 @@ public interface CommunityService {
 	public void deleteThread(String[] threadIds);
 	
 	public void saveThreadComment(Long threadId,String content,Long userId,String userName);
+	
+	/**
+	 * 根据帖子回复信息ID获取具体的帖子信息
+	 * @param user
+	 * @param ThreadId
+	 * @return
+	 */
+	public ThreadComment getThreadCommentByTreadId(long threadCommentId);
+	
+	public void updateThreadComment(ThreadComment thread);
 }

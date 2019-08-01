@@ -78,7 +78,7 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserHead(user.getHeadimgurl());
 		thread.setUserId(user.getId());
 		thread.setUserName(user.getNickname());
-		thread.setUserSectId(Long.parseLong(user.getSect_id()));
+		thread.setUserSectId(Long.parseLong(user.getSectId()));
 		thread.setUserSectName(user.getXiaoquName());
 		thread.setStickPriority("0");	//默认优先级0，为最低
 		threadRepository.save(thread);
@@ -262,6 +262,20 @@ public class CommunityServiceImpl implements CommunityService {
 		threadRepository.save(thread);
 		
 	}
+
+	@Override
+	public ThreadComment getThreadCommentByTreadId(long threadCommentId) {
+		return threadCommentRepository.findOne(threadCommentId);
+	}
 	
+	@Override
+	public void updateThreadComment(ThreadComment thread) {
+
+		ThreadComment t = threadCommentRepository.findOne(thread.getCommentId());
+		if (t == null) {
+			throw new BizValidateException("帖子不存在。");
+		}
+		threadCommentRepository.save(thread);
+	}
 	
 }
