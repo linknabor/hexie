@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -12,12 +11,10 @@ import javax.xml.bind.ValidationException;
 
 import org.apache.http.client.methods.HttpGet;
 import org.hibernate.bytecode.buildtime.spi.ExecutionException;
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.yumu.hexie.common.util.HttpUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -25,6 +22,7 @@ import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
+import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -79,6 +77,9 @@ public class WuyeUtil {
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"+ "?sect_id=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String BILL_PAY_ADDRESS_URL = "getBillAddressSDO.do"+ "?bill_id=%s";//查询账单地址
+	private static final String SYNC_SERVICE_CFG_URL = "/param/getParamSDO.do?info_id=%s&type=%s&para_name=%s";
+	
+	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
@@ -283,6 +284,19 @@ public class WuyeUtil {
 		return (BaseResult<WechatPayInfo>)baseResult;
 	}
 	
+	/**
+	 * 查询参数配置
+	 * @param reqUrl
+	 * @param c
+	 * @return
+	 */
+	public static BaseResult<HexieConfig> queryServiceCfg(String infoId, String type, String paraName) throws Exception {
+
+		String url = REQUEST_ADDRESS + String.format(SYNC_SERVICE_CFG_URL, infoId, type, paraName);
+		BaseResult baseResult = httpGet(url, HexieConfig.class);
+		return (BaseResult<HexieConfig>)baseResult;
+	}
+	
 	private static BaseResult httpGet(String reqUrl, Class c){
 		HttpGet get = new HttpGet(reqUrl);
 		get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36");
@@ -335,20 +349,4 @@ public class WuyeUtil {
 	}
 
 
-	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
-	
-	public static void main(String args[]) throws JSONException {
-		try {
-
-			BaseResult v =jsonToBeanResult("{\"result\":\"USERPAYING\",\"data\":{\"packageValue\":\"prepay_id=wx17200917723531c72b8b31ba1759562900\",\"trade_water_id\":\"201907172009P36403\",\"appid\":\"wx8c0072a9504288f3\",\"signtype\":\"RSA\",\"paysign\":\"qbdUGEUIzkUMQ4rczjmty5qQKYl6pmGLrOF2fNFgSqwjUx1ODGI7sqfOj/q9burYid7ssVXIiNPNpiR3aK/yNvDlqkEW1MbCD9q6KxtbJFAKzydyBoJSuEkT23B0D07HGhbTBmzmb/KnwbfJ7uySW6P4v5KtL4j8ZDpGRHlWjg8d9K5vS9gD8JV3mmntG0pKpoMaiAPPIBV7M/KqC+ROr153FiTpsnNK64c/tjgLFsjQkQ1wUx+YZhVsjuRyy2MNK28fNqnZlCjT4+2Ax46ismyg6ipGkxskUm4Ydw/r1HGgk030lHFI/iOY6jI/6zmbSiKUdvyE5HSvKuAyQWzdKw\",\"noncestr\":\"70ba31fc859649af95b0bb1e2c08f325\",\"timestamp\":\"1563365357\"}}", WechatPayInfo.class);
-			BaseResult<WechatPayInfo> aaa =(BaseResult<WechatPayInfo>)v;
-			WechatPayInfo a1 = aaa.getData();
-			System.out.println(a1.getAppid());;
-//			getMemberPrePayInfo("201907171826P80471","1","o_3DlwWzqY176xwmAzIIjY7fSGBQ","www.baidu.com");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-	}
 }

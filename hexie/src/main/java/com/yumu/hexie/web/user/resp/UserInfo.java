@@ -5,6 +5,9 @@
 package com.yumu.hexie.web.user.resp;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import org.springframework.beans.BeanUtils;
 
@@ -62,6 +65,10 @@ public class UserInfo implements Serializable {
 	private String cspId;//公司
 	public String getSectId() {
 		return sectId;
+ 	private Map<?, ?> cfgParam = new HashMap<>();
+	
+    public String getSect_id() {
+		return sect_id;
 	}
 	public void setSectId(String sectId) {
 		this.sectId = sectId;
@@ -260,6 +267,12 @@ public class UserInfo implements Serializable {
     public void setId(long id) {
         this.id = id;
     }
+	public Map<?, ?> getCfgParam() {
+		return cfgParam;
+	}
+	public void setCfgParam(Map<?, ?> cfgParam) {
+		this.cfgParam = cfgParam;
+	}
     
     
 }

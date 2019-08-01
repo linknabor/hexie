@@ -1,13 +1,8 @@
 package com.yumu.hexie.web.user;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -38,17 +33,17 @@ public class MessageController extends BaseController {
 	@Inject
 	private MessageService messageService;
 	
-	private static Map<Integer, String> msgTypeMap = new HashMap<>();
+//	private static Map<Integer, String> msgTypeMap = new HashMap<>();
 	
-	@PostConstruct
-	public void initMsgTypeMapping() {
-		
-		msgTypeMap.put(0, "wuye");
-		msgTypeMap.put(1, "yewei");
-		msgTypeMap.put(2, "juwei");
-		msgTypeMap.put(3, "bianmin");
-		msgTypeMap.put(9, "pingtai");
-	}
+//	@PostConstruct
+//	public void initMsgTypeMapping() {
+//		
+//		msgTypeMap.put(0, "wuye");
+//		msgTypeMap.put(1, "yewei");
+//		msgTypeMap.put(2, "juwei");
+//		msgTypeMap.put(3, "bianmin");
+//		msgTypeMap.put(9, "pingtai");
+//	}
 	
 	/**
 	 * 移动端查询消息列表
@@ -58,21 +53,13 @@ public class MessageController extends BaseController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings({ "unchecked" })
-	@RequestMapping(value = "/messages/{currentPage}", method = RequestMethod.GET)
+	@RequestMapping(value = "/messages/{msgType}/{currentPage}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<Map<String, List<Message>>> messages(@ModelAttribute(Constants.USER)User user, @PathVariable int currentPage)
+	public BaseResult<List<Message>> messages(@ModelAttribute(Constants.USER)User user, @PathVariable int msgType, @PathVariable int currentPage)
 			throws Exception {
 		
-		Map<String, List<Message>> map = new HashMap<>();
-		Iterator<Entry<Integer, String>> it = msgTypeMap.entrySet().iterator();
-		while(it.hasNext()) {
-			Entry<Integer, String> entry = it.next();
-			Integer msgType = entry.getKey();
-			String msgTypeValue = entry.getValue();
-			List<Message> messageList = messageService.queryMessagesByUserAndType(user, msgType, currentPage, PAGE_SIZE);
-			map.put(msgTypeValue, messageList);
-		}
-		return BaseResult.successResult(map);
+		List<Message> messageList = messageService.queryMessagesByUserAndType(user, msgType, currentPage, PAGE_SIZE);
+		return BaseResult.successResult(messageList);
 	}
 
 	//消息详情

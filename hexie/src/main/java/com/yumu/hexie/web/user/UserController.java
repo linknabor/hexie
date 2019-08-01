@@ -3,6 +3,7 @@ package com.yumu.hexie.web.user;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -10,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,6 +34,7 @@ import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
+import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
@@ -61,12 +64,12 @@ public class UserController extends BaseController{
     private CouponService couponService;
     @Inject
     private OperatorService operatorService;
-    
     @Inject
     private GotongService goTongService;
-    
     @Inject
     private SystemConfigService systemConfigService;
+    @Autowired
+    private ParamService paramService;
     
 
     @Value(value = "${testMode}")
@@ -77,13 +80,14 @@ public class UserController extends BaseController{
     public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user) throws Exception {
 		
 		try {
-			log.error("进入userInfo接口");
 			user = userService.getById(user.getId());
-			log.error("userInfo的user "+ user);
+			log.error("userInfo的user: "+ user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
-			    log.error("user.getOfficeTel = "+ user.getOfficeTel());
-			    return new BaseResult<UserInfo>().success(new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId())));
+			    Map<String, String> paramMap = paramService.getParamByUser(user);
+			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
+			    userInfo.setCfgParam(paramMap);
+			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
 			    return new BaseResult<UserInfo>().success(null);
 			}
@@ -292,14 +296,14 @@ public class UserController extends BaseController{
     
     @RequestMapping(value = "/saveLocation", method = RequestMethod.GET)
    	@ResponseBody
-       public BaseResult<String> saveLocation(String weixin_id,String Latitude,String Longitude){
-       	User  user=userService.getByOpenId(weixin_id);
-       	if(user != null){
-       		user.setLatitude(Double.parseDouble(Latitude));//纬度
-       		user.setLongitude(Double.parseDouble(Longitude));//经度
-       		userService.save(user);
-       		 return  new BaseResult<String>().success("地理位置保存成功!"); 
-       	}
-       	 return  new BaseResult<String>().failMsg("未找到该用户!"); 
-       }
+   	public BaseResult<String> saveLocation(String weixin_id,String Latitude,String Longitude){
+    	User  user=userService.getByOpenId(weixin_id);
+    	if(user != null){
+   		user.setLatitude(Double.parseDouble(Latitude));//纬度
+   		user.setLongitude(Double.parseDouble(Longitude));//经度
+		userService.save(user);
+			return  new BaseResult<String>().success("地理位置保存成功!"); 
+		}
+    	return  new BaseResult<String>().failMsg("未找到该用户!"); 
+    }
 }

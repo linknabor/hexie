@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 
  
-public interface ServiceOperatorSectRepository  extends JpaRepository<ServiceoperatorSect, Long> {
+public interface ServiceOperatorSectRepository  extends JpaRepository<ServiceOperatorSect, Long> {
 	
 	@Query(nativeQuery=true,value=" select sectId from serviceoperatorSect where operatorId = ?1")
 	public List<String> findByOperatorId(Long operatorId);
