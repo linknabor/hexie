@@ -10,7 +10,7 @@ public class Message extends BaseModel{
 
 	private static final long serialVersionUID = 4808669460780339640L;
 	
-	private int msgType;	//资讯类型  0. 健康类、1.文化娱乐类、2.城市社区时事、3.教育类、4.居家生活类、5.母婴、6.汽车、7.其他
+	private int msgType;	//资讯类型  0.物业公告, 1.业委会公告, 2.居委会公告, 3.便民信息, 9.全局资讯
 	private String title;	//资讯抬头
 	private String summary;	//资讯摘要	
 	private String content;	//资讯内容

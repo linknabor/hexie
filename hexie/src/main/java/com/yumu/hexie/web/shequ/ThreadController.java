@@ -47,10 +47,11 @@ public class ThreadController extends BaseController {
 			Pageable pageable = new PageRequest(currPage, pageSize, sort);
 			String nickName=baseRequestDTO.getData().get("nickName");
 			String createDate=baseRequestDTO.getData().get("createDate");
+			String sectId=baseRequestDTO.getData().get("sectIds");
 			if(!StringUtil.isEmpty(createDate)){
 				createDate=createDate.replaceAll("-", "");
 			}
-			Page<Thread> page=communityService.getThreadList(nickName,createDate,baseRequestDTO.getSectList(),pageable);
+			Page<Thread> page=communityService.getThreadList(nickName,createDate,sectId,baseRequestDTO.getSectList(),pageable);
 			Map<String,Object> map=new HashMap<>();
 			map.put("list", page.getContent());
 			map.put("count", page.getTotalElements());	

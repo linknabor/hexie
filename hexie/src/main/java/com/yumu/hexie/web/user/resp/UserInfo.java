@@ -58,20 +58,19 @@ public class UserInfo implements Serializable {
     private long id;
     private String officeTel;
     
-    private String sect_id;//小区id
-	private String csp_id;//公司
-
-    public String getSect_id() {
-		return sect_id;
+    private String sectId;//小区id
+	private String cspId;//公司
+	public String getSectId() {
+		return sectId;
 	}
-	public void setSect_id(String sect_id) {
-		this.sect_id = sect_id;
+	public void setSectId(String sectId) {
+		this.sectId = sectId;
 	}
-	public String getCsp_id() {
-		return csp_id;
+	public String getCspId() {
+		return cspId;
 	}
-	public void setCsp_id(String csp_id) {
-		this.csp_id = csp_id;
+	public void setCspId(String cspId) {
+		this.cspId = cspId;
 	}
 	public String getOfficeTel() {
 		return officeTel;

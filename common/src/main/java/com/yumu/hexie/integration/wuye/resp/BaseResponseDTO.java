@@ -1,5 +1,7 @@
 package com.yumu.hexie.integration.wuye.resp;
 
+import java.util.List;
+
 import com.yumu.hexie.integration.wuye.base.BaseQuery;
 
 public class BaseResponseDTO<T> extends BaseQuery {
@@ -9,22 +11,30 @@ public class BaseResponseDTO<T> extends BaseQuery {
 	 */
 	private static final long serialVersionUID = -1637582137500635252L;
 	
-	private String return_code;	//返回码	
-	private String return_message;	//返回提示语
+	private String requestId;	//请求ID
+	private String returnCode;	//返回码	
+	private String returnMessage;	//返回提示语
 	private String sign;	//签名
 	private T data;	//数据
+	private List<String> sectList;	//小区id
 	
-	public String getReturn_code() {
-		return return_code;
+	public String getRequestId() {
+		return requestId;
 	}
-	public void setReturn_code(String return_code) {
-		this.return_code = return_code;
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
 	}
-	public String getReturn_message() {
-		return return_message;
+	public String getReturnCode() {
+		return returnCode;
 	}
-	public void setReturn_message(String return_message) {
-		this.return_message = return_message;
+	public void setReturnCode(String returnCode) {
+		this.returnCode = returnCode;
+	}
+	public String getReturnMessage() {
+		return returnMessage;
+	}
+	public void setReturnMessage(String returnMessage) {
+		this.returnMessage = returnMessage;
 	}
 	public String getSign() {
 		return sign;
@@ -39,5 +49,17 @@ public class BaseResponseDTO<T> extends BaseQuery {
 		this.data = data;
 	}
 	
-
+	public List<String> getSectList() {
+		return sectList;
+	}
+	public void setSectList(List<String> sectList) {
+		this.sectList = sectList;
+	}
+	@Override
+	public String toString() {
+		return "BaseResponseDTO [requestId=" + requestId + ", returnCode=" + returnCode + ", returnMessage="
+				+ returnMessage + ", sign=" + sign + ", data=" + data + ", sectList=" + sectList + "]";
+	}
+	
+	
 }
