@@ -63,12 +63,10 @@ public class UserInfo implements Serializable {
     
     private String sectId;//小区id
 	private String cspId;//公司
-	public String getSectId() {
-		return sectId;
  	private Map<?, ?> cfgParam = new HashMap<>();
 	
-    public String getSect_id() {
-		return sect_id;
+	public String getSectId() {
+		return sectId;
 	}
 	public void setSectId(String sectId) {
 		this.sectId = sectId;
