@@ -153,8 +153,8 @@ public class MemberServiceImpl implements MemberService{
 					}
 				}
 				member.setStatus(MemberVo.MEMBER_YES);
-				
 				memberRepository.save(member);//保存会员
+				
 				couponServiceImpl.addCoupon4Member(user);//发放会员优惠卷
 				
 				return "SUCCESS";
@@ -174,9 +174,49 @@ public class MemberServiceImpl implements MemberService{
 	}
 
 	@Override
-	public String getNotify(HttpServletRequest request, HttpServletResponse response) {
+	public List<Member> getMemberBillS(User user) {
 		// TODO Auto-generated method stub
+		try {
+			List<Member> memberis = memberRepository.findByUserid(user.getId());
+		
+			Member member = new Member();
+			member.setUserid(user.getId());
+			Calendar c = Calendar.getInstance();
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
+			if(memberis.isEmpty()) {
+				c.setTime(new Date());
+				c.add(Calendar.DAY_OF_MONTH, 365);
+				member.setStartdate(df.format(new Date()).substring(0, 10));//获取当前日期
+				member.setEnddate(df.format(c.getTime()).substring(0, 10));//当前日期加1年
+				member.setStatus(MemberVo.MEMBER_YES);
+				memberis.add(member);
+				return memberis;
+			}else {
+				member = memberis.get(0);
+				if("0".equals(memberis.get(0).getStatus())) {
+					String enddate = memberis.get(0).getEnddate();
+					Date date = df.parse(enddate);
+					c.setTime(date);
+					c.add(Calendar.DAY_OF_MONTH, 365);
+					member.setEnddate(df.format(c.getTime()).substring(0, 10));//根据之前日期加日期加1年
+				}else {
+					c.setTime(new Date());
+					c.add(Calendar.DAY_OF_MONTH, 365);
+					member.setStartdate(df.format(new Date()).substring(0, 10));//获取当前日期
+					member.setEnddate(df.format(c.getTime()).substring(0, 10));//当前日期加1年
+				}
+				member.setStatus(MemberVo.MEMBER_YES);
+				memberis.remove(0);
+				memberis.add(member);
+				return memberis;
+			}
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
+		
 	}
+
 
 }

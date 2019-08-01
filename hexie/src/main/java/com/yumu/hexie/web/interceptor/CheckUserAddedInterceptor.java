@@ -27,7 +27,7 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 		if (request.getSession().getAttribute(Constants.USER) == null) {
 			String code = request.getParameter("code");
 			if (StringUtil.isNotEmpty(code)) {
-				if(request.getRequestURI().indexOf("login") >= 0 || request.getRequestURI().indexOf("servplat")>0) {
+				if(request.getRequestURI().indexOf("login") >= 0) {
 					return true;
 				} else {
 					User userAccount = userService.getOrSubscibeUserByCode(code);

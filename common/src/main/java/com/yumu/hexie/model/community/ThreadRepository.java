@@ -41,13 +41,15 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " where threadStatus = 0 " 
 			+ " and IF (?1!='', userName like CONCAT('%',?1,'%'), 1=1)"
 			+ " and IF (?2!='', createDate = ?2, 1=1)"
-			+ " and userSectId in ?3 \n#pageable\n",
+			+ " and IF (?3!='', userSectId = ?3, 1=1)"
+			+ " and userSectId in ?4 \n#pageable\n",
 			countQuery="select count(*) from thread  where threadStatus = 0 " 
 			+ " and IF (?1!='', userName like CONCAT('%',?1,'%'), 1=1)"
 			+ " and IF (?2!='', createDate = ?2, 1=1)"
-			+ " and userSectId in ?3"
+			+ " and IF (?3!='', userSectId = ?3, 1=1)"
+			+ " and userSectId in ?4"
 			,nativeQuery = true)
-	public Page<Thread> getThreadList(String nickName, String createDate,List<String> sectIds,Pageable pageable);
+	public Page<Thread> getThreadList(String nickName, String createDate,String sectId,List<String> sectIds,Pageable pageable);
 	
 	@Modifying
 	@Query(nativeQuery = true,value="update thread set threadStatus=1 where threadId in ?1")

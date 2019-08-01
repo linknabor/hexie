@@ -72,4 +72,34 @@ public class BaseResponse {
 		return dto;
 		
 	}
+	
+	/**
+	 *  带有分页多条的返回
+	 * @param requestId
+	 * @param page
+	 * @return
+	 */
+	public static <T> BaseResponseDTO<T> success(String requestId, T t, List<String> sectIds) {
+		
+		BaseResponseDTO<T> dto = new BaseResponseDTO<>();
+		dto.setRequestId(requestId);
+		dto.setReturnCode(SUCCESS);
+		dto.setData(t);
+		dto.setSectList(sectIds);
+		return dto;
+		
+	}
+	
+	/**
+	 *  带有分页多条的返回
+	 * @param requestId
+	 * @param page
+	 * @return
+	 */
+	public static <T> BaseResponseDTO<T> success(BaseResponseDTO<T> dto) {
+		
+		dto.setReturnCode(SUCCESS);
+		return dto;
+		
+	}
 }

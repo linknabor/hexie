@@ -5,6 +5,7 @@
 package com.yumu.hexie.service.repair.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -31,10 +33,13 @@ import com.yumu.hexie.model.localservice.repair.RepairProject;
 import com.yumu.hexie.model.localservice.repair.RepairProjectRepository;
 import com.yumu.hexie.model.localservice.repair.RepairSeed;
 import com.yumu.hexie.model.localservice.repair.RepairSeedRepository;
+import com.yumu.hexie.model.localservice.repair.ServiceOperatorSectRepository;
+import com.yumu.hexie.model.localservice.repair.ServiceoperatorSect;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.UploadService;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -79,6 +84,12 @@ public class RepairServiceImpl implements RepairService {
     
     @Inject
     private RegionRepository  regionRepository;
+    
+    @Inject
+    private UserRepository  userRepository;
+    
+    @Inject
+    private ServiceOperatorSectRepository serviceOperatorSectRepository;
     /**  
      * @param repairType
      * @return
@@ -100,6 +111,11 @@ public class RepairServiceImpl implements RepairService {
         RepairProject project = repairProjectRepository.findOne(req.getProjectId());
         Address address = addressRepository.findOne(req.getAddressId());
         
+        //查询region 
+        Region region=regionRepository.findOne(address.getXiaoquId());
+        if(region != null && StringUtil.isNotEmpty(region.getSectId())){
+        	user.setSectId(region.getSectId());
+        }
         RepairOrder order = new RepairOrder(req, user, project, address);
         order = repairOrderRepository.save(order);
         uploadService.updateRepairImg(order);
@@ -347,8 +363,8 @@ public class RepairServiceImpl implements RepairService {
 		int currPage=baseRequestDTO.getCurr_page();
 		int pageSize=baseRequestDTO.getPage_size();
 		Pageable pageable = new PageRequest(currPage, pageSize, sort);
-	    List<String> regionList=getRegoinIds(baseRequestDTO.getSectList());
 	    
+	    List<String> sectList=baseRequestDTO.getSectList();
 		String payType=map.get("payType");
 		String  status=map.get("status");
 		String finishByUser=map.get("finishByUser");
@@ -357,11 +373,9 @@ public class RepairServiceImpl implements RepairService {
 		String tel=map.get("tel");
 		String operatorName=map.get("operatorName");
 		String operatorTel=map.get("operatorTel");
-		if(regionList.size()<=0){
-			regionList.add(",");
-		}
+		String sectId=map.get("sectIds");
 		Page<RepairOrder>	repariList=repairOrderRepository.getRepairOderList(payType,status,finishByUser,
-	    		finishByOpeator,address,tel,operatorName,operatorTel,regionList,pageable);
+	    		finishByOpeator,address,tel,operatorName,operatorTel,sectId,sectList,pageable);
 		return repariList;
 	}
 
@@ -369,6 +383,85 @@ public class RepairServiceImpl implements RepairService {
 	
 	public List<String> getRegoinIds(List<String> sect_ids){
 		return regionRepository.getRegionBySectid(sect_ids);
+	}
+
+	@Override
+	public Page<Object> getServiceoperator(BaseRequestDTO<Map<String, String>> baseRequestDTO) {
+		Map<String,String> map=baseRequestDTO.getData();
+		Sort sort = new Sort(Direction.DESC , "id");
+		int currPage=baseRequestDTO.getCurr_page();
+		int pageSize=baseRequestDTO.getPage_size();
+		Pageable pageable = new PageRequest(currPage, pageSize, sort);
+	    
+	    List<String> sectList=baseRequestDTO.getSectList();
+		String name=map.get("name");
+		String tel=map.get("tel");
+		String sectId=map.get("sectIds");
+		Page<Object> list=serviceOperatorRepository.getServiceoperator(name,tel,sectId,sectList,pageable);
+		return list;
+	}
+
+	@Override
+	@Transactional
+	public int saveRepiorOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO) {
+		Map<String,String> map=baseRequestDTO.getData();
+		String sectIds =map.get("sectIds");
+		String[] sectids=sectIds.split(",");
+		String tel=map.get("tel");
+		String name=map.get("name");
+		String id=map.get("id");
+		ServiceOperator so=new ServiceOperator();
+		if(StringUtil.isEmpty(id)){
+			List<User> usesrList=userRepository.findByTel(tel);
+			if(usesrList.size()<=0){
+				return 0;
+			}
+			User u=usesrList.get(usesrList.size()-1);
+			so.setCreateDate(System.currentTimeMillis());
+			so.setLatitude(0.0);
+			so.setLongitude(0.0);
+			so.setName(name);
+			so.setTel(tel);
+			so.setType(1);
+			so.setUserId(u.getId());
+			so.setOpenId(u.getOpenid());
+			so.setCompanyName(map.get("cspName"));
+		}else{
+			so=serviceOperatorRepository.findOne(Long.valueOf(id));
+			so.setName(name);
+			serviceOperatorSectRepository.deleteByOperatorId(Long.valueOf(id));
+		}
+		ServiceOperator serviceOperator=serviceOperatorRepository.save(so);
+		for (int i = 0; i < sectids.length; i++) {
+			ServiceoperatorSect s=new ServiceoperatorSect();
+			s.setSectId(sectids[i]);
+			s.setOperatorId(serviceOperator.getId());
+			s.setCreateDate(System.currentTimeMillis());
+			serviceOperatorSectRepository.save(s);
+		}
+		return 1;
+	}
+
+	@Override
+	public Map<String, Object> operatorInfo(BaseRequestDTO<String> baseRequestDTO) {
+		Map<String,Object> map=new HashMap<String, Object>();
+		List<String> sectList=serviceOperatorSectRepository.findByOperatorId(Long.valueOf(baseRequestDTO.getData()));
+		ServiceOperator serviceOperator =serviceOperatorRepository.findOne(Long.valueOf(baseRequestDTO.getData()));
+		map.put("sectList", sectList);
+		map.put("serviceOperator", serviceOperator);
+		return map;
+	}
+
+	@Override
+	@Transactional
+	public void deleteOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO) {
+		String operatorId=baseRequestDTO.getData().get("ID");
+		String sectId=baseRequestDTO.getData().get("sectId");
+		serviceOperatorSectRepository.deleteByOperatorIdAndSectId(Long.valueOf(operatorId),sectId);
+	    List<String> list=serviceOperatorSectRepository.findByOperatorId(Long.valueOf(operatorId));
+	    if(list.size()==0){
+	    	serviceOperatorRepository.delete(Long.valueOf(operatorId));
+	    }
 	}
 
 }
