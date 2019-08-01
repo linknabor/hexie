@@ -13,7 +13,7 @@
       		<maxHistory>30</maxHistory>
    		</rollingPolicy>
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %caller{1} %-5level %logger{36} - %msg%n
             </pattern>
         </encoder>
     </appender>

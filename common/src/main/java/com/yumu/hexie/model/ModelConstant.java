@@ -297,4 +297,6 @@ public class ModelConstant {
 	//评论或者投诉
 	public static final int HAOJIAAN_COMMPENT_STATUS_COMMENT = 1;//评论
 	public static final int HAOJIAAN_COMMPENT_STATUS_COMPLAIN = 2;//投诉
+	
+	public static final String PARA_TYPE_CSP = "2";
 }		
