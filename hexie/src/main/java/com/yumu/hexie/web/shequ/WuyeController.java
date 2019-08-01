@@ -108,8 +108,8 @@ public class WuyeController extends BaseController {
 			log.error("这里是删除房子后保存的电话");
 			log.error("保存电话到user表==》开始");
 			user.setOfficeTel(r.getData());
-			user.setSect_id("0");
-			user.setCsp_id("0");
+			user.setSectId("0");
+			user.setCspId("0");
 			userService.save(user);
 			log.error("保存电话到user表==》成功");
 			return BaseResult.successResult("删除房子成功！");

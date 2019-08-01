@@ -117,16 +117,16 @@ public class MessageServiceImpl implements MessageService {
 		Pageable pageable = new PageRequest(page, pageSize);
 		switch (msgType) {
 		case 0:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSect_id(), msgType, pageable);
+			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
 			break;
 		case 1:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSect_id(), msgType, pageable);
+			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
 			break;
 		case 2:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSect_id(), msgType, pageable);
+			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
 			break;
 		case 3:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSect_id(), msgType, pageable);
+			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
 			break;	
 		case 9:
 			messageList = messageRepository.queryMessagesByStatusAndMsgType(pageable);

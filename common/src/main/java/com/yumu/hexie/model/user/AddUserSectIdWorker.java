@@ -46,7 +46,7 @@ public class AddUserSectIdWorker implements Runnable{
 	}
 	@SuppressWarnings("unchecked")
 	public void deal(){
-		if(StringUtil.isEmpty(user.getSect_id())){
+		if(StringUtil.isEmpty(user.getSectId())){
 			HexieUser hexieUser = wuyeService.queryPayUserAndBindHouse(user.getWuyeId());
 			if(hexieUser != null){
 				boolean isSuccess = transactionUtil.transact(s -> wuyeService.setDefaultAddress(user, hexieUser));	
