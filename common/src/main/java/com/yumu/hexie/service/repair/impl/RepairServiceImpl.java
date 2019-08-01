@@ -414,9 +414,14 @@ public class RepairServiceImpl implements RepairService {
 		if(StringUtil.isEmpty(id)){
 			List<User> usesrList=userRepository.findByTel(tel);
 			if(usesrList.size()<=0){
-				return 0;
+				return 0;//未查询到用户
 			}
 			User u=usesrList.get(usesrList.size()-1);
+			List<ServiceOperator>  operatorList= serviceOperatorRepository.findByUserId(u.getId());
+			if(operatorList.size()>0){
+				return 2;//已存在改用户的维修工
+
+			}
 			so.setCreateDate(System.currentTimeMillis());
 			so.setLatitude(0.0);
 			so.setLongitude(0.0);
