@@ -34,7 +34,7 @@ import com.yumu.hexie.model.localservice.repair.RepairProjectRepository;
 import com.yumu.hexie.model.localservice.repair.RepairSeed;
 import com.yumu.hexie.model.localservice.repair.RepairSeedRepository;
 import com.yumu.hexie.model.localservice.repair.ServiceOperatorSectRepository;
-import com.yumu.hexie.model.localservice.repair.ServiceoperatorSect;
+import com.yumu.hexie.model.localservice.repair.ServiceOperatorSect;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
@@ -438,7 +438,7 @@ public class RepairServiceImpl implements RepairService {
 		}
 		ServiceOperator serviceOperator=serviceOperatorRepository.save(so);
 		for (int i = 0; i < sectids.length; i++) {
-			ServiceoperatorSect s=new ServiceoperatorSect();
+			ServiceOperatorSect s=new ServiceOperatorSect();
 			s.setSectId(sectids[i]);
 			s.setOperatorId(serviceOperator.getId());
 			s.setCreateDate(System.currentTimeMillis());

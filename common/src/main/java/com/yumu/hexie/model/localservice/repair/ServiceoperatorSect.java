@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import com.yumu.hexie.model.BaseModel;
 
 @Entity
-public class ServiceoperatorSect extends BaseModel{
+public class ServiceOperatorSect extends BaseModel{
 
 	/**
 	 * 
