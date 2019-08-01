@@ -14,8 +14,8 @@ public interface MemberService {
 	public List<Member> getMember(User user);
 	
 	public WechatPayInfo getPayInfo(User user);
-	
-	public String getNotify(HttpServletRequest request, HttpServletResponse response);
 
-	String getNotify(UnionPayVO unionpayvo);
+	public String getNotify(UnionPayVO unionpayvo);
+
+	public List<Member> getMemberBillS(User user);
 }

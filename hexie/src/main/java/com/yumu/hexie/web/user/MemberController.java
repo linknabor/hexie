@@ -85,9 +85,9 @@ public class MemberController extends BaseController{
 	
 	
 	
-	@RequestMapping(value="/getMemberBillDetail",method = RequestMethod.GET)
+	@RequestMapping(value="/getMemberBillS",method = RequestMethod.GET)
 	@ResponseBody
-	public List<MemberBill> getMemberBillDetail(@ModelAttribute(Constants.USER) User user){
+	public List<Member> getMemberBillS(@ModelAttribute(Constants.USER) User user){
 		
 		return null;
 	}
