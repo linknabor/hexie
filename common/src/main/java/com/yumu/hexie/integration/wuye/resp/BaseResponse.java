@@ -1,4 +1,4 @@
-package com.yumu.hexie.web;
+package com.yumu.hexie.integration.wuye.resp;
 
 import java.util.List;
 

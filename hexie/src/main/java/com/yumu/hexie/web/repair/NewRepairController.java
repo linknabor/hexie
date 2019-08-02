@@ -17,7 +17,6 @@ import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.service.repair.RepairService;
 import com.yumu.hexie.web.BaseController;
-import com.yumu.hexie.web.BaseResponse;
 
 @Controller
 public class NewRepairController extends BaseController{
