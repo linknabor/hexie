@@ -82,4 +82,15 @@ public class NewRepairController extends BaseController{
 		return result;
 	}
 	
+	@RequestMapping(value = "/servplat/repair/checkTel", method = RequestMethod.POST,produces = "application/json")
+	@ResponseBody
+	public BaseResponseDTO<Integer> checkTel(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
+		BaseResponseDTO<Integer> result=new BaseResponseDTO<>();
+		if("hexie-servplat".equals(baseRequestDTO.getSign())){
+			int r=repairService.checkTel(baseRequestDTO);
+			result.setData(r);
+		}
+		return result;
+	}
+	
 }
