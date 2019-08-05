@@ -18,14 +18,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wuye.resp.BaseResponse;
+import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.exception.IntegrationBizException;
 import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
-import com.yumu.hexie.web.BaseResult;
 
 @Controller
 public class ThreadController extends BaseController {
@@ -36,12 +38,12 @@ public class ThreadController extends BaseController {
 	@Inject
 	private UserService userService;
     
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/servplat/thread/getThreadList", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/servplat/thread/getThreadList", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<Map<String,Object>> getThreadList(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
+	public BaseResponseDTO<Map<String,Object>> getThreadList(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		Map<String,Object> map=new HashMap<>();
+		try {
+		    Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
 			int currPage=baseRequestDTO.getCurr_page();
 			int pageSize=baseRequestDTO.getPage_size();
 			Pageable pageable = new PageRequest(currPage, pageSize, sort);
@@ -52,71 +54,71 @@ public class ThreadController extends BaseController {
 				createDate=createDate.replaceAll("-", "");
 			}
 			Page<Thread> page=communityService.getThreadList(nickName,createDate,sectId,baseRequestDTO.getSectList(),pageable);
-			Map<String,Object> map=new HashMap<>();
 			map.put("list", page.getContent());
 			map.put("count", page.getTotalElements());	
-			return BaseResult.successResult(map);
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return BaseResult.fail("签名错误!");
+		return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/servplat/thread/deleteThread", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResult<String> deleteThread(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			String threadIds=baseRequestDTO.getData().get("threadIds");
+	public BaseResponseDTO<String> deleteThread(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		try {
+		    String threadIds=baseRequestDTO.getData().get("threadIds");
 			String[] threda_ids=threadIds.split(",");
 			communityService.deleteThread(threda_ids);
-			return BaseResult.successResult("");
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return BaseResult.fail("签名错误!");
+			return BaseResponse.success(baseRequestDTO.getRequestId());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/servplat/thread/getThreadDetail", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResult<Map<String,Object>> getThreadDetail(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
+	public BaseResponseDTO<Map<String,Object>> getThreadDetail(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		Map<String,Object> map=new HashMap<>();
+		try {
 			String  threadId=baseRequestDTO.getData().get("threadId");
 			Thread  thread=communityService.getThreadByTreadId(Long.parseLong(threadId));
 			List<ThreadComment>  list=communityService.getCommentListByThreadId(Long.parseLong(threadId));
-			Map<String,Object> map=new HashMap<>();
 			map.put("list", list);
 			map.put("thread", thread);
-			return BaseResult.successResult(map);
-		}
-		return BaseResult.fail("签名错误!");
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}	
+			return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/servplat/thread/saveThreadComment", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResult<String> saveThreadComment(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
+	public BaseResponseDTO<String> saveThreadComment(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		try {
 			Map<String,String> map=baseRequestDTO.getData();
 			String threadId=map.get("threadId");
 			String content=map.get("content");
 			String userId=map.get("userId");
 			String userName=map.get("userName");
-			communityService.saveThreadComment(Long.parseLong(threadId),content,Long.parseLong(userId),userName);	
-			return BaseResult.successResult("");
-		}
-		return BaseResult.fail("签名错误!");
+			communityService.saveThreadComment(Long.parseLong(threadId),content,Long.parseLong(userId),userName);		
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}	
+		return BaseResponse.success(baseRequestDTO.getRequestId());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/servplat/thread/getUserInfo", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResult<Map<String,Object>> getUserInfo(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			String userId=baseRequestDTO.getData().get("userId");
-			User user=userService.getById(Long.parseLong(userId));
-			Map<String,Object> map=new HashMap<>();
-			map.put("userInfo", user);
-			return BaseResult.successResult(map);
-		}
-		return BaseResult.fail("签名错误!");
+	public BaseResponseDTO<Map<String,Object>> getUserInfo(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		     	Map<String,Object> map=new HashMap<>();	
+		    try {
+			    String userId=baseRequestDTO.getData().get("userId");
+				User user=userService.getById(Long.parseLong(userId));
+				map.put("userInfo", user);
+			} catch (Exception e) {
+				throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+			}
+			return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 
 }

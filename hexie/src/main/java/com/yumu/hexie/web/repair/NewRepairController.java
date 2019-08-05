@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.repair;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.yumu.hexie.integration.wuye.resp.BaseResponse;
 import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
+import com.yumu.hexie.service.exception.IntegrationBizException;
 import com.yumu.hexie.service.repair.RepairService;
 import com.yumu.hexie.web.BaseController;
 
@@ -26,71 +29,77 @@ public class NewRepairController extends BaseController{
 	
 	@RequestMapping(value = "/servplat/repair/getRepairOderList", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResponseDTO<List<RepairOrder>> getRepairOderList(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		BaseResponseDTO<List<RepairOrder>> result=new BaseResponseDTO<>();
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			Page<RepairOrder> page=repairService.getRepairOderList(baseRequestDTO);
-			result.setTotal_size((int)page.getTotalElements());
-			result.setData(page.getContent());
+	public BaseResponseDTO<Map<String,Object>> getRepairOderList(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		Map<String,Object> map=new HashMap<>();
+		try {
+		Page<RepairOrder> page=repairService.getRepairOderList(baseRequestDTO);
+		map.put("count", page.getTotalElements());
+		map.put("list", page.getContent());
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return result;
+		return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
 	@RequestMapping(value = "/servplat/repair/getServiceoperator", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResponseDTO<List<Object>> getServiceoperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		BaseResponseDTO<List<Object>> result=new BaseResponseDTO<>();
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			Page<Object> page=repairService.getServiceoperator(baseRequestDTO);
-			result.setTotal_size((int)page.getTotalElements());
-			result.setData(page.getContent());
+	public BaseResponseDTO<Map<String,Object>> getServiceoperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+		Map<String,Object> map=new HashMap<>();
+		try {
+			Page<Object>  page=repairService.getServiceoperator(baseRequestDTO);
+			map.put("count", page.getTotalElements());
+			map.put("list", page.getContent());
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return result;
+		return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
 	@RequestMapping(value = "/servplat/repair/saveRepiorOperator", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Integer> saveRepiorOperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		BaseResponseDTO<Integer> result=new BaseResponseDTO<>();
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			int r=repairService.saveRepiorOperator(baseRequestDTO);
-			result.setData(r);
+		int r=0;
+		try {
+			 r=repairService.saveRepiorOperator(baseRequestDTO);
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return result;
+		return BaseResponse.success(baseRequestDTO.getRequestId(), r);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/servplat/repair/operatorInfo", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResponseDTO<ServiceOperator> operatorInfo(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
-		BaseResponseDTO<ServiceOperator> result=new BaseResponseDTO<>();
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			Map<String,Object> map=repairService.operatorInfo(baseRequestDTO);
-			result.setSectList((List<String>)map.get("sectList"));
-			result.setData((ServiceOperator)map.get("serviceOperator"));
+	public BaseResponseDTO<Map<String,Object>> operatorInfo(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
+		Map<String,Object> map=null;		
+		try {
+			 map=repairService.operatorInfo(baseRequestDTO);
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return result;
+		return BaseResponse.success(baseRequestDTO.getRequestId(),map);
 	}
 	
 	@RequestMapping(value = "/servplat/repair/deleteOperator", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Integer> deleteOperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
-		BaseResponseDTO<Integer> result=new BaseResponseDTO<>();
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
+		try {
 			repairService.deleteOperator(baseRequestDTO);
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return result;
+		return BaseResponse.success(baseRequestDTO.getRequestId());
 	}
 	
 	@RequestMapping(value = "/servplat/repair/checkTel", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Integer> checkTel(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
-		BaseResponseDTO<Integer> result=new BaseResponseDTO<>();
-		if("hexie-servplat".equals(baseRequestDTO.getSign())){
-			int r=repairService.checkTel(baseRequestDTO);
-			result.setData(r);
+		int r=0;
+		try {
+			 r=repairService.checkTel(baseRequestDTO);
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
-		return result;
+		return BaseResponse.success(baseRequestDTO.getRequestId(), r);
 	}
 	
 }
