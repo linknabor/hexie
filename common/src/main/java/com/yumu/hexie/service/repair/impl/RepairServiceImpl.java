@@ -469,4 +469,13 @@ public class RepairServiceImpl implements RepairService {
 	    }
 	}
 
+	@Override
+	public int checkTel(BaseRequestDTO<String> baseRequestDTO) {
+		List<User> usesrList=userRepository.findByTel(baseRequestDTO.getData());
+		if(usesrList.size()<=0){
+			return 0;//未查询到用户
+		}
+		return 1;
+	}
+
 }
