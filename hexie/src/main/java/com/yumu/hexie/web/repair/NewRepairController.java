@@ -1,7 +1,6 @@
 package com.yumu.hexie.web.repair;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,19 +14,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.integration.wuye.resp.BaseResponse;
 import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
-import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.service.exception.IntegrationBizException;
 import com.yumu.hexie.service.repair.RepairService;
 import com.yumu.hexie.web.BaseController;
 
 @Controller
+@RequestMapping(value = "/servplat/repair")
 public class NewRepairController extends BaseController{
 	
 	@Autowired
 	private RepairService repairService;
 	
-	@RequestMapping(value = "/servplat/repair/getRepairOderList", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/getRepairOderList", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getRepairOderList(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		Map<String,Object> map=new HashMap<>();
@@ -41,7 +40,7 @@ public class NewRepairController extends BaseController{
 		return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
-	@RequestMapping(value = "/servplat/repair/getServiceoperator", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/getServiceoperator", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getServiceoperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		Map<String,Object> map=new HashMap<>();
@@ -55,7 +54,7 @@ public class NewRepairController extends BaseController{
 		return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
-	@RequestMapping(value = "/servplat/repair/saveRepiorOperator", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/saveRepiorOperator", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Integer> saveRepiorOperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		int r=0;
@@ -67,7 +66,7 @@ public class NewRepairController extends BaseController{
 		return BaseResponse.success(baseRequestDTO.getRequestId(), r);
 	}
 	
-	@RequestMapping(value = "/servplat/repair/operatorInfo", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/operatorInfo", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> operatorInfo(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
 		Map<String,Object> map=null;		
@@ -79,7 +78,7 @@ public class NewRepairController extends BaseController{
 		return BaseResponse.success(baseRequestDTO.getRequestId(),map);
 	}
 	
-	@RequestMapping(value = "/servplat/repair/deleteOperator", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/deleteOperator", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Integer> deleteOperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		try {
@@ -90,7 +89,7 @@ public class NewRepairController extends BaseController{
 		return BaseResponse.success(baseRequestDTO.getRequestId());
 	}
 	
-	@RequestMapping(value = "/servplat/repair/checkTel", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/checkTel", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Integer> checkTel(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
 		int r=0;

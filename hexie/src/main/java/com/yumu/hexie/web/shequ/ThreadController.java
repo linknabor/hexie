@@ -30,6 +30,7 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 
 @Controller
+@RequestMapping(value = "/servplat/thread")
 public class ThreadController extends BaseController {
 
 	@Inject
@@ -38,7 +39,7 @@ public class ThreadController extends BaseController {
 	@Inject
 	private UserService userService;
     
-	@RequestMapping(value = "/servplat/thread/getThreadList", method = RequestMethod.POST)
+	@RequestMapping(value = "/getThreadList", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getThreadList(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		Map<String,Object> map=new HashMap<>();
@@ -62,7 +63,7 @@ public class ThreadController extends BaseController {
 		return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
-	@RequestMapping(value = "/servplat/thread/deleteThread", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/deleteThread", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<String> deleteThread(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		try {
@@ -75,7 +76,7 @@ public class ThreadController extends BaseController {
 			return BaseResponse.success(baseRequestDTO.getRequestId());
 	}
 	
-	@RequestMapping(value = "/servplat/thread/getThreadDetail", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/getThreadDetail", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getThreadDetail(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		Map<String,Object> map=new HashMap<>();
@@ -91,7 +92,7 @@ public class ThreadController extends BaseController {
 			return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
 	
-	@RequestMapping(value = "/servplat/thread/saveThreadComment", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/saveThreadComment", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<String> saveThreadComment(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		try {
@@ -107,7 +108,7 @@ public class ThreadController extends BaseController {
 		return BaseResponse.success(baseRequestDTO.getRequestId());
 	}
 	
-	@RequestMapping(value = "/servplat/thread/getUserInfo", method = RequestMethod.POST,produces = "application/json")
+	@RequestMapping(value = "/getUserInfo", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getUserInfo(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		     	Map<String,Object> map=new HashMap<>();	
