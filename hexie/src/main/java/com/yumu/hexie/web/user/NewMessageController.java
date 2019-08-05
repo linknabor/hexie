@@ -25,7 +25,7 @@ import com.yumu.hexie.web.BaseController;
  *
  */
 @RestController
-@RequestMapping(value = "/servplat/message/")
+@RequestMapping(value = "/servplat/message")
 public class NewMessageController extends BaseController {
 
 	@Autowired
@@ -73,7 +73,7 @@ public class NewMessageController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/messageDetail", method = RequestMethod.POST)
+	@RequestMapping(value = "/getMessageDetail", method = RequestMethod.POST)
 	public BaseResponseDTO<Message> getMessageDetail(@RequestBody BaseRequestDTO<String> baseRequestDTO)
 			throws Exception {
 		Message message;
