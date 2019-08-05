@@ -21,6 +21,7 @@ import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
+import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
@@ -70,6 +71,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	protected WechatCoreService wechatCoreService;
 	@Inject
 	protected ShareService shareService;
+	@Inject
+	protected RepairOrderRepository repairOrderRepository;
 	
 	@Inject
 	private SalePlanService salePlanService;
@@ -129,6 +132,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
         sOrder.setPrice(amount);
         sOrder = serviceOrderRepository.save(sOrder);
+        
+        order.setOrderId(sOrder.getId());
+        repairOrderRepository.save(order);
 
         item.setServiceOrder(sOrder);
         item.setAmount(amount*1f);
