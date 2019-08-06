@@ -63,4 +63,7 @@ public interface RepairService {
 	public void deleteOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO);
 	//根据电话检验维修员是否存在
 	public int checkTel(BaseRequestDTO<String> baseRequestDTO);
+	
+	//根据维修工id获取服务区域
+	public List<String> showSect(String id);
 }

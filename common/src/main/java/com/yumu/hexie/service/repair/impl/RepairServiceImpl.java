@@ -464,7 +464,7 @@ public class RepairServiceImpl implements RepairService {
 		String sectId=baseRequestDTO.getData().get("sectId");
 		serviceOperatorSectRepository.deleteByOperatorIdAndSectId(Long.valueOf(operatorId),sectId);
 	    List<String> list=serviceOperatorSectRepository.findByOperatorId(Long.valueOf(operatorId));
-	    if(list.size()==0){
+	    if(list.size()==0 || StringUtil.isEmpty(sectId)){
 	    	serviceOperatorRepository.delete(Long.valueOf(operatorId));
 	    }
 	}
@@ -476,6 +476,11 @@ public class RepairServiceImpl implements RepairService {
 			return 0;//未查询到用户
 		}
 		return 1;
+	}
+
+	@Override
+	public List<String> showSect(String id) {
+		return   serviceOperatorSectRepository.findByOperatorId(Long.valueOf(id));
 	}
 
 }
