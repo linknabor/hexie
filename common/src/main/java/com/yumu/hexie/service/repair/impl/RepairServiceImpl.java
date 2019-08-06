@@ -11,6 +11,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +63,8 @@ import com.yumu.hexie.vo.req.RepairOrderReq;
  */
 @Service("repairService")
 public class RepairServiceImpl implements RepairService {
+	
+	private static final Logger log = LoggerFactory.getLogger(RepairServiceImpl.class);
 
     @Inject
     private RepairProjectRepository repairProjectRepository;
@@ -405,6 +409,7 @@ public class RepairServiceImpl implements RepairService {
 	@Transactional
 	public int saveRepiorOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO) {
 		Map<String,String> map=baseRequestDTO.getData();
+		log.error("map参数："+map.toString());
 		String sectIds =map.get("sectIds");
 		String[] sectids=sectIds.split(",");
 		String tel=map.get("tel");
@@ -412,6 +417,7 @@ public class RepairServiceImpl implements RepairService {
 		String id=map.get("id")==null?"":map.get("id");
 		ServiceOperator so=new ServiceOperator();
 		if(StringUtil.isEmpty(id)){
+			log.error("name："+name);
 			List<User> usesrList=userRepository.findByTel(tel);
 			if(usesrList.size()<=0){
 				return 0;//未查询到用户
@@ -431,6 +437,7 @@ public class RepairServiceImpl implements RepairService {
 			so.setUserId(u.getId());
 			so.setOpenId(u.getOpenid());
 			so.setCompanyName(map.get("cspName"));
+			log.error("cspName："+map.get("cspName"));
 		}else{
 			so=serviceOperatorRepository.findOne(Long.valueOf(id));
 			so.setName(name);
