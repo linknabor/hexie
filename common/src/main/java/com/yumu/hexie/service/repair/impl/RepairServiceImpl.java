@@ -409,7 +409,7 @@ public class RepairServiceImpl implements RepairService {
 		String[] sectids=sectIds.split(",");
 		String tel=map.get("tel");
 		String name=map.get("name");
-		String id=map.get("id");
+		String id=map.get("id")==null?"":map.get("id");
 		ServiceOperator so=new ServiceOperator();
 		if(StringUtil.isEmpty(id)){
 			List<User> usesrList=userRepository.findByTel(tel);
