@@ -23,6 +23,8 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 	
 	public List<Thread> findByThreadStatusAndUserSectId(String threadStatus, long userSectId, Pageable page);
 	
+	public List<Thread> findByThreadStatusAndUserId(String threadStatus, long userId, Pageable page);
+	
 	@Query(value="from Thread t where t.threadStatus = ?1 and t.userSectId = ?2 and t.threadCategory = ?3 ")
 	public List<Thread> getThreadListByCategory(String threadStatus, long userSectId, String threadCategory, Pageable page);
 	
