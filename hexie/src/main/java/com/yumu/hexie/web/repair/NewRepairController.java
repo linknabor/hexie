@@ -1,6 +1,7 @@
 package com.yumu.hexie.web.repair;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +100,18 @@ public class NewRepairController extends BaseController{
 			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
 		return BaseResponse.success(baseRequestDTO.getRequestId(), r);
+	}
+	
+	@RequestMapping(value = "/showSect", method = RequestMethod.POST,produces = "application/json")
+	@ResponseBody
+	public BaseResponseDTO<List<String>> showSect(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
+	  List<String> sectList=null;
+		try {
+			sectList=repairService.showSect(baseRequestDTO.getData());
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}
+		return BaseResponse.success(baseRequestDTO.getRequestId(),sectList);
 	}
 	
 }
