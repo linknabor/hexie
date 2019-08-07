@@ -84,7 +84,7 @@ public class AppConfig {
         TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
         factory.setPort(86);
         factory.addConnectorCustomizers(new AppTomcatConnectorCustomizer());
-        factory.addAdditionalTomcatConnectors(createSslConnector());
+//        factory.addAdditionalTomcatConnectors(createSslConnector());
         return factory;
     }
     
