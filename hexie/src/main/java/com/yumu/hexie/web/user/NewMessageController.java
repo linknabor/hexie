@@ -37,7 +37,7 @@ public class NewMessageController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/getMessageList", method = RequestMethod.POST)
+	@RequestMapping(value = "/get", method = RequestMethod.POST)
 	public BaseResponseDTO<?> messages(@RequestBody BaseRequestDTO<Message> baseRequestDTO)
 			throws Exception {
 
@@ -55,7 +55,7 @@ public class NewMessageController extends BaseController {
 	 * @param baseRequestDTO
 	 * @return
 	 */
-	@RequestMapping(value = "/saveMessage", method = RequestMethod.POST)
+	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public BaseResponseDTO<String> saveMessage(@RequestBody BaseRequestDTO<Message> baseRequestDTO) {
 		
 		try {
@@ -73,7 +73,7 @@ public class NewMessageController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/getMessageDetail", method = RequestMethod.POST)
+	@RequestMapping(value = "/getDetail", method = RequestMethod.POST)
 	public BaseResponseDTO<Message> getMessageDetail(@RequestBody BaseRequestDTO<String> baseRequestDTO)
 			throws Exception {
 		Message message;

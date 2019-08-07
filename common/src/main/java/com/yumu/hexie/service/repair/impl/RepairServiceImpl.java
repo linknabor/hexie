@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,8 @@ import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
+import com.yumu.hexie.model.localservice.repair.RepairArea;
+import com.yumu.hexie.model.localservice.repair.RepairAreaRepository;
 import com.yumu.hexie.model.localservice.repair.RepairConstant;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
@@ -78,18 +81,17 @@ public class RepairServiceImpl implements RepairService {
     private UploadService uploadService;
     @Inject
     private GotongService gotongService;
-
     @Inject
     private RepairAssignService repairAssignService;
-    
     @Inject
     private RegionRepository  regionRepository;
-    
     @Inject
     private UserRepository  userRepository;
-    
     @Inject
     private ServiceOperatorSectRepository serviceOperatorSectRepository;
+    @Autowired
+    private RepairAreaRepository repairAreaRepository;
+    
     /**  
      * @param repairType
      * @return
@@ -116,6 +118,12 @@ public class RepairServiceImpl implements RepairService {
         if(region != null && StringUtil.isNotEmpty(region.getSectId())){
         	user.setSectId(region.getSectId());
         }
+        
+        //校验小区是否在开通为序服务的范围内
+        List<RepairArea> areaList = repairAreaRepository.findBySectId(user.getSectId());
+        if (areaList == null || areaList.size() == 0) {
+			throw new BizValidateException("当前地址 [" + address.getRegionStr() + "]尚未开通维修服务，请联系小区所在物业。");
+		}
         RepairOrder order = new RepairOrder(req, user, project, address);
         order = repairOrderRepository.save(order);
         uploadService.updateRepairImg(order);
