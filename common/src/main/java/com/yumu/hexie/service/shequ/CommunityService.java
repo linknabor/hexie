@@ -22,6 +22,15 @@ public interface CommunityService {
 	 */
 	public List<Thread> getThreadList(long userSectId, Pageable page);	
 	
+
+	/**
+	 * 获取用户自己帖子列表
+	 * @param userSectId 用户所在小区
+	 * @param sort 排序
+	 * @return
+	 */
+	public List<Thread> getThreadListByUserId(long userId, Pageable page);	
+	
 	/**
 	 * 0 A)获取帖子列表,查看所有小区的
 	 * @param sort

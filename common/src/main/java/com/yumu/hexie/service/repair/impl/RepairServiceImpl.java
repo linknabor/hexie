@@ -11,6 +11,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +66,8 @@ import com.yumu.hexie.vo.req.RepairOrderReq;
  */
 @Service("repairService")
 public class RepairServiceImpl implements RepairService {
+	
+	private static final Logger log = LoggerFactory.getLogger(RepairServiceImpl.class);
 
     @Inject
     private RepairProjectRepository repairProjectRepository;
@@ -472,7 +476,7 @@ public class RepairServiceImpl implements RepairService {
 		String sectId=baseRequestDTO.getData().get("sectId");
 		serviceOperatorSectRepository.deleteByOperatorIdAndSectId(Long.valueOf(operatorId),sectId);
 	    List<String> list=serviceOperatorSectRepository.findByOperatorId(Long.valueOf(operatorId));
-	    if(list.size()==0){
+	    if(list.size()==0 || StringUtil.isEmpty(sectId)){
 	    	serviceOperatorRepository.delete(Long.valueOf(operatorId));
 	    }
 	}
@@ -484,6 +488,11 @@ public class RepairServiceImpl implements RepairService {
 			return 0;//未查询到用户
 		}
 		return 1;
+	}
+
+	@Override
+	public List<String> showSect(String id) {
+		return   serviceOperatorSectRepository.findByOperatorId(Long.valueOf(id));
 	}
 
 }
