@@ -49,11 +49,30 @@ public class RepairAreaController {
 		
 		try {
 			List<RepairArea> list = baseRequestDTO.getData();
-			repairAreaService.saveRepairArea(list);
+			repairAreaService.saveRepairArea(list, false);
 			return BaseResponse.success(baseRequestDTO.getRequestId());
 		} catch (Exception e) {
 			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
 		
-	} 
+	}
+	
+	/**
+	 * 管理端新增维修区域(小区用)
+	 * @param baseRequestDTO
+	 * @return
+	 */
+	@RequestMapping(value = "/sectSave", method = RequestMethod.POST)
+	public BaseResponseDTO<List<RepairArea>> saveSectRepairArea(@RequestBody BaseRequestDTO<List<RepairArea>> baseRequestDTO) {
+		
+		try {
+			List<RepairArea> list = baseRequestDTO.getData();
+			repairAreaService.saveRepairArea(list, true);
+			return BaseResponse.success(baseRequestDTO.getRequestId());
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}
+		
+	}
+	
 }
