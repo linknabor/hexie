@@ -256,7 +256,7 @@ public class WuyeUtil {
 //		return jsonToBeanResult(response, CellListVO.class);
 		
 		sect_name = URLEncoder.encode(sect_name,"GBK");
-		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
+		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, nname);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
