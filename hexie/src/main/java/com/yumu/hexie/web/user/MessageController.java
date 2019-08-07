@@ -1,11 +1,9 @@
 package com.yumu.hexie.web.user;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,11 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
-import com.yumu.hexie.integration.wuye.resp.BaseResponse;
-import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
-import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.community.Message;
-import com.yumu.hexie.model.community.MessageSect;
 import com.yumu.hexie.model.user.Feedback;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.MessageService;
@@ -30,21 +24,9 @@ import com.yumu.hexie.web.user.req.ReplyReq;
 @Controller(value = "messageController")
 public class MessageController extends BaseController {
 	
-	private static final int PAGE_SIZE = 10;
+	private static final int PAGE_SIZE = 5;
 	@Inject
 	private MessageService messageService;
-	
-//	private static Map<Integer, String> msgTypeMap = new HashMap<>();
-	
-//	@PostConstruct
-//	public void initMsgTypeMapping() {
-//		
-//		msgTypeMap.put(0, "wuye");
-//		msgTypeMap.put(1, "yewei");
-//		msgTypeMap.put(2, "juwei");
-//		msgTypeMap.put(3, "bianmin");
-//		msgTypeMap.put(9, "pingtai");
-//	}
 	
 	/**
 	 * 移动端查询消息列表
