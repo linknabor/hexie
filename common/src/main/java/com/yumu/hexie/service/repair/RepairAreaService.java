@@ -8,6 +8,6 @@ public interface RepairAreaService {
 	
 	public List<RepairArea> getRepairArea(RepairArea repairArea);
 
-	public void saveRepairArea(List<RepairArea> list);
+	public void saveRepairArea(List<RepairArea> list, boolean isSect);
 	
 }

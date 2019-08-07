@@ -12,5 +12,7 @@ public interface RepairAreaRepository extends JpaRepository<RepairArea, Long>{
 	public List<RepairArea> findByCspIdAndSectid(String cspId, String sectId);
 	
 	public List<RepairArea> findBySectId(String sectId);
+	
+	public List<RepairArea> findByCspId(String cspId);
 
 }

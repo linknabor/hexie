@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.repair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,32 @@ public class RepairAreaServiceImpl implements RepairAreaService {
 
 	@Transactional
 	@Override
-	public void saveRepairArea(List<RepairArea> list) {
-
-		RepairArea repairArea = list.get(0);
-		List<RepairArea> areaList = repairAreaRepository.findByCspIdAndSectid(repairArea.getCspId(), repairArea.getSectId());
-		if (areaList != null && areaList.size() > 0) {
-			repairAreaRepository.delete(areaList);	//先把原来保存的这个物业公司的维修区域全部删除
+	public void saveRepairArea(List<RepairArea> list, boolean isSect) {
+		
+		/*
+		 * 1.物业公司先删除这个物业下所有的小区，然后重新添加
+		 * 2.小区只删除本小区的，然后重新添加
+		 */
+		List<RepairArea> existList = new ArrayList<>();
+		if (!isSect) {
+			String cspId = list.get(0).getCspId();
+			existList = repairAreaRepository.findByCspId(cspId);
+		}else {
+			List<RepairArea> loopList = null;
+			for (RepairArea existArea : list) {
+				loopList = repairAreaRepository.findByCspIdAndSectid(existArea.getCspId(), existArea.getSectId());
+				if (loopList != null) {
+					existList.addAll(loopList);
+				}
+			}
+			
 		}
+		if (existList != null) {
+			for (RepairArea existArea : existList) {	//这里用主键删除。其实可以直接delete一个list,但是可能多人操作会有锁表
+				repairAreaRepository.delete(existArea.getId());
+			}
+		}
+
 		for (RepairArea area : list) {
 			if (StringUtil.isEmpty(area.getSectId())) {
 				continue;
