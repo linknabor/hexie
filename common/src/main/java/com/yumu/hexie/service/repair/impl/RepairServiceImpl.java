@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,8 @@ import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
+import com.yumu.hexie.model.localservice.repair.RepairArea;
+import com.yumu.hexie.model.localservice.repair.RepairAreaRepository;
 import com.yumu.hexie.model.localservice.repair.RepairConstant;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
@@ -82,18 +85,17 @@ public class RepairServiceImpl implements RepairService {
     private UploadService uploadService;
     @Inject
     private GotongService gotongService;
-
     @Inject
     private RepairAssignService repairAssignService;
-    
     @Inject
     private RegionRepository  regionRepository;
-    
     @Inject
     private UserRepository  userRepository;
-    
     @Inject
     private ServiceOperatorSectRepository serviceOperatorSectRepository;
+    @Autowired
+    private RepairAreaRepository repairAreaRepository;
+    
     /**  
      * @param repairType
      * @return
@@ -120,6 +122,12 @@ public class RepairServiceImpl implements RepairService {
         if(region != null && StringUtil.isNotEmpty(region.getSectId())){
         	user.setSectId(region.getSectId());
         }
+        
+        //校验小区是否在开通为序服务的范围内
+        List<RepairArea> areaList = repairAreaRepository.findBySectId(user.getSectId());
+        if (areaList == null || areaList.size() == 0) {
+			throw new BizValidateException("当前地址 [" + address.getRegionStr() + "]尚未开通维修服务，请联系小区所在物业。");
+		}
         RepairOrder order = new RepairOrder(req, user, project, address);
         order = repairOrderRepository.save(order);
         uploadService.updateRepairImg(order);
@@ -409,7 +417,6 @@ public class RepairServiceImpl implements RepairService {
 	@Transactional
 	public int saveRepiorOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO) {
 		Map<String,String> map=baseRequestDTO.getData();
-		log.error("map参数："+map.toString());
 		String sectIds =map.get("sectIds");
 		String[] sectids=sectIds.split(",");
 		String tel=map.get("tel");
@@ -417,7 +424,6 @@ public class RepairServiceImpl implements RepairService {
 		String id=map.get("id");
 		ServiceOperator so=new ServiceOperator();
 		if(StringUtil.isEmpty(id)){
-			log.error("name："+name);
 			List<User> usesrList=userRepository.findByTel(tel);
 			if(usesrList.size()<=0){
 				return 0;//未查询到用户
@@ -437,7 +443,6 @@ public class RepairServiceImpl implements RepairService {
 			so.setUserId(u.getId());
 			so.setOpenId(u.getOpenid());
 			so.setCompanyName(map.get("cspName"));
-			log.error("cspName："+map.get("cspName"));
 		}else{
 			so=serviceOperatorRepository.findOne(Long.valueOf(id));
 			so.setName(name);
