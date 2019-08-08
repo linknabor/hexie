@@ -66,4 +66,6 @@ public interface RepairService {
 	
 	//根据维修工id获取服务区域
 	public List<String> showSect(String id);
+	//根据电话获取用户
+	public List<User> getHexieUserInfo(String data);
 }

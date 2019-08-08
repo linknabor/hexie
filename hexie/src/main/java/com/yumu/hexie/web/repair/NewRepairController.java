@@ -18,6 +18,7 @@ import com.yumu.hexie.integration.wuye.resp.BaseResponse;
 import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.IntegrationBizException;
 import com.yumu.hexie.service.repair.RepairService;
 import com.yumu.hexie.web.BaseController;
@@ -117,6 +118,27 @@ public class NewRepairController extends BaseController{
 			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
 		}
 		return BaseResponse.success(baseRequestDTO.getRequestId(),sectList);
+	}
+	
+	
+	@RequestMapping(value = "/getHexieUserInfo", method = RequestMethod.POST,produces = "application/json")
+	@ResponseBody
+	public BaseResponseDTO<Map<String,Object>> getHexieUserInfo(@RequestBody BaseRequestDTO<String> baseRequestDTO) {
+		Map<String,Object> map=new HashMap<>();
+		try {
+			List<User> userList=repairService.getHexieUserInfo(baseRequestDTO.getData());
+			if(userList.size()<=0){
+				map.put("result", 0);	
+			}else{
+				map.put("result", 1);
+				map.put("list",userList);
+			}
+			
+			
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}
+		return BaseResponse.success(baseRequestDTO.getRequestId(),map);
 	}
 	
 }
