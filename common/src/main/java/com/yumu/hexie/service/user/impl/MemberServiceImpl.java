@@ -81,8 +81,8 @@ public class MemberServiceImpl implements MemberService{
 			
 			return WuyeUtil.getMemberPrePayInfo(String.valueOf(bill.getMemberbillid()), bill.getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			log.error("err msg :" + e.getMessage());
 		}
 		return null;
 	}
