@@ -349,7 +349,7 @@ public class CommunityController extends BaseController{
 		}
 		
 		List<ThreadComment>list = communityService.getCommentListByThreadId(threadId);
-		
+
 		for (int i = 0; i < list.size(); i++) {
 			
 			ThreadComment tc = list.get(i);
@@ -357,6 +357,22 @@ public class CommunityController extends BaseController{
 				tc.setIsCommentOwner("true");
 			}else {
 				tc.setIsCommentOwner("false");
+			}
+			
+			String tcAttachmentUrl = tc.getAttachmentUrl();
+			if (!StringUtil.isEmpty(tcAttachmentUrl)) {
+				
+				String[]urls = tcAttachmentUrl.split(",");
+				
+				List<String> previewLinkList = new ArrayList<String>();
+				
+				for (int j = 0; j < urls.length; j++) {
+					
+					String urlKey = urls[j];
+					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					
+				}
+				tc.setPreviewLink(previewLinkList);
 			}
 			
 		}
