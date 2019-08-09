@@ -63,7 +63,7 @@ public class RepairListItem implements Serializable {
         repairType = order.getRepairType();
         projectId = order.getProjectId();
         projectName = order.getMemo();//把项目内容替换为维修内容
-        time = DateUtil.dtFormat(order.getRequireDate(),"MM.dd HH:mm");
+        time = DateUtil.dtFormat(order.getCreateDate(),"MM.dd HH:mm");
         switch (order.getStatus()){
             case RepairConstant.STATUS_CREATE:
                 statusStr = "未接单";
