@@ -717,7 +717,7 @@ public class WuyeController extends BaseController {
 	public BaseResult<String> addSectIdToRegion(@RequestParam String code) throws Exception {
 		if ("hexieCode".equals(code)) {
 		     wuyeService.addSectIdToRegion();
-			log.error("用户设置完成!!!");
+			log.error("region设置完成!!!");
 			return BaseResult.successResult("");
 		} else {
 			return BaseResult.fail("请求错误！！！");
