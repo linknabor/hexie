@@ -84,7 +84,7 @@ public class RepairController extends BaseController{
     public BaseResult<Long> repair(@ModelAttribute(Constants.USER)User user,@RequestBody RepairOrderReq req){
         req.setRequireDate(DateUtil.parse(req.getRequireDateStr(), "yyyy-MM-dd HH:mm"));
        // req.setRequireDateStr("2019-07-19 13:00");
-        if(StringUtil.isEmpty(req.getMemo())){
+        if(StringUtil.isEmpty(req.getMemo().trim())){
         	return new BaseResult<Long>().failMsg("请填写报修内容!");
         }
         Long oId = repairService.repair(req, user);
