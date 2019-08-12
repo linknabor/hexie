@@ -222,16 +222,7 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		Long sect_id = null;
-		try {
-			//sect_id = user.getXiaoquId();
-			sect_id =Long.parseLong(user.getSectId());
-		} catch (Exception e) {
-			
-			return BaseResult.fail("用户没有注册小区。");
-		}
-		
-		if(sect_id == null){
+		if(StringUtil.isEmpty(user.getSectId())){
 			
 			return BaseResult.fail("用户没有注册小区。");
 		}
