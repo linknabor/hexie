@@ -218,23 +218,6 @@ public class WuyeUtil {
 	
 	//15.根据ID查询指定类型的合协社区物业信息
 	public static BaseResult<CellListVO> getMngHeXieList(String sect_id, String build_id, String unit_id, String data_type) throws Exception{
-//		//中文打码
-//		sect_name = URLEncoder.encode(sect_name, "gbk");
-//		Map<String, String>map = new HashMap<String, String>();
-//		map.put("sect_name", sect_name);
-//		map.put("build_id", build_id);
-//		map.put("unit_id", unit_id);
-//		map.put("data_type", data_type);
-//		String response = "";
-//		//请求
-//		response = HttpUtil.doPostMap(REQUEST_ADDRESS+MNG_HEXIE_LIST_URL, map, "gbk");
-//		BaseResult v = new BaseResult<CellListVO>();
-//		try {
-//			v =jsonToBeanResult(response, CellListVO.class);
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
-//		return v;
 
 		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);
