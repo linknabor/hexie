@@ -141,8 +141,8 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public BillListVO queryBillList(String userId, String payStatus,
-			String startDate, String endDate,String currentPage, String totalCount,String house_id) {
-		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id).getData();
+			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id) {
+		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id).getData();
 	}
 
 	@Override
