@@ -93,11 +93,11 @@ public class WuyeUtil {
 	
 	//根据sectName得到sectid
 	public static BaseResult<String> querySectIdByName(String regionName){
-		/*try {
+	    try {
 			regionName = URLEncoder.encode(regionName,"GBK");
 		} catch (UnsupportedEncodingException e) {
 			log.error("字符转换错误："+regionName);
-		}*/
+		}
 		String url = REQUEST_ADDRESS + String.format(QUERY_SECTID_BY_SECTNAME, regionName);
 		return (BaseResult<String>)httpGet(url,String.class);
 	}
