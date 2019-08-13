@@ -11,9 +11,10 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.stereotype.Component;
+import org.springframework.core.annotation.Order;
 
 import com.yumu.hexie.web.wrapper.ServplatRequestWrapper;
 
@@ -21,7 +22,8 @@ import com.yumu.hexie.web.wrapper.ServplatRequestWrapper;
  * @author huym
  *
  */
-@Component
+@WebFilter(urlPatterns = "/servplat/*", filterName = "servplatFilter")
+@Order(2)
 public class ServplatFilter implements Filter {
 	
 	private final static String MESSAGE_URL = "/servplat/message";

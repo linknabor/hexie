@@ -93,11 +93,11 @@ public class WuyeUtil {
 	
 	//根据sectName得到sectid
 	public static BaseResult<String> querySectIdByName(String regionName){
-		/*try {
+	    try {
 			regionName = URLEncoder.encode(regionName,"GBK");
 		} catch (UnsupportedEncodingException e) {
 			log.error("字符转换错误："+regionName);
-		}*/
+		}
 		String url = REQUEST_ADDRESS + String.format(QUERY_SECTID_BY_SECTNAME, regionName);
 		return (BaseResult<String>)httpGet(url,String.class);
 	}
@@ -218,23 +218,6 @@ public class WuyeUtil {
 	
 	//15.根据ID查询指定类型的合协社区物业信息
 	public static BaseResult<CellListVO> getMngHeXieList(String sect_id, String build_id, String unit_id, String data_type) throws Exception{
-//		//中文打码
-//		sect_name = URLEncoder.encode(sect_name, "gbk");
-//		Map<String, String>map = new HashMap<String, String>();
-//		map.put("sect_name", sect_name);
-//		map.put("build_id", build_id);
-//		map.put("unit_id", unit_id);
-//		map.put("data_type", data_type);
-//		String response = "";
-//		//请求
-//		response = HttpUtil.doPostMap(REQUEST_ADDRESS+MNG_HEXIE_LIST_URL, map, "gbk");
-//		BaseResult v = new BaseResult<CellListVO>();
-//		try {
-//			v =jsonToBeanResult(response, CellListVO.class);
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
-//		return v;
 
 		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);
@@ -243,20 +226,9 @@ public class WuyeUtil {
 	
 	//20.根据名称模糊查询合协社区小区列表
 	public static BaseResult<CellListVO> getVagueSectByName(String sect_name) throws Exception{
-//		log.error("ceshi2");
-//		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
-//		//中文打码
-		String nname = sect_name;
-		//sect_name = URLEncoder.encode(sect_name, "gbk");
-
-//		Map<String, String>map = new HashMap<String, String>();
-//		map.put("sect_name", sect_name);
-//		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name="+nname, null, "gbk");
-//		log.error("【response】:"+response);
-//		return jsonToBeanResult(response, CellListVO.class);
 		
 		sect_name = URLEncoder.encode(sect_name,"GBK");
-		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, nname);
+		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}

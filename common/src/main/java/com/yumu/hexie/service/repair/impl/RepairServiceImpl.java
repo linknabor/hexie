@@ -421,14 +421,12 @@ public class RepairServiceImpl implements RepairService {
 		String[] sectids=sectIds.split(",");
 		String tel=map.get("tel");
 		String name=map.get("name");
+		String userId=map.get("userId");
 		String id=map.get("id");
 		ServiceOperator so=new ServiceOperator();
 		if(StringUtil.isEmpty(id)){
-			List<User> usesrList=userRepository.findByTel(tel);
-			if(usesrList.size()<=0){
-				return 0;//未查询到用户
-			}
-			User u=usesrList.get(usesrList.size()-1);
+			User u=userRepository.findById(Long.parseLong(userId));
+			
 			List<ServiceOperator>  operatorList= serviceOperatorRepository.findByUserId(u.getId());
 			if(operatorList.size()>0){
 				return 2;//已存在改用户的维修工
@@ -493,6 +491,11 @@ public class RepairServiceImpl implements RepairService {
 	@Override
 	public List<String> showSect(String id) {
 		return   serviceOperatorSectRepository.findByOperatorId(Long.valueOf(id));
+	}
+
+	@Override
+	public List<User> getHexieUserInfo(String data) {
+		return userRepository.findByTel(data);
 	}
 
 }

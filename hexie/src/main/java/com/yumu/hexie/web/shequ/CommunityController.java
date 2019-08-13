@@ -222,16 +222,7 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		Long sect_id = null;
-		try {
-			//sect_id = user.getXiaoquId();
-			sect_id =Long.parseLong(user.getSectId());
-		} catch (Exception e) {
-			
-			return BaseResult.fail("用户没有注册小区。");
-		}
-		
-		if(sect_id == null){
+		if(StringUtil.isEmpty(user.getSectId())){
 			
 			return BaseResult.fail("用户没有注册小区。");
 		}
@@ -349,7 +340,7 @@ public class CommunityController extends BaseController{
 		}
 		
 		List<ThreadComment>list = communityService.getCommentListByThreadId(threadId);
-		
+
 		for (int i = 0; i < list.size(); i++) {
 			
 			ThreadComment tc = list.get(i);
@@ -357,6 +348,22 @@ public class CommunityController extends BaseController{
 				tc.setIsCommentOwner("true");
 			}else {
 				tc.setIsCommentOwner("false");
+			}
+			
+			String tcAttachmentUrl = tc.getAttachmentUrl();
+			if (!StringUtil.isEmpty(tcAttachmentUrl)) {
+				
+				String[]urls = tcAttachmentUrl.split(",");
+				
+				List<String> previewLinkList = new ArrayList<String>();
+				
+				for (int j = 0; j < urls.length; j++) {
+					
+					String urlKey = urls[j];
+					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					
+				}
+				tc.setPreviewLink(previewLinkList);
 			}
 			
 		}

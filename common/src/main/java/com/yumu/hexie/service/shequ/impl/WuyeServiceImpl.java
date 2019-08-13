@@ -345,13 +345,11 @@ public class WuyeServiceImpl implements WuyeService {
 			user.setCounty(u.getRegion_name());
 			user.setXiaoquId(re.get(0).getId());
 			user.setXiaoquName(u.getSect_name());
-			user.setSectId(u.getSect_id());	
-			user.setCspId(u.getCsp_id());
-			userService.save(user);
 			log.error("保存用户成功！！！");
 		}
-
-	
+		user.setSectId(u.getSect_id());	
+		user.setCspId(u.getCsp_id());
+		userService.save(user);
 		
 	}
 

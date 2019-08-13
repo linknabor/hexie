@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairProject;
@@ -82,7 +83,10 @@ public class RepairController extends BaseController{
     @ResponseBody
     public BaseResult<Long> repair(@ModelAttribute(Constants.USER)User user,@RequestBody RepairOrderReq req){
         req.setRequireDate(DateUtil.parse(req.getRequireDateStr(), "yyyy-MM-dd HH:mm"));
-        req.setRequireDateStr("2019-07-19 13:00");
+       // req.setRequireDateStr("2019-07-19 13:00");
+        if(StringUtil.isEmpty(req.getMemo().trim())){
+        	return new BaseResult<Long>().failMsg("请填写报修内容!");
+        }
         Long oId = repairService.repair(req, user);
         if(oId!=null){
             return new BaseResult<Long>().success(oId);
