@@ -3,10 +3,7 @@ package com.yumu.hexie.web.user;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,19 +23,26 @@ import com.yumu.hexie.web.user.req.ReplyReq;
 
 @Controller(value = "messageController")
 public class MessageController extends BaseController {
-	private static final Logger log = LoggerFactory
-			.getLogger(MessageController.class);
-
-	private static final int PAGE_SIZE = 10;
+	
+	private static final int PAGE_SIZE = 5;
 	@Inject
 	private MessageService messageService;
-	//消息列表
-	@RequestMapping(value = "/messages/{currentPage}", method = RequestMethod.GET)
+	
+	/**
+	 * 移动端查询消息列表
+	 * @param user
+	 * @param currentPage
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings({ "unchecked" })
+	@RequestMapping(value = "/messages/{msgType}/{currentPage}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<Message>> messages(@ModelAttribute(Constants.USER)User user, @PathVariable int currentPage)
+	public BaseResult<List<Message>> messages(@ModelAttribute(Constants.USER)User user, @PathVariable int msgType, @PathVariable int currentPage)
 			throws Exception {
-		List<Message> message = messageService.queryMessages( currentPage, PAGE_SIZE);
-		return BaseResult.successResult(message);
+		
+		List<Message> messageList = messageService.queryMessagesByUserAndType(user, msgType, currentPage, PAGE_SIZE);
+		return BaseResult.successResult(messageList);
 	}
 
 	//消息详情
@@ -66,5 +70,6 @@ public class MessageController extends BaseController {
 			throws Exception {
 		return BaseResult.successResult(messageService.reply(user.getId(),user.getNickname(),user.getHeadimgurl(), req.getMessageId(), req.getContent()));
 	}
+	
 	
 }

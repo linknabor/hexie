@@ -25,4 +25,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query(nativeQuery=true ,value="SELECT * from user where shareCode = ?")
     public List<User> getUserByShareCode(String shareCode);
 	
+	public List<User> findByWuyeId(String wuyeId);
+	
+	public User findById(long id);
+	
+	@Query(nativeQuery=true ,value="select *  from user where sectId is null and tel is not null  limit ?1,?2")
+	public List<User> getUserList(int pageSize,int pageNum);
 }

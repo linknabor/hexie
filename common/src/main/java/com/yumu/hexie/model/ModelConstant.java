@@ -6,6 +6,8 @@ public class ModelConstant {
 	//消息类型
 	public static final int MESSAGE_GONGGAO = 0;
 	public static final int MESSAGE_ZIXUN = 1;
+	public static final int MESSAGE_STATUS_VALID = 0;
+	public static final int MESSAGE_STATUS_INVALID = 1;
 
 	//资讯子类型
 	public static final int MESSAGE_SUB_TYPE_HEATH = 1;
@@ -294,4 +296,6 @@ public class ModelConstant {
 	//评论或者投诉
 	public static final int HAOJIAAN_COMMPENT_STATUS_COMMENT = 1;//评论
 	public static final int HAOJIAAN_COMMPENT_STATUS_COMPLAIN = 2;//投诉
+	
+	public static final String PARA_TYPE_CSP = "2";
 }		

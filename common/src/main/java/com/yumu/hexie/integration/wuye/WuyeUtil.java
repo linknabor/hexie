@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -12,12 +11,10 @@ import javax.xml.bind.ValidationException;
 
 import org.apache.http.client.methods.HttpGet;
 import org.hibernate.bytecode.buildtime.spi.ExecutionException;
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.yumu.hexie.common.util.HttpUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -25,6 +22,7 @@ import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
+import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -54,12 +52,14 @@ public class WuyeUtil {
 	}
 
 	// 接口地址
+	private static final String QUERY_SECTID_BY_SECTNAME = "querySectIdByNameSDO.do?regionName=%s"; // 
+	private static final String PAY_USER_BIND_HOUSE_URL = "payUserBindHouseSDO.do?wuyeId=%s"; // 
 	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s"; // 房屋详情地址
 	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s"; // 添加房子
 	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s"; // 无账单添加房子
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
-	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s"; // 获取账单列表
+	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do?user_id=%s&stmt_id=%s&bill_id=%s"; // 获取账单详情
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
@@ -67,6 +67,8 @@ public class WuyeUtil {
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do?user_id=%s&bill_id=%s&stmt_id=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
 			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
+	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
+	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&bill_id=%s&stmt_id=%s&trade_water_id=%s&package=%s"; // 微信支付返回
 	//private static final String GET_LOCATION_URL = "getGeographicalPositionSDO.do"; // 用户地理位置
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
@@ -75,10 +77,29 @@ public class WuyeUtil {
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"+ "?sect_id=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String BILL_PAY_ADDRESS_URL = "getBillAddressSDO.do"+ "?bill_id=%s";//查询账单地址
+	private static final String SYNC_SERVICE_CFG_URL = "/param/getParamSDO.do?info_id=%s&type=%s&para_name=%s";
+	
+	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
+	}
+	//根据wuyeId查询缴费用户并绑定房子
+	public static BaseResult<HexieUser> queryPayUserAndBindHouse(String wuyeId){
+		String url = REQUEST_ADDRESS + String.format(PAY_USER_BIND_HOUSE_URL, wuyeId);
+		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
+	}
+	
+	//根据sectName得到sectid
+	public static BaseResult<String> querySectIdByName(String regionName){
+	    try {
+			regionName = URLEncoder.encode(regionName,"GBK");
+		} catch (UnsupportedEncodingException e) {
+			log.error("字符转换错误："+regionName);
+		}
+		String url = REQUEST_ADDRESS + String.format(QUERY_SECTID_BY_SECTNAME, regionName);
+		return (BaseResult<String>)httpGet(url,String.class);
 	}
 	
 	// 1.房产列表
@@ -136,9 +157,9 @@ public class WuyeUtil {
 	
 	//status 00,01,02? startDate 2015-02
 	// 8.账单记录
-	public static BaseResult<BillListVO> queryBillList(String userId,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id){
+	public static BaseResult<BillListVO> queryBillList(String userId,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id,String sect_id){
 		//total_count 和curr_page没有填
-		String url = REQUEST_ADDRESS + String.format(BILL_LIST_URL, userId,payStatus,startDate,endDate,currentPage,totalCount,house_id);
+		String url = REQUEST_ADDRESS + String.format(BILL_LIST_URL, userId,payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
@@ -197,23 +218,6 @@ public class WuyeUtil {
 	
 	//15.根据ID查询指定类型的合协社区物业信息
 	public static BaseResult<CellListVO> getMngHeXieList(String sect_id, String build_id, String unit_id, String data_type) throws Exception{
-//		//中文打码
-//		sect_name = URLEncoder.encode(sect_name, "gbk");
-//		Map<String, String>map = new HashMap<String, String>();
-//		map.put("sect_name", sect_name);
-//		map.put("build_id", build_id);
-//		map.put("unit_id", unit_id);
-//		map.put("data_type", data_type);
-//		String response = "";
-//		//请求
-//		response = HttpUtil.doPostMap(REQUEST_ADDRESS+MNG_HEXIE_LIST_URL, map, "gbk");
-//		BaseResult v = new BaseResult<CellListVO>();
-//		try {
-//			v =jsonToBeanResult(response, CellListVO.class);
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
-//		return v;
 
 		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);
@@ -222,17 +226,6 @@ public class WuyeUtil {
 	
 	//20.根据名称模糊查询合协社区小区列表
 	public static BaseResult<CellListVO> getVagueSectByName(String sect_name) throws Exception{
-//		log.error("ceshi2");
-//		log.error("123:"+REQUEST_ADDRESS+SECT_VAGUE_LIST_URL);
-//		//中文打码
-		String nname = sect_name;
-		//sect_name = URLEncoder.encode(sect_name, "gbk");
-
-//		Map<String, String>map = new HashMap<String, String>();
-//		map.put("sect_name", sect_name);
-//		String response = HttpUtil.doPostMap(REQUEST_ADDRESS+SECT_VAGUE_LIST_URL+"?sect_name="+nname, null, "gbk");
-//		log.error("【response】:"+response);
-//		return jsonToBeanResult(response, CellListVO.class);
 		
 		sect_name = URLEncoder.encode(sect_name,"GBK");
 		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
@@ -240,11 +233,41 @@ public class WuyeUtil {
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
-	//21 根据账单查询地址
     public static BaseResult<HexieUser> getAddressByBill(String billId){
     	String url = REQUEST_ADDRESS + String.format(BILL_PAY_ADDRESS_URL,billId);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
-    };
+    };	
+    // 21.缴费
+	public static BaseResult<WechatPayInfo> getMemberPrePayInfo(String billId,float totalPrice,String openId,String notifyUrl) throws Exception {
+
+		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_PAY_URL, billId,openId,totalPrice,notifyUrl);
+
+		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
+
+		return (BaseResult<WechatPayInfo>)baseResult;
+	}
+	
+    // 22.查询
+	public static BaseResult<WechatPayInfo> queryOrderInfo(String paymentNo) throws Exception {
+
+		String url = REQUEST_ADDRESS + String.format(MEMBER_WX_Query_URL, paymentNo);
+
+		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
+		return (BaseResult<WechatPayInfo>)baseResult;
+	}
+	
+	/**
+	 * 查询参数配置
+	 * @param reqUrl
+	 * @param c
+	 * @return
+	 */
+	public static BaseResult<HexieConfig> queryServiceCfg(String infoId, String type, String paraName) throws Exception {
+
+		String url = REQUEST_ADDRESS + String.format(SYNC_SERVICE_CFG_URL, infoId, type, paraName);
+		BaseResult baseResult = httpGet(url, HexieConfig.class);
+		return (BaseResult<HexieConfig>)baseResult;
+	}
 	
 	private static BaseResult httpGet(String reqUrl, Class c){
 		HttpGet get = new HttpGet(reqUrl);
@@ -298,17 +321,4 @@ public class WuyeUtil {
 	}
 
 
-	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
-	
-	public static void main(String args[]) throws JSONException {
-		String resp = "{\"result\":\"00\",\"data\":{\"trade_water_id\":\"20160112175644955015\",\"merger_status\":\"02\",\"package\":\"wx20160112175645c1930803540408946371\"}}";
-
-		try {
-			BaseResult v =jsonToBeanResult(resp, PayResult.class);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-	}
 }

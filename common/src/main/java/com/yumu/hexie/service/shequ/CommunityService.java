@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
@@ -20,6 +21,15 @@ public interface CommunityService {
 	 * @return
 	 */
 	public List<Thread> getThreadList(long userSectId, Pageable page);	
+	
+
+	/**
+	 * 获取用户自己帖子列表
+	 * @param userSectId 用户所在小区
+	 * @param sort 排序
+	 * @return
+	 */
+	public List<Thread> getThreadListByUserId(long userId, Pageable page);	
 	
 	/**
 	 * 0 A)获取帖子列表,查看所有小区的
@@ -159,7 +169,7 @@ public interface CommunityService {
 	public List<Thread> getThreadListByNewCategory(String category, long userSectId, Pageable page);
 	
 	/**
-	 * 获取帖子列表，全部小区（新分类:即叽歪和二手）
+	 * 获取帖子列表
 	 * @param category
 	 * @param userSectId
 	 * @param sort
@@ -167,4 +177,20 @@ public interface CommunityService {
 	 */
 	public List<Thread> getThreadListByNewCategory(String category, Pageable page);
 	
+	
+	public Page<Thread> getThreadList(String nickName, String createDate,String sectId,List<String> sectIds,Pageable pageable);
+	
+	public void deleteThread(String[] threadIds);
+	
+	public void saveThreadComment(Long threadId,String content,Long userId,String userName);
+	
+	/**
+	 * 根据帖子回复信息ID获取具体的帖子信息
+	 * @param user
+	 * @param ThreadId
+	 * @return
+	 */
+	public ThreadComment getThreadCommentByTreadId(long threadCommentId);
+	
+	public void updateThreadComment(ThreadComment thread);
 }

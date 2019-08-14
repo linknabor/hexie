@@ -109,11 +109,13 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public CouponSeed createOrderSeed(long userId,ServiceOrder order) {
 		log.error("CREATE SEED:" + userId + " -- " +order.getId());
+		//查询类型为订单分裂模板类型的优惠卷种子
 		List<CouponSeed> templates = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_ORDER_BUY_TEMPLATE);
 		for(CouponSeed template : templates) {
 			log.error("CREATE SEED:templateId:" + template.getId());
 			if(template == null||!template.isCanUse()||!canUse(template,order)) {
 			} else {
+				//根据种子id查询优惠卷规则表
 				List<CouponRule> rules = couponRuleRepository.findBySeedId(template.getId());
 				if(rules.isEmpty()) {
 					continue;
@@ -165,9 +167,6 @@ public class CouponServiceImpl implements CouponService {
 			return null;
 		}
 		Coupon coupon  = findCouponBySeedAndUser(seed.getId(), user.getId());
-		if(coupon != null) {
-			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"你已领取过该现金券！");
-		}
 		
 		List<CouponRule> rules = couponRuleRepository.findBySeedIdAndStatusDuration(
 				seed.getId(), ModelConstant.COUPON_RULE_STATUS_AVAILABLE,new Date(), new Date());
@@ -229,6 +228,20 @@ public class CouponServiceImpl implements CouponService {
 			if(coupon != null) {
 	            log.warn("添加注册红包 User["+user.getId()+"]Coupon["+coupon.getId()+"]");
 				return coupon;
+			}
+		}
+		return null;
+	}
+	/**
+	 * 会员
+	 */
+	@Override
+	public Coupon addCoupon4Member(User user) {
+		List<CouponSeed> cs = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_MEMBER);
+		for(CouponSeed c:cs){
+			Coupon coupon = addCouponFromSeed(c, user);
+			if(coupon != null) {
+	            log.warn("添加会员红包 User["+user.getId()+"]Coupon["+coupon.getId()+"]");
 			}
 		}
 		return null;

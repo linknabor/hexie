@@ -72,16 +72,28 @@ public class User extends BaseModel{
 	private boolean newRegiste = true;
 	private String officeTel;
 	
-	private Integer total_bind;
 	
+	private String sectId;//小区id
+	private String cspId;//公司
 	
+	 
 
-	public Integer getTotal_bind() {
-		return total_bind;
+
+
+	public String getSectId() {
+		return sectId;
 	}
 
-	public void setTotal_bind(Integer total_bind) {
-		this.total_bind = total_bind;
+	public void setSectId(String sectId) {
+		this.sectId = sectId;
+	}
+
+	public String getCspId() {
+		return cspId;
+	}
+
+	public void setCspId(String cspId) {
+		this.cspId = cspId;
 	}
 
 	public String getOfficeTel() {
