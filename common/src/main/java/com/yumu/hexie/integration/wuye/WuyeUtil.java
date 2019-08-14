@@ -59,7 +59,7 @@ public class WuyeUtil {
 	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s"; // 无账单添加房子
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
-	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s"; // 获取账单列表
+	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do?user_id=%s&stmt_id=%s&bill_id=%s"; // 获取账单详情
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
@@ -157,9 +157,9 @@ public class WuyeUtil {
 	
 	//status 00,01,02? startDate 2015-02
 	// 8.账单记录
-	public static BaseResult<BillListVO> queryBillList(String userId,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id){
+	public static BaseResult<BillListVO> queryBillList(String userId,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id,String sect_id){
 		//total_count 和curr_page没有填
-		String url = REQUEST_ADDRESS + String.format(BILL_LIST_URL, userId,payStatus,startDate,endDate,currentPage,totalCount,house_id);
+		String url = REQUEST_ADDRESS + String.format(BILL_LIST_URL, userId,payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
@@ -218,23 +218,6 @@ public class WuyeUtil {
 	
 	//15.根据ID查询指定类型的合协社区物业信息
 	public static BaseResult<CellListVO> getMngHeXieList(String sect_id, String build_id, String unit_id, String data_type) throws Exception{
-//		//中文打码
-//		sect_name = URLEncoder.encode(sect_name, "gbk");
-//		Map<String, String>map = new HashMap<String, String>();
-//		map.put("sect_name", sect_name);
-//		map.put("build_id", build_id);
-//		map.put("unit_id", unit_id);
-//		map.put("data_type", data_type);
-//		String response = "";
-//		//请求
-//		response = HttpUtil.doPostMap(REQUEST_ADDRESS+MNG_HEXIE_LIST_URL, map, "gbk");
-//		BaseResult v = new BaseResult<CellListVO>();
-//		try {
-//			v =jsonToBeanResult(response, CellListVO.class);
-//		} catch (JSONException e) {
-//			e.printStackTrace();
-//		}
-//		return v;
 
 		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);

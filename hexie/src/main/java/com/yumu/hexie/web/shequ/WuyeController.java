@@ -245,10 +245,10 @@ public class WuyeController extends BaseController {
 	public BaseResult<BillListVO> billList(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String payStatus, @RequestParam(required = false) String startDate,
 			@RequestParam(required = false) String endDate, @RequestParam(required = false) String currentPage,
-			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id)
+			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, @RequestParam(required = false) String sect_id)
 			throws Exception {
 		BillListVO listVo = wuyeService.queryBillList(user.getWuyeId(), payStatus, startDate, endDate, currentPage,
-				totalCount, house_id);
+				totalCount, house_id,sect_id);
 		if (listVo != null && listVo.getBill_info() != null) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -653,32 +653,33 @@ public class WuyeController extends BaseController {
 		}
 
 	}
-	
-	    // 设置用户shareCode
-		@RequestMapping(value = "/updateRepeatUserShareCode", method = RequestMethod.GET)
-		@ResponseBody
-		public BaseResult<String> updateRepeatUserShareCode(@RequestParam String code) throws Exception {
-			if ("hexieCode".equals(code)) {
-			     wuyeService.updateRepeatUserShareCode();
-				log.error("操作完成!!!");
-				return BaseResult.successResult("");
-			} else {
-				return BaseResult.fail("请求错误！！！");
-			}
 
+    // 设置用户shareCode
+	@RequestMapping(value = "/updateRepeatUserShareCode", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> updateRepeatUserShareCode(@RequestParam String code) throws Exception {
+		if ("hexieCode".equals(code)) {
+		     wuyeService.updateRepeatUserShareCode();
+			log.error("操作完成!!!");
+			return BaseResult.successResult("");
+		} else {
+			return BaseResult.fail("请求错误！！！");
 		}
+
+	}
+	
+	// 设置用户shareCode
+	@RequestMapping(value = "/updateUserShareCode", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> updateUserShareCode(@RequestParam String code) throws Exception {
 		
-		// 设置用户shareCode
-		@RequestMapping(value = "/updateUserShareCode", method = RequestMethod.GET)
-		@ResponseBody
-		public BaseResult<String> updateUserShareCode(@RequestParam String code) throws Exception {
-					if ("hexieCode".equals(code)) {
-					     wuyeService.updateUserShareCode();
-						log.error("操作完成!!!");
-						return BaseResult.successResult("");
-					} else {
-						return BaseResult.fail("请求错误！！！");
-					}
+		if ("hexieCode".equals(code)) {
+		     wuyeService.updateUserShareCode();
+			log.error("操作完成!!!");
+			return BaseResult.successResult("");
+		} else {
+			return BaseResult.fail("请求错误！！！");
+		}
 
 	}
 
@@ -709,8 +710,7 @@ public class WuyeController extends BaseController {
 		}
 
 	}
-	
-	
+		
 	//region表添加sectId
 	@RequestMapping(value = "/addSectIdToRegion", method = RequestMethod.GET)
 	@ResponseBody
@@ -739,29 +739,5 @@ public class WuyeController extends BaseController {
 
 	}
 	
-
-		// for (User u : list) {
-		// if(u.getWuyeId() != null){
-		// HouseListVO listVo = wuyeService.queryHouse(u.getWuyeId());
-		// if(listVo != null ){
-		// if(listVo.getHou_info()!=null && listVo.getHou_info().size()>0){
-		// hexieUser.setCity_id(listVo.getHou_info().get(0).getCity_id());
-		// hexieUser.setCity_name(listVo.getHou_info().get(0).getCity_name());
-		// hexieUser.setProvince_id(listVo.getHou_info().get(0).getProvince_id());
-		// hexieUser.setProvince_name(listVo.getHou_info().get(0).getProvince_name());
-		// hexieUser.setRegion_id(listVo.getHou_info().get(0).getRegion_id());
-		// hexieUser.setRegion_name(listVo.getHou_info().get(0).getRegion_name());
-		// hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
-		// hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
-		// setDefaultAddress(u,hexieUser);
-		// log.info("cell_adress:"+listVo.getHou_info().get(0).getCell_addr());
-		// }
-		// }
-		// }
-		// }
-		// pageNum+=pageSize;
-		// if(list.size()>0){
-		// setDefaultAddr(pageNum,pageSize);
-		// }
 
 }
