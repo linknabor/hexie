@@ -1,5 +1,7 @@
 package com.yumu.hexie.model.user;
 
+import static org.junit.Assert.fail;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -70,8 +72,11 @@ public class AddressWorker implements Runnable {
 						hexieUser.setCell_addr(listVo.getHou_info().get(0).getCell_addr());
 						hexieUser.setSect_name(listVo.getHou_info().get(0).getSect_name());
 						hexieUser.setSect_addr(listVo.getHou_info().get(0).getSect_addr());
-						transactionUtil.transact(s -> wuyeService.setDefaultAddress(u, hexieUser));
+						boolean isSuccess = transactionUtil.transact(s -> wuyeService.setDefaultAddress(u, hexieUser));
 						log.info("cell_adress:" + listVo.getHou_info().get(0).getCell_addr());
+						if (!isSuccess) {
+							failCount++;
+						}
 					}
 				}
 				successCount++;

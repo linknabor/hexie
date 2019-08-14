@@ -27,15 +27,16 @@ public interface CouponService {
 	public CouponRule saveRule(CouponRule rule);
 	
 	
-	public Coupon addCoupon4Regist(User user);
-	public Coupon addCoupon4Subscribe(User user);
+	public Coupon addCoupon4Regist(User user);//注册
+	public Coupon addCoupon4Member(User user);//会员
+	public Coupon addCoupon4Subscribe(User user);//订阅
 	public Coupon addCouponFromSeed(String seedStr,User user);
 	public Coupon addCouponFromSeed(CouponSeed seed,User user);
 
 	public List<Coupon> findCouponsFromOrder(long orderId);
 	public Coupon findCouponBySeedAndUser(long seedId,long userId);
 	public List<Coupon> findCouponsBySeedStr(String seedStr);
-
+	//是否可用
     public boolean isAvaible(Cart cart,Coupon coupon);
     public boolean isAvaible(HomeCart cart,Coupon coupon);
     public boolean isAvaible(ServiceOrder order,Coupon coupon, boolean withLocked);

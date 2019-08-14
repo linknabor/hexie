@@ -16,8 +16,8 @@ public class RegionServiceImpl implements RegionService{
 	RegionRepository regionRepository;
 
 	@Override
-	public Region getRegionInfoByName(String name) {
-		return regionRepository.findByName(name);
+	public List<Region> findByNameAndParentId(String name,Long parentId) {
+		return regionRepository.findAllByParentIdAndName(parentId, name);
 	}
 
 	@Override
@@ -35,6 +35,11 @@ public class RegionServiceImpl implements RegionService{
 	@Override
 	public Region getRegionInfoById(long id) {
 		return regionRepository.findOne(id);
+	}
+
+	@Override
+	public List<Region> findAllBySectId(String sectId) {
+		return regionRepository.findAllBySectId(sectId);
 	}
 
 
