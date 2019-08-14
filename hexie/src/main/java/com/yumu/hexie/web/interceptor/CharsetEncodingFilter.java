@@ -12,8 +12,8 @@ import javax.servlet.annotation.WebFilter;
 
 import org.springframework.core.annotation.Order;
 
-@WebFilter(urlPatterns = "/*", filterName = "charsetEncodingFilter" )
-@Order(1)
+//@WebFilter(urlPatterns = "/*", filterName = "charsetEncodingFilter" )
+//@Order(1)
 public class CharsetEncodingFilter implements Filter{
 
 	@Override
