@@ -39,6 +39,7 @@ import com.yumu.hexie.model.localservice.repair.RepairProjectRepository;
 import com.yumu.hexie.model.localservice.repair.RepairSeed;
 import com.yumu.hexie.model.localservice.repair.RepairSeedRepository;
 import com.yumu.hexie.model.localservice.repair.ServiceOperatorSectRepository;
+import com.yumu.hexie.model.localservice.repair.ServiceOperatorVo;
 import com.yumu.hexie.model.localservice.repair.ServiceOperatorSect;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.Address;
@@ -415,14 +416,14 @@ public class RepairServiceImpl implements RepairService {
 
 	@Override
 	@Transactional
-	public int saveRepiorOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO) {
-		Map<String,String> map=baseRequestDTO.getData();
-		String sectIds =map.get("sectIds");
+	public int saveRepiorOperator(BaseRequestDTO<ServiceOperatorVo> baseRequestDTO) {
+		ServiceOperatorVo vo=baseRequestDTO.getData();
+		String sectIds =vo.getSectIds();
 		String[] sectids=sectIds.split(",");
-		String tel=map.get("tel");
-		String name=map.get("name");
-		String userId=map.get("userId");
-		String id=map.get("id");
+		String tel=vo.getTel();
+		String name=vo.getName();
+		String userId=vo.getUserId();
+		String id=vo.getId();
 		ServiceOperator so=new ServiceOperator();
 		if(StringUtil.isEmpty(id)){
 			User u=userRepository.findById(Long.parseLong(userId));
@@ -440,7 +441,7 @@ public class RepairServiceImpl implements RepairService {
 			so.setType(1);
 			so.setUserId(u.getId());
 			so.setOpenId(u.getOpenid());
-			so.setCompanyName(map.get("cspName"));
+			so.setCompanyName(vo.getCspName());
 		}else{
 			so=serviceOperatorRepository.findOne(Long.valueOf(id));
 			so.setName(name);
