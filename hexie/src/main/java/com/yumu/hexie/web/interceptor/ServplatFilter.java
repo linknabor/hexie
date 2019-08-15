@@ -14,7 +14,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.core.annotation.Order;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.yumu.hexie.web.wrapper.ServplatRequestWrapper;
 
@@ -23,8 +24,9 @@ import com.yumu.hexie.web.wrapper.ServplatRequestWrapper;
  *
  */
 @WebFilter(urlPatterns = "/servplat/*", filterName = "servplatFilter")
-@Order(2)
 public class ServplatFilter implements Filter {
+	
+	private static Logger logger = LoggerFactory.getLogger(ServplatFilter.class);
 	
 	private final static String MESSAGE_URL = "/servplat/message";
 	private final static String THREAD_URL = "/servplat/thread";
@@ -61,7 +63,8 @@ public class ServplatFilter implements Filter {
     		if (requestUri.indexOf(MESSAGE_URL) != -1 || requestUri.indexOf(THREAD_URL) != -1 || requestUri.indexOf(REPAIR_URL) != -1
     				||requestUri.indexOf(REPAIR_AREA_URL) != -1) {
     			//TODO validate signature
-    			requestWrapper = new ServplatRequestWrapper((HttpServletRequest) request);
+    			logger.error("requestUri is : " + requestUri + ", charset encoding : " + httpServletRequest.getCharacterEncoding());
+    			requestWrapper = new ServplatRequestWrapper(httpServletRequest);
     		}
             
         }
