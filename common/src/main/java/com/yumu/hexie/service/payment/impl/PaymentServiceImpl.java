@@ -120,7 +120,6 @@ public class PaymentServiceImpl implements PaymentService {
         validatePayRequest(pay);
         log.warn("[Payment-req]["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
         //支付然后没继续的情景=----校验所需时间较长，是否需要如此操作
-
         try {
         	
             if(checkPaySuccess(pay.getPaymentNo())){
@@ -138,12 +137,8 @@ public class PaymentServiceImpl implements PaymentService {
         	sign.setTimestamp(payinfo.getTimestamp());
         	sign.setSignType(payinfo.getSigntype());
         	return sign;
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("err msg :" + e.getMessage());
 		}
 //      PrePaymentOrder preWechatOrder = wechatCoreService.createOrder(pay);
 //      pay.setPrepayId(preWechatOrder.getPrepay_id());
@@ -187,11 +182,6 @@ public class PaymentServiceImpl implements PaymentService {
         }
         try {
 			BaseResult baseResult = WuyeUtil.queryOrderInfo(payment.getPaymentNo());
-//	        PaymentOrderResult poResult = wechatCoreService.queryOrder(payment.getPaymentNo());
-//	        if(poResult==null)
-//	        {
-//	        	return payment;
-//	        }
 	        if("USERPAYING".equals(baseResult.getResult())) {//1. 支付中
 	            log.warn("[Payment-refreshStatus]isPaying["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
 	            return payment;
@@ -203,8 +193,7 @@ public class PaymentServiceImpl implements PaymentService {
 	            payment.paySuccess("532858859");//没有此id
 	        }
         } catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("err msg :" + e.getMessage());
 		}
         return paymentOrderRepository.save(payment);
     }

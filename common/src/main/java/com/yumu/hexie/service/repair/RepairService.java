@@ -13,11 +13,13 @@ import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairProject;
+import com.yumu.hexie.model.localservice.repair.ServiceOperatorVo;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.repair.req.RepairCancelReq;
 import com.yumu.hexie.service.repair.req.RepairComment;
 import com.yumu.hexie.service.repair.resp.RepairListItem;
 import com.yumu.hexie.vo.req.RepairOrderReq;
+
 
 /**
  * <pre>
@@ -56,7 +58,7 @@ public interface RepairService {
 	public Page<Object> getServiceoperator(BaseRequestDTO<Map<String,String>> baseRequestDTO);
 	
 	//保存维修工
-	public int saveRepiorOperator(BaseRequestDTO<Map<String, String>> baseRequestDTO);
+	public int saveRepiorOperator(BaseRequestDTO<ServiceOperatorVo> baseRequestDTO);
 	//根据维修工id获取信息
 	public Map<String, Object> operatorInfo(BaseRequestDTO<String> baseRequestDTO);
 	//删除维修工信息

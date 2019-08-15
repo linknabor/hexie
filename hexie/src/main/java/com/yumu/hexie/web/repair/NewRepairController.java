@@ -18,6 +18,7 @@ import com.yumu.hexie.integration.wuye.resp.BaseResponse;
 import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
+import com.yumu.hexie.model.localservice.repair.ServiceOperatorVo;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.IntegrationBizException;
 import com.yumu.hexie.service.repair.RepairService;
@@ -62,7 +63,7 @@ public class NewRepairController extends BaseController{
 	
 	@RequestMapping(value = "/saveRepiorOperator", method = RequestMethod.POST,produces = "application/json")
 	@ResponseBody
-	public BaseResponseDTO<Integer> saveRepiorOperator(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
+	public BaseResponseDTO<Integer> saveRepiorOperator(@RequestBody BaseRequestDTO<ServiceOperatorVo> baseRequestDTO) {
 		int r=0;
 		try {
 			log.error("参数："+baseRequestDTO.toString());

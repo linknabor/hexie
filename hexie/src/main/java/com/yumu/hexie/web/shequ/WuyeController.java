@@ -245,10 +245,10 @@ public class WuyeController extends BaseController {
 	public BaseResult<BillListVO> billList(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String payStatus, @RequestParam(required = false) String startDate,
 			@RequestParam(required = false) String endDate, @RequestParam(required = false) String currentPage,
-			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id)
+			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, @RequestParam(required = false) String sect_id)
 			throws Exception {
 		BillListVO listVo = wuyeService.queryBillList(user.getWuyeId(), payStatus, startDate, endDate, currentPage,
-				totalCount, house_id);
+				totalCount, house_id,sect_id);
 		if (listVo != null && listVo.getBill_info() != null) {
 			return BaseResult.successResult(listVo);
 		} else {
