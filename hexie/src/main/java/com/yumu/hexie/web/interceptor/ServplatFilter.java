@@ -4,6 +4,7 @@
 package com.yumu.hexie.web.interceptor;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -64,6 +65,8 @@ public class ServplatFilter implements Filter {
     				||requestUri.indexOf(REPAIR_AREA_URL) != -1) {
     			//TODO validate signature
     			logger.error("requestUri is : " + requestUri + ", charset encoding : " + httpServletRequest.getCharacterEncoding());
+    			String csn = Charset.defaultCharset().name();
+    			logger.error("default charset name is : " + csn);
     			requestWrapper = new ServplatRequestWrapper(httpServletRequest);
     		}
             
