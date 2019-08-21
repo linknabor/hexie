@@ -80,6 +80,7 @@ public class UserController extends BaseController{
     public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user) throws Exception {
 		
 		try {
+			log.error("user的userID: "+ user.getId());
 			user = userService.getById(user.getId());
 			log.error("userInfo的user: "+ user);
 			if(user != null){
