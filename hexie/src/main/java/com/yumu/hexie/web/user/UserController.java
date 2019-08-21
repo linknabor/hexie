@@ -148,6 +148,7 @@ public class UserController extends BaseController{
 				UserWeiXin u = userService.getOrSubscibeUserByOpenId(userAccount.getOpenid());
 				
 				updateWeUserInfo(userAccount, u);
+				session.removeAttribute(Constants.USER);
 				session.setAttribute(Constants.USER, userAccount);
 			}
 			if(userAccount == null) {
