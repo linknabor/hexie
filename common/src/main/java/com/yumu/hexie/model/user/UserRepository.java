@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-	public User findByOpenid(String openid);
+	public List<User> findByOpenid(String openid);
 	public List<User> findByTel(String tel);
 	
 	public List<User> findByShareCode(String shareCode);
