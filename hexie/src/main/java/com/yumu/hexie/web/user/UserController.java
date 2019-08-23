@@ -2,10 +2,14 @@ package com.yumu.hexie.web.user;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -13,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,8 +55,9 @@ public class UserController extends BaseController{
 	
 	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 	
-	private static final Integer lock = 0;
-
+	private static String SPRING_SESSION_KEY = "spring:session:sessions:%s";
+	private static String SPRING_SESSION_EXPIRE_KEY = "spring:session:sessions:expires:%s";
+	
 	@Inject
 	private UserService userService;
 	@Inject
@@ -70,6 +76,8 @@ public class UserController extends BaseController{
     private SystemConfigService systemConfigService;
     @Autowired
     private ParamService paramService;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
     
 
     @Value(value = "${testMode}")
@@ -79,8 +87,17 @@ public class UserController extends BaseController{
 	@ResponseBody
     public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user) throws Exception {
 		
+		User sessionUser = user;
 		try {
-			log.error("user的userID: "+ user.getId());
+			List<User> userList = userService.getByOpenId(user.getOpenid());
+			if (userList!=null) {
+				for (User baseduser : userList) {
+					if (baseduser.getId() == user.getId()) {
+						user = baseduser;
+						break;
+					}
+				}
+			}
 			user = userService.getById(user.getId());
 			log.error("userInfo的user: "+ user);
 			if(user != null){
@@ -90,7 +107,11 @@ public class UserController extends BaseController{
 			    userInfo.setCfgParam(paramMap);
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-			    return new BaseResult<UserInfo>().success(null);
+				log.error("current user id in session is not the same with the id in database. user : " + sessionUser);
+				log.error("will remove the session in redis, session id : " + session.getId());
+				redisTemplate.delete(String.format(SPRING_SESSION_KEY, session.getId()));
+				redisTemplate.delete(String.format(SPRING_SESSION_EXPIRE_KEY, session.getId()));
+				return new BaseResult<UserInfo>().success(null);
 			}
 		} catch (Exception e) {
 			
@@ -149,7 +170,6 @@ public class UserController extends BaseController{
 				UserWeiXin u = userService.getOrSubscibeUserByOpenId(userAccount.getOpenid());
 				
 				updateWeUserInfo(userAccount, u);
-				session.removeAttribute(Constants.USER);
 				session.setAttribute(Constants.USER, userAccount);
 			}
 			if(userAccount == null) {
@@ -186,32 +206,27 @@ public class UserController extends BaseController{
 		if (!user.isNewRegiste()) {
 			return ;
 		}
+		List<Coupon>list = new ArrayList<Coupon>();
 		
-		synchronized (lock) {
-			
-			List<Coupon>list = new ArrayList<Coupon>();
-			
-			String couponStr = systemConfigService.queryValueByKey("SUBSCRIBE_COUPONS");
-			String[]couponArr = null;
-			if (!StringUtil.isEmpty(couponStr)) {
-				couponArr = couponStr.split(",");
-			}
-			if (couponArr!=null) {
-				for (int i = 0; i < couponArr.length; i++) {
-					
-					try {
-						Coupon coupon = couponService.addCouponFromSeed(couponArr[i], user);
-						list.add(coupon);
-					} catch (Exception e) {
-						log.error(e.getMessage());
-					}
+		String couponStr = systemConfigService.queryValueByKey("SUBSCRIBE_COUPONS");
+		String[]couponArr = null;
+		if (!StringUtil.isEmpty(couponStr)) {
+			couponArr = couponStr.split(",");
+		}
+		if (couponArr!=null) {
+			for (int i = 0; i < couponArr.length; i++) {
+				
+				try {
+					Coupon coupon = couponService.addCouponFromSeed(couponArr[i], user);
+					list.add(coupon);
+				} catch (Exception e) {
+					log.error(e.getMessage());
 				}
 			}
-			
-			if (list.size()>0) {
-				goTongService.sendSubscribeMsg(user);
-			}
-			
+		}
+		
+		if (list.size()>0) {
+			goTongService.sendSubscribeMsg(user);
 		}
 		
 	}
@@ -287,25 +302,34 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/cancelSubscribe", method = RequestMethod.GET)
 	@ResponseBody
     public BaseResult<String> cancelSubscribe(String weixin_id){
-    	User  user=userService.getByOpenId(weixin_id);
-    	if(user != null){
-    		user.setSubscribe(0);
-    		userService.save(user);
-    		 return  new BaseResult<String>().success("关注被取消"); 
-    	}
-    	 return  new BaseResult<String>().failMsg("未找到该用户"); 
+    	List<User> userList = userService.getByOpenId(weixin_id);
+    	if (userList!=null && userList.size()>0) {
+    		for (User user : userList) {
+    			user.setSubscribe(0);
+        		userService.save(user);
+			}
+    		return  new BaseResult<String>().success("关注被取消"); 
+		}else {
+			return  new BaseResult<String>().failMsg("未找到该用户");
+		}
+    	 
     }
     
     @RequestMapping(value = "/saveLocation", method = RequestMethod.GET)
    	@ResponseBody
    	public BaseResult<String> saveLocation(String weixin_id,String Latitude,String Longitude){
-    	User  user=userService.getByOpenId(weixin_id);
-    	if(user != null){
-   		user.setLatitude(Double.parseDouble(Latitude));//纬度
-   		user.setLongitude(Double.parseDouble(Longitude));//经度
-		userService.save(user);
-			return  new BaseResult<String>().success("地理位置保存成功!"); 
+    	List<User> userList = userService.getByOpenId(weixin_id);
+    	if (userList!=null) {
+			for (User user : userList) {
+				user.setLatitude(Double.parseDouble(Latitude));//纬度
+		   		user.setLongitude(Double.parseDouble(Longitude));//经度
+				userService.save(user);
+			}
+			return new BaseResult<String>().success("地理位置保存成功!");
+		}else {
+			return new BaseResult<String>().failMsg("未找到该用户!");
 		}
-    	return  new BaseResult<String>().failMsg("未找到该用户!"); 
+   		
+    	 
     }
 }

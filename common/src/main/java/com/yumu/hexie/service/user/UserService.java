@@ -13,7 +13,7 @@ import com.yumu.hexie.model.user.User;
 public interface UserService {
 
     public User getById(long uId);
-    public User getByOpenId(String openId);
+    public List<User> getByOpenId(String openId);
     public List<User> getByTel(String tel);
 	//获取用户信息
 	public User getOrSubscibeUserByCode(String code);
