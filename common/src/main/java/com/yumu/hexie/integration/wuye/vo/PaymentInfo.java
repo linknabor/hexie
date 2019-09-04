@@ -19,6 +19,7 @@ public class PaymentInfo implements Serializable {
 	private String mianAmt;
 	private String show_invoice_flag;//是否开通电子发票功能
 	private String show_com_flag;//是否允许公司开票功能
+	private String show_invoice;//是否开票
 	private String invoice_title;//发票抬头（回显使用）
 	private List<PaymentData> fee_data;
 	@Transient
@@ -85,6 +86,12 @@ public class PaymentInfo implements Serializable {
 	public void setInvoice_title(String invoice_title) {
 		this.invoice_title = invoice_title;
 	}
+	public String getShow_invoice() {
+		return show_invoice;
+	}
+	public void setShow_invoice(String show_invoice) {
+		this.show_invoice = show_invoice;
+	}
 	
-
+	
 }
