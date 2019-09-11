@@ -141,7 +141,7 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/login/{code}", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestParam(name="oriApp", required = false) String oriApp) throws Exception {
+    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestBody(required = false) Map<String, String> postData) throws Exception {
 		
 		User userAccount = null;
 		try {
@@ -153,9 +153,8 @@ public class UserController extends BaseController{
 			        }catch(Throwable t){}
 			    }
 			    if(userAccount == null) {
-			    	
+			    	String oriApp = postData.get("oriApp");
 			    	log.info("oriApp : " + oriApp);
-			    	log.error("oriApp : " + oriApp);
 			    	if (StringUtils.isEmpty(oriApp)) {
 			    		userAccount = userService.getOrSubscibeUserByCode(code);
 					}else {
