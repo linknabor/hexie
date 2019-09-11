@@ -2,12 +2,10 @@ package com.yumu.hexie.web.user;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,13 +47,11 @@ import com.yumu.hexie.web.user.req.MobileYzm;
 import com.yumu.hexie.web.user.req.SimpleRegisterReq;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
+
 @Controller(value = "userController")
 public class UserController extends BaseController{
 	
 	private static final Logger log = LoggerFactory.getLogger(UserController.class);
-	
-	private static String SPRING_SESSION_KEY = "spring:session:sessions:%s";
-	private static String SPRING_SESSION_EXPIRE_KEY = "spring:session:sessions:expires:%s";
 	
 	@Inject
 	private UserService userService;
@@ -76,8 +71,6 @@ public class UserController extends BaseController{
     private SystemConfigService systemConfigService;
     @Autowired
     private ParamService paramService;
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
     
 
     @Value(value = "${testMode}")
@@ -85,10 +78,12 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
 	@ResponseBody
-    public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user) throws Exception {
+    public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user,
+    		HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		User sessionUser = user;
 		try {
+			log.info("user :" + user);
 			List<User> userList = userService.getByOpenId(user.getOpenid());
 			if (userList!=null) {
 				for (User baseduser : userList) {
@@ -107,10 +102,8 @@ public class UserController extends BaseController{
 			    userInfo.setCfgParam(paramMap);
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-				log.error("current user id in session is not the same with the id in database. user : " + sessionUser);
-				log.error("will remove the session in redis, session id : " + session.getId());
-				redisTemplate.delete(String.format(SPRING_SESSION_KEY, session.getId()));
-				redisTemplate.delete(String.format(SPRING_SESSION_EXPIRE_KEY, session.getId()));
+				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());
+				session.setMaxInactiveInterval(1);//将会话过期
 				return new BaseResult<UserInfo>().success(null);
 			}
 		} catch (Exception e) {
