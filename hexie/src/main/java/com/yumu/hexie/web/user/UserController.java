@@ -141,7 +141,7 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/login/{code}", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestParam(required = false) String oriApp) throws Exception {
+    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestParam(name="oriApp", required = false) String oriApp) throws Exception {
 		
 		User userAccount = null;
 		try {
