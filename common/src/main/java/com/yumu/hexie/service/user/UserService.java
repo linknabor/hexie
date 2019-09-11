@@ -19,7 +19,7 @@ public interface UserService {
 	public User getOrSubscibeUserByCode(String code);
 	
 	//第三方授权获取用户信息
-	public User getTpSubscibeUserByCode(String code, String from);
+	public User getTpSubscibeUserByCode(String code, String oriApp);
 	
     public UserWeiXin getOrSubscibeUserByOpenId(String openid);
 	

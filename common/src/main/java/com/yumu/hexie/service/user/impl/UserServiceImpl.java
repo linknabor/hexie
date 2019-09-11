@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public User getTpSubscibeUserByCode(String code, String from) {
-		UserWeiXin user = wechatCoreService.getByOAuthAccessToken(code, from);
+	public User getTpSubscibeUserByCode(String code, String oriApp) {
+		UserWeiXin user = wechatCoreService.getByOAuthAccessToken(code, oriApp);
 		if(user == null) {
             throw new BizValidateException("微信信息不正确");
         }

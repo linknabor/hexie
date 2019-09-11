@@ -74,16 +74,16 @@ public class OAuthService {
 	 * @param from 来自哪个公众号，如果为空，则说明不是从授权的公众号进来的
 	 * @return AccessTokenOAuth对象
 	 */
-	public static AccessTokenOAuth getOAuthAccessToken(String code, String from, String componentAccessToken) {
+	public static AccessTokenOAuth getOAuthAccessToken(String code, String oriApp, String componentAccessToken) {
 		
 		Assert.hasText(code, "code不能为空。");
 		
 		String url = "";
 		//合协公众号获取token
-		if (StringUtils.isEmpty(from)) {
+		if (StringUtils.isEmpty(oriApp)) {
 			url = GET_ACCESS_TOKEN_OAUTH.replace("APPID", ConstantWeChat.APPID).replace("SECRET", ConstantWeChat.APPSECRET).replace("CODE", code);
 		}else {	//其他第三方授权公众号获取token
-			url = GET_ACCESS_TOKEN_COMPONENT_AUTH.replace("APPID", from).replace("CODE", code).
+			url = GET_ACCESS_TOKEN_COMPONENT_AUTH.replace("APPID", oriApp).replace("CODE", code).
 					replace("COMPONENT_APPID", ConstantWeChat.COMPONENT_APPID).replace("COMPONENT_ACCESS_TOKEN", componentAccessToken);
 		}
 
