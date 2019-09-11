@@ -23,7 +23,7 @@ public class ConstantWeChat {
 	 */
 	public static String APPSECRET = ConfigUtil.get("appSecret");
 	
-	public static String COMPONENT_APPID = "componentAppId";
+	public static String COMPONENT_APPID = ConfigUtil.get("componentAppId");
 	
 	public static String MAIN_SERVER = ConfigUtil.get("mainServer");
 	
