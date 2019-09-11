@@ -153,6 +153,9 @@ public class UserController extends BaseController{
 			        }catch(Throwable t){}
 			    }
 			    if(userAccount == null) {
+			    	
+			    	log.info("oriApp : " + oriApp);
+			    	log.error("oriApp : " + oriApp);
 			    	if (StringUtils.isEmpty(oriApp)) {
 			    		userAccount = userService.getOrSubscibeUserByCode(code);
 					}else {
