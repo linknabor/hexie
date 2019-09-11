@@ -499,6 +499,5 @@
 		<module>common</module>
 		<module>hexie</module>
 		<module>hexiebk</module>
-    <module>hexie-tpauth</module>
   </modules>
 </project>
