@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,8 @@ import com.yumu.hexie.service.user.UserService;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
+	
+	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Inject
 	private UserRepository userRepository;
@@ -42,10 +46,18 @@ public class UserServiceImpl implements UserService {
     }
 	@Override
 	public User getOrSubscibeUserByCode(String code) {
-		UserWeiXin user = wechatCoreService.getByOAuthAccessToken(code);
+		
+		return getTpSubscibeUserByCode(code, null);
+	}
+	
+	@Override
+	public User getTpSubscibeUserByCode(String code, String from) {
+		UserWeiXin user = wechatCoreService.getByOAuthAccessToken(code, from);
 		if(user == null) {
             throw new BizValidateException("微信信息不正确");
         }
+		logger.info("userWeiXin is : " + user);
+		
 		String openId = user.getOpenid();
 		List<User> userList = userRepository.findByOpenid(openId);
 		User userAccount = null;
@@ -72,6 +84,8 @@ public class UserServiceImpl implements UserService {
         }
 		return userAccount;
 	}
+	
+	
 	private User createUser(UserWeiXin user) {
 		User userAccount;
 		userAccount = new User();
@@ -137,13 +151,7 @@ public class UserServiceImpl implements UserService {
 		pointService.addZhima(user, 100, "zm-binding-"+user.getId());
 		return userRepository.save(user);
 	}
-//	@Override
-//	public void syncUsersFromWechat() {
-//		List<UserWeiXin> us = wechatCoreService.getUserList();
-//		for(UserWeiXin u : us) {
-//			getOrSubscibeUserByOpenId(u);
-//		}
-//	}
+
 	@Override
 	public UserWeiXin getOrSubscibeUserByOpenId(String openid) {
 

@@ -23,7 +23,8 @@ public class ConstantWeChat {
 	 */
 	public static String APPSECRET = ConfigUtil.get("appSecret");
 	
-
+	public static String COMPONENT_APPID = "componentAppId";
+	
 	public static String MAIN_SERVER = ConfigUtil.get("mainServer");
 	
 	public static boolean isMainServer(){
@@ -146,4 +147,9 @@ public class ConstantWeChat {
 	 */
 	public static final String SCOPE_SNSAPI_BASE = "snsapi_base";
 	public static final String SCOPE_SNSAPI_USERINFO = "snsapi_userinfo";
+	
+	
+	public static final String KEY_COMPONENT_ACESS_TOKEN = "oaAuth_componentAccessToken";
+	public static final String KEY_AUTHORIZER_ACCESS_TOKEN = "oaAuth_authorizerAccessToken_";	//后面要拼接appId 
+	
 }

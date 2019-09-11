@@ -17,6 +17,10 @@ public interface UserService {
     public List<User> getByTel(String tel);
 	//获取用户信息
 	public User getOrSubscibeUserByCode(String code);
+	
+	//第三方授权获取用户信息
+	public User getTpSubscibeUserByCode(String code, String from);
+	
     public UserWeiXin getOrSubscibeUserByOpenId(String openid);
 	
 	//从profile页面进行修改用户信息

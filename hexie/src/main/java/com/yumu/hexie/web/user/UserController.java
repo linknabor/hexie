@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -74,7 +75,7 @@ public class UserController extends BaseController{
     
 
     @Value(value = "${testMode}")
-    private String testMode;
+    private Boolean testMode;
 	
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
 	@ResponseBody
@@ -94,7 +95,6 @@ public class UserController extends BaseController{
 				}
 			}
 			user = userService.getById(user.getId());
-			log.error("userInfo的user: "+ user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    Map<String, String> paramMap = paramService.getParamByUser(user);
@@ -141,19 +141,24 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/login/{code}", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code) throws Exception {
+    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestParam String from) throws Exception {
 		
 		User userAccount = null;
 		try {
 			if (StringUtil.isNotEmpty(code)) {
-			    if("true".equals(testMode)) {
+			    if(Boolean.TRUE.equals(testMode)) {
 			        try{
 				        Long id = Long.valueOf(code);
 				    	userAccount = userService.getById(id);
 			        }catch(Throwable t){}
 			    }
 			    if(userAccount == null) {
-			        userAccount = userService.getOrSubscibeUserByCode(code);
+			    	if (StringUtils.isEmpty(from)) {
+			    		userAccount = userService.getOrSubscibeUserByCode(code);
+					}else {
+						userAccount = userService.getTpSubscibeUserByCode(code, from);
+					}
+			       
 			    }
 			    
 				pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());

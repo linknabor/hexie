@@ -22,7 +22,7 @@ public interface WechatCoreService {
 			String nonce);
 
 	public UserWeiXin getUserInfo(String openid);
-	public UserWeiXin getByOAuthAccessToken(String code);
+	public UserWeiXin getByOAuthAccessToken(String code, String from);
     public List<UserWeiXin> getUserList();
 	
 

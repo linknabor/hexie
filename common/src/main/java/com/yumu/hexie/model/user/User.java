@@ -76,9 +76,8 @@ public class User extends BaseModel{
 	private String sectId;//小区id
 	private String cspId;//公司
 	
-	 
-
-
+	private String oriSys;	//来自哪个系统
+	private String oriUserId;	//源用户ID
 
 	public String getSectId() {
 		return sectId;
@@ -401,6 +400,23 @@ public class User extends BaseModel{
 		this.newRegiste = isNewRegiste;
 	}
 
+	
+	public String getOriSys() {
+		return oriSys;
+	}
+
+	public void setOriSys(String oriSys) {
+		this.oriSys = oriSys;
+	}
+
+	public String getOriUserId() {
+		return oriUserId;
+	}
+
+	public void setOriUserId(String oriUserId) {
+		this.oriUserId = oriUserId;
+	}
+
 	@Override
 	public String toString() {
 		return "User [realName=" + realName + ", name=" + name + ", tel=" + tel + ", provinceId=" + provinceId
@@ -412,9 +428,9 @@ public class User extends BaseModel{
 				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", registerDate="
 				+ registerDate + ", identityCard=" + identityCard + ", zhima=" + zhima + ", lvdou=" + lvdou
 				+ ", couponCount=" + couponCount + ", shareCode=" + shareCode + ", newRegiste=" + newRegiste
-				+ ", officeTel=" + officeTel + "]";
+				+ ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId + ", oriSys=" + oriSys
+				+ ", oriUserId=" + oriUserId + "]";
 	}
 
-	
 	
 }

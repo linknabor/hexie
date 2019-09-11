@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -35,10 +37,10 @@ import com.yumu.hexie.integration.wechat.util.MessageUtil;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.payment.RefundOrder;
+import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.WechatException;
-import com.yumu.hexie.service.user.CouponService;
 
 @Service(value = "wechatCoreService")
 public class WechatCoreServiceImpl implements WechatCoreService {
@@ -48,12 +50,10 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	public String jsTicket = "";
 	private static final Logger LOGGER = LoggerFactory.getLogger(WechatCoreServiceImpl.class);
 	@Inject
-	private com.yumu.hexie.service.user.UserService userService;
-	@Inject
 	private SystemConfigService systemConfigService;
-	@Inject 
-	private CouponService couponService;
-
+	@Autowired
+	private RedisRepository redisRepository;
+	
 
 	// FIXME 暂时没用
 	@Override
@@ -201,9 +201,16 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	}
 
 	@Override
-	public UserWeiXin getByOAuthAccessToken(String code) {
+	public UserWeiXin getByOAuthAccessToken(String code, String from) {
 		try {
-		    AccessTokenOAuth auth =  OAuthService.getOAuthAccessToken(code);
+			AccessTokenOAuth auth = null;
+			if (!StringUtils.isEmpty(from)) {
+				String componentAccessToken = redisRepository.getComponentAccessToken(ConstantWeChat.KEY_COMPONENT_ACESS_TOKEN);
+//				String authorizerAccessToken = redisRepository.getAuthorizerAccessToken(ConstantWeChat.KEY_AUTHORIZER_ACCESS_TOKEN);
+				auth = OAuthService.getOAuthAccessToken(code, from, componentAccessToken);
+			}else {
+				auth =  OAuthService.getOAuthAccessToken(code);
+			}
 	        return OAuthService.getUserInfoOauth(auth.getAccessToken(),auth.getOpenid());
 		} catch (Exception e) {
 			processError(e);
