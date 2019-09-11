@@ -34,8 +34,7 @@ public class OAuthService {
 	/**
 	 * 第三方授权使用的获取的TOKEN的链接
 	 */
-	public static String GET_ACCESS_TOKEN_COMPONENT_AUTH = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=APPID&code=CODE&grant_type=authorization_code&component_appid=COMPONENT_APPID&component_access_token=COMPONENT_ACCESS_TOKEN";
-	
+	public static String GET_ACCESS_TOKEN_COMPONENT_AUTH = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=APPID&code=CODE&grant_type=authorization_code&component_appid=COMPONENT_ID&component_access_token=COMPONENT_ACCESS_TOKEN";
 	
 	/**
 	 * 获得Oauth认证的URL
@@ -84,7 +83,7 @@ public class OAuthService {
 			url = GET_ACCESS_TOKEN_OAUTH.replace("APPID", ConstantWeChat.APPID).replace("SECRET", ConstantWeChat.APPSECRET).replace("CODE", code);
 		}else {	//其他第三方授权公众号获取token
 			url = GET_ACCESS_TOKEN_COMPONENT_AUTH.replace("APPID", oriApp).replace("CODE", code).
-					replace("COMPONENT_APPID", ConstantWeChat.COMPONENT_APPID).replace("COMPONENT_ACCESS_TOKEN", componentAccessToken);
+					replace("COMPONENT_ID", ConstantWeChat.COMPONENT_APPID).replace("COMPONENT_ACCESS_TOKEN", componentAccessToken);
 		}
 
 		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null, null);
