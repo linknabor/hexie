@@ -97,7 +97,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 		hOrder = haoJiaAnOrderRespository.save(hOrder);
 		
 		userNoticeService.yuyueSuccess(user.getId(), yOrder.getTel(), yOrder.getReceiverName(), yOrder.getId(), yOrder.getProductName(), ModelConstant.YUYUE_PAYMENT_TYPE_OFFLINE, 0);
-		String accessToken = systemConfigService.queryWXAToken();
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 
         List<ServiceOperator> ops = null;
         List<Long> regionIds = new ArrayList<Long>();

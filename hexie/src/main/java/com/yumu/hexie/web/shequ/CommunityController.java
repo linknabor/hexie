@@ -35,7 +35,6 @@ import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.wechat.service.FileService;
-import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.community.Annoucement;
 import com.yumu.hexie.model.community.CommunityInfo;
@@ -86,18 +85,9 @@ public class CommunityController extends BaseController{
 	public BaseResult<List<Thread>> getThreadList(@ModelAttribute(Constants.USER)User user, @RequestBody Thread thread, 
 				@PathVariable String filter,  @PathVariable int currPage ) throws Exception {
 		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		log.debug("sect_id is : " + sect_id);
 		log.debug("filter is : " + filter);
 		
-		if ("y".equals(filter) && null == sect_id) {
+		if ("y".equals(filter)) {
 			return BaseResult.successResult(new ArrayList<Thread>());
 		}
 		
@@ -293,21 +283,7 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
 		Long threadId = thread.getThreadId();
-		
 		if (StringUtil.isEmpty(threadId)) {
 			return BaseResult.fail("未选中帖子");
 		}
@@ -415,7 +391,8 @@ public class CommunityController extends BaseController{
 			
 			PutExtra extra = new PutExtra();
 			File img = null;
-			String accessToken=systemConfigService.queryWXAToken();
+			User user = userService.getById(ret.getUserId());
+			String accessToken=systemConfigService.queryWXAToken(user.getAppId());
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
 					
@@ -557,19 +534,6 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
 		//更新帖子回复数量及最后评论时间
 		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
 		thread.setCommentsCount(thread.getCommentsCount()+1);
@@ -647,20 +611,6 @@ public class CommunityController extends BaseController{
 	public BaseResult deleteComment(HttpSession session, @RequestBody ThreadComment comment) throws Exception{
 		
 		User user = (User)session.getAttribute(Constants.USER);
-		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
 		communityService.deleteComment(user, comment.getCommentId());	//添加评论
 		
 		//更新帖子回复数量
@@ -669,36 +619,6 @@ public class CommunityController extends BaseController{
 		communityService.updateThread(thread);
 		
 		return BaseResult.successResult("succeeded");
-		
-	}
-	
-	/**
-	 * 获取微信ACCESS_TOKEN
-	 * @param session
-	 * @return
-	 */
-	@SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/thread/getAccessToken", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult getAccessToken(HttpSession session){
-		
-		User user = (User)session.getAttribute(Constants.USER);
-		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		String access_token = WeixinUtil.getToken();
-		return BaseResult.successResult(access_token);
 		
 	}
 	
@@ -894,19 +814,10 @@ public class CommunityController extends BaseController{
 	public BaseResult<List<CommunityInfo>> getCommunityInfo(HttpSession session){
 		
 		User user = (User)session.getAttribute(Constants.USER);
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
+		Long sect_id = user.getXiaoquId();
+		if(sect_id == null || sect_id == 0){
 			return BaseResult.fail("您还没有填写小区信息。");
 		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.fail("您还没有填写小区信息。");
-		}
-		
 		Sort sort = new Sort(Direction.ASC , "infoType");
 		
 		List<CommunityInfo>cityList = communityService.getCommunityInfoByCityIdAndInfoType(user.getCityId(), "0",sort);
@@ -939,19 +850,10 @@ public class CommunityController extends BaseController{
 	public BaseResult<List<Annoucement>> getAnnoucementList(HttpSession session){
 		
 		User user = (User)session.getAttribute(Constants.USER);
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
+		Long sect_id = user.getXiaoquId();;
+		if(sect_id == null || sect_id == 0){
 			return BaseResult.fail("您还没有填写小区信息。");
 		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.fail("您还没有填写小区信息。");
-		}
-		
 		Sort sort = new Sort(Direction.DESC , "annoucementId");
 		List<Annoucement> list = communityService.getAnnoucementList(sort);
 		
@@ -1038,7 +940,8 @@ public class CommunityController extends BaseController{
 			PutExtra extra = new PutExtra();
 			File img = null;
 			
-			String accessToken = systemConfigService.queryWXAToken();
+			User user = userService.getById(ret.getCommentUserId());
+			String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 			
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {

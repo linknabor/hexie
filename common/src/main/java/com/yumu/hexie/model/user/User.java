@@ -72,12 +72,13 @@ public class User extends BaseModel{
 	private boolean newRegiste = true;
 	private String officeTel;
 	
-	
 	private String sectId;//小区id
 	private String cspId;//公司
 	
-	private String oriSys;	//来自哪个系统
-	private String oriUserId;	//源用户ID
+	private String appId;
+	
+	private String oriSys;	//来自哪个系统,迁移过来的数据有这个字段
+	private String oriUserId;	//源用户ID,迁移过来的数据有这个字段
 
 	public String getSectId() {
 		return sectId;
@@ -417,6 +418,14 @@ public class User extends BaseModel{
 		this.oriUserId = oriUserId;
 	}
 
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
+
 	@Override
 	public String toString() {
 		return "User [realName=" + realName + ", name=" + name + ", tel=" + tel + ", provinceId=" + provinceId
@@ -428,9 +437,10 @@ public class User extends BaseModel{
 				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", registerDate="
 				+ registerDate + ", identityCard=" + identityCard + ", zhima=" + zhima + ", lvdou=" + lvdou
 				+ ", couponCount=" + couponCount + ", shareCode=" + shareCode + ", newRegiste=" + newRegiste
-				+ ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId + ", oriSys=" + oriSys
-				+ ", oriUserId=" + oriUserId + "]";
+				+ ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId + ", appId=" + appId
+				+ ", oriSys=" + oriSys + ", oriUserId=" + oriUserId + "]";
 	}
+	
 
 	
 }

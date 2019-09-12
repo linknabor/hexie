@@ -8,8 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -73,6 +75,11 @@ public class UserServiceImpl implements UserService {
             userAccount = createUser(user);
             userAccount.setNewRegiste(true);
         }
+		if (StringUtils.isEmpty(userAccount.getAppId())) {
+			
+			updateAppId(userAccount, oriApp);
+			
+		}
         if(StringUtil.isEmpty(userAccount.getNickname())){
             userAccount = updateUserByWechat(user, userAccount);
         }else if(user.getSubscribe()!=null&&user.getSubscribe() != userAccount.getSubscribe()) {
@@ -103,6 +110,23 @@ public class UserServiceImpl implements UserService {
 		userAccount = userRepository.save(userAccount);
 		return userAccount;
 	}
+	
+	/**
+	 * 设置更新appid
+	 * @param userAccount
+	 * @param oriApp
+	 * @return
+	 */
+	private User updateAppId(User userAccount, String oriApp) {
+		
+		if (StringUtils.isEmpty(oriApp)) {
+			userAccount.setAppId(ConstantWeChat.APPID);	//合协用户填这个
+		}else {
+			userAccount.setAppId(oriApp);	//其他系统用户填自己的appId
+		}
+		return userRepository.save(userAccount);
+	}
+	
     private User updateSubscribeInfo(UserWeiXin user, User userAccount) {
         userAccount.setSubscribe(user.getSubscribe());
         userAccount.setSubscribe_time(user.getSubscribe_time());
@@ -153,9 +177,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserWeiXin getOrSubscibeUserByOpenId(String openid) {
+	public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid) {
 
-		UserWeiXin user = wechatCoreService.getUserInfo(openid);
+		UserWeiXin user = wechatCoreService.getUserInfo(appId, openid);
 		return user;
 	}
     /** 

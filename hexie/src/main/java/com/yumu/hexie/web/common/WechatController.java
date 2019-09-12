@@ -1,8 +1,6 @@
 package com.yumu.hexie.web.common;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
-import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
 import com.yumu.hexie.integration.wechat.service.FundService;
 import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
 import com.yumu.hexie.model.payment.PaymentConstant;
@@ -66,15 +62,6 @@ public class WechatController extends BaseController{
     	}
     }
     
-    @ResponseBody
-    @RequestMapping(value = "/checkSignature", method = RequestMethod.POST,produces="text/plain;charset=UTF-8" )
-    public String process(HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-    	request.setCharacterEncoding("UTF-8");
-    	response.setCharacterEncoding("UTF-8");
-    	return wechatCoreService.processWebchatRequest(request);
-    }
-
     @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST )
     public String orderNotify(@RequestParam String bankType,@RequestParam String merNo,@RequestParam String orderDate,@RequestParam String orderNo,

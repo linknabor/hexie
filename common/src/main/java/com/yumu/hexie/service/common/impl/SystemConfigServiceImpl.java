@@ -14,10 +14,13 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.systemconfig.SystemConfigUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.system.SystemConfig;
@@ -93,17 +96,32 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     
     }
     
-    public String queryWXAToken() {
-    	SystemConfig config = getConfigFromCache(ACC_TOKEN);
-        if (config != null) {
-            try {
-                AccessToken at = (AccessToken) JacksonJsonUtil.jsonToBean(config.getSysValue(), AccessToken.class);
-                return at.getToken();
-            } catch (JSONException e) {
-               log.error("queryWXAccToken failed :", e);
+    /**
+     * 根据appid获取微信公众号的accessToken
+     * @param appId
+     * @return
+     */
+    public String queryWXAToken(String appId) {
+    	
+    	if (AppUtil.isMainApp(appId) || StringUtils.isEmpty(appId)) {
+    		SystemConfig config = getConfigFromCache(ACC_TOKEN);
+            if (config != null) {
+                try {
+                    AccessToken at = (AccessToken) JacksonJsonUtil.jsonToBean(config.getSysValue(), AccessToken.class);
+                    return at.getToken();
+                } catch (JSONException e) {
+                   log.error("queryWXAccToken failed :", e);
+                }
             }
-        }
-        throw new BizValidateException("微信token没有记录");
+            throw new BizValidateException("微信token没有记录");
+		
+    	} else {
+    		
+    		String authorizerAccessToken = redisRepository.getAuthorizerAccessToken(ConstantWeChat.KEY_AUTHORIZER_ACCESS_TOKEN);
+    		return authorizerAccessToken;
+    		
+		}
+    	
     }
     
     @Override
@@ -128,5 +146,6 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	
 		return ret;
 	}
+    
     
 }

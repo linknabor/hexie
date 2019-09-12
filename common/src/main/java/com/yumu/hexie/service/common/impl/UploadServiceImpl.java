@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,10 @@ import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.wechat.service.FileService;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.UploadService;
+import com.yumu.hexie.service.user.UserService;
 
 /**
  * <pre>
@@ -53,6 +56,9 @@ public class UploadServiceImpl implements UploadService {
     
 	@Inject
 	private SystemConfigService systemConfigService;
+	
+	@Autowired
+	private UserService userService;
     /** 
      * @param order
      * @see com.yumu.hexie.service.common.UploadService#updateRepairImg(com.yumu.hexie.model.localservice.repair.RepairOrder)
@@ -65,8 +71,9 @@ public class UploadServiceImpl implements UploadService {
                 && StringUtil.isEmpty(order.getCommentImgUrls()))) {
             return;
         }
-        String imgUrls = moveImges(order.getImgUrls());
-        String commentImgUrls = moveImges(order.getCommentImgUrls());
+        User user = userService.getById(order.getUserId());
+        String imgUrls = moveImges(user.getAppId(), order.getImgUrls());
+        String commentImgUrls = moveImges(user.getAppId(), order.getCommentImgUrls());
         
         RepairOrder nOrder = repairOrderRepository.findOne(order.getId());
         nOrder.setImgUrls(imgUrls);
@@ -74,7 +81,7 @@ public class UploadServiceImpl implements UploadService {
         repairOrderRepository.save(nOrder);
     }
 
-    private String moveImges(String imgUrls) {
+    private String moveImges(String appId, String imgUrls) {
         if(StringUtil.isEmpty(imgUrls)) {
             return "";
         }
@@ -85,7 +92,7 @@ public class UploadServiceImpl implements UploadService {
                 continue;
             }
             if (url.indexOf("http")<0) {
-                String qiniuUrl = uploadFileToQiniu(downloadFromWechat(url));
+                String qiniuUrl = uploadFileToQiniu(downloadFromWechat(appId, url));
                 if(!StringUtils.isEmpty(qiniuUrl)) {
                     newImgUrls += qiniuUrl;
                 } else {
@@ -119,8 +126,8 @@ public class UploadServiceImpl implements UploadService {
     }
 
     //从微信服务器上下载
-    private File downloadFromWechat(String mediaId) {
-    	String accessToken=systemConfigService.queryWXAToken();
+    private File downloadFromWechat(String appId, String mediaId) {
+    	String accessToken=systemConfigService.queryWXAToken(appId);
         InputStream inputStream = null;
 
         String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");

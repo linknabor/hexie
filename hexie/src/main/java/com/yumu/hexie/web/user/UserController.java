@@ -145,6 +145,9 @@ public class UserController extends BaseController{
 		
 		User userAccount = null;
 		try {
+			String oriApp = postData.get("oriApp");
+	    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
+	    	
 			if (StringUtil.isNotEmpty(code)) {
 			    if(Boolean.TRUE.equals(testMode)) {
 			        try{
@@ -153,8 +156,7 @@ public class UserController extends BaseController{
 			        }catch(Throwable t){}
 			    }
 			    if(userAccount == null) {
-			    	String oriApp = postData.get("oriApp");
-			    	log.info("oriApp : " + oriApp);
+			    	
 			    	if (StringUtils.isEmpty(oriApp)) {
 			    		userAccount = userService.getOrSubscibeUserByCode(code);
 					}else {
@@ -167,7 +169,7 @@ public class UserController extends BaseController{
 				wuyeService.userLogin(userAccount.getOpenid());
 				
 				/*判断用户是否关注公众号*/
-				UserWeiXin u = userService.getOrSubscibeUserByOpenId(userAccount.getOpenid());
+				UserWeiXin u = userService.getOrSubscibeUserByOpenId(oriApp, userAccount.getOpenid());
 				
 				updateWeUserInfo(userAccount, u);
 				session.setAttribute(Constants.USER, userAccount);
