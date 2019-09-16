@@ -64,6 +64,11 @@ public class UserInfo implements Serializable {
     private String sectId;//小区id
 	private String cspId;//公司
  	private Map<?, ?> cfgParam = new HashMap<>();
+ 	
+ 	private long oriUserId = 0l;
+ 	private String oriSys;
+ 	
+ 	private boolean isMain = true;
 	
 	public String getSectId() {
 		return sectId;
@@ -270,6 +275,27 @@ public class UserInfo implements Serializable {
 	}
 	public void setCfgParam(Map<?, ?> cfgParam) {
 		this.cfgParam = cfgParam;
+	}
+	public long getOriUserId() {
+		return oriUserId;
+	}
+	public void setOriUserId(long oriUserId) {
+		this.oriUserId = oriUserId;
+	}
+	public String getOriSys() {
+		return oriSys;
+	}
+	public void setOriSys(String oriSys) {
+		this.oriSys = oriSys;
+	}
+	public boolean isMain() {
+		return isMain;
+	}
+	public void setMain(boolean isMain) {
+		if (this.oriUserId > 0) {
+			isMain = false;
+		}
+		this.isMain = isMain;
 	}
     
     
