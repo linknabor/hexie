@@ -24,6 +24,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -38,6 +39,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
+import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -245,18 +247,31 @@ public class WuyeController extends BaseController {
 	public BaseResult<BillListVO> billList(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String payStatus, @RequestParam(required = false) String startDate,
 			@RequestParam(required = false) String endDate, @RequestParam(required = false) String currentPage,
-			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, @RequestParam(required = false) String sect_id)
+			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, 
+			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
 		BillListVO listVo = wuyeService.queryBillList(user.getWuyeId(), payStatus, startDate, endDate, currentPage,
-				totalCount, house_id,sect_id);
+				totalCount, house_id,sect_id,regionname);
 		if (listVo != null && listVo.getBill_info() != null) {
 			return BaseResult.successResult(listVo);
 		} else {
 			return BaseResult.successResult(null);
 		}
 	}
-
-	/***************** [END]账单查询 ********************/
+	/***************** [BEGIN]无账单查询 ********************/
+	@RequestMapping(value = "/getPayListStd", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<BillListVO> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String startDate,
+			@RequestParam(required = false) String endDate,  @RequestParam(required = false) String house_id, 
+			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
+			throws Exception {
+		BillListVO listVo = wuyeService.queryBillListStd(user.getWuyeId(), startDate, endDate,house_id,sect_id,regionname);
+		if (listVo != null && listVo.getBill_info() != null) {
+			return BaseResult.successResult(listVo);
+		} else {
+			return BaseResult.successResult(null);
+		}
+	}
 
 	/***************** [BEGIN]缴费 ********************/
 	@RequestMapping(value = "/getBillDetail", method = RequestMethod.GET)
@@ -598,9 +613,10 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String build_id,
-			@RequestParam(required = false) String unit_id, @RequestParam(required = false) String data_type)
+			@RequestParam(required = false) String unit_id, @RequestParam(required = false) String data_type,
+			@RequestParam(required = false) String regionname)
 			throws Exception {
-		CellListVO cellMng = wuyeService.querySectHeXieList(sect_id, build_id, unit_id, data_type);
+		CellListVO cellMng = wuyeService.querySectHeXieList(sect_id, build_id, unit_id, data_type,regionname);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
@@ -612,10 +628,10 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String sect_name) throws Exception {
+			@RequestParam(required = false) String sect_name,@RequestParam(required = false) String regionname) throws Exception {
 		log.error("ceshi");
 
-		CellListVO cellMng = wuyeService.getVagueSectByName(sect_name);
+		CellListVO cellMng = wuyeService.getVagueSectByName(sect_name,regionname);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
@@ -739,5 +755,19 @@ public class WuyeController extends BaseController {
 
 	}
 	
+	//查询所有环境路径
+	@RequestMapping(value = "/getRegionUrl", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RegionUrl>> getRegionUrl() throws Exception {
 
+		return BaseResult.successResult(wuyeService.getRegionUrl());
+	}
+	
+	//查询所有环境路径
+	@RequestMapping(value = "/getBillStartDateSDO", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<BillStartDate> getBillStartDateSDO(@ModelAttribute(Constants.USER) User user,@RequestParam String house_id,@RequestParam String regionname) throws Exception {
+
+		return BaseResult.successResult(wuyeService.getBillStartDateSDO(user.getWuyeId(),house_id,regionname));
+	}
 }
