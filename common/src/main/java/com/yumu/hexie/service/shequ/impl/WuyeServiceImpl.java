@@ -32,6 +32,8 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.region.RegionUrl;
+import com.yumu.hexie.model.region.RegionUrlRepository;
 import com.yumu.hexie.model.user.AddRegionSectIdWorker;
 import com.yumu.hexie.model.user.AddUserSectIdWorker;
 import com.yumu.hexie.model.user.Address;
@@ -74,6 +76,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private AddressRepository addressRepository;
+	
+	@Autowired
+	private RegionUrlRepository regionUrlRepository;
 	
 	@Autowired
 	private UserService userService;
@@ -141,8 +146,9 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public BillListVO queryBillList(String userId, String payStatus,
-			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id) {
-		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id).getData();
+			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id,String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
@@ -191,9 +197,10 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Override
 	public CellListVO querySectHeXieList(String sect_id, String build_id,
-			String unit_id, String data_type) {
+			String unit_id, String data_type,String regionname) {
 		try {
-			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type).getData();
+			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
 			log.error("异常捕获信息:"+e);
 			e.printStackTrace();
@@ -203,11 +210,12 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(String sect_name) {
+	public CellListVO getVagueSectByName(String sect_name,String regionname) {
 		try {
-			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name);
+			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name,regionurl.getRegionUrl());
 			log.error(s.getResult());
-			return WuyeUtil.getVagueSectByName(sect_name).getData();
+			return s.getData();
 		} catch (Exception e) {
 			log.error("异常捕获信息:"+e);
 		}
@@ -553,6 +561,18 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public String getSectIdByRegionName(String regionName) {
 		return WuyeUtil.querySectIdByName(regionName).getData();
+	}
+
+	@Override
+	public List<RegionUrl> getRegionUrl() {
+		return regionUrlRepository.findAll();
+	}
+
+	@Override
+	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
+			String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
 	
 }
