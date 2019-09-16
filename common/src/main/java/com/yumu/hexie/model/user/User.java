@@ -78,7 +78,7 @@ public class User extends BaseModel{
 	private String appId;
 	
 	private String oriSys;	//来自哪个系统,迁移过来的数据有这个字段
-	private String oriUserId;	//源用户ID,迁移过来的数据有这个字段
+	private long oriUserId;	//源用户ID,迁移过来的数据有这个字段
 
 	public String getSectId() {
 		return sectId;
@@ -409,12 +409,12 @@ public class User extends BaseModel{
 	public void setOriSys(String oriSys) {
 		this.oriSys = oriSys;
 	}
-
-	public String getOriUserId() {
+	
+	public long getOriUserId() {
 		return oriUserId;
 	}
 
-	public void setOriUserId(String oriUserId) {
+	public void setOriUserId(long oriUserId) {
 		this.oriUserId = oriUserId;
 	}
 
