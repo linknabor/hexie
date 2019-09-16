@@ -21,6 +21,7 @@ import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
@@ -573,6 +574,17 @@ public class WuyeServiceImpl implements WuyeService {
 			String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
+	}
+
+	@Override
+	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		try {
+			return WuyeUtil.getBillStartDateSDO(house_id,regionurl.getRegionUrl()).getData();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 }

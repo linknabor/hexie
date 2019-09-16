@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
@@ -107,5 +108,7 @@ public interface WuyeService {
 	public List<RegionUrl> getRegionUrl();
 	// 8.账单记录
 	public BillListVO queryBillListStd(String userId,String startDate,String endDate,String house_id,String sect_id,String regionname);
+	//获取无账单开始日期
+	public BillStartDate getBillStartDateSDO(String userId,String house_id,String regionname);
 	
 }

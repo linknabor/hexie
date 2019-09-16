@@ -19,6 +19,7 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
@@ -79,6 +80,8 @@ public class WuyeUtil {
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String BILL_PAY_ADDRESS_URL = "getBillAddressSDO.do"+ "?bill_id=%s";//查询账单地址
 	private static final String SYNC_SERVICE_CFG_URL = "/param/getParamSDO.do?info_id=%s&type=%s&para_name=%s";
+	private static final String BILL_LIST_DATE = "getBillStartDateSDO.do?mng_cell_id=%s";
+	
 	
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
@@ -274,6 +277,14 @@ public class WuyeUtil {
 		String url = REQUEST_ADDRESS + String.format(SYNC_SERVICE_CFG_URL, infoId, type, paraName);
 		BaseResult baseResult = httpGet(url, HexieConfig.class);
 		return (BaseResult<HexieConfig>)baseResult;
+	}
+	
+	//无账单获取缴费日期
+	public static BaseResult<BillStartDate> getBillStartDateSDO(String house_id,String regionurl) throws Exception{
+
+		String url = regionurl + String.format(BILL_LIST_DATE, house_id);
+		log.error("【url】:"+url);
+		return (BaseResult<BillStartDate>)httpGet(url,BillStartDate.class);
 	}
 	
 	private static BaseResult httpGet(String reqUrl, Class c){
