@@ -2,12 +2,10 @@ package com.yumu.hexie.web.user;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,13 +48,11 @@ import com.yumu.hexie.web.user.req.MobileYzm;
 import com.yumu.hexie.web.user.req.SimpleRegisterReq;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
+
 @Controller(value = "userController")
 public class UserController extends BaseController{
 	
 	private static final Logger log = LoggerFactory.getLogger(UserController.class);
-	
-	private static String SPRING_SESSION_KEY = "spring:session:sessions:%s";
-	private static String SPRING_SESSION_EXPIRE_KEY = "spring:session:sessions:expires:%s";
 	
 	@Inject
 	private UserService userService;
@@ -76,30 +72,32 @@ public class UserController extends BaseController{
     private SystemConfigService systemConfigService;
     @Autowired
     private ParamService paramService;
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
     
 
     @Value(value = "${testMode}")
-    private String testMode;
+    private Boolean testMode;
 	
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
 	@ResponseBody
-    public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user) throws Exception {
+    public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user,
+    		HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		User sessionUser = user;
 		try {
+			log.info("user :" + user);
 			List<User> userList = userService.getByOpenId(user.getOpenid());
 			if (userList!=null) {
 				for (User baseduser : userList) {
 					if (baseduser.getId() == user.getId()) {
 						user = baseduser;
 						break;
+					}else if (baseduser.getOriUserId() == user.getId()) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
+						user = baseduser;
+						break;
 					}
 				}
 			}
 			user = userService.getById(user.getId());
-			log.error("userInfo的user: "+ user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    Map<String, String> paramMap = paramService.getParamByUser(user);
@@ -107,10 +105,8 @@ public class UserController extends BaseController{
 			    userInfo.setCfgParam(paramMap);
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-				log.error("current user id in session is not the same with the id in database. user : " + sessionUser);
-				log.error("will remove the session in redis, session id : " + session.getId());
-				redisTemplate.delete(String.format(SPRING_SESSION_KEY, session.getId()));
-				redisTemplate.delete(String.format(SPRING_SESSION_EXPIRE_KEY, session.getId()));
+				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());
+				session.setMaxInactiveInterval(1);//将会话过期
 				return new BaseResult<UserInfo>().success(null);
 			}
 		} catch (Exception e) {
@@ -148,26 +144,35 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/login/{code}", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code) throws Exception {
+    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestBody(required = false) Map<String, String> postData) throws Exception {
 		
 		User userAccount = null;
 		try {
+			String oriApp = postData.get("oriApp");
+	    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
+	    	
 			if (StringUtil.isNotEmpty(code)) {
-			    if("true".equals(testMode)) {
+			    if(Boolean.TRUE.equals(testMode)) {
 			        try{
 				        Long id = Long.valueOf(code);
 				    	userAccount = userService.getById(id);
 			        }catch(Throwable t){}
 			    }
 			    if(userAccount == null) {
-			        userAccount = userService.getOrSubscibeUserByCode(code);
+			    	
+			    	if (StringUtils.isEmpty(oriApp)) {
+			    		userAccount = userService.getOrSubscibeUserByCode(code);
+					}else {
+						userAccount = userService.getTpSubscibeUserByCode(code, oriApp);
+					}
+			       
 			    }
 			    
 				pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
 				wuyeService.userLogin(userAccount.getOpenid());
 				
 				/*判断用户是否关注公众号*/
-				UserWeiXin u = userService.getOrSubscibeUserByOpenId(userAccount.getOpenid());
+				UserWeiXin u = userService.getOrSubscibeUserByOpenId(oriApp, userAccount.getOpenid());
 				
 				updateWeUserInfo(userAccount, u);
 				session.setAttribute(Constants.USER, userAccount);

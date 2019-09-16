@@ -4,6 +4,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +24,13 @@ public class RedisRepository {
     private RedisTemplate<String, HomeCart> homeCartRedisTemplate;
     @Inject
     private RedisTemplate<String, ShareAccessRecord> shareAccessRecordTemplate;
-    
     @Inject
     private RedisTemplate<String, SystemConfig> systemConfigRedisTemplate;
-    
     @Inject
     private RedisTemplate<String, OrderCarInfo> orderCarInfoRedisTemplate;//创建订单之前用户填写的车辆信息
+    @Autowired
+	@Qualifier(value = "authRedisTemplate")
+	private RedisTemplate<String, Object> authRedisTemplate;
     
     /**
      * 获取订单车辆信息 
@@ -79,6 +82,14 @@ public class RedisRepository {
     
     public void removeShareRecord(String key) {
     	shareAccessRecordTemplate.delete(key);
+    }
+    
+    public String getComponentAccessToken(String key) {
+    	return (String) authRedisTemplate.opsForValue().get(key);
+    }
+    
+    public String getAuthorizerAccessToken(String key) {
+    	return (String) authRedisTemplate.opsForValue().get(key);
     }
 
 //    

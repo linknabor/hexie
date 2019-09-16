@@ -144,14 +144,7 @@ public class WeixinUtil {
 			return at.getToken();
 		}
 	}
-//	public static String getToken() {
-//		if(at == null) {
-//			at = WeixinUtil.getAccessToken();
-//			return at.getToken();
-//		} else {
-//			return at.getToken();
-//		}
-//	}
+	
 	/**
 	 * 获取token值
 	 * 

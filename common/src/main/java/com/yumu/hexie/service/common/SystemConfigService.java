@@ -18,7 +18,7 @@ public interface SystemConfigService {
 
     public int querySmsChannel();
     public String queryJsTickets();
-    public String queryWXAToken();
+    public String queryWXAToken(String appId);
     
     public String[] queryActPeriod();
     public Set<String> getUnCouponItems();
