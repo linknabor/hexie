@@ -68,8 +68,6 @@ public class UserInfo implements Serializable {
  	private long oriUserId = 0l;
  	private String oriSys;
  	
- 	private boolean isMain = true;
-	
 	public String getSectId() {
 		return sectId;
 	}
@@ -287,15 +285,6 @@ public class UserInfo implements Serializable {
 	}
 	public void setOriSys(String oriSys) {
 		this.oriSys = oriSys;
-	}
-	public boolean isMain() {
-		return isMain;
-	}
-	public void setMain(boolean isMain) {
-		if (this.oriUserId > 0) {
-			isMain = false;
-		}
-		this.isMain = isMain;
 	}
     
     
