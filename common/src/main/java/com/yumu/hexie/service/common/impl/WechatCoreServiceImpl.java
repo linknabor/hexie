@@ -95,9 +95,9 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 		
 		try {
 			AccessTokenOAuth auth = null;
+			LOGGER.info("is main app : " + AppUtil.isMainApp(oriApp));
 			if (AppUtil.isMainApp(oriApp)) {
 				String componentAccessToken = redisRepository.getComponentAccessToken(ConstantWeChat.KEY_COMPONENT_ACESS_TOKEN);
-//				String authorizerAccessToken = redisRepository.getAuthorizerAccessToken(ConstantWeChat.KEY_AUTHORIZER_ACCESS_TOKEN);
 				auth = OAuthService.getOAuthAccessToken(code, oriApp, componentAccessToken);
 			}else {
 				auth =  OAuthService.getOAuthAccessToken(code);
