@@ -32,11 +32,13 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
+import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
@@ -72,6 +74,8 @@ public class UserController extends BaseController{
     private SystemConfigService systemConfigService;
     @Autowired
     private ParamService paramService;
+    @Autowired
+    private PageConfigService pageConfigService;
     
 
     @Value(value = "${testMode}")
@@ -100,9 +104,13 @@ public class UserController extends BaseController{
 			user = userService.getById(user.getId());
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
-			    Map<String, String> paramMap = paramService.getParamByUser(user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
+			    Map<String, String> paramMap = paramService.getParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
+			    
+			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getOriSys());
+			    userInfo.setIconList(iconList);
+			    
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
 				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());

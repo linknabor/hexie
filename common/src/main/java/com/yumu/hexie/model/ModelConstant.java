@@ -299,4 +299,7 @@ public class ModelConstant {
 	public static final int HAOJIAAN_COMMPENT_STATUS_COMPLAIN = 2;//投诉
 	
 	public static final String PARA_TYPE_CSP = "2";
+	
+	//底部图标缓存key
+	public static final String KEY_BOTTOM_ICON = "bottomIcon";
 }		
