@@ -5,13 +5,16 @@
 package com.yumu.hexie.web.user.resp;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
 import org.springframework.beans.BeanUtils;
 
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.view.BottomIcon;
 
 /**
  * <pre>
@@ -64,7 +67,12 @@ public class UserInfo implements Serializable {
     private String sectId;//小区id
 	private String cspId;//公司
  	private Map<?, ?> cfgParam = new HashMap<>();
-	
+ 	private List<BottomIcon> iconList = new ArrayList<BottomIcon>();
+ 	
+ 	private String oriSys;
+ 	private long oriUserId = 0l;
+
+ 	
 	public String getSectId() {
 		return sectId;
 	}
@@ -270,6 +278,24 @@ public class UserInfo implements Serializable {
 	}
 	public void setCfgParam(Map<?, ?> cfgParam) {
 		this.cfgParam = cfgParam;
+	}
+	public long getOriUserId() {
+		return oriUserId;
+	}
+	public void setOriUserId(long oriUserId) {
+		this.oriUserId = oriUserId;
+	}
+	public String getOriSys() {
+		return oriSys;
+	}
+	public void setOriSys(String oriSys) {
+		this.oriSys = oriSys;
+	}
+	public List<BottomIcon> getIconList() {
+		return iconList;
+	}
+	public void setIconList(List<BottomIcon> iconList) {
+		this.iconList = iconList;
 	}
     
     
