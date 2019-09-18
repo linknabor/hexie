@@ -87,10 +87,6 @@ public class CommunityController extends BaseController{
 		
 		log.debug("filter is : " + filter);
 		
-		if ("y".equals(filter)) {
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
 		Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
 		
 		List<Thread>list = new ArrayList<Thread>();

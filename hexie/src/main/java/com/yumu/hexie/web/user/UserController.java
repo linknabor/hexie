@@ -33,6 +33,7 @@ import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BottomIcon;
+import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -95,7 +96,7 @@ public class UserController extends BaseController{
 					if (baseduser.getId() == user.getId()) {
 						user = baseduser;
 						break;
-					}else if (baseduser.getOriUserId() == user.getId()) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
+					}else if (StringUtils.isEmpty(baseduser.getId())&&baseduser.getOriUserId() == user.getId() ) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
 						user = baseduser;
 						break;
 					}
@@ -108,8 +109,10 @@ public class UserController extends BaseController{
 			    Map<String, String> paramMap = paramService.getParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
-			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getOriSys());
+			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    userInfo.setIconList(iconList);
+			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
+			    userInfo.setQrCode(qrCode.getQrLink());
 			    
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {

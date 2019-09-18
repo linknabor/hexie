@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.Banner;
@@ -32,6 +33,8 @@ import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.BottomIconRepository;
 import com.yumu.hexie.model.view.PageConfigView;
 import com.yumu.hexie.model.view.PageConfigViewRepository;
+import com.yumu.hexie.model.view.QrCode;
+import com.yumu.hexie.model.view.QrCodeRepository;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.page.PageConfigService;
 
@@ -47,6 +50,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private BottomIconRepository bottomIconRepository;
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
+	@Autowired
+	private QrCodeRepository qrCodeRepository;
 
 	@Override
 	public List<Banner> queryBannerType(User user, int bannerType) {
@@ -71,7 +76,7 @@ public class PageConfigServiceImpl implements PageConfigService {
     public List<BottomIcon> getBottomIcon(String iconSys) throws JsonParseException, JsonMappingException, IOException {
  
     	if (StringUtil.isEmpty(iconSys)) {
-			iconSys = "_hxm";
+			iconSys = ConstantWeChat.APPID;
 		}
     	ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
     	List<BottomIcon> iconList = new ArrayList<>();
@@ -120,6 +125,16 @@ public class PageConfigServiceImpl implements PageConfigService {
 			strMap.put(key, valueStr);
 		}
 		redisTemplate.opsForHash().putAll(ModelConstant.KEY_BOTTOM_ICON, strMap);
+	}
+
+	@Override
+	public QrCode getQrCode(String fromSys) {
+		
+		if (StringUtil.isEmpty(fromSys)) {
+			fromSys = ConstantWeChat.APPID;
+		}
+		QrCode qrCode = qrCodeRepository.findByFromSys(fromSys);
+		return qrCode;
 	}
     
 

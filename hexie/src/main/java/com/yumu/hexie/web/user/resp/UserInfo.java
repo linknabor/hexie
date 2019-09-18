@@ -69,8 +69,7 @@ public class UserInfo implements Serializable {
  	private Map<?, ?> cfgParam = new HashMap<>();
  	private List<BottomIcon> iconList = new ArrayList<BottomIcon>();
  	
- 	private String oriSys;
- 	private long oriUserId = 0l;
+ 	private String qrCode;
 
  	
 	public String getSectId() {
@@ -279,23 +278,17 @@ public class UserInfo implements Serializable {
 	public void setCfgParam(Map<?, ?> cfgParam) {
 		this.cfgParam = cfgParam;
 	}
-	public long getOriUserId() {
-		return oriUserId;
-	}
-	public void setOriUserId(long oriUserId) {
-		this.oriUserId = oriUserId;
-	}
-	public String getOriSys() {
-		return oriSys;
-	}
-	public void setOriSys(String oriSys) {
-		this.oriSys = oriSys;
-	}
 	public List<BottomIcon> getIconList() {
 		return iconList;
 	}
 	public void setIconList(List<BottomIcon> iconList) {
 		this.iconList = iconList;
+	}
+	public String getQrCode() {
+		return qrCode;
+	}
+	public void setQrCode(String qrCode) {
+		this.qrCode = qrCode;
 	}
     
     
