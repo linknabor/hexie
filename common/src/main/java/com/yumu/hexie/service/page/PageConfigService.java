@@ -9,10 +9,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.Banner;
 import com.yumu.hexie.model.view.BottomIcon;
+import com.yumu.hexie.model.view.QrCode;
 
 public interface PageConfigService {
 	public List<Banner> queryBannerType(User user, int bannerType);
     public String findByTempKey(String key);
 	List<BottomIcon> getBottomIcon(String iconSys) throws JsonParseException, JsonMappingException, IOException;
 	void updateBottomIcon() throws JsonProcessingException;
+	public QrCode getQrCode(String fromSys);
 }

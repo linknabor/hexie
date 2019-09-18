@@ -71,6 +71,8 @@ public class UserInfo implements Serializable {
  	
  	private String oriSys;
  	private long oriUserId = 0l;
+ 	
+ 	private String qrCode;
 
  	
 	public String getSectId() {
@@ -296,6 +298,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setIconList(List<BottomIcon> iconList) {
 		this.iconList = iconList;
+	}
+	public String getQrCode() {
+		return qrCode;
+	}
+	public void setQrCode(String qrCode) {
+		this.qrCode = qrCode;
 	}
     
     
