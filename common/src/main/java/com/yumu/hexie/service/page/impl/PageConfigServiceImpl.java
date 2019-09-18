@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.Banner;
@@ -75,7 +76,7 @@ public class PageConfigServiceImpl implements PageConfigService {
     public List<BottomIcon> getBottomIcon(String iconSys) throws JsonParseException, JsonMappingException, IOException {
  
     	if (StringUtil.isEmpty(iconSys)) {
-			iconSys = "_hxm";
+			iconSys = ConstantWeChat.APPID;
 		}
     	ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
     	List<BottomIcon> iconList = new ArrayList<>();
@@ -129,6 +130,9 @@ public class PageConfigServiceImpl implements PageConfigService {
 	@Override
 	public QrCode getQrCode(String fromSys) {
 		
+		if (StringUtil.isEmpty(fromSys)) {
+			fromSys = ConstantWeChat.APPID;
+		}
 		QrCode qrCode = qrCodeRepository.findByFromSys(fromSys);
 		return qrCode;
 	}
