@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
+import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -570,7 +571,7 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
+	public List<OtherBillInfo> queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
 			String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
@@ -580,7 +581,7 @@ public class WuyeServiceImpl implements WuyeService {
 	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		try {
-			return WuyeUtil.getBillStartDateSDO(house_id,regionurl.getRegionUrl()).getData();
+			return WuyeUtil.getBillStartDateSDO(userId,house_id,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

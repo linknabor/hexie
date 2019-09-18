@@ -32,6 +32,7 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
+import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
@@ -261,12 +262,12 @@ public class WuyeController extends BaseController {
 	/***************** [BEGIN]无账单查询 ********************/
 	@RequestMapping(value = "/getPayListStd", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<BillListVO> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String startDate,
+	public BaseResult<List<OtherBillInfo>> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String startDate,
 			@RequestParam(required = false) String endDate,  @RequestParam(required = false) String house_id, 
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
-		BillListVO listVo = wuyeService.queryBillListStd(user.getWuyeId(), startDate, endDate,house_id,sect_id,regionname);
-		if (listVo != null && listVo.getBill_info() != null) {
+		List<OtherBillInfo> listVo = wuyeService.queryBillListStd(user.getWuyeId(), startDate, endDate,house_id,sect_id,regionname);
+		if (listVo != null && !listVo.isEmpty()) {
 			return BaseResult.successResult(listVo);
 		} else {
 			return BaseResult.successResult(null);
@@ -763,7 +764,7 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(wuyeService.getRegionUrl());
 	}
 	
-	//查询所有环境路径
+	//查询无账单缴费房子开始日期
 	@RequestMapping(value = "/getBillStartDateSDO", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<BillStartDate> getBillStartDateSDO(@ModelAttribute(Constants.USER) User user,@RequestParam String house_id,@RequestParam String regionname) throws Exception {
