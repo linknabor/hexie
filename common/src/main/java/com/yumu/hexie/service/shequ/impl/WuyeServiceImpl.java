@@ -571,7 +571,7 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public List<OtherBillInfo> queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
+	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
 			String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();

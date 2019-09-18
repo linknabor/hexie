@@ -262,12 +262,12 @@ public class WuyeController extends BaseController {
 	/***************** [BEGIN]无账单查询 ********************/
 	@RequestMapping(value = "/getPayListStd", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<OtherBillInfo>> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String start_date,
+	public BaseResult<BillListVO> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String start_date,
 			@RequestParam(required = false) String end_date,  @RequestParam(required = false) String house_id, 
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
-		List<OtherBillInfo> listVo = wuyeService.queryBillListStd(user.getWuyeId(), start_date, end_date,house_id,sect_id,regionname);
-		if (listVo != null && !listVo.isEmpty()) {
+		BillListVO listVo = wuyeService.queryBillListStd(user.getWuyeId(), start_date, end_date,house_id,sect_id,regionname);
+		if (listVo != null && !listVo.getOther_bill_info().isEmpty()) {
 			return BaseResult.successResult(listVo);
 		} else {
 			return BaseResult.successResult(null);
