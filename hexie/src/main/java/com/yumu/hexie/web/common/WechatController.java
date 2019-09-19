@@ -111,8 +111,10 @@ public class WechatController extends BaseController{
     	
     	JsSign s = null;
 		try {
+			
+			LOGGER.info("user : " + user);
 			if (user == null) {
-				return new BaseResult<JsSign>().failMsg("支付初始化失败，请稍后重试！");
+				return new BaseResult<JsSign>().failMsg("未获取到用户信息，支付初始化失败，请稍后重试！");
 			}
 			s = wechatCoreService.getJsSign(urlReq.getUrl(), user.getAppId());
 		} catch (Exception e) {
