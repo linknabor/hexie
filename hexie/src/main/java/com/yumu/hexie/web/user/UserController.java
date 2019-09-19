@@ -97,14 +97,10 @@ public class UserController extends BaseController{
 				oriApp = ConstantWeChat.APPID;
 			}
 			
-			log.info("user :" + user);
+			log.info("user in session :" + sessionUser);
 			List<User> userList = userService.getByOpenId(user.getOpenid());
 			if (userList!=null) {
 				for (User baseduser : userList) {
-					
-					if (!baseduser.getAppId().equals(oriApp)) {	//比如宝房的用户登陆合协的公众号，则当前 session需要清空重新授权。如果将来公众号用户共同，则把这个判断去掉就行了
-						continue;
-					}
 					
 					if (baseduser.getId() == user.getId()) {
 						user = baseduser;
@@ -116,6 +112,12 @@ public class UserController extends BaseController{
 				}
 			}
 			user = userService.getById(user.getId());
+			if (user != null) {
+				String userAppId = user.getAppId();	//如果根据session中信息获得的用户并非当前公众号的，比如宝房用户登陆合协公众号，则需要清空session，让他重新登陆
+				if (!oriApp.equals(userAppId)) {
+					user = null;
+				}
+			}
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
