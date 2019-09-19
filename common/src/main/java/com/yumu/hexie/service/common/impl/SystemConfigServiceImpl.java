@@ -133,6 +133,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	public String queryJsTickets(String appId) {
         
     	String tickets = "";
+    	log.info("appId is : " + appId, "is main :" + AppUtil.isMainApp(appId));
         if (AppUtil.isMainApp(appId) || StringUtils.isEmpty(appId)) {
         	SystemConfig config = getConfigFromCache(JS_TOKEN);
 	        if (config != null) {
