@@ -108,7 +108,7 @@ public interface WuyeService {
 	//查询所有请求地址
 	public List<RegionUrl> getRegionUrl();
 	// 8.账单记录
-	public List<OtherBillInfo> queryBillListStd(String userId,String startDate,String endDate,String house_id,String sect_id,String regionname);
+	public BillListVO queryBillListStd(String userId,String startDate,String endDate,String house_id,String sect_id,String regionname);
 	//获取无账单开始日期
 	public BillStartDate getBillStartDateSDO(String userId,String house_id,String regionname);
 	

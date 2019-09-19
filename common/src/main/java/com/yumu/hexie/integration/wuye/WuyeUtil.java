@@ -169,11 +169,13 @@ public class WuyeUtil {
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
 	// 8.5：无账单记录
-	public static BaseResult<List<OtherBillInfo>> queryBillList(String userId,String startDate,String endDate, String house_id,String sect_id,String regionurl){
+	public static BaseResult<BillListVO> queryBillList(String userId,String startDate,String endDate, String house_id,String sect_id,String regionurl){
 		//total_count 和curr_page没有填
+		log.error("startDate:"+startDate+"     endDate"+endDate);
 		String url = regionurl + String.format(BILL_LIST_STD_URL, userId,startDate,endDate,house_id,sect_id);
-		return (BaseResult<List<OtherBillInfo>>)httpGet(url,OtherBillInfo.class);
+		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
+	
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
 	public static BaseResult<PaymentInfo> getBillDetail(String userId,String stmtId,String anotherbillIds){
 		String url = REQUEST_ADDRESS + String.format(BILL_DETAIL_URL, userId,stmtId,anotherbillIds);
