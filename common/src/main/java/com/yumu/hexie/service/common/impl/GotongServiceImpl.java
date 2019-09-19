@@ -79,7 +79,7 @@ public class GotongServiceImpl implements GotongService {
         ServiceOperator op = serviceOperatorRepository.findOne(opId);
         User user = userService.getById(op.getUserId());
         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-        TemplateMsgService.sendRepairAssignMsg(order, op, accessToken);
+        TemplateMsgService.sendRepairAssignMsg(order, op, accessToken, user.getAppId());
     }
     @Async
     @Override
@@ -153,8 +153,8 @@ public class GotongServiceImpl implements GotongService {
         for(ServiceOperator op: ops) {
             LOG.error("发送到操作员！["+serviceType+"]" + billName + " -- " + op.getName() + "--" + op.getId());
             User user = userService.getById(op.getUserId());
-            String accessToken = systemConfigService.queryWXAToken(user.getOpenid());
-            TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken);    
+            String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+            TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId());    
         }
         
     }

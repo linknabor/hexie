@@ -251,24 +251,13 @@ public class UserController extends BaseController{
 	@RequestMapping(value = "/getyzm", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<String> getYzm(@RequestBody MobileYzm yzm, @ModelAttribute(Constants.USER)User user) throws Exception {
-		boolean result = smsService.sendVerificationCode(user.getId(), yzm.getMobile());
+		boolean result = smsService.sendVerificationCode(user, yzm.getMobile());
 		if(result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
 	    return  new BaseResult<String>().success("验证码发送成功");
     }
 	
-	@RequestMapping(value = "/getyzm1", method = RequestMethod.POST)
-	@ResponseBody
-    public BaseResult<String> getYzm1(@RequestBody MobileYzm yzm) throws Exception {
-		boolean result = smsService.sendVerificationCode(12345, yzm.getMobile());
-		if(!result) {
-		    return new BaseResult<String>().failMsg("发送验证码失败");
-		}
-	    return  new BaseResult<String>().success("验证码发送成功");
-    }
-
-
 	@RequestMapping(value = "/savePersonInfo/{captcha}", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<UserInfo> savePersonInfo(HttpSession session,@RequestBody User editUser,@ModelAttribute(Constants.USER)User user,
