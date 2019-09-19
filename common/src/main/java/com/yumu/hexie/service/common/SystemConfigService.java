@@ -17,8 +17,8 @@ import java.util.Set;
 public interface SystemConfigService {
 
     public int querySmsChannel();
-    public String queryJsTickets();
-    public String queryWXAToken(String appId);
+    String queryJsTickets(String appId);
+    String queryWXAToken(String appId);
     
     public String[] queryActPeriod();
     public Set<String> getUnCouponItems();

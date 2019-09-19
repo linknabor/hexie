@@ -117,19 +117,30 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		
     	} else {
     		
-    		String authorizerAccessToken = redisRepository.getAuthorizerAccessToken(ConstantWeChat.KEY_AUTHORIZER_ACCESS_TOKEN);
+    		String authorizerAccessToken = redisRepository.getAuthorizerAccessToken(ConstantWeChat.KEY_AUTHORIZER_ACCESS_TOKEN + appId);
     		return authorizerAccessToken;
     		
 		}
     	
     }
     
+    /**
+     * 根据appid获取微信公众号的jsticket
+     * @param appId
+     * @return
+     */
     @Override
-	public String queryJsTickets() {
-        String tickets = "";
-        SystemConfig config = getConfigFromCache(JS_TOKEN);
-        if (config != null) {
-            tickets = config.getSysValue();
+	public String queryJsTickets(String appId) {
+        
+    	String tickets = "";
+        if (AppUtil.isMainApp(appId) || StringUtils.isEmpty(appId)) {
+        	SystemConfig config = getConfigFromCache(JS_TOKEN);
+	        if (config != null) {
+	            tickets = config.getSysValue();
+	        }
+        } else {
+        	
+        	tickets = redisRepository.getAuthorizerJsTicket(ConstantWeChat.KEY_AUTHORIZER_JS_TICKET + appId);
         }
         return tickets;
     }
@@ -146,6 +157,6 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	
 		return ret;
 	}
-    
+
     
 }
