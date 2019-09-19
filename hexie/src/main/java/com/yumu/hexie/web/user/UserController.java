@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
@@ -89,10 +90,22 @@ public class UserController extends BaseController{
 		
 		User sessionUser = user;
 		try {
+			
+			String oriApp = request.getParameter("oriApp");
+			log.info("oriApp : " + oriApp);
+			if (StringUtil.isEmpty(oriApp)) {
+				oriApp = ConstantWeChat.APPID;
+			}
+			
 			log.info("user :" + user);
 			List<User> userList = userService.getByOpenId(user.getOpenid());
 			if (userList!=null) {
 				for (User baseduser : userList) {
+					
+					if (!baseduser.getAppId().equals(oriApp)) {	//比如宝房的用户登陆合协的公众号，则当前 session需要清空重新授权。如果将来公众号用户共同，则把这个判断去掉就行了
+						continue;
+					}
+					
 					if (baseduser.getId() == user.getId()) {
 						user = baseduser;
 						break;
