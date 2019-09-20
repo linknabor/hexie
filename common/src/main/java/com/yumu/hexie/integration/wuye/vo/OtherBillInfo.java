@@ -13,8 +13,15 @@ public class OtherBillInfo {
 	private String show_com_flag;//是否允许公司开票功能
 	private String show_invoice;//是否开票
 	private String invoice_title;//发票抬头（回显使用）
+	private String cell_addr;
 	private boolean selected =false;//为了展示用
 	
+	public String getCell_addr() {
+		return cell_addr;
+	}
+	public void setCell_addr(String cell_addr) {
+		this.cell_addr = cell_addr;
+	}
 	public String getVer_no() {
 		return ver_no;
 	}
