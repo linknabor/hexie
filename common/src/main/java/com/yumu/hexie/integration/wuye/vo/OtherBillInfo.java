@@ -13,9 +13,16 @@ public class OtherBillInfo {
 	private String show_com_flag;//是否允许公司开票功能
 	private String show_invoice;//是否开票
 	private String invoice_title;//发票抬头（回显使用）
-	private String cell_addr;
+	private String cell_addr;//房屋地址
+	private String cnst_area;//房屋平米
 	private boolean selected =false;//为了展示用
 	
+	public String getCnst_area() {
+		return cnst_area;
+	}
+	public void setCnst_area(String cnst_area) {
+		this.cnst_area = cnst_area;
+	}
 	public String getCell_addr() {
 		return cell_addr;
 	}
