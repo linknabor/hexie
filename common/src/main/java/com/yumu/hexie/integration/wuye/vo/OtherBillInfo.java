@@ -8,6 +8,8 @@ public class OtherBillInfo {
 	private String paid_bills;
 	private String unpaid_bills;
 	private String fee_type_show_name;
+	
+	
 	private boolean selected =false;//为了展示用
 	
 	public boolean isSelected() {
