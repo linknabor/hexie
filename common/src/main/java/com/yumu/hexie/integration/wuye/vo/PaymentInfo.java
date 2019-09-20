@@ -21,10 +21,19 @@ public class PaymentInfo implements Serializable {
 	private String show_com_flag;//是否允许公司开票功能
 	private String show_invoice;//是否开票
 	private String invoice_title;//发票抬头（回显使用）
+	private String ver_no;
 	private List<PaymentData> fee_data;
 	@Transient
 	public String getPaymethodStr(){
 		return KeyToNameUtil.keyToName(KeyToNameUtil.PAYMETHOD_TYPE, paymethod);
+	}
+	
+	
+	public String getVer_no() {
+		return ver_no;
+	}
+	public void setVer_no(String ver_no) {
+		this.ver_no = ver_no;
 	}
 	public String getMianBill() {
 		return mianBill;
