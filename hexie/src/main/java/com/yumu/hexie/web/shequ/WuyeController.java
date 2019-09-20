@@ -411,7 +411,7 @@ public class WuyeController extends BaseController {
 	@Async
 	private void sendMsg(User user) {
 		String msg = "您好，欢迎加入合协社区。您已获得价值10元红包一份。感谢您对合协社区的支持。";
-		smsService.sendMsg(user.getId(), user.getTel(), msg, 11, 3);
+		smsService.sendMsg(user, user.getTel(), msg, 11, 3);
 	}
 
 	@Async

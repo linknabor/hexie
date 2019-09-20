@@ -91,6 +91,10 @@ public class RedisRepository {
     public String getAuthorizerAccessToken(String key) {
     	return (String) authRedisTemplate.opsForValue().get(key);
     }
+    
+    public String getAuthorizerJsTicket(String key) {
+    	return (String) authRedisTemplate.opsForValue().get(key);
+    }
 
 //    
 //    public void put(String key, String value, Long expireDate) {

@@ -151,5 +151,6 @@ public class ConstantWeChat {
 	
 	public static final String KEY_COMPONENT_ACESS_TOKEN = "oaAuth_componentAccessToken";
 	public static final String KEY_AUTHORIZER_ACCESS_TOKEN = "oaAuth_authorizerAccessToken_";	//后面要拼接appId 
+	public static final String KEY_AUTHORIZER_JS_TICKET = "oaAuth_authorizerJsTicket_";
 	
 }

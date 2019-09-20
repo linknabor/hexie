@@ -10,12 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.RandomStringUtils;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.eucp.CreateBlueUtil;
 import com.yumu.hexie.integration.eucp.YimeiUtil;
 import com.yumu.hexie.model.commonsupport.gotong.SmsHis;
 import com.yumu.hexie.model.commonsupport.gotong.SmsHisRepository;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 
@@ -34,9 +36,9 @@ public class SmsServiceImpl implements SmsService {
     private Long expireMinutes;
     @Value(value = "${testMode}")
     private String testMode;
-
+    
     @Override
-    public boolean sendVerificationCode(long userId,String mobilePhone) {
+    public boolean sendVerificationCode(User user, String mobilePhone) {
         SmsHis his = smsHisRepository.findByPhoneLatest(mobilePhone);
         //FIXME 需要考虑每人每天条数
         if(his!=null
@@ -45,7 +47,7 @@ public class SmsServiceImpl implements SmsService {
             return false;
         }
         
-        String sign = getMsgSignature();
+        String sign = getMsgSignature(user.getAppId());
         
         String code = RandomStringUtils.randomNumeric(5);
         String message = MessageFormat.format("短信验证码{0}，在30分钟内输入有效。", code);
@@ -56,7 +58,7 @@ public class SmsServiceImpl implements SmsService {
         sms.setMsg(message);
         sms.setSendDate(new Date());
         sms.setPhone(mobilePhone);
-        sms.setUserId(userId);
+        sms.setUserId(user.getId());
         sms = smsHisRepository.save(sms);
         
 		String sendMsg = systemConfigService.queryValueByKey("SEND_MSG");        
@@ -94,16 +96,16 @@ public class SmsServiceImpl implements SmsService {
     }
 
 	@Override
-	public boolean sendMsg(long userId,String mobile, String msg,long id) {
+	public boolean sendMsg(User user,String mobile, String msg,long id) {
 		
-		return sendMsg(userId, mobile, msg, id, 0);
+		return sendMsg(user, mobile, msg, id, 0);
 	}
 	
 	@Override
-	public boolean sendMsg(long userId,String mobile, String msg,long id, int msgType) {
+	public boolean sendMsg(User user,String mobile, String msg,long id, int msgType) {
 		boolean res = false;
 		
-		String sign = getMsgSignature();
+		String sign = getMsgSignature(user.getAppId());
 		msg = sign.concat(msg);
 		try{
 			
@@ -128,13 +130,13 @@ public class SmsServiceImpl implements SmsService {
 	        sms.setMsg(msg);
 	        sms.setSendDate(new Date());
 	        sms.setPhone(mobile);
-	        sms.setUserId(userId);
+	        sms.setUserId(user.getId());
 	        sms = smsHisRepository.save(sms);
 		}
 		return res;
 	}
 	
-	private String getMsgSignature(){
+	private String getMsgSignature(String appId){
 		
 		//是否使用自定义签名
 		String use_default_sign = systemConfigService.queryValueByKey("USE_DEFINED_MSG_SIGN"); 
@@ -144,11 +146,19 @@ public class SmsServiceImpl implements SmsService {
 			return ""; 
 		}
 		
-		String sign = systemConfigService.queryValueByKey("DEFAULT_SIGN");	//默认签名值
+		String sign = "";
+		String key = "DEFAULT_SIGN";
+		if (AppUtil.isMainApp(appId)||StringUtil.isEmpty(appId)) {
+			//do nothing
+		}else {
+			key = key + "_" + appId;
+		}
+		sign = systemConfigService.queryValueByKey(key);	//形如：DEFAULT_SIGN_wxa48ca61b68163483
+		
 		sign = "【"+sign+"】";
 		
 		if (StringUtil.isEmpty(sign)) {
-			LOGGER.error("未配置系统参数SYS_NAME，默认值：合协社区");
+			LOGGER.error("未配置系统参数DEFAULT_SIGN，默认值：合协社区");
 			sign = "【合协社区】";
 		}
 		return sign;
