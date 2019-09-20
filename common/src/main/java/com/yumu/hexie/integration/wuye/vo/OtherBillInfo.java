@@ -8,8 +8,57 @@ public class OtherBillInfo {
 	private String paid_bills;
 	private String unpaid_bills;
 	private String fee_type_show_name;
+	private String ver_no;
+	private String show_invoice_flag;//是否开通电子发票功能
+	private String show_com_flag;//是否允许公司开票功能
+	private String show_invoice;//是否开票
+	private String invoice_title;//发票抬头（回显使用）
+	private String cell_addr;//房屋地址
+	private String cnst_area;//房屋平米
 	private boolean selected =false;//为了展示用
 	
+	public String getCnst_area() {
+		return cnst_area;
+	}
+	public void setCnst_area(String cnst_area) {
+		this.cnst_area = cnst_area;
+	}
+	public String getCell_addr() {
+		return cell_addr;
+	}
+	public void setCell_addr(String cell_addr) {
+		this.cell_addr = cell_addr;
+	}
+	public String getVer_no() {
+		return ver_no;
+	}
+	public void setVer_no(String ver_no) {
+		this.ver_no = ver_no;
+	}
+	public String getShow_invoice_flag() {
+		return show_invoice_flag;
+	}
+	public void setShow_invoice_flag(String show_invoice_flag) {
+		this.show_invoice_flag = show_invoice_flag;
+	}
+	public String getShow_com_flag() {
+		return show_com_flag;
+	}
+	public void setShow_com_flag(String show_com_flag) {
+		this.show_com_flag = show_com_flag;
+	}
+	public String getShow_invoice() {
+		return show_invoice;
+	}
+	public void setShow_invoice(String show_invoice) {
+		this.show_invoice = show_invoice;
+	}
+	public String getInvoice_title() {
+		return invoice_title;
+	}
+	public void setInvoice_title(String invoice_title) {
+		this.invoice_title = invoice_title;
+	}
 	public boolean isSelected() {
 		return selected;
 	}
