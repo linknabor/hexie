@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -83,7 +84,9 @@ public class TemplateMsgService {
 		msg.setData(vo);
 		
 		msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_PAY_SUCCESS));
-		msg.setUrl(SUCCESS_URL.replace("ORDER_ID", ""+order.getId()).replace("ORDER_TYPE", ""+order.getOrderType()));
+		String url = SUCCESS_URL.replace("ORDER_ID", ""+order.getId()).replace("ORDER_TYPE", ""+order.getOrderType());
+		url = AppUtil.addAppOnUrl(url, appId);
+		msg.setUrl(url);
 		msg.setTouser(order.getOpenId());
 		sendMsg(msg, accessToken);
 	}
@@ -107,7 +110,9 @@ public class TemplateMsgService {
 		TemplateMsg<RegisterSuccessVO>msg = new TemplateMsg<RegisterSuccessVO>();
 		msg.setData(vo);
 		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_REG_SUCCESS));
-		msg.setUrl(REG_SUCCESS_URL);
+		
+		String url = AppUtil.addAppOnUrl(REG_SUCCESS_URL, user.getAppId());
+		msg.setUrl(url);
 		msg.setTouser(user.getOpenid());
 		sendMsg(msg, accessToken);
 	
@@ -136,7 +141,8 @@ public class TemplateMsgService {
 		TemplateMsg<WuyePaySuccessVO>msg = new TemplateMsg<WuyePaySuccessVO>();
 		msg.setData(vo);
 		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_WUYEPAY_SUCCESS));
-		msg.setUrl(REG_SUCCESS_URL);
+		String url = AppUtil.addAppOnUrl(REG_SUCCESS_URL, user.getAppId());
+		msg.setUrl(url);
 		msg.setTouser(user.getOpenid());
 		sendMsg(msg, accessToken);
 	
@@ -163,7 +169,8 @@ public class TemplateMsgService {
     	TemplateMsg<RepairOrderVO>msg = new TemplateMsg<RepairOrderVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_REPAIR_ASSIGN));
-    	msg.setUrl(GotongServiceImpl.WEIXIU_NOTICE+ro.getId());
+    	String url = GotongServiceImpl.WEIXIU_NOTICE + ro.getId();
+    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(op.getOpenId());
     	TemplateMsgService.sendMsg(msg, accessToken);
     	
@@ -181,6 +188,7 @@ public class TemplateMsgService {
         TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<YuyueOrderVO>();
         msg.setData(vo);
         msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_YUYUE_ASSGIN));
+        url = AppUtil.addAppOnUrl(url, appId);
         msg.setUrl(url);
         msg.setTouser(openId);
         TemplateMsgService.sendMsg(msg, accessToken);
@@ -201,7 +209,9 @@ public class TemplateMsgService {
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_YUYUE_ASSGIN));
-    	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId());
+    	String url = GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId();
+    	url = AppUtil.addAppOnUrl(url, user.getAppId());
+    	msg.setUrl(url);
     	msg.setTouser(openId);
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
@@ -221,7 +231,9 @@ public class TemplateMsgService {
     	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_COMPLAIN));
-    	msg.setUrl(GotongServiceImpl.COMPLAIN_DETAIL + comment.getId());
+    	String url = GotongServiceImpl.COMPLAIN_DETAIL + comment.getId();
+    	url = AppUtil.addAppOnUrl(url, user.getAppId());
+    	msg.setUrl(url);
     	msg.setTouser(openId);
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
@@ -244,6 +256,6 @@ public class TemplateMsgService {
 
     	
     }
-    
+
 
 }
