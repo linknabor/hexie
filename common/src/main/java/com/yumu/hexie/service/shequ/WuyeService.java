@@ -3,6 +3,8 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -44,17 +46,17 @@ public interface WuyeService {
 	// 8.账单记录
 	public BillListVO queryBillList(String userId,String payStatus,String startDate,String endDate,String currentPage, String totalCount,String house_id,String sect_id,String regionname);
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
-	public PaymentInfo getBillDetail(String userId,String stmtId,String anotherbillIds);
+	public PaymentInfo getBillDetail(String userId,String stmtId,String billIds,String regionname);
 	// 10.缴费
 	public WechatPayInfo getPrePayInfo(String userId,String billId,String stmtId, 
 				String openId, String couponUnit, String couponNum, 
 				String couponId,String mianBill,String mianAmt, String reduceAmt, 
-				String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception;
+				String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception;
 	// 10.5 无账单缴费
 	public WechatPayInfo getOtherPrePayInfo(String userId,String houseId,String start_date,String end_date, 
 				String openId, String couponUnit, String couponNum, 
 				String couponId,String mianBill,String mianAmt, String reduceAmt, 
-				String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception;
+				String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception;
 	// 11.通知已支付
 	public PayResult noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId);
 	// 12.查询是否已经用过红包
@@ -116,5 +118,4 @@ public interface WuyeService {
 	public BillListVO queryBillListStd(String userId,String startDate,String endDate,String house_id,String sect_id,String regionname);
 	//获取无账单开始日期
 	public BillStartDate getBillStartDateSDO(String userId,String house_id,String regionname);
-	
 }

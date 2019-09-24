@@ -32,6 +32,7 @@ import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.region.RegionUrl;
 
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
@@ -179,16 +180,16 @@ public class WuyeUtil {
 	}
 	
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
-	public static BaseResult<PaymentInfo> getBillDetail(String userId,String stmtId,String anotherbillIds){
-		String url = REQUEST_ADDRESS + String.format(BILL_DETAIL_URL, userId,stmtId,anotherbillIds);
+	public static BaseResult<PaymentInfo> getBillDetail(String userId,String stmtId,String anotherbillIds,String regionurl){
+		String url = regionurl + String.format(BILL_DETAIL_URL, userId,stmtId,anotherbillIds);
 		return (BaseResult<PaymentInfo>)httpGet(url,PaymentInfo.class);
 	}
 	// 10.缴费
 	public static BaseResult<WechatPayInfo> getPrePayInfo(String userId,String billId,String stmtId,String openId,
 		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
-		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionurl) throws Exception {
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
-		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
+		String url = regionurl + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
 					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
@@ -200,9 +201,9 @@ public class WuyeUtil {
 	// 10.5 无账单缴费
 	public static BaseResult<WechatPayInfo> getOtherPrePayInfo(String userId,String houseId,String start_date,String end_date,String openId,
 		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
-		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionurl) throws Exception {
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
-		String url = REQUEST_ADDRESS + String.format(OTHER_WX_PAY_URL, userId,houseId,start_date,end_date,openId,
+		String url = regionurl + String.format(OTHER_WX_PAY_URL, userId,houseId,start_date,end_date,openId,
 					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
