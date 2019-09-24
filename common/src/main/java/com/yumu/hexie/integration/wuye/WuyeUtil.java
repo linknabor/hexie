@@ -71,6 +71,8 @@ public class WuyeUtil {
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do?user_id=%s&bill_id=%s&stmt_id=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
 			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
+	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do?user_id=%s&mng_cell_id=%s&start_date=%s&end_date=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
+			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s";//支付请求
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&bill_id=%s&stmt_id=%s&trade_water_id=%s&package=%s"; // 微信支付返回
@@ -187,6 +189,20 @@ public class WuyeUtil {
 		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
 		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
+					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
+	
+		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
+		if (!baseResult.isSuccess()) {
+			throw new ValidationException(baseResult.getData().toString());
+		}
+		return (BaseResult<WechatPayInfo>)baseResult;
+	}
+	// 10.5 无账单缴费
+	public static BaseResult<WechatPayInfo> getOtherPrePayInfo(String userId,String houseId,String start_date,String end_date,String openId,
+		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
+		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		invoice_title = URLEncoder.encode(invoice_title,"GBK");
+		String url = REQUEST_ADDRESS + String.format(OTHER_WX_PAY_URL, userId,houseId,start_date,end_date,openId,
 					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);

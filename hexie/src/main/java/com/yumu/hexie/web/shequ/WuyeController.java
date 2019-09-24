@@ -305,6 +305,29 @@ public class WuyeController extends BaseController {
 		}
 		return BaseResult.successResult(result);
 	}
+	// stmtId在快捷支付的时候会用到
+	@RequestMapping(value = "/getOtherPrePayInfo", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<WechatPayInfo> getOtherPrePayInfo(@ModelAttribute(Constants.USER) User user,
+			@RequestParam(required = false) String houseId, @RequestParam(required = false) String start_date, @RequestParam(required = false) String end_date,
+			@RequestParam(required = false) String couponUnit, @RequestParam(required = false) String couponNum,
+			@RequestParam(required = false) String couponId, @RequestParam(required = false) String mianBill,
+			@RequestParam(required = false) String mianAmt, @RequestParam(required = false) String reduceAmt,
+			@RequestParam(required = false) String invoice_title_type,
+			@RequestParam(required = false) String credit_code, @RequestParam(required = false) String invoice_title)
+			throws Exception {
+		WechatPayInfo result;
+		try {
+			result = wuyeService.getOtherPrePayInfo(user.getWuyeId(), houseId, start_date,end_date, user.getOpenid(), couponUnit,
+					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(),
+					invoice_title);
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			return BaseResult.fail(e.getMessage());
+		}
+		return BaseResult.successResult(result);
+	}
 
 	// stmtId在快捷支付的时候会用到
 	@RequestMapping(value = "/getPrePayInfoo", method = RequestMethod.GET)

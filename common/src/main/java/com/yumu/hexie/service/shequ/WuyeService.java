@@ -50,6 +50,11 @@ public interface WuyeService {
 				String openId, String couponUnit, String couponNum, 
 				String couponId,String mianBill,String mianAmt, String reduceAmt, 
 				String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception;
+	// 10.5 无账单缴费
+	public WechatPayInfo getOtherPrePayInfo(String userId,String houseId,String start_date,String end_date, 
+				String openId, String couponUnit, String couponNum, 
+				String couponId,String mianBill,String mianAmt, String reduceAmt, 
+				String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception;
 	// 11.通知已支付
 	public PayResult noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId);
 	// 12.查询是否已经用过红包

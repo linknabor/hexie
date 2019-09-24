@@ -168,6 +168,17 @@ public class WuyeServiceImpl implements WuyeService {
 				invoice_title_type, credit_code, mobile, invoice_title)
 				.getData();
 	}
+	
+	@Override
+	public WechatPayInfo getOtherPrePayInfo(String userId, String houseId, String start_date, String end_date,
+			String openId, String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
+			String reduceAmt, String invoice_title_type, String credit_code, String mobile, String invoice_title)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return WuyeUtil.getOtherPrePayInfo(userId, houseId, start_date,end_date, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+				invoice_title_type, credit_code, mobile, invoice_title)
+				.getData();
+	}
 
 	@Override
 	public PayResult noticePayed(String userId, String billId, String stmtId, String tradeWaterId, String packageId) {
@@ -587,5 +598,6 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		return null;
 	}
+
 	
 }
