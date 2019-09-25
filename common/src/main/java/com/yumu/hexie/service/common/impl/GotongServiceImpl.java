@@ -13,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ConfigUtil;
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.DataJsonVo;
@@ -77,9 +79,13 @@ public class GotongServiceImpl implements GotongService {
     @Override
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
         ServiceOperator op = serviceOperatorRepository.findOne(opId);
-        User user = userService.getById(op.getUserId());
-        String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-        TemplateMsgService.sendRepairAssignMsg(order, op, accessToken, user.getAppId());
+        User opUser = userService.getById(op.getUserId());
+        User orderUser = userService.getById(order.getUserId());
+        if (!StringUtils.isEmpty(opUser.getAppId()) && !opUser.getAppId().equals(orderUser.getAppId())) {
+			return;
+		}
+        String accessToken = systemConfigService.queryWXAToken(opUser.getAppId());
+        TemplateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
     }
     @Async
     @Override
