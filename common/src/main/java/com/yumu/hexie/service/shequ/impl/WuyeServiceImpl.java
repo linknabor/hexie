@@ -155,17 +155,30 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public PaymentInfo getBillDetail(String userId, String stmtId,
-			String anotherbillIds) {
-		return WuyeUtil.getBillDetail(userId, stmtId, anotherbillIds).getData();
+			String billIds,String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.getBillDetail(userId, stmtId, billIds,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
 	public WechatPayInfo getPrePayInfo(String userId, String billId,
 			String stmtId, String openId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
-			String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+			String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		return WuyeUtil.getPrePayInfo(userId, billId, stmtId, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, mobile, invoice_title)
+				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
+				.getData();
+	}
+	
+	@Override
+	public WechatPayInfo getOtherPrePayInfo(String userId, String houseId, String start_date, String end_date,
+			String openId, String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
+			String reduceAmt, String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname)
+			throws Exception {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.getOtherPrePayInfo(userId, houseId, start_date,end_date, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
 				.getData();
 	}
 
@@ -587,5 +600,6 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		return null;
 	}
+
 	
 }
