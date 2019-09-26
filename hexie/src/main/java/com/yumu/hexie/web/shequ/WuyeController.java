@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.baidu.BaiduMapUtil;
+import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -782,9 +784,9 @@ public class WuyeController extends BaseController {
 	//查询所有环境路径
 	@RequestMapping(value = "/getRegionUrl", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<RegionUrl>> getRegionUrl() throws Exception {
+	public BaseResult<RegionVo> getRegionUrl(@RequestParam(required=false) String coordinate) throws Exception {
 
-		return BaseResult.successResult(wuyeService.getRegionUrl());
+		return BaseResult.successResult(wuyeService.getRegionUrl(coordinate));
 	}
 	
 	//查询无账单缴费房子开始日期
