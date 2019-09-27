@@ -1,0 +1,23 @@
+jdbc:
+    dialect: org.hibernate.dialect.MySQL5Dialect
+    driverClassName: com.mysql.jdbc.Driver
+    password: hexie
+    url: jdbc:mysql://localhost:3306/hexie?useUnicode=true&characterEncoding=utf8
+    username: hexie
+qiniu:
+    access:
+        key: PORmFHhIRgvjrOvefySPWKFto5j-Ea82SOIiq2Oq
+    domain: http://img.e-shequ.com/
+    secret:
+        key: rk-9mzo8Y6Bxwhh1zqKZ2qgqozhQhA7OYGmVmLTY
+redis:
+    database: 6
+    host: svn-service.chinacloudapp.cn
+    password: hexie
+    port: 6379
+sms:
+    expire:
+        minutes: 30
+testMode: true
+tmpfile:
+    dir: f:\tmp\images

@@ -59,7 +59,7 @@ public class QiniuUtil {
 	private void init() {
 		try {
 			props.load(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("config.properties"));
+					.getResourceAsStream("application.properties"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

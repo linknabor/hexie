@@ -11,7 +11,7 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-boot.version>1.5.22.RELEASE</spring-boot.version>
-		<spring-cloud.version>Dalston.SR1</spring-cloud.version>
+		<spring-cloud.version>Dalston.SR5</spring-cloud.version>
 		<mysql-connector-java.version>5.1.33</mysql-connector-java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -117,12 +117,12 @@
 					</configuration>
 				</plugin>
 				<plugin>
-	            <groupId>org.springframework.boot</groupId>
-	            <artifactId>spring-boot-maven-plugin</artifactId>
-			    <configuration>
-			        <executable>true</executable>
-			    </configuration>
-	        </plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+					<configuration>
+						<executable>true</executable>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -131,5 +131,6 @@
 		<module>hexie</module>
 		<module>hexiebk</module>
 		<module>hexie-eureka</module>
+		<module>hexie-config</module>
 	</modules>
 </project>
