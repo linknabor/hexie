@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration
 import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAspectJAutoProxy
 @EnableAsync
 @EnableCaching(proxyTargetClass=true)
+@EnableEurekaClient
 public class AppConfig {
 
     public static void main(String[] args) {
@@ -40,7 +42,6 @@ public class AppConfig {
     @Bean
     public EmbeddedServletContainerFactory EmbeddedServletContainerFactory(){
         TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
-        factory.setPort(86);
         factory.addConnectorCustomizers(new AppTomcatConnectorCustomizer());
         if (!Boolean.TRUE.equals(testMode)) {
         	factory.addAdditionalTomcatConnectors(createSslConnector());

@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.yumu</groupId>
+		<artifactId>hexie-parent</artifactId>
+		<version>1.0</version>
+	</parent>
+	<artifactId>hexie-config</artifactId>
+	<name>hexie-config</name>
+	<url>http://e-shequ.com</url>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- eureka client -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+		
+		<!-- config server -->
+		 <dependency> 
+			<groupId>org.springframework.cloud</groupId> 
+			<artifactId>spring-cloud-config-server</artifactId>
+		</dependency>
+		
+		<!-- 安全验证 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>	<!-- 这个需要为 true 热部署才有效 -->
+		</dependency>
+
+	</dependencies>
+</project>

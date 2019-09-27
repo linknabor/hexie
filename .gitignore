@@ -16,3 +16,5 @@
 /hexie/common/.settings/*.prefs
 /hexie/common/logs/*.log
 /common/.gitignore
+/hexie-config/.settings/*.prefs
+/hexie-eureka/.settings/*.prefs

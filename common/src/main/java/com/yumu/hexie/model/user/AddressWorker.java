@@ -1,6 +1,5 @@
 package com.yumu.hexie.model.user;
 
-import static org.junit.Assert.fail;
 
 import java.util.List;
 

@@ -1,0 +1,23 @@
+debug:
+   false
+eureka:
+    client:
+        fetchRegistry: false
+        registerWithEureka: false
+        serviceUrl:
+            defaultZone: http://${security.user.name}:${security.user.password}@localhost:${server.port}/eureka/
+    instance:
+        hostname: localhost
+    server:
+        enable-self-preservation: false
+        eviction-interval-timer-in-ms: 15000
+        responseCacheAutoExpirationInSeconds: 180
+        responseCacheUpdateInvervalMs: 30000
+security:
+    basic:
+        enabled: true
+    user:
+        name: hexie
+        password: hexie231
+server:
+    port: 8761
