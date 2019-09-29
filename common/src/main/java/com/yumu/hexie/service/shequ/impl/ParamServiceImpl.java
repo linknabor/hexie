@@ -67,7 +67,7 @@ public class ParamServiceImpl implements ParamService {
 	public Map<String, String> getParamByUser(User user) {
 
 		String cspId = user.getCspId();
-		if (StringUtil.isEmpty(cspId)) {
+		if (StringUtil.isEmpty(cspId) || "0".equals(cspId)) {
 			return new HashMap<String, String>();
 		}
 		Map<String, String> paramMap = (Map<String, String>) redisTemplate.opsForHash().get(CACHED_KEY, cspId);

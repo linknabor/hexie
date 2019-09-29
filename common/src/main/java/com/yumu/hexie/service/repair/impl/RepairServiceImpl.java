@@ -424,12 +424,16 @@ public class RepairServiceImpl implements RepairService {
 		String name=vo.getName();
 		String userId=vo.getUserId();
 		String id=vo.getId();
+		String cspName=vo.getCspName();
+		if(StringUtil.isEmpty(cspName)){
+			cspName="";
+		}
 		ServiceOperator so=new ServiceOperator();
 		if(StringUtil.isEmpty(id)){
 			User u=userRepository.findById(Long.parseLong(userId));
 			
 			List<ServiceOperator>  operatorList= serviceOperatorRepository.findByUserId(u.getId());
-			if(operatorList.size()>0){
+			if(operatorList.size()>0 && cspName.equals(operatorList.get(0).getCompanyName())){
 				return 2;//已存在改用户的维修工
 
 			}
