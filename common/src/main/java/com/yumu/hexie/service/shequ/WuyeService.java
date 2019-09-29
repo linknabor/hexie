@@ -1,8 +1,6 @@
 package com.yumu.hexie.service.shequ;
 
 
-import java.util.List;
-
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -15,7 +13,6 @@ import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
-import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
@@ -40,7 +37,7 @@ public interface WuyeService {
 	public PaymentInfo queryPaymentDetail(String userId,String waterId);
 	//status 00,01,02? startDate 2015-02
 	// 8.账单记录
-	public BillListVO queryBillList(String userId,String payStatus,String startDate,String endDate,String currentPage, String totalCount,String house_id,String sect_id,String regionname);
+	public BillListVO queryBillList(String userId,String payStatus,String startDate,String endDate,String currentPage, String totalCount,String house_id,String sect_id);
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
 	public PaymentInfo getBillDetail(String userId,String stmtId,String anotherbillIds);
 	// 10.缴费
@@ -58,10 +55,10 @@ public interface WuyeService {
 	public InvoiceInfo getInvoiceByTradeId(String trade_water_id);
 	
 	//15.根据数据类型查询指定的合协社区物业单元信息
-	public CellListVO querySectHeXieList(String sect_id, String build_id, String unit_id, String data_type,String regionname);
+	public CellListVO querySectHeXieList(String sect_id, String build_id, String unit_id, String data_type);
 	
 	//16.根据名称模糊查询合协社区小区列表
-	public CellListVO getVagueSectByName(String sect_name,String regionname);
+	public CellListVO getVagueSectByName(String sect_name);
 	
 	//根据账单查询地址
 	public HexieUser getAddressByBill(String billId);
@@ -103,9 +100,5 @@ public interface WuyeService {
 	
 	//根据regionName去community查询sectId
 	public String getSectIdByRegionName(String regionName);
-	//查询所有请求地址
-	public List<RegionUrl> getRegionUrl();
-	// 8.账单记录
-	public BillListVO queryBillListStd(String userId,String startDate,String endDate,String house_id,String sect_id,String regionname);
 	
 }
