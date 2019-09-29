@@ -3,8 +3,8 @@ package com.yumu.hexie.integration.wechat.service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
@@ -17,8 +17,6 @@ import com.yumu.hexie.integration.wechat.util.WeixinUtil;
  */
 public class OAuthService {
 
-	private static final Logger log = LoggerFactory.getLogger(OAuthService.class);
-	
 	/**
 	 * wechat oauth url
 	 */
@@ -28,12 +26,16 @@ public class OAuthService {
 	 * 通过oauth获取用户详细信息
 	 */
 	public static String GET_USER_INFO_OAUTH = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
-
 	/**
 	 * 获取oauth网页认证的token
 	 */
 	public static String GET_ACCESS_TOKEN_OAUTH = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code";
-
+	
+	/**
+	 * 第三方授权使用的获取的TOKEN的链接
+	 */
+	public static String GET_ACCESS_TOKEN_COMPONENT_AUTH = "https://api.weixin.qq.com/sns/oauth2/component/access_token?appid=APPID&code=CODE&grant_type=authorization_code&component_appid=COMPONENT_ID&component_access_token=COMPONENT_ACCESS_TOKEN";
+	
 	/**
 	 * 获得Oauth认证的URL
 	 * @param redirectUrl	跳转的url
@@ -57,16 +59,32 @@ public class OAuthService {
 	
 	/**
 	 * 获取Access_Token（oAuth认证,此access_token与基础支持的access_token不同）
-	 * 
-	 * @param code
-	 *            用户授权后得到的code
+	 * @param code 用户授权后得到的code
 	 * @return AccessTokenOAuth对象
 	 */
 	public static AccessTokenOAuth getOAuthAccessToken(String code) {
-		String url = GET_ACCESS_TOKEN_OAUTH
-				.replace("APPID", ConstantWeChat.APPID)
-				.replace("SECRET", ConstantWeChat.APPSECRET)
-				.replace("CODE", code);
+		
+		return getOAuthAccessToken(code, null, null);
+	}
+	
+	/**
+	 * 获取Access_Token（oAuth认证,此access_token与基础支持的access_token不同）
+	 * @param code 用户授权后得到的code
+	 * @param from 来自哪个公众号，如果为空，则说明不是从授权的公众号进来的
+	 * @return AccessTokenOAuth对象
+	 */
+	public static AccessTokenOAuth getOAuthAccessToken(String code, String oriApp, String componentAccessToken) {
+		
+		Assert.hasText(code, "code不能为空。");
+		
+		String url = "";
+		//合协公众号获取token
+		if (StringUtils.isEmpty(oriApp)) {
+			url = GET_ACCESS_TOKEN_OAUTH.replace("APPID", ConstantWeChat.APPID).replace("SECRET", ConstantWeChat.APPSECRET).replace("CODE", code);
+		}else {	//其他第三方授权公众号获取token
+			url = GET_ACCESS_TOKEN_COMPONENT_AUTH.replace("APPID", oriApp).replace("CODE", code).
+					replace("COMPONENT_ID", ConstantWeChat.COMPONENT_APPID).replace("COMPONENT_ACCESS_TOKEN", componentAccessToken);
+		}
 
 		WechatResponse jsonObject = WeixinUtil.httpsRequest(url, "POST", null, null);
 

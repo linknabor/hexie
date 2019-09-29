@@ -18,20 +18,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.TransactionUtil;
+import com.yumu.hexie.integration.baidu.BaiduMapUtil;
+import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
+import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.region.RegionUrl;
+import com.yumu.hexie.model.region.RegionUrlRepository;
 import com.yumu.hexie.model.user.AddRegionSectIdWorker;
 import com.yumu.hexie.model.user.AddUserSectIdWorker;
 import com.yumu.hexie.model.user.Address;
@@ -74,6 +80,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private AddressRepository addressRepository;
+	
+	@Autowired
+	private RegionUrlRepository regionUrlRepository;
 	
 	@Autowired
 	private UserService userService;
@@ -141,23 +150,37 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public BillListVO queryBillList(String userId, String payStatus,
-			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id) {
-		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id).getData();
+			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id,String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
 	public PaymentInfo getBillDetail(String userId, String stmtId,
-			String anotherbillIds) {
-		return WuyeUtil.getBillDetail(userId, stmtId, anotherbillIds).getData();
+			String billIds,String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.getBillDetail(userId, stmtId, billIds,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
 	public WechatPayInfo getPrePayInfo(String userId, String billId,
 			String stmtId, String openId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
-			String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+			String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		return WuyeUtil.getPrePayInfo(userId, billId, stmtId, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, mobile, invoice_title)
+				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
+				.getData();
+	}
+	
+	@Override
+	public WechatPayInfo getOtherPrePayInfo(String userId, String houseId, String start_date, String end_date,
+			String openId, String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
+			String reduceAmt, String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname)
+			throws Exception {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.getOtherPrePayInfo(userId, houseId, start_date,end_date, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
 				.getData();
 	}
 
@@ -191,9 +214,10 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Override
 	public CellListVO querySectHeXieList(String sect_id, String build_id,
-			String unit_id, String data_type) {
+			String unit_id, String data_type,String regionname) {
 		try {
-			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type).getData();
+			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
 			log.error("异常捕获信息:"+e);
 			e.printStackTrace();
@@ -203,11 +227,12 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(String sect_name) {
+	public CellListVO getVagueSectByName(String sect_name,String regionname) {
 		try {
-			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name);
+			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name,regionurl.getRegionUrl());
 			log.error(s.getResult());
-			return WuyeUtil.getVagueSectByName(sect_name).getData();
+			return s.getData();
 		} catch (Exception e) {
 			log.error("异常捕获信息:"+e);
 		}
@@ -554,5 +579,41 @@ public class WuyeServiceImpl implements WuyeService {
 	public String getSectIdByRegionName(String regionName) {
 		return WuyeUtil.querySectIdByName(regionName).getData();
 	}
+
+	@Override
+	public RegionVo getRegionUrl(String coordinate) {
+		coordinate = BaiduMapUtil.findByCoordinateGetBaidu(coordinate);
+		String name = BaiduMapUtil.findByBaiduGetCity(coordinate);
+		log.error("坐标获取地址："+name);
+		RegionUrl regionurl = regionUrlRepository.findregionname(name);
+		RegionVo region = new RegionVo();
+		if(regionurl==null) {
+			region.setAddress("上海市");
+		}else {
+			region.setAddress(regionurl.getRegionname());
+		}
+		region.setRegionurl(regionUrlRepository.findAll());
+
+		return region;
+	}
+
+	@Override
+	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
+			String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
+	}
+
+	@Override
+	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		try {
+			return WuyeUtil.getBillStartDateSDO(userId,house_id,regionurl.getRegionUrl()).getData();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	
 }

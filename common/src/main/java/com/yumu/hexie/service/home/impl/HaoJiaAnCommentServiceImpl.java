@@ -1,8 +1,6 @@
 package com.yumu.hexie.service.home.impl;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.ServiceRegionRepository;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
@@ -61,7 +58,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		comment.setCommentUserId(user.getId());//评论人
 		comment.setCommentUserTel(user.getTel());//用户电话
 		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.save(comment);
-		String accessToken = systemConfigService.queryWXAToken();//微信token
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());//微信token
         
 		//1评论 2投诉，如果是投诉发送短信模板给商家，确认是否承认投诉
 		if(comment.getCommentType() == ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {

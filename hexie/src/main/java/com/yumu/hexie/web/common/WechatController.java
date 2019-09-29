@@ -1,26 +1,25 @@
 package com.yumu.hexie.web.common;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
-import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
 import com.yumu.hexie.integration.wechat.service.FundService;
 import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.o2o.BaojieService;
 import com.yumu.hexie.service.o2o.XiyiService;
@@ -67,15 +66,6 @@ public class WechatController extends BaseController{
     }
     
     @ResponseBody
-    @RequestMapping(value = "/checkSignature", method = RequestMethod.POST,produces="text/plain;charset=UTF-8" )
-    public String process(HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
-    	request.setCharacterEncoding("UTF-8");
-    	response.setCharacterEncoding("UTF-8");
-    	return wechatCoreService.processWebchatRequest(request);
-    }
-
-    @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST )
     public String orderNotify(@RequestParam String bankType,@RequestParam String merNo,@RequestParam String orderDate,@RequestParam String orderNo,
     		@RequestParam String productId,@RequestParam String respCode,@RequestParam String respDesc,@RequestParam String signature,
@@ -114,14 +104,19 @@ public class WechatController extends BaseController{
     	return new BaseResult<JsSign>().success(wechatCoreService.getPrepareSign(prepayId));
     }
     
-  //用于唤起扫码
+    //用于唤起扫码
     @ResponseBody
     @RequestMapping(value = "/getUrlJsSign", method = RequestMethod.POST )
-    public BaseResult<JsSign> getUrlJsSign(@RequestBody UrlSignReq urlReq) throws Exception {
+    public BaseResult<JsSign> getUrlJsSign(@ModelAttribute(Constants.USER)User user, @RequestBody UrlSignReq urlReq) throws Exception {
     	
     	JsSign s = null;
 		try {
-			s = wechatCoreService.getJsSign(urlReq.getUrl());
+			
+			LOGGER.info("user : " + user);
+			if (user == null) {
+				return new BaseResult<JsSign>().failMsg("未获取到用户信息，支付初始化失败，请稍后重试！");
+			}
+			s = wechatCoreService.getJsSign(urlReq.getUrl(), user.getAppId());
 		} catch (Exception e) {
 			throw new Exception(e);
 		}

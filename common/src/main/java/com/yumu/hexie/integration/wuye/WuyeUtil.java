@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -19,6 +20,7 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
@@ -26,9 +28,11 @@ import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
+import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.region.RegionUrl;
 
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
@@ -60,6 +64,7 @@ public class WuyeUtil {
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
+	private static final String BILL_LIST_STD_URL = "getPayListStdSDO.do?user_id=%s&start_date=%s&end_date=%s&mng_cell_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do?user_id=%s&stmt_id=%s&bill_id=%s"; // 获取账单详情
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
@@ -67,7 +72,9 @@ public class WuyeUtil {
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do?user_id=%s&bill_id=%s&stmt_id=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
 			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
-	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
+	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do?user_id=%s&mng_cell_id=%s&start_date=%s&end_date=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
+			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
+	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s";//支付请求
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&bill_id=%s&stmt_id=%s&trade_water_id=%s&package=%s"; // 微信支付返回
 	//private static final String GET_LOCATION_URL = "getGeographicalPositionSDO.do"; // 用户地理位置
@@ -78,6 +85,8 @@ public class WuyeUtil {
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String BILL_PAY_ADDRESS_URL = "getBillAddressSDO.do"+ "?bill_id=%s";//查询账单地址
 	private static final String SYNC_SERVICE_CFG_URL = "/param/getParamSDO.do?info_id=%s&type=%s&para_name=%s";
+	private static final String BILL_LIST_DATE = "getBillStartDateSDO.do?user_id=%s&mng_cell_id=%s";//获取无账单日期
+	
 	
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
@@ -157,22 +166,44 @@ public class WuyeUtil {
 	
 	//status 00,01,02? startDate 2015-02
 	// 8.账单记录
-	public static BaseResult<BillListVO> queryBillList(String userId,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id,String sect_id){
+	public static BaseResult<BillListVO> queryBillList(String userId,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id,String sect_id,String regionurl){
 		//total_count 和curr_page没有填
-		String url = REQUEST_ADDRESS + String.format(BILL_LIST_URL, userId,payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
+		String url = regionurl + String.format(BILL_LIST_URL, userId,payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
+	// 8.5：无账单记录
+	public static BaseResult<BillListVO> queryBillList(String userId,String startDate,String endDate, String house_id,String sect_id,String regionurl){
+		//total_count 和curr_page没有填
+		log.error("startDate:"+startDate+"     endDate"+endDate);
+		String url = regionurl + String.format(BILL_LIST_STD_URL, userId,startDate,endDate,house_id,sect_id);
+		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
+	}
+	
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
-	public static BaseResult<PaymentInfo> getBillDetail(String userId,String stmtId,String anotherbillIds){
-		String url = REQUEST_ADDRESS + String.format(BILL_DETAIL_URL, userId,stmtId,anotherbillIds);
+	public static BaseResult<PaymentInfo> getBillDetail(String userId,String stmtId,String anotherbillIds,String regionurl){
+		String url = regionurl + String.format(BILL_DETAIL_URL, userId,stmtId,anotherbillIds);
 		return (BaseResult<PaymentInfo>)httpGet(url,PaymentInfo.class);
 	}
 	// 10.缴费
 	public static BaseResult<WechatPayInfo> getPrePayInfo(String userId,String billId,String stmtId,String openId,
 		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
-		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionurl) throws Exception {
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
-		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
+		String url = regionurl + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
+					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
+	
+		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
+		if (!baseResult.isSuccess()) {
+			throw new ValidationException(baseResult.getData().toString());
+		}
+		return (BaseResult<WechatPayInfo>)baseResult;
+	}
+	// 10.5 无账单缴费
+	public static BaseResult<WechatPayInfo> getOtherPrePayInfo(String userId,String houseId,String start_date,String end_date,String openId,
+		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
+		String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionurl) throws Exception {
+		invoice_title = URLEncoder.encode(invoice_title,"GBK");
+		String url = regionurl + String.format(OTHER_WX_PAY_URL, userId,houseId,start_date,end_date,openId,
 					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
@@ -217,18 +248,18 @@ public class WuyeUtil {
 	}
 	
 	//15.根据ID查询指定类型的合协社区物业信息
-	public static BaseResult<CellListVO> getMngHeXieList(String sect_id, String build_id, String unit_id, String data_type) throws Exception{
+	public static BaseResult<CellListVO> getMngHeXieList(String sect_id, String build_id, String unit_id, String data_type,String regionurl) throws Exception{
 
-		String url = REQUEST_ADDRESS + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
+		String url = regionurl + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
 	//20.根据名称模糊查询合协社区小区列表
-	public static BaseResult<CellListVO> getVagueSectByName(String sect_name) throws Exception{
+	public static BaseResult<CellListVO> getVagueSectByName(String sect_name,String regionurl) throws Exception{
 		
 		sect_name = URLEncoder.encode(sect_name,"GBK");
-		String url = REQUEST_ADDRESS + String.format(SECT_VAGUE_LIST_URL, sect_name);
+		String url = regionurl + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
@@ -269,6 +300,14 @@ public class WuyeUtil {
 		return (BaseResult<HexieConfig>)baseResult;
 	}
 	
+	//无账单获取缴费日期
+	public static BaseResult<BillStartDate> getBillStartDateSDO(String userid,String house_id,String regionurl) throws Exception{
+
+		String url = regionurl + String.format(BILL_LIST_DATE,userid, house_id);
+		log.error("【url】:"+url);
+		return (BaseResult<BillStartDate>)httpGet(url,BillStartDate.class);
+	}
+	
 	private static BaseResult httpGet(String reqUrl, Class c){
 		HttpGet get = new HttpGet(reqUrl);
 		get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36");
@@ -291,7 +330,16 @@ public class WuyeUtil {
 					throw new ExecutionException(err_code+", " +err_msg);
 				}
 			}
-			
+			if(reqUrl.indexOf("otherWechatPayRequestSDO.do")>=0) {
+				resp = resp.replace("package", "packageValue");
+				Map respMap = JacksonJsonUtil.json2map(resp);
+				String result = (String)respMap.get("result");
+				if (!"00".equals(result)) {
+					err_msg = (String)respMap.get("err_msg");
+					err_code = result;
+					throw new ExecutionException(err_code+", " +err_msg);
+				}
+			}
 			if (reqUrl.indexOf("wechatPayQuerySDO.do")>=0) {
 				Map respMap = JacksonJsonUtil.json2map(resp);
 				String result = (String)respMap.get("result");

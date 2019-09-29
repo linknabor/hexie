@@ -7,8 +7,10 @@ import java.util.Date;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -36,14 +38,16 @@ public class TemplateMsgService {
 	private static final Logger log = LoggerFactory.getLogger(TemplateMsgService.class);
 
 	public static String SUCCESS_URL = ConfigUtil.get("successUrl");
-	public static String SUCCESS_MSG_TEMPLATE = ConfigUtil.get("paySuccessTemplate");
 	public static String REG_SUCCESS_URL = ConfigUtil.get("regSuccessUrl");
-	public static String REG_SUCCESS_MSG_TEMPLATE = ConfigUtil.get("registerSuccessTemplate");
-	public static String WUYE_PAY_SUCCESS_MSG_TEMPLATE = ConfigUtil.get("wuyePaySuccessTemplate");
-	public static String REPAIR_ASSIGN_TEMPLATE = ConfigUtil.get("reapirAssginTemplate");
+
+	public static final String TEMPLATE_TYPE_PAY_SUCCESS = "paySuccessTemplate";
+	public static final String TEMPLATE_TYPE_REG_SUCCESS = "registerSuccessTemplate";
+	public static final String TEMPLATE_TYPE_WUYEPAY_SUCCESS = "wuyePaySuccessTemplate";
+	public static final String TEMPLATE_TYPE_REPAIR_ASSIGN = "reapirAssginTemplate";
+	public static final String TEMPLATE_TYPE_YUYUE_ASSGIN = "yuyueNoticeTemplate";
+	public static final String TEMPLATE_TYPE_COMPLAIN = "complainTemplate";
 	
-	public static String YUYUE_ASSIGN_TEMPLATE = ConfigUtil.get("yuyueNoticeTemplate");
-	public static String COMPLAIN_TEMPLATE = ConfigUtil.get("complainTemplate");
+	
 	/**
 	 * 模板消息发送
 	 */
@@ -62,7 +66,7 @@ public class TemplateMsgService {
 		return false;
 	}
 	
-	public static void sendPaySuccessMsg(ServiceOrder order, String accessToken) {
+	public static void sendPaySuccessMsg(ServiceOrder order, String accessToken, String appId) {
 		log.error("发送模板消息！！！！！！！！！！！！！！！" + order.getOrderNo());
 		PaySuccessVO vo = new PaySuccessVO();
 		vo.setFirst(new TemplateItem("您的订单：("+order.getOrderNo()+")已支付成功"));
@@ -79,8 +83,10 @@ public class TemplateMsgService {
 		TemplateMsg<PaySuccessVO> msg = new TemplateMsg<PaySuccessVO>();
 		msg.setData(vo);
 		
-		msg.setTemplate_id(SUCCESS_MSG_TEMPLATE);
-		msg.setUrl(SUCCESS_URL.replace("ORDER_ID", ""+order.getId()).replace("ORDER_TYPE", ""+order.getOrderType()));
+		msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_PAY_SUCCESS));
+		String url = SUCCESS_URL.replace("ORDER_ID", ""+order.getId()).replace("ORDER_TYPE", ""+order.getOrderType());
+		url = AppUtil.addAppOnUrl(url, appId);
+		msg.setUrl(url);
 		msg.setTouser(order.getOpenId());
 		sendMsg(msg, accessToken);
 	}
@@ -103,8 +109,10 @@ public class TemplateMsgService {
 		
 		TemplateMsg<RegisterSuccessVO>msg = new TemplateMsg<RegisterSuccessVO>();
 		msg.setData(vo);
-		msg.setTemplate_id(REG_SUCCESS_MSG_TEMPLATE);
-		msg.setUrl(REG_SUCCESS_URL);
+		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_REG_SUCCESS));
+		
+		String url = AppUtil.addAppOnUrl(REG_SUCCESS_URL, user.getAppId());
+		msg.setUrl(url);
 		msg.setTouser(user.getOpenid());
 		sendMsg(msg, accessToken);
 	
@@ -132,8 +140,9 @@ public class TemplateMsgService {
 		
 		TemplateMsg<WuyePaySuccessVO>msg = new TemplateMsg<WuyePaySuccessVO>();
 		msg.setData(vo);
-		msg.setTemplate_id(WUYE_PAY_SUCCESS_MSG_TEMPLATE);
-		msg.setUrl(REG_SUCCESS_URL);
+		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_WUYEPAY_SUCCESS));
+		String url = AppUtil.addAppOnUrl(REG_SUCCESS_URL, user.getAppId());
+		msg.setUrl(url);
 		msg.setTouser(user.getOpenid());
 		sendMsg(msg, accessToken);
 	
@@ -144,7 +153,7 @@ public class TemplateMsgService {
 	 * @param seed
 	 * @param ro
 	 */
-    public static void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op, String accessToken) {
+    public static void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op, String accessToken, String appId) {
     	
     	log.error("发送维修单分配模版消息#########" + ", order id: " + ro.getId() + "operator id : " + op.getId());
 
@@ -159,14 +168,15 @@ public class TemplateMsgService {
   
     	TemplateMsg<RepairOrderVO>msg = new TemplateMsg<RepairOrderVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(REPAIR_ASSIGN_TEMPLATE);
-    	msg.setUrl(GotongServiceImpl.WEIXIU_NOTICE+ro.getId());
+    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_REPAIR_ASSIGN));
+    	String url = GotongServiceImpl.WEIXIU_NOTICE + ro.getId();
+    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(op.getOpenId());
     	TemplateMsgService.sendMsg(msg, accessToken);
     	
     }
     public static void sendYuyueBillMsg(String openId,String title,String billName, 
-    			String requireTime, String url, String accessToken) {
+    			String requireTime, String url, String accessToken, String appId) {
 
         //更改为使用模版消息发送
         YuyueOrderVO vo = new YuyueOrderVO();
@@ -177,7 +187,8 @@ public class TemplateMsgService {
   
         TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<YuyueOrderVO>();
         msg.setData(vo);
-        msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
+        msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_YUYUE_ASSGIN));
+        url = AppUtil.addAppOnUrl(url, appId);
         msg.setUrl(url);
         msg.setTouser(openId);
         TemplateMsgService.sendMsg(msg, accessToken);
@@ -185,7 +196,7 @@ public class TemplateMsgService {
     }
     
    
-    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken,String openId ) {
+    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken,String openId) {
     	HaoJiaAnOrderVO vo = new HaoJiaAnOrderVO();
     	vo.setTitle(new TemplateItem("有新的预约服务"));
     	vo.setAppointmentDate(new TemplateItem(hOrder.getExpectedTime()));
@@ -197,15 +208,16 @@ public class TemplateMsgService {
     	
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(YUYUE_ASSIGN_TEMPLATE);
-    	msg.setUrl(GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId());
+    	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_YUYUE_ASSGIN));
+    	String url = GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId();
+    	url = AppUtil.addAppOnUrl(url, user.getAppId());
+    	msg.setUrl(url);
     	msg.setTouser(openId);
-//    	msg.setTouser("o_3Dlwb5LserLCnzuQwDNUMYoypM");//朱衍伟的openId
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
     
     //投诉模板，发送给商家
-    public static void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken,String openId ) {
+    public static void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken,String openId) {
     	log.error("sendHaoJiaAnCommentMsg的用户电话="+comment.getCommentUserTel());
     	HaoJiaAnCommentVO vo = new HaoJiaAnCommentVO();
     	vo.setTitle(new TemplateItem("用户投诉"));//标题
@@ -218,13 +230,32 @@ public class TemplateMsgService {
     	log.error("投诉的user="+user+""); 
     	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(COMPLAIN_TEMPLATE);
-    	msg.setUrl(GotongServiceImpl.COMPLAIN_DETAIL + comment.getId());
+    	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_COMPLAIN));
+    	String url = GotongServiceImpl.COMPLAIN_DETAIL + comment.getId();
+    	url = AppUtil.addAppOnUrl(url, user.getAppId());
+    	msg.setUrl(url);
     	msg.setTouser(openId);
-//    	msg.setTouser(user.getOpenid());
-//    	msg.setTouser("o_3DlwbtqJzdSvGBCOXYDyxH8n-M");//肖强的openId
-    	
     	TemplateMsgService.sendMsg(msg, accessToken);
     }
+    
+    /**
+     * 不同公众号用不同模板消息
+     */
+    public static String getTemplateByAppId(String appId, String templateType) {
+    	
+    	Assert.hasText(templateType, "模板消息类型不能为空。");
+    	
+    	if (StringUtils.isEmpty(appId)) {
+			appId = ConfigUtil.get("appId");
+		}
+    	
+    	String key = templateType + "_" + appId;
+    	
+    	String templateId = ConfigUtil.get(key);
+    	return templateId;
+
+    	
+    }
+
 
 }

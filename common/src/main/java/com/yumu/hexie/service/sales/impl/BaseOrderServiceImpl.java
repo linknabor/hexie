@@ -183,6 +183,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	protected void commonPostProcess(int orderOp, ServiceOrder order) {
 
 		log.error("commonPostProcess" + order.getOrderNo());
+		User user = userService.getById(order.getUserId());//短信发送号码修改为用户注册号码 2016012
 		if(orderOp==ModelConstant.ORDER_OP_CREATE){
 			log.error("shareService.record" + order.getOrderNo());
 			shareService.record(order);
@@ -192,11 +193,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		} else if(orderOp == ModelConstant.ORDER_OP_UPDATE_PAYSTATUS
 				&&(order.getStatus()==ModelConstant.ORDER_STATUS_PAYED||order.getStatus()==ModelConstant.ORDER_STATUS_CONFIRM)){
 			if(order.getOrderType() != ModelConstant.ORDER_TYPE_YUYUE){
-				User user = userService.getById(order.getUserId());//短信发送号码修改为用户注册号码 20160120
 				userNoticeService.orderSuccess(order.getUserId(), user.getTel(),order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
 			}
-			String token = systemconfigservice.queryWXAToken();
-			TemplateMsgService.sendPaySuccessMsg(order, token);
+			String token = systemconfigservice.queryWXAToken(user.getAppId());
+			TemplateMsgService.sendPaySuccessMsg(order, token, user.getAppId());
 		} else if(orderOp == ModelConstant.ORDER_OP_SEND){
 			userNoticeService.orderSend(order.getUserId(), order.getTel(),order.getId(), order.getOrderNo(), order.getLogisticName(), order.getLogisticNo());
 		}

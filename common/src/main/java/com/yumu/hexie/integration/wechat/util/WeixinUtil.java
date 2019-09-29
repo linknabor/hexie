@@ -120,11 +120,16 @@ public class WeixinUtil {
 		return jsTicket;
 	}
 	
-	public static JsSign getJsSign(String url, String jsTicket) {
+	public static JsSign getJsSign(String url, String appId, String jsTicket) {
+		
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
+		}
+		
 		long timestamp = new Date().getTime();
 		String param = JS_T_PARAM.replace("JS_TICKET",jsTicket).replace("TIMESTAMP", ""+timestamp).replace("URL", url);
 		JsSign r = new JsSign();
-		r.setAppId(ConstantWeChat.APPID);
+		r.setAppId(appId);
 		r.setNonceStr(NONCESTR);
 		r.setSignature(Sha1Util.getSha1(param));
 		r.setTimestamp(""+timestamp);
@@ -144,14 +149,7 @@ public class WeixinUtil {
 			return at.getToken();
 		}
 	}
-//	public static String getToken() {
-//		if(at == null) {
-//			at = WeixinUtil.getAccessToken();
-//			return at.getToken();
-//		} else {
-//			return at.getToken();
-//		}
-//	}
+	
 	/**
 	 * 获取token值
 	 * 

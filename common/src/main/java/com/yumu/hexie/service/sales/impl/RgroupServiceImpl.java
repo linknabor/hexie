@@ -57,7 +57,7 @@ public class RgroupServiceImpl implements RgroupService {
 				}
 				User u = userService.getById(o.getUserId());
 
-				userNoticeService.groupFail(o.getUserId(),u.getTel(), o.getGroupRuleId(), rule.getProductName(), rule.getGroupMinNum(), rule.getName());
+				userNoticeService.groupFail(u, u.getTel(), o.getGroupRuleId(), rule.getProductName(), rule.getGroupMinNum(), rule.getName());
 			}catch(Exception e) {
 			    log.error("cancelGroupError",e);
 			}

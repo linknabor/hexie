@@ -38,4 +38,13 @@ public class PageConfigController extends BaseController{
         response.setCharacterEncoding("UTF-8");
         return pageConfigService.findByTempKey(tempKey);
     }
+    
+    @ResponseBody
+    @RequestMapping(value = "/iconList/{fromSys}", method = RequestMethod.PUT )
+    public String updateIconBottom(@PathVariable String fromSys) throws Exception {
+      
+    	pageConfigService.updateBottomIcon();
+    	return "success";
+    }
+    
 }

@@ -104,7 +104,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     public void postOrderConfirm(ServiceOrder o) {
         User u = userService.getById(o.getUserId());
         RgroupRule rule = cacheableService.findRgroupRule(o.getGroupRuleId());
-        userNoticeService.groupSuccess(o.getUserId(), u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
+        userNoticeService.groupSuccess(u, u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
             rule.getProductName(), rule.getName());
     }
 

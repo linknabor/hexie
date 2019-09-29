@@ -13,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ConfigUtil;
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.DataJsonVo;
@@ -77,8 +79,13 @@ public class GotongServiceImpl implements GotongService {
     @Override
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
         ServiceOperator op = serviceOperatorRepository.findOne(opId);
-        String accessToken = systemConfigService.queryWXAToken();
-        TemplateMsgService.sendRepairAssignMsg(order, op, accessToken);
+        User opUser = userService.getById(op.getUserId());
+        User orderUser = userService.getById(order.getUserId());
+        if (!StringUtils.isEmpty(opUser.getAppId()) && !opUser.getAppId().equals(orderUser.getAppId())) {
+			return;
+		}
+        String accessToken = systemConfigService.queryWXAToken(opUser.getAppId());
+        TemplateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
     }
     @Async
     @Override
@@ -93,7 +100,7 @@ public class GotongServiceImpl implements GotongService {
         NewsMessage msg = new NewsMessage(news);
         msg.setTouser(user.getOpenid());
         msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        String accessToken = systemConfigService.queryWXAToken();
+        String accessToken = systemConfigService.queryWXAToken(user.getAppId());
         CustomService.sendCustomerMessage(msg, accessToken);
     }
     
@@ -111,7 +118,7 @@ public class GotongServiceImpl implements GotongService {
          NewsMessage msg = new NewsMessage(news);
          msg.setTouser(user.getOpenid());
          msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-         String accessToken = systemConfigService.queryWXAToken();
+         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
          CustomService.sendCustomerMessage(msg, accessToken);
 	}
 
@@ -133,7 +140,8 @@ public class GotongServiceImpl implements GotongService {
         NewsMessage msg = new NewsMessage(news);
         msg.setTouser(op.getOpenId());
         msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        String accessToken = systemConfigService.queryWXAToken();
+        User user = userService.getById(op.getUserId());
+        String accessToken = systemConfigService.queryWXAToken(user.getAppId());
         CustomService.sendCustomerMessage(msg, accessToken);
     }
     /** 
@@ -148,10 +156,11 @@ public class GotongServiceImpl implements GotongService {
     public void sendCommonYuyueBillMsg(int serviceType,String title, String billName, String requireTime, String url) {
         LOG.error("发送预约通知！["+serviceType+"]" + billName + " -- " + requireTime);
         List<ServiceOperator> ops = operatorService.findByType(serviceType);
-        String accessToken = systemConfigService.queryWXAToken();
         for(ServiceOperator op: ops) {
             LOG.error("发送到操作员！["+serviceType+"]" + billName + " -- " + op.getName() + "--" + op.getId());
-            TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken);    
+            User user = userService.getById(op.getUserId());
+            String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+            TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId());    
         }
         
     }
@@ -173,7 +182,7 @@ public class GotongServiceImpl implements GotongService {
 			data.setKeyword4(new DataJsonVo(""));
 			data.setRemark(new DataJsonVo(""));
 			msg.setData(data);
-			String accessToken = systemConfigService.queryWXAToken();
+			String accessToken = systemConfigService.queryWXAToken(useropenId.get(i).getAppId());
 			CustomService.sendCustomerMessage(msg, accessToken);
 		}
 		
