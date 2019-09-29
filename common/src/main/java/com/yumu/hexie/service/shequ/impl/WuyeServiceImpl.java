@@ -18,19 +18,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.TransactionUtil;
-import com.yumu.hexie.integration.baidu.BaiduMapUtil;
-import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
-import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
-import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -157,30 +153,17 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public PaymentInfo getBillDetail(String userId, String stmtId,
-			String billIds,String regionname) {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
-		return WuyeUtil.getBillDetail(userId, stmtId, billIds,regionurl.getRegionUrl()).getData();
+			String anotherbillIds) {
+		return WuyeUtil.getBillDetail(userId, stmtId, anotherbillIds).getData();
 	}
 
 	@Override
 	public WechatPayInfo getPrePayInfo(String userId, String billId,
 			String stmtId, String openId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
-			String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
 		return WuyeUtil.getPrePayInfo(userId, billId, stmtId, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
-				.getData();
-	}
-	
-	@Override
-	public WechatPayInfo getOtherPrePayInfo(String userId, String houseId, String start_date, String end_date,
-			String openId, String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
-			String reduceAmt, String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname)
-			throws Exception {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
-		return WuyeUtil.getOtherPrePayInfo(userId, houseId, start_date,end_date, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
+				invoice_title_type, credit_code, mobile, invoice_title)
 				.getData();
 	}
 
@@ -581,20 +564,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public RegionVo getRegionUrl(String coordinate) {
-		coordinate = BaiduMapUtil.findByCoordinateGetBaidu(coordinate);
-		String name = BaiduMapUtil.findByBaiduGetCity(coordinate);
-		log.error("坐标获取地址："+name);
-		RegionUrl regionurl = regionUrlRepository.findregionname(name);
-		RegionVo region = new RegionVo();
-		if(regionurl==null) {
-			region.setAddress("上海市");
-		}else {
-			region.setAddress(regionurl.getRegionname());
-		}
-		region.setRegionurl(regionUrlRepository.findAll());
-
-		return region;
+	public List<RegionUrl> getRegionUrl() {
+		return regionUrlRepository.findAll();
 	}
 
 	@Override
@@ -603,17 +574,5 @@ public class WuyeServiceImpl implements WuyeService {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
-
-	@Override
-	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
-		try {
-			return WuyeUtil.getBillStartDateSDO(userId,house_id,regionurl.getRegionUrl()).getData();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	
 }
