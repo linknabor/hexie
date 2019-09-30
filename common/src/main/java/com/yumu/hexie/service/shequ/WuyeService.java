@@ -41,10 +41,10 @@ public interface WuyeService {
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
 	public PaymentInfo getBillDetail(String userId,String stmtId,String anotherbillIds);
 	// 10.缴费
-	public WechatPayInfo getPrePayInfo(String userId,String billId,String stmtId, 
-				String openId, String couponUnit, String couponNum, 
+	public WechatPayInfo getPrePayInfo(User user,String billId,String stmtId, 
+				String couponUnit, String couponNum, 
 				String couponId,String mianBill,String mianAmt, String reduceAmt, 
-				String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception;
+				String invoice_title_type, String credit_code, String invoice_title) throws Exception;
 	// 11.通知已支付
 	public PayResult noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId);
 	// 12.查询是否已经用过红包

@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -13,6 +14,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.hibernate.bytecode.buildtime.spi.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -29,18 +31,24 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.user.User;
 
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
 
 	private static String REQUEST_ADDRESS = "http://www.e-shequ.com/mobileInterface/mobile/";
 	private static String SYSTEM_NAME;
+	private static Map<String, String> sysMap = new HashMap<>();
 	private static Properties props = new Properties();
 	
 	static {
 		try {
 			props.load(Thread.currentThread().getContextClassLoader()
 					.getResourceAsStream("wechat.properties"));
+			//TODO 先暂时写死下面的appid映射，以后做到表里
+			sysMap.put("wxbd214f5765f346c1", "_hxm");
+			sysMap.put("wxf51b0f0356e2432c", "_hexieliangyou");
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -168,12 +176,21 @@ public class WuyeUtil {
 		return (BaseResult<PaymentInfo>)httpGet(url,PaymentInfo.class);
 	}
 	// 10.缴费
-	public static BaseResult<WechatPayInfo> getPrePayInfo(String userId,String billId,String stmtId,String openId,
+	public static BaseResult<WechatPayInfo> getPrePayInfo(User user,String billId,String stmtId,
 		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
-		String invoice_title_type, String credit_code, String mobile, String invoice_title) throws Exception {
+		String invoice_title_type, String credit_code, String invoice_title) throws Exception {
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
-		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, userId,billId,stmtId,openId,
-					couponUnit,couponNum,couponId,SYSTEM_NAME,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, mobile, invoice_title);
+		
+		String appid = user.getAppId();
+		String fromSys = SYSTEM_NAME;
+		if (StringUtils.isEmpty(appid)) {
+			//do nothing
+		}else {
+			fromSys = sysMap.get(appid);
+		}
+		
+		String url = REQUEST_ADDRESS + String.format(WX_PAY_URL, user.getWuyeId(),billId,stmtId,user.getOpenid(),
+					couponUnit,couponNum,couponId, fromSys, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(), invoice_title);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		if (!baseResult.isSuccess()) {

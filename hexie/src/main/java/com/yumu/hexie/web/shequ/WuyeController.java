@@ -279,8 +279,8 @@ public class WuyeController extends BaseController {
 			throws Exception {
 		WechatPayInfo result;
 		try {
-			result = wuyeService.getPrePayInfo(user.getWuyeId(), billId, stmtId, user.getOpenid(), couponUnit,
-					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(),
+			result = wuyeService.getPrePayInfo(user, billId, stmtId, couponUnit,
+					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code,
 					invoice_title);
 		} catch (Exception e) {
 
