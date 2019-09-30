@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.TransactionUtil;
+import com.yumu.hexie.integration.baidu.BaiduMapUtil;
+import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -579,8 +581,20 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public List<RegionUrl> getRegionUrl() {
-		return regionUrlRepository.findAll();
+	public RegionVo getRegionUrl(String coordinate) {
+		coordinate = BaiduMapUtil.findByCoordinateGetBaidu(coordinate);
+		String name = BaiduMapUtil.findByBaiduGetCity(coordinate);
+		log.error("坐标获取地址："+name);
+		RegionUrl regionurl = regionUrlRepository.findregionname(name);
+		RegionVo region = new RegionVo();
+		if(regionurl==null) {
+			region.setAddress("上海市");
+		}else {
+			region.setAddress(regionurl.getRegionname());
+		}
+		region.setRegionurl(regionUrlRepository.findAll());
+
+		return region;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -113,7 +114,7 @@ public interface WuyeService {
 	//根据regionName去community查询sectId
 	public String getSectIdByRegionName(String regionName);
 	//查询所有请求地址
-	public List<RegionUrl> getRegionUrl();
+	public RegionVo getRegionUrl(String coordinate);
 	// 8.账单记录
 	public BillListVO queryBillListStd(String userId,String startDate,String endDate,String house_id,String sect_id,String regionname);
 	//获取无账单开始日期
