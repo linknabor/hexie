@@ -1,10 +1,6 @@
 package com.yumu.hexie.service.shequ;
 
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -15,12 +11,10 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
-import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
-import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
@@ -49,15 +43,14 @@ public interface WuyeService {
 	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
 	public PaymentInfo getBillDetail(String userId,String stmtId,String billIds,String regionname);
 	// 10.缴费
-	public WechatPayInfo getPrePayInfo(String userId,String billId,String stmtId, 
-				String openId, String couponUnit, String couponNum, 
+	public WechatPayInfo getPrePayInfo(User user,String billId,String stmtId, 
+				String couponUnit, String couponNum, 
 				String couponId,String mianBill,String mianAmt, String reduceAmt, 
-				String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception;
+				String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception;
 	// 10.5 无账单缴费
-	public WechatPayInfo getOtherPrePayInfo(String userId,String houseId,String start_date,String end_date, 
-				String openId, String couponUnit, String couponNum, 
-				String couponId,String mianBill,String mianAmt, String reduceAmt, 
-				String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception;
+	public WechatPayInfo getOtherPrePayInfo(User user,String houseId,String start_date,String end_date, 
+				String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt, 
+				String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception;
 	// 11.通知已支付
 	public PayResult noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId);
 	// 12.查询是否已经用过红包

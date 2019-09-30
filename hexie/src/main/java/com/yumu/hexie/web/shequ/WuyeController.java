@@ -21,10 +21,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -34,7 +32,6 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
-import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
@@ -42,7 +39,6 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
-import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -297,8 +293,8 @@ public class WuyeController extends BaseController {
 			throws Exception {
 		WechatPayInfo result;
 		try {
-			result = wuyeService.getPrePayInfo(user.getWuyeId(), billId, stmtId, user.getOpenid(), couponUnit,
-					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(),
+			result = wuyeService.getPrePayInfo(user, billId, stmtId, couponUnit,
+					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code,
 					invoice_title,regionname);
 		} catch (Exception e) {
 
@@ -320,8 +316,8 @@ public class WuyeController extends BaseController {
 			throws Exception {
 		WechatPayInfo result;
 		try {
-			result = wuyeService.getOtherPrePayInfo(user.getWuyeId(), houseId, start_date,end_date, user.getOpenid(), couponUnit,
-					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(),
+			result = wuyeService.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit,
+					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code,
 					invoice_title,regionname);
 		} catch (Exception e) {
 

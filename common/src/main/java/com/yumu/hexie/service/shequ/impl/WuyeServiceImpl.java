@@ -30,7 +30,6 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
-import com.yumu.hexie.integration.wuye.vo.OtherBillInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -163,24 +162,24 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public WechatPayInfo getPrePayInfo(String userId, String billId,
-			String stmtId, String openId, String couponUnit, String couponNum, 
+	public WechatPayInfo getPrePayInfo(User user, String billId,
+			String stmtId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
-			String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname) throws Exception {
+			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
-		return WuyeUtil.getPrePayInfo(userId, billId, stmtId, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
+		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
 				.getData();
 	}
 	
 	@Override
-	public WechatPayInfo getOtherPrePayInfo(String userId, String houseId, String start_date, String end_date,
-			String openId, String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
-			String reduceAmt, String invoice_title_type, String credit_code, String mobile, String invoice_title,String regionname)
+	public WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
+			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
+			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
 			throws Exception {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
-		return WuyeUtil.getOtherPrePayInfo(userId, houseId, start_date,end_date, openId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, mobile, invoice_title,regionurl.getRegionUrl())
+		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
 				.getData();
 	}
 
