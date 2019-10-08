@@ -1,0 +1,45 @@
+wechat:
+   mainServer: false;
+   appId: wx95f46f41ca5e570e
+   appSecret: 280e6af60fe8e77cf2a8cb8efc7b398a
+   mchId: 1265636001
+   key: GuoJiaJiaWechat20151104134600001
+   unifiedUrl: https://api.mch.weixin.qq.com/pay/unifiedorder
+   tradeType: JSAPI
+   wechatCertPath: f:/wechatCert/apiclient_cert.p12
+   sysName: _hxm
+   
+   moduleLink : 
+      couponUrl: https://test.e-shequ.com/weixin/coupon.html?o=
+      memberNotifyurl: https://test.e-shequ.com/wechat/hexie/wechat/memberReturn
+      notifyUrl: https://test.e-shequ.com/wechat/hexie/wechat/orderNotify
+      regSuccessUrl: https://test.e-shequ.com/weixin/person/coupons.html
+      requestUrl: https://test.e-shequ.com/mobileInterface/mobile/
+      subscribeDetail: https://test.e-shequ.com/weixin/person/coupons.html
+      subscribeImage: http://img.e-shequ.com/welcome.jpg
+      successUrl: https://test.e-shequ.com/weixin/group/success.html?orderId=ORDER_ID&type=ORDER_TYPE
+      weixiuDetail: https://test.e-shequ.com/weixin/person/index.html%23/ordersDetail?orderId=
+      weixiuNotice: https://test.e-shequ.com/weixin/person/index.html%23/operatorOrdersDetail?ordersID
+      updateCacheUrl: https://www.e-shequ.cn/baofang/bk/refreshCache/%s/%s=
+
+   template: 
+      paySuccessTemplate_wx95f46f41ca5e570e: RfF1oyJGwkBxaM5t7U35iQY6pPRhCxKUOjhjihdldj0
+      paySuccessTemplate_wxa48ca61b68163483: _LNqhv-NUOcw1eB7-427TrU8_62-lFz7Sdf8DAYlTKo
+      reapirAssginTemplate_wx95f46f41ca5e570e: Prtdw3oROeKgmRTncJ9yNR7UpcMKnZzyJEr9ozrfH7I
+      reapirAssginTemplate_wxa48ca61b68163483: l5KGLEwJqhdOWPcEYpX4vJAS6lw1oMP3IP_zf5vC3es
+      registerSuccessTemplate_wx95f46f41ca5e570e: ohinzqS_RphS__v8tMD-b3-9ohZg6KRYlOGYTyFp_ns
+      registerSuccessTemplate_wxa48ca61b68163483: 93dB5ApNl874asgDGq0N57Y6ICTRaMccIH1ApR0lzHU
+      wuyePaySuccessTemplate_wx95f46f41ca5e570e: ONoRDVNmfDVwx3VlI0rYdR5LNMD36Kiom_HZ_n6NTAI
+      wuyePaySuccessTemplate_wxa48ca61b68163483: TkrZzyCfUbGTQc1qKXeSYzUgfVNzsloJKNsGDcXcknk
+      yuyueNoticeTemplate_wx95f46f41ca5e570e: Q4Spz2m2MJIKItXSL08vQwfzSxcUzlGoX4DDeRfqULM
+      yuyueNoticeTemplate_wxa48ca61b68163483: 9i6scgUorwzk9OQM3HGy4jx2Yx16fiEtH7Q3vDE8U5
+
+   baidu: 
+      baiduMapkey: 634346E2b1ecf1881e798fb94d54b0a3
+      
+   amap:
+      amapCloudKey: 952894b4d1fa0aa376c63738fa32c453
+      amapList: 20
+      amapPage: 1
+      amapTableid: 56c6d50c305a2a328815f20Q
+s

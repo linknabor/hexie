@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
-<project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.yumu</groupId>
@@ -14,22 +12,16 @@
 	<url>http://e-shequ.com</url>
 
 	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
+		<!-- config server -->
+		 <dependency> 
+			<groupId>org.springframework.cloud</groupId> 
+			<artifactId>spring-cloud-config-server</artifactId>
 		</dependency>
 
 		<!-- eureka client -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-eureka</artifactId>
-		</dependency>
-		
-		<!-- config server -->
-		 <dependency> 
-			<groupId>org.springframework.cloud</groupId> 
-			<artifactId>spring-cloud-config-server</artifactId>
+			<artifactId>spring-cloud-netflix-eureka-client</artifactId>
 		</dependency>
 		
 		<!-- 安全验证 -->
@@ -42,6 +34,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>	<!-- 这个需要为 true 热部署才有效 -->
+		</dependency>
+		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>
