@@ -77,8 +77,6 @@ public class WebConfig extends WebMvcConfigurationSupport {
     @Bean
     public static PropertySourcesPlaceholderConfigurer loadProperties() {
         PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-        Resource[] resources = new ClassPathResource[]{new ClassPathResource("config.properties")};
-        configurer.setLocations(resources);
         configurer.setFileEncoding(PROP_FILE_ENCODING);
         configurer.setIgnoreUnresolvablePlaceholders(true);
         return configurer;

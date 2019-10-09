@@ -12,18 +12,19 @@
 	<url>http://e-shequ.com</url>
 
 	<dependencies>
+		
+		<!-- eureka client -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+	
 		<!-- config server -->
 		 <dependency> 
 			<groupId>org.springframework.cloud</groupId> 
 			<artifactId>spring-cloud-config-server</artifactId>
 		</dependency>
 
-		<!-- eureka client -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-netflix-eureka-client</artifactId>
-		</dependency>
-		
 		<!-- 安全验证 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -36,6 +37,12 @@
 			<optional>true</optional>	<!-- 这个需要为 true 热部署才有效 -->
 		</dependency>
 		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

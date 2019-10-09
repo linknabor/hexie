@@ -2,20 +2,38 @@ debug: false
 server:
    port: 8780
 spring:
+   profiles: 
+      active: native   #设置使用本地配置(默认是git,可以设置：subversion(SVN)，native(本地))
    application:
-      name: hexie-config-center
+      name: hexie-config-server
    cloud: 
       config:
          server: 
             native:  
-               searchLocations: classpath:/config   #读配置文件的地方，也可以是某个git或者svn地址
+               searchLocations: classpath:/config
 eureka:
    client:
       fetchRegistry: true
       registerWithEureka: true
       serviceUrl:
-         defaultZone: http://hexie:hexie231@localhost:8761/eureka/   #eureka地址
+         defaultZone: http://hexie:hexie231@localhost:8761/eureka/
    instance:
       hostname: ${spring.cloud.client.ipAddress}
-      instance-id: ${spring.cloud.client.ipAddress}:${server.port}   #实例id
-      prefer-ip-address : false   #注册IP还是主机名，true就ip
+      instance-id: ${spring.cloud.client.ipAddress}:${spring.cloud.client.hostname}:${server.port}
+      prefer-ip-address : false
+
+security:
+    basic:
+        enabled: true
+    user:
+        name: hexie
+        password: hexie232
+        
+info:   
+   app: 
+      name: config-server
+   company:
+      name: www.e-shequ.cn
+   build: 
+      artifactId: hexie-config
+      version: ${project.version}

@@ -1,0 +1,87 @@
+#指定active的值来决定使用哪个环境的配置。dev本地开发,test测试环境，uat环境，以及prod生产
+spring:
+   application:
+      name: hexie
+   profiles: 
+      active: dev
+
+---
+#本地开发环境
+spring:
+   profiles: dev
+server:
+   port: 86
+eureka:
+   client:
+      fetchRegistry: true
+      registerWithEureka: true
+      #eureka地址
+      serviceUrl:
+         defaultZone: http://hexie:hexie231@localhost:8761/eureka/
+   instance:
+      hostname: ${spring.cloud.client.ipAddress}
+      #实例id
+      instance-id: ${spring.cloud.client.ipAddress}:${spring.cloud.client.hostname}:${server.port}
+      #注册IP还是主机名，true就ip
+      prefer-ip-address : false
+info:   
+   app: 
+      name: hexie-server
+   company:
+      name: www.e-shequ.cn
+   build: 
+      artifactId: hexie
+      version: ${project.version}   
+jdbc:
+    dialect: org.hibernate.dialect.MySQL5Dialect
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hexie?useUnicode=true&characterEncoding=utf8
+    username: hexie
+    password: hexie
+qiniu:
+    access:
+        key: PORmFHhIRgvjrOvefySPWKFto5j-Ea82SOIiq2Oq
+    domain: http://img.e-shequ.cn/
+    secret:
+        key: rk-9mzo8Y6Bxwhh1zqKZ2qgqozhQhA7OYGmVmLTY
+redis:
+    database: 6
+    host: svn-service.chinacloudapp.cn
+    password: hexie
+    port: 6379
+sms:
+    expire:
+        minutes: 30
+testMode: true
+tmpfile:
+    dir: f:\tmp\images
+    
+---
+#测试环境
+spring:
+   profiles: test
+server:
+   port: 86
+jdbc:
+    dialect: org.hibernate.dialect.MySQL5Dialect
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://test-wechat:3306/hexie?useUnicode=true&characterEncoding=utf8
+    username: hexie
+    password: hexie
+qiniu:
+    access:
+        key: PORmFHhIRgvjrOvefySPWKFto5j-Ea82SOIiq2Oq
+    domain: http://img.e-shequ.cn/
+    secret:
+        key: rk-9mzo8Y6Bxwhh1zqKZ2qgqozhQhA7OYGmVmLTY
+redis:
+    database: 3
+    host: test-wechat
+    password: hexie
+    port: 6379
+sms:
+    expire:
+        minutes: 30
+testMode: false
+tmpfile:
+    dir: f:\tmp\images
