@@ -131,14 +131,17 @@
 								<directory>src/main/resources/</directory>
 								<filtering>true</filtering>
 								<includes>
-								<!-- 如果用.properties配置文件，那下面还需要添，另外日志文件都统一叫logback-spring.xml，boot启动时会自动识别 -->
+									<!-- 如果用.properties配置文件，那下面还需要添，另外日志文件都统一叫logback-spring.xml，boot启动时会自动识别 -->
 									<include>**/*.yml</include>
 									<include>**/*.properties</include>
 									<include>logback-spring.xml</include>
 								</includes>
 							</resource>
 						</resources>
-						<useDefaultDelimiters>true</useDefaultDelimiters>
+						<delimiters>
+							<delimiter>${*}</delimiter>
+						</delimiters>
+						<useDefaultDelimiters>false</useDefaultDelimiters>
 					</configuration>
 				</plugin>
 			</plugins>

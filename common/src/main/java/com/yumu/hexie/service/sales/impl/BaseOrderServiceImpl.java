@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
@@ -52,7 +51,6 @@ import com.yumu.hexie.vo.SingleItemOrder;
 public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrderService {
 
     protected static final Logger log = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
-	public static String COUPON_URL = ConfigUtil.get("couponUrl");
 	@Inject
 	protected ServiceOrderRepository serviceOrderRepository;
 	@Inject
