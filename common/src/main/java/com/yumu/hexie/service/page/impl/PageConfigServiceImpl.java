@@ -188,7 +188,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 			break;
 		}
 		
-		TypeReference<List<BgImage>> typeReference = new TypeReference<List<BgImage>>() {};
+		TypeReference<BgImage> typeReference = new TypeReference<BgImage>() {};
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 		BgImage bgImage = new BgImage();
 		String obj = (String) redisTemplate.opsForHash().get(keyType, appId);
