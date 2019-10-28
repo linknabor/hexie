@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +48,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 			try {
 	
 				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_BIND_HOUSE_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				BindHouseQueue queue = objectMapper.readValue(json, new TypeReference<BindHouseQueue>(){});
 				User user = queue.getUser();
