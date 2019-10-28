@@ -327,8 +327,10 @@ public class ModelConstant {
 	public static final int BG_IMAGE_TYPE_THREAD = 4;
 	public static final int BG_IMAGE_TYPE_BIND_HOUSE = 5;
 	public static final int BG_IMAGE_TYPE_RESERVATION = 6;
-	
-	
+
+	//队列
+	public static final String KEY_POINT_QUEUE = "pointQueue";
+	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
 	
 	
 }		

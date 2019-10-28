@@ -1,21 +1,29 @@
 package com.yumu.hexie.service.user.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.amap.AmapUtil;
 import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
+import com.yumu.hexie.integration.wuye.vo.HexieAddress;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddressRepository;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -25,6 +33,7 @@ import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.AddressService;
+import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
 
@@ -33,14 +42,36 @@ public class AddressServiceImpl implements AddressService {
 
     private static final Logger log = LoggerFactory.getLogger(AddressServiceImpl.class);
     
+    private static Map<String,Long> map = null;
+    
     @Inject
     private UserService userService;
     @Inject
     private AddressRepository addressRepository;
     @Inject
     private AmapAddressRepository amapAddressRepository;
-    @Inject
+    @Autowired
     private RegionRepository regionRepository;
+    @Autowired
+    private RegionService regionService;
+    
+    @PostConstruct
+	public void init() {
+		if(map == null){
+			getNeedRegion();
+		}
+	}
+    
+    public void getNeedRegion(){
+		
+		if(map==null){
+			map=new HashMap<>();
+			List<Region>  regionList=regionRepository.findNeedRegion();
+			for (Region region : regionList) {
+				map.put(region.getName(), region.getId());
+			}
+		}
+	}
     
     @Override
     public Address addAddress(AddressReq addressReq) {
@@ -257,4 +288,115 @@ public class AddressServiceImpl implements AddressService {
 	public List<Address> getAddressByShareCode(String shareCode) {
 		return addressRepository.getAddressByShareCode(shareCode);
 	}
+	
+	/**
+	 * 根据合协社区用户绑定的房屋设置默认地址
+	 * @param user
+	 * @param addr
+	 */
+	@Override
+	@Transactional
+	public void updateDefaultAddress(User user, HexieAddress addr) {
+		
+		boolean result = true;
+		List<Address> list = getAddressByuserIdAndAddress(user.getId(), addr.getCell_addr());
+		for (Address address : list) {
+			if (address.isMain()) {
+				log.info("存在重复默认地址:"+address.getDetailAddress()+"---id:"+address.getId());
+				result = false;
+				break;
+			}
+		}
+		if (result) {
+			List<Address> addressList= getAddressByMain(user.getId(), true);
+			for (Address address : addressList) {
+				if (address != null) {
+					address.setMain(false);
+					addressRepository.save(address);
+					log.info("默认地址设置为不是默认:"+address.getDetailAddress()+"---id:"+address.getId());
+				}
+			}
+			
+			List<Region> re = null;
+			if (addr.getSect_id() != null) {
+				re = regionService.findAllBySectId(addr.getSect_id());
+				if(re.size()==0){
+					log.info("根据小区id["+addr.getSect_id()+"]未查询到相对应的小区，开始按名字查询，名称：" + addr.getRegion_name());
+					re = regionRepository.findByNameAndRegionType(addr.getRegion_name(), 3);
+				}
+				if(re.size()==0){
+					log.info("未查询到小区！"+addr.getSect_name() + ",开始创建。");
+					Region region = new Region();
+					region.setName(addr.getSect_name());
+					region.setParentId(0);
+					region.setParentName(addr.getRegion_name());
+					region.setRegionType(ModelConstant.REGION_XIAOQU);
+					region.setXiaoquAddress(addr.getSect_addr());
+					region.setSectId(addr.getSect_id());
+					regionService.saveRegion(region);
+					re = new ArrayList<>();
+					re.add(region);
+				}
+			}
+			
+			Address add = new Address();
+			boolean hasAddr = false;
+			if (list.size() > 0) {
+				add = list.get(0);
+				hasAddr = true;
+			} else {
+				
+				if (re != null && re.size()> 0) {
+					
+					add.setReceiveName(user.getNickname());
+					add.setTel(user.getTel());
+					add.setUserId(user.getId());
+					add.setCreateDate(System.currentTimeMillis());
+					add.setXiaoquId(re.get(0).getId());
+					add.setXiaoquName(addr.getSect_name());
+					add.setDetailAddress(addr.getCell_addr());
+					add.setCity(addr.getCity_name());
+					Long cityId = map.get(addr.getCity_name());
+					if (cityId == null) {
+						cityId = 0l;
+					}
+					add.setCityId(cityId);
+					add.setCounty(addr.getRegion_name());
+					Long countyId = map.get(addr.getRegion_name());
+					if (countyId == null) {
+						countyId = 0l;
+					}
+					add.setCountyId(countyId);
+					add.setProvince(addr.getProvince_name());
+					Long provinceId = map.get(addr.getProvince_name());
+					if (provinceId == null) {
+						provinceId = 0l;
+					}
+					add.setProvinceId(provinceId);
+					double latitude = 0;
+					double longitude = 0;
+					if (user.getLatitude() != null) {
+						latitude = user.getLatitude();
+					}
+	
+					if (user.getLongitude() != null) {
+						longitude = user.getLongitude();
+					}
+					add.setLatitude(latitude);
+					add.setLongitude(longitude);
+					user.setXiaoquId(re.get(0).getId());
+					hasAddr = true;
+					
+				}
+
+			}
+			if (hasAddr) {
+				add.setMain(true);
+				addressRepository.save(add);
+			}
+			
+		}
+	}
+
+	
 }
