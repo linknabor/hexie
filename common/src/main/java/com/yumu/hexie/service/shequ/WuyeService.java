@@ -36,6 +36,7 @@ public interface WuyeService {
 	public HexieHouse getHouse(String userId, String stmtId);
 
 	
+	
 	// 5.用户登录
 	public HexieUser userLogin(String openId);
 
@@ -102,6 +103,10 @@ public interface WuyeService {
 	// 获取无账单开始日期
 	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname);
 
+	
+	HexieHouse getHouse(String userId, String stmtId, String house_id);
+	HexieUser bindHouse(User user, String stmtId, HexieHouse house);
+	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
 	
 	HexieHouse getHouse(String userId, String stmtId, String house_id);
 	HexieUser bindHouse(User user, String stmtId, HexieHouse house);
