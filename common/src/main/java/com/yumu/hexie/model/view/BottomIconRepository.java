@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BottomIconRepository extends JpaRepository<BottomIcon, Long> {
 
-	List<BottomIcon> findByIconSys(String iconSys, Sort sort);
+	List<BottomIcon> findByAppId(String appId, Sort sort);
 }

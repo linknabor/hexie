@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
+import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
@@ -43,5 +44,9 @@ public interface AddressService {
 	public List<Address> getAddressByMain(long id,boolean main);
 	
 	public List<Address> getAddressByShareCode(String shareCode);
+
+	void updateDefaultAddress(User user, HexieAddress addr);
+	
+	
 	
 }
