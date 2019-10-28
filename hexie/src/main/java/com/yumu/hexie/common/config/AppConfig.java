@@ -25,7 +25,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @ComponentScan(basePackages = {"com.yumu.hexie"}, includeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = {"com.yumu.hexie.web.*","com.yumu.hexie.service.*"}))
 @EnableJpaRepositories({"com.yumu.hexie.model.*"})
 @EnableScheduling
-@EnableAspectJAutoProxy
+@EnableAspectJAutoProxy()
 @EnableAsync
 @EnableCaching(proxyTargetClass=true)
 public class AppConfig {
