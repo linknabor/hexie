@@ -16,12 +16,15 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -100,7 +103,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 			iconList = objectMapper.readValue(iconObj, typeReference);
 		} else {
 			Sort sort = new Sort(Direction.ASC, "sort");
-			iconList = bottomIconRepository.findByIconSys(iconSys, sort);
+			iconList = bottomIconRepository.findByAppId(iconSys, sort);
 			String iconStr = objectMapper.writeValueAsString(iconList);
 			redisTemplate.opsForHash().put(ModelConstant.KEY_TYPE_BOTTOM_ICON, iconSys, iconStr);
 		}
@@ -122,12 +125,12 @@ public class PageConfigServiceImpl implements PageConfigService {
 		}
 		Map<String, List<BottomIcon>> iconMap = new HashMap<String, List<BottomIcon>>();
 		for (BottomIcon bottomIcon : iconList) {
-			if (!iconMap.containsKey(bottomIcon.getIconSys())) {
+			if (!iconMap.containsKey(bottomIcon.getAppId())) {
 				List<BottomIcon> list = new ArrayList<>();
 				list.add(bottomIcon);
-				iconMap.put(bottomIcon.getIconSys(), list);
+				iconMap.put(bottomIcon.getAppId(), list);
 			} else {
-				List<BottomIcon> list = iconMap.get(bottomIcon.getIconSys());
+				List<BottomIcon> list = iconMap.get(bottomIcon.getAppId());
 				list.add(bottomIcon);
 			}
 		}
@@ -146,14 +149,14 @@ public class PageConfigServiceImpl implements PageConfigService {
 	
 	/**
 	 * 根据不同sys动态获取空白背景地图
-	 * @param fromSys
+	 * @param appId
 	 * @return
 	 */
 	@Override
-	public List<BgImage> getBgImage(String imageType, String fromSys) throws JsonParseException, JsonMappingException, IOException {
+	public BgImage getBgImage(String imageType, String appId) throws JsonParseException, JsonMappingException, IOException {
 
-		if (StringUtil.isEmpty(fromSys)) {
-			fromSys = ConstantWeChat.APPID;
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
 		}
 		
 		int type = 0;
@@ -185,20 +188,26 @@ public class PageConfigServiceImpl implements PageConfigService {
 			break;
 		}
 		
-		TypeReference<List<BottomIcon>> typeReference = new TypeReference<List<BottomIcon>>() {};
+		TypeReference<List<BgImage>> typeReference = new TypeReference<List<BgImage>>() {};
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		List<BgImage> imageList = new ArrayList<>();
-		String obj = (String) redisTemplate.opsForHash().get(keyType, fromSys);
+		BgImage bgImage = new BgImage();
+		String obj = (String) redisTemplate.opsForHash().get(keyType, appId);
 		if (!StringUtils.isEmpty(obj)) {
-			imageList = objectMapper.readValue(obj, typeReference);
+			bgImage = objectMapper.readValue(obj, typeReference);
 		}
-		if (imageList.isEmpty()) {
-			imageList = bgImageRepository.findByTypeAndFromSys(type, fromSys);
-			if (!imageList.isEmpty()) {
-				savePageView2HashCache(keyType, fromSys, imageList);
+		if (!StringUtils.isEmpty(bgImage.getId())) {
+			bgImage = bgImageRepository.findByTypeAndAppId(type, appId);
+			if (!StringUtils.isEmpty(bgImage.getId())) {
+				savePageView2HashCache(keyType, appId, bgImage);
 			}
 		}
-		return imageList;
+		return bgImage;
+	}
+	
+	//TODO
+	public void updateBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) {
+		
+		
 	}
 	
 	
@@ -231,6 +240,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 		String str = objectMapper.writeValueAsString(o);
 		redisTemplate.opsForHash().put(hashKey, field, str);
+		
 	}
 
 }

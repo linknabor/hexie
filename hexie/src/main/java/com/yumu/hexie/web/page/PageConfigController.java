@@ -5,7 +5,6 @@
 package com.yumu.hexie.web.page;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -42,23 +41,25 @@ public class PageConfigController extends BaseController{
     
     @RequestMapping(value = "/pageconfig/{tempKey}", method = RequestMethod.GET )
     public String process(HttpServletRequest request,
-            HttpServletResponse response, @PathVariable String tempKey, @RequestParam String fromSys) throws Exception {
+            HttpServletResponse response, @PathVariable String tempKey, @RequestParam(required = false) String appId) throws Exception {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
         return pageConfigService.findByTempKey(tempKey);
     }
     
-    @RequestMapping(value = "/iconList/{fromSys}", method = RequestMethod.PUT )
-    public String updateIconBottom(@PathVariable String fromSys) throws Exception {
+    @RequestMapping(value = "/iconList/{appId}", method = RequestMethod.PUT )
+    public String updateIconBottom(@PathVariable String appId) throws Exception {
       
     	pageConfigService.updateBottomIcon();
     	return "success";
     }
     
     @RequestMapping(value = "/bgImage/{type}", method = RequestMethod.GET )
-    public List<BgImage> getBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) 
+    public BgImage getBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) 
     		throws JsonParseException, JsonMappingException, IOException {
     	
     	return pageConfigService.getBgImage(type, user.getAppId());
     }
+    
+   
 }

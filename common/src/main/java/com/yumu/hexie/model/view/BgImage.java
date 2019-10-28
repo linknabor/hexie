@@ -14,8 +14,7 @@ public class BgImage extends BaseModel {
 
 	private int type;	//类型
 	private String imgUrl;	//图片地址
-	private String fromSys;	//系统
-	private String forwardUrl;	//跳转地址
+	private String appId;	//系统
 	
 	public int getType() {
 		return type;
@@ -29,22 +28,15 @@ public class BgImage extends BaseModel {
 	public void setImgUrl(String imgUrl) {
 		this.imgUrl = imgUrl;
 	}
-	public String getFromSys() {
-		return fromSys;
+	public String getAppId() {
+		return appId;
 	}
-	public void setFromSys(String fromSys) {
-		this.fromSys = fromSys;
-	}
-	public String getForwardUrl() {
-		return forwardUrl;
-	}
-	public void setForwardUrl(String forwardUrl) {
-		this.forwardUrl = forwardUrl;
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 	@Override
 	public String toString() {
-		return "BgImage [type=" + type + ", imgUrl=" + imgUrl + ", fromSys=" + fromSys + ", forwardUrl=" + forwardUrl
-				+ "]";
+		return "BgImage [type=" + type + ", imgUrl=" + imgUrl + ", fromSys=" + appId + "]";
 	}
 	
 	

@@ -27,6 +27,7 @@ import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
+import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
@@ -62,11 +63,10 @@ public class WuyeUtil {
 
 	// 接口地址
 	private static final String QUERY_SECTID_BY_SECTNAME = "querySectIdByNameSDO.do?regionName=%s"; // 
-	private static final String PAY_USER_BIND_HOUSE_URL = "payUserBindHouseSDO.do?wuyeId=%s"; // 
 	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s"; // 房屋详情地址
 	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s"; // 添加房子
 	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s"; // 无账单添加房子
-	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s"; // 扫一扫（添加房子）
+	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s&house_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String BILL_LIST_STD_URL = "getPayListStdSDO.do?user_id=%s&start_date=%s&end_date=%s&mng_cell_id=%s&sect_id=%s"; // 获取账单列表
@@ -81,7 +81,7 @@ public class WuyeUtil {
 			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s";//支付请求
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
-	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&bill_id=%s&stmt_id=%s&trade_water_id=%s&package=%s"; // 微信支付返回
+	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&trade_water_id=%s"; // 微信支付返回
 	//private static final String GET_LOCATION_URL = "getGeographicalPositionSDO.do"; // 用户地理位置
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
 	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s";
@@ -91,18 +91,14 @@ public class WuyeUtil {
 	private static final String BILL_PAY_ADDRESS_URL = "getBillAddressSDO.do"+ "?bill_id=%s";//查询账单地址
 	private static final String SYNC_SERVICE_CFG_URL = "/param/getParamSDO.do?info_id=%s&type=%s&para_name=%s";
 	private static final String BILL_LIST_DATE = "getBillStartDateSDO.do?user_id=%s&mng_cell_id=%s";//获取无账单日期
-	
+	private static final String PAY_WATER_URL = "getMngCellByTradeIdSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录涉及的房屋
+	private static final String BIND_BY_TRADE_URL = "bindHouseByTradeIdSDO.do?user_id=%s&trade_water_id=%s";
 	
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
 	public static BaseResult<BillListVO> quickPayInfo(String stmtId, String currPage, String totalCount) {
 		String url = REQUEST_ADDRESS + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
-	}
-	//根据wuyeId查询缴费用户并绑定房子
-	public static BaseResult<HexieUser> queryPayUserAndBindHouse(String wuyeId){
-		String url = REQUEST_ADDRESS + String.format(PAY_USER_BIND_HOUSE_URL, wuyeId);
-		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
 	
 	//根据sectName得到sectid
@@ -128,6 +124,13 @@ public class WuyeUtil {
 		log.error("【绑定房产url】="+url);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
+	
+	// 4.根据订单查询房产信息
+	public static BaseResult<HexieHouse> getHouse(String userId,String stmtId) {
+		String url = REQUEST_ADDRESS + String.format(SYS_ADD_HOUSE_URL, userId,stmtId, "");
+		return (BaseResult<HexieHouse>)httpGet(url,HexieHouse.class);
+	}
+	
 	//无账单绑定房产
 	public static BaseResult<HexieUser> bindHouseNoStmt(String userId,String houseId, String area) {
 		String url = REQUEST_ADDRESS + String.format(ADD_HOUSENOSTMT_URL, userId,houseId,area);
@@ -141,8 +144,8 @@ public class WuyeUtil {
 	}
 	
 	// 4.根据订单查询房产信息
-	public static BaseResult<HexieHouse> getHouse(String userId,String stmtId) {
-		String url = REQUEST_ADDRESS + String.format(SYS_ADD_HOUSE_URL, userId,stmtId);
+	public static BaseResult<HexieHouse> getHouse(String userId,String stmtId, String house_id) {
+		String url = REQUEST_ADDRESS + String.format(SYS_ADD_HOUSE_URL, userId, stmtId, house_id);
 		return (BaseResult<HexieHouse>)httpGet(url,HexieHouse.class);
 	}
 
@@ -237,8 +240,9 @@ public class WuyeUtil {
 	}
 	
 	// 11.通知已支付
-	public static BaseResult<PayResult> noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId) {
-		String url = REQUEST_ADDRESS + String.format(WX_PAY_NOTICE, userId,billId,stmtId, tradeWaterId, packageId);
+	@SuppressWarnings("unchecked")
+	public static BaseResult<PayResult> noticePayed(String userId, String tradeWaterId) {
+		String url = REQUEST_ADDRESS + String.format(WX_PAY_NOTICE, userId,tradeWaterId);
 		return (BaseResult<PayResult>)httpGet(url,PayResult.class);
 	}
 	
@@ -276,6 +280,12 @@ public class WuyeUtil {
 		String url = regionurl + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		log.error("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
+	}
+	
+	//16.根据交易ID查询涉及到的房屋
+	public static BaseResult<String> getPayWaterToCell(String userId, String trade_water_id) {
+		String url = REQUEST_ADDRESS + String.format(PAY_WATER_URL, userId, trade_water_id);
+		return (BaseResult<String>)httpGet(url, String.class);
 	}
 	
 	//20.根据名称模糊查询合协社区小区列表
@@ -331,6 +341,14 @@ public class WuyeUtil {
 		return (BaseResult<BillStartDate>)httpGet(url,BillStartDate.class);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static BaseResult<HexieHouses> bindByTrade(String userId, String tradeWaterId) {
+		
+		String url = REQUEST_ADDRESS + String.format(BIND_BY_TRADE_URL, userId, tradeWaterId);
+		BaseResult<HexieHouses> baseResult = httpGet(url,HexieHouses.class);
+		return baseResult;
+	}
+	
 	private static BaseResult httpGet(String reqUrl, Class c){
 		HttpGet get = new HttpGet(reqUrl);
 		get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36");
@@ -377,7 +395,6 @@ public class WuyeUtil {
 			BaseResult v =jsonToBeanResult(resp, c);
 			return v;
 		} catch (Exception e) {
-			e.printStackTrace();
 			Log.error("err msg :" + e.getMessage());
 		}
 		BaseResult r= new BaseResult();
