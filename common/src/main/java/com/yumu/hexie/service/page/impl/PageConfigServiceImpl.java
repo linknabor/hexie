@@ -12,7 +12,6 @@ import java.util.function.Function;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.proxy.Callback;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -101,7 +100,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		Sort sort = new Sort(Direction.ASC, "sort");
 		Function<String, List<BottomIcon>> function = sysAppId->{return bottomIconRepository.findByAppId(sysAppId, sort);};
 		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
-		List<BottomIcon> iconList = getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
+		List<BottomIcon> iconList = (List<BottomIcon>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
 		return iconList;
 	}
 
@@ -157,7 +156,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		Sort sort = new Sort(Direction.ASC, "type");
 		Function<String, List<BgImage>> function = sysAppId->{return bgImageRepository.findByAppId(sysAppId, sort);};
 		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
-		List<BgImage> iconList = getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
+		List<BgImage> iconList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
 		return iconList;
 	}
 	
@@ -169,38 +168,49 @@ public class PageConfigServiceImpl implements PageConfigService {
 
 	/**
 	 * 动态获取公众号二维码
+	 * @throws IOException 
+	 * @throws JsonProcessingException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public QrCode getQrCode(String appId) {
+	public QrCode getQrCode(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
 		if (StringUtil.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
 		}
-		//TODO 做缓存
-		QrCode qrCode = qrCodeRepository.findByFromSys(appId);
+		Function<String, QrCode> function = sysAppId->{return qrCodeRepository.findByFromSys(sysAppId);};
+		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
+		QrCode qrCode = (QrCode) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
 		return qrCode;
 	}
 	
 	/**
 	 * 根据banner类型和appId获取banner
+	 * @throws IOException 
+	 * @throws JsonProcessingException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) {
+	public List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
 		if (StringUtils.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
 		}
-		Sort sort = new Sort(Direction.ASC, "sort");
-		return bannerRepository.findByBannerTypeAndStatusAndRegionTypeAndAppId(bannerType, ModelConstant.BANNER_STATUS_VALID, 
-				ModelConstant.REGION_ALL, appId, sort);
+		Sort sort = new Sort(Direction.ASC, "sortNo");
+		
+		Function<String, List<Banner>> function = sysAppId->{
+			return bannerRepository.findByBannerTypeAndStatusAndRegionTypeAndAppId(bannerType, ModelConstant.BANNER_STATUS_VALID, 
+				ModelConstant.REGION_ALL, sysAppId, sort);
+		};
+		TypeReference typeReference = new TypeReference<List<Banner>>() {};
+		List<Banner> bannerList = (List<Banner>) getConfigFromCache(ModelConstant.KEY_TYPE_BANNER, appId, typeReference, function);
+		return bannerList;
 		
 	}
-	
-	class A implements Callback{
-		
-		public void queryFromDb() {}
-	}
-	
 	
 	/**
 	 * 根据appId获取相应的图标或者背景图，每个公众号有自己不同的图标和背景图
@@ -213,21 +223,21 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @throws JsonMappingException
 	 * @throws JsonProcessingException
 	 */
-	private <T> List<T> getConfigFromCache(String redisKey, String appId, TypeReference<T> typeReference, Function<String, List<T>> function)
+	private <T> Object getConfigFromCache(String redisKey, String appId, TypeReference<T> typeReference, Function<String, T> function)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException {
 		
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		List<T> list = new ArrayList<>();
-		String obj = (String) redisTemplate.opsForHash().get(redisKey, appId);
-		if (!StringUtils.isEmpty(obj)) {
-			list = objectMapper.readValue(obj, typeReference);
-		} 
-		if (list.isEmpty()) {
-			list = function.apply(appId);
-			String objStr = objectMapper.writeValueAsString(list);
+		Object object = new Object();
+		String objStr = (String) redisTemplate.opsForHash().get(redisKey, appId);
+		if (!StringUtils.isEmpty(objStr)) {
+			object = objectMapper.readValue(objStr, typeReference);
+		}
+		if (object == null) {
+			object = function.apply(appId);
+			objStr = objectMapper.writeValueAsString(object);
 			redisTemplate.opsForHash().put(redisKey, appId, objStr);
 		}
-		return list;
+		return object;
 	}
 	
 	
