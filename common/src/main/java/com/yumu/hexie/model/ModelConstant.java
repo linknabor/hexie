@@ -302,9 +302,10 @@ public class ModelConstant {
 	
 	//底部图标缓存key
 	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";
-	
 	//bgImage Redis key
 	public static final String KEY_TYPE_BGIMAGE = "bgImage";
+	
+	public static final String KEY_TYPE_BANNER = "banner";
 
 	//队列
 	public static final String KEY_POINT_QUEUE = "pointQueue";

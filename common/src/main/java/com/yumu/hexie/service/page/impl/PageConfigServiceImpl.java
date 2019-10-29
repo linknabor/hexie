@@ -97,18 +97,10 @@ public class PageConfigServiceImpl implements PageConfigService {
 		if (StringUtil.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
 		}
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		List<BottomIcon> iconList = new ArrayList<>();
-		String iconObj = (String) redisTemplate.opsForHash().get(ModelConstant.KEY_TYPE_BOTTOM_ICON, iconSys);
-		if (!StringUtils.isEmpty(iconObj)) {
-			TypeReference<List<BottomIcon>> typeReference = new TypeReference<List<BottomIcon>>() {};
-			iconList = objectMapper.readValue(iconObj, typeReference);
-		} else {
-			Sort sort = new Sort(Direction.ASC, "sort");
-			iconList = bottomIconRepository.findByAppId(iconSys, sort);
-			String iconStr = objectMapper.writeValueAsString(iconList);
-			redisTemplate.opsForHash().put(ModelConstant.KEY_TYPE_BOTTOM_ICON, iconSys, iconStr);
-		}
+		Sort sort = new Sort(Direction.ASC, "sort");
+		Function<String, List<BottomIcon>> function = sysAppId->{return bottomIconRepository.findByAppId(sysAppId, sort);};
+		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
+		List<BottomIcon> iconList = (List<BottomIcon>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
 		return iconList;
 	}
 
@@ -292,8 +284,6 @@ public class PageConfigServiceImpl implements PageConfigService {
 			redisTemplate.opsForHash().put(redisKey, appId, objStr);
 		}
 		return object;
-		
-		
 	}
 	
 	
