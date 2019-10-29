@@ -155,9 +155,9 @@ public class PageConfigServiceImpl implements PageConfigService {
 		}
 		Sort sort = new Sort(Direction.ASC, "type");
 		Function<String, List<BgImage>> function = sysAppId->{return bgImageRepository.findByAppId(sysAppId, sort);};
-		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
-		List<BgImage> iconList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, typeReference, function);
-		return iconList;
+		TypeReference typeReference = new TypeReference<List<BgImage>>() {};
+		List<BgImage> imageList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, typeReference, function);
+		return imageList;
 	}
 	
 	//TODO
