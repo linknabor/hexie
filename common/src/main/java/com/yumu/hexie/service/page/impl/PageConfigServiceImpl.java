@@ -76,11 +76,21 @@ public class PageConfigServiceImpl implements PageConfigService {
 
 	}
 
+	/**
+	 * 到家、洗衣、红包页面配置
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public String findByTempKey(String key) {
-		PageConfigView v = pageConfigViewRepository.findByTempKey(key);
-		if (v != null) {
-			return v.getPageConfig();
+	public String findByTempKey(String key, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+		
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
+		}
+		Function<String, PageConfigView> function = sysAppId->{return pageConfigViewRepository.findByTempKeyAndAppId(key, sysAppId);};
+		TypeReference typeReference = new TypeReference<PageConfigView>() {};
+		PageConfigView pageConfigView = (PageConfigView) getConfigFromCache(ModelConstant.KEY_TYPE_PAGECONFIG, appId, typeReference, function);
+		if (pageConfigView != null) {
+			return pageConfigView.getPageConfig();
 		}
 		return "";
 	}

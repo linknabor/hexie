@@ -14,9 +14,9 @@ import com.yumu.hexie.model.view.QrCode;
 
 public interface PageConfigService {
 	
-	public List<Banner> queryBannerType(User user, int bannerType);
+	List<Banner> queryBannerType(User user, int bannerType);
 
-	public String findByTempKey(String key);
+	String findByTempKey(String key, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
 
 	List<BottomIcon> getBottomIcon(String appId) throws JsonParseException, JsonMappingException, IOException;
 

@@ -308,6 +308,8 @@ public class ModelConstant {
 	public static final String KEY_TYPE_BANNER = "banner";
 	
 	public static final String KEY_TYPE_QRCODE = "qrcode";
+	
+	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";
 
 	//队列
 	public static final String KEY_POINT_QUEUE = "pointQueue";

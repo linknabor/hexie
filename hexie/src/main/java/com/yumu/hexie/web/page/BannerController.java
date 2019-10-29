@@ -5,10 +5,12 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
@@ -32,8 +34,13 @@ public class BannerController extends BaseController{
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/banner/{bannerType}", method = RequestMethod.GET)
-	public BaseResult<List<Banner>> getBannerByBannerType(@ModelAttribute(Constants.USER)User user,@PathVariable int bannerType) throws Exception {
-		return BaseResult.successResult(pageConfigService.queryByBannerTypeAndAppId(bannerType, user.getAppId()));
+	public BaseResult<List<Banner>> getBannerByBannerType(@ModelAttribute(Constants.USER)User user,
+			@PathVariable int bannerType,
+			@RequestParam(required = false) String appId) throws Exception {
+		if (StringUtils.isEmpty(appId)) {
+			appId = user.getAppId();
+		}
+		return BaseResult.successResult(pageConfigService.queryByBannerTypeAndAppId(bannerType, appId));
     }
 	
 
