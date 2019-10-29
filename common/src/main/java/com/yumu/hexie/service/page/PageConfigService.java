@@ -22,9 +22,9 @@ public interface PageConfigService {
 
 	void updateBottomIcon() throws JsonProcessingException;
 
-	public QrCode getQrCode(String appId);
+	QrCode getQrCode(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
 	
-	List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId);
+	List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
 
 	List<BgImage> getBgImage(String appId) throws JsonParseException, JsonMappingException, IOException;
 }
