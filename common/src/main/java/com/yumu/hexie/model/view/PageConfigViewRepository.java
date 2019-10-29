@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PageConfigViewRepository extends JpaRepository<PageConfigView, Long> {
 
-    public PageConfigView findByTempKey(String key);
+    public PageConfigView findByTempKeyAndAppId(String key, String appId);
 }
