@@ -5,6 +5,7 @@
 package com.yumu.hexie.web.page;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -55,10 +56,10 @@ public class PageConfigController extends BaseController{
     }
     
     @RequestMapping(value = "/bgImage/{type}", method = RequestMethod.GET )
-    public BgImage getBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) 
+    public List<BgImage> getBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) 
     		throws JsonParseException, JsonMappingException, IOException {
     	
-    	return pageConfigService.getBgImage(type, user.getAppId());
+    	return pageConfigService.getBgImage(user.getAppId());
     }
     
    
