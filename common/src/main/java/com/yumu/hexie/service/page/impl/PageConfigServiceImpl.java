@@ -156,7 +156,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		Sort sort = new Sort(Direction.ASC, "type");
 		Function<String, List<BgImage>> function = sysAppId->{return bgImageRepository.findByAppId(sysAppId, sort);};
 		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
-		List<BgImage> iconList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
+		List<BgImage> iconList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, typeReference, function);
 		return iconList;
 	}
 	
@@ -227,8 +227,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 			appId = ConstantWeChat.APPID;
 		}
 		Function<String, QrCode> function = sysAppId->{return qrCodeRepository.findByFromSys(sysAppId);};
-		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
-		QrCode qrCode = (QrCode) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, function);
+		TypeReference typeReference = new TypeReference<QrCode>() {};
+		QrCode qrCode = (QrCode) getConfigFromCache(ModelConstant.KEY_TYPE_QRCODE, appId, typeReference, function);
 		return qrCode;
 	}
 	
@@ -273,10 +273,13 @@ public class PageConfigServiceImpl implements PageConfigService {
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException {
 		
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		Object object = new Object();
+		Object object = null;
 		String objStr = (String) redisTemplate.opsForHash().get(redisKey, appId);
 		if (!StringUtils.isEmpty(objStr)) {
-			object = objectMapper.readValue(objStr, typeReference);
+			String valueStr = objStr.replace("[", "").replace("]", "");
+			if (!StringUtils.isEmpty(valueStr)) {
+				object = objectMapper.readValue(objStr, typeReference);
+			}
 		}
 		if (object == null) {
 			object = function.apply(appId);

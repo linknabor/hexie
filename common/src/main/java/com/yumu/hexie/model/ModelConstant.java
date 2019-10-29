@@ -306,6 +306,8 @@ public class ModelConstant {
 	public static final String KEY_TYPE_BGIMAGE = "bgImage";
 	
 	public static final String KEY_TYPE_BANNER = "banner";
+	
+	public static final String KEY_TYPE_QRCODE = "qrcode";
 
 	//队列
 	public static final String KEY_POINT_QUEUE = "pointQueue";
