@@ -291,12 +291,6 @@ public class UserInfo implements Serializable {
 	public void setQrCode(String qrCode) {
 		this.qrCode = qrCode;
 	}
-	public String getOpenid() {
-		return openid;
-	}
-	public void setOpenid(String openid) {
-		this.openid = openid;
-	}
 	public List<BgImage> getBgImageList() {
 		return bgImageList;
 	}
