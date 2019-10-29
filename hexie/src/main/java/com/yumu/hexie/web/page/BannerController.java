@@ -33,7 +33,7 @@ public class BannerController extends BaseController{
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/banner/{bannerType}", method = RequestMethod.GET)
 	public BaseResult<List<Banner>> getBannerByBannerType(@ModelAttribute(Constants.USER)User user,@PathVariable int bannerType) throws Exception {
-		return BaseResult.successResult(pageConfigService.queryBannerType(user, bannerType));
+		return BaseResult.successResult(pageConfigService.queryByBannerTypeAndAppId(bannerType, user.getAppId()));
     }
 	
 
@@ -60,4 +60,6 @@ public class BannerController extends BaseController{
 		vo.setBrands(products);
 		return new BaseResult<BannersVO>().success(vo);
     }
+	
+	
 }
