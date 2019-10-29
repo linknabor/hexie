@@ -13,10 +13,18 @@ import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
 
 public interface PageConfigService {
+	
 	public List<Banner> queryBannerType(User user, int bannerType);
-    public String findByTempKey(String key);
+
+	public String findByTempKey(String key);
+
 	List<BottomIcon> getBottomIcon(String appId) throws JsonParseException, JsonMappingException, IOException;
+
 	void updateBottomIcon() throws JsonProcessingException;
-	public QrCode getQrCode(String fromSys);
-	BgImage getBgImage(String imageType, String fromSys) throws JsonParseException, JsonMappingException, IOException;
+
+	public QrCode getQrCode(String appId);
+	
+	List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId);
+
+	List<BgImage> getBgImage(String appId) throws JsonParseException, JsonMappingException, IOException;
 }

@@ -302,31 +302,9 @@ public class ModelConstant {
 	
 	//底部图标缓存key
 	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";
-	//社区首页banner缓存key
-	public static final String KEY_TYPE_SHEQU_BANNER = "communityBanner";
-	//社区板块整体页面缓存key
-	public static final String KEY_TYPE_SHEQU_PAGE = "communityPage";
 	
-	//无订单背景显示图缓存key
-	public static final String KEY_TYPE_BG_IMAGE_ORDER = "bgImageOrder";
-	//拼单背景
-	public static final String KEY_TYPE_BG_IMAGE_GROUP_ORDER = "bgImageGroupOrder";
-	//维修单
-	public static final String KEY_TYPE_BG_IMAGE_REPAIR_ORDER = "bgImageRepairOrder";
-	//帖子、意见投诉
-	public static final String KEY_TYPE_BG_IMAGE_THREAD = "bgImageThread";
-	//绑定房屋
-	public static final String KEY_TYPE_BG_IMAGE_BIND_HOUSE = "bgImageBindHouse";
-	//预约
-	public static final String KEY_TYPE_BG_IMAGE_RESERVATION = "bgImageReservation";
-	
-	//bgImage 类型
-	public static final int BG_IMAGE_TYPE_ORDER = 1;
-	public static final int BG_IMAGE_TYPE_GROUP_ORDER = 2;
-	public static final int BG_IMAGE_TYPE_REPAIR_ORDER = 3;
-	public static final int BG_IMAGE_TYPE_THREAD = 4;
-	public static final int BG_IMAGE_TYPE_BIND_HOUSE = 5;
-	public static final int BG_IMAGE_TYPE_RESERVATION = 6;
+	//bgImage Redis key
+	public static final String KEY_TYPE_BGIMAGE = "bgImage";
 
 	//队列
 	public static final String KEY_POINT_QUEUE = "pointQueue";
