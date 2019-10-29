@@ -19,3 +19,4 @@
 /hexie-config/.settings/*.prefs
 /hexie-eureka/.settings/*.prefs
 /hexie-config/logs/config-server/*.log
+/hexie/src/main/resources/a.properties.bak
