@@ -53,6 +53,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				BindHouseQueue queue = objectMapper.readValue(json, new TypeReference<BindHouseQueue>(){});
+				
+				logger.info("strat to consume to queue : " + queue);
+				
 				User user = queue.getUser();
 				int totalFailed = 0;
 				boolean isSuccess = false;
@@ -60,30 +63,37 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				while(!isSuccess && totalFailed < 3) {
 					
 					BaseResult<HexieHouses> baseResult = WuyeUtil.bindByTrade(user.getWuyeId(), queue.getTradeWaterId());
-					logger.info("baseResult is : " + baseResult);
-					
 					if (baseResult.isSuccess()) {
 						HexieHouses hexieHouses = baseResult.getData();
 						List<HexieHouse> houseList = hexieHouses.getHouses();
 						
-						if (houseList != null) {
+						if (houseList != null && houseList.size() > 0) {
 							for (HexieHouse hexieHouse : houseList) {
 								HexieUser hexieUser = new HexieUser();
 								BeanUtils.copyProperties(hexieHouse, hexieUser);
 								wuyeService.setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
 							}
+							isSuccess = true;
+						} else {
+							
+							logger.info("交易[" + queue.getTradeWaterId() + "] 未查询到对应房屋，可能还未入账。");
+							totalFailed++;
+							Thread.sleep(10000);
 						}
-						
-						isSuccess = true;
 						
 					} else if ("04".equals(baseResult.getResult())) {
 						//已绑定过的，直接消耗队列，不处理
+						logger.info("交易[" + queue.getTradeWaterId() + "] 已绑定房屋.");
 						isSuccess = true;
 					} else {
 						logger.error("用户：" + user.getId() + " + 交易[" + queue.getTradeWaterId() + "]，绑定房屋失败！");
 						totalFailed++;
 						Thread.sleep(10000);
 					}
+				}
+				
+				if (!isSuccess && totalFailed >= 3) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, json);
 				}
 			
 			} catch (Exception e) {
