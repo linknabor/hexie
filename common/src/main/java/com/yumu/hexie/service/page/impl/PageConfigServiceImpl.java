@@ -89,7 +89,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 		final String sysAppId = appId;
 		Supplier<PageConfigView> supplier = ()-> pageConfigViewRepository.findByTempKeyAndAppId(key, sysAppId);
 		TypeReference typeReference = new TypeReference<PageConfigView>() {};
-		PageConfigView pageConfigView = (PageConfigView) getConfigFromCache(ModelConstant.KEY_TYPE_PAGECONFIG, appId, typeReference, supplier);
+		String field = appId + "_" + key;
+		PageConfigView pageConfigView = (PageConfigView) getConfigFromCache(ModelConstant.KEY_TYPE_PAGECONFIG, field, typeReference, supplier);
 		if (pageConfigView != null) {
 			return pageConfigView.getPageConfig();
 		}
