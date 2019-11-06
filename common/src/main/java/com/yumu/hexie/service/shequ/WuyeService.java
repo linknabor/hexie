@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.shequ;
 
 
+import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -44,7 +45,11 @@ public interface WuyeService {
 	public WechatPayInfo getPrePayInfo(User user,String billId,String stmtId, 
 				String couponUnit, String couponNum, 
 				String couponId,String mianBill,String mianAmt, String reduceAmt, 
-				String invoice_title_type, String credit_code, String invoice_title) throws Exception;
+				String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception;
+	// 10.5 无账单缴费
+	public WechatPayInfo getOtherPrePayInfo(User user,String houseId,String start_date,String end_date, 
+				String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt, 
+				String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception;
 	// 11.通知已支付
 	public PayResult noticePayed(String userId,String billId,String stmtId, String tradeWaterId, String packageId);
 	// 12.查询是否已经用过红包

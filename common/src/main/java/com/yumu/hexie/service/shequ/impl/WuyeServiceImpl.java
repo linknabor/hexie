@@ -32,6 +32,8 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.region.RegionUrl;
+import com.yumu.hexie.model.region.RegionUrlRepository;
 import com.yumu.hexie.model.user.AddRegionSectIdWorker;
 import com.yumu.hexie.model.user.AddUserSectIdWorker;
 import com.yumu.hexie.model.user.Address;
@@ -74,6 +76,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private AddressRepository addressRepository;
+	
+	@Autowired
+	private RegionUrlRepository regionUrlRepository;
 	
 	@Autowired
 	private UserService userService;
@@ -155,9 +160,21 @@ public class WuyeServiceImpl implements WuyeService {
 	public WechatPayInfo getPrePayInfo(User user, String billId,
 			String stmtId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
-			String invoice_title_type, String credit_code, String invoice_title) throws Exception {
+			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, invoice_title)
+				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
+				.getData();
+	}
+	
+	@Override
+	public WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
+			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
+			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
+			throws Exception {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
 				.getData();
 	}
 

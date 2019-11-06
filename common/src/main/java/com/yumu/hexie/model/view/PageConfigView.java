@@ -31,7 +31,8 @@ public class PageConfigView extends BaseModel {
     private String description;
     
     private boolean available;
-
+    
+    private String fromSys;
 
     public String getPageConfig() {
         return pageConfig;
@@ -64,4 +65,14 @@ public class PageConfigView extends BaseModel {
     public void setTempKey(String tempKey) {
         this.tempKey = tempKey;
     }
+
+	public String getFromSys() {
+		return fromSys;
+	}
+
+	public void setFromSys(String fromSys) {
+		this.fromSys = fromSys;
+	}
+    
+    
 }
