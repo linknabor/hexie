@@ -218,8 +218,7 @@ public class WuyeServiceImpl implements WuyeService {
 			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
-			log.error("异常捕获信息:"+e);
-			e.printStackTrace();
+			log.error(e.getMessage(),e);
 		}
 		return null;
 	}
@@ -233,7 +232,7 @@ public class WuyeServiceImpl implements WuyeService {
 			log.error(s.getResult());
 			return s.getData();
 		} catch (Exception e) {
-			log.error("异常捕获信息:"+e);
+			log.error(e.getMessage(),e);
 		}
 		return null;
 	}
