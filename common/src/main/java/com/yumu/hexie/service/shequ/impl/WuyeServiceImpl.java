@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
@@ -151,6 +152,9 @@ public class WuyeServiceImpl implements WuyeService {
 	public BillListVO queryBillList(String userId, String payStatus,
 			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id,String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(StringUtil.isEmpty(regionurl)) {
+			return null;
+		}
 		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
 
@@ -158,6 +162,9 @@ public class WuyeServiceImpl implements WuyeService {
 	public PaymentInfo getBillDetail(String userId, String stmtId,
 			String billIds,String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(StringUtil.isEmpty(regionurl)) {
+			return null;
+		}
 		return WuyeUtil.getBillDetail(userId, stmtId, billIds,regionurl.getRegionUrl()).getData();
 	}
 
@@ -167,6 +174,9 @@ public class WuyeServiceImpl implements WuyeService {
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
 			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(StringUtil.isEmpty(regionurl)) {
+			return null;
+		}
 		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
 				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
 				.getData();
@@ -178,6 +188,9 @@ public class WuyeServiceImpl implements WuyeService {
 			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
 			throws Exception {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(StringUtil.isEmpty(regionurl)) {
+			return null;
+		}
 		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
 				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
 				.getData();
@@ -216,6 +229,9 @@ public class WuyeServiceImpl implements WuyeService {
 			String unit_id, String data_type,String regionname) {
 		try {
 			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			if(StringUtil.isEmpty(regionurl)) {
+				return null;
+			}
 			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
@@ -228,6 +244,9 @@ public class WuyeServiceImpl implements WuyeService {
 	public CellListVO getVagueSectByName(String sect_name,String regionname) {
 		try {
 			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			if(StringUtil.isEmpty(regionurl)) {
+				return null;
+			}
 			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name,regionurl.getRegionUrl());
 			log.error(s.getResult());
 			return s.getData();
@@ -599,12 +618,18 @@ public class WuyeServiceImpl implements WuyeService {
 	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
 			String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(StringUtil.isEmpty(regionurl)) {
+			return null;
+		}
 		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
 	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(StringUtil.isEmpty(regionurl)) {
+			return null;
+		}
 		try {
 			return WuyeUtil.getBillStartDateSDO(userId,house_id,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
