@@ -18,9 +18,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.TransactionUtil;
+import com.yumu.hexie.integration.baidu.BaiduMapUtil;
+import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
@@ -570,6 +573,41 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public String getSectIdByRegionName(String regionName) {
 		return WuyeUtil.querySectIdByName(regionName).getData();
+	}
+	
+	@Override
+	public RegionVo getRegionUrl(String coordinate) {
+		coordinate = BaiduMapUtil.findByCoordinateGetBaidu(coordinate);
+		String name = BaiduMapUtil.findByBaiduGetCity(coordinate);
+		log.error("坐标获取地址："+name);
+		RegionUrl regionurl = regionUrlRepository.findregionname(name);
+		RegionVo region = new RegionVo();
+		if(regionurl==null) {
+			region.setAddress("上海市");
+		}else {
+			region.setAddress(regionurl.getRegionname());
+		}
+		region.setRegionurl(regionUrlRepository.findAll());
+
+		return region;
+	}
+
+	@Override
+	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
+			String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
+	}
+
+	@Override
+	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		try {
+			return WuyeUtil.getBillStartDateSDO(userId,house_id,regionurl.getRegionUrl()).getData();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 }

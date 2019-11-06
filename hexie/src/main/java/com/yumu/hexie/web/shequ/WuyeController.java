@@ -25,6 +25,7 @@ import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -763,6 +764,23 @@ public class WuyeController extends BaseController {
 		}
 
 	}
+	
+	//查询所有环境路径
+		@RequestMapping(value = "/getRegionUrl", method = RequestMethod.GET)
+		@ResponseBody
+		public BaseResult<RegionVo> getRegionUrl(@RequestParam(required=false) String coordinate) throws Exception {
+
+			return BaseResult.successResult(wuyeService.getRegionUrl(coordinate));
+		}
+		
+		//查询无账单缴费房子开始日期
+		@RequestMapping(value = "/getBillStartDateSDO", method = RequestMethod.GET)
+		@ResponseBody
+		public BaseResult<BillStartDate> getBillStartDateSDO(@ModelAttribute(Constants.USER) User user,@RequestParam String house_id,@RequestParam String regionname) throws Exception {
+
+			return BaseResult.successResult(wuyeService.getBillStartDateSDO(user.getWuyeId(),house_id,regionname));
+		}
+	
 	
 
 }
