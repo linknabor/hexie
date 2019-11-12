@@ -254,7 +254,7 @@ public class WuyeController extends BaseController {
 		if (listVo != null && listVo.getBill_info() != null) {
 			return BaseResult.successResult(listVo);
 		} else {
-			return BaseResult.fail("请求值获取为空");
+			return BaseResult.successResult(null);
 		}
 	}
 	/***************** [END]账单查询 ********************/
@@ -270,7 +270,7 @@ public class WuyeController extends BaseController {
 		if (listVo != null && !listVo.getOther_bill_info().isEmpty()) {
 			return BaseResult.successResult(listVo);
 		} else {
-			return BaseResult.fail("请求值获取为空");
+			return BaseResult.successResult(null);
 		}
 	}
 
@@ -644,7 +644,7 @@ public class WuyeController extends BaseController {
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
-			return BaseResult.fail("请求值获取为空");
+			return BaseResult.successResult(new ArrayList<CellVO>());
 		}
 	}
 
@@ -659,7 +659,7 @@ public class WuyeController extends BaseController {
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
-			return BaseResult.fail("请求值获取为空");
+			return BaseResult.successResult(new ArrayList<CellVO>());
 		}
 	}
 
