@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
@@ -149,14 +151,28 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public BillListVO queryBillList(String userId, String payStatus,
-			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id) {
-		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id).getData();
+			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id,String regionname) {
+		if(StringUtils.isEmpty(regionname)) {
+			return null;
+		}
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(regionurl==null) {
+			return null;
+		}
+		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
 	public PaymentInfo getBillDetail(String userId, String stmtId,
-			String anotherbillIds) {
-		return WuyeUtil.getBillDetail(userId, stmtId, anotherbillIds).getData();
+			String billIds,String regionname) {
+		if(StringUtils.isEmpty(regionname)) {
+			return null;
+		}
+		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(regionurl==null) {
+			return null;
+		}
+		return WuyeUtil.getBillDetail(userId, stmtId, billIds,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
@@ -164,7 +180,13 @@ public class WuyeServiceImpl implements WuyeService {
 			String stmtId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
 			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
+		if(StringUtils.isEmpty(regionname)) {
+			return null;
+		}
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(regionurl==null) {
+			return null;
+		}
 		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
 				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
 				.getData();
@@ -175,7 +197,13 @@ public class WuyeServiceImpl implements WuyeService {
 			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
 			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
 			throws Exception {
+		if(StringUtils.isEmpty(regionname)) {
+			return null;
+		}
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(regionurl==null) {
+			return null;
+		}
 		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
 				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
 				.getData();
@@ -211,25 +239,39 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Override
 	public CellListVO querySectHeXieList(String sect_id, String build_id,
-			String unit_id, String data_type) {
+			String unit_id, String data_type,String regionname) {
 		try {
-			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type).getData();
+			if(StringUtils.isEmpty(regionname)) {
+				return null;
+			}
+			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			if(regionurl==null) {
+				return null;
+			}
+			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
-			log.error("异常捕获信息:"+e);
-			e.printStackTrace();
+			log.error(e.getMessage(),e);
 		}
 		return null;
 	}
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(String sect_name) {
+	public CellListVO getVagueSectByName(String sect_name,String regionname) {
+		log.info("regionname:"+regionname);
 		try {
-			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name);
+			if(StringUtils.isEmpty(regionname)) {
+				return null;
+			}
+			RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+			if(regionurl==null) {
+				return null;
+			}
+			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name,regionurl.getRegionUrl());
 			log.error(s.getResult());
-			return WuyeUtil.getVagueSectByName(sect_name).getData();
+			return s.getData();
 		} catch (Exception e) {
-			log.error("异常捕获信息:"+e);
+			log.error(e.getMessage(),e);
 		}
 		return null;
 	}
@@ -574,7 +616,7 @@ public class WuyeServiceImpl implements WuyeService {
 	public String getSectIdByRegionName(String regionName) {
 		return WuyeUtil.querySectIdByName(regionName).getData();
 	}
-	
+
 	@Override
 	public RegionVo getRegionUrl(String coordinate) {
 		coordinate = BaiduMapUtil.findByCoordinateGetBaidu(coordinate);
@@ -595,13 +637,25 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
 			String regionname) {
+		if(StringUtils.isEmpty(regionname)) {
+			return null;
+		}
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(regionurl==null) {
+			return null;
+		}
 		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
 
 	@Override
 	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
+		if(StringUtils.isEmpty(regionname)) {
+			return null;
+		}
 		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		if(regionurl==null) {
+			return null;
+		}
 		try {
 			return WuyeUtil.getBillStartDateSDO(userId,house_id,regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
@@ -609,5 +663,6 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		return null;
 	}
+
 	
 }
