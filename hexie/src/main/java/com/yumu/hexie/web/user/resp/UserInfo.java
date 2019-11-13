@@ -297,6 +297,12 @@ public class UserInfo implements Serializable {
 	public void setBgImageList(List<BgImage> bgImageList) {
 		this.bgImageList = bgImageList;
 	}
+	public List<BgImage> getBgImageList() {
+		return bgImageList;
+	}
+	public void setBgImageList(List<BgImage> bgImageList) {
+		this.bgImageList = bgImageList;
+	}
     
     
 	
