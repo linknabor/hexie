@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.springframework.beans.BeanUtils;
 
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 
 /**
@@ -68,8 +68,8 @@ public class UserInfo implements Serializable {
     private String sectId;//小区id
 	private String cspId;//公司
  	private Map<?, ?> cfgParam = new HashMap<>();
- 	private List<BottomIcon> iconList = new ArrayList<BottomIcon>();
- 	
+ 	private List<BottomIcon> iconList = new ArrayList<>();
+ 	private List<BgImage> bgImageList = new ArrayList<>();
  	private String qrCode;
 
  	
@@ -291,11 +291,17 @@ public class UserInfo implements Serializable {
 	public void setQrCode(String qrCode) {
 		this.qrCode = qrCode;
 	}
-	public String getOpenid() {
-		return openid;
+	public List<BgImage> getBgImageList() {
+		return bgImageList;
 	}
-	public void setOpenid(String openid) {
-		this.openid = openid;
+	public void setBgImageList(List<BgImage> bgImageList) {
+		this.bgImageList = bgImageList;
+	}
+	public List<BgImage> getBgImageList() {
+		return bgImageList;
+	}
+	public void setBgImageList(List<BgImage> bgImageList) {
+		this.bgImageList = bgImageList;
 	}
     
     

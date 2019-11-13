@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,14 +43,21 @@ public class PageConfigController extends BaseController{
     
     @RequestMapping(value = "/pageconfig/{tempKey}", method = RequestMethod.GET )
     public String process(HttpServletRequest request,
-            HttpServletResponse response, @PathVariable String tempKey, @RequestParam String fromSys) throws Exception {
+            HttpServletResponse response, 
+            @ModelAttribute(Constants.USER) User user, 
+            @PathVariable String tempKey, 
+            @RequestParam(required = false) String appId) throws Exception {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-        return pageConfigService.findByTempKey(tempKey);
+        
+        if (StringUtils.isEmpty(appId)) {
+			appId = user.getAppId();
+		}
+        return pageConfigService.findByTempKey(tempKey, appId);
     }
     
-    @RequestMapping(value = "/iconList/{fromSys}", method = RequestMethod.PUT )
-    public String updateIconBottom(@PathVariable String fromSys) throws Exception {
+    @RequestMapping(value = "/iconList/{appId}", method = RequestMethod.PUT )
+    public String updateIconBottom(@PathVariable String appId) throws Exception {
       
     	pageConfigService.updateBottomIcon();
     	return "success";
@@ -59,6 +67,8 @@ public class PageConfigController extends BaseController{
     public List<BgImage> getBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) 
     		throws JsonParseException, JsonMappingException, IOException {
     	
-    	return pageConfigService.getBgImage(type, user.getAppId());
+    	return pageConfigService.getBgImage(user.getAppId());
     }
+    
+   
 }

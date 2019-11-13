@@ -32,7 +32,7 @@ public class PageConfigView extends BaseModel {
     
     private boolean available;
     
-    private String fromSys;
+    private String appId;
 
     public String getPageConfig() {
         return pageConfig;
@@ -66,13 +66,14 @@ public class PageConfigView extends BaseModel {
         this.tempKey = tempKey;
     }
 
-	public String getFromSys() {
-		return fromSys;
+	public String getAppId() {
+		return appId;
 	}
 
-	public void setFromSys(String fromSys) {
-		this.fromSys = fromSys;
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
+
     
     
 }

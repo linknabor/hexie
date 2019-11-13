@@ -37,6 +37,7 @@ public class HexieUser implements Serializable {
 	private String sect_id;//小区id
 	private String csp_id;//公司
 	private String center_id;//中心管理id
+	private Integer total_bind = 0;
 	
 	public String getSect_id() {
 		return sect_id;
@@ -163,6 +164,12 @@ public class HexieUser implements Serializable {
 	}
 	public void setCell_addr(String cell_addr) {
 		this.cell_addr = cell_addr;
+	}
+	public Integer getTotal_bind() {
+		return total_bind;
+	}
+	public void setTotal_bind(Integer total_bind) {
+		this.total_bind = total_bind;
 	}
 	
 }

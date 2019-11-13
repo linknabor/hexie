@@ -10,7 +10,6 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
-import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -36,6 +35,10 @@ public interface WuyeService {
 	// 4.根据订单查询房产信息
 	public HexieHouse getHouse(String userId, String stmtId);
 
+	
+	
+	
+	
 	// 5.用户登录
 	public HexieUser userLogin(String openId);
 
@@ -64,8 +67,7 @@ public interface WuyeService {
 			String invoice_title_type, String credit_code, String invoice_title, String regionname) throws Exception;
 
 	// 11.通知已支付
-	public PayResult noticePayed(String userId, String billId, String stmtId, String tradeWaterId, String packageId);
-
+	public void noticePayed(User user, String billId, String tradeWaterId, String couponId, String feePrice, String bindSwitch);
 	// 12.查询是否已经用过红包
 	public String queryCouponIsUsed(String userId);
 
@@ -84,41 +86,13 @@ public interface WuyeService {
 
 	// 根据账单查询地址
 	public HexieUser getAddressByBill(String billId);
-
-	public void addSectToRegion();
-
-	public void addDefaultAddressAndUser() throws InterruptedException;
-
-	public void setDefaultAddress(User user, HexieUser u);
-
-	public void setUserSectid(User user, HexieUser u);
-
-	public void saveRegion(HexieUser u);
-
-	public void updateAddr();
-
-	public void updateUserShareCode();
-
-	public void updateRepeatUserShareCode();
-
-	/**
-	 * 更新未绑定房屋的地址及用户信息
-	 * 
-	 * @throws InterruptedException
-	 */
-	public void updateNonBindUser() throws InterruptedException;
-
-	public void setHasHouseUserSectId() throws InterruptedException;
-
-	public HexieUser queryPayUserAndBindHouse(String wuyeId);
-
-	// 添加区域region表字段sectId
-	public void addSectIdToRegion() throws InterruptedException;
-
-	// 保存region表sectId
-	public void saveRegionSectId(Region region, String sectId);
-
-	// 根据regionName去community查询sectId
+	
+	public void setDefaultAddress(User user,HexieUser u);
+	
+	//保存region表sectId
+	public void saveRegionSectId(Region region,String sectId);
+	
+	//根据regionName去community查询sectId
 	public String getSectIdByRegionName(String regionName);
 
 	// 查询所有请求地址
@@ -131,4 +105,13 @@ public interface WuyeService {
 	// 获取无账单开始日期
 	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname);
 
+	
+	HexieHouse getHouse(String userId, String stmtId, String house_id);
+	HexieUser bindHouse(User user, String stmtId, HexieHouse house);
+	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
+	
+	
+	HexieHouse getHouse(String userId, String stmtId, String house_id);
+	HexieUser bindHouse(User user, String stmtId, HexieHouse house);
+	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
 }

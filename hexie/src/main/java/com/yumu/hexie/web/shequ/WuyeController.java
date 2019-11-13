@@ -33,7 +33,6 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
-import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -79,13 +78,17 @@ public class WuyeController extends BaseController {
 	@Inject
 	private SystemConfigService systemConfigService;
 
+	/**
+	 * 根据用户身份查询其所绑定的房屋
+	 */
 	/***************** [BEGIN]房产 ********************/
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user) throws Exception {
-		log.error("User的物业id是：" + user.getWuyeId());
+		
+		log.info("user is : " + user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
-			// FIXME 后续可调转绑定房子页面
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
 		HouseListVO listVo = wuyeService.queryHouse(user.getWuyeId());
@@ -96,6 +99,14 @@ public class WuyeController extends BaseController {
 		}
 	}
 
+	/**
+	 * 房屋解绑
+	 * @param user
+	 * @param houseId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouse/delete/{houseId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<HexieHouse>> deleteHouse(@ModelAttribute(Constants.USER) User user,
@@ -120,6 +131,15 @@ public class WuyeController extends BaseController {
 		}
 	}
 
+	/**
+	 * 根据账单编号查询对应的房屋
+	 * @param user
+	 * @param stmtId
+	 * @param house_id
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouse", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<HexieHouse> hexiehouses(@ModelAttribute(Constants.USER) User user,
@@ -133,70 +153,56 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(wuyeService.getHouse(user.getWuyeId(), stmtId));
 	}
 
-	@RequestMapping(value = "/hexiehouse2", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<HexieHouse> hexiehouses2(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String house_id) throws Exception {
-
-		if (StringUtil.isEmpty(user.getWuyeId())) {
-			// FIXME 后续可调转绑定房子页面
-			return BaseResult.successResult(null);
-		}
-		return BaseResult.successResult(wuyeService.getHouse(user.getWuyeId(), house_id));
-	}
-
+	/**
+	 * 栀子花账单绑定房屋
+	 * @param user
+	 * @param stmtId
+	 * @param houseId
+	 * @param area
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/addhexiehouse", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<HexieHouse> addhouses(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String stmtId, @RequestParam(required = false) String houseId,
-			@RequestParam(required = false) String area) throws Exception {
+	public BaseResult<HexieHouse> addHouse(HttpSession httpSession, @ModelAttribute(Constants.USER) User user,
+			@RequestParam(required = false) String stmtId, 
+			@RequestParam(required = false) String houseId) throws Exception {
+		
 		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
-		log.error("HexieUser u = " + u);
+		log.info("HexieUser u = " + u);
 		if (u != null) {
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
-			// 添加电话到user表
-			log.error("这里是添加房子后保存的电话");
-			log.error("保存电话到user表==》开始");
-			user.setOfficeTel(u.getOffice_tel());
-			// userService.save(user);
-			log.error("保存电话到user表==》成功");
-			wuyeService.saveRegion(u);
 			wuyeService.setDefaultAddress(user, u);
+			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
+			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
 	}
 
-	// 无账单绑定
+	/**
+	 * 无账单绑定房屋
+	 * @param user
+	 * @param houseId
+	 * @param area
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/addhexiehouse2", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<HexieHouse> addhousesnostmt(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String houseId, @RequestParam(required = false) String area)
-			throws Exception {
+	public BaseResult<HexieHouse> addHouseNoStmt(HttpSession httpSession, 
+			@ModelAttribute(Constants.USER) User user,
+			@RequestParam(required = false) String houseId, 
+			@RequestParam(required = false) String area) throws Exception {
+		
 		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
-		log.error("HexieUser2 u = " + u);
+		log.info("HexieUser : " + u);
 		if (u != null) {
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
-			// 添加电话到user表
-			log.error("这里是添加房子后保存的电话");
-			log.error("保存电话到user表==》开始");
-			user.setOfficeTel(u.getOffice_tel());
-			// userService.save(user);
-			log.error("保存电话到user表==》成功");
-			wuyeService.saveRegion(u);
 			wuyeService.setDefaultAddress(user, u);
+			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
+			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
-	}
-
-	// 支付完成后设置默认地址
-	@RequestMapping(value = "/setDefaultAdressByBill", method = RequestMethod.POST)
-	@ResponseBody
-	public BaseResult<String> setDefaultAdressByBill(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String billId) throws Exception {
-		HexieUser u = wuyeService.getAddressByBill(billId);
-		wuyeService.saveRegion(u);
-		wuyeService.setDefaultAddress(user, u);
-		return BaseResult.successResult("");
 	}
 
 	/***************** [END]房产 ********************/
@@ -330,29 +336,16 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(result);
 	}
 
-	// stmtId在快捷支付的时候会用到
-	@RequestMapping(value = "/getPrePayInfoo", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<WechatPayInfo> getPrePayInfoo(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String billId) throws Exception {
-		WechatPayInfo result;
-		try {
-			System.out.println("try");
-		} catch (Exception e) {
-			System.out.println("catch");
-			e.printStackTrace();
-			return BaseResult.fail(e.getMessage());
-		}
-		System.out.println("no try catch");
-		return BaseResult.successResult(null);
-	}
-
 	/**
-	 * 通知支付成功，并获取支付查询的返回结果
-	 * 
+	 *  通知支付成功，并获取支付查询的返回结果
 	 * @param user
 	 * @param billId
 	 * @param stmtId
+	 * @param tradeWaterId
+	 * @param packageId
+	 * @param feePrice
+	 * @param couponId
+	 * @param bindSwitch
 	 * @return
 	 * @throws Exception
 	 */
@@ -360,24 +353,14 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/noticePayed", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<String> noticePayed(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId,
-			@RequestParam(required = false) String tradeWaterId, @RequestParam(required = false) String packageId,
-			@RequestParam(required = false) String feePrice, @RequestParam(required = false) String couponId)
+			@RequestParam(required = false) String billId, 
+			@RequestParam(required = false) String tradeWaterId, 
+			@RequestParam(required = false) String feePrice, 
+			@RequestParam(required = false) String couponId,
+			@RequestParam(value ="bind_switch", required = false) String bindSwitch)
 			throws Exception {
-		PayResult payResult = wuyeService.noticePayed(user.getWuyeId(), billId, stmtId, tradeWaterId, packageId);
-
-		String trade_status = payResult.getMerger_status();
-		// if ("01".equals(trade_status)) { //01表示支付成功，02表示未支付成功
-		//
-		//
-		// }else {
-		// return BaseResult.fail("支付结果未知，请稍后在支付记录界面查询。");
-		// }
-		pointService.addZhima(user, 10, "zhima-bill-" + user.getId() + "-" + billId);
-		if (couponId != null && couponId != "") {
-			couponService.comsume(feePrice, Long.valueOf(couponId));
-		}
-
+		
+		wuyeService.noticePayed(user, billId, tradeWaterId, couponId, feePrice, bindSwitch);
 		return BaseResult.successResult("支付成功。");
 	}
 
@@ -590,45 +573,14 @@ public class WuyeController extends BaseController {
 	}
 
 	@SuppressWarnings({ "rawtypes" })
-	@RequestMapping(value = "initSession4Test/{userId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/initSession4Test/{userId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId) {
 
-		User user = (User) session.getAttribute(Constants.USER);
-		if (session != null) {
-
-			if (user == null) {
-				user = new User();
-				user.setCity("上海市");
-				user.setCityId(20);
-				user.setProvince("上海");
-				user.setProvinceId(19);
-				if (!StringUtil.isEmpty(userId)) {
-					user.setId(Long.valueOf(userId));
-				} else {
-					user.setId(10);
-				}
-				user.setTel("18116419486");
-				user.setOpenid("ofDNH0o8JD8qC1n2P9KU5qq0UeWc");
-				user.setName("yiming");
-				user.setNickname("yiming");
-				user.setXiaoquName("西部花苑");
-				user.setXiaoquId(26387);
-				user.setCountyId(0);
-				user.setWuyeId("180613400000291915");
-				user.setHeadimgurl(
-						"http://wx.qlogo.cn/mmopen/ajNVdqHZLLBIY2Jial97RCIIyq0P4L8dhGicoYDlbNXqW5GJytxmkRDFdFlX9GScrsvo7vBuJuaEoMZeiaBPnb6AA/0");
-			} else {
-				if (!StringUtil.isEmpty(userId)) {
-
-					user = userRepository.findOne(Long.valueOf(userId));
-				}
-			}
-
-			// TODO set value on redis
+		if (!StringUtil.isEmpty(userId)) {
+			User user = userRepository.findOne(Long.valueOf(userId));
 			session.setAttribute("sessionUser", user);
 		}
-
 		return BaseResult.successResult("succeeded");
 
 	}
@@ -663,122 +615,7 @@ public class WuyeController extends BaseController {
 		}
 	}
 
-	// 已绑定房子的用户设置默认地址
-	@RequestMapping(value = "/setHasHouseUserDefaultAddr", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> setHasHouseUserDefaultAddr(@RequestParam String code) throws Exception {
-		if ("hexieCode".equals(code)) {
-		     wuyeService.addSectToRegion();
-		     
-		     wuyeService.addDefaultAddressAndUser();
-		     
-			log.error("默认地址设置完成11111111");
-			return BaseResult.successResult("");
-		} else {
-			return BaseResult.fail("请求错误！！！");
-		}
 
-	}
-	
-	// 更改默认地址
-	@RequestMapping(value = "/updateAddr", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> updateAddr(@RequestParam String code) throws Exception {
-		if ("hexieCode".equals(code)) {
-		     wuyeService.updateAddr();
-			log.error("操作完成!!!");
-			return BaseResult.successResult("");
-		} else {
-			return BaseResult.fail("请求错误！！！");
-		}
-
-	}
-
-    // 设置用户shareCode
-	@RequestMapping(value = "/updateRepeatUserShareCode", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> updateRepeatUserShareCode(@RequestParam String code) throws Exception {
-		if ("hexieCode".equals(code)) {
-		     wuyeService.updateRepeatUserShareCode();
-			log.error("操作完成!!!");
-			return BaseResult.successResult("");
-		} else {
-			return BaseResult.fail("请求错误！！！");
-		}
-
-	}
-	
-	// 设置用户shareCode
-	@RequestMapping(value = "/updateUserShareCode", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> updateUserShareCode(@RequestParam String code) throws Exception {
-		
-		if ("hexieCode".equals(code)) {
-		     wuyeService.updateUserShareCode();
-			log.error("操作完成!!!");
-			return BaseResult.successResult("");
-		} else {
-			return BaseResult.fail("请求错误！！！");
-		}
-
-	}
-
-   // 设置用户shareCode
-	@RequestMapping(value = "/updateNonBindUser", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> updateNonBindUser(@RequestParam String code) throws Exception {
-					if ("hexieCode".equals(code)) {
-					     wuyeService.updateNonBindUser();
-						log.error("操作完成!!!");
-						return BaseResult.successResult("");
-					} else {
-						return BaseResult.fail("请求错误！！！");
-					}
-
-	} 
-	
-	//用户设置小区id公司id
-	@RequestMapping(value = "/setHasHouseUserSectId", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> setHasHouseUserSectId(@RequestParam String code) throws Exception {
-		if ("hexieCode".equals(code)) {
-		     wuyeService.setHasHouseUserSectId();
-			log.error("用户设置完成!!!");
-			return BaseResult.successResult("");
-		} else {
-			return BaseResult.fail("请求错误！！！");
-		}
-
-	}
-		
-	//region表添加sectId
-	@RequestMapping(value = "/addSectIdToRegion", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> addSectIdToRegion(@RequestParam String code) throws Exception {
-		if ("hexieCode".equals(code)) {
-		     wuyeService.addSectIdToRegion();
-			log.error("region设置完成!!!");
-			return BaseResult.successResult("");
-		} else {
-			return BaseResult.fail("请求错误！！！");
-		}
-
-	}
-	
-	//region表添加tempsect表的区域
-	@RequestMapping(value = "/addTempSectToRegion", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<String> addTempSectToRegion(@RequestParam String code) throws Exception {
-		if ("hexieCode".equals(code)) {
-			  wuyeService.addSectToRegion();
-			log.error("添加完成!!!");
-			return BaseResult.successResult("");
-		} else {
-			return BaseResult.fail("请求错误！！！");
-		}
-
-	}
-	
 	//查询所有环境路径
 		@RequestMapping(value = "/getRegionUrl", method = RequestMethod.GET)
 		@ResponseBody
