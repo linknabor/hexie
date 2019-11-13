@@ -67,7 +67,6 @@ public class BaiduMapUtil {
 	 * 坐标转换（百度）
 	 */
 	public static String findByCoordinateGetBaidu(String coordinate) {
-		// TODO Auto-generated method stub
 		Map<String, String> paramsMap = new LinkedHashMap<String, String>();
 		paramsMap.put("coords", coordinate);//（经度，纬度）
 		paramsMap.put("from", "1");//1：GPS设备获取的角度坐标，WGS84坐标;
@@ -90,8 +89,7 @@ public class BaiduMapUtil {
 			}
 			return x+","+y;
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.error(e.getMessage(),e);
 		}
 		return null;
 	}
@@ -100,7 +98,6 @@ public class BaiduMapUtil {
 	 * 通过坐标获取市
 	 */
 	public static String findByBaiduGetCity(String coordinate) {
-		// TODO Auto-generated method stub
 		if(coordinate==null||"".equals(coordinate.trim())) {
 			return "";
 		}
@@ -131,8 +128,7 @@ public class BaiduMapUtil {
 			}
 			return city;
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.error(e.getMessage(),e);
 		}
 		return null;
 	}

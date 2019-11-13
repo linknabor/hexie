@@ -10,4 +10,8 @@
 /hexiebk/.classpath
 /hexiebk/.project
 /hexie/bin
-/hexie/logs/hexie/*.log
+/hexie/logs
+/common/logs/*.log
+/.settings/*.prefs
+/hexie/common/.settings/*.prefs
+/hexie/common/logs/*.log
