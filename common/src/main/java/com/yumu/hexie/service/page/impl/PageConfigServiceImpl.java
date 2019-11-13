@@ -161,7 +161,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public BgImage getBgImage(String imageType, String appId) throws JsonParseException, JsonMappingException, IOException {
+	public List<BgImage> getBgImage(String appId) throws JsonParseException, JsonMappingException, IOException {
 
 		if (StringUtil.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
@@ -178,53 +178,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	public void updateBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) {
 		
 		
-		String keyType = "0";
-		switch (type) {
-		case ModelConstant.BG_IMAGE_TYPE_ORDER:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_ORDER;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_GROUP_ORDER:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_GROUP_ORDER;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_REPAIR_ORDER:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_REPAIR_ORDER;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_THREAD:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_THREAD;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_BIND_HOUSE:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_BIND_HOUSE;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_RESERVATION:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_RESERVATION;
-			break;
-		default:
-			break;
-		}
-		
-		TypeReference<BgImage> typeReference = new TypeReference<BgImage>() {};
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		BgImage bgImage = new BgImage();
-		String obj = (String) redisTemplate.opsForHash().get(keyType, appId);
-		if (!StringUtils.isEmpty(obj)) {
-			bgImage = objectMapper.readValue(obj, typeReference);
-		}
-		if (!StringUtils.isEmpty(bgImage.getId())) {
-			bgImage = bgImageRepository.findByTypeAndAppId(type, appId);
-			if (!StringUtils.isEmpty(bgImage.getId())) {
-				savePageView2HashCache(keyType, appId, bgImage);
-			}
-		}
-		return bgImage;
 	}
-	
-	//TODO
-	public void updateBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) {
-		
-		
-	}
-	
-	
 
 	/**
 	 * 动态获取公众号二维码

@@ -109,11 +109,4 @@ public interface WuyeService {
 	HexieUser bindHouse(User user, String stmtId, HexieHouse house);
 	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
 	
-	HexieHouse getHouse(String userId, String stmtId, String house_id);
-	HexieUser bindHouse(User user, String stmtId, HexieHouse house);
-	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
-	
-	HexieHouse getHouse(String userId, String stmtId, String house_id);
-	HexieUser bindHouse(User user, String stmtId, HexieHouse house);
-	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
 }
