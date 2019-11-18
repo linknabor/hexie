@@ -107,6 +107,7 @@ public interface WuyeService {
 
 	
 	HexieHouse getHouse(String userId, String stmtId, String house_id);
+
 	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
 	
 	

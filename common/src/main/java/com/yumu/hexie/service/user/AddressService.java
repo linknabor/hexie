@@ -50,5 +50,4 @@ public interface AddressService {
 	List<Address> queryBindedAddressByUser(long userId);
 	
 	
-	
 }

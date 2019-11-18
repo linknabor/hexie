@@ -177,8 +177,7 @@ public class WuyeServiceImpl implements WuyeService {
 		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
 		
 	}
-	
-	@Override
+
 	public HexieHouse getHouse(String userId, String stmtId, String house_id) {
 		return WuyeUtil.getHouse(userId, stmtId, house_id).getData();
 	}
