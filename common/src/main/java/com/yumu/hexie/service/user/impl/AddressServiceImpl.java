@@ -391,11 +391,20 @@ public class AddressServiceImpl implements AddressService {
 
 			}
 			if (hasAddr) {
+				add.setBind(true);
 				add.setMain(true);
 				addressRepository.save(add);
 			}
 			
 		}
+	}
+
+	/**
+	 * 获取用户绑定过房子的地址
+	 */
+	@Override
+	public List<Address> queryBindedAddressByUser(long userId) {
+		return addressRepository.findByUserIdAndBind(userId, true);
 	}
 
 	

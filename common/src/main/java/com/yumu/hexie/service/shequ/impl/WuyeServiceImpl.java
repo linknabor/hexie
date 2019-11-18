@@ -39,7 +39,6 @@ import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.region.RegionUrlRepository;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
@@ -54,9 +53,6 @@ public class WuyeServiceImpl implements WuyeService {
 	private static final Logger log = LoggerFactory.getLogger(WuyeServiceImpl.class);
 	
 	private static Map<String,Long> map=null;
-	
-	@Autowired
-	private UserRepository userRepository;
 	
 	@Autowired
 	private RegionRepository regionRepository;
@@ -93,53 +89,6 @@ public class WuyeServiceImpl implements WuyeService {
 		wuyeQueueTask.bindHouseByQueue();
 	}
 	
-	@Override
-	public HexieUser bindHouse(User user, String stmtId, HexieHouse house) {
-		
-		log.info("userId : " + user.getId());
-		log.info("hosue is :" + house.toString());
-		
-		User currUser = userRepository.findOne(user.getId());
-		
-		log.error("total_bind :" + currUser.getTotalBind());
-		
-		if (currUser.getTotalBind() <= 0) {//从未绑定过的做新增
-			currUser.setTotalBind(1);
-			currUser.setSectId(house.getSect_id());
-			//这个user在外层需要重新set回session中
-			user.setTotalBind(1);
-			user.setCspId(house.getCsp_id());
-			user.setSectId(house.getSect_id());
-			
-		}else {
-			user.setTotalBind(user.getTotalBind()+1);
-			currUser.setTotalBind((currUser.getTotalBind()+1));
-		}
-		
-		BaseResult<HexieUser> r= WuyeUtil.bindHouse(currUser.getWuyeId(), stmtId, house.getMng_cell_id());
-		if ("04".equals(r.getResult())){
-			throw new BizValidateException("当前用户已经认领该房屋!");
-		}
-		if ("05".equals(r.getResult())) {
-			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
-		}
-		if ("01".equals(r.getResult())) {
-			throw new BizValidateException("账户不存在");
-		}
-		
-		if (r.isSuccess()) {
-			//添加电话到user表
-			currUser.setOfficeTel(r.getData().getOffice_tel());	//保存到数据库
-			user.setOfficeTel(r.getData().getOffice_tel());	//set到session
-		}
-		userRepository.save(currUser);
-		
-		setDefaultAddress(currUser, r.getData());;
-		
-		return r.getData();
-		
-	}
-
 	@Override
 	public BaseResult<String> deleteHouse(String userId, String houseId) {
 		BaseResult<String> r = WuyeUtil.deleteHouse(userId, houseId);

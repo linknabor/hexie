@@ -47,6 +47,8 @@ public interface AddressService {
 
 	void updateDefaultAddress(User user, HexieAddress addr);
 	
+	List<Address> queryBindedAddressByUser(long userId);
+	
 	
 	
 }
