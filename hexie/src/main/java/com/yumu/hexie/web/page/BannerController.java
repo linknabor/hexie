@@ -5,14 +5,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
@@ -25,24 +24,27 @@ import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.page.resp.BannerProductVO;
 import com.yumu.hexie.web.page.resp.BannersVO;
 
-@Controller(value = "bannerController")
+@RestController(value = "bannerController")
 public class BannerController extends BaseController{
-	private static final Logger Log = LoggerFactory.getLogger(BannerController.class);
 
     @Inject
     private PageConfigService pageConfigService;
     @Inject
     private DistributionService distributionService;
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/banner/{bannerType}", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult<List<Banner>> getBannerByBannerType(@ModelAttribute(Constants.USER)User user,@PathVariable int bannerType) throws Exception {
-		return BaseResult.successResult(pageConfigService.queryBannerType(user, bannerType));
+	public BaseResult<List<Banner>> getBannerByBannerType(@ModelAttribute(Constants.USER)User user,
+			@PathVariable int bannerType,
+			@RequestParam(required = false) String appId) throws Exception {
+		if (StringUtils.isEmpty(appId)) {
+			appId = user.getAppId();
+		}
+		return BaseResult.successResult(pageConfigService.queryByBannerTypeAndAppId(bannerType, appId));
     }
 	
 
 	@RequestMapping(value = "/banners", method = RequestMethod.GET)
-	@ResponseBody
 	public BaseResult<BannersVO> getBanners(@ModelAttribute(Constants.USER)User user) throws Exception {
 		BannersVO vo = new BannersVO();
 		vo.setTitles(pageConfigService.queryBannerType(user, 1));
@@ -65,4 +67,6 @@ public class BannerController extends BaseController{
 		vo.setBrands(products);
 		return new BaseResult<BannersVO>().success(vo);
     }
+	
+	
 }

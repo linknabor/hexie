@@ -36,6 +36,7 @@ public class Address  extends BaseModel{
 	private String detailAddress;
 	private String tel;
 	private boolean main;//是否是默认地址
+	private boolean bind;	//是否是绑定过的房屋。只要绑定过一次，这个值就是true，代表是servplat存在的房子，可以做报修服务
 	
 	public void initAmapInfo(AmapAddress amapAddr){
 	    setAmapId(amapAddr.getId());
@@ -174,6 +175,13 @@ public class Address  extends BaseModel{
 
 	public void setXiaoquAddress(String xiaoquAddress) {
 		this.xiaoquAddress = xiaoquAddress;
+	}
+
+	public boolean isBind() {
+		return bind;
+	}
+	public void setBind(boolean bind) {
+		this.bind = bind;
 	}
 	
 }

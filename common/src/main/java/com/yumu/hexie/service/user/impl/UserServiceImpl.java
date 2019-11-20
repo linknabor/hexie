@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -17,8 +16,6 @@ import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.user.TempUser;
-import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.WechatCoreService;
@@ -206,29 +203,16 @@ public class UserServiceImpl implements UserService {
 		return userRepository.getBindHouseUser(pageNum,pageSize);
 	}
 	
-	@Autowired
-	private TempUserRepository tempUserRepository;
-	
-	@Override
-	public List<TempUser> getTempUser() {
-
-		return tempUserRepository.findAll();
-	}
 	@Override
 	public List<User> getByTel(String tel) {
 		return userRepository.findByTel(tel);
 	}
-	@Override
-	public List<TempUser> getTemp() {
 	
-		
-		return tempUserRepository.findBySectid("161223100120926240");
-	}
-	@Override
 	public List<String> getRepeatShareCodeUser() {
 		
 		return userRepository.getRepeatShareCodeUser();
 	}
+	
 	@Override
 	public List<User> getShareCodeIsNull() {
 		
@@ -238,7 +222,6 @@ public class UserServiceImpl implements UserService {
 	public List<User> getUserByShareCode(String shareCode) {
 		return userRepository.getUserByShareCode(shareCode);
 	}
-	
 	
    
 }

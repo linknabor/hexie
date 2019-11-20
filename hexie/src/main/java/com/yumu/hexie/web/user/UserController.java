@@ -33,6 +33,7 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.service.common.GotongService;
@@ -125,7 +126,9 @@ public class UserController extends BaseController{
 			    userInfo.setCfgParam(paramMap);
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
+			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    userInfo.setIconList(iconList);
+			    userInfo.setBgImageList(bgImageList);
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    userInfo.setQrCode(qrCode.getQrLink());
 			    

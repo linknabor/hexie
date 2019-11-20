@@ -2,6 +2,7 @@ package com.yumu.hexie.model.view;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import com.yumu.hexie.model.ModelConstant;
@@ -16,4 +17,8 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
 			+ "and m.bannerType=?5 "
 			+ "order by m.sortNo asc,m.id desc ")
 	public List<Banner> queryByBannerTypeAndUser(long provinceId,long cityId,long countyId,long xiaoquId, int bannerType);
+	
+	
+	
+	public List<Banner> findByBannerTypeAndStatusAndRegionTypeAndAppId(int bannerType, int status, int regionType, String appId, Sort sort);
 }

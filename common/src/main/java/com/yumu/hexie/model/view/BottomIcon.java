@@ -15,7 +15,7 @@ public class BottomIcon extends BaseModel {
 	private String iconName;
 	private String iconLink;
 	private String iconClass;
-	private String iconSys;
+	private String appId;
 	private Integer sort;
 	
 	public String getIconName() {
@@ -36,11 +36,11 @@ public class BottomIcon extends BaseModel {
 	public void setIconClass(String iconClass) {
 		this.iconClass = iconClass;
 	}
-	public String getIconSys() {
-		return iconSys;
+	public String getAppId() {
+		return appId;
 	}
-	public void setIconSys(String iconSys) {
-		this.iconSys = iconSys;
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 	public Integer getSort() {
 		return sort;
@@ -50,8 +50,8 @@ public class BottomIcon extends BaseModel {
 	}
 	@Override
 	public String toString() {
-		return "BottomIcon [iconName=" + iconName + ", iconLink=" + iconLink + ", iconClass=" + iconClass + ", iconSys="
-				+ iconSys + ", sort=" + sort + "]";
+		return "BottomIcon [iconName=" + iconName + ", iconLink=" + iconLink + ", iconClass=" + iconClass + ", appId="
+				+ appId + ", sort=" + sort + "]";
 	}
 	
 	

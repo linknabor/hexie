@@ -31,7 +31,6 @@ import com.yumu.hexie.service.repair.req.RepairComment;
 import com.yumu.hexie.service.repair.req.RepairPayReq;
 import com.yumu.hexie.service.repair.resp.RepairDetailItem;
 import com.yumu.hexie.service.repair.resp.RepairListItem;
-import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.vo.req.RepairOrderReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -50,8 +49,6 @@ public class RepairController extends BaseController{
     private RepairProjectRepository repairProjectRepository;
     @Inject
     private RepairService repairService;
-    @Inject
-    private AddressService addressService;
     //查询项目
     @RequestMapping(value="repair/projects/{repairType}", method = RequestMethod.GET)
     @ResponseBody
@@ -64,18 +61,14 @@ public class RepairController extends BaseController{
     public BaseResult<RepairReqPageVO> queryProject(@ModelAttribute(Constants.USER)User user,@PathVariable long projectId){
         RepairReqPageVO vo = new RepairReqPageVO();
         vo.setProject(repairProjectRepository.findOne(projectId));
-        List<Address> addrs = addressService.queryAddressByUser(user.getId());
-        if(addrs.size()>0){
-            for(Address addr : addrs) {
-                if(addr.isMain()) {
-                    vo.setAddress(addr);
-                    break;
-                }
-            }
-            if(vo.getAddress() == null){
-                vo.setAddress(addrs.get(0));
-            }
-        }
+        /*
+         * 1.维修只能修业主绑定的房子，自己添加的小区以外的地址物业服务不到。
+         * 2.进入到这个功能的用户应该都是已经绑定过房子的用户。需要去community查询他具体绑定的房屋地址，并在address表对应的记录上添加相应的标识
+         * 3.address表上已经有标识的用户，不用去community查询。
+         * 4.在所有绑定房屋的功能中，都将添加bind这个标识来标记address是否是合协社区的房子
+         */
+        Address address = repairService.getDefaultAddress(user);
+        vo.setAddress(address);
         return new BaseResult<RepairReqPageVO>().success(vo);
     }
     //提交
