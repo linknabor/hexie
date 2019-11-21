@@ -27,6 +27,5 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
 	@Query(nativeQuery = true, value = "select a.* from address a join user u on u.id = a.userId where u.shareCode = ?1 and a.main = '1' ")
 	public List<Address> getAddressByShareCode(String shareCode);
 
-    @Query("from Address a where a.id > 11546")
-	public List<Address> getNeedAddress();
+	public List<Address> findByUserIdAndBind(long userId, boolean bind);
 }

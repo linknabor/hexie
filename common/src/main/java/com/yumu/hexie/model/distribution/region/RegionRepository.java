@@ -20,7 +20,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     
     public List<Region> findAllByNameAndParentName(String name,String parentName);
     
-    public Region findByNameAndRegionType(String name,int regionType);
+    public List<Region> findByNameAndRegionType(String name,int regionType);
     
     @Query(" from Region  where regionType < 4")
     public List<Region> findNeedRegion();

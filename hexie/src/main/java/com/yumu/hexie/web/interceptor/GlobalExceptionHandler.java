@@ -44,7 +44,8 @@ public class GlobalExceptionHandler<T> {
             LOGGER.error("用户未登录！");
             return BaseResult.fail(BaseResult.NEED_LOGIN);
         }
-        LOGGER.error("内部处理异常", e);
+        LOGGER.error("请求的链接：" + req.getRequestURI());
+        LOGGER.error(e.getMessage(), e);
     	if(e instanceof BizValidateException) {
     		return BaseResult.fail(e.getMessage());
     	}
