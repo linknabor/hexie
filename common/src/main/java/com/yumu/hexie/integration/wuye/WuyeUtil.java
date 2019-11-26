@@ -195,7 +195,7 @@ public class WuyeUtil {
 	}
 	// 10.缴费
 	public static BaseResult<WechatPayInfo> getPrePayInfo(User user,String billId,String stmtId,
-		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
+		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,String fee_mianBill,String fee_mianAmt,
 		String invoice_title_type, String credit_code, String invoice_title,String regionurl) throws Exception {
 		
 		String appid = user.getAppId();
@@ -208,7 +208,7 @@ public class WuyeUtil {
 		
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
 		String url = regionurl + String.format(WX_PAY_URL, user.getWuyeId(),billId,stmtId,user.getOpenid(),
-					couponUnit,couponNum,couponId,fromSys,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(), invoice_title);
+					couponUnit,couponNum,couponId,fromSys,mianBill, mianAmt, reduceAmt,fee_mianBill,fee_mianAmt, invoice_title_type, credit_code, user.getTel(), invoice_title);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		if (!baseResult.isSuccess()) {
