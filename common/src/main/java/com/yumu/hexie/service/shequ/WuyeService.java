@@ -55,7 +55,7 @@ public interface WuyeService {
 
 	// 10.缴费
 	public WechatPayInfo getPrePayInfo(User user, String billId, String stmtId, String couponUnit, String couponNum,
-			String couponId, String mianBill, String mianAmt, String reduceAmt, String invoice_title_type,
+			String couponId, String mianBill, String mianAmt, String reduceAmt,String fee_mianBill,String fee_mianAmt, String invoice_title_type,
 			String credit_code, String invoice_title, String regionname) throws Exception;
 
 	// 10.5 无账单缴费
