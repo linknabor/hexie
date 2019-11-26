@@ -76,7 +76,7 @@ public class WuyeUtil {
 	private static final String QUICK_PAY_URL = "quickPaySDO.do?stmt_id=%s&curr_page=%s&total_count=%s"; // 快捷支付
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do?user_id=%s&bill_id=%s&stmt_id=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
-			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
+			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&fee_mianBill=%s&fee_mianAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do?user_id=%s&mng_cell_id=%s&start_date=%s&end_date=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
 			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
