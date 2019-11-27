@@ -296,6 +296,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String couponUnit, @RequestParam(required = false) String couponNum,
 			@RequestParam(required = false) String couponId, @RequestParam(required = false) String mianBill,
 			@RequestParam(required = false) String mianAmt, @RequestParam(required = false) String reduceAmt,
+			@RequestParam(required = false) String fee_mianBill,@RequestParam(required = false) String fee_mianAmt,
 			@RequestParam(required = false) String invoice_title_type,
 			@RequestParam(required = false) String credit_code, @RequestParam(required = false) String invoice_title,
 			@RequestParam(required = false) String regionname)
@@ -303,7 +304,7 @@ public class WuyeController extends BaseController {
 		WechatPayInfo result;
 		try {
 			result = wuyeService.getPrePayInfo(user, billId, stmtId, couponUnit,
-					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code,
+					couponNum, couponId, mianBill, mianAmt, reduceAmt,fee_mianBill,fee_mianAmt, invoice_title_type, credit_code,
 					invoice_title,regionname);
 		} catch (Exception e) {
 
