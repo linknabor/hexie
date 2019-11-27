@@ -176,7 +176,7 @@ public class UserController extends BaseController{
 						weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
 					}
 			    	
-			    	userService.updateUserLoginInfo(weixinUser, oriApp);
+			    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
 			    }
 			    
 				session.setAttribute(Constants.USER, userAccount);
