@@ -6,6 +6,8 @@ package com.yumu.hexie.model.view;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.yumu.hexie.model.BaseModel;
 
@@ -18,11 +20,12 @@ import com.yumu.hexie.model.BaseModel;
  * @version $Id: PageConfigView.java, v 0.1 2016年1月18日 上午9:41:56  Exp $
  */
 @Entity
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames= {"tempKey", "appId"})})
 public class PageConfigView extends BaseModel {
 
     private static final long serialVersionUID = 7403265377382069482L;
 
-    @Column(unique=true,length=100)
+    @Column(length=100)
     private String tempKey;
 
     @Column(length=2047)
