@@ -15,10 +15,10 @@ public interface UserService {
     public List<User> getByOpenId(String openId);
     public List<User> getByTel(String tel);
 	//获取用户信息
-	public User getOrSubscibeUserByCode(String code);
+	public UserWeiXin getOrSubscibeUserByCode(String code);
 	
 	//第三方授权获取用户信息
-	public User getTpSubscibeUserByCode(String code, String oriApp);
+	public UserWeiXin getTpSubscibeUserByCode(String code, String oriApp);
 	
     public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid);
 	
@@ -37,4 +37,5 @@ public interface UserService {
 	public List<User> getShareCodeIsNull();
 	
 	public List<User> getUserByShareCode(String shareCode);
+	User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp);
 }

@@ -90,5 +90,25 @@ public class BatchController extends BaseController {
 		}
 		
 	}
+	
+	/**
+	 * 手工修复绑定房屋
+	 * @param tradeWaterId
+	 * @param code
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/bindHouseBatch/{appId}", method = RequestMethod.GET)
+	public BaseResult<String> bindHouseBatch( @RequestParam String code, @PathVariable String appId){
+		
+		if ("hexieCode".equals(code)) {
+			batchService.bindHouseBatch(appId);
+			logger.error("操作完成!!!");
+			return BaseResult.successResult("success");
+		} else {
+			return BaseResult.fail("unkown request !");
+		}
+		
+	}
 
 }

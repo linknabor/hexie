@@ -1,7 +1,5 @@
 package com.yumu.hexie.web.user;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,26 +23,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
-import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
-import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
-import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
-import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
-import com.yumu.hexie.service.shequ.WuyeService;
-import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -64,17 +54,7 @@ public class UserController extends BaseController{
 	@Inject
 	private SmsService smsService;
     @Inject
-    private PointService pointService;
-    @Inject
-    private WuyeService wuyeService;
-    @Inject
-    private CouponService couponService;
-    @Inject
     private OperatorService operatorService;
-    @Inject
-    private GotongService goTongService;
-    @Inject
-    private SystemConfigService systemConfigService;
     @Autowired
     private ParamService paramService;
     @Autowired
@@ -189,22 +169,16 @@ public class UserController extends BaseController{
 			        }catch(Throwable t){}
 			    }
 			    if(userAccount == null) {
-			    	
+			    	UserWeiXin weixinUser = null;
 			    	if (StringUtils.isEmpty(oriApp)) {
-			    		userAccount = userService.getOrSubscibeUserByCode(code);
+			    		weixinUser = userService.getOrSubscibeUserByCode(code);
 					}else {
-						userAccount = userService.getTpSubscibeUserByCode(code, oriApp);
+						weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
 					}
-			       
+			    	
+			    	userService.updateUserLoginInfo(weixinUser, oriApp);
 			    }
 			    
-				pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
-				wuyeService.userLogin(userAccount.getOpenid());
-				
-				/*判断用户是否关注公众号*/
-				UserWeiXin u = userService.getOrSubscibeUserByOpenId(oriApp, userAccount.getOpenid());
-				
-				updateWeUserInfo(userAccount, u);
 				session.setAttribute(Constants.USER, userAccount);
 			}
 			if(userAccount == null) {
@@ -222,50 +196,6 @@ public class UserController extends BaseController{
 			}
 		}
     }
-	
-	private void updateWeUserInfo(User userAccount, UserWeiXin newUser) {
-        if(newUser != null && newUser.getSubscribe()!=null) {
-            if (1 == newUser.getSubscribe()) {
-                sendSubscribeCoupon(userAccount);
-                userAccount.setNewRegiste(false);
-            }
-            userAccount.setSubscribe(newUser.getSubscribe());
-            userAccount.setSubscribe_time(newUser.getSubscribe_time());
-            userAccount.setShareCode(DigestUtils.md5Hex("UID["+userAccount.getId()+"]"));
-            userService.save(userAccount);
-        }
-    }
-	
-	private void sendSubscribeCoupon(User user){
-		
-		if (!user.isNewRegiste()) {
-			return ;
-		}
-		List<Coupon>list = new ArrayList<Coupon>();
-		
-		String couponStr = systemConfigService.queryValueByKey("SUBSCRIBE_COUPONS");
-		String[]couponArr = null;
-		if (!StringUtil.isEmpty(couponStr)) {
-			couponArr = couponStr.split(",");
-		}
-		if (couponArr!=null) {
-			for (int i = 0; i < couponArr.length; i++) {
-				
-				try {
-					Coupon coupon = couponService.addCouponFromSeed(couponArr[i], user);
-					list.add(coupon);
-				} catch (Exception e) {
-					log.error(e.getMessage());
-				}
-			}
-		}
-		
-		if (list.size()>0) {
-			goTongService.sendSubscribeMsg(user);
-		}
-		
-	}
-	
 	
 	@RequestMapping(value = "/getyzm", method = RequestMethod.POST)
 	@ResponseBody

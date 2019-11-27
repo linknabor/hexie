@@ -7,8 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
+import com.yumu.hexie.integration.wuye.resp.HouseListVO;
+import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.batch.BatchService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.UserService;
@@ -23,6 +30,9 @@ public class BatchServiceImpl implements BatchService {
 	
 	@Autowired
 	WuyeService wuyeService;
+	
+	@Autowired
+	UserRepository userRepository;
 
 	@Override
 	public void updateUserShareCode() {
@@ -67,6 +77,39 @@ public class BatchServiceImpl implements BatchService {
 
 		User user = userService.getById(Long.valueOf(userId));
 		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
+	}
+
+	@Override
+	public void bindHouseBatch(String appId) {
+
+		Assert.hasText(appId, "appId不能为空");
+		
+		List<User> userList = userRepository.findByAppId(appId);
+		
+		for (User user : userList) {
+			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user.getWuyeId());
+			HouseListVO vo = baseResult.getData();
+			if (vo!=null) {
+				List<HexieHouse> houseList = vo.getHou_info();
+				if (houseList!=null && !houseList.isEmpty()) {
+					HexieHouse hexieHouse = houseList.get(0);
+					
+					user.setTotalBind(houseList.size());
+					user.setXiaoquName(hexieHouse.getSect_name());
+					user.setProvince(hexieHouse.getProvince_name());
+					user.setCity(hexieHouse.getCity_name());
+					user.setCounty(hexieHouse.getRegion_name());
+					user.setSectId(hexieHouse.getSect_id());	
+					user.setCspId(hexieHouse.getCsp_id());
+					if (!StringUtils.isEmpty(hexieHouse.getOffice_tel())) {
+						user.setOfficeTel(hexieHouse.getOffice_tel());
+					}
+					userService.save(user);
+					
+				}
+			}
+		}
+		
 	}
 
 }
