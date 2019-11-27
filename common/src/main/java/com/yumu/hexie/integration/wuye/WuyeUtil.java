@@ -50,6 +50,12 @@ public class WuyeUtil {
 			//TODO 先暂时写死下面的appid映射，以后做到表里
 			sysMap.put("wxbd214f5765f346c1", "_hxm");
 			sysMap.put("wxf51b0f0356e2432c", "_hexieliangyou");
+			sysMap.put("wxec3315b94f3da1a3", "_hexieweifa");
+			sysMap.put("wx895d483798f8d322", "_hexieyouyi");
+			sysMap.put("wx6b7f7d4010183c46", "_hexiebaofang");
+			sysMap.put("wxe8dea53aad1a93b9", "_donghuzj3");
+			sysMap.put("wx6160b615066a9f78", "_qibao");
+			sysMap.put("wx753f3c2293294605", "_guizhou");
 			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
