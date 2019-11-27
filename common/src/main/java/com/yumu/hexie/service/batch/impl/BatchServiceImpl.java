@@ -37,6 +37,7 @@ public class BatchServiceImpl implements BatchService {
 	UserRepository userRepository;
 
 
+
 	@Override
 	public void updateUserShareCode() {
 		List<User> list = userService.getShareCodeIsNull();
@@ -81,7 +82,6 @@ public class BatchServiceImpl implements BatchService {
 		User user = userService.getById(Long.valueOf(userId));
 		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
 	}
-
 
 	@Override
 	public void bindHouseBatch(String appId) {
