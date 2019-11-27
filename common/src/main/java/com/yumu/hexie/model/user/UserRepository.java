@@ -40,4 +40,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	 */
 	@Query(nativeQuery = true, value = "select count(1) from user where tel is not null ")
 	public Integer getRegisteredUserCount();
+	
+	public List<User> findByAppId(String appId);
+
 }

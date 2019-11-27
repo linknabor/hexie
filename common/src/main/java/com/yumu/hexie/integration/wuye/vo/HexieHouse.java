@@ -25,6 +25,7 @@ public class HexieHouse implements Serializable {
 	private String sect_id;//小区id
 	private String csp_id;//公司
 	private String center_id;//中心管理id
+	private String office_tel;
 	
 	public String getSect_id() {
 		return sect_id;
@@ -122,6 +123,12 @@ public class HexieHouse implements Serializable {
 	}
 	public void setPark_inf(List<ParkInfo> park_inf) {
 		this.park_inf = park_inf;
+	}
+	public String getOffice_tel() {
+		return office_tel;
+	}
+	public void setOffice_tel(String office_tel) {
+		this.office_tel = office_tel;
 	}
 	
 }
