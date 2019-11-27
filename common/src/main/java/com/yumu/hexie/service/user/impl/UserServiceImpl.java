@@ -68,15 +68,7 @@ public class UserServiceImpl implements UserService {
 	public User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp) {
 		
 		String openId = weixinUser.getOpenid();
-		List<User> userList = userRepository.findByOpenid(openId);
-		User userAccount = null;
-		if (userList!=null && userList.size()> 0) {
-			if (userList.size() == 1) {
-				userAccount = userList.get(0);
-			}else {
-				userAccount = userList.get(userList.size()-1);
-			}
-		}
+		User userAccount = multiFindByOpenId(openId);
 		
 		if(userAccount == null) {
 			userAccount = new User();
@@ -135,6 +127,20 @@ public class UserServiceImpl implements UserService {
         }
         pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
 		userAccount = userRepository.save(userAccount);
+		return userAccount;
+	}
+	
+	@Override
+	public User multiFindByOpenId(String openId) {
+		List<User> userList = userRepository.findByOpenid(openId);
+		User userAccount = null;
+		if (userList!=null && userList.size()> 0) {
+			if (userList.size() == 1) {
+				userAccount = userList.get(0);
+			}else {
+				userAccount = userList.get(userList.size()-1);
+			}
+		}
 		return userAccount;
 	}
 	
