@@ -182,10 +182,6 @@ public class WuyeServiceImpl implements WuyeService {
 		
 	}
 
-	public HexieHouse getHouse(User user, String stmtId, String house_id) {
-		return WuyeUtil.getHouse(user, stmtId, house_id).getData();
-	}
-
 	@Override
 	public BillListVO quickPayInfo(User user, String stmtId, String currPage, String totalCount) {
 		return WuyeUtil.quickPayInfo(user, stmtId, currPage, totalCount).getData();
