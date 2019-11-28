@@ -78,7 +78,6 @@ public class UserController extends BaseController{
     private ParamService paramService;
     @Autowired
     private PageConfigService pageConfigService;
-    
 
     @Value(value = "${testMode}")
     private Boolean testMode;
