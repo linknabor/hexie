@@ -299,7 +299,13 @@ public class WuyeServiceImpl implements WuyeService {
 		RegionUrl regionurl = locationService.getRegionUrlByName(regionName);
 		return WuyeUtil.queryBillList(user, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
 	}
-
+	
+	/**
+	 * 通过物业交易ID异步绑定房屋
+	 * @param bindSwitch
+	 * @param user
+	 * @param tradeWaterId
+	 */
 	@Override
 	public BillStartDate getBillStartDateSDO(User user, String house_id, String regionName) {
 		RegionUrl regionurl = locationService.getRegionUrlByName(regionName);
@@ -308,8 +314,11 @@ public class WuyeServiceImpl implements WuyeService {
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		return null;
+		
 	}
+
+
+
 	
 	@Override
 	public HexieUser bindHouse(User user, String stmtId, String houseId) {
