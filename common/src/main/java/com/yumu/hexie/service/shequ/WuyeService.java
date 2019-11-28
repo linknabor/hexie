@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.shequ;
 
-import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -12,102 +11,254 @@ import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
-import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
 
-	// 0. 快捷缴费信息
-	public BillListVO quickPayInfo(String stmtId, String currPage, String totalCount);
+	/**
+	 * 快捷缴费
+	 * @param uesr
+	 * @param stmtId
+	 * @param currPage
+	 * @param totalCount
+	 * @return
+	 */
+	BillListVO quickPayInfo(User uesr, String stmtId, String currPage, String totalCount);
 
-	// 1.房产列表
-	public HouseListVO queryHouse(String userId);
+	/**
+	 * 查询房屋
+	 * @param user
+	 * @return
+	 */
+	HouseListVO queryHouse(User user);
 
-	// 2.绑定房产
-	public HexieUser bindHouse(String userId, String stmtId, String houseId);
+	/**
+	 * 纸质账单绑定房屋
+	 * @param user
+	 * @param stmtId
+	 * @param houseId
+	 * @return
+	 */
+	HexieUser bindHouse(User user, String stmtId, String houseId);
 
-	// 无账单绑定
-	public HexieUser bindHouseNoStmt(String userId, String houseId, String area);
+	/**
+	 * 无账单绑定房屋
+	 * @param user
+	 * @param houseId
+	 * @param area
+	 * @return
+	 */
+	HexieUser bindHouseNoStmt(User user, String houseId, String area);
 
-	// 3.删除房产
-	public BaseResult<String> deleteHouse(String userId, String houseId);
+	/**
+	 * 删除房产
+	 * @param user
+	 * @param houseId
+	 * @return
+	 */
+	BaseResult<String> deleteHouse(User user, String houseId);
 
-	// 4.根据订单查询房产信息
-	public HexieHouse getHouse(String userId, String stmtId);
-
+	/**
+	 * 根据订单查询房产信息
+	 * @param user
+	 * @param stmtId
+	 * @return
+	 */
+	HexieHouse getHouse(User user, String stmtId);
 	
-	
-	
-	
-	// 5.用户登录
-	public HexieUser userLogin(String openId);
+	/**
+	 * 获取房屋信息
+	 * @param userId
+	 * @param stmtId
+	 * @param house_id
+	 * @return
+	 */
+	HexieHouse getHouse(String userId, String stmtId, String house_id);
 
-	// 6.缴费记录查询
-	public PayWaterListVO queryPaymentList(String userId, String startDate, String endDate);
+	/**
+	 * 用户登录
+	 * @param user
+	 * @return
+	 */
+	HexieUser userLogin(User user);
 
-	// 7.缴费详情
-	public PaymentInfo queryPaymentDetail(String userId, String waterId);
+	/**
+	 * 缴费记录查询
+	 * @param user
+	 * @param startDate
+	 * @param endDate
+	 * @return
+	 */
+	PayWaterListVO queryPaymentList(User user, String startDate, String endDate);
 
-	// status 00,01,02? startDate 2015-02
-	// 8.账单记录
-	public BillListVO queryBillList(String userId, String payStatus, String startDate, String endDate,
+	/**
+	 * 缴费详情
+	 * @param user
+	 * @param waterId
+	 * @return
+	 */
+	PaymentInfo queryPaymentDetail(User user, String waterId);
+
+	/**
+	 * 账单记录
+	 * @param user
+	 * @param payStatus
+	 * @param startDate
+	 * @param endDate
+	 * @param currentPage
+	 * @param totalCount
+	 * @param house_id
+	 * @param sect_id
+	 * @return
+	 */
+	BillListVO queryBillList(User user, String payStatus, String startDate, String endDate,
 			String currentPage, String totalCount, String house_id, String sect_id);
 
-	// 9.账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
-	public PaymentInfo getBillDetail(String userId, String stmtId, String anotherbillIds);
+	/**
+	 * 账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
+	 * @param user
+	 * @param stmtId
+	 * @param anotherbillIds
+	 * @return
+	 */
+	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds);
 
-	// 10.缴费
-	public WechatPayInfo getPrePayInfo(User user, String billId, String stmtId, String couponUnit, String couponNum,
+	/**
+	 * 物业账单缴费
+	 * @param user
+	 * @param billId
+	 * @param stmtId
+	 * @param couponUnit
+	 * @param couponNum
+	 * @param couponId
+	 * @param mianBill
+	 * @param mianAmt
+	 * @param reduceAmt
+	 * @param invoice_title_type
+	 * @param credit_code
+	 * @param invoice_title
+	 * @param regionname
+	 * @return
+	 * @throws Exception
+	 */
+	WechatPayInfo getPrePayInfo(User user, String billId, String stmtId, String couponUnit, String couponNum,
 			String couponId, String mianBill, String mianAmt, String reduceAmt, String invoice_title_type,
 			String credit_code, String invoice_title, String regionname) throws Exception;
 
-	// 10.5 无账单缴费
-	public WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
+	/**
+	 * 物业无账单缴费
+	 * @param user
+	 * @param houseId
+	 * @param start_date
+	 * @param end_date
+	 * @param couponUnit
+	 * @param couponNum
+	 * @param couponId
+	 * @param mianBill
+	 * @param mianAmt
+	 * @param reduceAmt
+	 * @param invoice_title_type
+	 * @param credit_code
+	 * @param invoice_title
+	 * @param regionname
+	 * @return
+	 * @throws Exception
+	 */
+	WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
 			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt, String reduceAmt,
 			String invoice_title_type, String credit_code, String invoice_title, String regionname) throws Exception;
 
-	// 11.通知已支付
-	public void noticePayed(User user, String billId, String tradeWaterId, String couponId, String feePrice, String bindSwitch);
-	// 12.查询是否已经用过红包
-	public String queryCouponIsUsed(String userId);
-
-	// 13.更新电子发票抬头信息
-	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code,
-			String trade_water_id);
-
-	// 14.根据交易号获取对应房子的发票信息
-	public InvoiceInfo getInvoiceByTradeId(String trade_water_id);
-
-	// 15.根据数据类型查询指定的合协社区物业单元信息
-	public CellListVO querySectHeXieList(String sect_id, String build_id, String unit_id, String data_type);
-
-	// 16.根据名称模糊查询合协社区小区列表
-	public CellListVO getVagueSectByName(String sect_name);
-
-	// 根据账单查询地址
-	public HexieUser getAddressByBill(String billId);
+	/**
+	 * 通知已支付
+	 * @param user
+	 * @param billId
+	 * @param tradeWaterId
+	 * @param couponId
+	 * @param feePrice
+	 * @param bindSwitch
+	 */
+	void noticePayed(User user, String billId, String tradeWaterId, String couponId, String feePrice, String bindSwitch);
 	
-	public void setDefaultAddress(User user,HexieUser u);
+	/**
+	 * 查询是否已经用过红包
+	 * @param user
+	 * @return
+	 */
+	String queryCouponIsUsed(User user);
+
+	/**
+	 * 更新电子发票抬头信息
+	 * @param user
+	 * @param mobile
+	 * @param invoice_title
+	 * @param invoice_title_type
+	 * @param credit_code
+	 * @param trade_water_id
+	 * @return
+	 */
+	String updateInvoice(User user, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id);
+
+	/**
+	 * 根据交易号获取对应房子的发票信息
+	 * @param user
+	 * @param trade_water_id
+	 * @return
+	 */
+	InvoiceInfo getInvoiceByTradeId(User user, String trade_water_id);
+
+	/**
+	 * 根据数据类型查询指定的合协社区物业单元信息
+	 * @param user
+	 * @param sect_id
+	 * @param build_id
+	 * @param unit_id
+	 * @param data_type
+	 * @return
+	 */
+	CellListVO querySectHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type);
+
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param user
+	 * @param sect_name
+	 * @return
+	 */
+	CellListVO getVagueSectByName(User user, String sect_name);
+
+	/**
+	 * 设置默认地址
+	 * @param user
+	 * @param u
+	 */
+	void setDefaultAddress(User user, HexieUser u);
 	
-	//保存region表sectId
-	public void saveRegionSectId(Region region,String sectId);
-	
-	//根据regionName去community查询sectId
-	public String getSectIdByRegionName(String regionName);
+	/**
+	 * 标准版账单记录
+	 * @param user
+	 * @param startDate
+	 * @param endDate
+	 * @param house_id
+	 * @param sect_id
+	 * @param regionname
+	 * @return
+	 */
+	BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String sect_id, String regionname);
 
-	// 查询所有请求地址
-	public RegionVo getRegionUrl(String coordinate);
+	/**
+	 * 获取无账单开始日期
+	 * @param userId
+	 * @param house_id
+	 * @param regionname
+	 * @return
+	 */
+	BillStartDate getBillStartDateSDO(User user, String house_id, String regionname);
 
-	// 8.账单记录
-	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
-			String regionname);
-
-	// 获取无账单开始日期
-	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname);
-
-	
-	HexieHouse getHouse(String userId, String stmtId, String house_id);
-
+	/**
+	 * 异步绑定房屋
+	 * @param bindSwitch
+	 * @param user
+	 * @param tradeWaterId
+	 */
 	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
 	
 	

@@ -9,14 +9,14 @@ public class RegionUrl extends BaseModel{
 
 	private static final long serialVersionUID = 4276437344314180001L;
 	
-	private String regionname;
+	private String regionName;
 	private String regionUrl;
-	
-	public String getRegionname() {
-		return regionname;
+	private String regionCode;
+	public String getRegionName() {
+		return regionName;
 	}
-	public void setRegionname(String regionname) {
-		this.regionname = regionname;
+	public void setRegionName(String regionName) {
+		this.regionName = regionName;
 	}
 	public String getRegionUrl() {
 		return regionUrl;
@@ -24,6 +24,13 @@ public class RegionUrl extends BaseModel{
 	public void setRegionUrl(String regionUrl) {
 		this.regionUrl = regionUrl;
 	}
+	public String getRegionCode() {
+		return regionCode;
+	}
+	public void setRegionCode(String regionCode) {
+		this.regionCode = regionCode;
+	}
+	
 	
 	
 }

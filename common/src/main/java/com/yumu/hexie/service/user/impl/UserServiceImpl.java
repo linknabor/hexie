@@ -120,7 +120,7 @@ public class UserServiceImpl implements UserService {
         
         //绑定物业信息
         if(StringUtil.isEmpty(userAccount.getWuyeId()) ){
-        	BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount.getOpenid());
+        	BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount);
     		if(r.isSuccess()) {
     			userAccount.setWuyeId(r.getData().getUser_id());
     		}

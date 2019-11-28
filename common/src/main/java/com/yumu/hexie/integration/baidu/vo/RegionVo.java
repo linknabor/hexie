@@ -5,14 +5,14 @@ import java.util.List;
 import com.yumu.hexie.model.region.RegionUrl;
 
 public class RegionVo {
-	private List<RegionUrl> regionurl;
+	private List<RegionUrl> regionUrl;
 	private String address;
 	
-	public List<RegionUrl> getRegionurl() {
-		return regionurl;
+	public List<RegionUrl> getRegionUrl() {
+		return regionUrl;
 	}
-	public void setRegionurl(List<RegionUrl> regionurl) {
-		this.regionurl = regionurl;
+	public void setRegionurl(List<RegionUrl> regionUrl) {
+		this.regionUrl = regionUrl;
 	}
 	public String getAddress() {
 		return address;
