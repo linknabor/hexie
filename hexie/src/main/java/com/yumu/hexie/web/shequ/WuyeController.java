@@ -150,6 +150,7 @@ public class WuyeController extends BaseController {
 			return BaseResult.successResult(null);
 		}
 		return BaseResult.successResult(wuyeService.getHouse(user, stmtId));
+
 	}
 
 	/**
@@ -672,7 +673,6 @@ public class WuyeController extends BaseController {
 
 		return BaseResult.successResult(wuyeService.getBillStartDateSDO(user,house_id,regionname));
 	}
-	
 	
 
 }

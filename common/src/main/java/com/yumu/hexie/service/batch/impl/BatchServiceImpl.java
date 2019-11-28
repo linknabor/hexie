@@ -91,6 +91,7 @@ public class BatchServiceImpl implements BatchService {
 		List<User> userList = userRepository.findByAppId(appId);
 		
 		for (User user : userList) {
+
 			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
 			HouseListVO vo = baseResult.getData();
 			if (vo!=null) {

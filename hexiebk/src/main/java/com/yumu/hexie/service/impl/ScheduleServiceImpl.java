@@ -463,6 +463,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 				MemberBill bill = listbill.get(i);
 				User user = userRepository.findById(bill.getUserid());
 				BaseResult baseResult = WuyeUtil.queryOrderInfo(user, String.valueOf(bill.getMemberbillid()));
+
 				if("SUCCESS".equals(baseResult.getResult())) {
 					bill.setEnddate(df.format(new Date()));
 					bill.setStatus(MemberVo.SUCCESS);
