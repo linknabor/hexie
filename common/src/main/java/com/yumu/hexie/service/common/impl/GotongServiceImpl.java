@@ -81,7 +81,10 @@ public class GotongServiceImpl implements GotongService {
         ServiceOperator op = serviceOperatorRepository.findOne(opId);
         User opUser = userService.getById(op.getUserId());
         User orderUser = userService.getById(order.getUserId());
-        if (!StringUtils.isEmpty(opUser.getAppId()) && !opUser.getAppId().equals(orderUser.getAppId())) {
+        if (StringUtils.isEmpty(opUser.getAppId()) ) {
+			return;
+		}
+        if (!opUser.getAppId().equals(orderUser.getAppId())) {
 			return;
 		}
         String accessToken = systemConfigService.queryWXAToken(opUser.getAppId());

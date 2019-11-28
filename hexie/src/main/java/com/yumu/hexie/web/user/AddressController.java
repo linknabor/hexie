@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
@@ -70,13 +71,21 @@ public class AddressController extends BaseController{
 		return BaseResult.successResult("设置默认地址成功");
     }
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/addresses", method = RequestMethod.GET)
 	@ResponseBody
-    public BaseResult<List<Address>> queryAddressList(@ModelAttribute(Constants.USER)User user) throws Exception {
-		List<Address> addresses = addressService.queryAddressByUser(user.getId());
+    public BaseResult<List<Address>> queryAddressList(@ModelAttribute(Constants.USER)User user,
+    		@RequestParam(required=false, name="module") String module) throws Exception {
+		List<Address> addresses = new ArrayList<>();
+		if ("repair".equals(module)) {
+			addresses = addressService.queryBindedAddressByUser(user.getId());
+		}else {
+			addresses = addressService.queryAddressByUser(user.getId());
+		}
 		BaseResult<List<Address>> r = BaseResult.successResult(addresses);
 		return r;
     }
+	
 	@RequestMapping(value = "/addAddress", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<Address> save(HttpSession session,@ModelAttribute(Constants.USER)User user,@RequestBody AddressReq address) throws Exception {

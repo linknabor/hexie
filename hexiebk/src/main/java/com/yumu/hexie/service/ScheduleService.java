@@ -1,5 +1,9 @@
 package com.yumu.hexie.service;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 public interface ScheduleService {
 
@@ -17,6 +21,10 @@ public interface ScheduleService {
     public void executeCouponTimeoutJob();
     //7.优惠券到期提醒
     public void executeCoupinTimeoutHintJob();
-    //会员定时 订单状态查询  及会员日期判断
+    //8.会员定时 订单状态查询  及会员日期判断
     public void executeMemberTimtout();
+    
+    //9.物业支付完成后的队列服务
+	void updatePointByQueue() throws JsonParseException, JsonMappingException, IOException;
+	
 }
