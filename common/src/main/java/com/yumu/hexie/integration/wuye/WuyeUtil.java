@@ -461,8 +461,7 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<CellListVO> getVagueSectByName(User user, String sect_name) throws Exception{
-		
-		sect_name = URLEncoder.encode(sect_name,"GBK");
+    sect_name = URLEncoder.encode(sect_name,"GBK");
 		String url = getRequestUri(user) + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.info("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);

@@ -81,7 +81,6 @@ public interface WuyeService {
 	 * @return
 	 */
 	HexieUser userLogin(User user);
-
 	/**
 	 * 缴费记录查询
 	 * @param user

@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -93,7 +94,7 @@ public class WuyeServiceImpl implements WuyeService {
 		BaseResult<String> r = WuyeUtil.deleteHouse(user, houseId);
 		return r;
 	}
-
+	
 	@Override
 	public HexieHouse getHouse(User user, String stmtId) {
 		return WuyeUtil.getHouse(user, stmtId).getData();
@@ -180,10 +181,6 @@ public class WuyeServiceImpl implements WuyeService {
 		//3.绑定所缴纳物业费的房屋
 		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
 		
-	}
-
-	public HexieHouse getHouse(User user, String stmtId, String house_id) {
-		return WuyeUtil.getHouse(user, stmtId, house_id).getData();
 	}
 
 	@Override
@@ -363,9 +360,62 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		
-		
 	}
 
+
+
+	
+	@Override
+	public HexieUser bindHouse(String userId, String stmtId, String houseId) {
+		BaseResult<HexieUser> r= WuyeUtil.bindHouse(userId, stmtId, houseId);
+		if("04".equals(r.getResult())){
+			throw new BizValidateException("当前用户已经认领该房屋!");
+		}
+		if ("05".equals(r.getResult())) {
+			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
+		}
+		if("01".equals(r.getResult())) {
+			throw new BizValidateException("账户不存在！");
+		}
+		return r.getData();
+	}
+	
+	/**
+	 * 通过物业交易ID异步绑定房屋
+	 * @param bindSwitch
+	 * @param user
+	 * @param tradeWaterId
+	 */
+	@Override
+	public void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId) {
+		
+		Assert.hasText(tradeWaterId, "物业交易ID不能为空。 ");
+		
+		if ("1".equals(bindSwitch)) {
+			int retryTimes = 0;
+			boolean isSuccess = false;
+			
+			while(!isSuccess && retryTimes < 3) {
+				
+				try {
+					BindHouseQueue bindHouseQueue = new BindHouseQueue();
+					bindHouseQueue.setUser(user);
+					bindHouseQueue.setTradeWaterId(tradeWaterId);
+					
+					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+					String value = objectMapper.writeValueAsString(bindHouseQueue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, value);
+					isSuccess = true;
+				
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					retryTimes++;
+				}
+			}
+		}
+		
+		
+	}
 
 
 	
