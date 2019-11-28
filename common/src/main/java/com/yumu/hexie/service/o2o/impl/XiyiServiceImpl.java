@@ -136,15 +136,15 @@ public class XiyiServiceImpl implements XiyiService {
      * @see com.yumu.hexie.service.o2o.XiyiService#pay(com.yumu.hexie.model.localservice.bill.YunXiyiBill)
      */
     @Override
-    public JsSign pay(YunXiyiBill bill, String openId) {
+    public JsSign pay(YunXiyiBill bill, User user) {
         log.warn("发起支付[BEG]" + bill.getId()); 
         //获取支付单
-        PaymentOrder pay = commonHomeService.reqPay(bill,openId);
+        PaymentOrder pay = commonHomeService.reqPay(bill,user.getOpenid());
         //发起支付
         bill.pay(pay.getId());
         bill = yunXiyiBillRepository.save(bill);
         log.warn("发起支付[END]" + bill.getId()); 
-        return paymentService.requestPay(pay);
+        return paymentService.requestPay(user, pay);
     }
 
     private void paySuccess(YunXiyiBill bill,PaymentOrder pay) {
