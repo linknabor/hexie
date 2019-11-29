@@ -11,6 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.UserService;
 
@@ -35,7 +36,8 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 					return true;
 				} else {
 					logger.info("requeste uri : " + request.getRequestURI());
-					User userAccount = userService.getOrSubscibeUserByCode(code);
+					UserWeiXin weixinUser = userService.getOrSubscibeUserByCode(code);
+					User userAccount = userService.multiFindByOpenId(weixinUser.getOpenid());
 					request.getSession().setAttribute(Constants.USER, userAccount);
 				}
 			}

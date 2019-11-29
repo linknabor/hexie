@@ -7,4 +7,7 @@ public interface BatchService {
 	void updateUserShareCode();
 	
 	void fixBindHouse(String userId, String tradeWaterId);
+
+	void bindHouseBatch(String appId);
+
 }
