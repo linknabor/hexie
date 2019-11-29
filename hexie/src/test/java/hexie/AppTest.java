@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.yumu.hexie.common.config.AppConfig;
+import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 
 import junit.framework.TestCase;
 
@@ -49,6 +50,34 @@ public class AppTest extends TestCase {
 		
 		redisTemplate.opsForHash().putAll("test1", map);
 		redisTemplate.opsForHash().putAll("test2", map2);
+		
+	}
+	
+	@Autowired
+	private BaiduMapUtil baiduMapUtil;
+	
+	@Test
+	public void testBaiduMap() {
+		
+		String str = baiduMapUtil.findByBaiduGetCity("106.74590655179391,26.671247860481976");
+		System.out.println("str:" + str);
+		
+		String str2 = baiduMapUtil.findByCoordinateGetBaidu("121.4737,31.23037");
+		System.out.println("str2:" + str2);
+		
+		String str3 = baiduMapUtil.findByBaiduGetCity("");
+		System.out.println("str3:" + str3);
+		
+		String str4 = baiduMapUtil.findByCoordinateGetBaidu("");
+		System.out.println("str4:" + str4);
+		
+		String str5 = baiduMapUtil.findByBaiduGetCity("null");
+		System.out.println("str5:" + str5);
+		
+		String str6 = baiduMapUtil.findByCoordinateGetBaidu("null");
+		System.out.println("str6:" + str6);
+		
+		
 		
 	}
 

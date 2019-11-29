@@ -35,6 +35,9 @@ public class LocationServiceImpl implements LocationService {
 	private static final String DEFAULT_REGiON = "上海市";
 	
 	@Autowired
+	private BaiduMapUtil baiduMapUtil;
+	
+	@Autowired
 	private RegionUrlRepository regionUrlRepository;
 	
 	@PostConstruct
@@ -55,8 +58,8 @@ public class LocationServiceImpl implements LocationService {
 		if (StringUtils.isEmpty(coordinate)) {
 			return new RegionVo();
 		}
-		coordinate = BaiduMapUtil.findByCoordinateGetBaidu(coordinate);
-		String name = BaiduMapUtil.findByBaiduGetCity(coordinate);
+		coordinate = baiduMapUtil.findByCoordinateGetBaidu(coordinate);
+		String name = baiduMapUtil.findByBaiduGetCity(coordinate);
 		logger.info("坐标:" + coordinate + ", 对应地址："+name);
 		RegionVo vo = getRegionUrlFromCache(name);
 		return vo;
