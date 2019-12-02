@@ -464,6 +464,10 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<CellListVO> getVagueSectByName(User user, String sect_name, String regionurl) throws Exception{
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		sect_name = URLEncoder.encode(sect_name,"GBK");
 		String url = regionurl + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.info("【url】:"+url);

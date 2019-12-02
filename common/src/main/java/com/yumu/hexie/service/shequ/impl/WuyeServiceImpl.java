@@ -126,11 +126,9 @@ public class WuyeServiceImpl implements WuyeService {
 			String endDate,String currentPage, String totalCount,String house_id,String sect_id, String regionName) {
 		RegionUrl regionurl = null;
 		String targetUrl = "";
-		if (StringUtils.isEmpty(regionName)) {
+		if (!StringUtils.isEmpty(regionName)) {
 			regionurl = locationService.getRegionUrlByName(regionName);
 			targetUrl = regionurl.getRegionUrl();
-		}else {
-			regionurl = null;
 		}
 		return WuyeUtil.queryBillList(user, payStatus, startDate, endDate, currentPage, totalCount,house_id, sect_id, targetUrl).getData();
 	}
@@ -229,9 +227,15 @@ public class WuyeServiceImpl implements WuyeService {
 	//根据名称模糊查询合协社区小区列表
 	@Override
 	public CellListVO getVagueSectByName(User user, String sect_name, String region_name) {
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
 		try {
-			RegionUrl regionurl = locationService.getRegionUrlByName(region_name);
-			return WuyeUtil.getVagueSectByName(user, sect_name, regionurl.getRegionUrl()).getData();
+			if (!StringUtils.isEmpty(region_name)) {
+				regionurl = locationService.getRegionUrlByName(region_name);
+				targetUrl = regionurl.getRegionUrl();
+			}
+			return WuyeUtil.getVagueSectByName(user, sect_name, targetUrl).getData();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
