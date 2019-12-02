@@ -442,10 +442,10 @@ public class ScheduleServiceImpl implements ScheduleService{
 	
 	
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	@Scheduled(cron = "0 */20 * * * ?")
 	public void executeMemberTimtout() {
-		// TODO Auto-generated method stub
 		SCHEDULE_LOG.debug("--------------------会员支付定时开始：-------------------");
 		try {
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
@@ -461,12 +461,12 @@ public class ScheduleServiceImpl implements ScheduleService{
 			List<MemberBill> listbill = memberBillRepository.findByStatus(MemberVo.MIDDLE);
 			for (int i = 0; i < listbill.size(); i++) {
 				MemberBill bill = listbill.get(i);
-				@SuppressWarnings("rawtypes")
-				BaseResult baseResult = WuyeUtil.queryOrderInfo(String.valueOf(bill.getMemberbillid()));
+				User user = userRepository.findById(bill.getUserid());
+				BaseResult baseResult = WuyeUtil.queryOrderInfo(user, String.valueOf(bill.getMemberbillid()));
+
 				if("SUCCESS".equals(baseResult.getResult())) {
 					bill.setEnddate(df.format(new Date()));
 					bill.setStatus(MemberVo.SUCCESS);
-					User user = userRepository.findById(bill.getUserid());
 					if(user == null) {
 						throw new BizValidateException("账单userid没有查询到用户");
 					}
