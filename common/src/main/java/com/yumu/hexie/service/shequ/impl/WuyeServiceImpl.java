@@ -236,6 +236,7 @@ public class WuyeServiceImpl implements WuyeService {
 				targetUrl = regionurl.getRegionUrl();
 			}
 			return WuyeUtil.getVagueSectByName(user, sect_name, targetUrl).getData();
+      
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
