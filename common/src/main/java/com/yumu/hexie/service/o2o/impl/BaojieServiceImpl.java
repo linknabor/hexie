@@ -139,7 +139,7 @@ public class BaojieServiceImpl implements BaojieService {
         bill.setPaymentId(pay.getId());
         bill = baojieBillRepository.save(bill);
         log.warn("发起支付[END]" + bill.getId()); 
-        return paymentService.requestPay(pay);
+        return paymentService.requestPay(user, pay);
     }
 
     /** 

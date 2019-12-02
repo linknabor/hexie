@@ -25,7 +25,7 @@ import com.yumu.hexie.service.o2o.req.CommonBillReq;
 public interface XiyiService {
     
     public YunXiyiBill createBill(User user,CommonBillReq req,HomeCart cart);
-    public JsSign pay(YunXiyiBill bill,String openId);
+    public JsSign pay(YunXiyiBill bill,User user);
     public void update4Payment(PaymentOrder payment);
     public void notifyPayed(long billId);
     //public void accept(long billId,long userId);

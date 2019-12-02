@@ -214,9 +214,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         }
 		//获取支付单
 		PaymentOrder pay = paymentService.fetchPaymentOrder(order);
+		User user = userService.getById(order.getUserId());
         log.warn("[requestPay]PaymentId:" + pay.getId());
 		//发起支付
-		JsSign sign = paymentService.requestPay(pay);
+		JsSign sign = paymentService.requestPay(user, pay);
         log.warn("[requestPay]NonceStr:" + sign.getNonceStr());
 		//操作记录
 		commonPostProcess(ModelConstant.ORDER_OP_REQPAY,order);
