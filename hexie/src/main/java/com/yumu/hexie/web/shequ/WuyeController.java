@@ -22,7 +22,6 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -287,8 +286,11 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/getBillDetail", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<PaymentInfo> getBillDetail(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId) {
-		return BaseResult.successResult(WuyeUtil.getBillDetail(user, stmtId, billId).getData());
+			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId,
+			@RequestParam(required = false) String regionname) {
+		
+		PaymentInfo paymentInfo = wuyeService.getBillDetail(user, stmtId, billId, regionname);
+		return BaseResult.successResult(paymentInfo);
 	}
 
 	// stmtId在快捷支付的时候会用到

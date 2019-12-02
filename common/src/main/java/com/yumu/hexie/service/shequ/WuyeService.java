@@ -120,7 +120,7 @@ public interface WuyeService {
 	 * @param anotherbillIds
 	 * @return
 	 */
-	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds);
+	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName);
 
 	/**
 	 * 物业账单缴费
