@@ -278,7 +278,11 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<PaymentInfo> getBillDetail(User user,String stmtId,String anotherbillIds){
+	public static BaseResult<PaymentInfo> getBillDetail(User user,String stmtId,String anotherbillIds, String regionurl){
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = getRequestUri(user) + String.format(BILL_DETAIL_URL,user.getWuyeId(),stmtId,anotherbillIds);
 		return (BaseResult<PaymentInfo>)httpGet(url,PaymentInfo.class);
 	}

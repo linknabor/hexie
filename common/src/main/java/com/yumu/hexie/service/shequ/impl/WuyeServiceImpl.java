@@ -134,8 +134,14 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds) {
-		return WuyeUtil.getBillDetail(user, stmtId, anotherbillIds).getData();
+	public PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName) {
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
+		}
+		return WuyeUtil.getBillDetail(user, stmtId, anotherbillIds, targetUrl).getData();
 	}
 
 	@Override
