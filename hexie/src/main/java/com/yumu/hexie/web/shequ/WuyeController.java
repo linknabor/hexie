@@ -254,10 +254,10 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String payStatus, @RequestParam(required = false) String startDate,
 			@RequestParam(required = false) String endDate, @RequestParam(required = false) String currentPage,
 			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, 
-			@RequestParam(required = false) String sect_id)
+			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
 		BillListVO listVo = wuyeService.queryBillList(user, payStatus, startDate, endDate, currentPage,
-				totalCount, house_id,sect_id);
+				totalCount, house_id, sect_id, regionname);
 		if (listVo != null && listVo.getBill_info() != null) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -627,9 +627,10 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String build_id,
-			@RequestParam(required = false) String unit_id, @RequestParam(required = false) String data_type)
+			@RequestParam(required = false) String unit_id, @RequestParam(required = false) String data_type,
+			@RequestParam(required = false, value = "regionname") String regionName)
 			throws Exception {
-		CellListVO cellMng = wuyeService.querySectHeXieList(user, sect_id, build_id, unit_id, data_type);
+		CellListVO cellMng = wuyeService.querySectHeXieList(user, sect_id, build_id, unit_id, data_type, regionName);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
@@ -648,9 +649,10 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String sect_name) throws Exception {
+			@RequestParam(required = false) String sect_name,
+			@RequestParam(required = false, value = "regionname") String regionName) throws Exception {
 
-		CellListVO cellMng = wuyeService.getVagueSectByName(user, sect_name);
+		CellListVO cellMng = wuyeService.getVagueSectByName(user, sect_name, regionName);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {

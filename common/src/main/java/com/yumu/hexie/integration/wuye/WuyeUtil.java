@@ -243,9 +243,12 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<BillListVO> queryBillList(User user,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id,String sect_id){
-		//total_count 和curr_page没有填
-		String url = getRequestUri(user) + String.format(BILL_LIST_URL,user.getWuyeId(),payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
+	public static BaseResult<BillListVO> queryBillList(User user,String payStatus,String startDate,String endDate, String currentPage, String totalCount, String house_id,String sect_id, String regionurl){
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
+		String url = regionurl + String.format(BILL_LIST_URL,user.getWuyeId(),payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
 	
@@ -435,9 +438,9 @@ public class WuyeUtil {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<CellListVO> getMngHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type) throws Exception{
+	public static BaseResult<CellListVO> getMngHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type, String regionurl) throws Exception{
 
-		String url = getRequestUri(user) + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
+		String url = regionurl + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
@@ -460,9 +463,9 @@ public class WuyeUtil {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<CellListVO> getVagueSectByName(User user, String sect_name) throws Exception{
-    sect_name = URLEncoder.encode(sect_name,"GBK");
-		String url = getRequestUri(user) + String.format(SECT_VAGUE_LIST_URL, sect_name);
+	public static BaseResult<CellListVO> getVagueSectByName(User user, String sect_name, String regionurl) throws Exception{
+		sect_name = URLEncoder.encode(sect_name,"GBK");
+		String url = regionurl + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.info("【url】:"+url);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
