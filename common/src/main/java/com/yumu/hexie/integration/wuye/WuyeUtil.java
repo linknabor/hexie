@@ -264,8 +264,10 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<BillListVO> queryBillList(User user, String startDate, String endDate, String house_id,String sect_id,String regionurl){
-		//total_count 和curr_page没有填
 		log.info("startDate:"+startDate+", endDate"+endDate);
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = regionurl + String.format(BILL_LIST_STD_URL, user.getWuyeId(),startDate,endDate,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
@@ -318,6 +320,10 @@ public class WuyeUtil {
 			fromSys = sysMap.get(appid);
 		}
 		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
+		
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
 		String url = regionurl + String.format(WX_PAY_URL, user.getWuyeId(),billId,stmtId,user.getOpenid(),
 					couponUnit,couponNum,couponId,fromSys,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(), invoice_title);
@@ -360,6 +366,10 @@ public class WuyeUtil {
 			//do nothing
 		}else {
 			fromSys = sysMap.get(appid);
+		}
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
 		}
 		
 		String url = regionurl + String.format(OTHER_WX_PAY_URL, user.getWuyeId(),houseId,start_date,end_date,user.getOpenid(),
@@ -444,6 +454,9 @@ public class WuyeUtil {
 	@SuppressWarnings("unchecked")
 	public static BaseResult<CellListVO> getMngHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type, String regionurl) throws Exception{
 
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = regionurl + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
@@ -534,6 +547,9 @@ public class WuyeUtil {
 	@SuppressWarnings("unchecked")
 	public static BaseResult<BillStartDate> getBillStartDateSDO(User user,String house_id,String regionurl) throws Exception{
 
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = regionurl + String.format(BILL_LIST_DATE, user.getWuyeId(), house_id);
 		return (BaseResult<BillStartDate>)httpGet(url,BillStartDate.class);
 	}
