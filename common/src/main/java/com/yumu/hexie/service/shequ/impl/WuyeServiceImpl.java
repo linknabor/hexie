@@ -123,8 +123,16 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public BillListVO queryBillList(User user, String payStatus, String startDate, 
-			String endDate,String currentPage, String totalCount,String house_id,String sect_id) {
-		return WuyeUtil.queryBillList(user, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id).getData();
+			String endDate,String currentPage, String totalCount,String house_id,String sect_id, String regionName) {
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
+		}else {
+			regionurl = null;
+		}
+		return WuyeUtil.queryBillList(user, payStatus, startDate, endDate, currentPage, totalCount,house_id, sect_id, targetUrl).getData();
 	}
 
 	@Override
@@ -208,9 +216,10 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Override
 	public CellListVO querySectHeXieList(User user, String sect_id, String build_id,
-			String unit_id, String data_type) {
+			String unit_id, String data_type, String region_name) {
 		try {
-			return WuyeUtil.getMngHeXieList(user, sect_id, build_id, unit_id, data_type).getData();
+			RegionUrl regionurl = locationService.getRegionUrlByName(region_name);
+			return WuyeUtil.getMngHeXieList(user, sect_id, build_id, unit_id, data_type, regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -219,11 +228,10 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(User user, String sect_name) {
+	public CellListVO getVagueSectByName(User user, String sect_name, String region_name) {
 		try {
-			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(user, sect_name);
-			log.info(s.getResult());
-			return WuyeUtil.getVagueSectByName(user, sect_name).getData();
+			RegionUrl regionurl = locationService.getRegionUrlByName(region_name);
+			return WuyeUtil.getVagueSectByName(user, sect_name, regionurl.getRegionUrl()).getData();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}

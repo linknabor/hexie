@@ -111,7 +111,7 @@ public interface WuyeService {
 	 * @return
 	 */
 	BillListVO queryBillList(User user, String payStatus, String startDate, String endDate,
-			String currentPage, String totalCount, String house_id, String sect_id);
+			String currentPage, String totalCount, String house_id, String sect_id, String regionName);
 
 	/**
 	 * 账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
@@ -214,7 +214,7 @@ public interface WuyeService {
 	 * @param data_type
 	 * @return
 	 */
-	CellListVO querySectHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type);
+	CellListVO querySectHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type, String region_name);
 
 	/**
 	 * 根据名称模糊查询合协社区小区列表
@@ -222,7 +222,7 @@ public interface WuyeService {
 	 * @param sect_name
 	 * @return
 	 */
-	CellListVO getVagueSectByName(User user, String sect_name);
+	CellListVO getVagueSectByName(User user, String sect_name, String region_name);
 
 	/**
 	 * 设置默认地址
