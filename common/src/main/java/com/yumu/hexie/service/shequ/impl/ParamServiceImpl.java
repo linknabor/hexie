@@ -31,13 +31,13 @@ public class ParamServiceImpl implements ParamService {
 	 * 缓存物业公司参数到redis中，如果失败重新请求，总共请求3次
 	 */
 	@Override
-	public void cacheParam(String infoId, String type) {
+	public void cacheParam(User user, String infoId, String type) {
 
 		boolean isSuccess = false;
 		int count = 0;
 		while(!isSuccess && count <3) {	//请求三次
 			try {
-				BaseResult<HexieConfig> baseResult = WuyeUtil.queryServiceCfg(infoId, type, PARAM_NAMES);
+				BaseResult<HexieConfig> baseResult = WuyeUtil.queryServiceCfg(user, infoId, type, PARAM_NAMES);
 				HexieConfig hexieConfig = baseResult.getData();
 				if (hexieConfig == null) {
 					logger.error("未查询到参数：" + PARAM_NAMES);
@@ -72,7 +72,7 @@ public class ParamServiceImpl implements ParamService {
 		}
 		Map<String, String> paramMap = (Map<String, String>) redisTemplate.opsForHash().get(CACHED_KEY, cspId);
 		if (paramMap == null || paramMap.entrySet().isEmpty()) {
-			cacheParam(cspId, ModelConstant.PARA_TYPE_CSP);
+			cacheParam(user, cspId, ModelConstant.PARA_TYPE_CSP);
 			paramMap = (Map<String, String>) redisTemplate.opsForHash().get(CACHED_KEY, cspId);
 		}
 		return paramMap;

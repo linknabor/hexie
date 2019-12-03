@@ -18,8 +18,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.baidu.BaiduMapUtil;
-import com.yumu.hexie.integration.baidu.vo.RegionVo;
+
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -37,9 +36,9 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.region.RegionUrl;
-import com.yumu.hexie.model.region.RegionUrlRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
@@ -50,6 +49,7 @@ import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service("wuyeService")
 public class WuyeServiceImpl implements WuyeService {
+	
 	private static final Logger log = LoggerFactory.getLogger(WuyeServiceImpl.class);
 	
 	private static Map<String,Long> map=null;
@@ -59,9 +59,6 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private AddressService addressService;
-	
-	@Autowired
-	private RegionUrlRepository regionUrlRepository;
 	
 	@Autowired
 	private UserService userService;
@@ -78,9 +75,12 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private WuyeQueueTask wuyeQueueTask;
 	
+	@Autowired
+	private LocationService locationService;
+	
 	@Override
-	public HouseListVO queryHouse(String userId) {
-		return WuyeUtil.queryHouse(userId).getData();
+	public HouseListVO queryHouse(User user) {
+		return WuyeUtil.queryHouse(user).getData();
 	}
 
 	@PostConstruct
@@ -90,42 +90,58 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public BaseResult<String> deleteHouse(String userId, String houseId) {
-		BaseResult<String> r = WuyeUtil.deleteHouse(userId, houseId);
+	public BaseResult<String> deleteHouse(User user, String houseId) {
+		BaseResult<String> r = WuyeUtil.deleteHouse(user, houseId);
 		return r;
 	}
-
+	
 	@Override
-	public HexieHouse getHouse(String userId, String stmtId) {
-		return WuyeUtil.getHouse(userId, stmtId).getData();
+	public HexieHouse getHouse(User user, String stmtId) {
+		return WuyeUtil.getHouse(user, stmtId).getData();
+	}
+	
+	@Override
+	public HexieHouse getHouse(String userId, String stmtId, String house_id) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public HexieUser userLogin(String openId) {
-		return WuyeUtil.userLogin(openId).getData();
+	public HexieUser userLogin(User user) {
+		return WuyeUtil.userLogin(user).getData();
 	}
 
 	@Override
-	public PayWaterListVO queryPaymentList(String userId, String startDate,
-			String endDate) {
-		return WuyeUtil.queryPaymentList(userId, startDate, endDate).getData();
+	public PayWaterListVO queryPaymentList(User user, String startDate, String endDate) {
+		return WuyeUtil.queryPaymentList(user, startDate, endDate).getData();
 	}
 
 	@Override
-	public PaymentInfo queryPaymentDetail(String userId, String waterId) {
-		return WuyeUtil.queryPaymentDetail(userId, waterId).getData();
+	public PaymentInfo queryPaymentDetail(User user, String waterId) {
+		return WuyeUtil.queryPaymentDetail(user, waterId).getData();
 	}
 
 	@Override
-	public BillListVO queryBillList(String userId, String payStatus,
-			String startDate, String endDate,String currentPage, String totalCount,String house_id,String sect_id) {
-		return WuyeUtil.queryBillList(userId, payStatus, startDate, endDate, currentPage, totalCount,house_id,sect_id).getData();
+	public BillListVO queryBillList(User user, String payStatus, String startDate, 
+			String endDate,String currentPage, String totalCount,String house_id,String sect_id, String regionName) {
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
+		}
+		return WuyeUtil.queryBillList(user, payStatus, startDate, endDate, currentPage, totalCount,house_id, sect_id, targetUrl).getData();
 	}
 
 	@Override
-	public PaymentInfo getBillDetail(String userId, String stmtId,
-			String anotherbillIds) {
-		return WuyeUtil.getBillDetail(userId, stmtId, anotherbillIds).getData();
+	public PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName) {
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
+		}
+		return WuyeUtil.getBillDetail(user, stmtId, anotherbillIds, targetUrl).getData();
 	}
 
 	@Override
@@ -133,9 +149,15 @@ public class WuyeServiceImpl implements WuyeService {
 			String stmtId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, String fee_mianBill,String fee_mianAmt,
 			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionname)) {
+			regionurl = locationService.getRegionUrlByName(regionname);
+			targetUrl = regionurl.getRegionUrl();
+		}
 		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
-				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
+				invoice_title_type, credit_code, invoice_title,targetUrl)
 				.getData();
 	}
 	
@@ -144,9 +166,15 @@ public class WuyeServiceImpl implements WuyeService {
 			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
 			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
 			throws Exception {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionname)) {
+			regionurl = locationService.getRegionUrlByName(regionname);
+			targetUrl = regionurl.getRegionUrl();
+		}
 		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
+				invoice_title_type, credit_code, invoice_title,targetUrl)
 				.getData();
 	}
 
@@ -178,61 +206,70 @@ public class WuyeServiceImpl implements WuyeService {
 		
 	}
 
-	public HexieHouse getHouse(String userId, String stmtId, String house_id) {
-		return WuyeUtil.getHouse(userId, stmtId, house_id).getData();
+	@Override
+	public BillListVO quickPayInfo(User user, String stmtId, String currPage, String totalCount) {
+		return WuyeUtil.quickPayInfo(user, stmtId, currPage, totalCount).getData();
 	}
 
 	@Override
-	public BillListVO quickPayInfo(String stmtId, String currPage, String totalCount) {
-		return WuyeUtil.quickPayInfo(stmtId, currPage, totalCount).getData();
-	}
+	public String queryCouponIsUsed(User user) {
 
-	@Override
-	public String queryCouponIsUsed(String userId) {
-
-		BaseResult<String> r = WuyeUtil.couponUseQuery(userId);
+		BaseResult<String> r = WuyeUtil.couponUseQuery(user);
 		return r.getResult();
 	}
 
 	@Override
-	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
-		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
+	public String updateInvoice(User user, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+		BaseResult<String> r = WuyeUtil.updateInvoice(user, invoice_title, invoice_title_type, credit_code, trade_water_id);
 		return r.getResult();
 	}
 
 	@Override
-	public InvoiceInfo getInvoiceByTradeId(String trade_water_id) {
-		return WuyeUtil.getInvoiceInfo(trade_water_id).getData();
+	public InvoiceInfo getInvoiceByTradeId(User user, String trade_water_id) {
+		return WuyeUtil.getInvoiceInfo(user, trade_water_id).getData();
 	}
 	
 	@Override
-	public CellListVO querySectHeXieList(String sect_id, String build_id,
-			String unit_id, String data_type) {
+	public CellListVO querySectHeXieList(User user, String sect_id, String build_id,
+			String unit_id, String data_type, String region_name) {
 		try {
-			return WuyeUtil.getMngHeXieList(sect_id, build_id, unit_id, data_type).getData();
+			
+			RegionUrl regionurl = null;
+			String targetUrl = "";
+			if (!StringUtils.isEmpty(region_name)) {
+				regionurl = locationService.getRegionUrlByName(region_name);
+				targetUrl = regionurl.getRegionUrl();
+			}
+			return WuyeUtil.getMngHeXieList(user, sect_id, build_id, unit_id, data_type, targetUrl).getData();
 		} catch (Exception e) {
-			log.error("异常捕获信息:"+e);
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(String sect_name) {
+	public CellListVO getVagueSectByName(User user, String sect_name, String region_name) {
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
 		try {
-			BaseResult<CellListVO> s = WuyeUtil.getVagueSectByName(sect_name);
-			log.error(s.getResult());
-			return WuyeUtil.getVagueSectByName(sect_name).getData();
+			if (!StringUtils.isEmpty(region_name)) {
+				regionurl = locationService.getRegionUrlByName(region_name);
+				targetUrl = regionurl.getRegionUrl();
+			}
+			return WuyeUtil.getVagueSectByName(user, sect_name, targetUrl).getData();
+      
 		} catch (Exception e) {
-			log.error("异常捕获信息:"+e);
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}
 
 	@Override
-	public HexieUser bindHouseNoStmt(String userId, String houseId, String area) {
-		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(userId, houseId, area);
+	public HexieUser bindHouseNoStmt(User user, String houseId, String area) {
+		
+		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(user, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -249,14 +286,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public HexieUser getAddressByBill(String billId) {
-		
-		return WuyeUtil.getAddressByBill(billId).getData();
-	}
-
-	@Override
 	@Transactional
-	public void setDefaultAddress(User user,HexieUser u) {
+	public void setDefaultAddress(User user, HexieUser u) {
 
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
@@ -299,54 +330,48 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public void saveRegionSectId(Region region, String sectId) {
-		region.setSectId(sectId);
-		regionRepository.save(region);
-	}
-
-	@Override
-	public String getSectIdByRegionName(String regionName) {
-		return WuyeUtil.querySectIdByName(regionName).getData();
+	public BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, 
+			String sect_id, String regionName) {
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
+		}
+		return WuyeUtil.queryBillList(user, startDate, endDate,house_id,sect_id,targetUrl).getData();
 	}
 	
+	/**
+	 * 通过物业交易ID异步绑定房屋
+	 * @param bindSwitch
+	 * @param user
+	 * @param tradeWaterId
+	 */
 	@Override
-	public RegionVo getRegionUrl(String coordinate) {
-		coordinate = BaiduMapUtil.findByCoordinateGetBaidu(coordinate);
-		String name = BaiduMapUtil.findByBaiduGetCity(coordinate);
-		log.error("坐标获取地址："+name);
-		RegionUrl regionurl = regionUrlRepository.findregionname(name);
-		RegionVo region = new RegionVo();
-		if(regionurl==null) {
-			region.setAddress("上海市");
-		}else {
-			region.setAddress(regionurl.getRegionname());
+	public BillStartDate getBillStartDateSDO(User user, String house_id, String regionName) {
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
 		}
-		region.setRegionurl(regionUrlRepository.findAll());
-
-		return region;
-	}
-
-	@Override
-	public BillListVO queryBillListStd(String userId, String startDate, String endDate, String house_id, String sect_id,
-			String regionname) {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
-		return WuyeUtil.queryBillList(userId, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
-	}
-
-	@Override
-	public BillStartDate getBillStartDateSDO(String userId, String house_id, String regionname) {
-		RegionUrl regionurl = regionUrlRepository.findregionname(regionname);
 		try {
-			return WuyeUtil.getBillStartDateSDO(userId,house_id,regionurl.getRegionUrl()).getData();
+			return WuyeUtil.getBillStartDateSDO(user,house_id,targetUrl).getData();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage(), e);
 		}
 		return null;
+		
 	}
+
+
+
 	
 	@Override
-	public HexieUser bindHouse(String userId, String stmtId, String houseId) {
-		BaseResult<HexieUser> r= WuyeUtil.bindHouse(userId, stmtId, houseId);
+	public HexieUser bindHouse(User user, String stmtId, String houseId) {
+		BaseResult<HexieUser> r= WuyeUtil.bindHouse(user, stmtId, houseId);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -393,9 +418,6 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		
-		
 	}
-
-
 	
 }

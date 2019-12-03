@@ -1,29 +1,17 @@
 package com.yumu.hexie.service.user.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import javax.inject.Inject;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.mysql.fabric.xmlrpc.base.Data;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
-import com.yumu.hexie.common.util.RSAUtil;
 import com.yumu.hexie.common.util.UnionUtil;
 import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -32,8 +20,6 @@ import com.yumu.hexie.model.user.Member;
 import com.yumu.hexie.model.user.MemberBill;
 import com.yumu.hexie.model.user.MemberBillRepository;
 import com.yumu.hexie.model.user.MemberRepository;
-import com.yumu.hexie.model.user.MemberRuleRelationshipsRepository;
-import com.yumu.hexie.model.user.MemberRuleRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -47,10 +33,6 @@ public class MemberServiceImpl implements MemberService{
 	@Inject
 	private MemberRepository memberRepository;
 	@Inject
-	private MemberRuleRepository memberRuleRepository;
-	@Inject
-	private MemberRuleRelationshipsRepository memberRuleRelationshipsRepository;
-	@Inject
 	private MemberBillRepository memberBillRepository;
 	@Inject
 	private UserRepository userRepository;
@@ -59,13 +41,11 @@ public class MemberServiceImpl implements MemberService{
 	
 	@Override
 	public List<Member> getMember(User user) {
-		// TODO Auto-generated method stub
 		return memberRepository.findByUserid(user.getId());
 	}
 
 	@Override
 	public WechatPayInfo getPayInfo(User user) {
-		// TODO Auto-generated method stub
 		
 		log.info("会员支付接口：UserId:"+user.getId());
 		try {
@@ -79,7 +59,7 @@ public class MemberServiceImpl implements MemberService{
 			bill.setUserid(user.getId());
 			bill = memberBillRepository.save(bill);
 			
-			return WuyeUtil.getMemberPrePayInfo(String.valueOf(bill.getMemberbillid()), bill.getPrice(), user.getOpenid(),MemberVo.NOTIFYURL).getData();
+			return WuyeUtil.getMemberPrePayInfo(user, String.valueOf(bill.getMemberbillid()), bill.getPrice(),MemberVo.NOTIFYURL).getData();
 		} catch (Exception e) {
 			
 			log.error("err msg :" + e.getMessage());
@@ -89,7 +69,6 @@ public class MemberServiceImpl implements MemberService{
 	
 	@Override
 	public String getNotify(UnionPayVO unionpayvo) {
-		// TODO Auto-generated method stub
 		try {
 			
 			String requestStr = unionpayvo.getUnionPayStr();
