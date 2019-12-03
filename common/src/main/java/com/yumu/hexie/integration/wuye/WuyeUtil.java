@@ -417,8 +417,9 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static BaseResult<String> updateInvoice(User user, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+	public static BaseResult<String> updateInvoice(String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
 		try {
+			User user = new User();
 			invoice_title = URLEncoder.encode(invoice_title,"GBK");
 			String url = getRequestUri(user) + String.format(APPLY_INVOICE_URL, user.getTel(), invoice_title, invoice_title_type, credit_code, trade_water_id);
 			return (BaseResult<String>)httpGet(url,String.class);
@@ -436,7 +437,8 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<InvoiceInfo> getInvoiceInfo(User user, String trade_water_id) {
+	public static BaseResult<InvoiceInfo> getInvoiceInfo(String trade_water_id) {
+		User user = new User();
 		String url = getRequestUri(user) + String.format(INVOICE_INFO_TO_TRADE, trade_water_id);
 		return (BaseResult<InvoiceInfo>)httpGet(url,InvoiceInfo.class);
 	}
