@@ -22,6 +22,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -86,6 +87,12 @@ public class WuyeController extends BaseController {
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
 		log.info("user is : " + user);
+		 //绑定物业信息
+        if(StringUtil.isEmpty(user.getWuyeId()) ){
+        	HexieUser r = WuyeUtil.userLogin(user).getData();
+    		user.setWuyeId(r.getUser_id());
+    		user = userService.save(user);
+        }
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}

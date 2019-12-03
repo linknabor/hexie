@@ -26,6 +26,8 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
@@ -59,7 +61,6 @@ public class UserController extends BaseController{
     private ParamService paramService;
     @Autowired
     private PageConfigService pageConfigService;
-    
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -100,6 +101,12 @@ public class UserController extends BaseController{
 					user = null;
 				}
 			}
+			 //绑定物业信息
+	        if(StringUtil.isEmpty(user.getWuyeId()) ){
+	        	HexieUser r = WuyeUtil.userLogin(user).getData();
+	    		user.setWuyeId(r.getUser_id());
+	    		user = userService.save(user);
+	        }
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
