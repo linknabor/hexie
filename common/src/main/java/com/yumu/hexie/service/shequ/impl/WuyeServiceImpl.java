@@ -150,9 +150,14 @@ public class WuyeServiceImpl implements WuyeService {
 			String couponId,String mianBill,String mianAmt, String reduceAmt, 
 			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
 		
-		RegionUrl regionurl = locationService.getRegionUrlByName(regionname);
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionname)) {
+			regionurl = locationService.getRegionUrlByName(regionname);
+			targetUrl = regionurl.getRegionUrl();
+		}
 		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
+				invoice_title_type, credit_code, invoice_title,targetUrl)
 				.getData();
 	}
 	
@@ -161,9 +166,15 @@ public class WuyeServiceImpl implements WuyeService {
 			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
 			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
 			throws Exception {
-		RegionUrl regionurl = locationService.getRegionUrlByName(regionname);
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionname)) {
+			regionurl = locationService.getRegionUrlByName(regionname);
+			targetUrl = regionurl.getRegionUrl();
+		}
 		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, invoice_title,regionurl.getRegionUrl())
+				invoice_title_type, credit_code, invoice_title,targetUrl)
 				.getData();
 	}
 
@@ -222,8 +233,14 @@ public class WuyeServiceImpl implements WuyeService {
 	public CellListVO querySectHeXieList(User user, String sect_id, String build_id,
 			String unit_id, String data_type, String region_name) {
 		try {
-			RegionUrl regionurl = locationService.getRegionUrlByName(region_name);
-			return WuyeUtil.getMngHeXieList(user, sect_id, build_id, unit_id, data_type, regionurl.getRegionUrl()).getData();
+			
+			RegionUrl regionurl = null;
+			String targetUrl = "";
+			if (!StringUtils.isEmpty(region_name)) {
+				regionurl = locationService.getRegionUrlByName(region_name);
+				targetUrl = regionurl.getRegionUrl();
+			}
+			return WuyeUtil.getMngHeXieList(user, sect_id, build_id, unit_id, data_type, targetUrl).getData();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
@@ -315,8 +332,14 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, 
 			String sect_id, String regionName) {
-		RegionUrl regionurl = locationService.getRegionUrlByName(regionName);
-		return WuyeUtil.queryBillList(user, startDate, endDate,house_id,sect_id,regionurl.getRegionUrl()).getData();
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
+		}
+		return WuyeUtil.queryBillList(user, startDate, endDate,house_id,sect_id,targetUrl).getData();
 	}
 	
 	/**
@@ -327,9 +350,15 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Override
 	public BillStartDate getBillStartDateSDO(User user, String house_id, String regionName) {
-		RegionUrl regionurl = locationService.getRegionUrlByName(regionName);
+		
+		RegionUrl regionurl = null;
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			regionurl = locationService.getRegionUrlByName(regionName);
+			targetUrl = regionurl.getRegionUrl();
+		}
 		try {
-			return WuyeUtil.getBillStartDateSDO(user,house_id,regionurl.getRegionUrl()).getData();
+			return WuyeUtil.getBillStartDateSDO(user,house_id,targetUrl).getData();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
