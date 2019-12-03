@@ -37,6 +37,7 @@ public class BatchServiceImpl implements BatchService {
 	UserRepository userRepository;
 
 
+
 	@Override
 	public void updateUserShareCode() {
 		List<User> list = userService.getShareCodeIsNull();

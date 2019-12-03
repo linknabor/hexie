@@ -69,6 +69,7 @@ public class UserController extends BaseController{
     public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user,
     		HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
+		long beginTime = System.currentTimeMillis();
 		User sessionUser = user;
 		try {
 			
@@ -111,7 +112,9 @@ public class UserController extends BaseController{
 			    userInfo.setBgImageList(bgImageList);
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    userInfo.setQrCode(qrCode.getQrLink());
-			    
+			    long endTime = System.currentTimeMillis();
+				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
+
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
 				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());
@@ -156,6 +159,7 @@ public class UserController extends BaseController{
 	@ResponseBody
     public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestBody(required = false) Map<String, String> postData) throws Exception {
 		
+		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
 		try {
 			String oriApp = postData.get("oriApp");
@@ -184,7 +188,8 @@ public class UserController extends BaseController{
 			if(userAccount == null) {
 			    return new BaseResult<UserInfo>().failMsg("用户不存在！");
 			}
-
+			long endTime = System.currentTimeMillis();
+			log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 			return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
 			    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
 		} catch (Exception e) {
