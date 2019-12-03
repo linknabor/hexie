@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -97,7 +95,7 @@ public class WuyeController extends BaseController {
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
-		HouseListVO listVo = wuyeService.queryHouse(user.getWuyeId());
+		HouseListVO listVo = wuyeService.queryHouse(user);
 		if (listVo != null && listVo.getHou_info() != null) {
 			return BaseResult.successResult(listVo.getHou_info());
 		} else {
@@ -120,7 +118,7 @@ public class WuyeController extends BaseController {
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.fail("删除房子失败！请重新访问页面并操作！");
 		}
-		com.yumu.hexie.integration.wuye.resp.BaseResult<String> r = wuyeService.deleteHouse(user.getWuyeId(), houseId);
+		com.yumu.hexie.integration.wuye.resp.BaseResult<String> r = wuyeService.deleteHouse(user, houseId);
 		// boolean r = wuyeService.deleteHouse(user.getWuyeId(), houseId);
 		if ((boolean) r.isSuccess()) {
 			// 添加电话到user表
@@ -156,7 +154,8 @@ public class WuyeController extends BaseController {
 			// FIXME 后续可调转绑定房子页面
 			return BaseResult.successResult(null);
 		}
-		return BaseResult.successResult(wuyeService.getHouse(user.getWuyeId(), stmtId));
+		return BaseResult.successResult(wuyeService.getHouse(user, stmtId));
+
 	}
 
 	/**
@@ -175,7 +174,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String stmtId, 
 			@RequestParam(required = false) String houseId) throws Exception {
 		
-		HexieUser u = wuyeService.bindHouse(user.getWuyeId(), stmtId, houseId);
+		HexieUser u = wuyeService.bindHouse(user, stmtId, houseId);
 		log.info("HexieUser u = " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
@@ -201,7 +200,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String houseId, 
 			@RequestParam(required = false) String area) throws Exception {
 		
-		HexieUser u = wuyeService.bindHouseNoStmt(user.getWuyeId(), houseId, area);
+		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
 		log.info("HexieUser : " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
@@ -212,14 +211,16 @@ public class WuyeController extends BaseController {
 	}
 
 	/***************** [END]房产 ********************/
+	
 
 	/***************** [BEGIN]缴费记录 ********************/
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/paymentHistory", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<PayWater>> paymentHistory(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate)
 			throws Exception {
-		PayWaterListVO listVo = wuyeService.queryPaymentList(user.getWuyeId(), startDate, endDate);
+		PayWaterListVO listVo = wuyeService.queryPaymentList(user, startDate, endDate);
 		if (listVo != null && listVo.getBill_info_water() != null) {
 			return BaseResult.successResult(listVo.getBill_info_water());
 		} else {
@@ -236,33 +237,32 @@ public class WuyeController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/queryPaymentDetail/{trade_water_id}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<PaymentInfo> queryPaymentDetail(@ModelAttribute(Constants.USER) User user,
 			@PathVariable String trade_water_id) throws Exception {
-		PaymentInfo info = wuyeService.queryPaymentDetail(user.getWuyeId(), trade_water_id);
-		// PayWaterListVO listVo =
-		// wuyeService.queryPaymentList(user.getWuyeId(), startDate, endDate);
+		PaymentInfo info = wuyeService.queryPaymentDetail(user, trade_water_id);
 		if (info != null) {
 			return BaseResult.successResult(info);
 		} else {
 			return BaseResult.successResult(null);
 		}
 	}
-
-	// FIXME 详情查询等记录有了再加
 	/***************** [END]缴费记录 ********************/
 
 	/***************** [BEGIN]账单查询 ********************/
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/billList", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<BillListVO> billList(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String payStatus, @RequestParam(required = false) String startDate,
 			@RequestParam(required = false) String endDate, @RequestParam(required = false) String currentPage,
-			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, @RequestParam(required = false) String sect_id)
+			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, 
+			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
-		BillListVO listVo = wuyeService.queryBillList(user.getWuyeId(), payStatus, startDate, endDate, currentPage,
-				totalCount, house_id,sect_id);
+		BillListVO listVo = wuyeService.queryBillList(user, payStatus, startDate, endDate, currentPage,
+				totalCount, house_id, sect_id, regionname);
 		if (listVo != null && listVo.getBill_info() != null) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -272,13 +272,14 @@ public class WuyeController extends BaseController {
 	/***************** [END]账单查询 ********************/
 	
 	/***************** [BEGIN]无账单查询 ********************/
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getPayListStd", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<BillListVO> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String start_date,
 			@RequestParam(required = false) String end_date,  @RequestParam(required = false) String house_id, 
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
-		BillListVO listVo = wuyeService.queryBillListStd(user.getWuyeId(), start_date, end_date,house_id,sect_id,regionname);
+		BillListVO listVo = wuyeService.queryBillListStd(user, start_date, end_date,house_id,sect_id,regionname);
 		if (listVo != null && !listVo.getOther_bill_info().isEmpty()) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -287,14 +288,19 @@ public class WuyeController extends BaseController {
 	}
 
 	/***************** [BEGIN]缴费 ********************/
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getBillDetail", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<PaymentInfo> getBillDetail(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId) {
-		return BaseResult.successResult(WuyeUtil.getBillDetail(user.getWuyeId(), stmtId, billId).getData());
+			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId,
+			@RequestParam(required = false) String regionname) {
+		
+		PaymentInfo paymentInfo = wuyeService.getBillDetail(user, stmtId, billId, regionname);
+		return BaseResult.successResult(paymentInfo);
 	}
 
 	// stmtId在快捷支付的时候会用到
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getPrePayInfo", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<WechatPayInfo> getPrePayInfo(@ModelAttribute(Constants.USER) User user,
@@ -312,13 +318,32 @@ public class WuyeController extends BaseController {
 					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code,
 					invoice_title,regionname);
 		} catch (Exception e) {
-
-			e.printStackTrace();
+			log.error(e.getMessage(),e);
 			return BaseResult.fail(e.getMessage());
 		}
 		return BaseResult.successResult(result);
 	}
-	// stmtId在快捷支付的时候会用到
+
+	/**
+	 * 无账单缴费唤起支付
+	 * @param user
+	 * @param houseId
+	 * @param start_date
+	 * @param end_date
+	 * @param couponUnit
+	 * @param couponNum
+	 * @param couponId
+	 * @param mianBill
+	 * @param mianAmt
+	 * @param reduceAmt
+	 * @param invoice_title_type
+	 * @param credit_code
+	 * @param invoice_title
+	 * @param regionname
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getOtherPrePayInfo", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<WechatPayInfo> getOtherPrePayInfo(@ModelAttribute(Constants.USER) User user,
@@ -370,12 +395,13 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult("支付成功。");
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/quickPayBillList/{stmtId}/{currPage}/{totalCount}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<BillListVO> quickPayBillList(@ModelAttribute(Constants.USER) User user,
 			@PathVariable String stmtId, @PathVariable String currPage, @PathVariable String totalCount)
 			throws Exception {
-		BillListVO listVo = wuyeService.quickPayInfo(stmtId, currPage, totalCount);
+		BillListVO listVo = wuyeService.quickPayInfo(user, stmtId, currPage, totalCount);
 		if (listVo != null) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -491,7 +517,7 @@ public class WuyeController extends BaseController {
 		List<Coupon> list = couponService.findAvaibleCouponForWuye(user.getId());
 
 		if (list.size() > 0) {
-			String result = wuyeService.queryCouponIsUsed(user.getWuyeId());
+			String result = wuyeService.queryCouponIsUsed(user);
 			for (int i = 0; i < list.size(); i++) {
 				Coupon coupon = list.get(i);
 				if ((coupon.getStatus() == ModelConstant.COUPON_STATUS_AVAILABLE)) {
@@ -546,18 +572,20 @@ public class WuyeController extends BaseController {
 		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
 	}
 
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult applyInvoice(@RequestParam(required = false) String mobile,
+	public BaseResult applyInvoice(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String mobile,
 			@RequestParam(required = false) String invoice_title, @RequestParam(required = false) String yzm,
 			@RequestParam(required = false) String trade_water_id,
 			@RequestParam(required = false) String invoice_title_type,
 			@RequestParam(required = false) String credit_code) {
+		
 		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);
 		if (!isCheck) {
 			return new BaseResult<UserInfo>().failMsg("校验失败！");
 		} else {
-			String result = wuyeService.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code,
+			String result = wuyeService.updateInvoice(user, invoice_title, invoice_title_type, credit_code,
 					trade_water_id);
 			if ("99".equals(result)) {
 				return BaseResult.fail("网络异常，请刷新后重试");
@@ -566,10 +594,11 @@ public class WuyeController extends BaseController {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required = false) String trade_water_id) {
-		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(trade_water_id);
+	public BaseResult<InvoiceInfo> getInvoice(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String trade_water_id) {
+		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(user, trade_water_id);
 
 		if (invoice != null) {
 			return BaseResult.successResult(invoice);
@@ -591,14 +620,25 @@ public class WuyeController extends BaseController {
 
 	}
 
-	// 根据ID查询指定类型的合协社区物业信息
+	/**
+	 * 根据ID查询指定类型的合协社区物业信息
+	 * @param user
+	 * @param sect_id
+	 * @param build_id
+	 * @param unit_id
+	 * @param data_type
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getHeXieCellById", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getHeXieCellById(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String build_id,
-			@RequestParam(required = false) String unit_id, @RequestParam(required = false) String data_type)
+			@RequestParam(required = false) String unit_id, @RequestParam(required = false) String data_type,
+			@RequestParam(required = false, value = "regionname") String regionName)
 			throws Exception {
-		CellListVO cellMng = wuyeService.querySectHeXieList(sect_id, build_id, unit_id, data_type);
+		CellListVO cellMng = wuyeService.querySectHeXieList(user, sect_id, build_id, unit_id, data_type, regionName);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
@@ -606,14 +646,21 @@ public class WuyeController extends BaseController {
 		}
 	}
 
-	// 根据名称模糊查询合协社区小区列表
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param user
+	 * @param sect_name
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String sect_name) throws Exception {
-		log.error("ceshi");
+			@RequestParam(required = false) String sect_name,
+			@RequestParam(required = false, value = "regionname") String regionName) throws Exception {
 
-		CellListVO cellMng = wuyeService.getVagueSectByName(sect_name);
+		CellListVO cellMng = wuyeService.getVagueSectByName(user, sect_name, regionName);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
@@ -621,23 +668,21 @@ public class WuyeController extends BaseController {
 		}
 	}
 
+	/**
+	 * 查询无账单缴费房子开始日期
+	 * @param user
+	 * @param house_id
+	 * @param regionname
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getBillStartDateSDO", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<BillStartDate> getBillStartDateSDO(@ModelAttribute(Constants.USER) User user,@RequestParam String house_id,@RequestParam String regionname) throws Exception {
 
-	//查询所有环境路径
-		@RequestMapping(value = "/getRegionUrl", method = RequestMethod.GET)
-		@ResponseBody
-		public BaseResult<RegionVo> getRegionUrl(@RequestParam(required=false) String coordinate) throws Exception {
-
-			return BaseResult.successResult(wuyeService.getRegionUrl(coordinate));
-		}
-		
-		//查询无账单缴费房子开始日期
-		@RequestMapping(value = "/getBillStartDateSDO", method = RequestMethod.GET)
-		@ResponseBody
-		public BaseResult<BillStartDate> getBillStartDateSDO(@ModelAttribute(Constants.USER) User user,@RequestParam String house_id,@RequestParam String regionname) throws Exception {
-
-			return BaseResult.successResult(wuyeService.getBillStartDateSDO(user.getWuyeId(),house_id,regionname));
-		}
-	
+		return BaseResult.successResult(wuyeService.getBillStartDateSDO(user,house_id,regionname));
+	}
 	
 
 }

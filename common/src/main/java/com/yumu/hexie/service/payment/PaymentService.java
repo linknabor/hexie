@@ -5,6 +5,7 @@ import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.payment.PaymentOrder;
+import com.yumu.hexie.model.user.User;
 
 /**
  * <pre>
@@ -29,7 +30,7 @@ public interface PaymentService {
     //线下支付
     public void payOffline(BaseO2OService order);
     //发起支付
-    public JsSign requestPay(PaymentOrder payment);
+    public JsSign requestPay(User user, PaymentOrder payment);
     //取消支付
     public PaymentOrder cancelPayment(int orderType,long orderId);
     //全额退款申请

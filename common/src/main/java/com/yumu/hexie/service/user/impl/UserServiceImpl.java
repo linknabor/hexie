@@ -85,49 +85,49 @@ public class UserServiceImpl implements UserService {
 			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 			userAccount.setShareCode(DigestUtils.md5Hex("UID["+userAccount.getId()+"]"));
 			
-        }else {
-        	
-        	if(StringUtil.isEmpty(userAccount.getNickname())){
-            	userAccount.setName(weixinUser.getNickname());
-                userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
-                userAccount.setNickname(weixinUser.getNickname());
-                userAccount.setSex(weixinUser.getSex());
-                if(StringUtil.isEmpty(userAccount.getCountry())
-                		||StringUtil.isEmpty(userAccount.getProvince())){
-                	userAccount.setCountry(weixinUser.getCountry());
-                	userAccount.setProvince(weixinUser.getProvince());
-                	userAccount.setCity(weixinUser.getCity());
-                }
-                userAccount.setLanguage(weixinUser.getLanguage());
-                //从网页进入时下面两个值为空
-                userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
-                userAccount.setSubscribe(weixinUser.getSubscribe());
-            	
-            }else if(weixinUser.getSubscribe()!=null&&weixinUser.getSubscribe() != userAccount.getSubscribe()) {
-            	userAccount.setSubscribe(weixinUser.getSubscribe());
-                userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
+    }else {
+
+      if(StringUtil.isEmpty(userAccount.getNickname())){
+          userAccount.setName(weixinUser.getNickname());
+            userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
+            userAccount.setNickname(weixinUser.getNickname());
+            userAccount.setSex(weixinUser.getSex());
+            if(StringUtil.isEmpty(userAccount.getCountry())
+                ||StringUtil.isEmpty(userAccount.getProvince())){
+              userAccount.setCountry(weixinUser.getCountry());
+              userAccount.setProvince(weixinUser.getProvince());
+              userAccount.setCity(weixinUser.getCity());
             }
+            userAccount.setLanguage(weixinUser.getLanguage());
+            //从网页进入时下面两个值为空
+            userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
+            userAccount.setSubscribe(weixinUser.getSubscribe());
+
+        }else if(weixinUser.getSubscribe()!=null&&weixinUser.getSubscribe() != userAccount.getSubscribe()) {
+          userAccount.setSubscribe(weixinUser.getSubscribe());
+            userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
         }
+    }
 		
-		//更新用户appId
-		if (StringUtils.isEmpty(userAccount.getAppId())) {
-			if (StringUtils.isEmpty(oriApp)) {
-				userAccount.setAppId(ConstantWeChat.APPID);	//合协用户填这个
-			}else {
-				userAccount.setAppId(oriApp);	//其他系统用户填自己的appId
-			}
-		}
-        
-        //绑定物业信息
-        if(StringUtil.isEmpty(userAccount.getWuyeId()) ){
-        	BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount.getOpenid());
-    		if(r.isSuccess()) {
-    			userAccount.setWuyeId(r.getData().getUser_id());
-    		}
-        }
-        pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
-		userAccount = userRepository.save(userAccount);
-		return userAccount;
+    //更新用户appId
+    if (StringUtils.isEmpty(userAccount.getAppId())) {
+      if (StringUtils.isEmpty(oriApp)) {
+        userAccount.setAppId(ConstantWeChat.APPID);	//合协用户填这个
+      }else {
+        userAccount.setAppId(oriApp);	//其他系统用户填自己的appId
+      }
+    }
+
+    //绑定物业信息
+    if(StringUtil.isEmpty(userAccount.getWuyeId()) ){
+      BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount);
+      if(r.isSuccess()) {
+        userAccount.setWuyeId(r.getData().getUser_id());
+      }
+    }
+    pointService.addZhima(userAccount, 5, "zm-login-"+DateUtil.dtFormat(new Date(),"yyyy-MM-dd")+userAccount.getId());
+    userAccount = userRepository.save(userAccount);
+    return userAccount;
 	}
 	
 	@Override

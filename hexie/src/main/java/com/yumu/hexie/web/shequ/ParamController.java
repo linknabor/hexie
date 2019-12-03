@@ -10,11 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.web.BaseController;
 
@@ -31,8 +33,10 @@ public class ParamController extends BaseController {
 	@Autowired
 	private ParamService paramService;
 	
-	@RequestMapping(value = "/initParam", method = RequestMethod.GET)
-	public void initParam(HttpServletResponse response, @RequestParam(value="info_id") String infoId, 
+	@RequestMapping(value = "/initParam/{oriSys}", method = RequestMethod.GET)
+	public void initParam(HttpServletResponse response, 
+			@PathVariable String oriSys,
+			@RequestParam(value="info_id") String infoId, 
 			@RequestParam(value="type") String type) throws IOException {
 		
 		Runnable runnable = ()->{
@@ -42,7 +46,9 @@ public class ParamController extends BaseController {
 			} catch (InterruptedException e) {
 				logger.error(e.getMessage(), e);
 			}
-			paramService.cacheParam(infoId, type);
+			User user = new User();
+			user.setOriSys(oriSys);
+			paramService.cacheParam(user, infoId, type);
 		};
 		Thread t = new Thread(runnable);
 		t.start();

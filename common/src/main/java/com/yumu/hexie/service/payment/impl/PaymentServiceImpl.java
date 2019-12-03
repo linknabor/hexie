@@ -4,20 +4,18 @@
  */
 package com.yumu.hexie.service.payment.impl;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.common.CloseOrderResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
-import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
-import com.yumu.hexie.integration.wechat.entity.common.PrePaymentOrder;
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -28,11 +26,12 @@ import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.payment.PaymentOrderRepository;
 import com.yumu.hexie.model.payment.RefundOrder;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.payment.RefundService;
-import com.yumu.hexie.service.user.req.MemberVo;
+import com.yumu.hexie.service.user.UserService;
 
 /**
  * <pre>
@@ -53,6 +52,8 @@ public class PaymentServiceImpl implements PaymentService {
     protected WechatCoreService wechatCoreService;
     @Inject
     protected RefundService refundService;
+    @Autowired
+    protected UserService userService;
     /** 
      * @param order
      * @return
@@ -116,18 +117,18 @@ public class PaymentServiceImpl implements PaymentService {
      * @see com.yumu.hexie.service.payment.PaymentService#requestPay(com.yumu.hexie.model.payment.PaymentOrder)
      */
     @Override
-    public JsSign requestPay(PaymentOrder pay) {
+    public JsSign requestPay(User user, PaymentOrder pay) {
         validatePayRequest(pay);
         log.warn("[Payment-req]["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
         //支付然后没继续的情景=----校验所需时间较长，是否需要如此操作
         try {
         	
-            if(checkPaySuccess(pay.getPaymentNo())){
+            if(checkPaySuccess(user, pay.getPaymentNo())){
                 throw new BizValidateException(pay.getId(),"订单已支付成功，勿重复提交！").setError();
             }
             paymentOrderRepository.save(pay);
             log.warn("获取预支付id前——————————前：");
-        	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(pay.getPaymentNo(), pay.getPrice(), pay.getOpenId(),ConstantWeChat.NOTIFYURL).getData();
+        	WechatPayInfo payinfo = WuyeUtil.getMemberPrePayInfo(user, pay.getPaymentNo(), pay.getPrice(),ConstantWeChat.NOTIFYURL).getData();
         	log.warn("获取预支付id后——————————后：");
         	JsSign sign = new JsSign();
         	sign.setAppId(payinfo.getAppid());
@@ -138,15 +139,8 @@ public class PaymentServiceImpl implements PaymentService {
         	sign.setSignType(payinfo.getSigntype());
         	return sign;
 		} catch (Exception e) {
-			log.error("err msg :" + e.getMessage());
+			log.error(e.getMessage(), e);
 		}
-//      PrePaymentOrder preWechatOrder = wechatCoreService.createOrder(pay);
-//      pay.setPrepayId(preWechatOrder.getPrepay_id());
-//      paymentOrderRepository.save(pay);
-//      log.warn("[Payment-req]Saved["+pay.getPaymentNo()+"]["+pay.getOrderId()+"]["+pay.getOrderType()+"]");
-//      //3. 从微信获取签名
-//      JsSign sign = wechatCoreService.getPrepareSign(preWechatOrder.getPrepay_id());
-//      log.warn("[Payment-req]sign["+sign.getSignature()+"]");
         return null;
     }
     
@@ -162,10 +156,11 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    private boolean checkPaySuccess(String paymentNo) throws Exception{
+    @SuppressWarnings("rawtypes")
+	private boolean checkPaySuccess(User user, String paymentNo) throws Exception{
         log.warn("[Payment-check]begin["+paymentNo+"]");
         
-        BaseResult baseResult = WuyeUtil.queryOrderInfo(paymentNo);
+        BaseResult baseResult = WuyeUtil.queryOrderInfo(user, paymentNo);
         log.warn("baseResult:"+baseResult.getResult());
         return baseResult.getResult().equals("SUCCESS");//表示交易成功
     }
@@ -174,14 +169,16 @@ public class PaymentServiceImpl implements PaymentService {
      * @return
      * @see com.yumu.hexie.service.payment.PaymentService#refreshStatus(com.yumu.hexie.model.payment.PaymentOrder)
      */
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public PaymentOrder refreshStatus(PaymentOrder payment) {
         log.warn("[Payment-refreshStatus]begin["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
         if(payment.getStatus() != PaymentConstant.PAYMENT_STATUS_INIT){
             return payment;
         }
         try {
-			BaseResult baseResult = WuyeUtil.queryOrderInfo(payment.getPaymentNo());
+        	User user = userService.getById(payment.getUserId());
+			BaseResult baseResult = WuyeUtil.queryOrderInfo(user, payment.getPaymentNo());
 	        if("USERPAYING".equals(baseResult.getResult())) {//1. 支付中
 	            log.warn("[Payment-refreshStatus]isPaying["+payment.getOrderType()+"]["+payment.getOrderId()+"]");
 	            return payment;
