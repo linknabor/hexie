@@ -219,8 +219,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public String updateInvoice(String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
-		BaseResult<String> r = WuyeUtil.updateInvoice(invoice_title, invoice_title_type, credit_code, trade_water_id);
+	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 		return r.getResult();
 	}
 
