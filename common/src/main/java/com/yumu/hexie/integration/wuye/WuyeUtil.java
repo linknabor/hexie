@@ -418,6 +418,7 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+
 		try {
 			User user = new User();
 			invoice_title = URLEncoder.encode(invoice_title,"GBK");
