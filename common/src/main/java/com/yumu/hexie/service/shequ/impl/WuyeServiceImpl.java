@@ -219,14 +219,14 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public String updateInvoice(User user, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
-		BaseResult<String> r = WuyeUtil.updateInvoice(user, invoice_title, invoice_title_type, credit_code, trade_water_id);
+	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 		return r.getResult();
 	}
 
 	@Override
-	public InvoiceInfo getInvoiceByTradeId(User user, String trade_water_id) {
-		return WuyeUtil.getInvoiceInfo(user, trade_water_id).getData();
+	public InvoiceInfo getInvoiceByTradeId(String trade_water_id) {
+		return WuyeUtil.getInvoiceInfo(trade_water_id).getData();
 	}
 	
 	@Override
