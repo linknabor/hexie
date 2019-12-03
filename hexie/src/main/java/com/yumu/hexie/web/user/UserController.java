@@ -103,7 +103,7 @@ public class UserController extends BaseController{
 			}
 			 //绑定物业信息
 	        if(StringUtil.isEmpty(user.getWuyeId()) ){
-	        	HexieUser r = WuyeUtil.userLogin(user.getOpenid()).getData();
+	        	HexieUser r = WuyeUtil.userLogin(user).getData();
 	    		user.setWuyeId(r.getUser_id());
 	    		user = userService.save(user);
 	        }
