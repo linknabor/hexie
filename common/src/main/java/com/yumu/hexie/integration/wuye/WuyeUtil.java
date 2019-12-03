@@ -417,11 +417,11 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static BaseResult<String> updateInvoice(String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
 		try {
 			User user = new User();
 			invoice_title = URLEncoder.encode(invoice_title,"GBK");
-			String url = getRequestUri(user) + String.format(APPLY_INVOICE_URL, user.getTel(), invoice_title, invoice_title_type, credit_code, trade_water_id);
+			String url = getRequestUri(user) + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
 			return (BaseResult<String>)httpGet(url,String.class);
 		} catch (UnsupportedEncodingException e) {
 			BaseResult r= new BaseResult();
