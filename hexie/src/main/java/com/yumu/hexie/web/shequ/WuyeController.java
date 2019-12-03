@@ -88,6 +88,12 @@ public class WuyeController extends BaseController {
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
 		log.info("user is : " + user);
+		 //绑定物业信息
+        if(StringUtil.isEmpty(user.getWuyeId()) ){
+        	HexieUser r = WuyeUtil.userLogin(user.getOpenid()).getData();
+    		user.setWuyeId(r.getUser_id());
+    		user = userService.save(user);
+        }
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
