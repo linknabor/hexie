@@ -264,8 +264,10 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<BillListVO> queryBillList(User user, String startDate, String endDate, String house_id,String sect_id,String regionurl){
-		//total_count 和curr_page没有填
 		log.info("startDate:"+startDate+", endDate"+endDate);
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = regionurl + String.format(BILL_LIST_STD_URL, user.getWuyeId(),startDate,endDate,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
@@ -278,7 +280,11 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<PaymentInfo> getBillDetail(User user,String stmtId,String anotherbillIds){
+	public static BaseResult<PaymentInfo> getBillDetail(User user,String stmtId,String anotherbillIds, String regionurl){
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = getRequestUri(user) + String.format(BILL_DETAIL_URL,user.getWuyeId(),stmtId,anotherbillIds);
 		return (BaseResult<PaymentInfo>)httpGet(url,PaymentInfo.class);
 	}
@@ -312,6 +318,10 @@ public class WuyeUtil {
 			//do nothing
 		}else {
 			fromSys = sysMap.get(appid);
+		}
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
 		}
 		
 		invoice_title = URLEncoder.encode(invoice_title,"GBK");
@@ -356,6 +366,10 @@ public class WuyeUtil {
 			//do nothing
 		}else {
 			fromSys = sysMap.get(appid);
+		}
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
 		}
 		
 		String url = regionurl + String.format(OTHER_WX_PAY_URL, user.getWuyeId(),houseId,start_date,end_date,user.getOpenid(),
@@ -440,6 +454,9 @@ public class WuyeUtil {
 	@SuppressWarnings("unchecked")
 	public static BaseResult<CellListVO> getMngHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type, String regionurl) throws Exception{
 
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = regionurl + String.format(MNG_HEXIE_LIST_URL, sect_id,build_id,unit_id,data_type);
 		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
@@ -464,6 +481,10 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<CellListVO> getVagueSectByName(User user, String sect_name, String regionurl) throws Exception{
+		
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		sect_name = URLEncoder.encode(sect_name,"GBK");
 		String url = regionurl + String.format(SECT_VAGUE_LIST_URL, sect_name);
 		log.info("【url】:"+url);
@@ -526,6 +547,9 @@ public class WuyeUtil {
 	@SuppressWarnings("unchecked")
 	public static BaseResult<BillStartDate> getBillStartDateSDO(User user,String house_id,String regionurl) throws Exception{
 
+		if (StringUtils.isEmpty(regionurl)) {
+			regionurl = getRequestUri(user);
+		}
 		String url = regionurl + String.format(BILL_LIST_DATE, user.getWuyeId(), house_id);
 		return (BaseResult<BillStartDate>)httpGet(url,BillStartDate.class);
 	}
@@ -611,9 +635,9 @@ public class WuyeUtil {
 	
 	private static String getRequestUri(User user) {
 		
-		String oriSys = user.getOriSys();
+		String appId = user.getAppId();
 		String requestUri = REQUEST_ADDRESS;
-		if ("_guizhou".equals(oriSys)) {
+		if ("_guizhou".equals(sysMap.get(appId))) {
 			requestUri = REQUEST_ADDRESS_GZ;
 		}
 		return requestUri;
