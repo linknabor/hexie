@@ -635,9 +635,9 @@ public class WuyeUtil {
 	
 	private static String getRequestUri(User user) {
 		
-		String oriSys = user.getOriSys();
+		String appId = user.getAppId();
 		String requestUri = REQUEST_ADDRESS;
-		if ("_guizhou".equals(oriSys)) {
+		if ("_guizhou".equals(sysMap.get(appId))) {
 			requestUri = REQUEST_ADDRESS_GZ;
 		}
 		return requestUri;
