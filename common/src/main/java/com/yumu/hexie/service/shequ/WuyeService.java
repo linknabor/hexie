@@ -122,7 +122,7 @@ public interface WuyeService {
 	 */
 	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName);
 
-	/**
+/**
 	 * 物业账单缴费
 	 * @param user
 	 * @param billId
@@ -141,7 +141,7 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	WechatPayInfo getPrePayInfo(User user, String billId, String stmtId, String couponUnit, String couponNum,
-			String couponId, String mianBill, String mianAmt, String reduceAmt, String invoice_title_type,
+			String couponId, String mianBill, String mianAmt, String reduceAmt,String fee_mianBill,String fee_mianAmt, String invoice_title_type,
 			String credit_code, String invoice_title, String regionname) throws Exception;
 
 	/**
