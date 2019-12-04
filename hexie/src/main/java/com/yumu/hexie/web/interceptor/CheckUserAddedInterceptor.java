@@ -41,6 +41,13 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 					request.getSession().setAttribute(Constants.USER, userAccount);
 				}
 			}
+		}else{
+			User userAccount = (User) request.getSession().getAttribute(Constants.USER);
+			userService.bindWuYeId(userAccount);
+			if(userAccount.getWuyeId().isEmpty()) {
+				userAccount = userService.multiFindByOpenId(userAccount.getOpenid());
+				request.getSession().setAttribute(Constants.USER, userAccount);
+			}
 		}
 		return true;
 	}

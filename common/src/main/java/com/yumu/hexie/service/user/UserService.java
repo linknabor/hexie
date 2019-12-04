@@ -41,5 +41,5 @@ public interface UserService {
 	public List<User> getUserByShareCode(String shareCode);
 	User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp);
 	User multiFindByOpenId(String openId);
-	User bindWuYeId(HttpSession session,User user);
+	User bindWuYeId(User user);
 }

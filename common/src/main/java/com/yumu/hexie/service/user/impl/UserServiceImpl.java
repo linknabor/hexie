@@ -167,7 +167,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Async
-	public User bindWuYeId(HttpSession session,User user) {
+	public User bindWuYeId(User user) {
 		 //绑定物业信息
     	try {
     		if(StringUtil.isEmpty(user.getWuyeId()) ){
@@ -175,7 +175,6 @@ public class UserServiceImpl implements UserService {
         		if(r.isSuccess()) {
         			user.setWuyeId(r.getData().getUser_id());
             		user = userRepository.save(user);
-            		session.setAttribute(Constants.USER, user);
         		}
     		}
 		} catch (Exception e) {
