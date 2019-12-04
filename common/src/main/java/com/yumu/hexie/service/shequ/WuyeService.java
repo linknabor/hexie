@@ -195,7 +195,7 @@ public interface WuyeService {
 	 * @param trade_water_id
 	 * @return
 	 */
-	String updateInvoice(User user, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id);
+	String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id);
 
 	/**
 	 * 根据交易号获取对应房子的发票信息
@@ -203,7 +203,7 @@ public interface WuyeService {
 	 * @param trade_water_id
 	 * @return
 	 */
-	InvoiceInfo getInvoiceByTradeId(User user, String trade_water_id);
+	InvoiceInfo getInvoiceByTradeId(String trade_water_id);
 
 	/**
 	 * 根据数据类型查询指定的合协社区物业单元信息

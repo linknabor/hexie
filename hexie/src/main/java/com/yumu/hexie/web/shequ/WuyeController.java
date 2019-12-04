@@ -577,7 +577,7 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult applyInvoice(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String mobile,
+	public BaseResult applyInvoice(@RequestParam(required = false) String mobile,
 			@RequestParam(required = false) String invoice_title, @RequestParam(required = false) String yzm,
 			@RequestParam(required = false) String trade_water_id,
 			@RequestParam(required = false) String invoice_title_type,
@@ -587,7 +587,7 @@ public class WuyeController extends BaseController {
 		if (!isCheck) {
 			return new BaseResult<UserInfo>().failMsg("校验失败！");
 		} else {
-			String result = wuyeService.updateInvoice(user, invoice_title, invoice_title_type, credit_code,
+			String result = wuyeService.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code,
 					trade_water_id);
 			if ("99".equals(result)) {
 				return BaseResult.fail("网络异常，请刷新后重试");
@@ -599,8 +599,8 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<InvoiceInfo> getInvoice(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String trade_water_id) {
-		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(user, trade_water_id);
+	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required = false) String trade_water_id) {
+		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(trade_water_id);
 
 		if (invoice != null) {
 			return BaseResult.successResult(invoice);
