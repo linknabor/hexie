@@ -43,4 +43,5 @@ public interface UserService {
 	User multiFindByOpenId(String openId);
 	
 	boolean checkDuplicateLogin(HttpSession httpSession);
+
 }
