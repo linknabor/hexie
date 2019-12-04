@@ -38,9 +38,15 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 					logger.info("requeste uri : " + request.getRequestURI());
 					UserWeiXin weixinUser = userService.getOrSubscibeUserByCode(code);
 					User userAccount = userService.multiFindByOpenId(weixinUser.getOpenid());
-					userService.bindWuYeId(userAccount);
 					request.getSession().setAttribute(Constants.USER, userAccount);
 				}
+			}
+		}else{
+			User userAccount = (User) request.getSession().getAttribute(Constants.USER);
+			userService.bindWuYeId(userAccount);
+			if(userAccount.getWuyeId().isEmpty()) {
+				userAccount = userService.multiFindByOpenId(userAccount.getOpenid());
+				request.getSession().setAttribute(Constants.USER, userAccount);
 			}
 		}
 		return true;
