@@ -84,11 +84,11 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user) throws Exception {
+	public BaseResult<List<HexieHouse>> hexiehouses(HttpSession session,@ModelAttribute(Constants.USER) User user) throws Exception {
 		
 		log.info("user is : " + user);
 		//绑定物业信息
-		userService.bindWuYeId(user);
+		userService.bindWuYeId(session,user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
