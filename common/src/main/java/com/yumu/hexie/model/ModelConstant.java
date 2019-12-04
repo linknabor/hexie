@@ -314,7 +314,6 @@ public class ModelConstant {
 	//队列
 	public static final String KEY_POINT_QUEUE = "pointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
-	
 	public static final String KEY_USER_LOGIN = "userLoginSession_";
 
 	
