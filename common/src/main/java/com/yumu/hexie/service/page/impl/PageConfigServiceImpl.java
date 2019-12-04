@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -16,12 +17,15 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -72,38 +76,44 @@ public class PageConfigServiceImpl implements PageConfigService {
 
 	}
 
+	/**
+	 * 到家、洗衣、红包页面配置
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public String findByTempKey(String key) {
-		PageConfigView v = pageConfigViewRepository.findByTempKey(key);
-		if (v != null) {
-			return v.getPageConfig();
+	public String findByTempKey(String key, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+		
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
+		}
+		final String sysAppId = appId;
+		Supplier<PageConfigView> supplier = ()-> pageConfigViewRepository.findByTempKeyAndAppId(key, sysAppId);
+		TypeReference typeReference = new TypeReference<PageConfigView>() {};
+		String field = appId + "_" + key;
+		PageConfigView pageConfigView = (PageConfigView) getConfigFromCache(ModelConstant.KEY_TYPE_PAGECONFIG, field, typeReference, supplier);
+		if (pageConfigView != null) {
+			return pageConfigView.getPageConfig();
 		}
 		return "";
 	}
 
 	/**
 	 * 根据不同sys动态获取底部icon。
-	 * @param iconSys
+	 * @param appId
 	 * @return
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public List<BottomIcon> getBottomIcon(String iconSys) throws JsonParseException, JsonMappingException, IOException {
+	public List<BottomIcon> getBottomIcon(String appId) throws JsonParseException, JsonMappingException, IOException {
 
-		if (StringUtil.isEmpty(iconSys)) {
-			iconSys = ConstantWeChat.APPID;
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
 		}
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		List<BottomIcon> iconList = new ArrayList<>();
-		String iconObj = (String) redisTemplate.opsForHash().get(ModelConstant.KEY_TYPE_BOTTOM_ICON, iconSys);
-		if (!StringUtils.isEmpty(iconObj)) {
-			TypeReference<List<BottomIcon>> typeReference = new TypeReference<List<BottomIcon>>() {};
-			iconList = objectMapper.readValue(iconObj, typeReference);
-		} else {
-			Sort sort = new Sort(Direction.ASC, "sort");
-			iconList = bottomIconRepository.findByIconSys(iconSys, sort);
-			String iconStr = objectMapper.writeValueAsString(iconList);
-			redisTemplate.opsForHash().put(ModelConstant.KEY_TYPE_BOTTOM_ICON, iconSys, iconStr);
-		}
+		Sort sort = new Sort(Direction.ASC, "sort");
+		final String sysAppId = appId;
+		Supplier<List<BottomIcon>> supplier = ()-> bottomIconRepository.findByAppId(sysAppId, sort);
+		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
+		List<BottomIcon> iconList = (List<BottomIcon>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, supplier);
 		return iconList;
 	}
 
@@ -115,19 +125,19 @@ public class PageConfigServiceImpl implements PageConfigService {
 
 		redisTemplate.expire(ModelConstant.KEY_TYPE_BOTTOM_ICON, 1l, TimeUnit.MILLISECONDS); // 先把原来的过期
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		Sort sort = new Sort(Direction.ASC, "iconSys", "sort");
+		Sort sort = new Sort(Direction.ASC, "appId", "sort");
 		List<BottomIcon> iconList = bottomIconRepository.findAll(sort);
 		if (iconList == null || iconList.isEmpty()) {
 			throw new BizValidateException("尚未配置任何bottom icon.");
 		}
 		Map<String, List<BottomIcon>> iconMap = new HashMap<String, List<BottomIcon>>();
 		for (BottomIcon bottomIcon : iconList) {
-			if (!iconMap.containsKey(bottomIcon.getIconSys())) {
+			if (!iconMap.containsKey(bottomIcon.getAppId())) {
 				List<BottomIcon> list = new ArrayList<>();
 				list.add(bottomIcon);
-				iconMap.put(bottomIcon.getIconSys(), list);
+				iconMap.put(bottomIcon.getAppId(), list);
 			} else {
-				List<BottomIcon> list = iconMap.get(bottomIcon.getIconSys());
+				List<BottomIcon> list = iconMap.get(bottomIcon.getAppId());
 				list.add(bottomIcon);
 			}
 		}
@@ -146,91 +156,110 @@ public class PageConfigServiceImpl implements PageConfigService {
 	
 	/**
 	 * 根据不同sys动态获取空白背景地图
-	 * @param fromSys
+	 * @param appId
 	 * @return
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public List<BgImage> getBgImage(String imageType, String fromSys) throws JsonParseException, JsonMappingException, IOException {
+	public List<BgImage> getBgImage(String appId) throws JsonParseException, JsonMappingException, IOException {
 
-		if (StringUtil.isEmpty(fromSys)) {
-			fromSys = ConstantWeChat.APPID;
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
 		}
-		
-		int type = 0;
-		if (!StringUtils.isEmpty(imageType)) {
-			type = Integer.valueOf(imageType);
-		}
-		
-		String keyType = "0";
-		switch (type) {
-		case ModelConstant.BG_IMAGE_TYPE_ORDER:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_ORDER;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_GROUP_ORDER:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_GROUP_ORDER;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_REPAIR_ORDER:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_REPAIR_ORDER;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_THREAD:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_THREAD;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_BIND_HOUSE:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_BIND_HOUSE;
-			break;
-		case ModelConstant.BG_IMAGE_TYPE_RESERVATION:
-			keyType = ModelConstant.KEY_TYPE_BG_IMAGE_RESERVATION;
-			break;
-		default:
-			break;
-		}
-		
-		TypeReference<List<BottomIcon>> typeReference = new TypeReference<List<BottomIcon>>() {};
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		List<BgImage> imageList = new ArrayList<>();
-		String obj = (String) redisTemplate.opsForHash().get(keyType, fromSys);
-		if (!StringUtils.isEmpty(obj)) {
-			imageList = objectMapper.readValue(obj, typeReference);
-		}
-		if (imageList.isEmpty()) {
-			imageList = bgImageRepository.findByTypeAndFromSys(type, fromSys);
-			if (!imageList.isEmpty()) {
-				savePageView2HashCache(keyType, fromSys, imageList);
-			}
-		}
+		Sort sort = new Sort(Direction.ASC, "type");
+		final String sysAppId = appId;
+		Supplier<List<BgImage>> supplier = ()-> bgImageRepository.findByAppId(sysAppId, sort);
+		TypeReference typeReference = new TypeReference<List<BgImage>>() {};
+		List<BgImage> imageList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, typeReference, supplier);
 		return imageList;
 	}
 	
-	
+	//TODO
+	public void updateBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) {
+		
+		
+	}
 
 	/**
 	 * 动态获取公众号二维码
+	 * @throws IOException 
+	 * @throws JsonProcessingException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public QrCode getQrCode(String fromSys) {
+	public QrCode getQrCode(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 
-		if (StringUtil.isEmpty(fromSys)) {
-			fromSys = ConstantWeChat.APPID;
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
 		}
-		QrCode qrCode = qrCodeRepository.findByFromSys(fromSys);
+		final String sysAppId = appId;
+		Supplier<QrCode> supplier = ()->qrCodeRepository.findByFromSys(sysAppId);
+		
+		TypeReference typeReference = new TypeReference<QrCode>() {};
+		QrCode qrCode = (QrCode) getConfigFromCache(ModelConstant.KEY_TYPE_QRCODE, appId, typeReference, supplier);
 		return qrCode;
 	}
 	
 	/**
-	 * 将值存入redis中, hash形式
-	 * @param hashKey
-	 * @param field
-	 * @param o
+	 * 根据banner类型和appId获取banner
+	 * @throws IOException 
+	 * @throws JsonProcessingException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+
+		if (StringUtils.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
+		}
+		Sort sort = new Sort(Direction.ASC, "sortNo");
+		
+		final String sysAppId = appId;
+		Supplier<List<Banner>> supplier = ()-> bannerRepository.findByBannerTypeAndStatusAndRegionTypeAndAppId(bannerType, ModelConstant.BANNER_STATUS_VALID, 
+				ModelConstant.REGION_ALL, sysAppId, sort);
+
+		String filed = appId + "_" + bannerType;
+		TypeReference typeReference = new TypeReference<List<Banner>>() {};
+		List<Banner> bannerList = (List<Banner>) getConfigFromCache(ModelConstant.KEY_TYPE_BANNER, filed, typeReference, supplier);
+		return bannerList;
+		
+	}
+	
+	/**
+	 * 根据appId获取相应的图标或者背景图，每个公众号有自己不同的图标和背景图
+	 * @param appId	公众号的appId
+	 * @param typeReference	泛型类型
+	 * @param function	查询数据库函数，外面自己实现好传进来，这里只是调用
+	 * @return
+	 * @throws IOException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
 	 * @throws JsonProcessingException
 	 */
-	private void savePageView2HashCache(String hashKey, String field, Object o) throws JsonProcessingException {
+	private <T> Object getConfigFromCache(String redisKey, String filed, TypeReference<T> typeReference, Supplier<T> supplier)
+			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException {
 		
-		if (o == null) {
-			return;
-		}
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		String str = objectMapper.writeValueAsString(o);
-		redisTemplate.opsForHash().put(hashKey, field, str);
+		Object object = null;
+		String objStr = (String) redisTemplate.opsForHash().get(redisKey, filed);
+		if (!StringUtils.isEmpty(objStr)) {
+			String valueStr = objStr.replace("[", "").replace("]", "");
+			if (!StringUtils.isEmpty(valueStr)) {
+				object = objectMapper.readValue(objStr, typeReference);
+			}
+		}
+		if (object == null) {
+			object = supplier.get();
+			objStr = objectMapper.writeValueAsString(object);
+			redisTemplate.opsForHash().put(redisKey, filed, objStr);
+		}
+		return object;
 	}
+	
+	
 
 }

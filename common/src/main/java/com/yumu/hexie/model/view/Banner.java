@@ -19,6 +19,8 @@ public class Banner extends BaseModel {
 	//冗余字段
 	private int onSaleType=0;//与OnsaleRule中的productType对应
 	private String brandName;//品牌名称
+	
+	private String appId;	//公众号ID，不同公众号不同图片配置
 
 	public int getBannerType() {
 		return bannerType;
@@ -74,4 +76,11 @@ public class Banner extends BaseModel {
 	public void setBrandName(String brandName) {
 		this.brandName = brandName;
 	}
+	public String getAppId() {
+		return appId;
+	}
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
+	
 }

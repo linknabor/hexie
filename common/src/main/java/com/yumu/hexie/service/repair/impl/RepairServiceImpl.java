@@ -24,7 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
+import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
+import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
+import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -38,9 +42,9 @@ import com.yumu.hexie.model.localservice.repair.RepairProject;
 import com.yumu.hexie.model.localservice.repair.RepairProjectRepository;
 import com.yumu.hexie.model.localservice.repair.RepairSeed;
 import com.yumu.hexie.model.localservice.repair.RepairSeedRepository;
+import com.yumu.hexie.model.localservice.repair.ServiceOperatorSect;
 import com.yumu.hexie.model.localservice.repair.ServiceOperatorSectRepository;
 import com.yumu.hexie.model.localservice.repair.ServiceOperatorVo;
-import com.yumu.hexie.model.localservice.repair.ServiceOperatorSect;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
@@ -96,6 +100,8 @@ public class RepairServiceImpl implements RepairService {
     private ServiceOperatorSectRepository serviceOperatorSectRepository;
     @Autowired
     private RepairAreaRepository repairAreaRepository;
+    @Autowired
+    private RepairService repairService;
     
     /**  
      * @param repairType
@@ -502,5 +508,75 @@ public class RepairServiceImpl implements RepairService {
 	public List<User> getHexieUserInfo(String data) {
 		return userRepository.findByTel(data);
 	}
+
+	/**
+	 * 1.根据用户id查address表，找到bind字段为true的房子取出来
+	 * 2.如果步骤1未查询到房屋，则查询community,将community返回的房屋打标记
+	 */
+	@Override
+	public Address getDefaultAddress(User user) {
+		
+		Address defaultAddr = queryBindedHouse(user);
+		if (defaultAddr==null) {
+			log.info("未查询到默认绑定房屋的地址。will find house on communiy .");
+
+			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
+			if (baseResult!=null) {
+				HouseListVO houseVo = baseResult.getData();
+				if (houseVo !=null ) {
+					List<HexieHouse> houseList = houseVo.getHou_info();
+					if (houseList!=null && !houseList.isEmpty()) {
+						repairService.updateBindedAddress(user, houseList);
+					}
+				}
+			}
+			defaultAddr = queryBindedHouse(user);
+		}
+		
+		return defaultAddr;
+	}
+
+	/**
+	 * 查询绑定过的房屋，并去除其中
+	 * @param user
+	 * @return
+	 */
+	private Address queryBindedHouse(User user) {
+		Address defaultAddr = null;
+		List<Address> addrs = addressRepository.findAllByUserId(user.getId());
+		
+        if(addrs!=null && !addrs.isEmpty()){
+            for(Address addr : addrs) {
+                if(addr.isBind()) {
+                	defaultAddr = addr;
+                    break;
+                }
+            }
+        }
+		return defaultAddr;
+	}
+	
+	/**
+	 * 将已绑定的房屋的地址的bind字段设置成true
+	 */
+	@Override
+	@Transactional
+	public void updateBindedAddress(User user, List<HexieHouse> houseList) {
+		
+		for (HexieHouse house : houseList) {
+			List<Address> addrList = addressRepository.getAddressByuserIdAndAddress(user.getId(), house.getCell_addr());
+			if (addrList!=null && !addrList.isEmpty()) {
+				for (Address address : addrList) {
+					address.setBind(true);
+					addressRepository.save(address);
+				}
+			}
+		}
+		User ruser = userRepository.getOne(user.getId());
+		ruser.setTotalBind(houseList.size());
+		userRepository.save(ruser);
+		
+	}
+
 
 }

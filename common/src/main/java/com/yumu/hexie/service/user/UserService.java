@@ -2,8 +2,9 @@ package com.yumu.hexie.service.user;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
-import com.yumu.hexie.model.user.TempUser;
 import com.yumu.hexie.model.user.User;
 
 
@@ -16,10 +17,10 @@ public interface UserService {
     public List<User> getByOpenId(String openId);
     public List<User> getByTel(String tel);
 	//获取用户信息
-	public User getOrSubscibeUserByCode(String code);
+	public UserWeiXin getOrSubscibeUserByCode(String code);
 	
 	//第三方授权获取用户信息
-	public User getTpSubscibeUserByCode(String code, String oriApp);
+	public UserWeiXin getTpSubscibeUserByCode(String code, String oriApp);
 	
     public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid);
 	
@@ -33,13 +34,14 @@ public interface UserService {
 	//获取绑定过房子的用户
 	public List<User> getBindHouseUser(int pageNum,int pageSize);
 	
-	public List<TempUser> getTempUser();
-	
-	public List<TempUser> getTemp();
-	
 	public List<String> getRepeatShareCodeUser();
 	
 	public List<User> getShareCodeIsNull();
 	
 	public List<User> getUserByShareCode(String shareCode);
+	User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp);
+	User multiFindByOpenId(String openId);
+	
+	boolean checkDuplicateLogin(HttpSession httpSession);
+
 }

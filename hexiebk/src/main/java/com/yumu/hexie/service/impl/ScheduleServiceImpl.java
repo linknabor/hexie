@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.impl;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -7,15 +8,23 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -52,8 +61,10 @@ import com.yumu.hexie.service.o2o.XiyiService;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.impl.CouponServiceImpl;
 import com.yumu.hexie.service.user.req.MemberVo;
+import com.yumu.hexie.vo.PointQueue;
 
 @Service("scheduleService")
 public class ScheduleServiceImpl implements ScheduleService{
@@ -106,6 +117,12 @@ public class ScheduleServiceImpl implements ScheduleService{
 	
 	@Inject
 	private CouponServiceImpl couponServiceImpl;
+	
+	@Autowired
+	private PointService pointService;
+	
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 	
 	//1. 订单超时
     @Scheduled(cron = "50 1/3 * * * ?")
@@ -425,10 +442,10 @@ public class ScheduleServiceImpl implements ScheduleService{
 	
 	
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	@Scheduled(cron = "0 */20 * * * ?")
 	public void executeMemberTimtout() {
-		// TODO Auto-generated method stub
 		SCHEDULE_LOG.debug("--------------------会员支付定时开始：-------------------");
 		try {
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式
@@ -444,11 +461,12 @@ public class ScheduleServiceImpl implements ScheduleService{
 			List<MemberBill> listbill = memberBillRepository.findByStatus(MemberVo.MIDDLE);
 			for (int i = 0; i < listbill.size(); i++) {
 				MemberBill bill = listbill.get(i);
-				BaseResult baseResult = WuyeUtil.queryOrderInfo(String.valueOf(bill.getMemberbillid()));
+				User user = userRepository.findById(bill.getUserid());
+				BaseResult baseResult = WuyeUtil.queryOrderInfo(user, String.valueOf(bill.getMemberbillid()));
+
 				if("SUCCESS".equals(baseResult.getResult())) {
 					bill.setEnddate(df.format(new Date()));
 					bill.setStatus(MemberVo.SUCCESS);
-					User user = userRepository.findById(bill.getUserid());
 					if(user == null) {
 						throw new BizValidateException("账单userid没有查询到用户");
 					}
@@ -482,6 +500,27 @@ public class ScheduleServiceImpl implements ScheduleService{
 		SCHEDULE_LOG.debug("--------------------会员支付定时结束：-------------------");
 	}
 	
+	/**
+	 * 添加绿豆和芝麻的队列
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+//	@Scheduled(cron = "0/30 * * * * ?")
+	@Override
+	public void updatePointByQueue() throws JsonParseException, JsonMappingException, IOException {
+
+		String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_POINT_QUEUE, 25, TimeUnit.SECONDS);	//阻塞，如果队列中没有数据则25秒超时，定时每30秒执行一次
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		
+		PointQueue pointQueue = objectMapper.readValue(json, new TypeReference<PointQueue>(){});
+		if (ModelConstant.POINT_TYPE_ZIMA == pointQueue.getType()) {
+			pointService.addZhima(pointQueue.getUser(), pointQueue.getPoint(), pointQueue.getKey());
+		}else if (ModelConstant.POINT_TYPE_LVDOU == pointQueue.getType()) {
+			pointService.addLvdou(pointQueue.getUser(), pointQueue.getPoint(), pointQueue.getKey());
+		}
+		
+	}
 	
 	
 }

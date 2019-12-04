@@ -11,9 +11,11 @@ import org.springframework.data.domain.Page;
 
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
+import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairProject;
 import com.yumu.hexie.model.localservice.repair.ServiceOperatorVo;
+import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.repair.req.RepairCancelReq;
 import com.yumu.hexie.service.repair.req.RepairComment;
@@ -70,4 +72,8 @@ public interface RepairService {
 	public List<String> showSect(String id);
 	//根据电话获取用户
 	public List<User> getHexieUserInfo(String data);
+	
+	//报修页面显示的默认地址，这个地址必须是在servplat平台上存在的
+	Address getDefaultAddress(User user);
+	void updateBindedAddress(User user, List<HexieHouse> houseList);
 }

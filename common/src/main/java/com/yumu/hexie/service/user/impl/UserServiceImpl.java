@@ -1,15 +1,23 @@
 package com.yumu.hexie.service.user.impl;
 
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
@@ -17,8 +25,6 @@ import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.user.TempUser;
-import com.yumu.hexie.model.user.TempUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.WechatCoreService;
@@ -28,8 +34,8 @@ import com.yumu.hexie.service.user.UserService;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
-	
-	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
+	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Inject
 	private UserRepository userRepository;
@@ -39,123 +45,114 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private WechatCoreService wechatCoreService;
-    @Override
-    public User getById(long uId){
-        return userRepository.findOne(uId);
-    }
-    public List<User> getByOpenId(String openId){
-        return userRepository.findByOpenid(openId);
-    }
+
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
+
 	@Override
-	public User getOrSubscibeUserByCode(String code) {
-		
+	public User getById(long uId) {
+		return userRepository.findOne(uId);
+	}
+
+	public List<User> getByOpenId(String openId) {
+		return userRepository.findByOpenid(openId);
+	}
+
+	@Override
+	public UserWeiXin getOrSubscibeUserByCode(String code) {
+
 		return getTpSubscibeUserByCode(code, null);
 	}
-	
+
 	@Override
-	public User getTpSubscibeUserByCode(String code, String oriApp) {
+	public UserWeiXin getTpSubscibeUserByCode(String code, String oriApp) {
 		UserWeiXin user = wechatCoreService.getByOAuthAccessToken(code, oriApp);
-		if(user == null) {
-            throw new BizValidateException("微信信息不正确");
-        }
+		if (user == null) {
+			throw new BizValidateException("微信信息不正确");
+		}
 		logger.info("userWeiXin is : " + user);
-		
-		String openId = user.getOpenid();
-		List<User> userList = userRepository.findByOpenid(openId);
-		User userAccount = null;
-		if (userList!=null && userList.size()> 0) {
-			if (userList.size() == 1) {
-				userAccount = userList.get(0);
-			}else {
-				userAccount = userList.get(userList.size()-1);
+		return user;
+	}
+
+	@Override
+	@Transactional
+	public User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp) {
+
+		String openId = weixinUser.getOpenid();
+		User userAccount = multiFindByOpenId(openId);
+
+		if (userAccount == null) {
+			userAccount = new User();
+			userAccount.setOpenid(weixinUser.getOpenid());
+			userAccount.setName(weixinUser.getNickname());
+			userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
+			userAccount.setNickname(weixinUser.getNickname());
+			userAccount.setSubscribe(weixinUser.getSubscribe());
+			userAccount.setSex(weixinUser.getSex());
+			userAccount.setCountry(weixinUser.getCountry());
+			userAccount.setProvince(weixinUser.getProvince());
+			userAccount.setCity(weixinUser.getCity());
+			userAccount.setLanguage(weixinUser.getLanguage());
+			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
+			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + userAccount.getId() + "]"));
+
+		} else {
+
+			if (StringUtil.isEmpty(userAccount.getNickname())) {
+				userAccount.setName(weixinUser.getNickname());
+				userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
+				userAccount.setNickname(weixinUser.getNickname());
+				userAccount.setSex(weixinUser.getSex());
+				if (StringUtil.isEmpty(userAccount.getCountry()) || StringUtil.isEmpty(userAccount.getProvince())) {
+					userAccount.setCountry(weixinUser.getCountry());
+					userAccount.setProvince(weixinUser.getProvince());
+					userAccount.setCity(weixinUser.getCity());
+				}
+				userAccount.setLanguage(weixinUser.getLanguage());
+				// 从网页进入时下面两个值为空
+				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
+				userAccount.setSubscribe(weixinUser.getSubscribe());
+
+			} else if (weixinUser.getSubscribe() != null && weixinUser.getSubscribe() != userAccount.getSubscribe()) {
+				userAccount.setSubscribe(weixinUser.getSubscribe());
+				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 			}
 		}
-		
-		if(userAccount == null) {
-            userAccount = createUser(user);
-            userAccount.setNewRegiste(true);
-        }
+
+		// 更新用户appId
 		if (StringUtils.isEmpty(userAccount.getAppId())) {
-			
-			updateAppId(userAccount, oriApp);
-			
+			if (StringUtils.isEmpty(oriApp)) {
+				userAccount.setAppId(ConstantWeChat.APPID); // 合协用户填这个
+			} else {
+				userAccount.setAppId(oriApp); // 其他系统用户填自己的appId
+			}
 		}
-        if(StringUtil.isEmpty(userAccount.getNickname())){
-            userAccount = updateUserByWechat(user, userAccount);
-        }else if(user.getSubscribe()!=null&&user.getSubscribe() != userAccount.getSubscribe()) {
-            userAccount = updateSubscribeInfo(user, userAccount);
-        }
-        //绑定物业信息
-        if(StringUtil.isEmpty(userAccount.getWuyeId()) ){
-            bindWithWuye(userAccount);
-        }
-		return userAccount;
-	}
-	
-	
-	private User createUser(UserWeiXin user) {
-		User userAccount;
-		userAccount = new User();
-		userAccount.setOpenid(user.getOpenid());
-		userAccount.setName(user.getNickname());
-		userAccount.setHeadimgurl(user.getHeadimgurl());
-		userAccount.setNickname(user.getNickname());
-		userAccount.setSubscribe(user.getSubscribe());
-		userAccount.setSex(user.getSex());
-		userAccount.setCountry(user.getCountry());
-		userAccount.setProvince(user.getProvince());
-		userAccount.setCity(user.getCity());
-		userAccount.setLanguage(user.getLanguage());
-		userAccount.setSubscribe_time(user.getSubscribe_time());
+
+		// 绑定物业信息
+		if (StringUtil.isEmpty(userAccount.getWuyeId())) {
+			BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount);
+			if (r.isSuccess()) {
+				userAccount.setWuyeId(r.getData().getUser_id());
+			}
+		}
+		pointService.addZhima(userAccount, 5,
+				"zm-login-" + DateUtil.dtFormat(new Date(), "yyyy-MM-dd") + userAccount.getId());
 		userAccount = userRepository.save(userAccount);
 		return userAccount;
 	}
-	
-	/**
-	 * 设置更新appid
-	 * @param userAccount
-	 * @param oriApp
-	 * @return
-	 */
-	private User updateAppId(User userAccount, String oriApp) {
-		
-		if (StringUtils.isEmpty(oriApp)) {
-			userAccount.setAppId(ConstantWeChat.APPID);	//合协用户填这个
-		}else {
-			userAccount.setAppId(oriApp);	//其他系统用户填自己的appId
+
+	@Override
+	public User multiFindByOpenId(String openId) {
+		List<User> userList = userRepository.findByOpenid(openId);
+		User userAccount = null;
+		if (userList != null && userList.size() > 0) {
+			if (userList.size() == 1) {
+				userAccount = userList.get(0);
+			} else {
+				userAccount = userList.get(userList.size() - 1);
+			}
 		}
-		return userRepository.save(userAccount);
-	}
-	
-    private User updateSubscribeInfo(UserWeiXin user, User userAccount) {
-        userAccount.setSubscribe(user.getSubscribe());
-        userAccount.setSubscribe_time(user.getSubscribe_time());
-        return userRepository.save(userAccount);
-    }
-    private User updateUserByWechat(UserWeiXin user, User userAccount) {
-        userAccount.setName(user.getNickname());
-        userAccount.setHeadimgurl(user.getHeadimgurl());
-        userAccount.setNickname(user.getNickname());
-        userAccount.setSex(user.getSex());
-        if(StringUtil.isEmpty(userAccount.getCountry())
-        		||StringUtil.isEmpty(userAccount.getProvince())){
-        	userAccount.setCountry(user.getCountry());
-        	userAccount.setProvince(user.getProvince());
-        	userAccount.setCity(user.getCity());
-        }
-        userAccount.setLanguage(user.getLanguage());
-        //从网页进入时下面两个值为空
-        userAccount.setSubscribe_time(user.getSubscribe_time());
-        userAccount.setSubscribe(user.getSubscribe());
-        return userRepository.save(userAccount);
-    }
-	
-	private void bindWithWuye(User userAccount) {
-		BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount.getOpenid());
-		if(r.isSuccess()) {
-			userAccount.setWuyeId(r.getData().getUser_id());
-			userRepository.save(userAccount);
-		}
+		return userAccount;
 	}
 
 	@Override
@@ -166,13 +163,14 @@ public class UserServiceImpl implements UserService {
 		user.setSex(sex);
 		return userRepository.save(user);
 	}
+
 	@Override
 	public User bindPhone(User user, String phone) {
 		user.setTel(phone);
-		if(user.getStatus() == 0 && StringUtil.isNotEmpty(user.getTel())){
+		if (user.getStatus() == 0 && StringUtil.isNotEmpty(user.getTel())) {
 			user.setStatus(ModelConstant.USER_STATUS_BINDED);
 		}
-		pointService.addZhima(user, 100, "zm-binding-"+user.getId());
+		pointService.addZhima(user, 100, "zm-binding-" + user.getId());
 		return userRepository.save(user);
 	}
 
@@ -182,63 +180,74 @@ public class UserServiceImpl implements UserService {
 		UserWeiXin user = wechatCoreService.getUserInfo(appId, openid);
 		return user;
 	}
-    /** 
-     * @param user
-     * @return
-     * @see com.yumu.hexie.service.user.UserService#save(com.yumu.hexie.model.user.User)
-     */
-    @Override
-    public User save(User user) {
-        return userRepository.save(user);
-    }
-    /** 
-     * @param code
-     * @return
-     * @see com.yumu.hexie.service.user.UserService#queryByShareCode(java.lang.String)
-     */
-    @Override
-    public User queryByShareCode(String code) {
-        List<User> users = userRepository.findByShareCode(code);
-        return users.size() > 0 ? users.get(0) : null;
-    }
-	@Override
-	public List<User> getBindHouseUser(int pageNum,int pageSize) {
-		return userRepository.getBindHouseUser(pageNum,pageSize);
-	}
-	
-	@Autowired
-	private TempUserRepository tempUserRepository;
-	
-	@Override
-	public List<TempUser> getTempUser() {
 
-		return tempUserRepository.findAll();
+	/**
+	 * @param user
+	 * @return
+	 * @see com.yumu.hexie.service.user.UserService#save(com.yumu.hexie.model.user.User)
+	 */
+	@Override
+	public User save(User user) {
+		return userRepository.save(user);
 	}
+
+	/**
+	 * @param code
+	 * @return
+	 * @see com.yumu.hexie.service.user.UserService#queryByShareCode(java.lang.String)
+	 */
+	@Override
+	public User queryByShareCode(String code) {
+		List<User> users = userRepository.findByShareCode(code);
+		return users.size() > 0 ? users.get(0) : null;
+	}
+
+	@Override
+	public List<User> getBindHouseUser(int pageNum, int pageSize) {
+		return userRepository.getBindHouseUser(pageNum, pageSize);
+	}
+
 	@Override
 	public List<User> getByTel(String tel) {
 		return userRepository.findByTel(tel);
 	}
-	@Override
-	public List<TempUser> getTemp() {
-	
-		
-		return tempUserRepository.findBySectid("161223100120926240");
-	}
-	@Override
+
 	public List<String> getRepeatShareCodeUser() {
-		
+
 		return userRepository.getRepeatShareCodeUser();
 	}
+
 	@Override
 	public List<User> getShareCodeIsNull() {
-		
+
 		return userRepository.getShareCodeIsNull();
 	}
+
 	@Override
 	public List<User> getUserByShareCode(String shareCode) {
 		return userRepository.getUserByShareCode(shareCode);
 	}
-	
-	
-   
+
+	/**
+	 * 防止用户短时间内重复调用login接口
+	 */
+	@Override
+	public boolean checkDuplicateLogin(HttpSession httpSession) {
+
+		boolean isDuplicateRequest = false;
+		String sessionId = httpSession.getId();
+		logger.info("user session : " + sessionId);
+
+		String key = ModelConstant.KEY_USER_LOGIN + sessionId;
+
+		Object object = redisTemplate.opsForValue().get(key);
+		if (object == null) {
+			redisTemplate.opsForValue().set(key, sessionId, 2, TimeUnit.SECONDS); // 设置3秒过期，3秒内任何请求不予处理
+		} else {
+
+			isDuplicateRequest = true;
+		}
+		return isDuplicateRequest;
+	}
+
 }

@@ -22,8 +22,9 @@ public class BillListVO implements Serializable {
 	private String pay_least_month;
 	private String reduce_mode;	//减免模式，记账时总金额四舍五入，0表示没有此功能，1表示四舍五入至元，2表示四舍五入至角，3表示自由调价
 	private int bills_size;
-
-	
+	private int billfee_discount_rule_conf;//物业费减免配置
+	private String billfee_discount_rule;
+	private String before_condition;//停车费是否减免前提条件（根据公司参数）
 	public List<OtherBillInfo> getOther_bill_info() {
 		return other_bill_info;
 	}
@@ -96,6 +97,24 @@ public class BillListVO implements Serializable {
 	}
 	public void setReduce_mode(String reduce_mode) {
 		this.reduce_mode = reduce_mode;
+	}
+	public int getBillfee_discount_rule_conf() {
+		return billfee_discount_rule_conf;
+	}
+	public void setBillfee_discount_rule_conf(int billfee_discount_rule_conf) {
+		this.billfee_discount_rule_conf = billfee_discount_rule_conf;
+	}
+	public String getBillfee_discount_rule() {
+		return billfee_discount_rule;
+	}
+	public void setBillfee_discount_rule(String billfee_discount_rule) {
+		this.billfee_discount_rule = billfee_discount_rule;
+	}
+	public String getBefore_condition() {
+		return before_condition;
+	}
+	public void setBefore_condition(String before_condition) {
+		this.before_condition = before_condition;
 	}
 	
 	
