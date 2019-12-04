@@ -161,6 +161,23 @@ public class UserServiceImpl implements UserService {
 		pointService.addZhima(user, 100, "zm-binding-"+user.getId());
 		return userRepository.save(user);
 	}
+	
+	@Override
+	public User bindWuYeId(User user) {
+		 //绑定物业信息
+    	try {
+    		if(StringUtil.isEmpty(user.getWuyeId()) ){
+    			BaseResult<HexieUser> r = WuyeUtil.userLogin(user);
+        		if(r.isSuccess()) {
+        			user.setWuyeId(r.getData().getUser_id());
+            		user = userRepository.save(user);
+        		}
+    		}
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		return user;
+	}
 
 	@Override
 	public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid) {

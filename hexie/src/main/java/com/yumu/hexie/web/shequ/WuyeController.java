@@ -88,11 +88,7 @@ public class WuyeController extends BaseController {
 		
 		log.info("user is : " + user);
 		 //绑定物业信息
-        if(StringUtil.isEmpty(user.getWuyeId()) ){
-        	HexieUser r = WuyeUtil.userLogin(user).getData();
-    		user.setWuyeId(r.getUser_id());
-    		user = userService.save(user);
-        }
+		user = userService.bindWuYeId(user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}

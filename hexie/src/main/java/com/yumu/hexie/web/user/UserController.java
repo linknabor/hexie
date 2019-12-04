@@ -102,12 +102,7 @@ public class UserController extends BaseController{
 				}
 			}
 			if(user != null){
-				 //绑定物业信息
-		        if(StringUtil.isEmpty(user.getWuyeId()) ){
-		        	HexieUser r = WuyeUtil.userLogin(user).getData();
-		    		user.setWuyeId(r.getUser_id());
-		    		user = userService.save(user);
-		        }
+				user = userService.bindWuYeId(user);
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
 			    Map<String, String> paramMap = paramService.getParamByUser(user);
