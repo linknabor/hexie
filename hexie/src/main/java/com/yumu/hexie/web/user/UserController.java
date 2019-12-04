@@ -173,6 +173,11 @@ public class UserController extends BaseController{
 			        }catch(Throwable t){}
 			    }
 			    if(userAccount == null) {
+			    	
+			    	if (userService.checkDuplicateLogin(session)) {
+						throw new BizValidateException("正在登陆中，请耐心等待。");
+					}
+			    	
 			    	UserWeiXin weixinUser = null;
 			    	if (StringUtils.isEmpty(oriApp)) {
 			    		weixinUser = userService.getOrSubscibeUserByCode(code);
