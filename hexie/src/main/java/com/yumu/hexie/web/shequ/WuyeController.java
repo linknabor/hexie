@@ -22,7 +22,6 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -84,7 +83,7 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<HexieHouse>> hexiehouses(HttpSession session,@ModelAttribute(Constants.USER) User user) throws Exception {
+	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
 		log.info("user is : " + user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
