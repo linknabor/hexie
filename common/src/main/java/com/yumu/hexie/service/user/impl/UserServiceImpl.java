@@ -2,12 +2,17 @@ package com.yumu.hexie.service.user.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -30,7 +35,7 @@ import com.yumu.hexie.service.user.UserService;
 @Service("userService")
 public class UserServiceImpl implements UserService {
 	
-	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Inject
 	private UserRepository userRepository;
@@ -40,6 +45,11 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private WechatCoreService wechatCoreService;
+	
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
+	
+	
     @Override
     public User getById(long uId){
         return userRepository.findOne(uId);
@@ -212,5 +222,26 @@ public class UserServiceImpl implements UserService {
 		return userRepository.getUserByShareCode(shareCode);
 	}
 	
+	/**
+	 * 防止用户短时间内重复调用login接口
+	 */
+	@Override
+	public boolean checkDuplicateLogin(HttpSession httpSession) {
+		
+		boolean isDuplicateRequest = false;
+		String sessionId = httpSession.getId();
+		logger.info("user session : " + sessionId);
+		
+		String key = ModelConstant.KEY_USER_LOGIN + sessionId;
+		
+		Object object = redisTemplate.opsForValue().get(key);
+		if (object == null) {
+			redisTemplate.opsForValue().set(key, sessionId, 2, TimeUnit.SECONDS);	//设置3秒过期，3秒内任何请求不予处理
+		}else {
+			isDuplicateRequest = true;
+		}
+		return isDuplicateRequest;
+	}
+
    
 }
