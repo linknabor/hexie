@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-
-import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -131,14 +129,7 @@ public class UserServiceImpl implements UserService {
 				userAccount.setAppId(oriApp); // 其他系统用户填自己的appId
 			}
 		}
-
-		// 绑定物业信息
-		if (StringUtil.isEmpty(userAccount.getWuyeId())) {
-			BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount);
-			if (r.isSuccess()) {
-				userAccount.setWuyeId(r.getData().getUser_id());
-			}
-		}
+		
 		pointService.addZhima(userAccount, 5,
 				"zm-login-" + DateUtil.dtFormat(new Date(), "yyyy-MM-dd") + userAccount.getId());
 		userAccount = userRepository.save(userAccount);
