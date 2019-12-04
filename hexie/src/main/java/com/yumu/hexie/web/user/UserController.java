@@ -168,45 +168,38 @@ public class UserController extends BaseController{
 		
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
-		try {
-			String oriApp = postData.get("oriApp");
-	    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
-	    	
-			if (StringUtil.isNotEmpty(code)) {
-			    if(Boolean.TRUE.equals(testMode)) {
-			        try{
-				        Long id = Long.valueOf(code);
-				    	userAccount = userService.getById(id);
-			        }catch(Throwable t){}
-			    }
-			    if(userAccount == null) {
-			    	UserWeiXin weixinUser = null;
-			    	if (StringUtils.isEmpty(oriApp)) {
-			    		weixinUser = userService.getOrSubscibeUserByCode(code);
-					}else {
-						weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
-					}
-			    	
-			    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
-			    }
-			    
-				session.setAttribute(Constants.USER, userAccount);
-			}
-			if(userAccount == null) {
-			    return new BaseResult<UserInfo>().failMsg("用户不存在！");
-			}
-			long endTime = System.currentTimeMillis();
-			log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
-			return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
-			    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
-		} catch (Exception e) {
-			
-			if (e instanceof BizValidateException) {
-				throw (BizValidateException)e;
-			}else {
-				throw new Exception(e);
-			}
+
+		String oriApp = postData.get("oriApp");
+    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
+    	
+		if (StringUtil.isNotEmpty(code)) {
+		    if(Boolean.TRUE.equals(testMode)) {
+		        try{
+			        Long id = Long.valueOf(code);
+			    	userAccount = userService.getById(id);
+		        }catch(Throwable t){}
+		    }
+		    if(userAccount == null) {
+		    	UserWeiXin weixinUser = null;
+		    	if (StringUtils.isEmpty(oriApp)) {
+		    		weixinUser = userService.getOrSubscibeUserByCode(code);
+				}else {
+					weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
+				}
+		    	
+		    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
+		    }
+		    
+			session.setAttribute(Constants.USER, userAccount);
 		}
+		if(userAccount == null) {
+		    return new BaseResult<UserInfo>().failMsg("用户不存在！");
+		}
+		long endTime = System.currentTimeMillis();
+		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
+		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
+		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+		
     }
 	
 	@RequestMapping(value = "/getyzm", method = RequestMethod.POST)
