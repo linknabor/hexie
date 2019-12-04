@@ -102,7 +102,7 @@ public class UserController extends BaseController{
 				}
 			}
 			if(user != null){
-				user = userService.bindWuYeId(user);
+				userService.bindWuYeId(user);
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
 			    Map<String, String> paramMap = paramService.getParamByUser(user);

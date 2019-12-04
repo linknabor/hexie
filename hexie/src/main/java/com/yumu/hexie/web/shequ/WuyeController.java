@@ -87,8 +87,8 @@ public class WuyeController extends BaseController {
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
 		log.info("user is : " + user);
-		 //绑定物业信息
-		user = userService.bindWuYeId(user);
+		//绑定物业信息
+		userService.bindWuYeId(user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
