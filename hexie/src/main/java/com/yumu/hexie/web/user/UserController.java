@@ -59,7 +59,6 @@ public class UserController extends BaseController{
     private ParamService paramService;
     @Autowired
     private PageConfigService pageConfigService;
-    
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -161,7 +160,6 @@ public class UserController extends BaseController{
 		
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
-		try {
 			String oriApp = postData.get("oriApp");
 	    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
 	    	
@@ -197,14 +195,6 @@ public class UserController extends BaseController{
 			log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 			return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
 			    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
-		} catch (Exception e) {
-			
-			if (e instanceof BizValidateException) {
-				throw (BizValidateException)e;
-			}else {
-				throw new Exception(e);
-			}
-		}
     }
 	
 	@RequestMapping(value = "/getyzm", method = RequestMethod.POST)
