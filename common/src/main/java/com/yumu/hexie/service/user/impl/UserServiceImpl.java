@@ -244,6 +244,7 @@ public class UserServiceImpl implements UserService {
 		if (object == null) {
 			redisTemplate.opsForValue().set(key, sessionId, 2, TimeUnit.SECONDS); // 设置3秒过期，3秒内任何请求不予处理
 		} else {
+
 			isDuplicateRequest = true;
 		}
 		return isDuplicateRequest;
