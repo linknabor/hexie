@@ -316,7 +316,7 @@ public class ModelConstant {
 	public static final String KEY_POINT_QUEUE = "pointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
 
-	
+
 	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";
 
 	//队列

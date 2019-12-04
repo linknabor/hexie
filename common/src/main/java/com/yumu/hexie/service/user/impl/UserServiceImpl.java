@@ -11,9 +11,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -209,6 +211,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User save(User user) {
 		return userRepository.save(user);
+
 	}
 	/**
 	 * @param code
@@ -220,6 +223,7 @@ public class UserServiceImpl implements UserService {
 		List<User> users = userRepository.findByShareCode(code);
 		return users.size() > 0 ? users.get(0) : null;
 	}
+
 
 	@Override
 	public List<User> getBindHouseUser(int pageNum, int pageSize) {
@@ -246,7 +250,6 @@ public class UserServiceImpl implements UserService {
 	public List<User> getUserByShareCode(String shareCode) {
 		return userRepository.getUserByShareCode(shareCode);
 	}
-
 
 	/**
 	 * 防止用户短时间内重复调用login接口
