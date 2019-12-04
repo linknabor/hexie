@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return userAccount;
 	}
-  
+
 	@Override
 	public User saveProfile(long userId, String nickName, int sex) {
 
@@ -210,6 +210,7 @@ public class UserServiceImpl implements UserService {
 	public User save(User user) {
 		return userRepository.save(user);
 	}
+
 	/**
 	 * @param code
 	 * @return
@@ -246,7 +247,6 @@ public class UserServiceImpl implements UserService {
 	public List<User> getUserByShareCode(String shareCode) {
 		return userRepository.getUserByShareCode(shareCode);
 	}
-
 
 	/**
 	 * 防止用户短时间内重复调用login接口
