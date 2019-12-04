@@ -128,14 +128,7 @@ public class UserServiceImpl implements UserService {
 				userAccount.setAppId(oriApp); // 其他系统用户填自己的appId
 			}
 		}
-
-		// 绑定物业信息
-		if (StringUtil.isEmpty(userAccount.getWuyeId())) {
-			BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount);
-			if (r.isSuccess()) {
-				userAccount.setWuyeId(r.getData().getUser_id());
-			}
-		}
+		
 		pointService.addZhima(userAccount, 5,
 				"zm-login-" + DateUtil.dtFormat(new Date(), "yyyy-MM-dd") + userAccount.getId());
 		userAccount = userRepository.save(userAccount);
@@ -155,7 +148,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return userAccount;
 	}
-
+  
 	@Override
 	public User saveProfile(long userId, String nickName, int sex) {
 
@@ -208,8 +201,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User save(User user) {
 		return userRepository.save(user);
-	}
 
+	}
 	/**
 	 * @param code
 	 * @return
@@ -220,6 +213,7 @@ public class UserServiceImpl implements UserService {
 		List<User> users = userRepository.findByShareCode(code);
 		return users.size() > 0 ? users.get(0) : null;
 	}
+
 
 	@Override
 	public List<User> getBindHouseUser(int pageNum, int pageSize) {
