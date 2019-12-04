@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -163,6 +164,7 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
+	@Async
 	public User bindWuYeId(User user) {
 		 //绑定物业信息
     	try {
