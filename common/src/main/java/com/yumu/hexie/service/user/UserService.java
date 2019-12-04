@@ -2,6 +2,8 @@ package com.yumu.hexie.service.user;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.user.User;
 
@@ -39,4 +41,6 @@ public interface UserService {
 	public List<User> getUserByShareCode(String shareCode);
 	User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp);
 	User multiFindByOpenId(String openId);
+	
+	boolean checkDuplicateLogin(HttpSession httpSession);
 }
