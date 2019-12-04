@@ -147,17 +147,18 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public WechatPayInfo getPrePayInfo(User user, String billId,
 			String stmtId, String couponUnit, String couponNum, 
-			String couponId,String mianBill,String mianAmt, String reduceAmt, 
+			String couponId,String mianBill,String mianAmt, String reduceAmt, String fee_mianBill,String fee_mianAmt,
 			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
-		
+	
 		RegionUrl regionurl = null;
 		String targetUrl = "";
 		if (!StringUtils.isEmpty(regionname)) {
 			regionurl = locationService.getRegionUrlByName(regionname);
 			targetUrl = regionurl.getRegionUrl();
 		}
-		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
+    return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
 				invoice_title_type, credit_code, invoice_title,targetUrl)
+
 				.getData();
 	}
 	
