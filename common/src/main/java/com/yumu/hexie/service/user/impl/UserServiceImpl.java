@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -165,7 +167,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Async
-	public User bindWuYeId(User user) {
+	public User bindWuYeId(HttpSession session,User user) {
 		 //绑定物业信息
     	try {
     		if(StringUtil.isEmpty(user.getWuyeId()) ){
@@ -173,6 +175,7 @@ public class UserServiceImpl implements UserService {
         		if(r.isSuccess()) {
         			user.setWuyeId(r.getData().getUser_id());
             		user = userRepository.save(user);
+            		session.setAttribute(Constants.USER, user);
         		}
     		}
 		} catch (Exception e) {
