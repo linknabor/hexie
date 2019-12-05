@@ -42,6 +42,6 @@ public interface UserService {
 	User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp);
 	User multiFindByOpenId(String openId);
 	
-	boolean checkDuplicateLogin(HttpSession httpSession);
+	boolean checkDuplicateLogin(UserWeiXin userWeiXin);
 
 }
