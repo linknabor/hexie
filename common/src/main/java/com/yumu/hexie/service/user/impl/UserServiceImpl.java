@@ -11,7 +11,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -247,17 +246,17 @@ public class UserServiceImpl implements UserService {
 	 * 防止用户短时间内重复调用login接口
 	 */
 	@Override
-	public boolean checkDuplicateLogin(HttpSession httpSession) {
+	public boolean checkDuplicateLogin(UserWeiXin userWeiXin) {
 
 		boolean isDuplicateRequest = false;
-		String sessionId = httpSession.getId();
-		logger.info("user session : " + sessionId);
+		String openid = userWeiXin.getOpenid();
+		logger.info("user openid : " + openid);
 
-		String key = ModelConstant.KEY_USER_LOGIN + sessionId;
+		String key = ModelConstant.KEY_USER_LOGIN + openid;
 
 		Object object = redisTemplate.opsForValue().get(key);
 		if (object == null) {
-			redisTemplate.opsForValue().set(key, sessionId, 2, TimeUnit.SECONDS); // 设置3秒过期，3秒内任何请求不予处理
+			redisTemplate.opsForValue().set(key, openid, 2, TimeUnit.SECONDS); // 设置2秒过期，2秒内任何请求不予处理
 		} else {
 
 			isDuplicateRequest = true;
