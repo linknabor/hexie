@@ -10,15 +10,15 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-
-import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -148,7 +148,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return userAccount;
 	}
-  
+
 	@Override
 	public User saveProfile(long userId, String nickName, int sex) {
 
@@ -203,6 +203,7 @@ public class UserServiceImpl implements UserService {
 		return userRepository.save(user);
 
 	}
+
 	/**
 	 * @param code
 	 * @return

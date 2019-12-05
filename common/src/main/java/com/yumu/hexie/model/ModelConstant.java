@@ -316,5 +316,6 @@ public class ModelConstant {
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
 	public static final String KEY_USER_LOGIN = "userLoginKey_";
 
+
 	
 }		
