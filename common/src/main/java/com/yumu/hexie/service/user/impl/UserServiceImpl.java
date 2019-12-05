@@ -10,13 +10,15 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -60,7 +62,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserWeiXin getOrSubscibeUserByCode(String code) {
-
 		return getTpSubscibeUserByCode(code, null);
 	}
 
@@ -127,14 +128,7 @@ public class UserServiceImpl implements UserService {
 				userAccount.setAppId(oriApp); // 其他系统用户填自己的appId
 			}
 		}
-
-		// 绑定物业信息
-		if (StringUtil.isEmpty(userAccount.getWuyeId())) {
-			BaseResult<HexieUser> r = WuyeUtil.userLogin(userAccount);
-			if (r.isSuccess()) {
-				userAccount.setWuyeId(r.getData().getUser_id());
-			}
-		}
+		
 		pointService.addZhima(userAccount, 5,
 				"zm-login-" + DateUtil.dtFormat(new Date(), "yyyy-MM-dd") + userAccount.getId());
 		userAccount = userRepository.save(userAccount);
@@ -154,7 +148,7 @@ public class UserServiceImpl implements UserService {
 		}
 		return userAccount;
 	}
-
+  
 	@Override
 	public User saveProfile(long userId, String nickName, int sex) {
 
@@ -173,6 +167,24 @@ public class UserServiceImpl implements UserService {
 		pointService.addZhima(user, 100, "zm-binding-" + user.getId());
 		return userRepository.save(user);
 	}
+	
+	@Override
+	@Async
+	public User bindWuYeId(User user) {
+		 //绑定物业信息
+    	try {
+    		if(StringUtil.isEmpty(user.getWuyeId()) ){
+    			BaseResult<HexieUser> r = WuyeUtil.userLogin(user);
+        		if(r.isSuccess()) {
+        			user.setWuyeId(r.getData().getUser_id());
+            		user = userRepository.save(user);
+        		}
+    		}
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+		return user;
+	}
 
 	@Override
 	public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid) {
@@ -189,8 +201,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User save(User user) {
 		return userRepository.save(user);
-	}
 
+	}
 	/**
 	 * @param code
 	 * @return
@@ -201,6 +213,7 @@ public class UserServiceImpl implements UserService {
 		List<User> users = userRepository.findByShareCode(code);
 		return users.size() > 0 ? users.get(0) : null;
 	}
+
 
 	@Override
 	public List<User> getBindHouseUser(int pageNum, int pageSize) {
