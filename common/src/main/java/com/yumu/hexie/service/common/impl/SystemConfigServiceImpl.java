@@ -8,20 +8,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.systemconfig.SystemConfigUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.system.SystemConfig;
 import com.yumu.hexie.model.system.SystemConfigRepository;
@@ -47,22 +50,47 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private SystemConfigRepository systemConfigRepository;
     @Inject
     private RedisRepository redisRepository;
+    @Autowired
+    private RedisTemplate<String, SystemConfig> redisTemplate;
     
+    
+    /**
+     * 启动时加载到redis缓存中
+     */
+    @PostConstruct
+    public void initSystemConfig() {
+    	
+    	List<SystemConfig> configList = systemConfigRepository.findAll();
+    	if (configList == null || configList.isEmpty()) {
+			log.error("未配置系统参数表systemConfig!");
+		}
+    	for (SystemConfig systemConfig : configList) {
+    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, systemConfig.getSysKey(), systemConfig);
+		}
+    	
+    }
+    
+    /**
+     * 获取短信渠道
+     */
     @Override
     public int querySmsChannel() {
     	
-        String value = queryValueByKey("SMS_CHANNEL");
-        if (!"0".equals(value)) {
+        String sysValue = getSysConfigByKey("SMS_CHANNEL");
+        if (!"0".equals(sysValue)) {
             return 1;
         }
         return 0;
         
     }
     
+    /**
+     * 获取红包活动时间段
+     */
     @Override
     public String[] queryActPeriod() {
     	
-    	String datePeriod = queryValueByKey("ACT_PERIOD");
+    	String datePeriod = getSysConfigByKey("ACT_PERIOD");
     	if (!StringUtil.isEmpty(datePeriod)) {
 			return datePeriod.split(",");
 		}else {
@@ -71,26 +99,32 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     	
     }
     
+    /**
+     * 不参与红包活动的项
+     */
     @Override
     public Set<String> getUnCouponItems() {
+    	
+    	String sysValue = getSysConfigByKey("NOCOUPON_ITEMS");
         Set<String> res = new HashSet<String>();
-        String key = "NOCOUPON_ITEMS";
-        String value = queryValueByKey(key);
-        if (!StringUtil.isEmpty(value)) {
-        	for(String idStr: value.split(",")) {
+        if (!StringUtil.isEmpty(sysValue)) {
+        	for(String idStr: sysValue.split(",")) {
                 res.add(idStr.trim());
             }
 		}
         return res;
     }
     
-    public SystemConfig getConfigFromCache(String key){
+    /**
+     * 从缓存中去系统配置参数
+     * @param key
+     * @return
+     */
+    private SystemConfig getConfigFromCache(String key){
     	
     	SystemConfig systemConfig = redisRepository.getSystemConfig(key);
     	if (systemConfig == null) {
-			log.error("could not find key [" + key +"] in cache " );
-			int ret = SystemConfigUtil.notifyRefreshing(key);
-			log.error("notify refreshing the cache : " + ret);
+    		systemConfig = new SystemConfig();
     	}
     	return systemConfig;
     
@@ -147,17 +181,32 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     }
    
     @Override
-	public String queryValueByKey(String key) {
+	public String getSysConfigByKey(String key) {
 		
-		String ret = "";
-		List<SystemConfig> list = systemConfigRepository.findAllBySysKey(key);
-		if (list.size()>0) {
-			SystemConfig config = list.get(0);
-			ret = config.getSysValue();
+    	String value = "";
+    	SystemConfig systemConfig = (SystemConfig) redisTemplate.opsForHash().get(ModelConstant.KEY_SYS_CONFIG, key);
+    	if (systemConfig != null) {
+			value = systemConfig.getSysValue();
 		}
-	
-		return ret;
+		return value;
 	}
-
+    
+    /**
+     * 重新加载系统参数
+     */
+    @Override
+    public void reloadSysConfigCache() {
+    	
+    	redisTemplate.delete(ModelConstant.KEY_SYS_CONFIG);
+    	List<SystemConfig> configList = systemConfigRepository.findAll();
+    	if (configList == null) {
+			log.error("未配置系统参数表systemConfig!");
+			return;
+		}
+    	for (SystemConfig systemConfig : configList) {
+    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, systemConfig.getSysKey(), systemConfig);
+		}
+    }
+    
     
 }

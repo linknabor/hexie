@@ -1,11 +1,9 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.json.JSONException;
@@ -54,24 +52,6 @@ public class AddressServiceImpl implements AddressService {
     private RegionRepository regionRepository;
     @Autowired
     private RegionService regionService;
-    
-    @PostConstruct
-	public void init() {
-		if(map == null){
-			getNeedRegion();
-		}
-	}
-    
-    public void getNeedRegion(){
-		
-		if(map==null){
-			map=new HashMap<>();
-			List<Region>  regionList=regionRepository.findNeedRegion();
-			for (Region region : regionList) {
-				map.put(region.getName(), region.getId());
-			}
-		}
-	}
     
     @Override
     public Address addAddress(AddressReq addressReq) {

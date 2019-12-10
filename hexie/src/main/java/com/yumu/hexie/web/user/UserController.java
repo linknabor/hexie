@@ -102,7 +102,7 @@ public class UserController extends BaseController{
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
-			    Map<String, String> paramMap = paramService.getParamByUser(user);
+			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
@@ -201,7 +201,7 @@ public class UserController extends BaseController{
 	@ResponseBody
     public BaseResult<String> getYzm(@RequestBody MobileYzm yzm, @ModelAttribute(Constants.USER)User user) throws Exception {
 		boolean result = smsService.sendVerificationCode(user, yzm.getMobile());
-		if(result) {
+		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
 	    return  new BaseResult<String>().success("验证码发送成功");

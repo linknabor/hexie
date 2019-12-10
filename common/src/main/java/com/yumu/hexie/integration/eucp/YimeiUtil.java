@@ -1,61 +1,59 @@
 package com.yumu.hexie.integration.eucp;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 
-import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import org.springframework.web.client.RestTemplate;
 
-import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.common.util.MyHttpClient;
-
+@Component
 public class YimeiUtil {
-	private static final Logger Log = LoggerFactory.getLogger(YimeiUtil.class);
-
-	private static final String cdkey = "6SDK-EMY-6688-KFYSS";
-	private static final String password = "096092";
-	private static final String urlStr = "http://sdk4report.eucp.b2m.cn:8080/sdkproxy/sendsms.action";
-	private static final String MSG_CHARSET = "UTF-8";
-	public static boolean sendMessage(String mobile,String message,long id) {
-		String msgId = ""+id;
-		String sendContent;
-		try {
-			sendContent = URLEncoder.encode(message, MSG_CHARSET);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			sendContent = message;
-		}
-		StringBuffer bufUrl = new StringBuffer();
-		bufUrl.append(urlStr).append("?cdkey=").append(cdkey).append("&password=").append(password);
-		bufUrl.append("&phone=").append(mobile).append("&message=").append(sendContent).append("&addserial=").append(msgId);
-		String urlContent = bufUrl.toString();
-		YimeiResult r = (YimeiResult)httpGet(urlContent, YimeiResult.class);
-		if(r == null){
-			return false;
-		}
-		return r.isSuccess();
-	}
 	
-	public static void main(String args[]) {
-		sendMessage("18019236112", "测试222",12);
-	}
+	private static final Logger logger = LoggerFactory.getLogger(YimeiUtil.class);
 	
-	private static Object httpGet(String reqUrl, Class c) {
-
-		HttpGet get = new HttpGet(reqUrl);
-		String resp;
+	@Value("${sms.yimei.cdkey}")
+	private String cdkey;
+	
+	@Value("${sms.yimei.password}")
+	private String password;
+	
+	@Value("${sms.yimei.url}")
+	private String urlStr;
+	
+	@Autowired
+	private RestTemplate restTemplate;
+	
+	public boolean sendMessage(String mobile, String message, long id) {
+		
 		try {
-			Log.error("REQ:" + reqUrl);
-			resp = MyHttpClient.getStringFromResponse(
-					MyHttpClient.execute(get), "UTF-8").trim();
-			Log.error("RESP:" + resp);
-			String json = JacksonJsonUtil.xml2json(resp);
-			return JacksonJsonUtil.jsonToBean(json, c);
+
+			Assert.hasLength(urlStr, "未配置 yimei短信请求服务地址，请检查配置文件。key: sms.yimei.url");
+			StringBuffer bufUrl = new StringBuffer();
+			bufUrl.append(urlStr).append("?cdkey=").append(cdkey).append("&password=").append(password);
+			String sendContent = URLEncoder.encode(message, Charset.forName("utf8").toString());
+			bufUrl.append("&phone=").append(mobile).append("&message=").append(sendContent).append("&addserial=").append(id);
+			String requestStr = bufUrl.toString();
+			logger.info("yimei request : " + requestStr);
+			ResponseEntity<YimeiResult> responseEntity = restTemplate.exchange(requestStr, HttpMethod.GET, null, YimeiResult.class);
+			logger.info("yimei response : " + responseEntity);
+			YimeiResult result = responseEntity.getBody();
+			if(result == null){
+				return false;
+			}
+			return result.isSuccess();
 		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-
+			logger.error(e.getMessage(), e);
+			return false;
+		} 
+		
 	}
+	
+	
 }
