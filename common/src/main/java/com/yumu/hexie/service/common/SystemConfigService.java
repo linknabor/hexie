@@ -16,12 +16,13 @@ import java.util.Set;
  */
 public interface SystemConfigService {
 
-    public int querySmsChannel();
+    int querySmsChannel();
     String queryJsTickets(String appId);
     String queryWXAToken(String appId);
     
-    public String[] queryActPeriod();
-    public Set<String> getUnCouponItems();
+    String[] queryActPeriod();
+    Set<String> getUnCouponItems();
 
-	String queryValueByKey(String key);
+	String getSysConfigByKey(String key);
+	void reloadSysConfigCache();
 }

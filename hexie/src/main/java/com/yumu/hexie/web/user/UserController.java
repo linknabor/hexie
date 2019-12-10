@@ -26,8 +26,6 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
-import com.yumu.hexie.integration.wuye.WuyeUtil;
-import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
@@ -104,7 +102,7 @@ public class UserController extends BaseController{
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
-			    Map<String, String> paramMap = paramService.getParamByUser(user);
+			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
@@ -162,45 +160,48 @@ public class UserController extends BaseController{
 		
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
-
-		String oriApp = postData.get("oriApp");
-    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
-    	
-		if (StringUtil.isNotEmpty(code)) {
-		    if(Boolean.TRUE.equals(testMode)) {
-		        try{
-			        Long id = Long.valueOf(code);
-			    	userAccount = userService.getById(id);
-		        }catch(Throwable t){}
-		    }
-		    if(userAccount == null) {
-		    	UserWeiXin weixinUser = null;
-		    	if (StringUtils.isEmpty(oriApp)) {
-		    		weixinUser = userService.getOrSubscibeUserByCode(code);
-				}else {
-					weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
-				}
-		    	
-		    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
-		    }
-		    
-			session.setAttribute(Constants.USER, userAccount);
-		}
-		if(userAccount == null) {
-		    return new BaseResult<UserInfo>().failMsg("用户不存在！");
-		}
-		long endTime = System.currentTimeMillis();
-		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
-		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
-		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
-		
+			String oriApp = postData.get("oriApp");
+	    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
+	    	
+			if (StringUtil.isNotEmpty(code)) {
+			    if(Boolean.TRUE.equals(testMode)) {
+			        try{
+				        Long id = Long.valueOf(code);
+				    	userAccount = userService.getById(id);
+			        }catch(Throwable t){}
+			    }
+			    if(userAccount == null) {
+			    	
+			    	UserWeiXin weixinUser = null;
+			    	if (StringUtils.isEmpty(oriApp)) {
+			    		weixinUser = userService.getOrSubscibeUserByCode(code);
+					}else {
+						weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
+					}
+			    	
+			    	if (userService.checkDuplicateLogin(weixinUser)) {
+						throw new BizValidateException("正在登陆中，请耐心等待。");
+					}
+			    	
+			    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
+			    }
+			    
+				session.setAttribute(Constants.USER, userAccount);
+			}
+			if(userAccount == null) {
+			    return new BaseResult<UserInfo>().failMsg("用户不存在！");
+			}
+			long endTime = System.currentTimeMillis();
+			log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
+			return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
+			    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
     }
 	
 	@RequestMapping(value = "/getyzm", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<String> getYzm(@RequestBody MobileYzm yzm, @ModelAttribute(Constants.USER)User user) throws Exception {
 		boolean result = smsService.sendVerificationCode(user, yzm.getMobile());
-		if(result) {
+		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
 	    return  new BaseResult<String>().success("验证码发送成功");
