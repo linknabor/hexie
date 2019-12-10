@@ -1,9 +1,5 @@
 package com.yumu.hexie.service.shequ.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -18,7 +14,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -33,8 +28,6 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.distribution.region.Region;
-import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -51,11 +44,6 @@ import com.yumu.hexie.vo.BindHouseQueue;
 public class WuyeServiceImpl implements WuyeService {
 	
 	private static final Logger log = LoggerFactory.getLogger(WuyeServiceImpl.class);
-	
-	private static Map<String,Long> map=null;
-	
-	@Autowired
-	private RegionRepository regionRepository;
 	
 	@Autowired
 	private AddressService addressService;
@@ -85,7 +73,6 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@PostConstruct
 	public void init() {
-		getNeedRegion();
 		wuyeQueueTask.bindHouseByQueue();
 	}
 	
@@ -149,14 +136,13 @@ public class WuyeServiceImpl implements WuyeService {
 			String stmtId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, String fee_mianBill,String fee_mianAmt,
 			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
-		
 		RegionUrl regionurl = null;
 		String targetUrl = "";
 		if (!StringUtils.isEmpty(regionname)) {
 			regionurl = locationService.getRegionUrlByName(regionname);
 			targetUrl = regionurl.getRegionUrl();
 		}
-		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
+    return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
 				invoice_title_type, credit_code, invoice_title,targetUrl)
 				.getData();
 	}
@@ -312,21 +298,6 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setOfficeTel(u.getOffice_tel());
 		userService.save(user);
 		
-	}
-
-	public void getNeedRegion(){
-		
-		try {
-			if(map==null){
-				map=new HashMap<>();
-				List<Region>  regionList=regionRepository.findNeedRegion();
-				for (Region region : regionList) {
-					map.put(region.getName(), region.getId());
-				}
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
 	}
 
 	@Override

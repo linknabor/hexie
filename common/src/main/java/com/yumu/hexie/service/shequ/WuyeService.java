@@ -122,7 +122,7 @@ public interface WuyeService {
 	 */
 	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName);
 
-	/**
+/**
 	 * 物业账单缴费
 	 * @param user
 	 * @param billId
