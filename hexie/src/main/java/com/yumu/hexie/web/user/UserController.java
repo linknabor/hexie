@@ -179,7 +179,7 @@ public class UserController extends BaseController{
 						weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
 					}
 			    	
-			    	if (userService.checkDuplicateLogin(weixinUser)) {
+			    	if (userService.checkDuplicateLogin(session)) {
 						throw new BizValidateException("正在登陆中，请耐心等待。");
 					}
 			    	
