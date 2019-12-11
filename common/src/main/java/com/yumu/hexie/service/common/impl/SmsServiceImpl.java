@@ -140,9 +140,9 @@ public class SmsServiceImpl implements SmsService {
 	        saveSms2cache(smsHis);
 		}
         
-		String sendMsg = systemConfigService.getSysConfigByKey("SEND_MSG"); //TODO cache  
+		String sendMsg = systemConfigService.getSysConfigByKey("SEND_MSG");
 		boolean ret = false;
-        if(!"0".equals(sendMsg)){
+        if("1".equals(sendMsg)){
         	if (systemConfigService.querySmsChannel()==0) {
         		ret = yimeiUtil.sendMessage(mobilePhone, smsHis.getMsg(), smsHis.getId());//.sendBatchMessage(account, password, mobilePhone, message);
 			}else {
@@ -151,6 +151,7 @@ public class SmsServiceImpl implements SmsService {
         } else {
         	ret = true;
         }
+        LOGGER.info("sendMessage ret :" + ret);
         return ret;
 		
 		
