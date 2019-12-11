@@ -42,12 +42,12 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
 			+ " and IF (?2!='', tel like CONCAT('%',?2,'%'), 1=1)"
 			+ " and IF (?3!='', b.sectId =?3, 1=1)"
 			+ " and b.sectId in ?4 GROUP BY b.operatorId \n#pageable\n",
-			countQuery="select count(*) from serviceoperator a "
+			countQuery="select count(1) from ( select b.operatorId from serviceoperator a "
     		+ "join serviceoperatorSect b on a.id=b.operatorId where 1=1 "
 			+ " IF (?1!='', name like CONCAT('%',?1,'%'), 1=1)"
 			+ " and IF (?2!='', tel like CONCAT('%',?2,'%'), 1=1)"
 			+ " and IF (?3!='', b.sectId =?3, 1=1)"
-			+ " and b.sectId in ?4 GROUP BY b.operatorId " 
+			+ " and b.sectId in ?4 GROUP BY b.operatorId ) b" 
 			,nativeQuery = true)
     public Page<Object>  getServiceoperator(String name,String tel,String sectId, List<String> sectIds,Pageable pageable);
 }
