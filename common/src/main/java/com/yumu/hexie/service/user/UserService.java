@@ -44,4 +44,5 @@ public interface UserService {
 	User bindWuYeId(User user);
 	boolean checkDuplicateLogin(HttpSession httpSession);
 
+
 }
