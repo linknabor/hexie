@@ -142,7 +142,7 @@ public class SmsServiceImpl implements SmsService {
 	        smsHis.setSendDate(new Date());
 	        smsHis.setPhone(mobilePhone);
 	        smsHis.setUserId(user.getId());
-	        if (StringUtils.isEmpty(user.getName())) {
+	        if (!StringUtils.isEmpty(user.getName())) {
 	        	smsHis.setUserName(user.getName());
 			}
 	        saveSms2cache(smsHis);
@@ -176,7 +176,9 @@ public class SmsServiceImpl implements SmsService {
 		String content = stringRedisTemplate.opsForValue().get(key);
 		SmsHis smsHis = null;
 		try {
-			smsHis = JacksonJsonUtil.getMapperInstance(false).readValue(content, SmsHis.class);
+			if (!StringUtils.isEmpty(content)) {
+				smsHis = JacksonJsonUtil.getMapperInstance(false).readValue(content, SmsHis.class);
+			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}
