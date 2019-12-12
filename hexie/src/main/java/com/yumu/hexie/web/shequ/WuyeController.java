@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -309,6 +310,12 @@ public class WuyeController extends BaseController {
 			throws Exception {
 		WechatPayInfo result;
 		try {
+			if (StringUtils.isEmpty(fee_mianBill)) {
+				fee_mianBill = "0";
+			}
+			if (StringUtils.isEmpty(fee_mianAmt)) {
+				fee_mianAmt = "0";
+			}
 			result = wuyeService.getPrePayInfo(user, billId, stmtId, couponUnit,
 					couponNum, couponId, mianBill, mianAmt, reduceAmt,fee_mianBill,fee_mianAmt, invoice_title_type, credit_code,
 					invoice_title,regionname);
