@@ -318,7 +318,7 @@ public class ModelConstant {
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
 	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
-	
+	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
 	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
 }		

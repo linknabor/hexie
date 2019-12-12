@@ -10,10 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.AppUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RandomStringUtils;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.eucp.CreateBlueUtil;
@@ -44,7 +48,7 @@ public class SmsServiceImpl implements SmsService {
     @Value(value = "${testMode}")
     private String testMode;
     @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private StringRedisTemplate stringRedisTemplate; 
     @Autowired
     private CreateBlueUtil createBlueUtil;
     @Autowired
@@ -54,10 +58,11 @@ public class SmsServiceImpl implements SmsService {
      * 发送短信验证码
      */
     @Override
-    public boolean sendVerificationCode(User user, String mobilePhone) {
+    public boolean sendVerificationCode(User user, String mobilePhone, String requestIp) {
       
     	String code = RandomStringUtils.randomNumeric(6);
     	String message = MessageFormat.format(VERICODE_MESSAGE, code);
+    	checkIpFrequency(requestIp);
     	checkMsgFrequency(mobilePhone);
     	return sendMessage(user, mobilePhone, message, code);
     }
@@ -137,6 +142,9 @@ public class SmsServiceImpl implements SmsService {
 	        smsHis.setSendDate(new Date());
 	        smsHis.setPhone(mobilePhone);
 	        smsHis.setUserId(user.getId());
+	        if (StringUtils.isEmpty(user.getName())) {
+	        	smsHis.setUserName(user.getName());
+			}
 	        saveSms2cache(smsHis);
 		}
         
@@ -165,7 +173,13 @@ public class SmsServiceImpl implements SmsService {
 	private SmsHis getSmsFromCache(String mobile) {
 		
 		String key = ModelConstant.KEY_MOBILE_VERICODE + mobile;
-		SmsHis smsHis = (SmsHis) redisTemplate.opsForValue().get(key);
+		String content = stringRedisTemplate.opsForValue().get(key);
+		SmsHis smsHis = null;
+		try {
+			smsHis = JacksonJsonUtil.getMapperInstance(false).readValue(content, SmsHis.class);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+		}
 		return smsHis;
 		
 	}
@@ -177,20 +191,48 @@ public class SmsServiceImpl implements SmsService {
 	 */
 	private void saveSms2cache(SmsHis smsHis) {
 		String key = ModelConstant.KEY_MOBILE_VERICODE + smsHis.getPhone();
-		redisTemplate.opsForValue().set(key, smsHis, 30, TimeUnit.MINUTES);	//30分钟超时
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		try {
+			String content = objectMapper.writeValueAsString(smsHis);	//这里实体转成json字符串存储，因为backend需要再查出来，不能直接序列化成指定类型的实体
+			stringRedisTemplate.opsForValue().set(key, content, 30, TimeUnit.MINUTES);	//30分钟超时
+		} catch (JsonProcessingException e) {
+			LOGGER.error(e.getMessage(), e);
+		}	
+		
 	}
 	
 	/**
 	 * 校验短信发送频率
+	 * 1.校验同一手机号一定时间段内的发送次数
 	 */
 	public void checkMsgFrequency(String mobile) {
 		
 		String key = ModelConstant.KEY_VERICODE_FREQUENCY + mobile;
-		Object lastSent = redisTemplate.opsForValue().get(key);
+		Object lastSent = stringRedisTemplate.opsForValue().get(key);
 		if (lastSent != null) {
 			throw new BizValidateException("发送过于频繁，请稍后再试");
 		}else {
-			redisTemplate.opsForValue().set(key, 1, 1, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+			stringRedisTemplate.opsForValue().set(key, "1", 1, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+		}
+		
+	}
+	
+	/**
+	 * 校验短信发送频率
+	 * 2.校验同一IP一定时间内的发送次数
+	 */
+	public void checkIpFrequency(String requestIp) {
+		
+		String key = ModelConstant.KEY_VERICODE_IP_FREQUENCY + requestIp;
+		Object totalSent = stringRedisTemplate.opsForValue().get(key);
+		if (totalSent != null) {
+			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
+			if (sent > 5) {
+				throw new BizValidateException("发送过于频繁，请稍后再试");
+			}
+		}else {
+			stringRedisTemplate.opsForValue().increment(key, 1);
+			stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);	//对于同一IP，设置30分钟内的访问次数限制
 		}
 		
 	}

@@ -14,7 +14,7 @@ public interface SmsService {
 	
 	public boolean sendMsg(User user, String mobile, String msg, long id, int msgType);
 	
-    public boolean sendVerificationCode(User user,String mobilePhone);
+    public boolean sendVerificationCode(User user, String mobilePhone, String requestIp);
 
     public boolean checkVerificationCode(String mobilePhone, String verificationCode);
 
