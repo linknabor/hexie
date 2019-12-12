@@ -25,7 +25,8 @@ import com.yumu.hexie.web.BaseController;
  * @author huym
  *
  */
-@RestController(value = "/param")
+@RequestMapping("/param")
+@RestController(value = "paramController")
 public class ParamController extends BaseController {
 
 	private static Logger logger = LoggerFactory.getLogger(ParamController.class);
