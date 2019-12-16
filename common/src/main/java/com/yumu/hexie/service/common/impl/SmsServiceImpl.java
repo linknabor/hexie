@@ -40,8 +40,6 @@ public class SmsServiceImpl implements SmsService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SmsServiceImpl.class);
 	private static final String VERICODE_MESSAGE = "短信验证码{0}，在30分钟内输入有效。";
 	
-	private static final String ENCODE_SALT = "nc.uqehs-e.www";
-
 	@Inject
 	private SystemConfigService systemConfigService;
     @Inject
@@ -263,7 +261,12 @@ public class SmsServiceImpl implements SmsService {
 		
 	}
 	
-	
+	public static void main(String[] args) {
+		
+		String trade_water_id = "191216135426990186";
+		String str = MD5Util.MD5Encode(trade_water_id, "");
+		System.out.println(str);
+	}
 	
 	/**
 	 * 校验申请发票短信
@@ -276,7 +279,7 @@ public class SmsServiceImpl implements SmsService {
 		Object value = stringRedisTemplate.opsForValue().get(key);
 		String token = "";
 		if (value == null) {
-			token = MD5Util.MD5Encode(tradeWaterId, ENCODE_SALT);
+			token = MD5Util.MD5Encode(tradeWaterId, "");
 			stringRedisTemplate.opsForValue().set(key, token, 30, TimeUnit.MINUTES);
 		}else {
 			token = (String) value;
