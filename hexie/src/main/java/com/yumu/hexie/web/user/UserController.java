@@ -231,7 +231,7 @@ public class UserController extends BaseController{
     public BaseResult<String> getYzm1(HttpServletRequest request, @RequestBody MobileYzm yzm, 
     		@RequestParam(required = false) String trade_water_id) throws Exception {
 		String requestIp = RequestUtil.getRealIp(request);
-		log.info("getyzm1 request ip : " + requestIp);
+		log.info("getyzm1 trade_water_id : " + trade_water_id);
 		log.info("getyzm1 request mobile: " + requestIp);
 		log.info("getyzm1 request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
 		String token = request.getHeader("Access-Control-Allow-Token");
