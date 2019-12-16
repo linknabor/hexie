@@ -44,10 +44,15 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 			}
 		}else{
 			User userAccount = (User) request.getSession().getAttribute(Constants.USER);
-			userService.bindWuYeId(userAccount);
+			
 			if(StringUtils.isEmpty(userAccount.getWuyeId())) {
-				userAccount = userService.getById(userAccount.getId());
-				request.getSession().setAttribute(Constants.USER, userAccount);
+				logger.info("user:" + userAccount + ", wuyeId has no value, will update !");
+				userService.bindWuYeId(userAccount);
+				User dbUser = userService.getById(userAccount.getId());
+				if (!StringUtils.isEmpty(dbUser.getWuyeId())) {
+					userAccount.setWuyeId(dbUser.getWuyeId());
+					request.getSession().setAttribute(Constants.USER, userAccount);
+				}
 			}
 		}
 		return true;

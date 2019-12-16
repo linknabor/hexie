@@ -252,14 +252,16 @@ public class UserController extends BaseController{
         if(!result){
             return new BaseResult<UserInfo>().failMsg("校验失败！");
         } else {
-            if(StringUtil.isNotEmpty(req.getName())) {
-                user.setName(req.getName());
-                user.setTel(req.getMobile());
-            }
-            
-            user.setRegisterDate(System.currentTimeMillis());
-            session.setAttribute(Constants.USER, userService.save(user));
-            return new BaseResult<UserInfo>().success(new UserInfo(user));
+			if(StringUtil.isNotEmpty(req.getName())) {
+			    user.setName(req.getName());
+			}
+			if (!StringUtils.isEmpty(req.getMobile())) {
+			 	user.setTel(req.getMobile());
+			}
+			user.setRegisterDate(System.currentTimeMillis());
+			User savedUser = userService.save(user);
+			session.setAttribute(Constants.USER, savedUser);
+			return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
         }
     }
     

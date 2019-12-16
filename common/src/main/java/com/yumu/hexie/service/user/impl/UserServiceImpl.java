@@ -170,20 +170,20 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Async
-	public User bindWuYeId(User user) {
+	public void bindWuYeId(User user) {
 		 //绑定物业信息
     	try {
     		if(StringUtil.isEmpty(user.getWuyeId()) ){
     			BaseResult<HexieUser> r = WuyeUtil.userLogin(user);
         		if(r.isSuccess()) {
-        			user.setWuyeId(r.getData().getUser_id());
-            		user = userRepository.save(user);
+        			User dbUser = userRepository.findById(user.getId());
+        			dbUser.setWuyeId(r.getData().getUser_id());
+            		userRepository.save(dbUser);
         		}
     		}
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
-		return user;
 	}
 
 	@Override
