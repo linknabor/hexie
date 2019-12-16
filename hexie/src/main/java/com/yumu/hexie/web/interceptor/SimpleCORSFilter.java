@@ -12,9 +12,13 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Component;
+
+import com.yumu.hexie.common.util.MD5Util;
+import com.yumu.hexie.common.util.RandomStringUtils;
 
 /**
  * <pre>
@@ -26,10 +30,25 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SimpleCORSFilter implements Filter {
+	
+	public static void main(String[] args) {
+		String random = RandomStringUtils.random(5);
+		String token = MD5Util.MD5Encode(random, "");
+		System.out.println(token);
+	}
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        HttpServletResponse response = (HttpServletResponse) res;
+        
+    	HttpServletRequest request = (HttpServletRequest) req;
+    	HttpServletResponse response = (HttpServletResponse) res;
+        
+        String requestUrl = request.getRequestURL().toString();
+        if (requestUrl.indexOf("/getInvoice") == -1) {	//发票的验证码添入额外的token，防止恶意刷验证码,其他的请求随意放一个token不做处理
+			String random = RandomStringUtils.random(5);
+			String token = MD5Util.MD5Encode(random, "");
+			response.addHeader("Access-Control-Allow-Token", token);
+		}
         response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Allow-Headers", "accept, content-type");

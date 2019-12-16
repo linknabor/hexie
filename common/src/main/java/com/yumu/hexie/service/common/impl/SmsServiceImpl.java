@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.MD5Util;
 import com.yumu.hexie.common.util.RandomStringUtils;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.eucp.CreateBlueUtil;
@@ -38,6 +39,8 @@ public class SmsServiceImpl implements SmsService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(SmsServiceImpl.class);
 	private static final String VERICODE_MESSAGE = "短信验证码{0}，在30分钟内输入有效。";
+	
+	private static final String ENCODE_SALT = "nc.uqehs-e.www";
 
 	@Inject
 	private SystemConfigService systemConfigService;
@@ -62,8 +65,9 @@ public class SmsServiceImpl implements SmsService {
       
     	String code = RandomStringUtils.randomNumeric(6);
     	String message = MessageFormat.format(VERICODE_MESSAGE, code);
-    	checkIpFrequency(requestIp);
+//    	checkIpFrequency(requestIp);	TODO ip暂时不限制，可能一个公司200人都一个IP
     	checkMsgFrequency(mobilePhone);
+    	checkMsgTotalLimit(mobilePhone);
     	return sendMessage(user, mobilePhone, message, code);
     }
 
@@ -145,7 +149,8 @@ public class SmsServiceImpl implements SmsService {
 	        if (!StringUtils.isEmpty(user.getName())) {
 	        	smsHis.setUserName(user.getName());
 			}
-	        saveSms2cache(smsHis);
+	        saveSms2Cache(smsHis);
+	        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
 		}
         
 		String sendMsg = systemConfigService.getSysConfigByKey("SEND_MSG");
@@ -191,7 +196,7 @@ public class SmsServiceImpl implements SmsService {
 	 * @param smsHis
 	 * @return
 	 */
-	private void saveSms2cache(SmsHis smsHis) {
+	private void saveSms2Cache(SmsHis smsHis) {
 		String key = ModelConstant.KEY_MOBILE_VERICODE + smsHis.getPhone();
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 		try {
@@ -205,7 +210,7 @@ public class SmsServiceImpl implements SmsService {
 	
 	/**
 	 * 校验短信发送频率
-	 * 1.校验同一手机号一定时间段内的发送次数
+	 * 1.校验同一手机号一定时间段内（1分钟内）的发送次数
 	 */
 	public void checkMsgFrequency(String mobile) {
 		
@@ -215,6 +220,25 @@ public class SmsServiceImpl implements SmsService {
 			throw new BizValidateException("发送过于频繁，请稍后再试");
 		}else {
 			stringRedisTemplate.opsForValue().set(key, "1", 1, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+		}
+		
+	}
+	
+	 /**
+	 * 校验短信发送频率
+	 *  1.校验同一个手机号一天内的发送次数（10条）
+	 */
+	public void checkMsgTotalLimit(String mobile) {
+		
+		String key = ModelConstant.KEY_VERICODE_TOTAL_LIMIT + mobile;
+		Object totalSent = stringRedisTemplate.opsForValue().get(key);
+		if (totalSent != null) {
+			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
+			if (sent > 10) {
+				throw new BizValidateException("发送过于频繁，请稍后再试");
+			}
+		}else {
+			stringRedisTemplate.opsForValue().set(key, "1", 24, TimeUnit.HOURS);	//设置一天内10条
 		}
 		
 	}
@@ -238,5 +262,52 @@ public class SmsServiceImpl implements SmsService {
 		}
 		
 	}
+	
+	
+	
+	/**
+	 * 校验申请发票短信
+	 *	给传上来的交易号打个码，打完码的token放在服务器端。请求验证码时需要前端将下发的token码重新带回来，否则不予以发短信
+	 */
+	@Override
+	public String saveAndGetInvoiceToken(String tradeWaterId) {
+		
+		String key = ModelConstant.KEY_VERICODE_TRADE_ID + tradeWaterId;
+		Object value = stringRedisTemplate.opsForValue().get(key);
+		String token = "";
+		if (value == null) {
+			token = MD5Util.MD5Encode(tradeWaterId, ENCODE_SALT);
+			stringRedisTemplate.opsForValue().set(key, token, 30, TimeUnit.MINUTES);
+		}else {
+			token = (String) value;
+		}
+		return token;
+		
+	}
+
+	@Override
+	public boolean verifySmsToken(String tradeWaterId, String token) {
+
+		if (StringUtils.isEmpty(token)) {
+			return false;
+		}
+		String key = ModelConstant.KEY_VERICODE_TRADE_ID + tradeWaterId;
+		String serverToken = (String)stringRedisTemplate.opsForValue().get(key);
+		if (!token.equals(serverToken)) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 获取随机无效token
+	 */
+	@Override
+	public String getRandomToken() {
+
+		String random = RandomStringUtils.random(10);
+		return MD5Util.MD5Encode(random, "");
+	}
+	
 	
 }

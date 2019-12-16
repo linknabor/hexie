@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
@@ -599,14 +600,24 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<InvoiceInfo> getInvoice(@RequestParam(required = false) String trade_water_id) {
-		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(trade_water_id);
-
-		if (invoice != null) {
-			return BaseResult.successResult(invoice);
-		} else {
-			return BaseResult.successResult(null);
+	public BaseResult<InvoiceInfo> getInvoice(HttpServletResponse response, @RequestParam(required = false) String trade_water_id) {
+		
+		String token = smsService.getRandomToken();
+		log.info("random token : " + token);
+		if (StringUtils.isEmpty(trade_water_id) || trade_water_id.length() != 18) {
+			response.addHeader("Access-Control-Allow-Token", token);
+			return BaseResult.fail("请正确填写交易ID。");
 		}
+		InvoiceInfo invoice = wuyeService.getInvoiceByTradeId(trade_water_id);
+		if (invoice == null) {
+			response.addHeader("Access-Control-Allow-Token", token);
+			return BaseResult.fail("未查询到交易对应的发票信息。");
+		}
+		token = smsService.saveAndGetInvoiceToken(trade_water_id);
+		log.info("token : " + token);
+		response.addHeader("Access-Control-Allow-Token", token);
+		return BaseResult.successResult(invoice);
+		
 	}
 
 	@SuppressWarnings({ "rawtypes" })
