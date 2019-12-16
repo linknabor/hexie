@@ -20,4 +20,10 @@ public interface SmsService {
 
 	public int getByPhoneAndMesssageTypeInOneMonth(String mobilePhone, int messageType, Date date);
 
+	String getRandomToken();
+	
+	String saveAndGetInvoiceToken(String tradeWaterId);
+	
+	boolean verifySmsToken(String tradeWaterId, String token);
+
 }

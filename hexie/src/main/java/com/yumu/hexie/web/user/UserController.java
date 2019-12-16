@@ -198,10 +198,20 @@ public class UserController extends BaseController{
 		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
     }
 	
+	/**
+	 * 注册获取验证码
+	 * @param request
+	 * @param yzm
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/getyzm", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<String> getYzm(HttpServletRequest request, @RequestBody MobileYzm yzm, @ModelAttribute(Constants.USER)User user) throws Exception {
 		String requestIp = RequestUtil.getRealIp(request);
+		log.info("getyzm request ip : " + requestIp);
+		log.info("getyzm request mobile: " + requestIp);
 		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
@@ -209,11 +219,27 @@ public class UserController extends BaseController{
 	    return  new BaseResult<String>().success("验证码发送成功");
     }
 	
+	/**
+	 * 发票获取短信验证码
+	 * @param request
+	 * @param yzm
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/getyzm1", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<String> getYzm1(HttpServletRequest request, @RequestBody MobileYzm yzm) throws Exception {
+    public BaseResult<String> getYzm1(HttpServletRequest request, @RequestBody MobileYzm yzm, 
+    		@RequestParam(required = false) String trade_water_id) throws Exception {
 		String requestIp = RequestUtil.getRealIp(request);
-		boolean result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp);
+		log.info("getyzm1 request ip : " + requestIp);
+		log.info("getyzm1 request mobile: " + requestIp);
+		log.info("getyzm1 request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
+		String token = request.getHeader("Access-Control-Allow-Token");
+		boolean result = smsService.verifySmsToken(trade_water_id, token);
+		if (!result) {
+			return new BaseResult<String>().failMsg("invalid request .");
+		}
+		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
@@ -257,12 +283,15 @@ public class UserController extends BaseController{
         } else {
             if(StringUtil.isNotEmpty(req.getName())) {
                 user.setName(req.getName());
-                user.setTel(req.getMobile());
             }
-            
+            if (!StringUtils.isEmpty(req.getMobile())) {
+            	 user.setTel(req.getMobile());
+			}
             user.setRegisterDate(System.currentTimeMillis());
-            session.setAttribute(Constants.USER, userService.save(user));
-            return new BaseResult<UserInfo>().success(new UserInfo(user));
+            User savedUser = userService.save(user);
+            
+            session.setAttribute(Constants.USER, savedUser);
+            return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
         }
     }
     

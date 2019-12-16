@@ -63,7 +63,9 @@ public class CreateBlueUtil {
 			
 			//返回串由逗号分割，逗号后面的值为短信状态，0表正常，其他值都为异常。
 			String response = responseEntity.getBody();
-			String status = response.substring(response.indexOf(",")+1, response.indexOf("\n"));
+			int begin = response.indexOf(",") + 1;
+			int end = response.indexOf("\n")==-1?response.length():response.indexOf("\n");
+			String status = response.substring(begin, end);
 			logger.info("status : " + status);
 			return "0".equals(status);
 		} catch (Exception e) {
