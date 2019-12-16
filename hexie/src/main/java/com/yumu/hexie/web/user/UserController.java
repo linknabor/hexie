@@ -237,7 +237,7 @@ public class UserController extends BaseController{
 		String token = request.getHeader("Access-Control-Allow-Token");
 		boolean result = smsService.verifySmsToken(trade_water_id, token);
 		if (!result) {
-			return new BaseResult<String>().failMsg("invalid request .");
+			return new BaseResult<String>().failMsg("invalid request!");
 		}
 		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp);
 		if(!result) {

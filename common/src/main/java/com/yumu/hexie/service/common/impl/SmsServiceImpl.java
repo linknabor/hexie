@@ -296,6 +296,7 @@ public class SmsServiceImpl implements SmsService {
 		}
 		String key = ModelConstant.KEY_VERICODE_TRADE_ID + tradeWaterId;
 		String serverToken = (String)stringRedisTemplate.opsForValue().get(key);
+		LOGGER.info("token : " + token + ", serverToken : " + serverToken);
 		if (!token.equals(serverToken)) {
 			return false;
 		}
