@@ -2,7 +2,6 @@ package com.yumu.hexie.integration.wuye;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,6 +31,7 @@ import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
@@ -39,22 +39,12 @@ public class WuyeUtil {
 	private static String REQUEST_ADDRESS;
 	private static String REQUEST_ADDRESS_GZ;
 	private static String SYSTEM_NAME;
-	private static Map<String, String> sysMap = new HashMap<>();
 	private static Properties props = new Properties();
 	
 	static {
 		try {
 			props.load(Thread.currentThread().getContextClassLoader()
 					.getResourceAsStream("wechat.properties"));
-			//TODO 先暂时写死下面的appid映射，以后做到表里
-			sysMap.put("wxbd214f5765f346c1", "_hxm");
-			sysMap.put("wxf51b0f0356e2432c", "_hexieliangyou");
-			sysMap.put("wxec3315b94f3da1a3", "_hexieweifa");
-			sysMap.put("wx895d483798f8d322", "_hexieyouyi");
-			sysMap.put("wx6b7f7d4010183c46", "_hexiebaofang");
-			sysMap.put("wxe8dea53aad1a93b9", "_donghuzj3");
-			sysMap.put("wx6160b615066a9f78", "_qibao");
-			sysMap.put("wx753f3c2293294605", "_guizhou");
 			
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -317,7 +307,7 @@ public class WuyeUtil {
 		if (StringUtils.isEmpty(appid)) {
 			//do nothing
 		}else {
-			fromSys = sysMap.get(appid);
+			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
 		
 		if (StringUtils.isEmpty(regionurl)) {
@@ -365,7 +355,7 @@ public class WuyeUtil {
 		if (StringUtils.isEmpty(appid)) {
 			//do nothing
 		}else {
-			fromSys = sysMap.get(appid);
+			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
 		
 		if (StringUtils.isEmpty(regionurl)) {
@@ -640,7 +630,7 @@ public class WuyeUtil {
 		
 		String appId = user.getAppId();
 		String requestUri = REQUEST_ADDRESS;
-		if ("_guizhou".equals(sysMap.get(appId))) {
+		if ("_guizhou".equals(SystemConfigServiceImpl.getSysMap().get(appId))) {
 			requestUri = REQUEST_ADDRESS_GZ;
 		}
 		return requestUri;

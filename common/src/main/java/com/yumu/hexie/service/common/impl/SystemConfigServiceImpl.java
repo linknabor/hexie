@@ -4,8 +4,10 @@
  */
 package com.yumu.hexie.service.common.impl;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -46,6 +48,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     private static final String JS_TOKEN = "JS_TOKEN";
     private static final String ACC_TOKEN = "ACCESS_TOKEN";
+    private static final String KEY_APP_SYS = "APP_SYS_";
+	private static Map<String, String> sysMap = new HashMap<>();
+    
     @Inject
     private SystemConfigRepository systemConfigRepository;
     @Inject
@@ -65,7 +70,18 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 			log.error("未配置系统参数表systemConfig!");
 		}
     	for (SystemConfig systemConfig : configList) {
-    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, systemConfig.getSysKey(), systemConfig);
+    		String sysKey = systemConfig.getSysKey();
+    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, sysKey, systemConfig);
+    		
+    		try {
+				if (sysKey.indexOf(KEY_APP_SYS) > -1) {
+					String key = sysKey.substring(sysKey.indexOf(KEY_APP_SYS) + 1);
+					sysMap.put(key, systemConfig.getSysValue());
+				}
+			} catch (Exception e) {
+				throw new BizValidateException(e.getMessage(), e);
+			}
+    		
 		}
     	
     }
@@ -204,9 +220,24 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 			return;
 		}
     	for (SystemConfig systemConfig : configList) {
-    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, systemConfig.getSysKey(), systemConfig);
-		}
+    		
+    		String sysKey = systemConfig.getSysKey();
+    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, sysKey, systemConfig);
+    		try {
+				if (sysKey.indexOf(KEY_APP_SYS) > -1) {
+					String key = sysKey.substring(sysKey.indexOf(KEY_APP_SYS) + 1);
+					sysMap.put(key, systemConfig.getSysValue());
+				}
+			} catch (Exception e) {
+				throw new BizValidateException(e.getMessage(), e);
+			}
+    	
+    	}
     }
+
+	public static Map<String, String> getSysMap() {
+		return sysMap;
+	}
     
     
 }
