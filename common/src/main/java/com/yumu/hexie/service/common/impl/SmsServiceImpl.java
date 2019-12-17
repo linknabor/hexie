@@ -233,7 +233,7 @@ public class SmsServiceImpl implements SmsService {
 		if (totalSent != null) {
 			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
 			if (sent > 10) {
-				throw new BizValidateException("发送过于频繁，请稍后再试");
+				throw new BizValidateException("当日短信验证码发送次数超限，请联系社区客服。");
 			}
 		}else {
 			stringRedisTemplate.opsForValue().set(key, "1", 24, TimeUnit.HOURS);	//设置一天内10条
