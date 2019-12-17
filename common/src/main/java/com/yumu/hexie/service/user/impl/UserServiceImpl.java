@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -245,17 +246,17 @@ public class UserServiceImpl implements UserService {
 	 * 防止用户短时间内重复调用login接口
 	 */
 	@Override
-	public boolean checkDuplicateLogin(UserWeiXin userWeiXin) {
+	public boolean checkDuplicateLogin(HttpSession httpSession) {
 
 		boolean isDuplicateRequest = false;
-		String openid = userWeiXin.getOpenid();
-		logger.info("user openid : " + openid);
+		String sessionId = httpSession.getId();
+		logger.info("user session : " + sessionId);
 
-		String key = ModelConstant.KEY_USER_LOGIN + openid;
+		String key = ModelConstant.KEY_USER_LOGIN + sessionId;
 
 		Object object = redisTemplate.opsForValue().get(key);
 		if (object == null) {
-			redisTemplate.opsForValue().set(key, openid, 2, TimeUnit.SECONDS); // 设置2秒过期，2秒内任何请求不予处理
+			redisTemplate.opsForValue().set(key, sessionId, 2, TimeUnit.SECONDS); // 设置3秒过期，3秒内任何请求不予处理
 		} else {
 
 			isDuplicateRequest = true;
