@@ -212,6 +212,11 @@ public class UserController extends BaseController{
 		String requestIp = RequestUtil.getRealIp(request);
 		log.info("getyzm request ip : " + requestIp);
 		log.info("getyzm request mobile: " + requestIp);
+		log.info("getyzm request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
+		String token = request.getHeader("Access-Control-Allow-Token");
+		if (StringUtils.isEmpty(token)) {
+			return new BaseResult<String>().failMsg("invalid request!");
+		}
 		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
