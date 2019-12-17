@@ -75,14 +75,16 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     		
     		try {
 				if (sysKey.indexOf(KEY_APP_SYS) > -1) {
-					String key = sysKey.substring(sysKey.indexOf(KEY_APP_SYS) + 1);
+					String key = sysKey.substring(sysKey.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), sysKey.length());
 					sysMap.put(key, systemConfig.getSysValue());
 				}
 			} catch (Exception e) {
-				throw new BizValidateException(e.getMessage(), e);
+				log.error("未配置系统参数表systemConfig中的APP_SYS_!");
 			}
     		
 		}
+    	log.info("系统appId映射： " + sysMap);
+    	
     	
     }
     
@@ -225,19 +227,26 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, sysKey, systemConfig);
     		try {
 				if (sysKey.indexOf(KEY_APP_SYS) > -1) {
-					String key = sysKey.substring(sysKey.indexOf(KEY_APP_SYS) + 1);
+					String key = sysKey.substring(sysKey.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), sysKey.length());
 					sysMap.put(key, systemConfig.getSysValue());
 				}
 			} catch (Exception e) {
-				throw new BizValidateException(e.getMessage(), e);
+				log.error("未配置系统参数表systemConfig中的APP_SYS_!");
 			}
     	
     	}
+    	log.info("系统appId映射： " + sysMap);
     }
 
 	public static Map<String, String> getSysMap() {
 		return sysMap;
 	}
     
+	public static void main(String[] args) {
+		
+		String str = "APP_SYS_wx6160b615066a9f78";
+		String key = str.substring(str.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), str.length());
+		System.out.println(key);
+	}
     
 }
