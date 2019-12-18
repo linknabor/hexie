@@ -284,7 +284,7 @@ public class UserController extends BaseController{
         }
         boolean result = smsService.checkVerificationCode(req.getMobile(), req.getYzm());
         if(!result){
-            return new BaseResult<UserInfo>().failMsg("验证码无效。");
+            return new BaseResult<UserInfo>().failMsg("验证码不正确。");
         } else {
             if(StringUtil.isNotEmpty(req.getName())) {
                 user.setName(req.getName());
