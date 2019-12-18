@@ -83,6 +83,7 @@ public class BatchServiceImpl implements BatchService {
 		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
 	}
 
+
 	@Override
 	public void bindHouseBatch(String appId) {
 

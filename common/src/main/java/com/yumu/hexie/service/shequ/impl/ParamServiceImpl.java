@@ -15,6 +15,7 @@ import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 
 @Service
@@ -25,13 +26,16 @@ public class ParamServiceImpl implements ParamService {
 	public final static String CACHED_KEY = "param";
 	
 	@Autowired
+	private SystemConfigService SystemConfigService;
+	
+	@Autowired
 	private RedisTemplate<String, Map<String, String>> redisTemplate;
 
 	/**
 	 * 缓存物业公司参数到redis中，如果失败重新请求，总共请求3次
 	 */
 	@Override
-	public void cacheParam(User user, String infoId, String type) {
+	public void cacheWuyeParam(User user, String infoId, String type) {
 
 		boolean isSuccess = false;
 		int count = 0;
@@ -64,7 +68,7 @@ public class ParamServiceImpl implements ParamService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, String> getParamByUser(User user) {
+	public Map<String, String> getWuyeParamByUser(User user) {
 
 		String cspId = user.getCspId();
 		if (StringUtil.isEmpty(cspId) || "0".equals(cspId)) {
@@ -72,10 +76,16 @@ public class ParamServiceImpl implements ParamService {
 		}
 		Map<String, String> paramMap = (Map<String, String>) redisTemplate.opsForHash().get(CACHED_KEY, cspId);
 		if (paramMap == null || paramMap.entrySet().isEmpty()) {
-			cacheParam(user, cspId, ModelConstant.PARA_TYPE_CSP);
+			cacheWuyeParam(user, cspId, ModelConstant.PARA_TYPE_CSP);
 			paramMap = (Map<String, String>) redisTemplate.opsForHash().get(CACHED_KEY, cspId);
 		}
 		return paramMap;
+	}
+	
+	@Override
+	public void updateSysParam() {
+		
+		SystemConfigService.reloadSysConfigCache();
 	}
 	
 

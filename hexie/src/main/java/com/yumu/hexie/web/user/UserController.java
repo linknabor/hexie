@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.common.util.RequestUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
@@ -102,7 +103,7 @@ public class UserController extends BaseController{
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
-			    Map<String, String> paramMap = paramService.getParamByUser(user);
+			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
@@ -160,57 +161,91 @@ public class UserController extends BaseController{
 		
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
-			String oriApp = postData.get("oriApp");
-	    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
-	    	
-			if (StringUtil.isNotEmpty(code)) {
-			    if(Boolean.TRUE.equals(testMode)) {
-			        try{
-				        Long id = Long.valueOf(code);
-				    	userAccount = userService.getById(id);
-			        }catch(Throwable t){}
-			    }
-			    if(userAccount == null) {
-			    	
-			    	if (userService.checkDuplicateLogin(session)) {
-						throw new BizValidateException("正在登陆中，请耐心等待。");
-					}
-			    	
-			    	UserWeiXin weixinUser = null;
-			    	if (StringUtils.isEmpty(oriApp)) {
-			    		weixinUser = userService.getOrSubscibeUserByCode(code);
-					}else {
-						weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
-					}
-			    	
-			    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
-			    }
-			    
-				session.setAttribute(Constants.USER, userAccount);
-			}
-			if(userAccount == null) {
-			    return new BaseResult<UserInfo>().failMsg("用户不存在！");
-			}
-			long endTime = System.currentTimeMillis();
-			log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
-			return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
-			    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+		String oriApp = postData.get("oriApp");
+    	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
+    	
+		if (StringUtil.isNotEmpty(code)) {
+		    if(Boolean.TRUE.equals(testMode)) {
+		        try{
+			        Long id = Long.valueOf(code);
+			    	userAccount = userService.getById(id);
+		        }catch(Throwable t){}
+		    }
+		    if(userAccount == null) {
+		    	
+		    	if (userService.checkDuplicateLogin(session)) {
+					throw new BizValidateException("正在登陆中，请耐心等待。");
+				}
+		    	
+		    	UserWeiXin weixinUser = null;
+		    	if (StringUtils.isEmpty(oriApp)) {
+		    		weixinUser = userService.getOrSubscibeUserByCode(code);
+				}else {
+					weixinUser = userService.getTpSubscibeUserByCode(code, oriApp);
+				}
+		    	
+		    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
+		    }
+		    
+			session.setAttribute(Constants.USER, userAccount);
+		}
+		if(userAccount == null) {
+		    return new BaseResult<UserInfo>().failMsg("用户不存在！");
+		}
+		long endTime = System.currentTimeMillis();
+		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
+		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
+		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+
     }
 	
+	/**
+	 * 注册获取验证码
+	 * @param request
+	 * @param yzm
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/getyzm", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<String> getYzm(@RequestBody MobileYzm yzm, @ModelAttribute(Constants.USER)User user) throws Exception {
-		boolean result = smsService.sendVerificationCode(user, yzm.getMobile());
-		if(result) {
+    public BaseResult<String> getYzm(HttpServletRequest request, @RequestBody MobileYzm yzm, @ModelAttribute(Constants.USER)User user) throws Exception {
+		String requestIp = RequestUtil.getRealIp(request);
+		log.info("getyzm request ip : " + requestIp);
+		log.info("getyzm request mobile: " + requestIp);
+		log.info("getyzm request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
+		String token = request.getHeader("Access-Control-Allow-Token");
+		if (StringUtils.isEmpty(token)) {
+			return new BaseResult<String>().failMsg("invalid request!");
+		}
+		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp);
+		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
 	    return  new BaseResult<String>().success("验证码发送成功");
     }
 	
+	/**
+	 * 发票获取短信验证码
+	 * @param request
+	 * @param yzm
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/getyzm1", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<String> getYzm1(@RequestBody MobileYzm yzm) throws Exception {
-		boolean result = smsService.sendVerificationCode(new User(), yzm.getMobile());
+    public BaseResult<String> getYzm1(HttpServletRequest request, @RequestBody MobileYzm yzm, 
+    		@RequestParam(required = false) String trade_water_id) throws Exception {
+		String requestIp = RequestUtil.getRealIp(request);
+		log.info("getyzm1 trade_water_id : " + trade_water_id);
+		log.info("getyzm1 request mobile: " + requestIp);
+		log.info("getyzm1 request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
+		String token = request.getHeader("Access-Control-Allow-Token");
+		boolean result = smsService.verifySmsToken(trade_water_id, token);
+		if (!result) {
+			return new BaseResult<String>().failMsg("invalid request!");
+		}
+		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
@@ -250,18 +285,20 @@ public class UserController extends BaseController{
         }
         boolean result = smsService.checkVerificationCode(req.getMobile(), req.getYzm());
         if(!result){
-            return new BaseResult<UserInfo>().failMsg("校验失败！");
+            return new BaseResult<UserInfo>().failMsg("验证码不正确。");
         } else {
-			if(StringUtil.isNotEmpty(req.getName())) {
-			    user.setName(req.getName());
-			}
-			if (!StringUtils.isEmpty(req.getMobile())) {
-			 	user.setTel(req.getMobile());
-			}
-			user.setRegisterDate(System.currentTimeMillis());
-			User savedUser = userService.save(user);
-			session.setAttribute(Constants.USER, savedUser);
-			return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
+            if(StringUtil.isNotEmpty(req.getName())) {
+                user.setName(req.getName());
+            }
+            if (!StringUtils.isEmpty(req.getMobile())) {
+            	 user.setTel(req.getMobile());
+			      }
+            user.setRegisterDate(System.currentTimeMillis());
+            User savedUser = userService.save(user);
+            
+            session.setAttribute(Constants.USER, savedUser);
+            return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
+
         }
     }
     
