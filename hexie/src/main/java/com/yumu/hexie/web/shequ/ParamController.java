@@ -25,7 +25,8 @@ import com.yumu.hexie.web.BaseController;
  * @author huym
  *
  */
-@RestController
+@RequestMapping("/param")
+@RestController(value = "paramController")
 public class ParamController extends BaseController {
 
 	private static Logger logger = LoggerFactory.getLogger(ParamController.class);
@@ -33,8 +34,8 @@ public class ParamController extends BaseController {
 	@Autowired
 	private ParamService paramService;
 	
-	@RequestMapping(value = "/initParam/{oriSys}", method = RequestMethod.GET)
-	public void initParam(HttpServletResponse response, 
+	@RequestMapping(value = "/wuye/{oriSys}", method = RequestMethod.GET)
+	public void initWuyeParam(HttpServletResponse response, 
 			@PathVariable String oriSys,
 			@RequestParam(value="info_id") String infoId, 
 			@RequestParam(value="type") String type) throws IOException {
@@ -42,17 +43,27 @@ public class ParamController extends BaseController {
 		Runnable runnable = ()->{
 			try {
 				//先休息1分钟，因为平台重新加载参数需要时间
-				Thread.sleep(0*60*1000);
+				Thread.sleep(60*1000);
 			} catch (InterruptedException e) {
 				logger.error(e.getMessage(), e);
 			}
 			User user = new User();
 			user.setOriSys(oriSys);
-			paramService.cacheParam(user, infoId, type);
+			paramService.cacheWuyeParam(user, infoId, type);
 		};
 		Thread t = new Thread(runnable);
 		t.start();
 		response.getWriter().print("ok");
+	}
+	
+	@RequestMapping(value = "/sys", method = RequestMethod.POST)
+	public String updateSysParam(@RequestParam(value = "code") String code) {
+		
+		if (!"hexie".equals(code)) {
+			return "";
+		}
+		paramService.updateSysParam();
+		return "success";
 	}
 	
 }

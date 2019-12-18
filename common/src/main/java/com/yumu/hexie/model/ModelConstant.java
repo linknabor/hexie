@@ -306,7 +306,7 @@ public class ModelConstant {
 	public static final String KEY_TYPE_BGIMAGE = "bgImage";
 	
 	public static final String KEY_TYPE_BANNER = "banner";
-	
+
 	public static final String KEY_TYPE_QRCODE = "qrcode";
 
 	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";
@@ -318,5 +318,11 @@ public class ModelConstant {
   public static final String KEY_USER_LOGIN = "userLoginSession_";
 
 
+	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
+	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
+	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericodeTotalLimit_";
+	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
+	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
+	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
 }		

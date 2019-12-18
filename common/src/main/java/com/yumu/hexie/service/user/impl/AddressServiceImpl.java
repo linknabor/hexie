@@ -75,7 +75,7 @@ public class AddressServiceImpl implements AddressService {
     
     @Override
     public Address addAddress(AddressReq addressReq) {
-        log.error("添加地址");
+        log.info("添加地址");
         Region xiaoqu;
         Address address = addressReq.getId() == null ||  addressReq.getId()==0 
                 ? new Address() : addressRepository.findOne(addressReq.getId());
