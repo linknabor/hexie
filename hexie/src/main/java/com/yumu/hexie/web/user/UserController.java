@@ -298,6 +298,7 @@ public class UserController extends BaseController{
             
             session.setAttribute(Constants.USER, savedUser);
             return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
+
         }
     }
     
