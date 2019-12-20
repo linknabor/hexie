@@ -292,7 +292,7 @@ public class UserController extends BaseController{
             }
             if (!StringUtils.isEmpty(req.getMobile())) {
             	 user.setTel(req.getMobile());
-			      }
+            }
             user.setRegisterDate(System.currentTimeMillis());
             User savedUser = userService.save(user);
             
