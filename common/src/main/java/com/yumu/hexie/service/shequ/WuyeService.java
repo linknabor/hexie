@@ -259,6 +259,14 @@ public interface WuyeService {
 	 * @param tradeWaterId
 	 */
 	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
+
+	/**
+	 * 根据户号获取房屋信息
+	 * @param user
+	 * @param verNo
+	 * @return
+	 */
+	HexieHouse getHouseByVerNo(User user, String verNo);
 	
 	
 }
