@@ -41,6 +41,8 @@ import com.yumu.hexie.model.view.PageConfigView;
 import com.yumu.hexie.model.view.PageConfigViewRepository;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.QrCodeRepository;
+import com.yumu.hexie.model.view.WuyePayTabs;
+import com.yumu.hexie.model.view.WuyePayTabsRepository;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.page.PageConfigService;
 
@@ -60,6 +62,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private QrCodeRepository qrCodeRepository;
 	@Autowired
 	private BgImageRepository bgImageRepository;
+	@Autowired
+	private WuyePayTabsRepository wuyePayTabsRepository;
 
 	/**
 	 * 根据banner类型动态获取
@@ -258,6 +262,35 @@ public class PageConfigServiceImpl implements PageConfigService {
 			redisTemplate.opsForHash().put(redisKey, filed, objStr);
 		}
 		return object;
+	}
+
+	/**
+	 * 获取物业缴费选款卡配置
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public List<WuyePayTabs> getWuyePayTabs(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+		
+		if (StringUtils.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
+		}
+		Sort sort = new Sort(Direction.ASC, "sort");
+		
+		final String sysAppId = appId;
+		Supplier<List<WuyePayTabs>> supplier = ()-> wuyePayTabsRepository.findByAppId(sysAppId, sort);
+
+		TypeReference typeReference = new TypeReference<List<WuyePayTabs>>() {};
+		List<WuyePayTabs> tabList = (List<WuyePayTabs>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, supplier);
+		return tabList;
+	}
+
+	/**
+	 * 更新物业缴费选款卡配置
+	 */
+	@Override
+	public void updateWuyePayTabs(String appId) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
