@@ -45,8 +45,6 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	private static final Logger log = LoggerFactory.getLogger(WuyeServiceImpl.class);
 	
-	private static final String DEFAULT_REGION = "上海市";
-	
 	@Autowired
 	private AddressService addressService;
 	
@@ -381,13 +379,16 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	private String getRegionUrl(String regionName) {
 		
-		Assert.hasText(regionName, "定位区域名称不能为空。");
-		RegionUrl regionurl = locationService.getRegionUrlByName(regionName);
-		if (regionurl == null) {
-			log.info("regionName : " + regionName + " 未能找到相应的配置链接，将使用默认配置。");
-			regionurl = locationService.getRegionUrlByName(DEFAULT_REGION);
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			RegionUrl regionurl = locationService.getRegionUrlByName(regionName);
+			if (regionurl == null) {
+				log.info("regionName : " + regionName + " 未能找到相应的配置链接。");
+			}else {
+				targetUrl = regionurl.getRegionUrl();
+			}
+			
 		}
-		String targetUrl = regionurl.getRegionUrl();
 		return targetUrl;
 		
 	}
