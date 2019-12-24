@@ -14,7 +14,6 @@ public class WuyePayTabs extends BaseModel {
 	
 	private String name;	//选项卡名称
 	private String sort;	//选项卡顺序
-	private boolean defaultSel;	//是否默认选中
 	private String appId;	//公众号APPID
 	
 	public String getName() {
@@ -29,12 +28,6 @@ public class WuyePayTabs extends BaseModel {
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
-	public boolean isDefaultSel() {
-		return defaultSel;
-	}
-	public void setDefaultSel(boolean defaultSel) {
-		this.defaultSel = defaultSel;
-	}
 	public String getAppId() {
 		return appId;
 	}
@@ -43,10 +36,8 @@ public class WuyePayTabs extends BaseModel {
 	}
 	@Override
 	public String toString() {
-		return "WuyePayTabs [name=" + name + ", sort=" + sort + ", defaultSel=" + defaultSel + ", appId=" + appId + "]";
+		return "WuyePayTabs [name=" + name + ", sort=" + sort + ", appId=" + appId + "]";
 	}
-	
-	
 	
 
 }
