@@ -280,7 +280,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		Supplier<List<WuyePayTabs>> supplier = ()-> wuyePayTabsRepository.findByAppId(sysAppId, sort);
 
 		TypeReference typeReference = new TypeReference<List<WuyePayTabs>>() {};
-		List<WuyePayTabs> tabList = (List<WuyePayTabs>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, supplier);
+		List<WuyePayTabs> tabList = (List<WuyePayTabs>) getConfigFromCache(ModelConstant.KEY_TYPE_WUYEPAY_TABS, appId, typeReference, supplier);
 		return tabList;
 	}
 
