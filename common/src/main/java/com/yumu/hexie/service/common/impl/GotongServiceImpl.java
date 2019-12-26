@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ConfigUtil;
-import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.DataJsonVo;
@@ -26,6 +25,7 @@ import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
 import com.yumu.hexie.integration.wechat.entity.customer.Template;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wechat.vo.SubscribeVO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
@@ -107,22 +107,44 @@ public class GotongServiceImpl implements GotongService {
         CustomService.sendCustomerMessage(msg, accessToken);
     }
     
-    @Async
     @Override
-	public void sendSubscribeMsg(User user) {
-
-         Article article = new Article();
-         article.setTitle("欢迎加入合协社区！");
-         article.setDescription("您已获得关注红包，点击查看。");
-         article.setPicurl(SUBSCRIBE_IMG);
-         article.setUrl(SUBSCRIBE_DETAIL);
-         News news = new News(new ArrayList<Article>());
-         news.getArticles().add(article);
-         NewsMessage msg = new NewsMessage(news);
-         msg.setTouser(user.getOpenid());
-         msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-         CustomService.sendCustomerMessage(msg, accessToken);
+	public boolean sendSubscribeMsg(SubscribeVO subscribeVO) {
+    	
+    	NewsMessage msg = null;
+    	User user = subscribeVO.getUser();
+    	String event = systemConfigService.getSysConfigByKey("SUBSCRIBE_EVENT");
+    	String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+    	if ("1".equals(event)) {
+			Article article = new Article();
+			article.setTitle("欢迎加入合协社区！");
+			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
+			article.setPicurl(SUBSCRIBE_IMG);
+			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
+			
+			News news = new News(new ArrayList<Article>());
+			news.getArticles().add(article);
+			msg = new NewsMessage(news);
+			msg.setTouser(user.getOpenid());
+			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+			
+		}else if ("2".equals(event)) {
+			Article article = new Article();
+			article.setTitle("欢迎加入合协社区！");
+			article.setDescription("您已获得关注红包，点击查看。");
+			article.setPicurl(SUBSCRIBE_IMG);
+			article.setUrl(SUBSCRIBE_DETAIL);
+			News news = new News(new ArrayList<Article>());
+			news.getArticles().add(article);
+			msg = new NewsMessage(news);
+			msg.setTouser(user.getOpenid());
+			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+		}
+    	if (msg == null) {
+			return false;
+		}
+    	
+		return CustomService.sendCustomerMessage(msg, accessToken);
+         
 	}
 
     /** 

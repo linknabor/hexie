@@ -4,9 +4,9 @@
  */
 package com.yumu.hexie.service.common;
 
+import com.yumu.hexie.integration.wechat.vo.SubscribeVO;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
-import com.yumu.hexie.model.user.User;
 
 /**
  * <pre>
@@ -24,7 +24,7 @@ public interface GotongService {
     
     public void sendRepairAssignedMsg(RepairOrder order);
     
-    public void sendSubscribeMsg(User user);
+    public boolean sendSubscribeMsg(SubscribeVO subscribeVO);
     
     public void sendCommonYuyueBillMsg(int serviceType,String title,String billName, String requireTime, String url);
     

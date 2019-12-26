@@ -57,7 +57,6 @@ public class UserInfo implements Serializable {
     private int zhima;
     private int lvdou;
     private Integer couponCount;
-	private String openid;
 	
     private String shareCode;
     
@@ -71,7 +70,8 @@ public class UserInfo implements Serializable {
  	private List<BottomIcon> iconList = new ArrayList<>();
  	private List<BgImage> bgImageList = new ArrayList<>();
  	private String qrCode;
-
+ 	
+ 	private String points;	//用户积分
  	
 	public String getSectId() {
 		return sectId;
@@ -296,6 +296,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setBgImageList(List<BgImage> bgImageList) {
 		this.bgImageList = bgImageList;
+	}
+	public String getPoints() {
+		return points;
+	}
+	public void setPoints(String points) {
+		this.points = points;
 	}
     
     

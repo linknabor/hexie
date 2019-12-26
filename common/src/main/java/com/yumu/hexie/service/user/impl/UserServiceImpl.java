@@ -1,39 +1,53 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlReq;
+import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlResp;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.integration.wechat.service.CardService;
+import com.yumu.hexie.integration.wechat.vo.SubscribeVO;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.model.user.WechatCard;
+import com.yumu.hexie.model.user.WechatCardCatagory;
+import com.yumu.hexie.model.user.WechatCardRepository;
+import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.service.user.UserQueueService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.WechatCardService;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
@@ -51,6 +65,33 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
+	
+	@Autowired
+	private UserQueueService userQueueService;
+	
+	@Autowired
+	private GotongService gotongService;
+	
+	@Autowired
+	private WechatCardService wechatCardService;
+	
+	@Autowired
+	private WechatCardRepository wechatCardRepository;
+	
+	@Autowired
+	private CardService cardService;
+	
+	@Autowired
+	private SystemConfigService systemConfigService;
+	
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+	
+	@PostConstruct
+	public void subscribeEvent() {
+		
+		userQueueService.subscribeEvent();
+	}
 
 	@Override
 	public User getById(long uId) {
@@ -215,12 +256,6 @@ public class UserServiceImpl implements UserService {
 		return users.size() > 0 ? users.get(0) : null;
 	}
 
-
-	@Override
-	public List<User> getBindHouseUser(int pageNum, int pageSize) {
-		return userRepository.getBindHouseUser(pageNum, pageSize);
-	}
-
 	@Override
 	public List<User> getByTel(String tel) {
 		return userRepository.findByTel(tel);
@@ -262,6 +297,64 @@ public class UserServiceImpl implements UserService {
 			isDuplicateRequest = true;
 		}
 		return isDuplicateRequest;
+	}
+
+	/**
+	 * 用户关注事件
+	 * 1.发客服消息发会员卡
+	 * 2.发出的卡券记录到数据库
+	 */
+	@Async
+	@Override
+	public void subscribeEvent(SubscribeVO subscribeVO) {
+
+		User user = subscribeVO.getUser();
+		WechatCardCatagory wechatCardCatagory = wechatCardService.getWechatCardCatagory(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getAppId());
+		/*1.记录卡券倒数据库*/
+		WechatCard wechatCard = new WechatCard();
+		wechatCard.setCardId(wechatCardCatagory.getCardId());
+		wechatCard.setCardType(wechatCardCatagory.getCardType());
+		wechatCard.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
+		wechatCard.setUserAppId(user.getAppId());
+		wechatCard.setUserOpenId(user.getOpenid());
+		wechatCard.setStatus(ModelConstant.CARD_STATUS_SENT);
+		wechatCardRepository.save(wechatCard);
+		
+		/*2.发送消息给用户*/
+		boolean isSuccess = false;
+		int totalFailed = 0;
+		while(!isSuccess && totalFailed >= 3) {
+			try {
+				String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+				ActivateUrlReq activateUrlReq = new ActivateUrlReq();
+				activateUrlReq.setCardId(subscribeVO.getCardId());
+				activateUrlReq.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
+				ActivateUrlResp activateUrlResp = cardService.getMemberCardActivateUrl(activateUrlReq, accessToken);
+				subscribeVO.setCardId(wechatCardCatagory.getCardId());
+				subscribeVO.setGetCardUrl(activateUrlResp.getUrl());
+				boolean flag = gotongService.sendSubscribeMsg(subscribeVO);
+				if(flag) {
+					isSuccess = true;
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				totalFailed ++;
+			}
+		}
+		
+		if (!isSuccess && totalFailed >= 3) {
+			Map<String, String> map = new HashMap<>();
+			map.put("appId", user.getAppId());
+			map.put("openid", user.getOpenid());
+			String json = "";
+			try {
+				json = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(map);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_SUBSCRIBE_MSG_QUEUE, json);
+			} catch (JsonProcessingException e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+		}
 	}
 
 }

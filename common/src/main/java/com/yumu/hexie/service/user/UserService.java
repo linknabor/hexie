@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.integration.wechat.vo.SubscribeVO;
 import com.yumu.hexie.model.user.User;
 
 
@@ -31,9 +32,6 @@ public interface UserService {
 	
 	public User queryByShareCode(String code);
 	
-	//获取绑定过房子的用户
-	public List<User> getBindHouseUser(int pageNum,int pageSize);
-	
 	public List<String> getRepeatShareCodeUser();
 	
 	public List<User> getShareCodeIsNull();
@@ -43,6 +41,9 @@ public interface UserService {
 	User multiFindByOpenId(String openId);
 	void bindWuYeId(User user);
 	boolean checkDuplicateLogin(HttpSession httpSession);
+	
+	//用户关注事件
+	void subscribeEvent(SubscribeVO subscribeVO);
 
 
 }

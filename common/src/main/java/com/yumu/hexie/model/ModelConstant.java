@@ -300,6 +300,18 @@ public class ModelConstant {
 	
 	public static final String PARA_TYPE_CSP = "2";
 	
+	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
+	
+	//微信会员卡领卡渠道
+	public static final String CARD_GET_SUBSCRIBE = "subscribe";	//关注领卡
+	public static final String CARD_GET_REGISTER = "register";	//注册领卡
+	public static final String CARD_GET_MENU = "menu";	//菜单领卡
+	
+	public static final int CARD_STATUS_SENT = 1;	//已发卡
+	public static final int CARD_STATUS_GOT = 2;	//已领卡
+	public static final int CARD_STATUS_ACTIVATED = 3;	//已激活
+	public static final int CARD_STATUS_DELETED = 4;	//已删除
+	
 	//底部图标缓存key
 	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";
 	//bgImage Redis key
@@ -315,8 +327,7 @@ public class ModelConstant {
 	public static final String KEY_POINT_QUEUE = "pointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
 
-  public static final String KEY_USER_LOGIN = "userLoginSession_";
-
+	public static final String KEY_USER_LOGIN = "userLoginSession_";	
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
 	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
@@ -324,5 +335,8 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
 	public static final String KEY_SYS_CONFIG = "sysConfig";
+	
+	public static final String KEY_SUBSCRIBE_MSG_QUEUE = "queue_subscribeMsg";	//关注推客服消息的队列
+	public static final String KEY_WECHAT_CARD = "wechatCard";
 	
 }		
