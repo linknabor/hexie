@@ -199,6 +199,7 @@ public class UserController extends BaseController{
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
 		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+
     }
 	
 	/**
@@ -295,11 +296,13 @@ public class UserController extends BaseController{
             if (!StringUtils.isEmpty(req.getMobile())) {
             	 user.setTel(req.getMobile());
 			}
+
             user.setRegisterDate(System.currentTimeMillis());
             User savedUser = userService.save(user);
             
             session.setAttribute(Constants.USER, savedUser);
             return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
+
         }
     }
     
