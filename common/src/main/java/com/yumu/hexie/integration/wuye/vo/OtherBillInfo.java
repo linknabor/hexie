@@ -16,6 +16,7 @@ public class OtherBillInfo {
 	private String cell_addr;//房屋地址
 	private String cnst_area;//房屋平米
 	private boolean selected =false;//为了展示用
+	private String mian_amt;//物业费减免金额
 	
 	public String getCnst_area() {
 		return cnst_area;
@@ -106,6 +107,12 @@ public class OtherBillInfo {
 	}
 	public void setFee_type_show_name(String fee_type_show_name) {
 		this.fee_type_show_name = fee_type_show_name;
+	}
+	public String getMian_amt() {
+		return mian_amt;
+	}
+	public void setMian_amt(String mian_amt) {
+		this.mian_amt = mian_amt;
 	}
 	
 	

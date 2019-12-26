@@ -84,6 +84,7 @@ public class WuyeUtil {
 	private static final String BILL_LIST_DATE = "getBillStartDateSDO.do?user_id=%s&mng_cell_id=%s";//获取无账单日期
 	private static final String PAY_WATER_URL = "getMngCellByTradeIdSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录涉及的房屋
 	private static final String BIND_BY_TRADE_URL = "bindHouseByTradeIdSDO.do?user_id=%s&trade_water_id=%s";
+	private static final String GET_HOUSE_VERNO_URL = "queryHouByVouNoSDO.do?user_id=%s&ver_no=%s"; //根据户号查询房屋
 	
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
 	
@@ -562,6 +563,20 @@ public class WuyeUtil {
 	}
 	
 	/**
+	 * 根据户号查询房屋信息
+	 * @param userId
+	 * @param stmtId
+	 * @param house_id
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static BaseResult<HexieHouse> getHouseByVerNo(User user, String verNo) {
+		String url = getRequestUri(user) + String.format(GET_HOUSE_VERNO_URL, user.getWuyeId(), verNo);
+		BaseResult<HexieHouse> baseResult = httpGet(url,HexieHouse.class);;
+		return baseResult;
+	}
+	
+	/**
 	 * get请求
 	 * TODO 使用restTemplate替代
 	 * @param reqUrl
@@ -648,6 +663,5 @@ public class WuyeUtil {
 		JavaType javaType = JacksonJsonUtil.getCollectionType(BaseResult.class, type);
 		return JacksonJsonUtil.getMapperInstance(false).readValue(jsonStr, javaType);
 	}
-
 
 }

@@ -1,10 +1,13 @@
 package com.yumu.hexie.integration.wuye.resp;
 
+import java.util.Map;
+
 public class CellVO {
 
 	private String id;
 	private String name;
 	private String version;
+	private Map<String, String> params;
 	
 	public String getId() {
 		return id;
@@ -23,6 +26,12 @@ public class CellVO {
 	}
 	public void setVersion(String version) {
 		this.version = version;
+	}
+	public Map<String, String> getParams() {
+		return params;
+	}
+	public void setParams(Map<String, String> params) {
+		this.params = params;
 	}
 	
 }
