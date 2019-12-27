@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
@@ -45,7 +44,6 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
-import com.yumu.hexie.service.user.UserQueueService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.WechatCardService;
 
@@ -67,9 +65,6 @@ public class UserServiceImpl implements UserService {
 	private RedisTemplate<String, Object> redisTemplate;
 	
 	@Autowired
-	private UserQueueService userQueueService;
-	
-	@Autowired
 	private GotongService gotongService;
 	
 	@Autowired
@@ -87,12 +82,6 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
 	
-	@PostConstruct
-	public void subscribeEvent() {
-		
-		userQueueService.subscribeEvent();
-	}
-
 	@Override
 	public User getById(long uId) {
 		return userRepository.findOne(uId);
@@ -304,7 +293,7 @@ public class UserServiceImpl implements UserService {
 	 * 1.发客服消息发会员卡
 	 * 2.发出的卡券记录到数据库
 	 */
-	@Async
+	@Transactional
 	@Override
 	public void subscribeEvent(SubscribeVO subscribeVO) {
 
