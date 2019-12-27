@@ -18,11 +18,11 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.impl.WuyeQueueTaskImpl;
-import com.yumu.hexie.service.user.UserQueueService;
+import com.yumu.hexie.service.user.UserQueueTask;
 import com.yumu.hexie.service.user.UserService;
 
 @Service
-public class UserQueueServiceImpl implements UserQueueService {
+public class UserQueueTaskImpl implements UserQueueTask {
 
 	private static Logger logger = LoggerFactory.getLogger(WuyeQueueTaskImpl.class);
 
