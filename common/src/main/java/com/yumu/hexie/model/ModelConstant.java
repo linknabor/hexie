@@ -318,13 +318,6 @@ public class ModelConstant {
 	public static final int CARD_STATUS_ACTIVATED = 3;	//已激活
 	public static final int CARD_STATUS_DELETED = 4;	//已删除
 	
-	//底部图标缓存key
-	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";
-	//bgImage Redis key
-	public static final String KEY_TYPE_BGIMAGE = "bgImage";
-	
-	public static final String KEY_TYPE_BANNER = "banner";
-
 	//队列
 	public static final String KEY_POINT_QUEUE = "pointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
