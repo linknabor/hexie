@@ -295,18 +295,20 @@ public class UserServiceImpl implements UserService {
 			throw new BizValidateException("未配置微信会员卡券。");
 		}
 		/*1.记录卡券倒数据库*/
-		WechatCard wechatCard = new WechatCard();
-		wechatCard.setCardId(wechatCardCatagory.getCardId());
-		wechatCard.setCardType(wechatCardCatagory.getCardType());
-		wechatCard.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
-		wechatCard.setUserAppId(user.getAppId());
-		wechatCard.setUserOpenId(user.getOpenid());
-		wechatCard.setStatus(ModelConstant.CARD_STATUS_SENT);
-		wechatCardRepository.save(wechatCard);
+		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(wechatCardCatagory.getCardId(), user.getOpenid());
+		if (wechatCard == null) {
+			wechatCard = new WechatCard();
+			wechatCard.setCardId(wechatCardCatagory.getCardId());
+			wechatCard.setCardType(wechatCardCatagory.getCardType());
+			wechatCard.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
+			wechatCard.setUserAppId(user.getAppId());
+			wechatCard.setUserOpenId(user.getOpenid());
+			wechatCard.setStatus(ModelConstant.CARD_STATUS_SENT);
+			wechatCardRepository.save(wechatCard);
+		}
 		
 		/*2.发送消息给用户*/
 		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-		accessToken = "28_6WiiMtOc1NwwiRWpi_w2cOCoQ6DTt1pe5mf3pcI8jB97IuliaBE43GlMJGoGbmuCiareIO3MPNFTUy7sdtI61EFBtr7k7L9LfWRxQpVWeplhaBLtrMZmy2UmntxuN6W4tfFTv2Q8rshkWkY7BDUgAEDFHY";
 		ActivateUrlReq activateUrlReq = new ActivateUrlReq();
 		activateUrlReq.setCardId(wechatCardCatagory.getCardId());
 		activateUrlReq.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
