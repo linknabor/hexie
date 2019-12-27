@@ -15,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
+import com.yumu.hexie.model.view.WuyePayTabs;
 
 /**
  * <pre>
@@ -69,6 +70,7 @@ public class UserInfo implements Serializable {
  	private Map<?, ?> cfgParam = new HashMap<>();
  	private List<BottomIcon> iconList = new ArrayList<>();
  	private List<BgImage> bgImageList = new ArrayList<>();
+ 	private List<WuyePayTabs> wuyeTabsList = new ArrayList<>();
  	private String qrCode;
  	
  	private String points;	//用户积分
@@ -296,6 +298,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setBgImageList(List<BgImage> bgImageList) {
 		this.bgImageList = bgImageList;
+	}
+	public List<WuyePayTabs> getWuyeTabsList() {
+		return wuyeTabsList;
+	}
+	public void setWuyeTabsList(List<WuyePayTabs> wuyeTabsList) {
+		this.wuyeTabsList = wuyeTabsList;
 	}
 	public String getPoints() {
 		return points;

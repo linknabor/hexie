@@ -111,23 +111,15 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public BillListVO queryBillList(User user, String payStatus, String startDate, 
 			String endDate,String currentPage, String totalCount,String house_id,String sect_id, String regionName) {
-		RegionUrl regionurl = null;
-		String targetUrl = "";
-		if (!StringUtils.isEmpty(regionName)) {
-			regionurl = locationService.getRegionUrlByName(regionName);
-			targetUrl = regionurl.getRegionUrl();
-		}
+		
+		String targetUrl = getRegionUrl(regionName);
 		return WuyeUtil.queryBillList(user, payStatus, startDate, endDate, currentPage, totalCount,house_id, sect_id, targetUrl).getData();
 	}
 
 	@Override
 	public PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName) {
-		RegionUrl regionurl = null;
-		String targetUrl = "";
-		if (!StringUtils.isEmpty(regionName)) {
-			regionurl = locationService.getRegionUrlByName(regionName);
-			targetUrl = regionurl.getRegionUrl();
-		}
+		
+		String targetUrl = getRegionUrl(regionName);
 		return WuyeUtil.getBillDetail(user, stmtId, anotherbillIds, targetUrl).getData();
 	}
 
@@ -136,13 +128,9 @@ public class WuyeServiceImpl implements WuyeService {
 			String stmtId, String couponUnit, String couponNum, 
 			String couponId,String mianBill,String mianAmt, String reduceAmt, String fee_mianBill,String fee_mianAmt,
 			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
-		RegionUrl regionurl = null;
-		String targetUrl = "";
-		if (!StringUtils.isEmpty(regionname)) {
-			regionurl = locationService.getRegionUrlByName(regionname);
-			targetUrl = regionurl.getRegionUrl();
-		}
-    return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
+		
+		String targetUrl = getRegionUrl(regionname);
+		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
 				invoice_title_type, credit_code, invoice_title,targetUrl)
 				.getData();
 	}
@@ -153,12 +141,7 @@ public class WuyeServiceImpl implements WuyeService {
 			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
 			throws Exception {
 		
-		RegionUrl regionurl = null;
-		String targetUrl = "";
-		if (!StringUtils.isEmpty(regionname)) {
-			regionurl = locationService.getRegionUrlByName(regionname);
-			targetUrl = regionurl.getRegionUrl();
-		}
+		String targetUrl = getRegionUrl(regionname);
 		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
 				invoice_title_type, credit_code, invoice_title,targetUrl)
 				.getData();
@@ -220,12 +203,7 @@ public class WuyeServiceImpl implements WuyeService {
 			String unit_id, String data_type, String region_name) {
 		try {
 			
-			RegionUrl regionurl = null;
-			String targetUrl = "";
-			if (!StringUtils.isEmpty(region_name)) {
-				regionurl = locationService.getRegionUrlByName(region_name);
-				targetUrl = regionurl.getRegionUrl();
-			}
+			String targetUrl = getRegionUrl(region_name);
 			return WuyeUtil.getMngHeXieList(user, sect_id, build_id, unit_id, data_type, targetUrl).getData();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -237,13 +215,8 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public CellListVO getVagueSectByName(User user, String sect_name, String region_name) {
 		
-		RegionUrl regionurl = null;
-		String targetUrl = "";
 		try {
-			if (!StringUtils.isEmpty(region_name)) {
-				regionurl = locationService.getRegionUrlByName(region_name);
-				targetUrl = regionurl.getRegionUrl();
-			}
+			String targetUrl = getRegionUrl(region_name);
 			return WuyeUtil.getVagueSectByName(user, sect_name, targetUrl).getData();
       
 		} catch (Exception e) {
@@ -304,12 +277,7 @@ public class WuyeServiceImpl implements WuyeService {
 	public BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, 
 			String sect_id, String regionName) {
 		
-		RegionUrl regionurl = null;
-		String targetUrl = "";
-		if (!StringUtils.isEmpty(regionName)) {
-			regionurl = locationService.getRegionUrlByName(regionName);
-			targetUrl = regionurl.getRegionUrl();
-		}
+		String targetUrl = getRegionUrl(regionName);
 		return WuyeUtil.queryBillList(user, startDate, endDate,house_id,sect_id,targetUrl).getData();
 	}
 	
@@ -322,12 +290,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public BillStartDate getBillStartDateSDO(User user, String house_id, String regionName) {
 		
-		RegionUrl regionurl = null;
-		String targetUrl = "";
-		if (!StringUtils.isEmpty(regionName)) {
-			regionurl = locationService.getRegionUrlByName(regionName);
-			targetUrl = regionurl.getRegionUrl();
-		}
+		String targetUrl = getRegionUrl(regionName);
 		try {
 			return WuyeUtil.getBillStartDateSDO(user,house_id,targetUrl).getData();
 		} catch (Exception e) {
@@ -336,9 +299,6 @@ public class WuyeServiceImpl implements WuyeService {
 		return null;
 		
 	}
-
-
-
 	
 	@Override
 	public HexieUser bindHouse(User user, String stmtId, String houseId) {
@@ -388,6 +348,48 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 		}
+		
+	}
+	
+	/**
+	 * 根据户号查询房屋
+	 * @param user
+	 * @param verNo
+	 * @return {@link HexieHouse}
+	 */
+	@Override
+	public HexieHouse getHouseByVerNo(User user, String verNo) {
+		
+		if (StringUtils.isEmpty(verNo)) {
+			throw new BizValidateException("户号不能为空。");
+		}
+		verNo = verNo.trim();
+		if (verNo.length() != 12) {
+			throw new BizValidateException("请输入正确的户号。");
+		}
+
+		verNo = verNo.replaceAll(" ", "");
+		return WuyeUtil.getHouseByVerNo(user, verNo).getData();
+	}
+	
+	/**
+	 * 获取需要发送的链接地址
+	 * @param regionName
+	 * @return
+	 */
+	private String getRegionUrl(String regionName) {
+		
+		String targetUrl = "";
+		if (!StringUtils.isEmpty(regionName)) {
+			RegionUrl regionurl = locationService.getRegionUrlByName(regionName);
+			if (regionurl == null) {
+				log.info("regionName : " + regionName + " 未能找到相应的配置链接。");
+			}else {
+				targetUrl = regionurl.getRegionUrl();
+			}
+			
+		}
+		return targetUrl;
 		
 	}
 	

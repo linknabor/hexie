@@ -300,6 +300,12 @@ public class ModelConstant {
 	
 	public static final String PARA_TYPE_CSP = "2";
 	
+	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";	//底部图标缓存key
+	public static final String KEY_TYPE_BGIMAGE = "bgImage";	//空白背景图
+	public static final String KEY_TYPE_BANNER = "banner";		//页面顶部轮播图
+	public static final String KEY_TYPE_QRCODE = "qrcode";		//公众号二维码
+	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";	//页面配置
+	public static final String KEY_TYPE_WUYEPAY_TABS = "wuyePayTabs";	//物业缴费选项卡
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
 	//微信会员卡领卡渠道
@@ -319,15 +325,10 @@ public class ModelConstant {
 	
 	public static final String KEY_TYPE_BANNER = "banner";
 
-	public static final String KEY_TYPE_QRCODE = "qrcode";
-
-	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";
-
 	//队列
 	public static final String KEY_POINT_QUEUE = "pointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
-
-	public static final String KEY_USER_LOGIN = "userLoginSession_";	
+	public static final String KEY_USER_LOGIN = "userLoginSession_";
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
 	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";

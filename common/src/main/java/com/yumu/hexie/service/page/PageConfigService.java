@@ -11,6 +11,7 @@ import com.yumu.hexie.model.view.Banner;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
+import com.yumu.hexie.model.view.WuyePayTabs;
 
 public interface PageConfigService {
 	
@@ -27,4 +28,8 @@ public interface PageConfigService {
 	List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
 
 	List<BgImage> getBgImage(String appId) throws JsonParseException, JsonMappingException, IOException;
+	
+	List<WuyePayTabs> getWuyePayTabs(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
+	
+	void updateWuyePayTabs(String appId);
 }

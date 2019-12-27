@@ -32,6 +32,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
+import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
@@ -108,8 +109,10 @@ public class UserController extends BaseController{
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
+			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
+			    userInfo.setWuyeTabsList(tabsList);
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    userInfo.setQrCode(qrCode.getQrLink());
 			    long endTime = System.currentTimeMillis();
@@ -292,7 +295,8 @@ public class UserController extends BaseController{
             }
             if (!StringUtils.isEmpty(req.getMobile())) {
             	 user.setTel(req.getMobile());
-			      }
+			}
+
             user.setRegisterDate(System.currentTimeMillis());
             User savedUser = userService.save(user);
             

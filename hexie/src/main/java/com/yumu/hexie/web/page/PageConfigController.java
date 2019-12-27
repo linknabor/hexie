@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -70,5 +71,21 @@ public class PageConfigController extends BaseController{
     	return pageConfigService.getBgImage(user.getAppId());
     }
     
+	/**
+	 * 更新物业缴费页面选项卡的动态配置
+	 * @param user
+	 * @param houseId
+	 * @param area
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/wuyePayTabs/{appId}", method = RequestMethod.POST)
+	@ResponseBody
+	public String updateWuyePayTabs(@ModelAttribute(Constants.USER) User user,
+			@PathVariable String appId) throws Exception {
+		
+		pageConfigService.updateWuyePayTabs(appId);
+		return "success";
+	}
    
 }
