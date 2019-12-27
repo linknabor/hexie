@@ -287,10 +287,13 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Transactional
 	@Override
-	public boolean subscribeEvent(SubscribeVO subscribeVO) {
+	public void subscribeEvent(SubscribeVO subscribeVO) {
 
 		User user = subscribeVO.getUser();
 		WechatCardCatagory wechatCardCatagory = wechatCardService.getWechatCardCatagory(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getAppId());
+		if (wechatCardCatagory == null) {
+			throw new BizValidateException("未配置微信会员卡券。");
+		}
 		/*1.记录卡券倒数据库*/
 		WechatCard wechatCard = new WechatCard();
 		wechatCard.setCardId(wechatCardCatagory.getCardId());
@@ -309,7 +312,10 @@ public class UserServiceImpl implements UserService {
 		ActivateUrlResp activateUrlResp = cardService.getMemberCardActivateUrl(activateUrlReq, accessToken);
 		subscribeVO.setCardId(wechatCardCatagory.getCardId());
 		subscribeVO.setGetCardUrl(activateUrlResp.getUrl());
-		return gotongService.sendSubscribeMsg(subscribeVO);
+		boolean isSuccess = gotongService.sendSubscribeMsg(subscribeVO);
+		if (!isSuccess) {
+			throw new BizValidateException("发送卡券客服消息失败。");
+		}
 		
 	}
 
