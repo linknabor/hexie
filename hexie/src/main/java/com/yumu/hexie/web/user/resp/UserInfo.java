@@ -72,7 +72,8 @@ public class UserInfo implements Serializable {
  	private List<BgImage> bgImageList = new ArrayList<>();
  	private List<WuyePayTabs> wuyeTabsList = new ArrayList<>();
  	private String qrCode;
-
+ 	
+ 	private String points;	//用户积分
  	
 	public String getSectId() {
 		return sectId;
@@ -303,6 +304,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setWuyeTabsList(List<WuyePayTabs> wuyeTabsList) {
 		this.wuyeTabsList = wuyeTabsList;
+	}
+	public String getPoints() {
+		return points;
+	}
+	public void setPoints(String points) {
+		this.points = points;
 	}
     
     
