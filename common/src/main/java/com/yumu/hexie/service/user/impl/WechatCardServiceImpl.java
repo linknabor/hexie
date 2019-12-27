@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.WechatCardCatagory;
 import com.yumu.hexie.model.user.WechatCardCatagoryRepository;
@@ -34,6 +35,12 @@ public class WechatCardServiceImpl implements WechatCardService {
 			}
 		}
 		return wechatCard;
+	}
+
+	@Override
+	public void activateCard(PreActivateReq preActivateReq) {
+
+		
 	}
 
 }
