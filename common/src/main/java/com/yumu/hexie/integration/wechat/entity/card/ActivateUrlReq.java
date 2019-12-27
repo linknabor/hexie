@@ -37,7 +37,11 @@ public class ActivateUrlReq implements Serializable{
 	public void setOuterStr(String outerStr) {
 		this.outerStr = outerStr;
 	}
-	
+
+	@Override
+	public String toString() {
+		return "ActivateUrlReq [cardId=" + cardId + ", outerStr=" + outerStr + "]";
+	}
 	
 	
 }

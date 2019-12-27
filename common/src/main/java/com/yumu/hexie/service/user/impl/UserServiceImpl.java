@@ -306,10 +306,12 @@ public class UserServiceImpl implements UserService {
 		
 		/*2.发送消息给用户*/
 		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		accessToken = "28_6WiiMtOc1NwwiRWpi_w2cOCoQ6DTt1pe5mf3pcI8jB97IuliaBE43GlMJGoGbmuCiareIO3MPNFTUy7sdtI61EFBtr7k7L9LfWRxQpVWeplhaBLtrMZmy2UmntxuN6W4tfFTv2Q8rshkWkY7BDUgAEDFHY";
 		ActivateUrlReq activateUrlReq = new ActivateUrlReq();
 		activateUrlReq.setCardId(subscribeVO.getCardId());
 		activateUrlReq.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
 		ActivateUrlResp activateUrlResp = cardService.getMemberCardActivateUrl(activateUrlReq, accessToken);
+		logger.info("activateUrlResp : " + activateUrlResp);
 		subscribeVO.setCardId(wechatCardCatagory.getCardId());
 		subscribeVO.setGetCardUrl(activateUrlResp.getUrl());
 		boolean isSuccess = gotongService.sendSubscribeMsg(subscribeVO);

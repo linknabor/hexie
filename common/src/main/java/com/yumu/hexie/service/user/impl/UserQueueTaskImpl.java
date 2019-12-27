@@ -83,6 +83,7 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				}
 				
 				if (!isSuccess) {
+					logger.info("subscribe event failed !, repush into the queue. json : " + json);
 					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_SUBSCRIBE_MSG_QUEUE, json);
 				}
 
