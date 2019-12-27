@@ -1,9 +1,7 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -14,15 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yumu.hexie.common.util.DateUtil;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlReq;
@@ -78,9 +73,6 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private SystemConfigService systemConfigService;
-	
-	@Autowired
-	private StringRedisTemplate stringRedisTemplate;
 	
 	@Override
 	public User getById(long uId) {
@@ -295,7 +287,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Transactional
 	@Override
-	public void subscribeEvent(SubscribeVO subscribeVO) {
+	public boolean subscribeEvent(SubscribeVO subscribeVO) {
 
 		User user = subscribeVO.getUser();
 		WechatCardCatagory wechatCardCatagory = wechatCardService.getWechatCardCatagory(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getAppId());
@@ -310,40 +302,15 @@ public class UserServiceImpl implements UserService {
 		wechatCardRepository.save(wechatCard);
 		
 		/*2.发送消息给用户*/
-		boolean isSuccess = false;
-		int totalFailed = 0;
-		while(!isSuccess && totalFailed >= 3) {
-			try {
-				String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-				ActivateUrlReq activateUrlReq = new ActivateUrlReq();
-				activateUrlReq.setCardId(subscribeVO.getCardId());
-				activateUrlReq.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
-				ActivateUrlResp activateUrlResp = cardService.getMemberCardActivateUrl(activateUrlReq, accessToken);
-				subscribeVO.setCardId(wechatCardCatagory.getCardId());
-				subscribeVO.setGetCardUrl(activateUrlResp.getUrl());
-				boolean flag = gotongService.sendSubscribeMsg(subscribeVO);
-				if(flag) {
-					isSuccess = true;
-				}
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-				totalFailed ++;
-			}
-		}
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		ActivateUrlReq activateUrlReq = new ActivateUrlReq();
+		activateUrlReq.setCardId(subscribeVO.getCardId());
+		activateUrlReq.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
+		ActivateUrlResp activateUrlResp = cardService.getMemberCardActivateUrl(activateUrlReq, accessToken);
+		subscribeVO.setCardId(wechatCardCatagory.getCardId());
+		subscribeVO.setGetCardUrl(activateUrlResp.getUrl());
+		return gotongService.sendSubscribeMsg(subscribeVO);
 		
-		if (!isSuccess && totalFailed >= 3) {
-			Map<String, String> map = new HashMap<>();
-			map.put("appId", user.getAppId());
-			map.put("openid", user.getOpenid());
-			String json = "";
-			try {
-				json = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(map);
-				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_SUBSCRIBE_MSG_QUEUE, json);
-			} catch (JsonProcessingException e) {
-				logger.error(e.getMessage(), e);
-			}
-			
-		}
 	}
 
 }

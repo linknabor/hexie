@@ -43,7 +43,7 @@ public interface UserService {
 	boolean checkDuplicateLogin(HttpSession httpSession);
 	
 	//用户关注事件
-	void subscribeEvent(SubscribeVO subscribeVO);
+	boolean subscribeEvent(SubscribeVO subscribeVO);
 
 
 }

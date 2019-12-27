@@ -74,8 +74,16 @@ public class UserQueueTaskImpl implements UserQueueTask {
 
 				SubscribeVO subscribeVO = new SubscribeVO();
 				subscribeVO.setUser(user);
-				userService.subscribeEvent(subscribeVO);
+				boolean isSuccess = false;
+				try {
+					isSuccess = userService.subscribeEvent(subscribeVO);
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);	//里面有事务，报错自己会回滚，外面catch住处理
+				}
 				
+				if (!isSuccess) {
+					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_SUBSCRIBE_MSG_QUEUE, json);
+				}
 
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);

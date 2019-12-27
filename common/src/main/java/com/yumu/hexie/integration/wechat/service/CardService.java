@@ -1,5 +1,7 @@
 package com.yumu.hexie.integration.wechat.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,8 @@ import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlResp;
 @Component
 public class CardService {
 
+	private static Logger logger = LoggerFactory.getLogger(CardService.class);
+	
 	private static final String MEMBERCARD_ACTIVATE_URL = "https://api.weixin.qq.com/card/membercard/activate/geturl?access_token= ACCESS_TOKEN";
 	
 	@Autowired
@@ -37,6 +41,9 @@ public class CardService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Object> httpEntity = new HttpEntity<>(activateUrlReq, headers);
 		String reqUrl = MEMBERCARD_ACTIVATE_URL.replaceAll("ACCESS_TOKEN", accessToken);
+		
+		logger.info("获取会员卡链接， httpEntity : " + httpEntity);
+		
 		ResponseEntity<ActivateUrlResp> responseEntity = restTemplate.exchange(reqUrl, HttpMethod.POST, httpEntity, ActivateUrlResp.class);
 		return responseEntity.getBody();
 	}
