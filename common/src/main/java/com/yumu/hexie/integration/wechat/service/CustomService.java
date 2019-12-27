@@ -52,9 +52,7 @@ public class CustomService {
 			logger.error(e.getMessage(), e);
 			return false;
 		}
-		logger.info("customer message request : " + CUSTOME_URL + ", postData: " + jsonStr);
 		WechatResponse jsonObject = WeixinUtil.httpsRequest(CUSTOME_URL, "POST", jsonStr, accessToken);
-		logger.info("customer message response : " + jsonObject);
 		if (null != jsonObject&&jsonObject.getErrcode()==0) {
 			bo = true;
 		}
