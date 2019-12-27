@@ -1,7 +1,10 @@
 package com.yumu.hexie.model.user;
 
+import javax.persistence.Entity;
+
 import com.yumu.hexie.model.BaseModel;
 
+@Entity
 public class WechatCard extends BaseModel {
 
 	/**

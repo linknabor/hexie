@@ -35,7 +35,6 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.o2o.OperatorService;
-import com.yumu.hexie.service.user.UserService;
 
 /**
  * <pre>
@@ -67,8 +66,6 @@ public class GotongServiceImpl implements GotongService {
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
     @Inject
-    private UserService  userService;
-    @Inject
     private OperatorService  operatorService;
     @Inject
     private SystemConfigService systemConfigService;
@@ -79,8 +76,8 @@ public class GotongServiceImpl implements GotongService {
     @Override
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
         ServiceOperator op = serviceOperatorRepository.findOne(opId);
-        User opUser = userService.getById(op.getUserId());
-        User orderUser = userService.getById(order.getUserId());
+        User opUser = userRepository.findOne(op.getUserId());
+        User orderUser = userRepository.findOne(order.getUserId());
         if (StringUtils.isEmpty(opUser.getAppId()) ) {
 			return;
 		}
@@ -93,7 +90,7 @@ public class GotongServiceImpl implements GotongService {
     @Async
     @Override
     public void sendRepairAssignedMsg(RepairOrder order){
-        User user = userService.getById(order.getUserId());
+        User user = userRepository.findOne(order.getUserId());
         News news = new News(new ArrayList<Article>());
         Article article = new Article();
         article.setTitle("您的维修单已被受理");
@@ -165,7 +162,7 @@ public class GotongServiceImpl implements GotongService {
         NewsMessage msg = new NewsMessage(news);
         msg.setTouser(op.getOpenId());
         msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        User user = userService.getById(op.getUserId());
+        User user = userRepository.findOne(op.getUserId());
         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
         CustomService.sendCustomerMessage(msg, accessToken);
     }
@@ -183,7 +180,7 @@ public class GotongServiceImpl implements GotongService {
         List<ServiceOperator> ops = operatorService.findByType(serviceType);
         for(ServiceOperator op: ops) {
             LOG.error("发送到操作员！["+serviceType+"]" + billName + " -- " + op.getName() + "--" + op.getId());
-            User user = userService.getById(op.getUserId());
+            User user = userRepository.findOne(op.getUserId());
             String accessToken = systemConfigService.queryWXAToken(user.getAppId());
             TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId());    
         }

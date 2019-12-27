@@ -1,6 +1,6 @@
 package com.yumu.hexie.service.user;
 
-public interface UserQueueService {
+public interface UserQueueTask {
 
 	void subscribeEvent();
 }

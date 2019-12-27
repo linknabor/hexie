@@ -1,7 +1,5 @@
 package com.yumu.hexie.service.shequ.impl;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -32,7 +30,6 @@ import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
-import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
@@ -61,9 +58,6 @@ public class WuyeServiceImpl implements WuyeService {
 	private RedisTemplate<String, String> redisTemplate;
 	
 	@Autowired
-	private WuyeQueueTask wuyeQueueTask;
-	
-	@Autowired
 	private LocationService locationService;
 	
 	@Override
@@ -71,10 +65,6 @@ public class WuyeServiceImpl implements WuyeService {
 		return WuyeUtil.queryHouse(user).getData();
 	}
 
-	@PostConstruct
-	public void init() {
-		wuyeQueueTask.bindHouseByQueue();
-	}
 	
 	@Override
 	public BaseResult<String> deleteHouse(User user, String houseId) {
