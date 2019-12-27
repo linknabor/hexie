@@ -76,7 +76,8 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				subscribeVO.setUser(user);
 				boolean isSuccess = false;
 				try {
-					isSuccess = userService.subscribeEvent(subscribeVO);
+					userService.subscribeEvent(subscribeVO);
+					isSuccess = true;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);	//里面有事务，报错自己会回滚，外面catch住处理
 				}
