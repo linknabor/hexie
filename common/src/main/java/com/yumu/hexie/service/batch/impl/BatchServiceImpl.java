@@ -21,7 +21,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.batch.BatchService;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
-import com.yumu.hexie.service.user.UserQueueTask;
+import com.yumu.hexie.service.user.WechatCardQueueTask;
 import com.yumu.hexie.service.user.UserService;
 
 @Service
@@ -39,7 +39,7 @@ public class BatchServiceImpl implements BatchService {
 	UserRepository userRepository;
 	
 	@Autowired
-	private UserQueueTask userQueueTask;
+	private WechatCardQueueTask userQueueTask;
 	
 	@Autowired
 	private WuyeQueueTask wuyeQueueTask;
