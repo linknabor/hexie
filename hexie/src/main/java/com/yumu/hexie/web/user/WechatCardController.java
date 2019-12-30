@@ -25,19 +25,19 @@ public class WechatCardController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/preActivate", method = RequestMethod.POST)
 	public BaseResult<String> preActivate(@RequestParam(name="card_id") String cardId,
-			@RequestParam(name="encrypt_code") String encryptCode,
-			@RequestParam(name="openid") String openid,
-			@RequestParam(name="outer_str") String outerStr,
-			@RequestParam(name="activate_ticket") String activateTicket) {
+			@RequestParam(name="encrypt_code", required = true) String encryptCode,
+			@RequestParam(name="openid", required = true) String openid,
+			@RequestParam(name="outer_str", required = true) String outerStr,
+			@RequestParam(name="activate_ticket", required = true) String activateTicket) {
 		
 		PreActivateReq preActivateReq = new PreActivateReq();
 		preActivateReq.setCardId(cardId);
-		preActivateReq.setActivateTicket(encryptCode);
+		preActivateReq.setEncryptCode(encryptCode);
 		preActivateReq.setOpenid(openid);
 		preActivateReq.setOuterStr(outerStr);
 		preActivateReq.setActivateTicket(activateTicket);
 		logger.info("preActivateReq is : " + preActivateReq);
-		wechatCardService.preActivate(preActivateReq);
+		wechatCardService.acctivate(preActivateReq);
 		return BaseResult.successResult("success");
 		
 	}
