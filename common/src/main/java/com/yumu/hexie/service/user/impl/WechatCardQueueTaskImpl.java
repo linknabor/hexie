@@ -18,11 +18,11 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.impl.WuyeQueueTaskImpl;
-import com.yumu.hexie.service.user.UserQueueTask;
-import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.WechatCardQueueTask;
+import com.yumu.hexie.service.user.WechatCardService;
 
 @Service
-public class UserQueueTaskImpl implements UserQueueTask {
+public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 
 	private static Logger logger = LoggerFactory.getLogger(WuyeQueueTaskImpl.class);
 
@@ -33,7 +33,7 @@ public class UserQueueTaskImpl implements UserQueueTask {
 	private SystemConfigService systemConfigService;
 	
 	@Autowired
-	private UserService userService;
+	private WechatCardService wechatCardService;
 	
 	/**
 	 * 关注事件
@@ -76,7 +76,7 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				subscribeVO.setUser(user);
 				boolean isSuccess = false;
 				try {
-					userService.subscribeEvent(subscribeVO);
+					wechatCardService.subscribeEvent(subscribeVO);
 					isSuccess = true;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);	//里面有事务，报错自己会回滚，外面catch住处理
