@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
+import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.WechatCardCatagory;
 import com.yumu.hexie.model.user.WechatCardCatagoryRepository;
@@ -21,6 +22,12 @@ public class WechatCardServiceImpl implements WechatCardService {
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 	
+	@Autowired
+	private CardService cardService;
+	
+	/**
+	 * 获取微信会员卡套。卡套相当于一个卡的模板，里面是没有积分的，只有规则。
+	 */
 	@Override
 	public WechatCardCatagory getWechatCardCatagory(int cardType, String appId) {
 
@@ -37,9 +44,12 @@ public class WechatCardServiceImpl implements WechatCardService {
 		return wechatCard;
 	}
 
+	/**
+	 * 会员卡预激活。根据微信回调到页面的参数获取activate_ticket
+	 */
 	@Override
-	public void activateCard(PreActivateReq preActivateReq) {
-
+	public void preActivate(PreActivateReq preActivateReq) {
+		
 		
 	}
 
