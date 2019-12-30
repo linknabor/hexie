@@ -2,9 +2,11 @@ package com.yumu.hexie.web.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
@@ -19,11 +21,11 @@ public class WechatCardController extends BaseController {
 	
 	private static WechatCardService wechatCardService;
 	
-	@RequestMapping(value = "/preActivate", method = RequestMethod.POST)
+	@RequestMapping(value = "/preActivate", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
 	public void preActivate(@RequestBody PreActivateReq preActivateReq) {
 		
 		logger.info("preActivateReq is : " + preActivateReq);
-		wechatCardService.activateCard(preActivateReq);
+		wechatCardService.preActivate(preActivateReq);
 		
 	}
 	

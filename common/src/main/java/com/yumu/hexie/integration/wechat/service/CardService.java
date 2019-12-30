@@ -26,7 +26,10 @@ public class CardService {
 
 	private static Logger logger = LoggerFactory.getLogger(CardService.class);
 	
-	private static final String MEMBERCARD_ACTIVATE_URL = "https://api.weixin.qq.com/card/membercard/activate/geturl?access_token= ACCESS_TOKEN";
+	//获取开卡组件的链接，用于预激活
+	private static final String GET_PREACTIVATE_URL = "https://api.weixin.qq.com/card/membercard/activate/geturl?access_token= ACCESS_TOKEN";
+	//获取activate_ticket，这个ticket是最终激活用的
+	private static String GET_ACTIVATE_TICKET = "https://api.weixin.qq.com/card/membercard/activatetempinfo/get?access_token=TOKEN";
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -48,12 +51,13 @@ public class CardService {
 			logger.error(e.getMessage(), e);
 		}
         HttpEntity<Object> httpEntity = new HttpEntity<>(reqData, headers);
-		String reqUrl = MEMBERCARD_ACTIVATE_URL.replaceAll("ACCESS_TOKEN", accessToken);
+		String reqUrl = GET_PREACTIVATE_URL.replaceAll("ACCESS_TOKEN", accessToken);
 		
 		logger.info("获获取会员卡开卡组件， req : " + activateUrlReq);
 		ResponseEntity<ActivateUrlResp> responseEntity = restTemplate.exchange(reqUrl, HttpMethod.POST, httpEntity, ActivateUrlResp.class);
 		logger.info("获取会员卡开卡组件， resp : " + responseEntity);
 		return responseEntity.getBody();
 	}
+	
 	
 }

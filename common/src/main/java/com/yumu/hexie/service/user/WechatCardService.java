@@ -7,5 +7,5 @@ public interface WechatCardService {
 	
 	public WechatCardCatagory getWechatCardCatagory(int cardType, String appId);
 	
-	public void activateCard(PreActivateReq preActivateReq);
+	public void preActivate(PreActivateReq preActivateReq);
 }
