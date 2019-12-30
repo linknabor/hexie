@@ -12,7 +12,7 @@ public class WechatCard extends BaseModel {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private String userId;
+	private Long userId;
 	private String userName;
 	private String userOpenId;
 	private String userAppId;
@@ -25,10 +25,10 @@ public class WechatCard extends BaseModel {
 	private String IsRestoreMemberCard;	//用户删除会员卡后可重新找回，当用户本次操作为找回时，该值为1，否则为0
 	private String unionId;
 	
-	public String getUserId() {
+	public Long getUserId() {
 		return userId;
 	}
-	public void setUserId(String userId) {
+	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
 	public String getUserName() {

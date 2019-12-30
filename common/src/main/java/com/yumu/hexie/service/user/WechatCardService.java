@@ -1,11 +1,20 @@
 package com.yumu.hexie.service.user;
 
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
+import com.yumu.hexie.integration.wechat.vo.SubscribeVO;
 import com.yumu.hexie.model.user.WechatCardCatagory;
 
 public interface WechatCardService {
 	
-	public WechatCardCatagory getWechatCardCatagory(int cardType, String appId);
+	WechatCardCatagory getWechatCardCatagoryByCardTypeAndAppId(int cardType, String appId);
 	
-	public void preActivate(PreActivateReq preActivateReq);
+	WechatCardCatagory getWechatCardCatagoryByCardTypeAndCardId(int cardType, String cardId);
+	
+	void acctivate(PreActivateReq preActivateReq);
+
+	void subscribeEvent(SubscribeVO subscribeVO);
+
+	
+
+	
 }
