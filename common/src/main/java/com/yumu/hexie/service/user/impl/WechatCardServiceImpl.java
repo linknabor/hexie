@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.integration.wechat.service.CardService;
@@ -12,6 +13,7 @@ import com.yumu.hexie.model.user.WechatCardCatagory;
 import com.yumu.hexie.model.user.WechatCardCatagoryRepository;
 import com.yumu.hexie.service.user.WechatCardService;
 
+@Service
 public class WechatCardServiceImpl implements WechatCardService {
 	
 	private static Logger logger = LoggerFactory.getLogger(WechatCardServiceImpl.class);

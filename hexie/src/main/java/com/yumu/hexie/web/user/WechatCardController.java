@@ -2,8 +2,7 @@ package com.yumu.hexie.web.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.service.user.WechatCardService;
 import com.yumu.hexie.web.BaseController;
+import com.yumu.hexie.web.BaseResult;
 
 @RequestMapping(value = "/card")
 @RestController
@@ -19,13 +19,26 @@ public class WechatCardController extends BaseController {
 
 	private static final Logger logger = LoggerFactory.getLogger(WechatCardController.class);
 	
-	private static WechatCardService wechatCardService;
+	@Autowired
+	private WechatCardService wechatCardService;
 	
-	@RequestMapping(value = "/preActivate", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
-	public void preActivate(@RequestBody PreActivateReq preActivateReq) {
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/preActivate", method = RequestMethod.POST)
+	public BaseResult<String> preActivate(@RequestParam(name="card_id") String cardId,
+			@RequestParam(name="encrypt_code") String encryptCode,
+			@RequestParam(name="openid") String openid,
+			@RequestParam(name="outer_str") String outerStr,
+			@RequestParam(name="activate_ticket") String activateTicket) {
 		
+		PreActivateReq preActivateReq = new PreActivateReq();
+		preActivateReq.setCardId(cardId);
+		preActivateReq.setActivateTicket(encryptCode);
+		preActivateReq.setOpenid(openid);
+		preActivateReq.setOuterStr(outerStr);
+		preActivateReq.setActivateTicket(activateTicket);
 		logger.info("preActivateReq is : " + preActivateReq);
 		wechatCardService.preActivate(preActivateReq);
+		return BaseResult.successResult("success");
 		
 	}
 	
