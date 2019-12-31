@@ -74,6 +74,7 @@ public class UserInfo implements Serializable {
  	private String qrCode;
  	
  	private String points;	//用户积分
+ 	private String cardStatus;	//用户会员卡状态
  	
 	public String getSectId() {
 		return sectId;
@@ -311,7 +312,12 @@ public class UserInfo implements Serializable {
 	public void setPoints(String points) {
 		this.points = points;
 	}
-    
+	public String getCardStatus() {
+		return cardStatus;
+	}
+	public void setCardStatus(String cardStatus) {
+		this.cardStatus = cardStatus;
+	}
     
 	
 }

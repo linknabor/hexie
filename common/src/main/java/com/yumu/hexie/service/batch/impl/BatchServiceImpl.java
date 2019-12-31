@@ -19,9 +19,9 @@ import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.batch.BatchService;
+import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
-import com.yumu.hexie.service.user.WechatCardQueueTask;
 import com.yumu.hexie.service.user.UserService;
 
 @Service
@@ -39,7 +39,7 @@ public class BatchServiceImpl implements BatchService {
 	UserRepository userRepository;
 	
 	@Autowired
-	private WechatCardQueueTask userQueueTask;
+	private WechatCardQueueTask wechatCardQueueTask;
 	
 	@Autowired
 	private WuyeQueueTask wuyeQueueTask;
@@ -47,8 +47,10 @@ public class BatchServiceImpl implements BatchService {
 	@PostConstruct
 	public void runBatch() {
 		
-		userQueueTask.subscribeEvent();
 		wuyeQueueTask.bindHouseByQueue();
+		wechatCardQueueTask.eventSubscribe();
+		wechatCardQueueTask.eventUserGetCard();
+		
 	}
 
 

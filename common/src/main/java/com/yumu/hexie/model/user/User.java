@@ -12,6 +12,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
+import com.yumu.hexie.model.ModelConstant;
 
 @Entity
 public class User extends BaseModel{
@@ -79,6 +80,7 @@ public class User extends BaseModel{
 	private String oriSys;	//来自哪个系统,迁移过来的数据有这个字段
 	private Long oriUserId = 0l;	//源用户ID,迁移过来的数据有这个字段
 	
+	private int cardStatus = ModelConstant.CARD_STATUS_NONE;	//用户会员卡状态
 	private int points;	//用户积分
 	
 	public String getSectId() {
@@ -445,6 +447,14 @@ public class User extends BaseModel{
 		this.points = points;
 	}
 
+	public int getCardStatus() {
+		return cardStatus;
+	}
+
+	public void setCardStatus(int cardStatus) {
+		this.cardStatus = cardStatus;
+	}
+
 	@Override
 	public String toString() {
 		return "User [realName=" + realName + ", name=" + name + ", tel=" + tel + ", provinceId=" + provinceId
@@ -457,9 +467,9 @@ public class User extends BaseModel{
 				+ registerDate + ", identityCard=" + identityCard + ", zhima=" + zhima + ", lvdou=" + lvdou
 				+ ", couponCount=" + couponCount + ", shareCode=" + shareCode + ", newRegiste=" + newRegiste
 				+ ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId + ", totalBind=" + totalBind
-				+ ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId + ", points=" + points + "]";
+				+ ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId + ", cardStatus=" + cardStatus
+				+ ", points=" + points + "]";
 	}
 
-	
 		
 }

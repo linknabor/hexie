@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
+import com.yumu.hexie.integration.wechat.entity.card.ActivateTempInfoResp;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlResp;
 import com.yumu.hexie.integration.wechat.entity.card.DecryptCodeResp;
@@ -37,6 +38,8 @@ public class CardService {
 	private static String ACTIVATE_URL = "https://api.weixin.qq.com/card/membercard/activate?access_token=ACCESS_TOKEN";
 	//CODE解码
 	private static String CODE_DECRYPT_URL ="https://api.weixin.qq.com/card/code/decrypt?access_token=ACCESS_TOKEN";
+	//开卡个人信息
+	private static String ACTIVATE_TEMP_INFO_URL = "https://api.weixin.qq.com/card/membercard/activatetempinfo/get?access_token=ACCESS_TOKEN";
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -81,7 +84,20 @@ public class CardService {
 		return decryptCodeResp;
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	/**
+	 * 获取微信用户开卡时填写的用户信息
+	 * @param map
+	 * @param accessToken
+	 * @return
+	 */
+	public ActivateTempInfoResp getActivateTempInfo(Map<String, String> map, String accessToken) {
+		
+		String reqUrl = ACTIVATE_TEMP_INFO_URL.replaceAll("ACCESS_TOKEN", accessToken);
+		ActivateTempInfoResp activateTempInfoResp = (ActivateTempInfoResp) restRequest(map, ActivateTempInfoResp.class, reqUrl, accessToken);
+		return activateTempInfoResp;
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
 	public Object restRequest(Object requestObj, Class respClazz, String reqUrl, String accessToken) {
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -96,9 +112,15 @@ public class CardService {
 		reqUrl = reqUrl.replaceAll("ACCESS_TOKEN", accessToken);
 		
 		logger.info("wechat card request url : " + reqUrl + ", request data : " + reqData);
-		ResponseEntity<Object> responseEntity = restTemplate.exchange(reqUrl, HttpMethod.POST, httpEntity, respClazz);
+		ResponseEntity<String> responseEntity = restTemplate.exchange(reqUrl, HttpMethod.POST, httpEntity, String.class);
 		logger.info("wechat card response: " + responseEntity);
-		return responseEntity.getBody();
+		Object returnObject = null;
+		try {
+			returnObject = JacksonJsonUtil.jsonToBean(responseEntity.getBody(), respClazz);
+		} catch (JSONException e) {
+			logger.error(e.getMessage(), e);
+		}
+		return returnObject;
 		
 	}
 	

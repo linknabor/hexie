@@ -1,8 +1,8 @@
-package com.yumu.hexie.integration.wechat.vo;
+package com.yumu.hexie.model.card.dto;
 
 import com.yumu.hexie.model.user.User;
 
-public class SubscribeVO {
+public class EventSubscribeDTO {
 	
 	private String cardId;	//卡券ID
 	private String getCardUrl;	//领取地址

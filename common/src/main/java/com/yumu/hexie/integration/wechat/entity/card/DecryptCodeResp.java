@@ -30,7 +30,10 @@ public class DecryptCodeResp implements Serializable {
 	public void setCode(String code) {
 		this.code = code;
 	}
-	
+	@Override
+	public String toString() {
+		return "DecryptCodeResp [errcode=" + errcode + ", errmsg=" + errmsg + ", code=" + code + "]";
+	}
 	
 
 }

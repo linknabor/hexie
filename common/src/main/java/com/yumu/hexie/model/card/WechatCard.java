@@ -1,4 +1,4 @@
-package com.yumu.hexie.model.user;
+package com.yumu.hexie.model.card;
 
 import javax.persistence.Entity;
 
@@ -24,6 +24,8 @@ public class WechatCard extends BaseModel {
 	private String outerStr;	//领取场景值，用于领取渠道数据统计。可在生成二维码接口及添加Addcard接口中自定义该字段的字符串值。
 	private String IsRestoreMemberCard;	//用户删除会员卡后可重新找回，当用户本次操作为找回时，该值为1，否则为0
 	private String unionId;
+	private String tel;	//用户手机号
+	private String sourceScene;	//来源场景
 	
 	public Long getUserId() {
 		return userId;
@@ -97,6 +99,17 @@ public class WechatCard extends BaseModel {
 	public void setStatus(int status) {
 		this.status = status;
 	}
-	
+	public String getTel() {
+		return tel;
+	}
+	public void setTel(String tel) {
+		this.tel = tel;
+	}
+	public String getSourceScene() {
+		return sourceScene;
+	}
+	public void setSourceScene(String sourceScene) {
+		this.sourceScene = sourceScene;
+	}
 	
 }
