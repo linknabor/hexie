@@ -27,7 +27,7 @@ public class WechatCardController extends BaseController {
 	public BaseResult<String> preActivate(@RequestParam(name="card_id") String cardId,
 			@RequestParam(name="encrypt_code", required = true) String encryptCode,
 			@RequestParam(name="openid", required = true) String openid,
-			@RequestParam(name="outer_str", required = true) String outerStr,
+			@RequestParam(name="outer_str", required = false) String outerStr,
 			@RequestParam(name="activate_ticket", required = true) String activateTicket) {
 		
 		PreActivateReq preActivateReq = new PreActivateReq();
