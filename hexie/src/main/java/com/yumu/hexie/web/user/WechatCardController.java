@@ -37,8 +37,8 @@ public class WechatCardController extends BaseController {
 		preActivateReq.setOuterStr(outerStr);
 		preActivateReq.setActivateTicket(activateTicket);
 		logger.info("preActivateReq is : " + preActivateReq);
-		wechatCardService.acctivate(preActivateReq);
-		return BaseResult.successResult("success");
+		String appId = wechatCardService.acctivate(preActivateReq);
+		return BaseResult.successResult(appId);
 		
 	}
 	
