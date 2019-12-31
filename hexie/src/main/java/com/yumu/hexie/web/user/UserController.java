@@ -282,7 +282,9 @@ public class UserController extends BaseController{
 
     @RequestMapping(value = "/simpleRegister", method = RequestMethod.POST)
     @ResponseBody
-    public BaseResult<UserInfo> simpleRegister(HttpSession session,@ModelAttribute(Constants.USER)User user,@RequestBody SimpleRegisterReq req) throws Exception {
+    public BaseResult<UserInfo> simpleRegister(HttpSession session, @ModelAttribute(Constants.USER)User user, 
+    		@RequestBody SimpleRegisterReq req) throws Exception {
+    	
         if(StringUtil.isEmpty(req.getMobile()) || StringUtil.isEmpty(req.getYzm())){
             return new BaseResult<UserInfo>().failMsg("信息请填写完整！");
         }

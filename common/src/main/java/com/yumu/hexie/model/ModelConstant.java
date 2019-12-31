@@ -313,8 +313,8 @@ public class ModelConstant {
 	public static final String CARD_GET_REGISTER = "register";	//注册领卡
 	public static final String CARD_GET_MENU = "menu";	//菜单领卡
 	
-	public static final int CARD_STATUS_SENT = 1;	//已发卡
-	public static final int CARD_STATUS_GOT = 2;	//已领卡
+	public static final int CARD_STATUS_NONE = 1;	//未领卡
+	public static final int CARD_STATUS_GET = 2;	//已领卡
 	public static final int CARD_STATUS_ACTIVATED = 3;	//已激活
 	public static final int CARD_STATUS_DELETED = 4;	//已删除
 	
@@ -330,7 +330,9 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
 	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
-	public static final String KEY_SUBSCRIBE_MSG_QUEUE = "queue_subscribeMsg";	//关注推客服消息的队列
-	public static final String KEY_WECHAT_CARD = "wechatCard";
+	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
+	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queue_event_subscribe";	//关注事件队列
+	public static final String KEY_EVENT_GETCARD_QUEUE = "queue_event_usergetcard";	//领卡事件消息队列
+	
 	
 }		

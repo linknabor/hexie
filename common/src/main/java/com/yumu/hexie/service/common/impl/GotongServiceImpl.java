@@ -25,7 +25,7 @@ import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
 import com.yumu.hexie.integration.wechat.entity.customer.Template;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wechat.vo.SubscribeVO;
+import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
@@ -105,7 +105,7 @@ public class GotongServiceImpl implements GotongService {
     }
     
     @Override
-	public boolean sendSubscribeMsg(SubscribeVO subscribeVO) {
+	public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO) {
     	
     	NewsMessage msg = null;
     	User user = subscribeVO.getUser();

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
-import com.yumu.hexie.service.user.WechatCardService;
+import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 

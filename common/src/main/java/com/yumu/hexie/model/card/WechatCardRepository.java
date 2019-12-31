@@ -1,4 +1,4 @@
-package com.yumu.hexie.model.user;
+package com.yumu.hexie.model.card;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,4 +1,4 @@
-package com.yumu.hexie.model.user;
+package com.yumu.hexie.model.card;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -6,5 +6,6 @@ public interface WechatCardCatagoryRepository extends JpaRepository<WechatCardCa
 
 	public WechatCardCatagory findByCardTypeAndAppId(int cardType, String appId);
 	
-	public WechatCardCatagory findByCardTypeAndCardId(int cardType, String cardId);
+	public WechatCardCatagory findByCardId(String cardId);
+	
 }
