@@ -219,8 +219,13 @@ public class WechatCardServiceImpl implements WechatCardService {
 		for (ActivateField activateField : fieldList) {
 			if ("USER_FORM_INFO_FLAG_MOBILE".equals(activateField.getName())) {	//只取一个手机号
 				mobile = activateField.getValue();
+				logger.info("get user mobile : " + mobile);
 				break;
 			}
+		}
+		
+		if (true) {	//just for test activate
+			return;
 		}
 		
 		/*2.解码微信返回的code */
@@ -285,7 +290,8 @@ public class WechatCardServiceImpl implements WechatCardService {
 		/*5.更新数据库中卡状态*/
 		wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(preActivateReq.getCardId(), preActivateReq.getOpenid());
 		if (wechatCard == null) {
-			//TODO 从未关注过公众号号的用户走其他途径(二维码领券等其他渠道)进入公众号领券激活会进到这里。
+			//从未关注过公众号号的用户走其他途径(二维码领券等其他渠道)进入公众号领券激活会进到这里。
+			logger.error("微信卡券尚未创建。 card_id : " + preActivateReq.getCardId() + ", openid : " + preActivateReq.getOpenid() + ", 将会新建卡片。");
 			wechatCard = new WechatCard();
 			wechatCard.setCardCode(preActivateReq.getCardId());
 			wechatCard.setUserOpenId(preActivateReq.getOpenid());
@@ -293,7 +299,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 			wechatCard.setOuterStr(preActivateReq.getOuterStr());	//未设置过的途径的应该是0
 			wechatCard.setUserAppId(wechatCardCatagory.getAppId());
 			wechatCard.setTel(mobile);
-			logger.error("微信卡券尚未创建。 card_id : " + preActivateReq.getCardId() + ", openid : " + preActivateReq.getOpenid());
+			
 		}
 		wechatCard.setCardCode(cardCode);
 		wechatCard.setStatus(ModelConstant.CARD_STATUS_ACTIVATED);
