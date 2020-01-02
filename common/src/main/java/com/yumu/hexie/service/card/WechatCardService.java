@@ -11,7 +11,7 @@ public interface WechatCardService {
 	
 	WechatCardCatagory getWechatCardCatagoryByCardId(String cardId);
 	
-	void acctivate(PreActivateReq preActivateReq);
+	String acctivate(PreActivateReq preActivateReq);
 
 	void eventSubscribe(EventSubscribeDTO eventSubscribeDTO);
 	
