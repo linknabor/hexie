@@ -139,7 +139,7 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		//关联用户会员卡信息
-		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, userAccount.getAppId());
+		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, userAccount.getOpenid());
 		if (wechatCard != null) {
 			logger.info("user [ " + userAccount.getOpenid()+ " ] has already got card. will syn card status to user. ");
 			userAccount.setCardStatus(wechatCard.getStatus());
