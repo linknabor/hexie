@@ -16,18 +16,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.CardUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
+import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.card.WechatCard;
+import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
-import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 
 @Service("userService")
@@ -39,13 +45,19 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Inject
-	private PointService pointService;
-
-	@Inject
 	private WechatCoreService wechatCoreService;
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
+	
+	@Autowired
+	private WechatCardRepository wechatCardRepository;
+	
+	@Autowired
+	private CardService cardService;
+	
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	@Override
 	public User getById(long uId) {
@@ -156,7 +168,6 @@ public class UserServiceImpl implements UserService {
 		if (user.getStatus() == 0 && StringUtil.isNotEmpty(user.getTel())) {
 			user.setStatus(ModelConstant.USER_STATUS_BINDED);
 		}
-		pointService.addZhima(user, 100, "zm-binding-" + user.getId());
 		return userRepository.save(user);
 	}
 	
@@ -247,6 +258,56 @@ public class UserServiceImpl implements UserService {
 			isDuplicateRequest = true;
 		}
 		return isDuplicateRequest;
+	}
+
+	/**
+	 * 注册
+	 */
+	@Override
+	@Transactional
+	public User simpleRegister(User user) {
+
+		/*查看用户是否领卡：如果已领卡，需要自动激活卡片。*/
+		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getOpenid());
+		if (wechatCard == null) {
+			logger.info("用户[" + user.getOpenid() + "]未领卡");
+		}else {
+			boolean needUpdateCard = false;
+			if (StringUtil.isEmpty(wechatCard.getUserId())) {
+				wechatCard.setUserId(user.getId());
+				wechatCard.setUserName(user.getName());
+				wechatCard.setTel(user.getTel());
+				needUpdateCard = true;
+			}
+			if (ModelConstant.CARD_STATUS_GET == wechatCard.getStatus()) {	//如果已领卡，需要激活
+				
+				ActivateReq activateReq = new ActivateReq();
+				activateReq.setCardId(wechatCard.getCardId());
+				activateReq.setCode(wechatCard.getCardCode());
+				int bonus = CardUtil.convertZhima(user.getZhima());
+				activateReq.setInitBonus(String.valueOf(bonus));
+				activateReq.setInitBonusRecord("用户积分兑换。");
+				activateReq.setMembershipNumber(wechatCard.getCardCode());
+				String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId()); 
+				ActivateResp activateResp = cardService.activateMemberCard(activateReq, accessToken);
+				if (!"0".equals(activateResp.getErrcode())) {
+					throw new BizValidateException("创建用户失败。 errmsg : " + activateResp.getErrmsg());
+				}
+				wechatCard.setStatus(ModelConstant.CARD_STATUS_ACTIVATED);
+				needUpdateCard = true;
+			}
+			if (needUpdateCard) {
+				wechatCardRepository.save(wechatCard);
+			}
+			
+		}
+		user.setRegisterDate(System.currentTimeMillis());
+		if (wechatCard != null) {
+			user.setCardStatus(wechatCard.getStatus());
+		}
+        User savedUser = userRepository.save(user);
+        return save(savedUser);
+		
 	}
 
 

@@ -47,9 +47,10 @@ public class BatchServiceImpl implements BatchService {
 	@PostConstruct
 	public void runBatch() {
 		
-		wuyeQueueTask.bindHouseByQueue();
+		wuyeQueueTask.bindHouseByTrade();
 		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
+		wechatCardQueueTask.addPoint();
 		
 	}
 
@@ -134,40 +135,5 @@ public class BatchServiceImpl implements BatchService {
 		}
 		
 	}
-
-	
-//	@Override
-//	public void convertZhima(String appId) {
-//
-//		int pageSize = 1000;	///默认每页1000条
-//		int currPage = 1;
-//		
-//		logger.info("开始换算会员积分 ...");
-//		long begin = System.currentTimeMillis();
-//		
-//		while (true){
-//			Pageable page = new PageRequest(currPage, pageSize);
-//			List<User> userList = userRepository.findByAppId(appId, page);
-//			if (userList == null || userList.isEmpty()) {
-//				break;
-//			}
-//			for (User user : userList) {
-//				int points = user.getZhima();
-//				if (points < 800) {
-//					points = 800;
-//				}else if (points > 8800) {
-//					points = 8800;
-//				}
-//				user.setPoints(points);
-//				userRepository.save(user);
-//			}
-//			currPage++;
-//		}
-//		
-//		long end = System.currentTimeMillis();
-//		logger.info("积分换算完成， 总耗时：" + (end-begin)/1000);
-//		
-//	}
-	
 
 }

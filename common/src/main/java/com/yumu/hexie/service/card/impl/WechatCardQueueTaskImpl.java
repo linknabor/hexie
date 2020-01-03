@@ -21,6 +21,8 @@ import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.impl.WuyeQueueTaskImpl;
+import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.vo.AddPointQueue;
 
 @Service
 public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
@@ -35,6 +37,9 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 
 	@Autowired
 	private WechatCardService wechatCardService;
+	
+	@Autowired
+	private PointService pointService;
 
 	/**
 	 * 关注事件 1.发送关注客服消息，推送会员卡 2.记录推送出去的会员卡到表里
@@ -131,6 +136,44 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				logger.error(e.getMessage(), e);
 			}
 		}
+	}
+
+	@Async
+	@Override
+	public void addPoint() {
+		
+		while (true) {
+			try {
+
+				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_ADD_POINT_QUEUE,
+						10, TimeUnit.SECONDS);
+
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
+
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				AddPointQueue addPointQueue = objectMapper.readValue(json, AddPointQueue.class);
+				logger.info("strat to consume addpoint queue : " + addPointQueue);
+
+				boolean isSuccess = false;
+				try {
+					pointService.addPoint(addPointQueue.getUser(), addPointQueue.getPoint(), addPointQueue.getKey());
+					isSuccess = true;
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+				}
+
+				if (!isSuccess) {
+					logger.info("add point failed !, repush into the queue. json : " + json);
+					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_ADD_POINT_QUEUE, json);
+				}
+
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
 	}
 
 }

@@ -1,25 +1,32 @@
 package com.yumu.hexie.service.user.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardReq;
+import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardResp;
+import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.card.WechatCard;
+import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.user.PointRecord;
 import com.yumu.hexie.model.user.PointRecordRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
-import com.yumu.hexie.vo.PointQueue;
 
 @Service("pointService")
 public class PointServiceImpl implements PointService {
@@ -31,73 +38,98 @@ public class PointServiceImpl implements PointService {
 	@Inject
 	private UserRepository userRepository;
 	@Autowired
-	private RedisTemplate<String, String> redisTemplate;
+	private WechatCardRepository wechatCardRepository;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private CardService cardService;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
-	@Override
-	public void addLvdou(User user, int point, String key) {
-		if(StringUtil.isNotEmpty(key)) {
-			List<PointRecord> rs = pointRecordRepository.findAllByKeyStr(key);
-			if(rs != null&&rs.size()>0) {
-				return;
-			}
-		}
-		PointRecord pr = new PointRecord();
-		pr.setType(ModelConstant.POINT_TYPE_LVDOU);
-		pr.setUserId(user.getId());
-		pr.setPoint(point);
-		pr.setKeyStr(key);
-		pointRecordRepository.save(pr);
-		user.setLvdou(user.getLvdou()+point);
-		userRepository.save(user);
-	}
-
-	@Override
-	public void addZhima(User user, int point, String key) {
-		if(StringUtil.isNotEmpty(key)) {
-			List<PointRecord> rs = pointRecordRepository.findAllByKeyStr(key);
-			if(rs != null&&rs.size()>0) {
-				return;
-			}
-		}
-		PointRecord pr = new PointRecord();
-		pr.setType(ModelConstant.POINT_TYPE_ZIMA);
-		pr.setUserId(user.getId());
-		pr.setPoint(point);
-		pr.setKeyStr(key);
-		pointRecordRepository.save(pr);
-		user.setZhima(user.getZhima()+point);
-		userRepository.save(user);
-	}
-
 	/**
-	 * 异步添加芝麻积分
+	 * 新增积分
+	 * @param user
+	 * @param point 本次增加的积分
+	 * @param key 形式为：wuyePay-userId-tradeWaterId
+	 * 
+	 * 步骤：
+	 * 0.请求微信更新会员卡积分
+	 * 1.更新pointRecord表，记录本次更新的流水
+	 * 2.更新user表的point字段
+	 * 3.更新wechatCard表的bonus字段
 	 */
 	@Override
-	public void addZhimaAsync(User user, int point, String key) {
-
-		int pointRetryTimes = 0;
-		boolean pointSuccess = false;
+	@Transactional
+	public void addPoint(User user, String point, String key) {
 		
-		while(!pointSuccess && pointRetryTimes < 3) {
-			
-			try {
-//				pointService.addZhima(user, 10, "zhima-bill-" + user.getId() + "-" + billId);
-				PointQueue pointQueue = new PointQueue();
-				pointQueue.setUser(user);
-				pointQueue.setPoint(10);
-				pointQueue.setType(ModelConstant.POINT_TYPE_ZIMA);
-				pointQueue.setKey(key);
-				
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				String value = objectMapper.writeValueAsString(pointQueue);
-				redisTemplate.opsForList().rightPush(ModelConstant.KEY_POINT_QUEUE, value);
-				pointSuccess = true;
-			
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-				pointRetryTimes++;
+		PointRecord pr = new PointRecord();
+		pr.setKeyStr(key);
+		List<PointRecord> prList = pointRecordRepository.findAllByKeyStr(key);
+		if (prList!=null && !prList.isEmpty()) {
+			return;
+		}
+		
+		BigDecimal bigPoint = new BigDecimal(point);
+		bigPoint = bigPoint.setScale(0, RoundingMode.HALF_UP);	//金额四舍五入，只保留整数部分
+		int addPoint = bigPoint.intValue();	//本次要增加的积分
+		User currentUser = userRepository.findOne(user.getId());
+		int currPoint = currentUser.getPoint();	//用户当前积分。无论有没有领卡或者激活卡，这个字段都记录积分
+		
+		//0.请求微信更新微信卡券积分
+		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getOpenid());
+		boolean needUpdateCard = false;
+		if (wechatCard == null || ModelConstant.CARD_STATUS_ACTIVATED != wechatCard.getStatus()) {
+			logger.error("当前用户尚未领取会员卡或者会员卡尚未激活，将跳过与微信同步会员卡积分。");
+		}else {
+			UpdateUserCardReq updateUserCardReq = new UpdateUserCardReq();
+			updateUserCardReq.setCardId(wechatCard.getCardId());
+			updateUserCardReq.setCode(wechatCard.getCardCode());
+			updateUserCardReq.setAddBonus(String.valueOf(addPoint));
+			updateUserCardReq.setBonus(String.valueOf(currPoint));
+			updateUserCardReq.setRecordBonus("消费" + point + "元，获得" + addPoint + "积分。");
+			String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId());
+			UpdateUserCardResp updateUserCardResp = cardService.updateUserMemeberCard(updateUserCardReq, accessToken);
+			logger.info("updateUserCardResp : " + updateUserCardResp);
+			if (!"0".equals(updateUserCardResp.getErrcode())) {
+				throw new BizValidateException("同步微信会员卡积分失败， errmsg : " + updateUserCardResp.getErrmsg());
+			}
+			needUpdateCard = true;
+		}
+		
+		//1.积分记录
+		pr = new PointRecord();
+		pr.setType(ModelConstant.POINT_TYPE_JIFEN);
+		pr.setUserId(user.getId());
+		pr.setPoint(bigPoint.intValue());
+		pr.setKeyStr(key);
+		pointRecordRepository.save(pr);
+		
+		//2.用户表积分字段更新
+		int ret = userRepository.updatePointByUserId(user.getId(), addPoint, currPoint);
+		if (ret == 0) {
+			throw new BizValidateException("更新用户积分失败， 用户ID:" + user.getId() + ", keyStr : " + key);
+		}
+		
+		//3.卡券表
+		if (needUpdateCard) {
+			int currBonus = wechatCard.getBonus();
+			int retcard = wechatCardRepository.updateCardPointByUserId(user.getId(), addPoint, currBonus);
+			if (retcard == 0) {
+				throw new BizValidateException("更新用户卡券积分失败， card code:" + wechatCard.getCardCode() + ", keyStr : " + key);
 			}
 		}
+		
+		stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);
+	
+		
 	}
-
+	
+	public static void main(String[] args) {
+		
+		String point = "99.49";
+		BigDecimal bigPoint = new BigDecimal(point);
+		bigPoint = bigPoint.setScale(0, RoundingMode.HALF_UP);	//金额四舍五入
+		System.out.println(bigPoint);
+	}
+	
 }

@@ -1,10 +1,13 @@
 package com.yumu.hexie.model.card;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.yumu.hexie.model.BaseModel;
 
 @Entity
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames= {"userOpenId", "cardId"})})
 public class WechatCard extends BaseModel {
 
 	/**
@@ -26,6 +29,8 @@ public class WechatCard extends BaseModel {
 	private String unionId;
 	private String tel;	//用户手机号
 	private String sourceScene;	//来源场景
+	private int bonus;	//卡券积分
+	private int balance;	//余额
 	
 	public Long getUserId() {
 		return userId;
@@ -110,6 +115,18 @@ public class WechatCard extends BaseModel {
 	}
 	public void setSourceScene(String sourceScene) {
 		this.sourceScene = sourceScene;
+	}
+	public int getBonus() {
+		return bonus;
+	}
+	public void setBonus(int bonus) {
+		this.bonus = bonus;
+	}
+	public int getBalance() {
+		return balance;
+	}
+	public void setBalance(int balance) {
+		this.balance = balance;
 	}
 	
 }

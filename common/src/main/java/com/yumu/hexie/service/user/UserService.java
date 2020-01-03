@@ -41,5 +41,6 @@ public interface UserService {
 	void bindWuYeId(User user);
 	boolean checkDuplicateLogin(HttpSession httpSession);
 	
-	
+	//注册
+	User simpleRegister(User user);
 }
