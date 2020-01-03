@@ -202,8 +202,9 @@ public class UserServiceImpl implements UserService {
         		if(r.isSuccess()) {
         			User dbUser = userRepository.findById(user.getId());
         			if (dbUser != null) {
-        				dbUser.setWuyeId(r.getData().getUser_id());
-                		userRepository.save(dbUser);
+//        				dbUser.setWuyeId(r.getData().getUser_id());
+//                		userRepository.save(dbUser);
+        				userRepository.updateUserWuyeId(r.getData().getUser_id(), dbUser.getId());
 					}
         		}
     		}
