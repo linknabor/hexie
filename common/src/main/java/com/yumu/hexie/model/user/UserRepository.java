@@ -48,5 +48,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Transactional
 	@Query(value = "update user set point = point + ?1 where id = ?2 and point = ?3 ", nativeQuery = true )
 	public int updatePointByUserId(long userId, int addPoint, int oriPoint);
+	
+	@Modifying
+	@Transactional
+	@Query(value = "update user set wuyeId = ?1 where id = ?2 ", nativeQuery = true)
+	public int updateUserWuyeId(String wuyeId, long id);
 
 }

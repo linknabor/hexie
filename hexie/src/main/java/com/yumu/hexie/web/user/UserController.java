@@ -101,6 +101,7 @@ public class UserController extends BaseController{
 					user = null;
 				}
 			}
+			log.info("user in db :" + user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
