@@ -13,7 +13,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yumu.hexie.common.util.CardUtil;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateTempInfoResp;
@@ -160,13 +159,12 @@ public class WechatCardServiceImpl implements WechatCardService {
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(eventGetCardDTO.getCardId(), eventGetCardDTO.getOpenid());
 		if (wechatCard == null) {
 			wechatCard = new WechatCard();
-			wechatCard.setCardId(eventGetCardDTO.getCardId());
-			
 			WechatCardCatagory wechatCardCatagory = wechatCardCatagoryRepository.findByCardId(eventGetCardDTO.getCardId());
 			wechatCard.setCardType(wechatCardCatagory.getCardType());
 			wechatCard.setUserAppId(eventGetCardDTO.getAppId());
 			wechatCard.setUserOpenId(eventGetCardDTO.getOpenid());
 		}
+		wechatCard.setCardId(eventGetCardDTO.getCardId());
 		wechatCard.setCardCode(eventGetCardDTO.getCardCode());
 		wechatCard.setIsRestoreMemberCard(eventGetCardDTO.getIsRestoreMemberCard());
 		wechatCard.setOldCardCode(eventGetCardDTO.getOldUserCardCode());
@@ -249,11 +247,10 @@ public class WechatCardServiceImpl implements WechatCardService {
 			bonusRecord = "老用户积分兑换。";
 		}
 		//积分转换
-		int points = 0;
+		int points = 88;	//新用户给88积分。
 		if (user != null) {
-			points = CardUtil.convertZhima(user.getZhima());
+			points = user.getLvdou();	//老用户直接取lvdou的值。
 		}
-		
 		String cardCode = decryptCodeResp.getCode();
 		ActivateReq activateReq = new ActivateReq();
 		activateReq.setCardId(preActivateReq.getCardId());
