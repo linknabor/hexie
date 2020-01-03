@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.yumu.hexie.common.util.CardUtil;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateTempInfoResp;
@@ -159,7 +160,6 @@ public class WechatCardServiceImpl implements WechatCardService {
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(eventGetCardDTO.getCardId(), eventGetCardDTO.getOpenid());
 		if (wechatCard == null) {
 			wechatCard = new WechatCard();
-			wechatCard.setCardCode(eventGetCardDTO.getCardCode());
 			wechatCard.setCardId(eventGetCardDTO.getCardId());
 			
 			WechatCardCatagory wechatCardCatagory = wechatCardCatagoryRepository.findByCardId(eventGetCardDTO.getCardId());
@@ -167,6 +167,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 			wechatCard.setUserAppId(eventGetCardDTO.getAppId());
 			wechatCard.setUserOpenId(eventGetCardDTO.getOpenid());
 		}
+		wechatCard.setCardCode(eventGetCardDTO.getCardCode());
 		wechatCard.setIsRestoreMemberCard(eventGetCardDTO.getIsRestoreMemberCard());
 		wechatCard.setOldCardCode(eventGetCardDTO.getOldUserCardCode());
 		wechatCard.setOuterStr(eventGetCardDTO.getOutStr());
@@ -186,7 +187,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 	 */
 	@Transactional
 	@Override
-	public String acctivate(PreActivateReq preActivateReq) {
+	public String activate(PreActivateReq preActivateReq) {
 		
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(preActivateReq.getCardId(), preActivateReq.getOpenid());
 		if (wechatCard != null && ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
@@ -250,7 +251,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		//积分转换
 		int points = 0;
 		if (user != null) {
-			points = convertZhima(user.getZhima());
+			points = CardUtil.convertZhima(user.getZhima());
 		}
 		
 		String cardCode = decryptCodeResp.getCode();
@@ -283,7 +284,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 			user.setZhima(0);
 			user.setRegisterDate(System.currentTimeMillis());
 			user.setNewRegiste(true);
-			user.setPoints(points);
+			user.setPoint(points);
 			user = userRepository.save(user);
 		}
 		
@@ -312,20 +313,26 @@ public class WechatCardServiceImpl implements WechatCardService {
 	}
 
 	/**
-	 * 芝麻转换成积分
-	 * @param zhima
-	 * @return
+	 * 页面获取微信会员卡激活链接
+	 * @param user
+	 * @return url
 	 */
-	private int convertZhima(int zhima) {
-		int points = zhima;
-		if (points == 0) {
-			points = 88;
-		}else if (points < 800) {
-			points = 800;
-		}else if (points > 8800) {
-			points = 8800;
+	@Override
+	public String getActivateUrlOnPage(User user) {
+
+		WechatCardCatagory weCardCatagory = getWechatCardCatagoryByCardTypeAndAppId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getAppId());
+		ActivateUrlReq activateUrlReq = new ActivateUrlReq();
+		activateUrlReq.setCardId(weCardCatagory.getCardId());
+		activateUrlReq.setOuterStr(ModelConstant.CARD_GET_REGISTER);
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		ActivateUrlResp activateUrlResp = cardService.getMemberCardActivateUrl(activateUrlReq, accessToken);
+		if (!"0".equals(activateUrlResp.getErrcode())) {
+			logger.error("getActivateUrlOnPage , errmsg : " + activateUrlResp.getErrmsg());
+			throw new BizValidateException("领取会员卡失败，请刷新后重试。");
 		}
-		return points;
+		return activateUrlResp.getUrl();
+		
 	}
+
 
 }

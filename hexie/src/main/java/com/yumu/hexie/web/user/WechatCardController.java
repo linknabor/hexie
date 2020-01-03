@@ -5,13 +5,16 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.web.BaseController;
@@ -29,6 +32,16 @@ public class WechatCardController extends BaseController {
 	@Autowired
 	 private WechatCoreService wechatCoreService;
 	
+	/**
+	 * 微信回调激活
+	 * @param request
+	 * @param cardId
+	 * @param encryptCode
+	 * @param openid
+	 * @param outerStr
+	 * @param activateTicket
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/preActivate", method = RequestMethod.POST)
 	public BaseResult<JsSign> preActivate(HttpServletRequest request,
@@ -45,7 +58,7 @@ public class WechatCardController extends BaseController {
 		preActivateReq.setOuterStr(outerStr);
 		preActivateReq.setActivateTicket(activateTicket);
 		logger.info("preActivateReq is : " + preActivateReq);
-		String appId = wechatCardService.acctivate(preActivateReq);
+		String appId = wechatCardService.activate(preActivateReq);
 		
 		String url = request.getRequestURL().toString();
 		JsSign jsSign = wechatCoreService.getJsSign(url, appId);
@@ -53,5 +66,18 @@ public class WechatCardController extends BaseController {
 		
 	}
 	
+	/**
+	 * 页面领卡激活
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/activateUrl", method = RequestMethod.GET)
+	public BaseResult<String> getCardOnPage(@ModelAttribute(Constants.USER) User user) {
+		
+		String url = wechatCardService.getActivateUrlOnPage(user);
+		return BaseResult.successResult(url);
+		
+	}
 	
 }

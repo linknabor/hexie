@@ -81,7 +81,7 @@ public class User extends BaseModel{
 	private Long oriUserId = 0l;	//源用户ID,迁移过来的数据有这个字段
 	
 	private int cardStatus = ModelConstant.CARD_STATUS_NONE;	//用户会员卡状态
-	private int points;	//用户积分
+	private int point;	//用户积分
 	
 	public String getSectId() {
 		return sectId;
@@ -439,12 +439,12 @@ public class User extends BaseModel{
 		this.oriUserId = oriUserId;
 	}
 
-	public int getPoints() {
-		return points;
+	public int getPoint() {
+		return point;
 	}
 
-	public void setPoints(int points) {
-		this.points = points;
+	public void setPoint(int point) {
+		this.point = point;
 	}
 
 	public int getCardStatus() {
@@ -468,7 +468,7 @@ public class User extends BaseModel{
 				+ ", couponCount=" + couponCount + ", shareCode=" + shareCode + ", newRegiste=" + newRegiste
 				+ ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId + ", totalBind=" + totalBind
 				+ ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId + ", cardStatus=" + cardStatus
-				+ ", points=" + points + "]";
+				+ ", point=" + point + "]";
 	}
 
 		

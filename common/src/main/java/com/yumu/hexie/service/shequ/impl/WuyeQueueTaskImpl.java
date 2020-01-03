@@ -42,7 +42,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	 */
 	@Override
 	@Async
-	public void bindHouseByQueue() {
+	public void bindHouseByTrade() {
 		
 		while(true) {
 			try {
@@ -104,4 +104,5 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 			}
 		}
 	}
+
 }

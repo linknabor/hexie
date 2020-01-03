@@ -111,18 +111,4 @@ public class BatchController extends BaseController {
 		
 	}
 	
-	@RequestMapping(value = "/points/{appId}", method = RequestMethod.POST)
-	public String convertZhima(@RequestParam String code, @PathVariable String appId) {
-		
-		if ("hexieCode".equals(code)) {
-			batchService.bindHouseBatch(appId);
-			logger.error("操作完成!!!");
-			return "success";
-		} else {
-			return "invalid request !";
-		}
-		
-	}
-
-
 }

@@ -21,6 +21,8 @@ import com.yumu.hexie.integration.wechat.entity.card.ActivateTempInfoResp;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlResp;
 import com.yumu.hexie.integration.wechat.entity.card.DecryptCodeResp;
+import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardReq;
+import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardResp;
 
 /**
  * 微信会员卡
@@ -40,6 +42,8 @@ public class CardService {
 	private static String CODE_DECRYPT_URL ="https://api.weixin.qq.com/card/code/decrypt?access_token=ACCESS_TOKEN";
 	//开卡个人信息
 	private static String ACTIVATE_TEMP_INFO_URL = "https://api.weixin.qq.com/card/membercard/activatetempinfo/get?access_token=ACCESS_TOKEN";
+	//更新卡券积分
+	private static String UPDATE_USER_CARD_URL = "https://api.weixin.qq.com/card/membercard/updateuser?access_token=ACCESS_TOKEN";
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -95,6 +99,17 @@ public class CardService {
 		String reqUrl = ACTIVATE_TEMP_INFO_URL.replaceAll("ACCESS_TOKEN", accessToken);
 		ActivateTempInfoResp activateTempInfoResp = (ActivateTempInfoResp) restRequest(map, ActivateTempInfoResp.class, reqUrl, accessToken);
 		return activateTempInfoResp;
+	}
+	
+	/**
+	 * 更新用户卡券信息，一般为更新积分或者余额操作，此操作需要具有幂等性
+	 */
+	public UpdateUserCardResp updateUserMemeberCard(UpdateUserCardReq updateUserCardReq, String accessToken) {
+		
+		String reqUrl = UPDATE_USER_CARD_URL.replaceAll("ACCESS_TOKEN", accessToken);
+		UpdateUserCardResp updateUserCardResp = (UpdateUserCardResp) restRequest(updateUserCardReq, UpdateUserCardResp.class, reqUrl, accessToken);
+		return updateUserCardResp;
+		
 	}
 	
 	@SuppressWarnings({ "rawtypes" })

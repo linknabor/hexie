@@ -2,8 +2,11 @@ package com.yumu.hexie.model.user;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 	public List<User> findByOpenid(String openid);
@@ -32,6 +35,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public Integer getRegisteredUserCount();
 	
 	public List<User> findByAppId(String appId);
+	
+	public List<User> findByAppId(String appId, Pageable pageable);
 
+	/**
+	 * 更新语句的where 条件必须带上原积分值，这样可以解决多次调用带来的幂等性问题。
+	 * @param userId
+	 * @param point
+	 * @return
+	 */
+	@Modifying
+	@Transactional
+	@Query(value = "update user set point = point + ?1 where id = ?2 and point = ?3 ", nativeQuery = true )
+	public int updatePointByUserId(long userId, int addPoint, int oriPoint);
 
 }

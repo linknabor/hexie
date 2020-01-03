@@ -67,15 +67,6 @@ public interface WuyeService {
 	HexieHouse getHouse(User user, String stmtId);
 	
 	/**
-	 * 获取房屋信息
-	 * @param userId
-	 * @param stmtId
-	 * @param house_id
-	 * @return
-	 */
-	HexieHouse getHouse(String userId, String stmtId, String house_id);
-
-	/**
 	 * 用户登录
 	 * @param user
 	 * @return
