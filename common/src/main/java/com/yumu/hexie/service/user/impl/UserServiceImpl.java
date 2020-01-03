@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.util.CardUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
@@ -89,6 +88,7 @@ public class UserServiceImpl implements UserService {
 
 		String openId = weixinUser.getOpenid();
 		User userAccount = multiFindByOpenId(openId);
+		boolean isNew = false;	//是否新用户
 
 		if (userAccount == null) {
 			userAccount = new User();
@@ -104,6 +104,7 @@ public class UserServiceImpl implements UserService {
 			userAccount.setLanguage(weixinUser.getLanguage());
 			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + userAccount.getId() + "]"));
+			isNew = true;
 
 		} else {
 
@@ -134,6 +135,19 @@ public class UserServiceImpl implements UserService {
 				userAccount.setAppId(ConstantWeChat.APPID); // 合协用户填这个
 			} else {
 				userAccount.setAppId(oriApp); // 其他系统用户填自己的appId
+			}
+		}
+		
+		//关联用户会员卡信息
+		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, userAccount.getAppId());
+		if (wechatCard != null) {
+			userAccount.setCardStatus(wechatCard.getStatus());
+			if (ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
+				int points = wechatCard.getBonus();
+				if (isNew) {	//新用户，送88积分
+					points += 88;
+				}
+				userAccount.setPoint(points);
 			}
 		}
 		userAccount = userRepository.save(userAccount);
@@ -287,8 +301,11 @@ public class UserServiceImpl implements UserService {
 				ActivateReq activateReq = new ActivateReq();
 				activateReq.setCardId(wechatCard.getCardId());
 				activateReq.setCode(wechatCard.getCardCode());
-				int bonus = CardUtil.convertZhima(user.getZhima());
-				activateReq.setInitBonus(String.valueOf(bonus));
+				int point = user.getLvdou();	//新用户送88积分。老用户，积分已经做过转换，直接取lvdou的值
+				if (point == 0) {	
+					point = 88;
+				}
+				activateReq.setInitBonus(String.valueOf(point));
 				activateReq.setInitBonusRecord("用户积分兑换。");
 				activateReq.setMembershipNumber(wechatCard.getCardCode());
 				String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId()); 
