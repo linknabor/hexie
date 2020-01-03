@@ -141,13 +141,19 @@ public class UserServiceImpl implements UserService {
 		//关联用户会员卡信息
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, userAccount.getAppId());
 		if (wechatCard != null) {
+			logger.info("user [ " + userAccount.getOpenid()+ " ] has already got card. will syn card status to user. ");
 			userAccount.setCardStatus(wechatCard.getStatus());
+			logger.info("card status : " + wechatCard.getStatus());
 			if (ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
 				int points = wechatCard.getBonus();
 				if (isNew) {	//新用户，送88积分
 					points += 88;
 				}
 				userAccount.setPoint(points);
+			}
+			if (StringUtil.isEmpty(wechatCard.getUserId())) {
+				logger.info("update card user info. card :" + wechatCard.getId());
+				wechatCardRepository.updateCardUserInfo(userAccount.getId(), userAccount.getName(), wechatCard.getId());
 			}
 		}
 		userAccount = userRepository.save(userAccount);
