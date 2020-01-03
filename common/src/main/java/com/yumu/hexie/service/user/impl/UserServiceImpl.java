@@ -136,6 +136,7 @@ public class UserServiceImpl implements UserService {
 				userAccount.setAppId(oriApp); // 其他系统用户填自己的appId
 			}
 		}
+		userAccount = userRepository.save(userAccount);
 		return userAccount;
 	}
 
@@ -180,8 +181,10 @@ public class UserServiceImpl implements UserService {
     			BaseResult<HexieUser> r = WuyeUtil.userLogin(user);
         		if(r.isSuccess()) {
         			User dbUser = userRepository.findById(user.getId());
-        			dbUser.setWuyeId(r.getData().getUser_id());
-            		userRepository.save(dbUser);
+        			if (dbUser != null) {
+        				dbUser.setWuyeId(r.getData().getUser_id());
+                		userRepository.save(dbUser);
+					}
         		}
     		}
 		} catch (Exception e) {
