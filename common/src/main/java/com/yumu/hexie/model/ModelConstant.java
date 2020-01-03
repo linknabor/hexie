@@ -142,6 +142,7 @@ public class ModelConstant {
 	
 	public static final int POINT_TYPE_ZIMA = 0;
 	public static final int POINT_TYPE_LVDOU = 1;
+	public static final int POINT_TYPE_JIFEN = 2;
 	
 
 
@@ -319,7 +320,7 @@ public class ModelConstant {
 	public static final int CARD_STATUS_DELETED = 4;	//已删除
 	
 	//队列
-	public static final String KEY_POINT_QUEUE = "pointQueue";
+	public static final String KEY_ADD_POINT_QUEUE = "addPointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
 	public static final String KEY_USER_LOGIN = "userLoginSession_";
 

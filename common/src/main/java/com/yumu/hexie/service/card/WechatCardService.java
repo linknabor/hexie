@@ -4,6 +4,7 @@ import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.model.card.WechatCardCatagory;
 import com.yumu.hexie.model.card.dto.EventGetCardDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
+import com.yumu.hexie.model.user.User;
 
 public interface WechatCardService {
 	
@@ -11,13 +12,13 @@ public interface WechatCardService {
 	
 	WechatCardCatagory getWechatCardCatagoryByCardId(String cardId);
 	
-	String acctivate(PreActivateReq preActivateReq);
+	String activate(PreActivateReq preActivateReq);
 
 	void eventSubscribe(EventSubscribeDTO eventSubscribeDTO);
 	
 	void eventGetCard(EventGetCardDTO eventGetCardDTO);
 
-	
+	String getActivateUrlOnPage(User user);
 
 	
 }

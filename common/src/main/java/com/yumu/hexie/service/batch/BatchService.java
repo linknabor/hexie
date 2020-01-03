@@ -10,6 +10,4 @@ public interface BatchService {
 
 	void bindHouseBatch(String appId);
 	
-//	void convertZhima(String appId);
-
 }

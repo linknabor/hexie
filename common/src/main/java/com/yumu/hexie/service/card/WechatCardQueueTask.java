@@ -5,4 +5,7 @@ public interface WechatCardQueueTask {
 	void eventSubscribe();
 	
 	void eventUserGetCard();
+	
+	void addPoint();
+	
 }

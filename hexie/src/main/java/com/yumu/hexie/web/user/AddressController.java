@@ -24,7 +24,6 @@ import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.AddressService;
-import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
@@ -40,8 +39,6 @@ public class AddressController extends BaseController{
     private AddressService addressService;
     @Inject
     private UserService userService;
-	@Inject
-	private PointService pointService;
 	@Inject
 	private RegionService regionService;
 	@Inject
@@ -106,7 +103,6 @@ public class AddressController extends BaseController{
 		//本方法内调用无法异步
 		addressService.fillAmapInfo(addr);
 		user = userService.getById(user.getId());
-		pointService.addZhima(user, 50, "zhima-address-"+user.getId()+"-"+address.getId());
 		session.setAttribute(Constants.USER, user);
 		return new BaseResult<Address>().success(addr);
     }

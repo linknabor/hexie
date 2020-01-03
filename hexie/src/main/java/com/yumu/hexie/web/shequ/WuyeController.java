@@ -46,7 +46,6 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -59,8 +58,6 @@ public class WuyeController extends BaseController {
 
 	@Inject
 	private WuyeService wuyeService;
-	@Inject
-	private PointService pointService;
 	@Inject
 	protected SmsService smsService;
 	@Inject
@@ -174,7 +171,6 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser u = " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
@@ -200,7 +196,6 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser : " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);

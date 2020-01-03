@@ -33,8 +33,8 @@ import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.AddPointQueue;
 import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service("wuyeService")
@@ -47,9 +47,6 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private UserService userService;
-	
-	@Autowired
-	private PointService pointService;
 	
 	@Autowired
 	private CouponService couponService;
@@ -77,12 +74,6 @@ public class WuyeServiceImpl implements WuyeService {
 		return WuyeUtil.getHouse(user, stmtId).getData();
 	}
 	
-	@Override
-	public HexieHouse getHouse(String userId, String stmtId, String house_id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public HexieUser userLogin(User user) {
 		return WuyeUtil.userLogin(user).getData();
@@ -157,8 +148,9 @@ public class WuyeServiceImpl implements WuyeService {
 			couponService.comsume(feePrice, Long.valueOf(couponId));
 		}
 		//2.添加芝麻积分
-		String pointKey = "zhima-bill-" + user.getId() + "-" + billId;
-		pointService.addZhima(user, 10, pointKey);
+		String pointKey = "wuyePay-" + user.getId() + "-" + tradeWaterId;
+//		pointService.addPoint(user, feePrice, pointKey);
+		addPointAsync(user, feePrice, pointKey);
 		
 		//3.绑定所缴纳物业费的房屋
 		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
@@ -331,10 +323,15 @@ public class WuyeServiceImpl implements WuyeService {
 					String value = objectMapper.writeValueAsString(bindHouseQueue);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, value);
 					isSuccess = true;
-				
+					
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 					retryTimes++;
+					try {
+						Thread.sleep(10000);
+					} catch (InterruptedException e1) {
+						log.error(e.getMessage(), e);
+					}
 				}
 			}
 		}
@@ -381,6 +378,50 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		return targetUrl;
 		
+	}
+	
+	/**
+	 * 异步添加积分
+	 * @param user
+	 * @param feePrice
+	 * @param pointKey
+	 */
+	public void addPointAsync(User user, String feePrice, String pointKey) {
+		
+		Assert.hasText(feePrice, "缴费金额为空。");
+
+		//防止重复添加卡券积分，半小时内只能提交队列一次。出队时也会校验重复性
+		Long increment = redisTemplate.opsForValue().increment(pointKey, 1);
+		log.info("addPoint, key[" + pointKey + "], add point[" + feePrice + "], increment : " + increment);
+		if (increment == 1) {
+			int retryTimes = 0;
+			boolean isSuccess = false;
+			while(!isSuccess && retryTimes < 3) {
+				
+				try {
+					AddPointQueue addPointQueue = new AddPointQueue();
+					addPointQueue.setUser(user);
+					addPointQueue.setPoint(feePrice);
+					addPointQueue.setKey(pointKey);
+					
+					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+					String value = objectMapper.writeValueAsString(addPointQueue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_ADD_POINT_QUEUE, value);
+					isSuccess = true;
+				
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					retryTimes++;
+					try {
+						Thread.sleep(10000);
+					} catch (InterruptedException e1) {
+						log.error(e.getMessage(), e);
+					}
+				}
+				
+			}
+		}
+	
 	}
 	
 }

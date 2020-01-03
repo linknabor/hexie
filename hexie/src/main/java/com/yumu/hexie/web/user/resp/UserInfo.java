@@ -73,7 +73,7 @@ public class UserInfo implements Serializable {
  	private List<WuyePayTabs> wuyeTabsList = new ArrayList<>();
  	private String qrCode;
  	
- 	private String points;	//用户积分
+ 	private String point;	//用户积分
  	private String cardStatus;	//用户会员卡状态
  	
 	public String getSectId() {
@@ -306,11 +306,11 @@ public class UserInfo implements Serializable {
 	public void setWuyeTabsList(List<WuyePayTabs> wuyeTabsList) {
 		this.wuyeTabsList = wuyeTabsList;
 	}
-	public String getPoints() {
-		return points;
+	public String getPoint() {
+		return point;
 	}
-	public void setPoints(String points) {
-		this.points = points;
+	public void setPoint(String point) {
+		this.point = point;
 	}
 	public String getCardStatus() {
 		return cardStatus;
