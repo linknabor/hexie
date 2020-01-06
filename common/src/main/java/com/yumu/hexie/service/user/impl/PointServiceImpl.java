@@ -79,7 +79,7 @@ public class PointServiceImpl implements PointService {
 		}
 		
 		User currentUser = userRepository.findOne(user.getId());
-		int currPoint = currentUser.getPoint();	//用户当前积分。无论有没有领卡或者激活卡，这个字段都记录积分
+		int totalPoint = currentUser.getPoint() + addPoint;	//需要设置的积分全量值，传入的数值会直接显示
 		
 		//0.请求微信更新微信卡券积分
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getOpenid());
@@ -91,7 +91,7 @@ public class PointServiceImpl implements PointService {
 			updateUserCardReq.setCardId(wechatCard.getCardId());
 			updateUserCardReq.setCode(wechatCard.getCardCode());
 			updateUserCardReq.setAddBonus(String.valueOf(addPoint));
-			updateUserCardReq.setBonus(String.valueOf(currPoint));
+			updateUserCardReq.setBonus(String.valueOf(totalPoint));
 			updateUserCardReq.setRecordBonus("消费" + point + "元，获得" + addPoint + "积分。");
 			String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId());
 			UpdateUserCardResp updateUserCardResp = cardService.updateUserMemeberCard(updateUserCardReq, accessToken);
@@ -111,7 +111,7 @@ public class PointServiceImpl implements PointService {
 		pointRecordRepository.save(pr);
 		
 		//2.用户表积分字段更新
-		int ret = userRepository.updatePointByUserId(addPoint, user.getId(), currPoint);
+		int ret = userRepository.updatePointByUserId(addPoint, user.getId(), user.getPoint());
 		if (ret == 0) {
 			throw new BizValidateException("更新用户积分失败， 用户ID:" + user.getId() + ", keyStr : " + key);
 		}
