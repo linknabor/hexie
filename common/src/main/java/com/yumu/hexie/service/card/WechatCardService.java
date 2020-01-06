@@ -20,5 +20,7 @@ public interface WechatCardService {
 
 	String getActivateUrlOnPage(User user);
 
+	boolean isCardServiceAvailable(String appId);
+
 	
 }
