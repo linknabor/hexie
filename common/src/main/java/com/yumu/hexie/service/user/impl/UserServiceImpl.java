@@ -142,7 +142,6 @@ public class UserServiceImpl implements UserService {
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, userAccount.getOpenid());
 		if (wechatCard != null) {
 			logger.info("user [ " + userAccount.getOpenid()+ " ] has already got card. will syn card status to user. ");
-			userAccount.setCardStatus(wechatCard.getStatus());
 			logger.info("card status : " + wechatCard.getStatus());
 			if (ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
 				int points = wechatCard.getBonus();
@@ -330,9 +329,6 @@ public class UserServiceImpl implements UserService {
 			
 		}
 		user.setRegisterDate(System.currentTimeMillis());
-		if (wechatCard != null) {
-			user.setCardStatus(wechatCard.getStatus());
-		}
         User savedUser = userRepository.save(user);
         return save(savedUser);
 		

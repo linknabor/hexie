@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.card;
 
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
+import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardCatagory;
 import com.yumu.hexie.model.card.dto.EventGetCardDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
@@ -21,6 +22,8 @@ public interface WechatCardService {
 	String getActivateUrlOnPage(User user);
 
 	boolean isCardServiceAvailable(String appId);
+
+	WechatCard getWechatMemberCard(String openid);
 
 	
 }
