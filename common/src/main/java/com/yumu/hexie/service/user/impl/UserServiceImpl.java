@@ -308,7 +308,7 @@ public class UserServiceImpl implements UserService {
 				ActivateReq activateReq = new ActivateReq();
 				activateReq.setCardId(wechatCard.getCardId());
 				activateReq.setCode(wechatCard.getCardCode());
-				int point = user.getLvdou();	//新用户送88积分。老用户，积分已经做过转换，直接取lvdou的值
+				int point = user.getPoint();	//新用户送88积分。老用户，积分已经做过转换，直接取lvdou的值
 				if (point == 0) {	
 					point = 88;
 				}

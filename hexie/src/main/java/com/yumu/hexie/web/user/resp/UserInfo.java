@@ -73,8 +73,9 @@ public class UserInfo implements Serializable {
  	private List<WuyePayTabs> wuyeTabsList = new ArrayList<>();
  	private String qrCode;
  	
- 	private String point;	//用户积分
+ 	private int point;	//用户积分
  	private int cardStatus;	//用户会员卡状态
+ 	private boolean cardService;	//是否开通卡券服务
  	
 	public String getSectId() {
 		return sectId;
@@ -306,10 +307,10 @@ public class UserInfo implements Serializable {
 	public void setWuyeTabsList(List<WuyePayTabs> wuyeTabsList) {
 		this.wuyeTabsList = wuyeTabsList;
 	}
-	public String getPoint() {
+	public int getPoint() {
 		return point;
 	}
-	public void setPoint(String point) {
+	public void setPoint(int point) {
 		this.point = point;
 	}
 	public int getCardStatus() {
@@ -318,5 +319,12 @@ public class UserInfo implements Serializable {
 	public void setCardStatus(int cardStatus) {
 		this.cardStatus = cardStatus;
 	}
+	public boolean isCardService() {
+		return cardService;
+	}
+	public void setCardService(boolean cardService) {
+		this.cardService = cardService;
+	}
+	
 	
 }

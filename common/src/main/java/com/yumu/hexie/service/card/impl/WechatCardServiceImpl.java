@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
@@ -249,7 +250,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		//积分转换
 		int points = 88;	//新用户给88积分。
 		if (user != null) {
-			points = user.getLvdou();	//老用户直接取lvdou的值。
+			points = user.getPoint();	//老用户直接取lvdou的值。
 		}
 		String cardCode = decryptCodeResp.getCode();
 		ActivateReq activateReq = new ActivateReq();
@@ -328,6 +329,20 @@ public class WechatCardServiceImpl implements WechatCardService {
 			throw new BizValidateException("领取会员卡失败，请刷新后重试。");
 		}
 		return activateUrlResp.getUrl();
+		
+	}
+	
+	@Override
+	public boolean isCardServiceAvailable (String appId){
+		
+		String appIds = systemConfigService.getSysConfigByKey("CARD_SERVICE_APPS");
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
 		
 	}
 

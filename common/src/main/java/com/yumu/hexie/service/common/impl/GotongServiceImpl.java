@@ -104,37 +104,31 @@ public class GotongServiceImpl implements GotongService {
         CustomService.sendCustomerMessage(msg, accessToken);
     }
     
+    /**
+     * 发送关注客服消息
+     */
     @Override
 	public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO) {
     	
     	NewsMessage msg = null;
     	User user = subscribeVO.getUser();
-    	String event = systemConfigService.getSysConfigByKey("SUBSCRIBE_EVENT");
+    	String cardServiceApps = systemConfigService.getSysConfigByKey("CARD_SERVICE_APPS");
     	String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-    	if ("1".equals(event)) {
-			Article article = new Article();
-			article.setTitle("欢迎加入合协社区！");
-			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
-			article.setPicurl(SUBSCRIBE_IMG);
-			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
-			
-			News news = new News(new ArrayList<Article>());
-			news.getArticles().add(article);
-			msg = new NewsMessage(news);
-			msg.setTouser(user.getOpenid());
-			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-			
-		}else if ("2".equals(event)) {
-			Article article = new Article();
-			article.setTitle("欢迎加入合协社区！");
-			article.setDescription("您已获得关注红包，点击查看。");
-			article.setPicurl(SUBSCRIBE_IMG);
-			article.setUrl(SUBSCRIBE_DETAIL);
-			News news = new News(new ArrayList<Article>());
-			news.getArticles().add(article);
-			msg = new NewsMessage(news);
-			msg.setTouser(user.getOpenid());
-			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+    	if (!StringUtils.isEmpty(cardServiceApps)) {
+    		if (cardServiceApps.indexOf(user.getAppId()) > -1) {
+    			Article article = new Article();
+    			article.setTitle("欢迎加入合协社区！");
+    			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
+    			article.setPicurl(SUBSCRIBE_IMG);
+    			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
+    			
+    			News news = new News(new ArrayList<Article>());
+    			news.getArticles().add(article);
+    			msg = new NewsMessage(news);
+    			msg.setTouser(user.getOpenid());
+    			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+			}
+    		
 		}
     	if (msg == null) {
 			return false;

@@ -33,9 +33,6 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 	private StringRedisTemplate stringRedisTemplate;
 
 	@Autowired
-	private SystemConfigService systemConfigService;
-
-	@Autowired
 	private WechatCardService wechatCardService;
 	
 	@Autowired
@@ -55,23 +52,20 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_EVENT_SUBSCRIBE_QUEUE,
 						10, TimeUnit.SECONDS);
 
-				String event = systemConfigService.getSysConfigByKey("SUBSCRIBE_EVENT");
-				if ("0".equals(event)) { // 0没活动
-					continue;
-				}
-
 				if (StringUtils.isEmpty(json)) {
 					continue;
 				}
-
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
-
 				logger.info("strat to consume subscribe event queue : " + map);
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
-
+				
+				//校验当前公众号是否卡通了卡券服务
+				if (!wechatCardService.isCardServiceAvailable(appId)) {
+					continue;
+				}
 				User user = new User();
 				user.setOpenid(openid);
 				user.setAppId(appId);
