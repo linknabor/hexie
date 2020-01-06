@@ -223,11 +223,6 @@ public class WechatCardServiceImpl implements WechatCardService {
 				break;
 			}
 		}
-		
-		if (true) {	//just for test activate
-			return wechatCardCatagory.getAppId();
-		}
-		
 		/*2.解码微信返回的code */
 		map = new HashMap<>();
 		map.put("encrypt_code", encryptCode);
