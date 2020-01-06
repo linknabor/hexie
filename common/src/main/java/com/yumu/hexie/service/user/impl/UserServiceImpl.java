@@ -303,6 +303,7 @@ public class UserServiceImpl implements UserService {
 				wechatCard.setTel(user.getTel());
 				needUpdateCard = true;
 			}
+			logger.info("用户["+user.getOpenid()+"], card status : " + wechatCard.getStatus());
 			if (ModelConstant.CARD_STATUS_GET == wechatCard.getStatus()) {	//如果已领卡，需要激活
 				
 				ActivateReq activateReq = new ActivateReq();
