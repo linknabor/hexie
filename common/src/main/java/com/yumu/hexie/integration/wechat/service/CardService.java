@@ -116,7 +116,7 @@ public class CardService {
 	public Object restRequest(Object requestObj, Class respClazz, String reqUrl, String accessToken) {
 		
 		HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         String reqData = "";
         try {
         	reqData = JacksonJsonUtil.beanToJson(requestObj);

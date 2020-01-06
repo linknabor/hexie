@@ -53,10 +53,10 @@ public class PointServiceImpl implements PointService {
 	 * @param key 形式为：wuyePay-userId-tradeWaterId
 	 * 
 	 * 步骤：
-	 * 0.请求微信更新会员卡积分
 	 * 1.更新pointRecord表，记录本次更新的流水
 	 * 2.更新user表的point字段
 	 * 3.更新wechatCard表的bonus字段
+	 * 4.请求微信更新会员卡积分
 	 */
 	@Override
 	@Transactional
@@ -87,18 +87,6 @@ public class PointServiceImpl implements PointService {
 		if (wechatCard == null || ModelConstant.CARD_STATUS_ACTIVATED != wechatCard.getStatus()) {
 			logger.error("当前用户尚未领取会员卡或者会员卡尚未激活，将跳过与微信同步会员卡积分。");
 		}else {
-			UpdateUserCardReq updateUserCardReq = new UpdateUserCardReq();
-			updateUserCardReq.setCardId(wechatCard.getCardId());
-			updateUserCardReq.setCode(wechatCard.getCardCode());
-			updateUserCardReq.setAddBonus(String.valueOf(addPoint));
-			updateUserCardReq.setBonus(String.valueOf(totalPoint));
-			updateUserCardReq.setRecordBonus("消费" + point + "元，获得" + addPoint + "积分。");
-			String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId());
-			UpdateUserCardResp updateUserCardResp = cardService.updateUserMemeberCard(updateUserCardReq, accessToken);
-			logger.info("updateUserCardResp : " + updateUserCardResp);
-			if (!"0".equals(updateUserCardResp.getErrcode())) {
-				throw new BizValidateException("同步微信会员卡积分失败， errmsg : " + updateUserCardResp.getErrmsg());
-			}
 			needUpdateCard = true;
 		}
 		
@@ -119,10 +107,24 @@ public class PointServiceImpl implements PointService {
 		//3.卡券表
 		if (needUpdateCard) {
 			int currBonus = wechatCard.getBonus();
-			int retcard = wechatCardRepository.updateCardPointByUserId(addPoint, user.getId(), currBonus);
+			int retcard = wechatCardRepository.updateCardByCardCode(addPoint, wechatCard.getCardCode(), currBonus);
 			if (retcard == 0) {
 				throw new BizValidateException("更新用户卡券积分失败， card code:" + wechatCard.getCardCode() + ", keyStr : " + key);
 			}
+		}
+		
+		//4.请求微信更新会员卡积分。这个放在最后一步，以防上面报错回滚
+		UpdateUserCardReq updateUserCardReq = new UpdateUserCardReq();
+		updateUserCardReq.setCardId(wechatCard.getCardId());
+		updateUserCardReq.setCode(wechatCard.getCardCode());
+		updateUserCardReq.setAddBonus(String.valueOf(addPoint));
+		updateUserCardReq.setBonus(String.valueOf(totalPoint));
+		updateUserCardReq.setRecordBonus("消费" + point + "元，获得" + addPoint + "积分。");
+		String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId());
+		UpdateUserCardResp updateUserCardResp = cardService.updateUserMemeberCard(updateUserCardReq, accessToken);
+		logger.info("updateUserCardResp : " + updateUserCardResp);
+		if (!"0".equals(updateUserCardResp.getErrcode())) {
+			throw new BizValidateException("同步微信会员卡积分失败， errmsg : " + updateUserCardResp.getErrmsg());
 		}
 		
 		stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);

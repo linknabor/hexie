@@ -13,8 +13,8 @@ public interface WechatCardRepository extends JpaRepository<WechatCard, Long> {
 	
 	@Modifying
 	@Transactional
-	@Query(value = "update wechatcard set bonus = bonus + ?1 where id = ?2 and bonus = ?3 ", nativeQuery = true)
-	public int updateCardPointByUserId(int addPoint, long userId, int oriPoint);
+	@Query(value = "update wechatcard set bonus = bonus + ?1 where cardCode = ?2 and bonus = ?3 ", nativeQuery = true)
+	public int updateCardByCardCode(int addPoint, String cardCode, int oriPoint);
 	
 	@Modifying
 	@Transactional
