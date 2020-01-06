@@ -311,6 +311,7 @@ public class UserServiceImpl implements UserService {
 				int point = user.getPoint();	//新用户送88积分。老用户，积分已经做过转换，直接取lvdou的值
 				if (point == 0) {	
 					point = 88;
+					user.setPoint(point);
 				}
 				activateReq.setInitBonus(String.valueOf(point));
 				activateReq.setInitBonusRecord("用户积分兑换。");
@@ -321,6 +322,7 @@ public class UserServiceImpl implements UserService {
 					throw new BizValidateException("创建用户失败。 errmsg : " + activateResp.getErrmsg());
 				}
 				wechatCard.setStatus(ModelConstant.CARD_STATUS_ACTIVATED);
+				wechatCard.setBonus(point);
 				needUpdateCard = true;
 			}
 			if (needUpdateCard) {

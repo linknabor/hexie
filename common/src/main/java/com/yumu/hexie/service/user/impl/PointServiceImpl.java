@@ -72,6 +72,12 @@ public class PointServiceImpl implements PointService {
 		BigDecimal bigPoint = new BigDecimal(point);
 		bigPoint = bigPoint.setScale(0, RoundingMode.HALF_UP);	//金额四舍五入，只保留整数部分
 		int addPoint = bigPoint.intValue();	//本次要增加的积分
+		
+		if (addPoint == 0) {
+			logger.info("本次缴费金额：" + point + "元，产生积分：" + addPoint + "。will skip .");
+			return;
+		}
+		
 		User currentUser = userRepository.findOne(user.getId());
 		int currPoint = currentUser.getPoint();	//用户当前积分。无论有没有领卡或者激活卡，这个字段都记录积分
 		
@@ -105,7 +111,7 @@ public class PointServiceImpl implements PointService {
 		pointRecordRepository.save(pr);
 		
 		//2.用户表积分字段更新
-		int ret = userRepository.updatePointByUserId(user.getId(), addPoint, currPoint);
+		int ret = userRepository.updatePointByUserId(addPoint, user.getId(), currPoint);
 		if (ret == 0) {
 			throw new BizValidateException("更新用户积分失败， 用户ID:" + user.getId() + ", keyStr : " + key);
 		}
@@ -113,7 +119,7 @@ public class PointServiceImpl implements PointService {
 		//3.卡券表
 		if (needUpdateCard) {
 			int currBonus = wechatCard.getBonus();
-			int retcard = wechatCardRepository.updateCardPointByUserId(user.getId(), addPoint, currBonus);
+			int retcard = wechatCardRepository.updateCardPointByUserId(addPoint, user.getId(), currBonus);
 			if (retcard == 0) {
 				throw new BizValidateException("更新用户卡券积分失败， card code:" + wechatCard.getCardCode() + ", keyStr : " + key);
 			}
