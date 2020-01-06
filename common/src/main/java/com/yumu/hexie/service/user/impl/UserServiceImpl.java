@@ -88,7 +88,6 @@ public class UserServiceImpl implements UserService {
 
 		String openId = weixinUser.getOpenid();
 		User userAccount = multiFindByOpenId(openId);
-		boolean isNew = false;	//是否新用户
 
 		if (userAccount == null) {
 			userAccount = new User();
@@ -104,7 +103,6 @@ public class UserServiceImpl implements UserService {
 			userAccount.setLanguage(weixinUser.getLanguage());
 			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + userAccount.getId() + "]"));
-			isNew = true;
 
 		} else {
 
@@ -145,7 +143,7 @@ public class UserServiceImpl implements UserService {
 			logger.info("card status : " + wechatCard.getStatus());
 			if (ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
 				int points = wechatCard.getBonus();
-				if (isNew) {	//新用户，送88积分
+				if (points == 0) {	//新用户，送88积分
 					points += 88;
 				}
 				userAccount.setPoint(points);
