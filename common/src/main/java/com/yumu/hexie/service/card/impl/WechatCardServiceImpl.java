@@ -345,6 +345,21 @@ public class WechatCardServiceImpl implements WechatCardService {
 		return isAvailable;
 		
 	}
+	
+	/**
+	 * 根据用户openid获取微信会员卡
+	 * @param openid
+	 * @return
+	 */
+	@Override
+	public WechatCard getWechatMemberCard(String openid) {
+		
+		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, openid);
+		if (wechatCard == null) {
+			wechatCard = new WechatCard();
+		}
+		return wechatCard;
+	}
 
 
 }

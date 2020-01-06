@@ -19,7 +19,6 @@ import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.card.WechatCardService;
-import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.impl.WuyeQueueTaskImpl;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.vo.AddPointQueue;

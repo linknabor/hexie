@@ -119,6 +119,8 @@ public class UserController extends BaseController{
 			    userInfo.setWuyeTabsList(tabsList);
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    userInfo.setQrCode(qrCode.getQrLink());
+			    
+			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
 			    userInfo.setCardService(wechatCardService.isCardServiceAvailable(user.getAppId()));
 			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
