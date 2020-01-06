@@ -1,7 +1,5 @@
 package com.yumu.hexie.service.card.impl;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -197,12 +195,6 @@ public class WechatCardServiceImpl implements WechatCardService {
 		//下面2个字段先要decode
 		String activateTicket = preActivateReq.getActivateTicket();
 		String encryptCode = preActivateReq.getEncryptCode();
-		try {
-			activateTicket = URLDecoder.decode(activateTicket, "utf-8");
-			encryptCode = URLDecoder.decode(encryptCode, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			logger.error(e.getLocalizedMessage(), e);
-		}
 		
 		/*1.用返回的acitvate_ticket获取用户开卡时填写的个人信息*/
 		Map<String, String> map = new HashMap<>();
