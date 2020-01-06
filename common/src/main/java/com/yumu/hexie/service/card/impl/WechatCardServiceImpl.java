@@ -245,7 +245,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		//积分转换
 		int points = 88;	//新用户给88积分。
 		if (user != null) {
-			points = user.getPoint();	//老用户直接取lvdou的值。
+			points = user.getPoint();	//老用户直接取。
 		}
 		String cardCode = decryptCodeResp.getCode();
 		ActivateReq activateReq = new ActivateReq();
@@ -297,6 +297,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		}
 		wechatCard.setCardCode(cardCode);
 		wechatCard.setStatus(ModelConstant.CARD_STATUS_ACTIVATED);
+		wechatCard.setBonus(points);
 		if (user!=null) {	//老用户
 			wechatCard.setUserId(user.getId());
 			wechatCard.setUserName(user.getName());
