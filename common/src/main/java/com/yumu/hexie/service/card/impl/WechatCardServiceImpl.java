@@ -236,7 +236,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		}
 		//积分转换
 		int points = 88;	//新用户给88积分。
-		if (user != null) {
+		if (user != null && user.getPoint() != 0) {
 			points = user.getPoint();	//老用户直接取。
 		}
 		String cardCode = decryptCodeResp.getCode();
@@ -252,7 +252,11 @@ public class WechatCardServiceImpl implements WechatCardService {
 			throw new BizValidateException("会员卡激活失败：" + activateResp.getErrmsg());
 		}
 		
-		/*4.根据openid做用户和卡的关联，如果没有用户的(新关注的user表没有记录，取关重新关注的则有记录)需要先生成新用户*/
+		/*4.根据openid做用户和卡的关联
+		 * 1.如果没有用户的(新关注的user表没有记录，取关重新关注的则有记录)需要先生成新用户
+		 * 2.如果有用户，但是未注册的（无手机号）的，需要绑定手机号
+		 * 3.如果有用户，并且注册了的
+		 */
 		if (user == null) {
 			user = new User();
 			user.setOpenid(preActivateReq.getOpenid());
@@ -269,6 +273,15 @@ public class WechatCardServiceImpl implements WechatCardService {
 			user.setZhima(0);
 			user.setRegisterDate(System.currentTimeMillis());
 			user.setNewRegiste(true);
+			user.setPoint(points);
+			user = userRepository.save(user);
+		}else if (StringUtils.isEmpty(user.getTel())) {
+			user.setTel(mobile);
+			user.setRegisterDate(System.currentTimeMillis());
+			user.setNewRegiste(true);
+			user.setPoint(points);
+			user = userRepository.save(user);
+		}else {
 			user.setPoint(points);
 			user = userRepository.save(user);
 		}
@@ -290,6 +303,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		wechatCard.setCardCode(cardCode);
 		wechatCard.setStatus(ModelConstant.CARD_STATUS_ACTIVATED);
 		wechatCard.setBonus(points);
+		wechatCard.setTel(mobile);
 		if (user!=null) {	//老用户
 			wechatCard.setUserId(user.getId());
 			wechatCard.setUserName(user.getName());
