@@ -21,6 +21,7 @@ import com.yumu.hexie.integration.wechat.entity.card.ActivateTempInfoResp;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlResp;
 import com.yumu.hexie.integration.wechat.entity.card.DecryptCodeResp;
+import com.yumu.hexie.integration.wechat.entity.card.GetUserCardResp;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardReq;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardResp;
 
@@ -44,6 +45,9 @@ public class CardService {
 	private static String ACTIVATE_TEMP_INFO_URL = "https://api.weixin.qq.com/card/membercard/activatetempinfo/get?access_token=ACCESS_TOKEN";
 	//更新卡券积分
 	private static String UPDATE_USER_CARD_URL = "https://api.weixin.qq.com/card/membercard/updateuser?access_token=ACCESS_TOKEN";
+	//查询用户卡券积分
+	private static String GET_USER_CARD_INFO_URL = "https://api.weixin.qq.com/card/membercard/userinfo/get?access_token=ACCESS_TOKEN";
+	
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -110,6 +114,19 @@ public class CardService {
 		UpdateUserCardResp updateUserCardResp = (UpdateUserCardResp) restRequest(updateUserCardReq, UpdateUserCardResp.class, reqUrl, accessToken);
 		return updateUserCardResp;
 		
+	}
+	
+	/**
+	 * 查询用户卡券信息
+	 * @param getMap
+	 * @param accessToken
+	 * @return
+	 */
+	public GetUserCardResp getUserCardInfo(Map<String ,String> getMap, String accessToken) {
+		
+		String reqUrl = GET_USER_CARD_INFO_URL.replaceAll("ACCESS_TOKEN", accessToken);
+		GetUserCardResp getUserCardResp = (GetUserCardResp) restRequest(getMap, GetUserCardResp.class, reqUrl, accessToken);
+		return getUserCardResp;
 	}
 	
 	@SuppressWarnings({ "rawtypes" })

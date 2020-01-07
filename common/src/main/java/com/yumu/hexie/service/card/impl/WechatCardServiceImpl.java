@@ -3,15 +3,19 @@ package com.yumu.hexie.service.card.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateTempInfoResp;
@@ -19,8 +23,10 @@ import com.yumu.hexie.integration.wechat.entity.card.ActivateTempInfoResp.Info.A
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateUrlResp;
 import com.yumu.hexie.integration.wechat.entity.card.DecryptCodeResp;
+import com.yumu.hexie.integration.wechat.entity.card.GetUserCardResp;
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.integration.wechat.service.CardService;
+import com.yumu.hexie.integration.wuye.vo.RefundDTO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardCatagory;
@@ -28,12 +34,14 @@ import com.yumu.hexie.model.card.WechatCardCatagoryRepository;
 import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.card.dto.EventGetCardDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
+import com.yumu.hexie.model.card.dto.EventUpdateCardDTO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.user.PointService;
 
 @Service
 public class WechatCardServiceImpl implements WechatCardService {
@@ -60,6 +68,12 @@ public class WechatCardServiceImpl implements WechatCardService {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+	
+	@Autowired
+	private PointService pointService;
 	
 	/**
 	 * 获取微信会员卡套。卡套相当于一个卡的模板，里面是没有积分的，只有规则。
@@ -334,20 +348,6 @@ public class WechatCardServiceImpl implements WechatCardService {
 		
 	}
 	
-	@Override
-	public boolean isCardServiceAvailable (String appId){
-		
-		String appIds = systemConfigService.getSysConfigByKey("CARD_SERVICE_APPS");
-		boolean isAvailable = false;
-		if (!StringUtils.isEmpty(appIds)) {
-			if (appIds.indexOf(appId) > -1) {
-				isAvailable = true;
-			}
-		}
-		return isAvailable;
-		
-	}
-	
 	/**
 	 * 根据用户openid获取微信会员卡
 	 * @param openid
@@ -363,5 +363,76 @@ public class WechatCardServiceImpl implements WechatCardService {
 		return wechatCard;
 	}
 
+	/**
+	 * 物业缴费退款
+	 */
+	@Override
+	public void wuyeRefund(RefundDTO refundDTO) {
+
+		String tradeWaterId = refundDTO.getTradeWaterId();
+		String key = ModelConstant.KEY_WUYE_REFUND_ORDER + tradeWaterId;
+		long value = stringRedisTemplate.opsForValue().increment(key, 1);
+		if (value == 1) {
+			String json;
+			try {
+				json = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(refundDTO);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_WUYE_REFUND_QUEUE, json);
+				stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);
+			} catch (JsonProcessingException e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+		}
+	}
+
+	/**
+	 * 用户更新卡事件
+	 * 1.由于小程序端也会更新用户积分，所以先要去微信查询用户的真实积分
+	 * 2.接步骤1，如果微信返回的用户积分和本地数据库里记录的不一样，说明是小程序端更新了积分。需要做一次积分同步的操作，并记下该条同步记录
+	 * 3.接步骤1，如果微信返回的用户积分和本地数据库里记录的一致，则说明是公众号的积分操作，不做更新。
+	 */
+	@Transactional
+	@Override
+	public void eventUpdateCard(EventUpdateCardDTO eventUpdateCardDTO) {
+
+		//1.去微信查询用户当前的卡券积分
+		String cardId = eventUpdateCardDTO.getCardId();
+		String cardCode = eventUpdateCardDTO.getCardCode();
+		
+		WechatCard wechatCard = wechatCardRepository.findByCardCode(cardCode);
+		if (wechatCard == null) {
+			throw new BizValidateException("数据库中未查询到当前卡号["+cardCode+"]的会员卡。 eventUpdateCardDTO : " + eventUpdateCardDTO);
+		}
+		Map<String ,String> requestMap = new HashMap<>();
+		requestMap.put("card_id", cardId);
+		requestMap.put("code", cardCode);
+		String accessToken = systemConfigService.queryWXAToken(eventUpdateCardDTO.getAppId());
+		GetUserCardResp getUserCardResp = cardService.getUserCardInfo(requestMap, accessToken);
+		logger.info("getUserCardResp : " + getUserCardResp);
+		if (!"0".equals(getUserCardResp.getErrcode())) {
+			throw new BizValidateException("查询会员卡详细信息失败：" + getUserCardResp.getErrmsg());
+		}
+		
+		String serverBonus = getUserCardResp.getBonus();	//微信的积分
+		int localBonus = wechatCard.getBonus();	//本地积分
+		int wechatBonus = Integer.parseInt(serverBonus);
+		if (localBonus == wechatBonus) {	
+			logger.info("本地积分与微信积分相同，将跳过积分同步。");
+			return;
+		}
+		
+		/*
+		 * 2.本地积分与微信积分不同，需要同步
+		 */
+		int increment = wechatBonus - localBonus;	//本次增量
+		User user = new User();
+		user.setOpenid(eventUpdateCardDTO.getOpenid());
+		String key = "syncWechat";
+		pointService.updatePoint(user, String.valueOf(increment), key, false);	//false代表不通知微信，仅仅本地更新
+	
+	
+	}
+
 
 }
+	

@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -46,6 +47,7 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -62,18 +64,16 @@ public class WuyeController extends BaseController {
 	protected SmsService smsService;
 	@Inject
 	protected CouponService couponService;
-
 	@Inject
 	protected UserService userService;
-
 	@Inject
 	protected AddressService addressService;
-
 	@Inject
 	protected UserRepository userRepository;
-
 	@Inject
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private PointService pointService;
 
 	/**
 	 * 根据用户身份查询其所绑定的房屋
@@ -171,6 +171,7 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser u = " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
+			pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
@@ -196,6 +197,7 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser : " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
+			pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);

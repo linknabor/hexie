@@ -39,7 +39,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public List<User> findByAppId(String appId, Pageable pageable);
 
 	/**
-	 * 更新语句的where 条件必须带上原积分值，这样可以解决多次调用带来的幂等性问题。
+	 * 根据增量更新。更新语句的where 条件必须带上原积分值，这样可以解决多次调用带来的幂等性问题。
 	 * @param userId
 	 * @param point
 	 * @return
@@ -47,7 +47,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Modifying
 	@Transactional
 	@Query(value = "update user set point = point + ?1 where id = ?2 and point = ?3 ", nativeQuery = true )
-	public int updatePointByUserId(int addPoint, long userId, int oriPoint);
+	public int updatePointByIncrement(int addPoint, long userId, int oriPoint);
 	
 	@Modifying
 	@Transactional

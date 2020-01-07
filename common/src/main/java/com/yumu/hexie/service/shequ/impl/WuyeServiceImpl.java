@@ -28,11 +28,13 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.AddPointQueue;
 import com.yumu.hexie.vo.BindHouseQueue;
@@ -56,6 +58,12 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private LocationService locationService;
+	
+	@Autowired
+	private PointService pointService;
+	
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -148,10 +156,13 @@ public class WuyeServiceImpl implements WuyeService {
 			couponService.comsume(feePrice, Long.valueOf(couponId));
 		}
 		//2.添加芝麻积分
-		String pointKey = "wuyePay-" + user.getId() + "-" + tradeWaterId;
-//		pointService.addPoint(user, feePrice, pointKey);
-		addPointAsync(user, feePrice, pointKey);
-		
+		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
+			String pointKey = "wuyePay-" + tradeWaterId;
+			addPointAsync(user, feePrice, pointKey);
+		}else {
+			String pointKey = "zhima-bill-" + user.getId() + "-" + billId;
+			pointService.updatePoint(user, "10", pointKey);
+		}
 		//3.绑定所缴纳物业费的房屋
 		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
 		

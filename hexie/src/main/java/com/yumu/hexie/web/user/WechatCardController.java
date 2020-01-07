@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
+import com.yumu.hexie.integration.wuye.vo.RefundDTO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.WechatCoreService;
@@ -78,6 +80,17 @@ public class WechatCardController extends BaseController {
 		String url = wechatCardService.getActivateUrlOnPage(user);
 		return BaseResult.successResult(url);
 		
+	}
+	
+	@RequestMapping(value = "/refund", method = RequestMethod.POST)
+	public String refund(@RequestParam(name="sysCode") String sysCode,
+			@RequestBody RefundDTO refundDTO) {
+		
+		if (!"hexie".equals(sysCode)) {
+			return "";
+		}
+		wechatCardService.wuyeRefund(refundDTO);
+		return "success";
 	}
 	
 }

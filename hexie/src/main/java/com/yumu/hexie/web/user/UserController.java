@@ -35,6 +35,7 @@ import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.SmsService;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
@@ -64,6 +65,8 @@ public class UserController extends BaseController{
     private PageConfigService pageConfigService;
     @Autowired
     private WechatCardService wechatCardService;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -121,7 +124,7 @@ public class UserController extends BaseController{
 			    userInfo.setQrCode(qrCode.getQrLink());
 			    
 			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
-			    userInfo.setCardService(wechatCardService.isCardServiceAvailable(user.getAppId()));
+			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
