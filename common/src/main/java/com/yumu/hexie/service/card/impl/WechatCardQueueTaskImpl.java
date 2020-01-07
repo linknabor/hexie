@@ -212,6 +212,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		
 	}
 
+	@Async
 	@Override
 	public void eventUpdateCard() {
 		
