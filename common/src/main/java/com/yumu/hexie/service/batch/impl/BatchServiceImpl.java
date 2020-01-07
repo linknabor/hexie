@@ -50,7 +50,9 @@ public class BatchServiceImpl implements BatchService {
 		wuyeQueueTask.bindHouseByTrade();
 		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
-		wechatCardQueueTask.addPoint();
+		wechatCardQueueTask.eventUpdateCard();
+		wechatCardQueueTask.updatePointAsync();
+		wechatCardQueueTask.wuyeRefund();
 		
 	}
 

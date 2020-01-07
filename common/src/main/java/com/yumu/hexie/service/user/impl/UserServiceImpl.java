@@ -33,6 +33,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 
 @Service("userService")
@@ -57,6 +58,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private SystemConfigService systemConfigService;
+	
+	@Autowired
+	private PointService pointService;
 	
 	@Override
 	public User getById(long uId) {
@@ -186,6 +190,7 @@ public class UserServiceImpl implements UserService {
 		if (user.getStatus() == 0 && StringUtil.isNotEmpty(user.getTel())) {
 			user.setStatus(ModelConstant.USER_STATUS_BINDED);
 		}
+		pointService.updatePoint(user, "100", "zm-binding-" + user.getId());
 		return userRepository.save(user);
 	}
 	

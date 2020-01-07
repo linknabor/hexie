@@ -6,6 +6,10 @@ public interface WechatCardQueueTask {
 	
 	void eventUserGetCard();
 	
-	void addPoint();
+	void eventUpdateCard();
+	
+	void updatePointAsync();
+	
+	void wuyeRefund();
 	
 }

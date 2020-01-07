@@ -241,6 +241,22 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	public static Map<String, String> getSysMap() {
 		return sysMap;
 	}
+	
+	
+	@Override
+	public boolean isCardServiceAvailable (String appId){
+		
+		String appIds = getSysConfigByKey("CARD_SERVICE_APPS");
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
+		
+	}
+	
     
 	public static void main(String[] args) {
 		

@@ -15,6 +15,7 @@ public class PointRecord extends BaseModel{
 	private int type ;//0 芝麻 1绿豆
 	private int reason;//发放原因类型 0.关注 1.绑定手机号 2.绑定房子 3.到家服务 4. 发起拼单 5. 参与拼单 6.单个拼单 7.物业缴费
 	private String keyStr;
+    private int pointSnapshot;	//本次添加之前的积分
 	
 
 	public int getPoint() {
@@ -51,13 +52,20 @@ public class PointRecord extends BaseModel{
 	public void setReason(int reason) {
 		this.reason = reason;
 	}
-
 	public String getKeyStr() {
 		return keyStr;
 	}
-
 	public void setKeyStr(String keyStr) {
 		this.keyStr = keyStr;
 	}
 
+	public int getPointSnapshot() {
+		return pointSnapshot;
+	}
+
+	public void setPointSnapshot(int pointSnapshot) {
+		this.pointSnapshot = pointSnapshot;
+	}
+	
+	
 }
