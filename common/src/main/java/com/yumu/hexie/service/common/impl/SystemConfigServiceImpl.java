@@ -260,9 +260,13 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     
 	public static void main(String[] args) {
 		
-		String str = "APP_SYS_wx6160b615066a9f78";
-		String key = str.substring(str.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), str.length());
-		System.out.println(key);
+//		String str = "APP_SYS_wx6160b615066a9f78";
+//		String key = str.substring(str.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), str.length());
+//		System.out.println(key);
+		
+		String appIds = "23456";
+		String a = null;
+		System.out.println(appIds.indexOf(a));
 	}
     
 }

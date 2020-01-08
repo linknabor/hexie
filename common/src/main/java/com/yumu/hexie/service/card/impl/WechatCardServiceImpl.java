@@ -448,7 +448,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		User user = new User();
 		user.setOpenid(eventUpdateCardDTO.getOpenid());
 		user.setAppId(eventUpdateCardDTO.getAppId());
-		String key = "syncWechat";
+		String key = "syncWechatPoint-" + eventUpdateCardDTO.getCreateTime();
 		pointService.updatePoint(user, String.valueOf(increment), key, false);	//false代表不通知微信，仅仅本地更新
 	
 	
