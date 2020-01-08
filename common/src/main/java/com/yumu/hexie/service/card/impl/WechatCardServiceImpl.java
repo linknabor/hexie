@@ -173,6 +173,9 @@ public class WechatCardServiceImpl implements WechatCardService {
 		if (wechatCard == null) {
 			wechatCard = new WechatCard();
 			WechatCardCatagory wechatCardCatagory = wechatCardCatagoryRepository.findByCardId(eventGetCardDTO.getCardId());
+			if (wechatCardCatagory == null) {
+				throw new BizValidateException("未配置card_id为["+eventGetCardDTO.getCardId()+"]的卡券");
+			}
 			wechatCard.setCardType(wechatCardCatagory.getCardType());
 			wechatCard.setUserAppId(eventGetCardDTO.getAppId());
 			wechatCard.setUserOpenId(eventGetCardDTO.getOpenid());
@@ -203,8 +206,23 @@ public class WechatCardServiceImpl implements WechatCardService {
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(preActivateReq.getCardId(), preActivateReq.getOpenid());
 		if (wechatCard != null && ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
 			logger.info("当前用户卡券已激活。卡券code:" + wechatCard.getCardCode());
-			User cardUser = new User();
-			cardUser.setAppId(wechatCard.getUserAppId());
+			User cardUser = userRepository.findById(wechatCard.getUserId());
+			if (cardUser == null) {
+				List<User> cardUserList = userRepository.findByOpenid(wechatCard.getUserOpenId());
+				if (cardUserList!=null && !cardUserList.isEmpty()) {
+					cardUser = cardUserList.get(cardUserList.size()-1);
+				}else {
+					cardUser = new User();
+					cardUser.setAppId(wechatCard.getUserAppId());
+				}
+			}
+			if (StringUtils.isEmpty(cardUser.getTel())) {
+				cardUser.setTel(wechatCard.getTel());
+				cardUser.setRegisterDate(wechatCard.getCreateDate());
+				cardUser.setPoint(wechatCard.getBonus());
+				cardUser.setNewRegiste(true);
+				userRepository.save(cardUser);
+			}
 			return cardUser;
 		}
 		
@@ -429,6 +447,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		int increment = wechatBonus - localBonus;	//本次增量
 		User user = new User();
 		user.setOpenid(eventUpdateCardDTO.getOpenid());
+		user.setAppId(eventUpdateCardDTO.getAppId());
 		String key = "syncWechat";
 		pointService.updatePoint(user, String.valueOf(increment), key, false);	//false代表不通知微信，仅仅本地更新
 	
