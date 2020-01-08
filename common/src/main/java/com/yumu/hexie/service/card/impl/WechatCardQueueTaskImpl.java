@@ -194,7 +194,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				try {
 					User user = new User();
 					user.setWuyeId(refundDTO.getWuyeId());
-					pointService.updatePoint(user, refundAmt, "wuyeRefund-" + refundDTO.getTradeWaterId());
+					pointService.updatePoint(user, refundAmt, "wuyeRefund-" + refundDTO.getTradeWaterId() , true);	//true标识需要通知微信扣减积分
 					isSuccess = true;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理

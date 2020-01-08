@@ -173,6 +173,9 @@ public class WechatCardServiceImpl implements WechatCardService {
 		if (wechatCard == null) {
 			wechatCard = new WechatCard();
 			WechatCardCatagory wechatCardCatagory = wechatCardCatagoryRepository.findByCardId(eventGetCardDTO.getCardId());
+			if (wechatCardCatagory == null) {
+				throw new BizValidateException("未配置card_id为["+eventGetCardDTO.getCardId()+"]的卡券");
+			}
 			wechatCard.setCardType(wechatCardCatagory.getCardType());
 			wechatCard.setUserAppId(eventGetCardDTO.getAppId());
 			wechatCard.setUserOpenId(eventGetCardDTO.getOpenid());
@@ -444,6 +447,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		int increment = wechatBonus - localBonus;	//本次增量
 		User user = new User();
 		user.setOpenid(eventUpdateCardDTO.getOpenid());
+		user.setAppId(eventUpdateCardDTO.getAppId());
 		String key = "syncWechat";
 		pointService.updatePoint(user, String.valueOf(increment), key, false);	//false代表不通知微信，仅仅本地更新
 	

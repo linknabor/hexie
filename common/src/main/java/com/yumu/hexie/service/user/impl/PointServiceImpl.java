@@ -108,6 +108,15 @@ public class PointServiceImpl implements PointService {
 	@Transactional
 	public void updatePoint(User user, String point, String key, boolean notifyWechat) {
 		
+		if (StringUtils.isEmpty(user.getAppId())) {	//这一段是给物业退款用的，因为退款传过来的只有用户的wuyeId，没有其他信息
+			List<User> wuyeUserList = userRepository.findByWuyeId(user.getWuyeId());
+			if (wuyeUserList == null || wuyeUserList.isEmpty()) {
+				logger.warn("未查询到物业ID为[" +user.getWuyeId()+"]的用户。");
+				return;
+			}
+			user = wuyeUserList.get(wuyeUserList.size()-1);
+		}
+		
 		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			return;
 		}
