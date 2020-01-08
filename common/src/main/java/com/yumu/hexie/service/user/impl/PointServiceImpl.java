@@ -117,13 +117,16 @@ public class PointServiceImpl implements PointService {
 			user = wuyeUserList.get(wuyeUserList.size()-1);
 		}
 		
-		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+		boolean isCardServiceAvailable = systemConfigService.isCardServiceAvailable(user.getAppId());
+		if (!isCardServiceAvailable) {
+			logger.info("当前公众号["+user.getAppId()+"]未开通会员卡服务， will skip.");
 			return;
 		}
 		PointRecord pr = new PointRecord();
 		pr.setKeyStr(key);
 		List<PointRecord> prList = pointRecordRepository.findAllByKeyStr(key);
 		if (prList!=null && !prList.isEmpty()) {
+			logger.info("key:"+key+"重复，本次积分已有过更新，will skip .");
 			return;
 		}
 		

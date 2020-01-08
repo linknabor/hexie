@@ -9,12 +9,20 @@ public class EventUpdateCardDTO implements Serializable {
 	 */
 	private static final long serialVersionUID = -773445918000323209L;
 	
+	private String createTime;
 	private String openid;
 	private String appId;
 	private String cardId;
 	private String cardCode;
 	private String modifyBonus;
 	private String modifyBalance;
+	
+	public String getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
 	public String getOpenid() {
 		return openid;
 	}
@@ -53,10 +61,10 @@ public class EventUpdateCardDTO implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "EventUpdateCardDTO [openid=" + openid + ", appId=" + appId + ", cardId=" + cardId + ", cardCode="
-				+ cardCode + ", modifyBonus=" + modifyBonus + ", modifyBalance=" + modifyBalance + "]";
+		return "EventUpdateCardDTO [createTime=" + createTime + ", openid=" + openid + ", appId=" + appId + ", cardId="
+				+ cardId + ", cardCode=" + cardCode + ", modifyBonus=" + modifyBonus + ", modifyBalance="
+				+ modifyBalance + "]";
 	}
-	
 	
 
 }
