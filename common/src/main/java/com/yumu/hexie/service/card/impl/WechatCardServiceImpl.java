@@ -198,12 +198,14 @@ public class WechatCardServiceImpl implements WechatCardService {
 	 */
 	@Transactional
 	@Override
-	public String activate(PreActivateReq preActivateReq) {
+	public User activate(PreActivateReq preActivateReq) {
 		
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(preActivateReq.getCardId(), preActivateReq.getOpenid());
 		if (wechatCard != null && ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
 			logger.info("当前用户卡券已激活。卡券code:" + wechatCard.getCardCode());
-			return "";
+			User cardUser = new User();
+			cardUser.setAppId(wechatCard.getUserAppId());
+			return cardUser;
 		}
 		
 		//下面2个字段先要decode
@@ -323,7 +325,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 			wechatCard.setUserName(user.getName());
 		}
 		wechatCardRepository.save(wechatCard);
-		return wechatCard.getUserAppId();
+		return user;
 	}
 
 	/**

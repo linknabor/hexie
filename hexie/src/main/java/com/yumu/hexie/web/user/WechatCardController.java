@@ -1,6 +1,7 @@
 package com.yumu.hexie.web.user;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
+import com.yumu.hexie.integration.wechat.entity.card.PreActivateResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wuye.vo.RefundDTO;
 import com.yumu.hexie.model.user.User;
@@ -46,7 +49,7 @@ public class WechatCardController extends BaseController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/preActivate", method = RequestMethod.POST)
-	public BaseResult<JsSign> preActivate(HttpServletRequest request,
+	public BaseResult<PreActivateResp> preActivate(HttpSession httpSession, HttpServletRequest request,
 			@RequestParam(name="card_id", required = true) String cardId,
 			@RequestParam(name="encrypt_code", required = true) String encryptCode,
 			@RequestParam(name="openid", required = true) String openid,
@@ -60,11 +63,18 @@ public class WechatCardController extends BaseController {
 		preActivateReq.setOuterStr(outerStr);
 		preActivateReq.setActivateTicket(activateTicket);
 		logger.info("preActivateReq is : " + preActivateReq);
-		String appId = wechatCardService.activate(preActivateReq);
+		User user = wechatCardService.activate(preActivateReq);
 		
 		String url = request.getRequestURL().toString();
-		JsSign jsSign = wechatCoreService.getJsSign(url, appId);
-		return BaseResult.successResult(jsSign);
+		JsSign jsSign = wechatCoreService.getJsSign(url, user.getAppId());
+		PreActivateResp preActivateResp = new PreActivateResp();
+		preActivateResp.setJsSign(jsSign);
+		preActivateResp.setUser(user);
+		if (!StringUtil.isEmpty(user.getTel())) {
+			logger.info("new user activated, will reset user session !");
+			httpSession.setAttribute(Constants.USER, user);
+		}
+		return BaseResult.successResult(preActivateResp);
 		
 	}
 	
