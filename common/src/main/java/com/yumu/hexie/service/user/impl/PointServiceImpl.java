@@ -65,7 +65,8 @@ public class PointServiceImpl implements PointService {
 	 * 新增积分
 	 * @param user
 	 * @param point 本次修改的积分，退款请传入负值
-	 * @param key 形式为：wuyePay-userId-tradeWaterId
+	 * @param key 形式为：wuyePay-tradeWaterId
+	 * @param isRefund 是否退款
 	 * 
 	 * 步骤：
 	 * 1.更新pointRecord表，记录本次更新的流水
@@ -80,7 +81,12 @@ public class PointServiceImpl implements PointService {
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			updatePoint(user, point, key, true);
 		}else {
-			addZhima(user, Integer.parseInt(point), key);
+			if (new BigDecimal(point).compareTo(BigDecimal.ZERO) > 0) {
+				addZhima(user, Integer.parseInt(point), key);
+			}else {
+				//未开通卡券服务的公众号，如果是退款操作不做任何处理
+			}
+			
 		}
 		
 	}
@@ -102,6 +108,9 @@ public class PointServiceImpl implements PointService {
 	@Transactional
 	public void updatePoint(User user, String point, String key, boolean notifyWechat) {
 		
+		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+			return;
+		}
 		PointRecord pr = new PointRecord();
 		pr.setKeyStr(key);
 		List<PointRecord> prList = pointRecordRepository.findAllByKeyStr(key);
@@ -129,7 +138,6 @@ public class PointServiceImpl implements PointService {
 				currentUser = userList.get(userList.size()-1);
 			}
 		}
-		logger.info("未查询到用户["+user.getOpenid()+"]，将跳过更新user表point字段。");
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, currentUser.getOpenid());
 		int currPoint = wechatCard.getBonus();
 		int totalPoint = currPoint + addPoint;	//需要设置的积分全量值，传入的数值会直接显示
@@ -144,9 +152,13 @@ public class PointServiceImpl implements PointService {
 		pointRecordRepository.save(pr);
 		
 		//2.用户表积分字段更新
-		int ret = userRepository.updatePointByIncrement(addPoint, currentUser.getId(), currPoint);
-		if (ret == 0) {
-			throw new BizValidateException("更新用户积分失败， 用户ID:" + currentUser.getId() + ", keyStr : " + key);
+		if (currentUser.getId() == 0) {
+			logger.info("未查询到用户["+user.getOpenid()+"]，将跳过更新user表point字段。");
+		}else {
+			int ret = userRepository.updatePointByIncrement(addPoint, currentUser.getId(), currPoint);
+			if (ret == 0) {
+				throw new BizValidateException("更新用户积分失败， 用户ID:" + currentUser.getId() + ", keyStr : " + key);
+			}
 		}
 		
 		//3.卡券表
