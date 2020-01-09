@@ -92,6 +92,19 @@ public class WechatCardController extends BaseController {
 		
 	}
 	
+	/*
+	 * 菜单领卡激活
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/activateUrlOnMenu", method = RequestMethod.GET)
+	public BaseResult<String> getCardOnMenu(@RequestParam String oriApp){
+		
+		User user = new User();
+		user.setAppId(oriApp);
+		String url = wechatCardService.getActivateUrlOnPage(user);
+		return BaseResult.successResult(url);
+	}
+	
 	@RequestMapping(value = "/refund", method = RequestMethod.POST)
 	public String refund(@RequestParam(name="sysCode") String sysCode,
 			@RequestBody RefundDTO refundDTO) {

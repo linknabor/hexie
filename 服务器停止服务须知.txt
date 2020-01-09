@@ -1,0 +1,25 @@
+为保证安全停止服务，不使正在进行中的队列丢失。停止服务前请务必执行以下操作：
+1.get请求查看当前队列开关状况
+生产：https://www.e-shequ.cn/wechat/hexie/wechat/maintenance/queueSwitch?sysCode=hexie
+测试：https://test.e-shequ.com/wechat/hexie/wechat/maintenance/queueSwitch?sysCode=hexie
+
+以上会返回一个json字符串，标记服务器上队列状态，on代表开启，off代表关闭。
+
+2.如果步骤1返回的服务状态为on开启，则需要POST请求以下链接：
+生产：https://www.e-shequ.cn/wechat/hexie/wechat/maintenance/queueSwitch?sysCode=hexie
+测试：https://test.e-shequ.com/wechat/hexie/wechat/maintenance/queueSwitch?sysCode=hexie
+POST 须要带上以下json对象，服务器名称大小写可忽略
+{
+    "server": "WECHAT-SERVER1",
+    "switch": "off"
+}
+执行完后等待一分钟，即可停止服务。
+
+3.重新启动服务后，执行POST请求
+生产：https://www.e-shequ.cn/wechat/hexie/wechat/maintenance/queueSwitch?sysCode=hexie
+测试：https://test.e-shequ.com/wechat/hexie/wechat/maintenance/queueSwitch?sysCode=hexie
+{
+    "server": "WECHAT-SERVER1",
+    "switch": "on"
+}
+重新开启队列服务

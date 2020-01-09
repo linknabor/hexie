@@ -18,6 +18,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.dto.EventGetCardDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.card.dto.EventUpdateCardDTO;
+import com.yumu.hexie.model.maintenance.MaintenanceService;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.card.WechatCardService;
@@ -39,6 +40,8 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 	private PointService pointService;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private MaintenanceService maintenanceService;
 
 	/**
 	 * 关注事件 1.发送关注客服消息，推送会员卡 2.记录推送出去的会员卡到表里
@@ -51,6 +54,11 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		while (true) {
 			try {
 
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
 				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_EVENT_SUBSCRIBE_QUEUE,
 						10, TimeUnit.SECONDS);
 
@@ -104,6 +112,11 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		while (true) {
 			try {
 
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
 				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_EVENT_GETCARD_QUEUE,
 						10, TimeUnit.SECONDS);
 
@@ -141,6 +154,11 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		while (true) {
 			try {
 
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
 				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_ADD_POINT_QUEUE,
 						10, TimeUnit.SECONDS);
 
@@ -178,14 +196,18 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		
 		while (true) {
 			try {
-
-				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_WUYE_REFUND_QUEUE,
-						10, TimeUnit.SECONDS);
-
-				if (StringUtils.isEmpty(json)) {
+				
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
 					continue;
 				}
 
+				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_WUYE_REFUND_QUEUE,
+						10, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				RefundDTO refundDTO = objectMapper.readValue(json, RefundDTO.class);
 				logger.info("strat to consume wuyeRefund queue : " + refundDTO);
@@ -219,13 +241,17 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		while (true) {
 			try {
 
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				
 				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_EVENT_UPDATECARD_QUEUE,
 						10, TimeUnit.SECONDS);
-
 				if (StringUtils.isEmpty(json)) {
 					continue;
 				}
-
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				EventUpdateCardDTO eventUpdateCardDTO = objectMapper.readValue(json, EventUpdateCardDTO.class);
 				logger.info("strat to consume updateCard event queue : " + eventUpdateCardDTO);

@@ -332,10 +332,12 @@ public class ModelConstant {
 	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
 	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
-	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queue_event_subscribe";	//关注事件队列
-	public static final String KEY_EVENT_GETCARD_QUEUE = "queue_event_usergetcard";	//领卡事件消息队列
-	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queue_event_updatecard";//更新卡事件消息队列
+	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
+	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
+	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
 	
 	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
-	public static final String KEY_WUYE_REFUND_QUEUE = "queue_wuye_refund";
+	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
+	
+	public static final String KEY_MAINTANANCE_SWITCH = "maintananceSwitch";
 }		
