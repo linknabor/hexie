@@ -21,6 +21,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.maintenance.MaintenanceService;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
@@ -35,6 +36,8 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private WuyeService wuyeService;
+	@Autowired
+	private MaintenanceService maintenanceService;
 	
 	/**
 	 * 绑定房屋队列。在缴费后调用，做异步绑定，缴费完了只要显示缴费金额即可，绑定在后台操作
@@ -46,7 +49,11 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 		
 		while(true) {
 			try {
-	
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
 				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_BIND_HOUSE_QUEUE, 30, TimeUnit.SECONDS);
 				if (StringUtils.isEmpty(json)) {
 					continue;
