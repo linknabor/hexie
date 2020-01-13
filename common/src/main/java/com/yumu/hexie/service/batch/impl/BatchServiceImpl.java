@@ -47,19 +47,16 @@ public class BatchServiceImpl implements BatchService {
 	@PostConstruct
 	public void runBatch() {
 		
-		Runnable run = ()->{
-			while(true) {
-				wuyeQueueTask.bindHouseByTrade();
-				wechatCardQueueTask.eventSubscribe();
-				wechatCardQueueTask.eventUserGetCard();
-				wechatCardQueueTask.eventUpdateCard();
-				wechatCardQueueTask.updatePointAsync();
-				wechatCardQueueTask.wuyeRefund();
-			}
-		};
-		Thread thread = new Thread(run);
-		thread.start();
+		wuyeQueueTask.bindHouseByTrade();
+		wechatCardQueueTask.eventSubscribe();
+		wechatCardQueueTask.eventUserGetCard();
+		wechatCardQueueTask.eventUpdateCard();
+		wechatCardQueueTask.updatePointAsync();
+		wechatCardQueueTask.wuyeRefund();
+		
 	}
+
+
 
 	@Override
 	public void updateUserShareCode() {
