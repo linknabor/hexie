@@ -252,7 +252,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 
 			if (!isSuccess) {
 				logger.info("subscribe event failed !, repush into the queue. json : " + json);
-				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_GETCARD_QUEUE, json);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_UPDATECARD_QUEUE, json);
 			}
 
 		} catch (Exception e) {

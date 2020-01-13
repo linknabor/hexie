@@ -2,7 +2,9 @@ package com.yumu.hexie.service.user.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -10,17 +12,20 @@ import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.entity.card.GetUserCardResp;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardReq;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardResp;
 import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
+import com.yumu.hexie.model.card.dto.EventUpdateCardDTO;
 import com.yumu.hexie.model.user.PointRecord;
 import com.yumu.hexie.model.user.PointRecordRepository;
 import com.yumu.hexie.model.user.User;
@@ -44,6 +49,8 @@ public class PointServiceImpl implements PointService {
 	private CardService cardService;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 	
 	
 	private void addZhima(User user, int point, String key) {
@@ -101,6 +108,7 @@ public class PointServiceImpl implements PointService {
 	 * @param notifyWechat 是否通知微信
 	 * 
 	 * 步骤：
+	 * 0.先查询微信，获得真实积分
 	 * 1.更新pointRecord表，记录本次更新的流水
 	 * 2.更新user表的point字段
 	 * 3.更新wechatCard表的bonus字段
@@ -152,7 +160,42 @@ public class PointServiceImpl implements PointService {
 				currentUser = userList.get(userList.size()-1);
 			}
 		}
+		
+		//0.先查询微信，获得真实积分
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, currentUser.getOpenid());
+		Map<String, String> reqMap = new HashMap<>();
+		reqMap.put("card_id", wechatCard.getCardId());
+		reqMap.put("code", wechatCard.getCardCode());
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		GetUserCardResp getUserCardResp = cardService.getUserCardInfo(reqMap, accessToken);
+		logger.info("getUserCardResp : " + getUserCardResp);
+		if (!"0".equals(getUserCardResp.getErrcode())) {
+			throw new BizValidateException("查询会员卡详细信息失败：" + getUserCardResp.getErrmsg());
+		}
+		String serverBonus = getUserCardResp.getBonus();	//微信的积分
+		int localBonus = wechatCard.getBonus();	//本地积分
+		int wechatBonus = Integer.parseInt(serverBonus);
+		if (localBonus != wechatBonus) {
+			int increment = wechatBonus - localBonus;
+			EventUpdateCardDTO eventUpdateCardDTO = new EventUpdateCardDTO();
+			eventUpdateCardDTO.setAppId(user.getAppId());
+			eventUpdateCardDTO.setCardCode(wechatCard.getCardCode());
+			eventUpdateCardDTO.setCardId(wechatCard.getCardId());
+			eventUpdateCardDTO.setCreateTime(String.valueOf(System.currentTimeMillis()));
+			eventUpdateCardDTO.setModifyBalance("0");
+			eventUpdateCardDTO.setModifyBonus(String.valueOf(increment));
+			String json = "";
+			try {
+				json = JacksonJsonUtil.beanToJson(eventUpdateCardDTO);
+			} catch (JSONException e) {
+				throw new BizValidateException(e.getMessage(), e);
+			}
+			logger.info("进入补差队列json:" + json);
+			stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_UPDATECARD_QUEUE, json);
+			throw new BizValidateException("微信积分["+wechatBonus+"]与本地积分["+localBonus+"]不同，本次差值将进入补差队列。");
+			
+		}
+		
 		int currPoint = wechatCard.getBonus();
 		int totalPoint = currPoint + addPoint;	//需要设置的积分全量值，传入的数值会直接显示
 		
@@ -210,7 +253,6 @@ public class PointServiceImpl implements PointService {
 			}else {
 				updateUserCardReq.setRecordBonus("本次退款" + point + "元，扣除" + addPoint + "积分。");
 			}
-			String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId());
 			UpdateUserCardResp updateUserCardResp = cardService.updateUserMemeberCard(updateUserCardReq, accessToken);
 			logger.info("updateUserCardResp : " + updateUserCardResp);
 			if (!"0".equals(updateUserCardResp.getErrcode())) {
