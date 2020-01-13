@@ -118,7 +118,7 @@ public class CardService {
 	
 	/**
 	 * 查询用户卡券信息
-	 * @param getMap
+	 * @param getMap, map中2个key:card_id, code
 	 * @param accessToken
 	 * @return
 	 */
