@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardReq;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardResp;
 import com.yumu.hexie.integration.wechat.service.CardService;
@@ -217,6 +219,18 @@ public class PointServiceImpl implements PointService {
 		}
 	
 		
+	}
+	
+	public static void main(String[] args) throws JSONException {
+		
+		UpdateUserCardReq updateUserCardReq = new UpdateUserCardReq();
+		updateUserCardReq.setCode("333811823730");
+		updateUserCardReq.setCardId("phZbVwDCWR5PBv99JjKmRzlVosn0");
+		updateUserCardReq.setAddBonus("10000");
+		updateUserCardReq.setRecordBonus("for test");
+		
+		String json = JacksonJsonUtil.beanToJson(updateUserCardReq);
+		System.out.println(json);
 	}
 	
 	
