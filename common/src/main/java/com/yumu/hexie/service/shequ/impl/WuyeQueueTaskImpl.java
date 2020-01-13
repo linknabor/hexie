@@ -1,7 +1,6 @@
 package com.yumu.hexie.service.shequ.impl;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,72 +43,71 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	 * @throws InterruptedException 
 	 */
 	@Override
-	@Async
+	@Async("taskExecutor")
 	public void bindHouseByTrade() {
 		
-		while(true) {
-			try {
-				if (!maintenanceService.isQueueSwitchOn()) {
-					logger.info("queue switch off ! ");
-					Thread.sleep(60000);
-					continue;
-				}
-				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_BIND_HOUSE_QUEUE, 30, TimeUnit.SECONDS);
-				if (StringUtils.isEmpty(json)) {
-					continue;
-				}
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				BindHouseQueue queue = objectMapper.readValue(json, new TypeReference<BindHouseQueue>(){});
+		try {
+			if (!maintenanceService.isQueueSwitchOn()) {
+				logger.info("queue switch off ! ");
+				Thread.sleep(60000);
+				return;
+			}
+			String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_BIND_HOUSE_QUEUE);
+			if (StringUtils.isEmpty(json)) {
+				return;
+			}
+			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+			BindHouseQueue queue = objectMapper.readValue(json, new TypeReference<BindHouseQueue>(){});
+			
+			logger.info("strat to consume to queue : " + queue);
+			
+			User user = queue.getUser();
+			int totalFailed = 0;
+			boolean isSuccess = false;
+			
+			while(!isSuccess && totalFailed < 3) {
 				
-				logger.info("strat to consume to queue : " + queue);
-				
-				User user = queue.getUser();
-				int totalFailed = 0;
-				boolean isSuccess = false;
-				
-				while(!isSuccess && totalFailed < 3) {
+				BaseResult<HexieHouses> baseResult = WuyeUtil.bindByTrade(user, queue.getTradeWaterId());
+				if (baseResult.isSuccess()) {
+					HexieHouses hexieHouses = baseResult.getData();
+					List<HexieHouse> houseList = hexieHouses.getHouses();
 					
-					BaseResult<HexieHouses> baseResult = WuyeUtil.bindByTrade(user, queue.getTradeWaterId());
-					if (baseResult.isSuccess()) {
-						HexieHouses hexieHouses = baseResult.getData();
-						List<HexieHouse> houseList = hexieHouses.getHouses();
-						
-						if (houseList != null && houseList.size() > 0) {
-							for (HexieHouse hexieHouse : houseList) {
-								HexieUser hexieUser = new HexieUser();
-								BeanUtils.copyProperties(hexieHouse, hexieUser);
-								wuyeService.setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
-							}
-							isSuccess = true;
-						} else {
-							
-							logger.info("交易[" + queue.getTradeWaterId() + "] 未查询到对应房屋，可能还未入账。");
-							totalFailed++;
-							Thread.sleep(10000);
+					if (houseList != null && houseList.size() > 0) {
+						for (HexieHouse hexieHouse : houseList) {
+							HexieUser hexieUser = new HexieUser();
+							BeanUtils.copyProperties(hexieHouse, hexieUser);
+							wuyeService.setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
 						}
-						
-					} else if ("04".equals(baseResult.getResult())) {
-						//已绑定过的，直接消耗队列，不处理
-						logger.info("交易[" + queue.getTradeWaterId() + "] 已绑定房屋.");
-						isSuccess = true;
-					} else if ("05".equals(baseResult.getResult())) {
-						logger.info("交易[" + queue.getTradeWaterId() + "] 用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。.");
 						isSuccess = true;
 					} else {
-						logger.error("用户：" + user.getId() + " + 交易[" + queue.getTradeWaterId() + "]，绑定房屋失败！");
+						
+						logger.info("交易[" + queue.getTradeWaterId() + "] 未查询到对应房屋，可能还未入账。");
 						totalFailed++;
 						Thread.sleep(10000);
 					}
+					
+				} else if ("04".equals(baseResult.getResult())) {
+					//已绑定过的，直接消耗队列，不处理
+					logger.info("交易[" + queue.getTradeWaterId() + "] 已绑定房屋.");
+					isSuccess = true;
+				} else if ("05".equals(baseResult.getResult())) {
+					logger.info("交易[" + queue.getTradeWaterId() + "] 用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。.");
+					isSuccess = true;
+				} else {
+					logger.error("用户：" + user.getId() + " + 交易[" + queue.getTradeWaterId() + "]，绑定房屋失败！");
+					totalFailed++;
+					Thread.sleep(10000);
 				}
-				
-				if (!isSuccess && totalFailed >= 3) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, json);
-				}
-			
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
 			}
+			
+			if (!isSuccess && totalFailed >= 3) {
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, json);
+			}
+		
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 		}
+	
 	}
 
 }
