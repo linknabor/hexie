@@ -245,8 +245,10 @@ public class WuyeServiceImpl implements WuyeService {
 
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
-		addressService.updateDefaultAddress(user, hexieAddress);
-		Integer totalBind = user.getTotalBind();
+		User currUser = userService.getById(user.getId());
+		
+		addressService.updateDefaultAddress(currUser, hexieAddress);
+		Integer totalBind = currUser.getTotalBind();
 		if (totalBind == null) {
 			totalBind = 0;
 		}
@@ -256,15 +258,15 @@ public class WuyeServiceImpl implements WuyeService {
 			totalBind = totalBind+1;
 		}
 		
-		user.setTotalBind(totalBind);
-		user.setXiaoquName(u.getSect_name());
-		user.setProvince(u.getProvince_name());
-		user.setCity(u.getCity_name());
-		user.setCounty(u.getRegion_name());
-		user.setSectId(u.getSect_id());	
-		user.setCspId(u.getCsp_id());
-		user.setOfficeTel(u.getOffice_tel());
-		userService.save(user);
+		currUser.setTotalBind(totalBind);
+		currUser.setXiaoquName(u.getSect_name());
+		currUser.setProvince(u.getProvince_name());
+		currUser.setCity(u.getCity_name());
+		currUser.setCounty(u.getRegion_name());
+		currUser.setSectId(u.getSect_id());	
+		currUser.setCspId(u.getCsp_id());
+		currUser.setOfficeTel(u.getOffice_tel());
+		userService.save(currUser);	//这里很可能会将user表中的其他字段刷掉，最好写update字段的方式 TODO
 		
 	}
 
