@@ -2,9 +2,7 @@ package com.yumu.hexie.service.user.impl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -17,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.wechat.entity.card.GetUserCardResp;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardReq;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardResp;
 import com.yumu.hexie.integration.wechat.service.CardService;
@@ -104,7 +101,6 @@ public class PointServiceImpl implements PointService {
 	 * @param notifyWechat 是否通知微信
 	 * 
 	 * 步骤：
-	 * 0.先查询微信，获得真实积分，如果与本地积分不平，先要抹平
 	 * 1.更新pointRecord表，记录本次更新的流水
 	 * 2.更新user表的point字段
 	 * 3.更新wechatCard表的bonus字段
@@ -156,68 +152,9 @@ public class PointServiceImpl implements PointService {
 				currentUser = userList.get(userList.size()-1);
 			}
 		}
-
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, currentUser.getOpenid());
 		int currPoint = wechatCard.getBonus();
 		int totalPoint = currPoint + addPoint;	//需要设置的积分全量值，传入的数值会直接显示
-		
-		//0.先查询微信，获得真实积分，如果与本地积分不平，先要抹平
-		Map<String, String> reqMap = new HashMap<>();
-		reqMap.put("card_id", wechatCard.getCardId());
-		reqMap.put("code", wechatCard.getCardCode());
-		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-		GetUserCardResp getUserCardResp = cardService.getUserCardInfo(reqMap, accessToken);
-		logger.info("getUserCardResp : " + getUserCardResp);
-		if (!"0".equals(getUserCardResp.getErrcode())) {
-			throw new BizValidateException("查询会员卡详细信息失败：" + getUserCardResp.getErrmsg());
-		}
-		String serverBonus = getUserCardResp.getBonus();	//微信的积分
-		int localBonus = wechatCard.getBonus();	//本地积分
-		int wechatBonus = Integer.parseInt(serverBonus);
-		int diff = wechatBonus = localBonus;
-		if (localBonus != wechatBonus) {
-			logger.info("微信积分["+wechatBonus+"]与本地积分["+localBonus+"]不同，将先抹平积分差值。");
-
-			//0-1保存本次抹平差异的积分记录
-			String balanceKey = "balance-" + key;
-			pr.setKeyStr(key);
-			List<PointRecord> prBalList = pointRecordRepository.findAllByKeyStr(key);
-			if (prBalList!=null && !prBalList.isEmpty()) {
-				logger.info("balanceKey:"+balanceKey+"重复，本次积分已有过更新，will skip .");
-				return;
-			}
-			pr = new PointRecord();
-			pr.setType(ModelConstant.POINT_TYPE_JIFEN);
-			pr.setUserId(currentUser.getId());
-			pr.setKeyStr(balanceKey);
-			pr.setPoint(diff);
-			pr.setPointSnapshot(localBonus);
-			pointRecordRepository.save(pr);
-			
-			//0-2抹平现有用户积分和微信的差异
-			if (currentUser.getId() == 0) {
-				logger.info("未查询到用户["+user.getOpenid()+"]，将跳过更新user表point字段。");
-			}else {
-				int ret = userRepository.updatePointByIncrement(diff, currentUser.getId(), currPoint);
-				if (ret == 0) {
-					throw new BizValidateException("抹平用户积分差异失败， 用户ID:" + currentUser.getId() + ", keyStr : " + key);
-				}
-			}
-			
-			//0-3抹平现有用户卡券积分和微信的差异
-			boolean needBalanceCard = false;
-			if (wechatCard == null || ModelConstant.CARD_STATUS_ACTIVATED != wechatCard.getStatus()) {
-				logger.error("当前用户尚未领取会员卡或者会员卡尚未激活，将跳过与微信同步会员卡积分。");
-			}else {
-				needBalanceCard = true;
-			}
-			if (needBalanceCard) {
-				int retcard = wechatCardRepository.updateCardByCardCodeIncremently(diff, wechatCard.getCardCode(), localBonus);
-				if (retcard == 0) {
-					throw new BizValidateException("抹平用户卡券积分差异失败， card code:" + wechatCard.getCardCode() + ", keyStr : " + key);
-				}
-			}
-		}
 		
 		//1.积分记录
 		pr = new PointRecord();
@@ -273,6 +210,7 @@ public class PointServiceImpl implements PointService {
 			}else {
 				updateUserCardReq.setRecordBonus("本次退款" + point + "元，扣除" + addPoint + "积分。");
 			}
+			String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId());
 			UpdateUserCardResp updateUserCardResp = cardService.updateUserMemeberCard(updateUserCardReq, accessToken);
 			logger.info("updateUserCardResp : " + updateUserCardResp);
 			if (!"0".equals(updateUserCardResp.getErrcode())) {
