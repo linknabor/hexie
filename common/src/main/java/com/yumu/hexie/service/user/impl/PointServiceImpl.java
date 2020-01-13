@@ -178,12 +178,13 @@ public class PointServiceImpl implements PointService {
 		if (localBonus != wechatBonus) {
 			int increment = wechatBonus - localBonus;
 			EventUpdateCardDTO eventUpdateCardDTO = new EventUpdateCardDTO();
-			eventUpdateCardDTO.setAppId(user.getAppId());
+			eventUpdateCardDTO.setAppId(currentUser.getAppId());
 			eventUpdateCardDTO.setCardCode(wechatCard.getCardCode());
 			eventUpdateCardDTO.setCardId(wechatCard.getCardId());
 			eventUpdateCardDTO.setCreateTime(String.valueOf(System.currentTimeMillis()));
 			eventUpdateCardDTO.setModifyBalance("0");
 			eventUpdateCardDTO.setModifyBonus(String.valueOf(increment));
+			eventUpdateCardDTO.setOpenid(currentUser.getOpenid());
 			String json = "";
 			try {
 				json = JacksonJsonUtil.beanToJson(eventUpdateCardDTO);
