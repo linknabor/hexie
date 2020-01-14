@@ -160,7 +160,13 @@ public class PointServiceImpl implements PointService {
 		}else {
 			needUpdateCard = true;
 		}
-		int currPoint = wechatCard.getBonus();
+		int currPoint = 0;
+		if (wechatCard == null) {
+			currPoint = currentUser.getPoint();
+		}else {
+			currPoint = wechatCard.getBonus();
+		}
+		
 		int totalPoint = currPoint + addPoint;	//需要设置的积分全量值，传入的数值会直接显示
 		
 		//1.积分记录
