@@ -27,6 +27,7 @@ import com.yumu.hexie.common.util.RequestUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
@@ -120,6 +121,12 @@ public class UserController extends BaseController{
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
+			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
+			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
+					//do nothing
+				}else {
+					userInfo.setPoint(wechatCard.getBonus());
+				}
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    userInfo.setQrCode(qrCode.getQrLink());
 			    
