@@ -179,15 +179,14 @@ public class PointServiceImpl implements PointService {
 				//向微信查询 TODO
 			}
 			if (wechatCard.getStatus() != ModelConstant.CARD_STATUS_ACTIVATED) {
-				logger.warn("当前卡状态未激活，实际已激活，需要更新。");
-				//TODO
+				logger.warn("当前卡状态未激活，实际已激活，需要更新状态。");
+				wechatCardRepository.updateCardStatus(ModelConstant.CARD_STATUS_ACTIVATED, wechatCard.getId());
 			}
 			int retcard = wechatCardRepository.updateCardByCardCodeIncremently(addPoint, wechatCard.getCardCode(), currBonus);
 			if (retcard == 0) {
 				throw new BizValidateException("更新用户卡券积分失败， card code:" + wechatCard.getCardCode() + ", keyStr : " + key);
 			}
 		}
-		
 		
 		//3.用户表积分字段更新
 		if (currentUser.getId() == 0) {
