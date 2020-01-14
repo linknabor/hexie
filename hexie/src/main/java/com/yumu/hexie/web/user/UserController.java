@@ -132,7 +132,7 @@ public class UserController extends BaseController{
 			} else {
 				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());
 				session.setMaxInactiveInterval(1);//将会话过期
-				Thread.sleep(200);
+				Thread.sleep(50);	//延时，因为上面设置了1秒。页面上也设置了延时，所以这里不需要1秒
 				return new BaseResult<UserInfo>().success(null);
 			}
 		} catch (Exception e) {

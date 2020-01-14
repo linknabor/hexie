@@ -102,8 +102,8 @@ public class PointServiceImpl implements PointService {
 	 * 
 	 * 步骤：
 	 * 1.更新pointRecord表，记录本次更新的流水
-	 * 2.更新user表的point字段
-	 * 3.更新wechatCard表的bonus字段
+	 * 2.更新wechatCard表的bonus字段
+	 * 3.更新user表的point字段
 	 * 4.请求微信更新会员卡积分
 	 */
 	@Override
@@ -165,17 +165,7 @@ public class PointServiceImpl implements PointService {
 		pr.setPointSnapshot(currPoint);
 		pointRecordRepository.save(pr);
 		
-		//2.用户表积分字段更新
-		if (currentUser.getId() == 0) {
-			logger.info("未查询到用户["+user.getOpenid()+"]，将跳过更新user表point字段。");
-		}else {
-			int ret = userRepository.updatePointByIncrement(addPoint, currentUser.getId(), currPoint);
-			if (ret == 0) {
-				throw new BizValidateException("更新用户积分失败， 用户ID:" + currentUser.getId() + ", keyStr : " + key);
-			}
-		}
-		
-		//3.卡券表
+		//2.卡券表
 		boolean needUpdateCard = false;
 		if (wechatCard == null || ModelConstant.CARD_STATUS_ACTIVATED != wechatCard.getStatus()) {
 			logger.error("当前用户尚未领取会员卡或者会员卡尚未激活，将跳过与微信同步会员卡积分。");
@@ -191,6 +181,17 @@ public class PointServiceImpl implements PointService {
 			int retcard = wechatCardRepository.updateCardByCardCodeIncremently(addPoint, wechatCard.getCardCode(), currBonus);
 			if (retcard == 0) {
 				throw new BizValidateException("更新用户卡券积分失败， card code:" + wechatCard.getCardCode() + ", keyStr : " + key);
+			}
+		}
+		
+		
+		//3.用户表积分字段更新
+		if (currentUser.getId() == 0) {
+			logger.info("未查询到用户["+user.getOpenid()+"]，将跳过更新user表point字段。");
+		}else {
+			int ret = userRepository.updatePointByTotal(totalPoint, currentUser.getId());
+			if (ret == 0) {
+				throw new BizValidateException("更新用户积分失败， 用户ID:" + currentUser.getId() + ", keyStr : " + key);
 			}
 		}
 		
