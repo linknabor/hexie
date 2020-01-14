@@ -2,12 +2,13 @@ package com.yumu.hexie.service.batch.impl;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -17,8 +18,9 @@ import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
-
 import com.yumu.hexie.service.batch.BatchService;
+import com.yumu.hexie.service.card.WechatCardQueueTask;
+import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.UserService;
 
@@ -35,6 +37,24 @@ public class BatchServiceImpl implements BatchService {
 	
 	@Autowired
 	UserRepository userRepository;
+	
+	@Autowired
+	private WechatCardQueueTask wechatCardQueueTask;
+	
+	@Autowired
+	private WuyeQueueTask wuyeQueueTask;
+	
+	@PostConstruct
+	public void runBatch() {
+		
+		wuyeQueueTask.bindHouseByTrade();
+		wechatCardQueueTask.eventSubscribe();
+		wechatCardQueueTask.eventUserGetCard();
+		wechatCardQueueTask.eventUpdateCard();
+		wechatCardQueueTask.updatePointAsync();
+		wechatCardQueueTask.wuyeRefund();
+		
+	}
 
 
 

@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -60,23 +61,19 @@ public class WuyeController extends BaseController {
 	@Inject
 	private WuyeService wuyeService;
 	@Inject
-	private PointService pointService;
-	@Inject
 	protected SmsService smsService;
 	@Inject
 	protected CouponService couponService;
-
 	@Inject
 	protected UserService userService;
-
 	@Inject
 	protected AddressService addressService;
-
 	@Inject
 	protected UserRepository userRepository;
-
 	@Inject
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private PointService pointService;
 
 	/**
 	 * 根据用户身份查询其所绑定的房屋
@@ -174,7 +171,7 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser u = " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
+			pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
@@ -200,7 +197,7 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser : " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
+			pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);

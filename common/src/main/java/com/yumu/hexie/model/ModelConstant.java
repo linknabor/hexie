@@ -142,6 +142,7 @@ public class ModelConstant {
 	
 	public static final int POINT_TYPE_ZIMA = 0;
 	public static final int POINT_TYPE_LVDOU = 1;
+	public static final int POINT_TYPE_JIFEN = 2;
 	
 
 
@@ -306,9 +307,20 @@ public class ModelConstant {
 	public static final String KEY_TYPE_QRCODE = "qrcode";		//公众号二维码
 	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";	//页面配置
 	public static final String KEY_TYPE_WUYEPAY_TABS = "wuyePayTabs";	//物业缴费选项卡
-
+	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
+	
+	//微信会员卡领卡渠道
+	public static final String CARD_GET_SUBSCRIBE = "subscribe";	//关注领卡
+	public static final String CARD_GET_REGISTER = "register";	//注册领卡
+	public static final String CARD_GET_MENU = "menu";	//菜单领卡
+	
+	public static final int CARD_STATUS_NONE = 1;	//未领卡
+	public static final int CARD_STATUS_GET = 2;	//已领卡
+	public static final int CARD_STATUS_ACTIVATED = 3;	//已激活
+	public static final int CARD_STATUS_DELETED = 4;	//已删除
+	
 	//队列
-	public static final String KEY_POINT_QUEUE = "pointQueue";
+	public static final String KEY_ADD_POINT_QUEUE = "addPointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
 	public static final String KEY_USER_LOGIN = "userLoginSession_";
 
@@ -319,4 +331,13 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
 	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
+	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
+	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
+	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
+	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
+	
+	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
+	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
+	
+	public static final String KEY_MAINTANANCE_SWITCH = "maintananceSwitch";
 }		

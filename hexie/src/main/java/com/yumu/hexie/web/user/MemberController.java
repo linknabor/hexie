@@ -3,14 +3,11 @@ package com.yumu.hexie.web.user;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,10 +15,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wechat.vo.UnionPayVO;
-import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.user.Member;
-import com.yumu.hexie.model.user.MemberBill;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.impl.MemberServiceImpl;
 import com.yumu.hexie.web.BaseController;

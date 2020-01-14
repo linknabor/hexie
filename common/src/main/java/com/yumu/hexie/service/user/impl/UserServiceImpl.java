@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.user.impl;
 
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -10,26 +9,28 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-
-import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
+import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.card.WechatCard;
+import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
@@ -44,14 +45,23 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Inject
-	private PointService pointService;
-
-	@Inject
 	private WechatCoreService wechatCoreService;
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
-
+	
+	@Autowired
+	private WechatCardRepository wechatCardRepository;
+	
+	@Autowired
+	private CardService cardService;
+	
+	@Autowired
+	private SystemConfigService systemConfigService;
+	
+	@Autowired
+	private PointService pointService;
+	
 	@Override
 	public User getById(long uId) {
 		return userRepository.findOne(uId);
@@ -130,8 +140,23 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		
-		pointService.addZhima(userAccount, 5,
-				"zm-login-" + DateUtil.dtFormat(new Date(), "yyyy-MM-dd") + userAccount.getId());
+		//关联用户会员卡信息
+		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, userAccount.getOpenid());
+		if (wechatCard != null) {
+			logger.info("user [ " + userAccount.getOpenid()+ " ] has already got card. will syn card status to user. ");
+			logger.info("card status : " + wechatCard.getStatus());
+			if (ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
+				int points = wechatCard.getBonus();
+				if (points == 0) {	//新用户，送88积分
+					points += 88;
+				}
+				userAccount.setPoint(points);
+			}
+			if (StringUtil.isEmpty(wechatCard.getUserId())) {
+				logger.info("update card user info. card :" + wechatCard.getId());
+				wechatCardRepository.updateCardUserInfo(userAccount.getId(), userAccount.getName(), wechatCard.getId());
+			}
+		}
 		userAccount = userRepository.save(userAccount);
 		return userAccount;
 	}
@@ -165,7 +190,7 @@ public class UserServiceImpl implements UserService {
 		if (user.getStatus() == 0 && StringUtil.isNotEmpty(user.getTel())) {
 			user.setStatus(ModelConstant.USER_STATUS_BINDED);
 		}
-		pointService.addZhima(user, 100, "zm-binding-" + user.getId());
+		pointService.updatePoint(user, "100", "zm-binding-" + user.getId());
 		return userRepository.save(user);
 	}
 	
@@ -178,8 +203,11 @@ public class UserServiceImpl implements UserService {
     			BaseResult<HexieUser> r = WuyeUtil.userLogin(user);
         		if(r.isSuccess()) {
         			User dbUser = userRepository.findById(user.getId());
-        			dbUser.setWuyeId(r.getData().getUser_id());
-            		userRepository.save(dbUser);
+        			if (dbUser != null) {
+//        				dbUser.setWuyeId(r.getData().getUser_id());
+//                		userRepository.save(dbUser);
+        				userRepository.updateUserWuyeId(r.getData().getUser_id(), dbUser.getId());
+					}
         		}
     		}
 		} catch (Exception e) {
@@ -213,12 +241,6 @@ public class UserServiceImpl implements UserService {
 	public User queryByShareCode(String code) {
 		List<User> users = userRepository.findByShareCode(code);
 		return users.size() > 0 ? users.get(0) : null;
-	}
-
-
-	@Override
-	public List<User> getBindHouseUser(int pageNum, int pageSize) {
-		return userRepository.getBindHouseUser(pageNum, pageSize);
 	}
 
 	@Override
@@ -263,5 +285,59 @@ public class UserServiceImpl implements UserService {
 		}
 		return isDuplicateRequest;
 	}
+
+	/**
+	 * 注册
+	 */
+	@Override
+	@Transactional
+	public User simpleRegister(User user) {
+
+		/*查看用户是否领卡：如果已领卡，需要自动激活卡片。*/
+		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getOpenid());
+		if (wechatCard == null) {
+			logger.info("用户[" + user.getOpenid() + "]未领卡");
+		}else {
+			boolean needUpdateCard = false;
+			if (StringUtil.isEmpty(wechatCard.getUserId())) {
+				wechatCard.setUserId(user.getId());
+				wechatCard.setUserName(user.getName());
+				wechatCard.setTel(user.getTel());
+				needUpdateCard = true;
+			}
+			logger.info("用户["+user.getOpenid()+"], card status : " + wechatCard.getStatus());
+			if (ModelConstant.CARD_STATUS_GET == wechatCard.getStatus()) {	//如果已领卡，需要激活
+				
+				ActivateReq activateReq = new ActivateReq();
+				activateReq.setCardId(wechatCard.getCardId());
+				activateReq.setCode(wechatCard.getCardCode());
+				int point = user.getPoint();	//新用户送88积分。老用户，积分已经做过转换，直接取lvdou的值
+				if (point == 0) {	
+					point = 88;
+					user.setPoint(point);
+				}
+				activateReq.setInitBonus(String.valueOf(point));
+				activateReq.setInitBonusRecord("用户积分兑换。");
+				activateReq.setMembershipNumber(wechatCard.getCardCode());
+				String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId()); 
+				ActivateResp activateResp = cardService.activateMemberCard(activateReq, accessToken);
+				if (!"0".equals(activateResp.getErrcode())) {
+					throw new BizValidateException("创建用户失败。 errmsg : " + activateResp.getErrmsg());
+				}
+				wechatCard.setStatus(ModelConstant.CARD_STATUS_ACTIVATED);
+				wechatCard.setBonus(point);
+				needUpdateCard = true;
+			}
+			if (needUpdateCard) {
+				wechatCardRepository.save(wechatCard);
+			}
+			
+		}
+		user.setRegisterDate(System.currentTimeMillis());
+        User savedUser = userRepository.save(user);
+        return save(savedUser);
+		
+	}
+
 
 }
