@@ -328,8 +328,8 @@ public class WuyeServiceImpl implements WuyeService {
 			boolean isSuccess = false;
 			
 			while(!isSuccess && retryTimes < 3) {
-				
 				try {
+					Thread.sleep(3000);	//休息3秒，让积分的线程先跑完。
 					BindHouseQueue bindHouseQueue = new BindHouseQueue();
 					bindHouseQueue.setUser(user);
 					bindHouseQueue.setTradeWaterId(tradeWaterId);

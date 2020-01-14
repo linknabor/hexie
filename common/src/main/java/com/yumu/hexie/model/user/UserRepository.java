@@ -49,6 +49,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query(value = "update user set point = point + ?1 where id = ?2 and point = ?3 ", nativeQuery = true )
 	public int updatePointByIncrement(int addPoint, long userId, int oriPoint);
 	
+	/**
+	 * 根据增量更新。更新语句的where 条件必须带上原积分值，这样可以解决多次调用带来的幂等性问题。
+	 * @param userId
+	 * @param point
+	 * @return
+	 */
+	@Modifying
+	@Transactional
+	@Query(value = "update user set point = ?1 where id = ?2 ", nativeQuery = true )
+	public int updatePointByTotal(int totalPoint, long userId);
+	
 	@Modifying
 	@Transactional
 	@Query(value = "update user set wuyeId = ?1 where id = ?2 ", nativeQuery = true)
