@@ -265,7 +265,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				if (!systemConfigService.isCardServiceAvailable(eventUpdateCardDTO.getAppId())) {
 					continue;
 				}
-				
+
 				boolean isSuccess = false;
 				try {
 					wechatCardService.eventUpdateCard(eventUpdateCardDTO);
