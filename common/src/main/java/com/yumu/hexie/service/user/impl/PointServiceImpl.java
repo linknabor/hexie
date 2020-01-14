@@ -161,7 +161,7 @@ public class PointServiceImpl implements PointService {
 			needUpdateCard = true;
 		}
 		int currPoint = 0;
-		if (wechatCard == null) {
+		if (!needUpdateCard) {
 			currPoint = currentUser.getPoint();
 		}else {
 			currPoint = wechatCard.getBonus();
