@@ -28,6 +28,10 @@ public interface WechatCardRepository extends JpaRepository<WechatCard, Long> {
 	@Query(value = "update wechatcard set userId = ?1, userName = ?2 where id = ?3 ", nativeQuery = true)
 	public int updateCardUserInfo(long userId, String userName, long id);
 	
+	@Modifying
+	@Transactional
+	@Query(value = "update wechatcard set status = ?1 where id = ?2 ", nativeQuery = true)
+	public int updateCardStatus(int status, long id);
 	
 	public WechatCard findByCardCode(String cardCode);
 }
