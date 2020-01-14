@@ -152,6 +152,7 @@ public class PointServiceImpl implements PointService {
 				currentUser = userList.get(userList.size()-1);
 			}
 		}
+		logger.info("currentUser is : " + currentUser);
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, currentUser.getOpenid());
 		boolean needUpdateCard = false;
 		if (wechatCard == null ) {
