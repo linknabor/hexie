@@ -190,7 +190,9 @@ public class UserServiceImpl implements UserService {
 		if (user.getStatus() == 0 && StringUtil.isNotEmpty(user.getTel())) {
 			user.setStatus(ModelConstant.USER_STATUS_BINDED);
 		}
-		pointService.updatePoint(user, "100", "zm-binding-" + user.getId());
+		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+			pointService.updatePoint(user, "100", "zm-binding-" + user.getId());
+		}
 		return userRepository.save(user);
 	}
 	

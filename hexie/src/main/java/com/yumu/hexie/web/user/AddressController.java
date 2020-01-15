@@ -24,6 +24,7 @@ import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
@@ -47,6 +48,8 @@ public class AddressController extends BaseController{
 	private RgroupAreaItemRepository rgroupAreaItemRepository;
 	@Autowired
 	private PointService pointService;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	@RequestMapping(value = "/address/delete/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
@@ -107,7 +110,9 @@ public class AddressController extends BaseController{
 		//本方法内调用无法异步
 		addressService.fillAmapInfo(addr);
 		user = userService.getById(user.getId());
-		pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
+		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+			pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
+		}
 		session.setAttribute(Constants.USER, user);
 		return new BaseResult<Address>().success(addr);
     }

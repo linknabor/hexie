@@ -127,6 +127,11 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				EventGetCardDTO eventGetCardDTO = objectMapper.readValue(json, EventGetCardDTO.class);
 				logger.info("strat to consume getCad event queue : " + eventGetCardDTO);
+				
+				//校验当前公众号是否卡通了卡券服务
+				if (!systemConfigService.isCardServiceAvailable(eventGetCardDTO.getAppId())) {
+					continue;
+				}
 
 				boolean isSuccess = false;
 				try {
@@ -255,6 +260,11 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				EventUpdateCardDTO eventUpdateCardDTO = objectMapper.readValue(json, EventUpdateCardDTO.class);
 				logger.info("strat to consume updateCard event queue : " + eventUpdateCardDTO);
+
+				//校验当前公众号是否卡通了卡券服务
+				if (!systemConfigService.isCardServiceAvailable(eventUpdateCardDTO.getAppId())) {
+					continue;
+				}
 
 				boolean isSuccess = false;
 				try {

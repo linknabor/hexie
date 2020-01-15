@@ -155,12 +155,18 @@ public class PointServiceImpl implements PointService {
 		logger.info("currentUser is : " + currentUser);
 		WechatCard wechatCard = wechatCardRepository.findByCardTypeAndUserOpenId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, currentUser.getOpenid());
 		boolean needUpdateCard = false;
-		if (wechatCard == null ) {
+		if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
 			logger.error("当前用户尚未领取会员卡或者会员卡尚未激活，将跳过与微信同步会员卡积分。");
 		}else {
 			needUpdateCard = true;
 		}
-		int currPoint = wechatCard.getBonus();
+		int currPoint = 0;
+		if (!needUpdateCard) {
+			currPoint = currentUser.getPoint();
+		}else {
+			currPoint = wechatCard.getBonus();
+		}
+		
 		int totalPoint = currPoint + addPoint;	//需要设置的积分全量值，传入的数值会直接显示
 		
 		//1.积分记录
@@ -180,8 +186,11 @@ public class PointServiceImpl implements PointService {
 				//向微信查询 TODO
 			}
 			if (wechatCard.getStatus() != ModelConstant.CARD_STATUS_ACTIVATED) {
-				logger.warn("当前卡状态未激活，实际已激活，需要更新状态。");
-				wechatCardRepository.updateCardStatus(ModelConstant.CARD_STATUS_ACTIVATED, wechatCard.getId());
+				logger.warn("当前卡["+wechatCard.getId()+"]状态未激活。");
+				if (!StringUtils.isEmpty(wechatCard.getCardCode())) {	//有CODE说明激活过了
+					wechatCardRepository.updateCardStatus(ModelConstant.CARD_STATUS_ACTIVATED, wechatCard.getId());
+				}
+
 			}
 			int retcard = wechatCardRepository.updateCardByCardCodeIncremently(addPoint, wechatCard.getCardCode(), currBonus);
 			if (retcard == 0) {

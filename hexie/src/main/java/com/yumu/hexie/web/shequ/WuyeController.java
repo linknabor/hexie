@@ -171,7 +171,9 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser u = " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
-			pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
+			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
+			}
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
@@ -197,7 +199,9 @@ public class WuyeController extends BaseController {
 		log.info("HexieUser : " + u);
 		if (u != null) {
 			wuyeService.setDefaultAddress(user, u);
-			pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
+			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
+			}
 			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
