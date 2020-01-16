@@ -7,6 +7,7 @@ package com.yumu.hexie.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Autowired
     private SystemConfigService systemConfigService;
     @Autowired
+    @Qualifier("systemConfigRedisTemplate")
     private RedisTemplate<String, SystemConfig> redisTemplate;
+    
+    public static void main(String[] args) {
+    	String sysKey = Keys.systemConfigKey(ACC_TOKEN);
+    	System.out.println(sysKey);
+	}
     
     /**
      * 获取AccessToken
