@@ -13,6 +13,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.yumu.hexie.model.system.SystemConfig;
+
 @Configuration
 public class RedisConfig {
 
@@ -61,8 +63,16 @@ public class RedisConfig {
 		redisTemplate.setHashKeySerializer(getStringRedisTemplate().getStringSerializer());
 		redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);	//同上
 		return redisTemplate;
-		
 	}
+    
+    @Bean(name = "systemConfigRedisTemplate")
+    public  RedisTemplate<String, SystemConfig> mainRedisTemplate(){
+        RedisTemplate<String, SystemConfig> redisTemplate = new RedisTemplate<String, SystemConfig>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<SystemConfig>(SystemConfig.class));
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
     
     @Bean
     public CacheManager getCacheManager() {
