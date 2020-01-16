@@ -108,23 +108,27 @@ public class ScheduleServiceImpl implements ScheduleService{
 	private CouponServiceImpl couponServiceImpl;
 	
 	//1. 订单超时
-    @Scheduled(cron = "50 1/3 * * * ?")
+//    @Scheduled(cron = "50 1/3 * * * ?")
+    @Override
     public void executeOrderTimeoutJob() {
     	executeOrderTimeoutJob(serviceOrderRepository.findTimeoutServiceOrder(System.currentTimeMillis()));
     }
 	//2. 退款状态更新
-    @Scheduled(cron = "10 10/30 * * * ?")
+//    @Scheduled(cron = "10 10/30 * * * ?")
+    @Override
     public void executeRefundStatusJob() {
     	executeRefundStatusJob(refundOrderRepository.findAllApplyedRefund(System.currentTimeMillis()-1800*1000));
     }
 	//3. 商品支付状态更新
-    @Scheduled(cron = "10 2/3 * * * ?")
+//    @Scheduled(cron = "10 2/3 * * * ?")
+    @Override
     public void executePayOrderStatusJob() {
         executeMarketPayOrderStatusJob(paymentOrderRepository.queryAllUnpayMarketOrderIds());
     }
     
    //4. 团购团超时
-    @Scheduled(cron = "11 2/5 * * * ?")
+//    @Scheduled(cron = "11 2/5 * * * ?")
+    @Override
     public void executeRGroupTimeoutJob() {
     	SCHEDULE_LOG.error("--------------------executeGroupTimeoutJob[B][R]-------------------");
     	List<RgroupRule> rules = rgroupRuleRepository.findTimeoutGroup(new Date());
@@ -153,8 +157,10 @@ public class ScheduleServiceImpl implements ScheduleService{
     	scheduleRecordRepository.save(sr);
     	SCHEDULE_LOG.debug("--------------------executeGroupTimeoutJob[E][R]-------------------");
     }
+    
   //4. 保洁超时  YunXiyiBillRepository
-    @Scheduled(cron = "50 1/2 * * * ?")
+//    @Scheduled(cron = "50 1/2 * * * ?")
+    @Override
     public void executeBaojieTimeoutJob() {
         SCHEDULE_LOG.debug("--------------------executeBaojieTimeoutJob[B][R]-------------------");
         List<BaojieBill> bills = baojieBillRepository.findTimeoutBill(System.currentTimeMillis() - 30000);
@@ -185,7 +191,8 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
     
     //4. 洗衣超时  YunXiyiBillRepository
-    @Scheduled(cron = "20 1/2 * * * ?")
+//    @Scheduled(cron = "20 1/2 * * * ?")
+    @Override
     public void executeXiyiTimeoutJob() {
         SCHEDULE_LOG.debug("--------------------executeXiyiTimeoutJob[B][R]-------------------");
         List<YunXiyiBill> bills = yunXiyiBillRepository.findTimeoutBill(System.currentTimeMillis() - 30000);
@@ -342,7 +349,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 	 * 3.不管多少券，每个用户每个月最多只能发两条短信以免造成骚扰
 	 */
 	@Override
-	@Scheduled(cron = "0 0 18 * * ? ")
+//	@Scheduled(cron = "0 0 18 * * ? ")
 	public void executeCoupinTimeoutHintJob() {
 		
 		String msg = "亲爱的邻居，您有amount元的优惠券即将过期，赶紧去“合协社区”看看吧！";
@@ -427,7 +434,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	@Scheduled(cron = "0 */20 * * * ?")
+//	@Scheduled(cron = "0 */20 * * * ?")
 	public void executeMemberTimtout() {
 		SCHEDULE_LOG.debug("--------------------会员支付定时开始：-------------------");
 		try {
