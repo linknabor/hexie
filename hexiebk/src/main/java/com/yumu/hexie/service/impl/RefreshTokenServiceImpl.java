@@ -4,6 +4,7 @@
  */
 package com.yumu.hexie.service.impl;
 
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
@@ -67,9 +69,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 				logger.error("获取token失败----------------------------------------------！！！！！！！！！！！");
 	            return;
 	        }
-			SystemConfig config = new SystemConfig(ACC_TOKEN, at.getToken());
-			config.setCreateDate(System.currentTimeMillis());
-			redisTemplate.opsForValue().set(sysKey, config);
+			SystemConfig config = null;
+			try {
+				config = new SystemConfig(ACC_TOKEN, JacksonJsonUtil.beanToJson(at));
+				config.setCreateDate(System.currentTimeMillis());
+				redisTemplate.opsForValue().set(sysKey, config);
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
 		}
         logger.error("--------------------refresh token[E]-------------------");
     }
