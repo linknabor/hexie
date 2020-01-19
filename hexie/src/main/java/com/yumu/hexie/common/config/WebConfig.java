@@ -13,8 +13,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -67,6 +65,7 @@ public class WebConfig extends WebMvcConfigurationSupport {
         	}
         };
     	converters.add(c);
+    	converters.add(new StringHttpMessageConverter(Charset.forName("GBK")));
     	converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
     	converters.add(new ByteArrayHttpMessageConverter());
     	converters.add(new ResourceHttpMessageConverter());

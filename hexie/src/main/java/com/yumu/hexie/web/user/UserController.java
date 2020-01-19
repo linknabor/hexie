@@ -127,8 +127,9 @@ public class UserController extends BaseController{
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    userInfo.setIconList(iconList);
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
-			    userInfo.setQrCode(qrCode.getQrLink());
-			    
+			    if (qrCode!=null) {
+			    	userInfo.setQrCode(qrCode.getQrLink());
+				}
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
 				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());

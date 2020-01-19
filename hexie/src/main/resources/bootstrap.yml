@@ -7,4 +7,5 @@ spring :
          profile: dev
          uri: http://hexie:hexie232@localhost:8780/
          fail-fast: true
-         
+logging:
+   config: classpath:logback.xml

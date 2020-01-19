@@ -24,6 +24,16 @@ eureka:
       instance-id: ${spring.cloud.client.ipAddress}:${spring.cloud.client.hostname}:${server.port}
       #注册IP还是主机名，true就ip
       prefer-ip-address : false
+feign:
+   hystrix:
+      enabled: true
+hystrix:
+   command:
+      default:
+         execution:
+            isolation:
+               thread:
+                  timeoutInMilliseconds: 20000
 info:   
    app: 
       name: hexie-server

@@ -14,27 +14,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<description>hexie</description>
-	<version>1.5.17</version>
+	<version>1.5.22</version>
 	<packaging>war</packaging>
 
 	<dependencies>
-		<!-- eureka的dependency必须放在最前面，不然依赖会有冲突 -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-eureka</artifactId>
-		</dependency>
 		
-		<!-- 配置中心客户端 -->
-		<dependency> 
-			<groupId>org.springframework.cloud</groupId> 
-			<artifactId>spring-cloud-config-client</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-	
 		<!-- project depends -->
 		<dependency>
 			<groupId>com.yumu</groupId>

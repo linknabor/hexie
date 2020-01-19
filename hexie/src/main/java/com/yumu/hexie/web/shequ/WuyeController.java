@@ -592,40 +592,8 @@ public class WuyeController extends BaseController {
 	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId) {
 
 		User user = (User) session.getAttribute(Constants.USER);
-		if (session != null) {
-
-			if (user == null) {
-				user = new User();
-				user.setCity("上海市");
-				user.setCityId(20);
-				user.setProvince("上海");
-				user.setProvinceId(19);
-				if (!StringUtil.isEmpty(userId)) {
-					user.setId(Long.valueOf(userId));
-				} else {
-					user.setId(10);
-				}
-				user.setTel("18116419486");
-				user.setOpenid("ofDNH0o8JD8qC1n2P9KU5qq0UeWc");
-				user.setName("yiming");
-				user.setNickname("yiming");
-				user.setXiaoquName("西部花苑");
-				user.setXiaoquId(26387);
-				user.setCountyId(0);
-				user.setWuyeId("180613400000291915");
-				user.setHeadimgurl(
-						"http://wx.qlogo.cn/mmopen/ajNVdqHZLLBIY2Jial97RCIIyq0P4L8dhGicoYDlbNXqW5GJytxmkRDFdFlX9GScrsvo7vBuJuaEoMZeiaBPnb6AA/0");
-			} else {
-				if (!StringUtil.isEmpty(userId)) {
-
-					user = userRepository.findOne(Long.valueOf(userId));
-				}
-			}
-
-			// TODO set value on redis
-			session.setAttribute("sessionUser", user);
-		}
-
+		user = userRepository.findOne(Long.valueOf(userId));
+		session.setAttribute("sessionUser", user);
 		return BaseResult.successResult("succeeded");
 
 	}

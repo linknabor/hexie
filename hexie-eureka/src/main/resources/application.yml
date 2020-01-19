@@ -15,7 +15,7 @@ eureka:
         responseCacheUpdateInvervalMs: 30000
 security:
     basic:
-        enabled: true
+        enabled: false
     user:
         name: hexie
         password: hexie231

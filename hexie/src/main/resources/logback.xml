@@ -92,7 +92,7 @@
     <logger name="com.yumu.hexie"  level="INFO" additivity="false">  
 	    <appender-ref ref="COMMONERROR"/>  
 	</logger>
-    <logger name="com.yumu.hexie.integration"  level="INFO" additivity="false">  
+    <logger name="com.yumu.hexie.integration"  level="DEBUG" additivity="false">  
 	    <appender-ref ref="INTEGRATION"/>  
 	</logger>
     <logger name="org.hibernate"  level="DEBUG" additivity="false">  

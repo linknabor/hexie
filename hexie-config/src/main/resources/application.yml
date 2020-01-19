@@ -11,6 +11,19 @@ spring:
          server: 
             native:  
                searchLocations: classpath:/config
+feign:
+   hystrix:
+      enabled: true
+ribbon:
+   eureka:
+      enabled: false
+hystrix:
+   command:
+      default:
+         execution:
+            isolation:
+               thread:
+                  timeoutInMilliseconds: 20000
 eureka:
    client:
       fetchRegistry: true

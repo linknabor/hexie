@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
+import com.yumu.hexie.integration.wuye.WuyeClients;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -93,9 +94,14 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private TransactionUtil transactionUtil;
 	
+	@Autowired
+	private WuyeClients wuyeClients;
+	
 	@Override
 	public HouseListVO queryHouse(String userId) {
-		return WuyeUtil.queryHouse(userId).getData();
+		
+		return wuyeClients.getHouse(userId).getData();
+//		return WuyeUtil.queryHouse(userId).getData();
 	}
 
 	@PostConstruct
