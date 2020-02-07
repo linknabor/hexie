@@ -1,4 +1,4 @@
-package com.yumu.hexie.model.distribution.region;
+package com.yumu.hexie.model.merchant;
 
 import javax.persistence.Entity;
 
@@ -38,8 +38,6 @@ public class Merchant  extends BaseModel{
 	private String email; //邮件
 	private String exitDate;//商户失效时间
 	
-	
-
 	public int getStatus() {
 		return status;
 	}
@@ -154,4 +152,5 @@ public class Merchant  extends BaseModel{
 	public void setExitDate(String exitDate) {
 		this.exitDate = exitDate;
 	}
+	
 }
