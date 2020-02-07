@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.integration.daojia.weizhuangwang.WeiZhuangWangReq;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.distribution.region.Merchant;
-import com.yumu.hexie.model.distribution.region.MerchantRepository;
 import com.yumu.hexie.model.localservice.oldversion.YuyueOrder;
 import com.yumu.hexie.model.localservice.oldversion.YuyueOrderRepository;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.WeiZhuangWangOrder;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.WeiZhuangWangOrderRepository;
+import com.yumu.hexie.model.merchant.Merchant;
+import com.yumu.hexie.model.merchant.MerchantRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;

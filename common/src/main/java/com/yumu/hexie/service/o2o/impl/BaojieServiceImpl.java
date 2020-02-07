@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
-import com.yumu.hexie.model.distribution.region.Merchant;
 import com.yumu.hexie.model.localservice.HomeBillItem;
 import com.yumu.hexie.model.localservice.HomeBillItemRepository;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
@@ -28,6 +27,7 @@ import com.yumu.hexie.model.localservice.ServiceItem;
 import com.yumu.hexie.model.localservice.ServiceType;
 import com.yumu.hexie.model.localservice.bill.BaojieBill;
 import com.yumu.hexie.model.localservice.bill.BaojieBillRepository;
+import com.yumu.hexie.model.merchant.Merchant;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.promotion.PromotionConstant;
