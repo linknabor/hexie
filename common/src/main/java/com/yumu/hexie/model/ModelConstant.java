@@ -151,15 +151,18 @@ public class ModelConstant {
 	public static final String THREAD_STATUS_DELETED = "1";
 	
 	//发布信息分类
-	public static final String THREAD_CATEGORY_OUTDOORS = "1";	//户外活动
-	public static final String THREAD_CATEGORY_PETS = "2";	//宠物宝贝
-	public static final String THREAD_CATEGORY_CATE = "3";	//吃货天地	
-	public static final String THREAD_CATEGORY_STORE = "4";	//二手市场
-	public static final String THREAD_CATEGORY_EDUCATION = "5";	//亲子教育
-	public static final String THREAD_CATEGORY_SPORTS = "6";	//运动达人
-	public static final String THREAD_CATEGORY_CHAT = "7";	//社区杂谈
-	public static final String THREAD_CATEGORY_BEAUTIES = "8";	//都市丽人
+	public static final int THREAD_CATEGORY_OUTDOORS = 1;	//户外活动
+	public static final int THREAD_CATEGORY_PETS = 2;	//宠物宝贝
+	public static final int THREAD_CATEGORY_CATE = 3;	//吃货天地	
+	public static final int THREAD_CATEGORY_STORE = 4;	//二手市场
+	public static final int THREAD_CATEGORY_EDUCATION = 5;	//亲子教育
+	public static final int THREAD_CATEGORY_SPORTS = 6;	//运动达人
+	public static final int THREAD_CATEGORY_CHAT = 7;	//社区杂谈
+	public static final int THREAD_CATEGORY_BEAUTIES = 8;	//都市丽人
+	public static final int THREAD_CATEGORY_HEALTH_REPORT = 9;	//健康上报
+	public static final int THREAD_CATEGORY_MASK_RESV = 10;	//口罩预约
 			
+	
 	//帖子回复状态 0.正常 1.撤销
 	public static final String COMMENT_STATUS_NORMAL = "0";
 	public static final String COMMENT_STATUS_DELETED = "1";
