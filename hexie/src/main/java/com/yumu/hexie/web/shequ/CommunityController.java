@@ -114,7 +114,7 @@ public class CommunityController extends BaseController{
 				
 				}else {
 					//邻里叽歪
-					list = communityService.getThreadListByNewCategory("4", user.getXiaoquId(), page);
+					list = communityService.getThreadListByNewCategory(ModelConstant.THREAD_CATEGORY_STORE, user.getXiaoquId(), page);
 					
 				}
 			
@@ -127,7 +127,7 @@ public class CommunityController extends BaseController{
 				}else {
 					
 					//邻里叽歪
-					list = communityService.getThreadListByNewCategory("4", page);
+					list = communityService.getThreadListByNewCategory(ModelConstant.THREAD_CATEGORY_STORE, page);
 					
 				}
 				
@@ -222,7 +222,7 @@ public class CommunityController extends BaseController{
 		
 		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
 		
-		return BaseResult.successResult("信息发布成功。");
+		return BaseResult.successResult("success");
 		
 		
 	}
@@ -737,7 +737,7 @@ public class CommunityController extends BaseController{
 				td.setImgUrlLink(imgLinkList);
 				td.setPreviewLink(previewLinkList);
 			}
-			if (ModelConstant.THREAD_CATEGORY_STORE.equals(td.getThreadCategory())) {
+			if (ModelConstant.THREAD_CATEGORY_STORE == (td.getThreadCategory())) {
 				td.setCategoryImgName("img_store_publish");
 				td.setCategoryCnName("二手市场");
 			}else {
