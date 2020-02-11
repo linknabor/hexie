@@ -23,6 +23,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateItem;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -46,6 +47,7 @@ public class TemplateMsgService {
 	public static final String TEMPLATE_TYPE_REPAIR_ASSIGN = "reapirAssginTemplate";
 	public static final String TEMPLATE_TYPE_YUYUE_ASSGIN = "yuyueNoticeTemplate";
 	public static final String TEMPLATE_TYPE_COMPLAIN = "complainTemplate";
+	public static final String TEMPLATE_TYPE_SERVICE = "serviceTemplate";
 	
 	
 	/**
@@ -266,18 +268,17 @@ public class TemplateMsgService {
      */
     public static void testSend(String openid, String accessToken, String appId) {
 	
-	  	RepairOrderVO vo = new RepairOrderVO();
-	  	vo.setTitle(new TemplateItem("您有新的快递！"));
+    	WuyeServiceVO vo = new WuyeServiceVO();
+	  	vo.setTitle(new TemplateItem("已接收您的快递包裹！"));
 	  	vo.setOrderNum(new TemplateItem("快递单号：" + System.currentTimeMillis()));
-	  	vo.setCustName(new TemplateItem("朱彬"));
-	  	vo.setCustMobile(new TemplateItem("13732219584"));
-	  	vo.setCustAddr(new TemplateItem("上海市浦东新区耀元路58号601"));
-	  	vo.setRemark(new TemplateItem(""));
+	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyyMMdd") + DateUtil.dtFormat(new Date().getTime(), "HHMM");
+	  	vo.setRecvDate(new TemplateItem(recvDate));
+	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
 	  	
-	  	TemplateMsg<RepairOrderVO>msg = new TemplateMsg<RepairOrderVO>();
+	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_REPAIR_ASSIGN));
-    	String url = GotongServiceImpl.WEIXIU_NOTICE + "10086";
+    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
+    	String url = GotongServiceImpl.SERVICE_URL + "10086";
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);

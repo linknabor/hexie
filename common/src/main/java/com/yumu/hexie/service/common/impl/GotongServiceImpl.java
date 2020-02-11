@@ -63,6 +63,8 @@ public class GotongServiceImpl implements GotongService {
     
     public static String SUBSCRIBE_DETAIL = ConfigUtil.get("subscribeDetail");
     
+    public static String SERVICE_URL = ConfigUtil.get("serviceUrl");
+    
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
     @Inject
