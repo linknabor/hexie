@@ -271,7 +271,7 @@ public class TemplateMsgService {
     	WuyeServiceVO vo = new WuyeServiceVO();
 	  	vo.setTitle(new TemplateItem("已接收您的快递包裹！"));
 	  	vo.setOrderNum(new TemplateItem(String.valueOf(System.currentTimeMillis())));
-	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyyMMdd") + DateUtil.dtFormat(new Date().getTime(), "HHMM");
+	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
 	  	vo.setRecvDate(new TemplateItem(recvDate));
 	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
 	  	
@@ -283,6 +283,12 @@ public class TemplateMsgService {
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);
   	
+	}
+    
+    public static void main(String[] args) {
+		
+    	System.out.println(DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+    	
 	}
 
 
