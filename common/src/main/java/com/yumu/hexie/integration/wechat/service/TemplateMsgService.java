@@ -175,6 +175,7 @@ public class TemplateMsgService {
     	TemplateMsgService.sendMsg(msg, accessToken);
     	
     }
+    
     public static void sendYuyueBillMsg(String openId,String title,String billName, 
     			String requireTime, String url, String accessToken, String appId) {
 
@@ -256,6 +257,32 @@ public class TemplateMsgService {
 
     	
     }
+    
+    /**
+     * 测试模板
+     * @param openid
+     * @param accessToken
+     * @param appId
+     */
+    public static void testSend(String openid, String accessToken, String appId) {
+	
+	  	RepairOrderVO vo = new RepairOrderVO();
+	  	vo.setTitle(new TemplateItem("您有新的快递！"));
+	  	vo.setOrderNum(new TemplateItem("快递单号：" + System.currentTimeMillis()));
+	  	vo.setCustName(new TemplateItem("朱彬"));
+	  	vo.setCustMobile(new TemplateItem("13732219584"));
+	  	vo.setCustAddr(new TemplateItem("上海市浦东新区耀元路58号601"));
+	  	vo.setRemark(new TemplateItem(""));
+	  	
+	  	TemplateMsg<RepairOrderVO>msg = new TemplateMsg<RepairOrderVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_REPAIR_ASSIGN));
+    	String url = GotongServiceImpl.WEIXIU_NOTICE + "10086";
+    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
+    	msg.setTouser(openid);
+    	TemplateMsgService.sendMsg(msg, accessToken);
+  	
+	}
 
 
 }

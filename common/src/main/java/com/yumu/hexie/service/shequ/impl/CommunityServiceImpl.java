@@ -64,13 +64,13 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByCategory(String category, long userSectId, Pageable page) {
+	public List<Thread> getThreadListByCategory(int category, long userSectId, Pageable page) {
 
 		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, page);
 	}
 
 	@Override
-	public List<Thread> getThreadListByCategory(String category, Pageable page) {
+	public List<Thread> getThreadListByCategory(int category, Pageable page) {
 		
 		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
 	}
@@ -85,9 +85,9 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserHead(user.getHeadimgurl());
 		thread.setUserId(user.getId());
 		thread.setUserName(user.getNickname());
-		thread.setUserSectId(Long.parseLong(user.getSectId()));
+		thread.setUserSectId(user.getSectId());
 		thread.setUserSectName(user.getXiaoquName());
-		thread.setStickPriority("0");	//默认优先级0，为最低
+		thread.setStickPriority(0);	//默认优先级0，为最低
 		threadRepository.save(thread);
 		
 		return thread;
@@ -220,7 +220,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByNewCategory(String category,
+	public List<Thread> getThreadListByNewCategory(int category,
 			long userSectId, Pageable page) {
 		
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, page); 
@@ -228,7 +228,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByNewCategory(String category, Pageable page) {
+	public List<Thread> getThreadListByNewCategory(int category, Pageable page) {
 
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
 	}
