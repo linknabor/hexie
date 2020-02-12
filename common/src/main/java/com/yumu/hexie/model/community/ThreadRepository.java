@@ -56,4 +56,25 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 	@Modifying
 	@Query(nativeQuery = true,value="update thread set threadStatus=1 where threadId in ?1")
 	public int deleteThread(String[] threadIds);
+	
+	
+	@Query(value="select thread.* from thread"
+			+ " where threadStatus = ?1 " 
+			+ " and IF (?2!='', createDate >= ?2, 1=1)"
+			+ " and IF (?3!='', createDate <= ?3, 1=1)"
+			+ " and userSectId in ?4 "
+			+ " order by createDateTime desc "
+			+ " \n#pageable\n",
+			countQuery="select count(*) from thread  where threadStatus = ?1 " 
+			+ " and IF (?2!='', createDate >= ?2 ), 1=1)"
+			+ " and IF (?3!='', createDate <= ?3, 1=1)"
+			+ " and userSectId in ?4 )"
+			,nativeQuery = true)
+	public Page<Thread> getThreadListByCategory(String threadStatus, String beginDate, String endDate, List<String> sectIds, Pageable pageable);
+	
+	
+	
+	
+	
+	
 }

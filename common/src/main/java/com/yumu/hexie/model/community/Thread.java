@@ -38,6 +38,7 @@ public class Thread implements Serializable{
 	private String userMobile;	//用户手机
 	private String userSectId;		//用户所在小区ID
 	private String userSectName; 	//用户所在小区名称
+	private String userAddress;		//用户地址
 	private double userSectLatitude;	//用户所在小区纬度
 	private double userSectLongtitude;	//用户所在小区精度
 	private String appid;	//所在公众号平台
@@ -50,6 +51,7 @@ public class Thread implements Serializable{
 	private int stickPriority;	//置顶优先级，数值越大优先级越高
 	private long lastCommentTime;	//最后评论时间
 	private String hasUnreadComment;	//是否有未读评论
+	private String remark;	//备注
 	
 	@Transient
 	private List<ThreadComment> comments;
@@ -282,6 +284,18 @@ public class Thread implements Serializable{
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+	}
+	public String getUserAddress() {
+		return userAddress;
+	}
+	public void setUserAddress(String userAddress) {
+		this.userAddress = userAddress;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 	

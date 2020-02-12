@@ -285,10 +285,26 @@ public class TemplateMsgService {
   	
 	}
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws JSONException {
 		
-    	System.out.println(DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+    	String appId = "wx95f46f41ca5e570e";
+    	String openid = "o_3DlwdnCLCz3AbTrZqj4HtKeQYY";
+    	WuyeServiceVO vo = new WuyeServiceVO();
+	  	vo.setTitle(new TemplateItem("已接收您的快递包裹！"));
+	  	vo.setOrderNum(new TemplateItem(String.valueOf(System.currentTimeMillis())));
+	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
+	  	vo.setRecvDate(new TemplateItem(recvDate));
+	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
+	  	
+	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
+    	String url = GotongServiceImpl.SERVICE_URL + "10086";
+    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
+    	msg.setTouser(openid);
     	
+    	String json = JacksonJsonUtil.beanToJson(msg);
+    	System.out.println(json);
 	}
 
 
