@@ -120,6 +120,7 @@ public class WuyeController extends BaseController {
 			user.setOfficeTel(r.getData());
 			user.setSectId("0");
 			user.setCspId("0");
+			user.setXiaoquName("");
 			userService.save(user);
 			log.error("保存电话到user表==》成功");
 			return BaseResult.successResult("删除房子成功！");

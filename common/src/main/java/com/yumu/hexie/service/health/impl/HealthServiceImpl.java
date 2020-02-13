@@ -17,6 +17,8 @@ import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadRepository;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
@@ -41,6 +43,12 @@ public class HealthServiceImpl implements HealthService {
 	@Autowired
 	private AddressRepository addressRepository;
 	
+	@Autowired
+	private ServiceOperatorRepository serviceOperatorRepository;
+	
+	/**
+	 * 健康上报
+	 */
 	@Override
 	@Transactional
 	public void addHealthReport(User user, Thread thread) {
@@ -54,17 +62,24 @@ public class HealthServiceImpl implements HealthService {
 			throw new BizValidateException("提交的答案数为：" + answers.length + ",应为4题。");
 		}
 		boolean isNormal = true;	//是否正常
-		for (String answer : answers) {
-			answer = answer.trim();
-			if ("1".equals(answer)) {
-				isNormal = false;
-				break;
-			}
-			if (answer.length()>1) {
-				isNormal = false;
-				break;
-			}
-			
+		String answer1 = answers[0];	//第一题 1无，2有
+		String answer2 = answers[1];	//第一题 1无，2有
+		String answer3 = answers[2];	//第三题 1，2，3有，4无
+		if (!"1".equals(answer1)) {
+			isNormal = false;
+		}
+		if (!"1".equals(answer2)) {
+			isNormal = false;
+		}
+		if (!"4".equals(answer3)) {
+			isNormal = false;
+		}
+		String answer4 = "";
+		if (answers.length == 4) {
+			answer4 = answers[3];	//第四题，填空题，不填说明正常
+		}
+		if (!StringUtils.isEmpty(answer4)) {
+			isNormal = false;
 		}
 		if (!isNormal) {
 			thread.setRemark("1");
@@ -75,6 +90,9 @@ public class HealthServiceImpl implements HealthService {
 		threadRepository.save(thread);
 	}
 
+	/**
+	 * 口罩预约
+	 */
 	@Override
 	@Transactional
 	public void addMaskReservation(User user, Thread thread) {
@@ -93,18 +111,48 @@ public class HealthServiceImpl implements HealthService {
 		threadRepository.save(thread);
 		
 	}
+	
+	/**
+	 * 服务预约
+	 * @param user
+	 * @param thread
+	 */
+	@Override
+	@Transactional
+	public void addServiceReservation(User user, Thread thread) {
+
+		Assert.hasText(thread.getThreadContent(), "预约信息不能为空。");
+		
+		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SERVICE_RESV);	//类型
+		saveThread(user, thread);
+		
+		List<ServiceOperator> opList = serviceOperatorRepository.getServiceoperator(thread.getUserSectId(), ModelConstant.SERVICE_OPER_TYPE_STAFF);	//找到物业人员，发模板消息
+		for (ServiceOperator serviceOperator : opList) {
+			//TODO 发送模板消息
+		}
+		threadRepository.save(thread);
+		
+	}
 
 	private void saveThread(User user, Thread thread) {
 		User currUser = userRepository.findOne(user.getId());
-		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
 		Address currAdddr = new Address();
-		for (Address address : addrList) {
+		List<Address> mainAddrList = addressRepository.getAddressByMain(currUser.getId(), true);
+		for (Address address : mainAddrList) {
 			if (address.getXiaoquName().equals(user.getXiaoquName())) {
 				currAdddr = address;
 				break;
 			}
 		}
-		
+		if (StringUtils.isEmpty(currAdddr.getDetailAddress())) {
+			List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+			for (Address address : addrList) {
+				if (address.getXiaoquName().equals(user.getSectId())) {
+					currAdddr = address;
+					break;
+				}
+			}
+		}
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
 		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
@@ -141,6 +189,18 @@ public class HealthServiceImpl implements HealthService {
 	public Page<Thread> getMaskReservation(BaseRequestDTO<Thread> baseRequestDTO) {
 		Thread thread = baseRequestDTO.getData();
 		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_MASK_RESV);
+		Page<Thread> page = getThread(baseRequestDTO);
+		return page;
+		
+	}
+	
+	/**
+	 * 获取服务预约列表
+	 */
+	@Override
+	public Page<Thread> getServiceReservation(BaseRequestDTO<Thread> baseRequestDTO) {
+		Thread thread = baseRequestDTO.getData();
+		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SERVICE_RESV);
 		Page<Thread> page = getThread(baseRequestDTO);
 		return page;
 		
