@@ -70,7 +70,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " \n#pageable\n",
 			countQuery="select count(*) from thread  where threadStatus = ?1 " 
 			+ " and threadCategory = ?2 "
-			+ " and IF (?3!='', createDate >= ?3 ), 1=1)"
+			+ " and IF (?3!='', createDate >= ?3, 1=1)"
 			+ " and IF (?4!='', createDate <= ?4, 1=1)"
 			+ " and userSectId in ?5 )"
 			,nativeQuery = true)
