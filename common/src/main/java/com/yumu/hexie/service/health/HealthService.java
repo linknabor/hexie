@@ -12,8 +12,14 @@ public interface HealthService {
 	
 	void addMaskReservation(User user, Thread thread);	//口罩预约
 	
+	void addServiceReservation(User user, Thread thread);	//服务预约
+	
 	Page<Thread> getHealthReport(BaseRequestDTO<Thread> baseRequestDTO);	//获取健康上报
 	
-	Page<Thread> getMaskReservation(BaseRequestDTO<Thread> baseRequestDTO);	//获取健康上报
+	Page<Thread> getMaskReservation(BaseRequestDTO<Thread> baseRequestDTO);	//口罩预约列表
+
+	Page<Thread> getServiceReservation(BaseRequestDTO<Thread> baseRequestDTO);	//服务预约列表	
+
+	
 	
 }

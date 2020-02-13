@@ -30,6 +30,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
@@ -66,6 +67,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private SystemConfigService systemConfigService;
+	
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -266,7 +270,9 @@ public class WuyeServiceImpl implements WuyeService {
 		currUser.setSectId(u.getSect_id());	
 		currUser.setCspId(u.getCsp_id());
 		currUser.setOfficeTel(u.getOffice_tel());
-		userService.save(currUser);	//这里很可能会将user表中的其他字段刷掉，最好写update字段的方式 TODO
+		userRepository.updateUserByHouse(currUser.getXiaoquId(), currUser.getXiaoquName(), 
+				currUser.getTotalBind(), currUser.getProvince(), currUser.getCity(), currUser.getCountry(), 
+				currUser.getSectId(), currUser.getCspId(), currUser.getOfficeTel(), currUser.getId());
 		
 	}
 
