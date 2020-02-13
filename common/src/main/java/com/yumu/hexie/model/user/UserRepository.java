@@ -82,9 +82,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	 */
 	@Modifying
 	@Transactional
-	@Query(value = "update user set xiaoquId = ?1, xiaoquName = ?2, totalBind = ?3, province = ?4, city = ?5 "
-			+ "county = ?6, sectId = ?7, cspId = ?8, officeTel = ?9 "
-			+ "where id = ?10 ", nativeQuery = true)
+	@Query(value = "update user set xiaoquId = ?1, xiaoquName = ?2, totalBind = ?3, province = ?4, city = ?5, "
+			+ " county = ?6, sectId = ?7, cspId = ?8, officeTel = ?9 "
+			+ " where id = ?10 ", nativeQuery = true)
 	public int updateUserByHouse(long xiaoquId, String xiaoquName, int totalBind, String province, String city, String county, 
 			String sectId, String cspId, String officeTel, long id);
 
