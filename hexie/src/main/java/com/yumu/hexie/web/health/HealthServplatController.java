@@ -33,4 +33,18 @@ public class HealthServplatController {
 		
 	}
 	
+	
+	/**
+	 * 获取口罩预约情况
+	 * @param baseRequestDTO
+	 * @return
+	 */
+	@RequestMapping(value = "/maskResv", method = RequestMethod.POST)
+	public BaseResponseDTO<?>  maskResv(@RequestBody BaseRequestDTO<Thread> baseRequestDTO) {
+		
+		Page<Thread> page = healthService.getMaskReservation(baseRequestDTO);
+		return BaseResponse.success(baseRequestDTO.getRequestId(), page);
+		
+	}
+	
 }

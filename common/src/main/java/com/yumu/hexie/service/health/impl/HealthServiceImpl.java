@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
@@ -78,9 +79,16 @@ public class HealthServiceImpl implements HealthService {
 	@Transactional
 	public void addMaskReservation(User user, Thread thread) {
 
-		Assert.hasText(thread.getThreadContent(), "预约身份证号不能为空。");
-
+		Assert.hasText(thread.getThreadContent(), "预约信息不能为空。");
+		
+		String content = thread.getThreadContent();
+		String[]answers = content.split(",");
+		if (answers.length<3) {
+			throw new BizValidateException("预约信息未填写完整。");
+		}
 		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_MASK_RESV);	//类型
+		thread.setUserName(answers[0]);
+		thread.setRemark(answers[2]);	//把证件号存起来，可能需要限制一个身份证的预约次数 TODO 
 		saveThread(user, thread);
 		threadRepository.save(thread);
 		
@@ -103,7 +111,9 @@ public class HealthServiceImpl implements HealthService {
 		thread.setThreadStatus(ModelConstant.THREAD_STATUS_NORMAL);
 		thread.setUserHead(currUser.getHeadimgurl());
 		thread.setUserId(currUser.getId());
-		thread.setUserName(currUser.getNickname());
+		if (StringUtils.isEmpty(thread.getUserName())) {
+			thread.setUserName(currUser.getName());	//口罩预约功能，这里存入用户填写的真实姓名。健康上报功能直接取用户注册时的微信名字
+		}
 		thread.setUserSectId(currUser.getSectId());
 		thread.setUserSectName(currUser.getXiaoquName());
 		thread.setUserAddress(currAdddr.getDetailAddress());
@@ -117,6 +127,8 @@ public class HealthServiceImpl implements HealthService {
 	 */
 	@Override
 	public Page<Thread> getHealthReport(BaseRequestDTO<Thread> baseRequestDTO) {
+		Thread thread = baseRequestDTO.getData();
+		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_HEALTH_REPORT);
 		Page<Thread> page = getThread(baseRequestDTO);
 		return page;
 		
@@ -127,7 +139,8 @@ public class HealthServiceImpl implements HealthService {
 	 */
 	@Override
 	public Page<Thread> getMaskReservation(BaseRequestDTO<Thread> baseRequestDTO) {
-		
+		Thread thread = baseRequestDTO.getData();
+		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_MASK_RESV);
 		Page<Thread> page = getThread(baseRequestDTO);
 		return page;
 		
@@ -135,8 +148,9 @@ public class HealthServiceImpl implements HealthService {
 	
 	private Page<Thread> getThread(BaseRequestDTO<Thread> baseRequestDTO) {
 		
+		Thread thread = baseRequestDTO.getData();
 		Pageable pageable = new PageRequest(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
-		Page<Thread> page = threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, 
+		Page<Thread> page = threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, thread.getThreadCategory(),
 				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), baseRequestDTO.getSectList(), pageable);
 		return page;
 	}
