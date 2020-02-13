@@ -132,6 +132,7 @@ public class UserController extends BaseController{
 			    
 			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
+			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
 			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 

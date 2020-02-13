@@ -26,4 +26,5 @@ public interface SystemConfigService {
 	String getSysConfigByKey(String key);
 	void reloadSysConfigCache();
 	boolean isCardServiceAvailable(String appId);
+	boolean coronaPreventionAvailable(String appId);
 }
