@@ -137,20 +137,11 @@ public class HealthServiceImpl implements HealthService {
 	private void saveThread(User user, Thread thread) {
 		User currUser = userRepository.findOne(user.getId());
 		Address currAdddr = new Address();
-		List<Address> mainAddrList = addressRepository.getAddressByMain(currUser.getId(), true);
-		for (Address address : mainAddrList) {
-			if (address.getXiaoquName().equals(user.getXiaoquName())) {
+		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+		for (Address address : addrList) {
+			if (address.getXiaoquName().equals(currUser.getXiaoquName())) {
 				currAdddr = address;
 				break;
-			}
-		}
-		if (StringUtils.isEmpty(currAdddr.getDetailAddress())) {
-			List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
-			for (Address address : addrList) {
-				if (address.getXiaoquName().equals(user.getSectId())) {
-					currAdddr = address;
-					break;
-				}
 			}
 		}
 		thread.setCreateDateTime(System.currentTimeMillis());
