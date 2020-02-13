@@ -72,7 +72,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " and threadCategory = ?2 "
 			+ " and IF (?3!='', createDate >= ?3, 1=1)"
 			+ " and IF (?4!='', createDate <= ?4, 1=1)"
-			+ " and userSectId in ?5 )"
+			+ " and userSectId in ?5 "
 			,nativeQuery = true)
 	public Page<Thread> getThreadListByCategory(String threadStatus, int threadCategory, String beginDate, String endDate, List<String> sectIds, Pageable pageable);
 	
