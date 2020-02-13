@@ -21,6 +21,7 @@ import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
+import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -76,11 +77,23 @@ public class WuyeServiceImpl implements WuyeService {
 		return WuyeUtil.queryHouse(user).getData();
 	}
 
-	
 	@Override
-	public BaseResult<String> deleteHouse(User user, String houseId) {
-		BaseResult<String> r = WuyeUtil.deleteHouse(user, houseId);
-		return r;
+	@Transactional
+	public boolean deleteHouse(User user, String houseId) {
+		
+		User curruser = userService.getById(user.getId());
+		BaseResult<String> result = WuyeUtil.deleteHouse(curruser, houseId);
+		if (result.isSuccess()) {
+			// 添加电话到user表
+			int totalBind = curruser.getTotalBind()-1;
+			if (totalBind < 0) {
+				totalBind = 0;
+			}
+			userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", curruser.getId());
+		} else {
+			throw new BizValidateException("解绑房屋失败。");
+		}
+		return result.isSuccess();
 	}
 	
 	@Override
@@ -225,9 +238,10 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public HexieUser bindHouseNoStmt(User user, String houseId, String area) {
+	public BindHouseDTO bindHouseNoStmt(User user, String houseId, String area) {
 		
-		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(user, houseId, area);
+		User currUser = userService.getById(user.getId());
+		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(currUser, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -240,12 +254,15 @@ public class WuyeServiceImpl implements WuyeService {
 		if("06".equals(r.getResult())) {
 			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
 		}
-		return r.getData();
+		BindHouseDTO dto = new BindHouseDTO();
+		dto.setHexieUser(r.getData());
+		dto.setUser(currUser);
+		return dto;
 	}
 
 	@Override
 	@Transactional
-	public void setDefaultAddress(User user, HexieUser u) {
+	public User setDefaultAddress(User user, HexieUser u) {
 
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
@@ -257,11 +274,13 @@ public class WuyeServiceImpl implements WuyeService {
 			totalBind = 0;
 		}
 		if (!StringUtils.isEmpty(u.getTotal_bind())) {
-			totalBind = u.getTotal_bind();	//如果值不为空，说明是跑批程序返回回来的，直接取值即可，如果值是空，走下面的else累加即可
-		}else {
-			totalBind = totalBind+1;
+			if (u.getTotal_bind() > 0) {
+				totalBind = u.getTotal_bind();	//如果值不为空，说明是跑批程序返回回来的，直接取值即可，如果值是空，走下面的else累加即可
+			}
 		}
-		
+		if (totalBind == 0) {
+			totalBind = totalBind + 1;
+		}
 		currUser.setTotalBind(totalBind);
 		currUser.setXiaoquName(u.getSect_name());
 		currUser.setProvince(u.getProvince_name());
@@ -273,6 +292,8 @@ public class WuyeServiceImpl implements WuyeService {
 		userRepository.updateUserByHouse(currUser.getXiaoquId(), currUser.getXiaoquName(), 
 				currUser.getTotalBind(), currUser.getProvince(), currUser.getCity(), currUser.getCountry(), 
 				currUser.getSectId(), currUser.getCspId(), currUser.getOfficeTel(), currUser.getId());
+		
+		return currUser;
 		
 	}
 
@@ -304,8 +325,10 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public HexieUser bindHouse(User user, String stmtId, String houseId) {
-		BaseResult<HexieUser> r= WuyeUtil.bindHouse(user, stmtId, houseId);
+	public BindHouseDTO bindHouse(User user, String stmtId, String houseId) {
+		
+		User currUser = userService.getById(user.getId());
+		BaseResult<HexieUser> r= WuyeUtil.bindHouse(currUser, stmtId, houseId);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -315,7 +338,10 @@ public class WuyeServiceImpl implements WuyeService {
 		if("01".equals(r.getResult())) {
 			throw new BizValidateException("账户不存在！");
 		}
-		return r.getData();
+		BindHouseDTO dto = new BindHouseDTO();
+		dto.setHexieUser(r.getData());
+		dto.setUser(currUser);
+		return dto;
 	}
 	
 	/**
