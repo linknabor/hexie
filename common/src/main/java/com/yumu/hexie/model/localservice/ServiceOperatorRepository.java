@@ -50,4 +50,12 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
 			+ " and b.sectId in ?4 GROUP BY b.operatorId ) b" 
 			,nativeQuery = true)
     public Page<Object>  getServiceoperator(String name,String tel,String sectId, List<String> sectIds,Pageable pageable);
+
+    @Query(value="select a.* from serviceoperator a "
+    		+ " join serviceoperatorSect b on a.id=b.operatorId "
+			+ " where b.sectId = ?1 "
+			+ " and a.type = ?2 ",
+			nativeQuery = true)
+    public List<ServiceOperator>  getServiceoperator(String sectId, int type);
+
 }

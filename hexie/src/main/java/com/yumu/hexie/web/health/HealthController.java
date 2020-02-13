@@ -45,4 +45,12 @@ public class HealthController extends BaseController {
 		return BaseResult.successResult("success");
 	}
 	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/serviceResv", method = RequestMethod.POST)
+	public BaseResult<String> serviceResv(@ModelAttribute(Constants.USER) User user, @RequestBody Thread thread) {
+		
+		healthService.addServiceReservation(user, thread);
+		return BaseResult.successResult("success");
+	}
+	
 }
