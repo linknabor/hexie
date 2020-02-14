@@ -133,12 +133,12 @@ public class HealthServiceImpl implements HealthService {
 		String title = "新预约服务通知";
 		String content = "您有1新的服务预约消息";
 		String requireTime = DateUtil.dtFormat(thread.getCreateDateTime(), "yyyy-MM-dd HH:mm:ss");
+		thread = threadRepository.save(thread);
 		
 		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndSectId(ModelConstant.SERVICE_OPER_TYPE_STAFF, user.getSectId());
 		for (ServiceOperator serviceOperator : opList) {
-			gotongService.sendServiceResvMsg(serviceOperator.getOpenId(), title, content, requireTime, user.getAppId());
+			gotongService.sendServiceResvMsg(thread.getThreadId(), serviceOperator.getOpenId(), title, content, requireTime, user.getAppId());
 		}
-		threadRepository.save(thread);
 		
 	}
 

@@ -30,5 +30,5 @@ public interface GotongService {
     
     public void pushweixinAll();
     
-	void sendServiceResvMsg(String openId, String title, String content, String requireTime, String appId);
+	void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String appId);
 }

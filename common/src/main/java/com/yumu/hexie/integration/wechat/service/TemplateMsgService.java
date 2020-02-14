@@ -179,7 +179,7 @@ public class TemplateMsgService {
     }
     
     /**
-     * 预约服务模板消息
+     * 预约服务模板
      * @param openId
      * @param title
      * @param billName
@@ -188,7 +188,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendYuyueBillMsg(String openId,String title,String billName, 
+    public static void sendYuyueBillMsg(String orderId, String openId, String title,String billName, 
     			String requireTime, String url, String accessToken, String appId) {
 
         //更改为使用模版消息发送
@@ -202,7 +202,7 @@ public class TemplateMsgService {
         msg.setData(vo);
         msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_YUYUE_ASSGIN));
         if (StringUtils.isEmpty(url)) {
-			url = "";
+			url = GotongServiceImpl.SERVICE_RESV_URL + orderId;
 		}
         url = AppUtil.addAppOnUrl(url, appId);
         msg.setUrl(url);
