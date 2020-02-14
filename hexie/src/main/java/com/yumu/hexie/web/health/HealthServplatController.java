@@ -12,10 +12,11 @@ import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.service.health.HealthService;
+import com.yumu.hexie.web.BaseController;
 
 @RestController
 @RequestMapping(value = "/servplat/health")
-public class HealthServplatController {
+public class HealthServplatController extends BaseController{
 
 	@Autowired
 	private HealthService healthService;
