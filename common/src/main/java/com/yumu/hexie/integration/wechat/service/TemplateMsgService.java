@@ -178,6 +178,16 @@ public class TemplateMsgService {
     	
     }
     
+    /**
+     * 预约服务模板消息
+     * @param openId
+     * @param title
+     * @param billName
+     * @param requireTime
+     * @param url
+     * @param accessToken
+     * @param appId
+     */
     public static void sendYuyueBillMsg(String openId,String title,String billName, 
     			String requireTime, String url, String accessToken, String appId) {
 
@@ -191,6 +201,9 @@ public class TemplateMsgService {
         TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<YuyueOrderVO>();
         msg.setData(vo);
         msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_YUYUE_ASSGIN));
+        if (StringUtils.isEmpty(url)) {
+			url = "";
+		}
         url = AppUtil.addAppOnUrl(url, appId);
         msg.setUrl(url);
         msg.setTouser(openId);

@@ -205,4 +205,11 @@ public class GotongServiceImpl implements GotongService {
 		}
 		
     }
+	@Override
+	public void sendServiceResvMsg(String openId, String title, String content, String requireTime, String appId) {
+		
+		String accessToken = systemConfigService.queryWXAToken(appId);
+		TemplateMsgService.sendYuyueBillMsg(openId, title, content, requireTime, "", accessToken, appId);    
+		
+	}
 }
