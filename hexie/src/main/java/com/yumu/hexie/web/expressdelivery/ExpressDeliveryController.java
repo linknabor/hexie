@@ -10,7 +10,7 @@ import com.yumu.hexie.service.expressdelivery.ExpressDeliveryService;
 import com.yumu.hexie.web.BaseController;
 
 @RestController
-@RequestMapping(value = "/express")
+@RequestMapping(value = "/servplat/express")
 public class ExpressDeliveryController extends BaseController{
 	
 	@Autowired
