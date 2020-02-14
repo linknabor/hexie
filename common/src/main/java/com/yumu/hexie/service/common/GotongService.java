@@ -29,4 +29,6 @@ public interface GotongService {
     public void sendCommonYuyueBillMsg(int serviceType,String title,String billName, String requireTime, String url);
     
     public void pushweixinAll();
+    
+	void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String appId);
 }

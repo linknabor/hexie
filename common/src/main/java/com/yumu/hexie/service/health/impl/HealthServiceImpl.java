@@ -23,6 +23,7 @@ import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.health.HealthService;
 
@@ -45,6 +46,9 @@ public class HealthServiceImpl implements HealthService {
 	
 	@Autowired
 	private ServiceOperatorRepository serviceOperatorRepository;
+	
+	@Autowired
+	private GotongService gotongService;
 	
 	/**
 	 * 健康上报
@@ -125,25 +129,38 @@ public class HealthServiceImpl implements HealthService {
 		
 		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SERVICE_RESV);	//类型
 		saveThread(user, thread);
+
+		String title = "新预约服务通知";
+		String content = "您有1新的服务预约消息";
+		String requireTime = DateUtil.dtFormat(thread.getCreateDateTime(), "yyyy-MM-dd HH:mm:ss");
+		thread = threadRepository.save(thread);
 		
-		List<ServiceOperator> opList = serviceOperatorRepository.getServiceoperator(thread.getUserSectId(), ModelConstant.SERVICE_OPER_TYPE_STAFF);	//找到物业人员，发模板消息
+		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndSectId(ModelConstant.SERVICE_OPER_TYPE_STAFF, user.getSectId());
 		for (ServiceOperator serviceOperator : opList) {
-			//TODO 发送模板消息
+			gotongService.sendServiceResvMsg(thread.getThreadId(), serviceOperator.getOpenId(), title, content, requireTime, user.getAppId());
 		}
-		threadRepository.save(thread);
 		
 	}
 
 	private void saveThread(User user, Thread thread) {
 		User currUser = userRepository.findOne(user.getId());
 		Address currAdddr = new Address();
-		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
-		for (Address address : addrList) {
+		
+		List<Address> defaultAddrList = addressRepository.getAddressByMain(currUser.getId(), true);
+		for (Address address : defaultAddrList) {
 			if (address.getXiaoquName().equals(currUser.getXiaoquName())) {
-				currAdddr = address;
-				break;
+				currAdddr = address;	//循环到结束，取最后一个符合的
 			}
 		}
+		if (StringUtils.isEmpty(currAdddr.getDetailAddress())) {
+			List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+			for (Address address : addrList) {
+				if (address.getXiaoquName().equals(currUser.getXiaoquName())) {
+					currAdddr = address;	//循环到结束，取最后一个符合的
+				}
+			}
+		}
+		
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
 		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));

@@ -64,6 +64,8 @@ public class GotongServiceImpl implements GotongService {
     public static String SUBSCRIBE_DETAIL = ConfigUtil.get("subscribeDetail");
     
     public static String SERVICE_URL = ConfigUtil.get("serviceUrl");
+
+    public static String SERVICE_RESV_URL = ConfigUtil.get("serviceResvUrl");
     
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
@@ -178,7 +180,7 @@ public class GotongServiceImpl implements GotongService {
             LOG.error("发送到操作员！["+serviceType+"]" + billName + " -- " + op.getName() + "--" + op.getId());
             User user = userRepository.findOne(op.getUserId());
             String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-            TemplateMsgService.sendYuyueBillMsg(op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId());    
+            TemplateMsgService.sendYuyueBillMsg("", op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId());    
         }
         
     }
@@ -205,4 +207,11 @@ public class GotongServiceImpl implements GotongService {
 		}
 		
     }
+	@Override
+	public void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String appId) {
+		
+		String accessToken = systemConfigService.queryWXAToken(appId);
+		TemplateMsgService.sendYuyueBillMsg(String.valueOf(threadId), openId, title, content, requireTime, "", accessToken, appId);    
+		
+	}
 }

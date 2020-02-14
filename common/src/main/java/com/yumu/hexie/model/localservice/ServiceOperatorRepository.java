@@ -37,25 +37,41 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     public List<ServiceOperator> findBySectId(String sectId);
     
     @Query(value="select a.*,b.sectId from serviceoperator a "
-    		+ "join serviceoperatorSect b on a.id=b.operatorId where 1=1"
-			+ " and IF (?1!='', name like CONCAT('%',?1,'%'), 1=1)"
-			+ " and IF (?2!='', tel like CONCAT('%',?2,'%'), 1=1)"
-			+ " and IF (?3!='', b.sectId =?3, 1=1)"
-			+ " and b.sectId in ?4 GROUP BY b.operatorId \n#pageable\n",
+    		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
+			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
+			+ " and IF (?3!='', tel like CONCAT('%',?3,'%'), 1=1)"
+			+ " and IF (?4!='', b.sectId =?4, 1=1)"
+			+ " and b.sectId in ?5 GROUP BY b.operatorId \n#pageable\n",
 			countQuery="select count(1) from ( select b.operatorId from serviceoperator a "
-    		+ "join serviceoperatorSect b on a.id=b.operatorId where 1=1 "
-			+ " and IF (?1!='', name like CONCAT('%',?1,'%'), 1=1)"
-			+ " and IF (?2!='', tel like CONCAT('%',?2,'%'), 1=1)"
-			+ " and IF (?3!='', b.sectId =?3, 1=1)"
-			+ " and b.sectId in ?4 GROUP BY b.operatorId ) b" 
+    		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
+			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
+			+ " and IF (?3!='', tel like CONCAT('%',?3,'%'), 1=1)"
+			+ " and IF (?4!='', b.sectId =?4, 1=1)"
+			+ " and b.sectId in ?5 GROUP BY b.operatorId ) b" 
 			,nativeQuery = true)
-    public Page<Object>  getServiceoperator(String name,String tel,String sectId, List<String> sectIds,Pageable pageable);
+    public Page<Object>  getServiceoperator(int type, String name, String tel, String sectId, 
+    		List<String> sectIds,Pageable pageable);
+    
+    @Query(value="select distinct a.* from serviceoperator a "
+    		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
+			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
+			+ " and IF (?3!='', tel like CONCAT('%',?3,'%'), 1=1)"
+			+ " and IF (?4!='', b.sectId =?4, 1=1)"
+			+ " and b.sectId in ?5 order by id desc \n#pageable\n",
+			countQuery="select count(distinct a.id) from serviceoperator a "
+    		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
+			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
+			+ " and IF (?3!='', tel like CONCAT('%',?3,'%'), 1=1)"
+			+ " and IF (?4!='', b.sectId =?4, 1=1)"
+			+ " and b.sectId in ?5 " 
+			,nativeQuery = true)
+    public Page<ServiceOperator>  getResvOper(int type, String name, String tel, String sectId, 
+    		List<String> sectIds,Pageable pageable);
 
-    @Query(value="select a.* from serviceoperator a "
-    		+ " join serviceoperatorSect b on a.id=b.operatorId "
-			+ " where b.sectId = ?1 "
-			+ " and a.type = ?2 ",
-			nativeQuery = true)
-    public List<ServiceOperator>  getServiceoperator(String sectId, int type);
-
+    public List<ServiceOperator> findByTypeAndUserIdAndCompanyName(int type, long userId, String companyName);
+    
+    @Query(nativeQuery = true, value="select a.* from serviceoperator a "
+    		+ "join serviceoperatorSect b on a.id = b.operatorId "
+    		+ "where a.type = ?1 and b.sectId = ?2 ")
+    public List<ServiceOperator> findByTypeAndSectId(int type, String sectId);
 }
