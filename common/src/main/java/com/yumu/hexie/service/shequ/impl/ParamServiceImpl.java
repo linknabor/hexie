@@ -22,7 +22,7 @@ import com.yumu.hexie.service.shequ.ParamService;
 public class ParamServiceImpl implements ParamService {
 	
 	private final static Logger logger = LoggerFactory.getLogger(ParamServiceImpl.class);
-	public final static String PARAM_NAMES = "ONLINE_REPAIR,ONLINE_SUGGESTION,ONLINE_MESSAGE";
+	public final static String PARAM_NAMES = "ONLINE_REPAIR,ONLINE_SUGGESTION,ONLINE_MESSAGE,CORONA_PREVENTION_MODE";
 	public final static String CACHED_KEY = "param";
 	
 	@Autowired
