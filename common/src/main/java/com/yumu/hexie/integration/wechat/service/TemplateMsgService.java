@@ -290,6 +290,38 @@ public class TemplateMsgService {
     	System.out.println(DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
     	
 	}
-
+    
+    
+    /**
+     * 快递外卖
+     * @param openid
+     * @param accessToken
+     * @param appId
+     */
+    public static void sendExpressDelivery(String openid, String accessToken, String appId,String type) {
+    	WuyeServiceVO vo = new WuyeServiceVO();
+    	if("0".equals(type)) {
+    		vo.setTitle(new TemplateItem("您的快递已送达！"));
+    	  	vo.setOrderNum(new TemplateItem(String.valueOf(System.currentTimeMillis())));
+    	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
+    	  	vo.setRecvDate(new TemplateItem(recvDate));
+    	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
+    	}else {
+    		vo.setTitle(new TemplateItem("您的外卖已送达！"));
+    	  	vo.setOrderNum(new TemplateItem(String.valueOf(System.currentTimeMillis())));
+    	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
+    	  	vo.setRecvDate(new TemplateItem(recvDate));
+    	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
+    	}
+	  	
+	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
+    	String url = GotongServiceImpl.SERVICE_URL + type;//type 0是快递  1是外卖
+    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
+    	msg.setTouser(openid);
+    	TemplateMsgService.sendMsg(msg, accessToken);
+  	
+	}
 
 }
