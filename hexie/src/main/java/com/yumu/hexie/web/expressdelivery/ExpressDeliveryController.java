@@ -1,5 +1,7 @@
 package com.yumu.hexie.web.expressdelivery;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,7 @@ public class ExpressDeliveryController extends BaseController{
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getExpress", method = RequestMethod.POST)
-	public BaseResult<Express> getExpress(@RequestParam(required=false) String userId) {
+	public BaseResult<List<Express>> getExpress(@RequestParam(required=false) String userId) {
 		
 		return BaseResult.successResult(expressDeliveryService.getExpress(Long.parseLong(userId)));
 	}
