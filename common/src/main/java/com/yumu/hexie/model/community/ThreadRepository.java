@@ -21,18 +21,18 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 	
 	public List<Thread> findByThreadStatus(String threadStatus, Pageable page);
 	
-	public List<Thread> findByThreadStatusAndUserSectId(String threadStatus, long userSectId, Pageable page);
+	public List<Thread> findByThreadStatusAndUserSectId(String threadStatus, String userSectId, Pageable page);
 	
 	public List<Thread> findByThreadStatusAndUserId(String threadStatus, long userId, Pageable page);
 	
 	@Query(value="from Thread t where t.threadStatus = ?1 and t.userSectId = ?2 and t.threadCategory = ?3 ")
-	public List<Thread> getThreadListByCategory(String threadStatus, long userSectId, int threadCategory, Pageable page);
+	public List<Thread> getThreadListByCategory(String threadStatus, String userSectId, int threadCategory, Pageable page);
 	
 	@Query(value="from Thread t where t.threadStatus = ?1 and t.threadCategory = ?2 ")
 	public List<Thread> getThreadListByCategory(String threadStatus, int threadCategory, Pageable page);
 	
 	@Query(value="from Thread t where t.threadStatus = ?1 and t.userSectId = ?2 and t.threadCategory <> ?3 ")
-	public List<Thread> getThreadListByNewCategory(String threadStatus, long userSectId, int threadCategory, Pageable page);
+	public List<Thread> getThreadListByNewCategory(String threadStatus, String userSectId, int threadCategory, Pageable page);
 	
 	@Query(value="from Thread t where t.threadStatus = ?1 and t.threadCategory <> ?2 ")
 	public List<Thread> getThreadListByNewCategory(String threadStatus, int threadCategory, Pageable page);
