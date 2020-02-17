@@ -1,7 +1,9 @@
 package com.yumu.hexie.service.expressdelivery;
 
-import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.express.Express;
 
 public interface ExpressDeliveryService {
-	void pullWechat(String wuyeId,String type);
+	void pullWechat(Express exr);
+	
+	public Express getExpress(long userId);
 }
