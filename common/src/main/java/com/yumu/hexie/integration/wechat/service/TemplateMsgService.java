@@ -298,7 +298,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendExpressDelivery(String openid, String accessToken, String appId,String userId) {
+    public static void sendExpressDelivery(String openid, String accessToken, String appId,long userId,String type) {
     	WuyeServiceVO vo = new WuyeServiceVO();
     	if("0".equals(type)) {
     		vo.setTitle(new TemplateItem("您的快递已送达！"));
@@ -317,7 +317,7 @@ public class TemplateMsgService {
 	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
-    	String url = GotongServiceImpl.SERVICE_URL + userId;
+    	String url = GotongServiceImpl.EXPRESS_URL + userId;
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);

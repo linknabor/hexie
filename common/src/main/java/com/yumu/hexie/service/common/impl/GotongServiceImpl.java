@@ -65,6 +65,8 @@ public class GotongServiceImpl implements GotongService {
     
     public static String SERVICE_URL = ConfigUtil.get("serviceUrl");
     
+    public static String EXPRESS_URL = ConfigUtil.get("expressUrl");
+    
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
     @Inject
