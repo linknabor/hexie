@@ -38,7 +38,7 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 	}
 
 	@Override
-	public Express getExpress(long userId) {
+	public List<Express> getExpress(long userId) {
 		// TODO Auto-generated method stub
 		return expressRepository.findByUserId(userId);
 	}
