@@ -54,7 +54,7 @@ public class CommunityServiceImpl implements CommunityService {
 	private AddressRepository addressRepository;
 	
 	@Override
-	public List<Thread> getThreadList(long userSectId, Pageable page) {
+	public List<Thread> getThreadList(String userSectId, Pageable page) {
 		
 		return threadRepository.findByThreadStatusAndUserSectId(ModelConstant.THREAD_STATUS_NORMAL, userSectId, page);
 		
@@ -74,7 +74,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByCategory(int category, long userSectId, Pageable page) {
+	public List<Thread> getThreadListByCategory(int category, String userSectId, Pageable page) {
 
 		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, page);
 	}
@@ -242,8 +242,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByNewCategory(int category,
-			long userSectId, Pageable page) {
+	public List<Thread> getThreadListByNewCategory(int category, String userSectId, Pageable page) {
 		
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, page); 
 	
