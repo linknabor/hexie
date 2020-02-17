@@ -34,7 +34,7 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 		exr.setDate_time(df.format(new Date()));
 		expressRepository.save(exr);
 		String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
-		TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId());
+		TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
 	}
 
 	@Override
