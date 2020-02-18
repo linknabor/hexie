@@ -59,6 +59,13 @@ public class HealthServiceImpl implements HealthService {
 
 		Assert.hasText(thread.getThreadContent(), "上报内容不能为空。");
 
+		if (StringUtils.isEmpty(thread.getUserSectId()) || StringUtils.isEmpty(thread.getUserSectName()) 
+				|| StringUtils.isEmpty(thread.getUserAddress())) {
+			thread.setUserSectId("0");
+			thread.setUserSectName("");
+			thread.setUserAddress("");
+		}
+		
 		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_HEALTH_REPORT);	//类型
 		String content = thread.getThreadContent();
 		String[]answers = content.split(",");
@@ -103,6 +110,13 @@ public class HealthServiceImpl implements HealthService {
 
 		Assert.hasText(thread.getThreadContent(), "预约信息不能为空。");
 		
+		if (StringUtils.isEmpty(thread.getUserSectId()) || StringUtils.isEmpty(thread.getUserSectName()) 
+				|| StringUtils.isEmpty(thread.getUserAddress())) {
+			thread.setUserSectId("0");
+			thread.setUserSectName("");
+			thread.setUserAddress("");
+		}
+		
 		String content = thread.getThreadContent();
 		String[]answers = content.split(",");
 		if (answers.length<3) {
@@ -144,22 +158,6 @@ public class HealthServiceImpl implements HealthService {
 
 	private void saveThread(User user, Thread thread) {
 		User currUser = userRepository.findOne(user.getId());
-		Address currAdddr = new Address();
-		
-		List<Address> defaultAddrList = addressRepository.getAddressByMain(currUser.getId(), true);
-		for (Address address : defaultAddrList) {
-			if (address.getXiaoquName().equals(currUser.getXiaoquName())) {
-				currAdddr = address;	//循环到结束，取最后一个符合的
-			}
-		}
-		if (StringUtils.isEmpty(currAdddr.getDetailAddress())) {
-			List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
-			for (Address address : addrList) {
-				if (address.getXiaoquName().equals(currUser.getXiaoquName())) {
-					currAdddr = address;	//循环到结束，取最后一个符合的
-				}
-			}
-		}
 		
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
@@ -170,9 +168,28 @@ public class HealthServiceImpl implements HealthService {
 		if (StringUtils.isEmpty(thread.getUserName())) {
 			thread.setUserName(currUser.getName());	//口罩预约功能，这里存入用户填写的真实姓名。健康上报功能直接取用户注册时的微信名字
 		}
-		thread.setUserSectId(currUser.getSectId());
-		thread.setUserSectName(currUser.getXiaoquName());
-		thread.setUserAddress(currAdddr.getDetailAddress());
+		if (StringUtils.isEmpty(thread.getUserSectId())) {	//服务预约功能如果小区ID为空，则自动从绑定房屋的地址填充。健康上报和口罩预约没填这个值是0
+			thread.setUserSectId(currUser.getSectId());
+			thread.setUserSectName(currUser.getXiaoquName());
+			
+			Address currAdddr = new Address();
+			
+			List<Address> defaultAddrList = addressRepository.getAddressByMain(currUser.getId(), true);
+			for (Address address : defaultAddrList) {
+				if (address.getXiaoquName().equals(currUser.getXiaoquName())) {
+					currAdddr = address;	//循环到结束，取最后一个符合的
+				}
+			}
+			if (StringUtils.isEmpty(currAdddr.getDetailAddress())) {
+				List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+				for (Address address : addrList) {
+					if (address.getXiaoquName().equals(currUser.getXiaoquName())) {
+						currAdddr = address;	//循环到结束，取最后一个符合的
+					}
+				}
+			}
+			thread.setUserAddress(currAdddr.getDetailAddress());
+		}
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
