@@ -96,13 +96,13 @@ public class CommunityController extends BaseController{
 		//查看本小区的
 		if ("y".equals(filter)) {
 			if (ModelConstant.THREAD_CATEGORY_SUGGESTION == thread.getThreadCategory()) {
-				list = communityService.getThreadListByCategory(thread.getThreadCategory(), String.valueOf(user.getXiaoquId()), page);
+				list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), String.valueOf(user.getXiaoquId()), page);
 			}else {
-				list = communityService.getThreadListByCategory(thread.getThreadCategory(), user.getSectId(), page);
+				list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), user.getSectId(), page);
 			}
 			
 		}else {
-			list = communityService.getThreadListByCategory(thread.getThreadCategory(), page);
+			list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), page);
 		}
 		
 		for (int i = 0; i < list.size(); i++) {
