@@ -58,7 +58,10 @@ public class HealthServiceImpl implements HealthService {
 	public void addHealthReport(User user, Thread thread) {
 
 		Assert.hasText(thread.getThreadContent(), "上报内容不能为空。");
-
+		Assert.hasText(thread.getUserSectId(), "小区ID不能为空。");
+		Assert.hasText(thread.getUserSectName(), " 小区名称不能为空。");
+		Assert.hasText(thread.getUserAddress(), "详细地址不能为空。");
+		
 		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_HEALTH_REPORT);	//类型
 		String content = thread.getThreadContent();
 		String[]answers = content.split(",");
@@ -102,6 +105,9 @@ public class HealthServiceImpl implements HealthService {
 	public void addMaskReservation(User user, Thread thread) {
 
 		Assert.hasText(thread.getThreadContent(), "预约信息不能为空。");
+		Assert.hasText(thread.getUserSectId(), "小区ID不能为空。");
+		Assert.hasText(thread.getUserSectName(), " 小区名称不能为空。");
+		Assert.hasText(thread.getUserAddress(), "详细地址不能为空。");
 		
 		String content = thread.getThreadContent();
 		String[]answers = content.split(",");
@@ -170,9 +176,11 @@ public class HealthServiceImpl implements HealthService {
 		if (StringUtils.isEmpty(thread.getUserName())) {
 			thread.setUserName(currUser.getName());	//口罩预约功能，这里存入用户填写的真实姓名。健康上报功能直接取用户注册时的微信名字
 		}
-		thread.setUserSectId(currUser.getSectId());
-		thread.setUserSectName(currUser.getXiaoquName());
-		thread.setUserAddress(currAdddr.getDetailAddress());
+		if (StringUtils.isEmpty(thread.getUserSectId())) {
+			thread.setUserSectId(currUser.getSectId());
+			thread.setUserSectName(currUser.getXiaoquName());
+			thread.setUserAddress(currAdddr.getDetailAddress());
+		}
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
