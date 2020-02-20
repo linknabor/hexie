@@ -3,6 +3,8 @@ package com.yumu.hexie.service.health.impl;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +36,8 @@ import com.yumu.hexie.service.health.HealthService;
  */
 @Service
 public class HealthServiceImpl implements HealthService {
+	
+	private static Logger logger = LoggerFactory.getLogger(HealthServiceImpl.class);
 
 	@Autowired
 	private UserRepository userRepository;
@@ -151,6 +155,7 @@ public class HealthServiceImpl implements HealthService {
 		
 		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndSectId(ModelConstant.SERVICE_OPER_TYPE_STAFF, user.getSectId());
 		for (ServiceOperator serviceOperator : opList) {
+			logger.info("准备发送服务预约模板消息， threadId:" + thread.getThreadId() + "serviceOperator: " + serviceOperator);
 			gotongService.sendServiceResvMsg(thread.getThreadId(), serviceOperator.getOpenId(), title, content, requireTime, user.getAppId());
 		}
 		

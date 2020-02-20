@@ -95,5 +95,11 @@ public class ServiceOperator  extends BaseModel {
     public void setType(int type) {
         this.type = type;
     }
+	@Override
+	public String toString() {
+		return "ServiceOperator [type=" + type + ", companyName=" + companyName + ", name=" + name + ", tel=" + tel
+				+ ", openId=" + openId + ", userId=" + userId + ", regionId=" + regionId + ", fromWuye=" + fromWuye
+				+ ", longitude=" + longitude + ", latitude=" + latitude + "]";
+	}
     
 }
