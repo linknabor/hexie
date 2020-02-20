@@ -284,6 +284,7 @@ public class Thread implements Serializable{
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+
 	}
 	public String getUserAddress() {
 		return userAddress;
@@ -296,6 +297,7 @@ public class Thread implements Serializable{
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
+
 	}
 	
 	

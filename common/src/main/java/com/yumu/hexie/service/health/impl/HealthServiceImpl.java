@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.health.impl;
 
 import java.util.Date;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -36,9 +37,9 @@ import com.yumu.hexie.service.health.HealthService;
  */
 @Service
 public class HealthServiceImpl implements HealthService {
-	
+  
 	private static Logger logger = LoggerFactory.getLogger(HealthServiceImpl.class);
-
+  
 	@Autowired
 	private UserRepository userRepository;
 	
@@ -174,6 +175,7 @@ public class HealthServiceImpl implements HealthService {
 		thread.setThreadStatus(ModelConstant.THREAD_STATUS_NORMAL);
 		thread.setUserHead(currUser.getHeadimgurl());
 		thread.setUserId(currUser.getId());
+
 		if (StringUtils.isEmpty(thread.getUserName())) {
 			thread.setUserName(currUser.getName());	//口罩预约功能，这里存入用户填写的真实姓名。健康上报功能直接取用户注册时的微信名字
 		}
@@ -248,6 +250,5 @@ public class HealthServiceImpl implements HealthService {
 				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), baseRequestDTO.getSectList(), pageable);
 		return page;
 	}
-	
 
 }
