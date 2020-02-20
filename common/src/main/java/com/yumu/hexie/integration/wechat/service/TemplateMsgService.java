@@ -48,6 +48,7 @@ public class TemplateMsgService {
 	public static final String TEMPLATE_TYPE_YUYUE_ASSGIN = "yuyueNoticeTemplate";
 	public static final String TEMPLATE_TYPE_COMPLAIN = "complainTemplate";
 	public static final String TEMPLATE_TYPE_SERVICE = "serviceTemplate";
+	public static final String TEMPLATE_TYPE_MESSAGE = "messageTemplate";
 	
 	
 	/**
@@ -323,5 +324,31 @@ public class TemplateMsgService {
     	TemplateMsgService.sendMsg(msg, accessToken);
   	
 	}
+    
+    /**
+     * 快递外卖
+     * @param openid
+     * @param accessToken
+     * @param appId
+     */
+    public static void sendHexieMessage(String openid, String accessToken, String appId,long userId,String content) {
+    	WuyeServiceVO vo = new WuyeServiceVO();
+		vo.setTitle(new TemplateItem("物业通知"));
+	  	vo.setOrderNum(new TemplateItem(content));
+	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
+	  	vo.setRecvDate(new TemplateItem(recvDate));
+	  	vo.setRemark(new TemplateItem("请点击查看"));
+    	
+	  	
+	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_MESSAGE));
+    	String url = GotongServiceImpl.MESSAGE_URL + userId;
+    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
+    	msg.setTouser(openid);
+    	TemplateMsgService.sendMsg(msg, accessToken);
+  	
+	}
+
 
 }

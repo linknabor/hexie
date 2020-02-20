@@ -34,6 +34,7 @@ public class ServplatFilter implements Filter {
 	private final static String REPAIR_URL = "/servplat/repair";
 	private final static String REPAIR_AREA_URL = "/servplat/repairArea";
 	private final static String EXPRESS_URL = "/servplat/express";
+	private final static String HEXIEMESSAGE_URL = "/servplat/hexiemessage";
 
 	/**
 	 * 
@@ -63,7 +64,7 @@ public class ServplatFilter implements Filter {
         	HttpServletRequest httpServletRequest = (HttpServletRequest)request;
         	String requestUri = httpServletRequest.getRequestURI();
     		if (requestUri.indexOf(MESSAGE_URL) != -1 || requestUri.indexOf(THREAD_URL) != -1 || requestUri.indexOf(REPAIR_URL) != -1
-    				||requestUri.indexOf(REPAIR_AREA_URL) != -1||requestUri.indexOf(EXPRESS_URL) != -1) {
+    				||requestUri.indexOf(REPAIR_AREA_URL) != -1||requestUri.indexOf(EXPRESS_URL) != -1||requestUri.indexOf(HEXIEMESSAGE_URL) != -1) {
     			//TODO validate signature
     			logger.error("requestUri is : " + requestUri + ", charset encoding : " + httpServletRequest.getCharacterEncoding());
     			String csn = Charset.defaultCharset().name();
