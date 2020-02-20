@@ -26,9 +26,9 @@ public interface GotongService {
     
     public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO);
     
-    public void sendCommonYuyueBillMsg(int serviceType,String title,String billName, String requireTime, String url);
+    public void sendCommonYuyueBillMsg(int serviceType,String title,String billName, String requireTime, String url, String remark);
     
     public void pushweixinAll();
     
-	void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String appId);
+	void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String remark, String appId);
 }
