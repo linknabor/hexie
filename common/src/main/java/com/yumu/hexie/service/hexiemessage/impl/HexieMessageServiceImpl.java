@@ -45,7 +45,7 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 			exr.setDate_time(df.format(new Date()));
 			hexieMessageRepository.save(exr);
 			String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
-			TemplateMsgService.sendHexieMessage(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
+			TemplateMsgService.sendHexieMessage(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getContent());
 			
 			smsService.sendMsg(user.get(0), user.get(0).getTel(), exr.getContent(), 0);//发送短信
 		}
