@@ -177,14 +177,14 @@ public class GotongServiceImpl implements GotongService {
      */
     @Async
     @Override
-    public void sendCommonYuyueBillMsg(int serviceType,String title, String billName, String requireTime, String url) {
+    public void sendCommonYuyueBillMsg(int serviceType,String title, String billName, String requireTime, String url, String remark) {
         LOG.error("发送预约通知！["+serviceType+"]" + billName + " -- " + requireTime);
         List<ServiceOperator> ops = operatorService.findByType(serviceType);
         for(ServiceOperator op: ops) {
             LOG.error("发送到操作员！["+serviceType+"]" + billName + " -- " + op.getName() + "--" + op.getId());
             User user = userRepository.findOne(op.getUserId());
             String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-            TemplateMsgService.sendYuyueBillMsg("", op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId());    
+            TemplateMsgService.sendYuyueBillMsg("", op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId(), remark);    
         }
         
     }
@@ -212,10 +212,10 @@ public class GotongServiceImpl implements GotongService {
 		
     }
 	@Override
-	public void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String appId) {
+	public void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String remark, String appId) {
 		
 		String accessToken = systemConfigService.queryWXAToken(appId);
-		TemplateMsgService.sendYuyueBillMsg(String.valueOf(threadId), openId, title, content, requireTime, "", accessToken, appId);    
+		TemplateMsgService.sendYuyueBillMsg(String.valueOf(threadId), openId, title, content, requireTime, "", accessToken, remark, appId);    
 		
 	}
 }

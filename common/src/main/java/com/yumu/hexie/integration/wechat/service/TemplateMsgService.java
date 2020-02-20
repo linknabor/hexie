@@ -190,15 +190,18 @@ public class TemplateMsgService {
      * @param appId
      */
     public static void sendYuyueBillMsg(String orderId, String openId, String title,String billName, 
-    			String requireTime, String url, String accessToken, String appId) {
+    			String requireTime, String url, String accessToken, String remark, String appId) {
 
         //更改为使用模版消息发送
         YuyueOrderVO vo = new YuyueOrderVO();
         vo.setTitle(new TemplateItem(title));
         vo.setProjectName(new TemplateItem(billName));
         vo.setRequireTime(new TemplateItem(requireTime));
-        vo.setRemark(new TemplateItem("请尽快处理！"));
-  
+        if (StringUtils.isEmpty(remark)) {
+        	vo.setRemark(new TemplateItem("请尽快处理！"));
+		}else {
+			vo.setRemark(new TemplateItem(remark));
+		}
         TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<YuyueOrderVO>();
         msg.setData(vo);
         msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_YUYUE_ASSGIN));

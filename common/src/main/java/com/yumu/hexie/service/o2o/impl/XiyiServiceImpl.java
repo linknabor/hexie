@@ -160,7 +160,7 @@ public class XiyiServiceImpl implements XiyiService {
 
     private void notify2Operators(YunXiyiBill bill){
         gotongService.sendCommonYuyueBillMsg(HomeServiceConstant.SERVICE_TYPE_XIYI,
-                "您有一条新的订单消息",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "");    
+                "您有一条新的订单消息",bill.getProjectName(), DateUtil.dtFormat(bill.getRequireDate(),"yyyy-MM-dd HH:mm"), "", "");    
     }
     /** 
      * @param payment
