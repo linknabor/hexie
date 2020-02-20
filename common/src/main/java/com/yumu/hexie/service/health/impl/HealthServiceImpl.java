@@ -154,7 +154,7 @@ public class HealthServiceImpl implements HealthService {
 			content = content.substring(0, 10) + "...";
 		}
 		String requireTime = DateUtil.dtFormat(thread.getCreateDateTime(), "yyyy-MM-dd HH:mm:ss");
-		String remark = "地址：" + thread.getUserAddress() + "，联系方式： " + user.getTel(); 
+		String remark = "地址：" + thread.getUserAddress() + "\r\n联系方式： " + user.getTel(); 
 		
 		thread = threadRepository.save(thread);
 		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndSectId(ModelConstant.SERVICE_OPER_TYPE_STAFF, user.getSectId());
