@@ -49,6 +49,7 @@ public class TemplateMsgService {
 	public static final String TEMPLATE_TYPE_COMPLAIN = "complainTemplate";
 	public static final String TEMPLATE_TYPE_SERVICE = "serviceTemplate";
 	public static final String TEMPLATE_TYPE_MESSAGE = "messageTemplate";
+
 	
 	
 	/**
@@ -179,19 +180,35 @@ public class TemplateMsgService {
     	
     }
     
-    public static void sendYuyueBillMsg(String openId,String title,String billName, 
-    			String requireTime, String url, String accessToken, String appId) {
 
+    /**
+     * 预约服务模板
+     * @param openId
+     * @param title
+     * @param billName
+     * @param requireTime
+     * @param url
+     * @param accessToken
+     * @param appId
+     */
+    public static void sendYuyueBillMsg(String orderId, String openId, String title,String billName, 
+    			String requireTime, String url, String accessToken, String remark, String appId) {
         //更改为使用模版消息发送
         YuyueOrderVO vo = new YuyueOrderVO();
         vo.setTitle(new TemplateItem(title));
         vo.setProjectName(new TemplateItem(billName));
         vo.setRequireTime(new TemplateItem(requireTime));
-        vo.setRemark(new TemplateItem("请尽快处理！"));
-  
+        if (StringUtils.isEmpty(remark)) {
+        	vo.setRemark(new TemplateItem("请尽快处理！"));
+		}else {
+			vo.setRemark(new TemplateItem(remark));
+		}
         TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<YuyueOrderVO>();
         msg.setData(vo);
         msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_YUYUE_ASSGIN));
+        if (StringUtils.isEmpty(url)) {
+			url = GotongServiceImpl.SERVICE_RESV_URL + orderId;
+		}
         url = AppUtil.addAppOnUrl(url, appId);
         msg.setUrl(url);
         msg.setTouser(openId);
@@ -286,6 +303,7 @@ public class TemplateMsgService {
   	
 	}
     
+
     public static void main(String[] args) {
 		
     	System.out.println(DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
@@ -348,6 +366,7 @@ public class TemplateMsgService {
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);
   	
+
 	}
 
 

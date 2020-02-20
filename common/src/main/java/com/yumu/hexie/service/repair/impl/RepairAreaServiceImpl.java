@@ -1,4 +1,4 @@
-package com.yumu.hexie.service.repair;
+package com.yumu.hexie.service.repair.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.localservice.repair.RepairArea;
 import com.yumu.hexie.model.localservice.repair.RepairAreaRepository;
+import com.yumu.hexie.service.repair.RepairAreaService;
 
 @Service
 public class RepairAreaServiceImpl implements RepairAreaService {

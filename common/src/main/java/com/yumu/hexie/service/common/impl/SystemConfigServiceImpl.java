@@ -242,7 +242,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		return sysMap;
 	}
 	
-	
+	/**
+	 * 公众号是否开启卡券功能
+	 */
 	@Override
 	public boolean isCardServiceAvailable (String appId){
 		
@@ -255,6 +257,22 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		}
 		return isAvailable;
 		
+	}
+	
+	/**
+	 * 公众号是否开肺炎抗疫板块
+	 */
+	@Override
+	public boolean coronaPreventionAvailable (String appId){
+		
+		String appIds = getSysConfigByKey("CORONA_PREVENTION_APPS");
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
 	}
 	
     

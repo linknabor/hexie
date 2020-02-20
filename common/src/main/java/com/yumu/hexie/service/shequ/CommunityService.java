@@ -20,7 +20,7 @@ public interface CommunityService {
 	 * @param sort 排序
 	 * @return
 	 */
-	public List<Thread> getThreadList(long userSectId, Pageable page);	
+	public List<Thread> getThreadList(String userSectId, Pageable page);	
 	
 
 	/**
@@ -45,7 +45,8 @@ public interface CommunityService {
 	 * @param sort	排序
 	 * @return
 	 */
-	public List<Thread> getThreadListByCategory(int category, long userSectId, Pageable page);
+	public List<Thread> getThreadListByCategory(long userId, int category, String userSectId, Pageable page);
+
 	
 	/**
 	 * 1 A)根据分类获取帖子列表，查看所有小区的
@@ -53,7 +54,8 @@ public interface CommunityService {
 	 * @param sort
 	 * @return
 	 */
-	public List<Thread> getThreadListByCategory(int category, Pageable page);
+	public List<Thread> getThreadListByCategory(long userId, int category, Pageable page);
+
 	
 	/**
 	 * 2.添加新帖子
@@ -166,7 +168,8 @@ public interface CommunityService {
 	 * @param sort
 	 * @return
 	 */
-	public List<Thread> getThreadListByNewCategory(int category, long userSectId, Pageable page);
+	public List<Thread> getThreadListByNewCategory(int category, String userSectId, Pageable page);
+
 	
 	/**
 	 * 获取帖子列表
