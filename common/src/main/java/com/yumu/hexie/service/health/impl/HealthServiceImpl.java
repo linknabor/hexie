@@ -148,15 +148,19 @@ public class HealthServiceImpl implements HealthService {
 		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SERVICE_RESV);	//类型
 		saveThread(user, thread);
 
-		String title = "新预约服务通知";
-		String content = "您有1新的服务预约消息";
+		String title = "您有1新的服务预约消息";
+		String content = thread.getThreadContent();
+		if (content.length() > 10) {
+			content = content.substring(0, 10) + "...";
+		}
 		String requireTime = DateUtil.dtFormat(thread.getCreateDateTime(), "yyyy-MM-dd HH:mm:ss");
-		thread = threadRepository.save(thread);
+		String remark = "地址：" + thread.getUserAddress() + "，联系方式： " + user.getTel(); 
 		
+		thread = threadRepository.save(thread);
 		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndSectId(ModelConstant.SERVICE_OPER_TYPE_STAFF, user.getSectId());
 		for (ServiceOperator serviceOperator : opList) {
 			logger.info("准备发送服务预约模板消息， threadId:" + thread.getThreadId() + "serviceOperator: " + serviceOperator);
-			gotongService.sendServiceResvMsg(thread.getThreadId(), serviceOperator.getOpenId(), title, content, requireTime, user.getAppId());
+			gotongService.sendServiceResvMsg(thread.getThreadId(), serviceOperator.getOpenId(), title, content, requireTime, remark, user.getAppId());
 		}
 		
 	}
