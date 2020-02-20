@@ -28,26 +28,30 @@ public class Thread implements Serializable{
 	private String threadTitle;	//抬头
 	private String threadContent;	//内容
 	private String threadStatus;	//状态
-	private String threadCategory;	//分类
+	private int threadCategory;	//分类
 	private String createDate;	//创建日期
 	private String createTime;	//创建时间
 	private long createDateTime;	//13位unixtime
 	private long userId;
 	private String userName;
 	private String userHead;	
-	private long userSectId;		//用户所在小区ID
+	private String userMobile;	//用户手机
+	private String userSectId;		//用户所在小区ID
 	private String userSectName; 	//用户所在小区名称
+	private String userAddress;		//用户地址
 	private double userSectLatitude;	//用户所在小区纬度
 	private double userSectLongtitude;	//用户所在小区精度
+	private String appid;	//所在公众号平台
 	private String attachmentUrl;	//一对多，逗号分割
 	private String uploadPicId;	//上传图片路径，一对多，逗号分隔
 	private String imgHeight;	//图片高度 ，一对多，逗号分割
 	private String imgWidth;	//图片宽度，一对多，逗号分割
 	private long likes;	//赞数量
 	private long commentsCount;	//评论数量
-	private String stickPriority;	//置顶优先级，数值越大优先级越高
+	private int stickPriority;	//置顶优先级，数值越大优先级越高
 	private long lastCommentTime;	//最后评论时间
 	private String hasUnreadComment;	//是否有未读评论
+	private String remark;	//备注
 	
 	@Transient
 	private List<ThreadComment> comments;
@@ -97,10 +101,10 @@ public class Thread implements Serializable{
 	public void setThreadStatus(String threadStatus) {
 		this.threadStatus = threadStatus;
 	}
-	public String getThreadCategory() {
+	public int getThreadCategory() {
 		return threadCategory;
 	}
-	public void setThreadCategory(String threadCategory) {
+	public void setThreadCategory(int threadCategory) {
 		this.threadCategory = threadCategory;
 	}
 	public String getCreateDate() {
@@ -145,10 +149,10 @@ public class Thread implements Serializable{
 	public void setLikes(long likes) {
 		this.likes = likes;
 	}
-	public long getUserSectId() {
+	public String getUserSectId() {
 		return userSectId;
 	}
-	public void setUserSectId(long userSectId) {
+	public void setUserSectId(String userSectId) {
 		this.userSectId = userSectId;
 	}
 	public List<ThreadComment> getComments() {
@@ -239,10 +243,10 @@ public class Thread implements Serializable{
 	public void setCategoryCnName(String categoryCnName) {
 		this.categoryCnName = categoryCnName;
 	}
-	public String getStickPriority() {
+	public int getStickPriority() {
 		return stickPriority;
 	}
-	public void setStickPriority(String stickPriority) {
+	public void setStickPriority(int stickPriority) {
 		this.stickPriority = stickPriority;
 	}
 	public String getImgHeight() {
@@ -269,19 +273,29 @@ public class Thread implements Serializable{
 	public void setHasUnreadComment(String hasUnreadComment) {
 		this.hasUnreadComment = hasUnreadComment;
 	}
-	
-	public static void main(String[] args) {
-		
-		
-		long time = System.currentTimeMillis();
-		try {
-			java.lang.Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String str = DateUtil.getSendTime(time);
-		System.out.println(str.toString());
+	public String getUserMobile() {
+		return userMobile;
+	}
+	public void setUserMobile(String userMobile) {
+		this.userMobile = userMobile;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+	public String getUserAddress() {
+		return userAddress;
+	}
+	public void setUserAddress(String userAddress) {
+		this.userAddress = userAddress;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 	

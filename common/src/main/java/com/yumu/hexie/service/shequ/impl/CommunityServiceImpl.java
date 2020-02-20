@@ -7,12 +7,13 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.model.ModelConstant;
@@ -24,7 +25,10 @@ import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.community.ThreadCommentRepository;
 import com.yumu.hexie.model.community.ThreadRepository;
+import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.CommunityService;
 
@@ -43,8 +47,14 @@ public class CommunityServiceImpl implements CommunityService {
 	@Inject
 	private AnnoucementRepository annoucementRepository;
 	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private AddressRepository addressRepository;
+	
 	@Override
-	public List<Thread> getThreadList(long userSectId, Pageable page) {
+	public List<Thread> getThreadList(String userSectId, Pageable page) {
 		
 		return threadRepository.findByThreadStatusAndUserSectId(ModelConstant.THREAD_STATUS_NORMAL, userSectId, page);
 		
@@ -64,32 +74,44 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByCategory(String category, long userSectId, Pageable page) {
+	public List<Thread> getThreadListByCategory(long userId, int category, String userSectId, Pageable page) {
 
-		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, page);
+		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, userId, page);
 	}
 
 	@Override
-	public List<Thread> getThreadListByCategory(String category, Pageable page) {
+	public List<Thread> getThreadListByCategory(long userId, int category, Pageable page) {
 		
-		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
+		return threadRepository.getThreadListByCategoryAndUserId(ModelConstant.THREAD_STATUS_NORMAL, category, userId, page);
 	}
 
 	@Override
+	@Transactional
 	public Thread addThread(User user, Thread thread) {
+		
+		User currUser = userRepository.findOne(user.getId());
+		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+		Address currAdddr = new Address();
+		for (Address address : addrList) {
+			if (address.getXiaoquName().equals(user.getXiaoquName())) {
+				currAdddr = address;
+				break;
+			}
+		}
 		
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
 		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
 		thread.setThreadStatus(ModelConstant.THREAD_STATUS_NORMAL);
-		thread.setUserHead(user.getHeadimgurl());
-		thread.setUserId(user.getId());
-		thread.setUserName(user.getNickname());
-		thread.setUserSectId(Long.parseLong(user.getSectId()));
-		thread.setUserSectName(user.getXiaoquName());
-		thread.setStickPriority("0");	//默认优先级0，为最低
-		threadRepository.save(thread);
-		
+		thread.setUserHead(currUser.getHeadimgurl());
+		thread.setUserId(currUser.getId());
+		thread.setUserName(currUser.getNickname());
+		thread.setUserSectId(currUser.getSectId());
+		thread.setUserSectName(currUser.getXiaoquName());
+		thread.setUserAddress(currAdddr.getDetailAddress());
+		thread.setUserMobile(currUser.getTel());
+		thread.setAppid(currUser.getAppId());
+		thread.setStickPriority(0);	//默认优先级0，为最低
 		return thread;
 	}
 
@@ -220,22 +242,21 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByNewCategory(String category,
-			long userSectId, Pageable page) {
+	public List<Thread> getThreadListByNewCategory(int category, String userSectId, Pageable page) {
 		
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, page); 
 	
 	}
 
 	@Override
-	public List<Thread> getThreadListByNewCategory(String category, Pageable page) {
+	public List<Thread> getThreadListByNewCategory(int category, Pageable page) {
 
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, category, page);
 	}
 
 	@Override
 	public Page<Thread> getThreadList(String nickName, String createDate,String sectId, List<String> sectIds,Pageable pageable) {
-		return threadRepository.getThreadList(nickName,createDate,sectId,sectIds,pageable);
+		return threadRepository.getThreadList(nickName,ModelConstant.THREAD_CATEGORY_SUGGESTION, createDate,sectId,sectIds,pageable);
 	}
 
 	@Override

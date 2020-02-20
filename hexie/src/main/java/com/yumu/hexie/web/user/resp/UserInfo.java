@@ -76,6 +76,7 @@ public class UserInfo implements Serializable {
  	private int point;	//用户积分
  	private int cardStatus;	//用户会员卡状态
  	private boolean cardService;	//是否开通卡券服务
+ 	private boolean coronaPrevention;	//肺炎疫情板块
  	
 	public String getSectId() {
 		return sectId;
@@ -324,6 +325,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setCardService(boolean cardService) {
 		this.cardService = cardService;
+	}
+	public boolean isCoronaPrevention() {
+		return coronaPrevention;
+	}
+	public void setCoronaPrevention(boolean coronaPrevention) {
+		this.coronaPrevention = coronaPrevention;
 	}
 	
 	
