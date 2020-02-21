@@ -28,7 +28,11 @@ public class ExpressDeliveryController extends BaseController{
 	@RequestMapping(value = "/pullWechat", method = RequestMethod.POST)
 	public String pullWechat(@RequestBody Express expr) {
 		log.info("pullWechat:--wuyeId:"+expr.getWuyeId()+"---type:"+expr.getType());
-		expressDeliveryService.pullWechat(expr);
+		try {
+			expressDeliveryService.pullWechat(expr);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		return "ok";
 	}
 	
