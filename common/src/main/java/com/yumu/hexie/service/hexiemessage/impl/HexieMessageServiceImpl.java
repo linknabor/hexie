@@ -36,6 +36,7 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 	
 	@Override
 	public void pullWechat(HexieMessage exr) {
+
 		String[] wuyeid = exr.getWuyeId().split(",");
 		if("0".equals(exr.getType())) {
 			for (int i = 0; i < wuyeid.length; i++) {
@@ -53,7 +54,7 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 				smsService.sendMsg(user.get(0), user.get(0).getTel(), exr.getContent(), 0);//发送短信
 			}
 		}
-		
+
 	}
 	
 	@Override

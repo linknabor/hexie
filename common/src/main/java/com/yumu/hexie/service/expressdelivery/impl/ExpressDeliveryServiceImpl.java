@@ -32,6 +32,7 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 		String[] wuyeid = exr.getWuyeId().split(",");
 		for (int i = 0; i < wuyeid.length; i++) {
 			List<User> user = userRepository.findByWuyeId(wuyeid[i]);
+
 			if(user != null && !user.isEmpty()){
 				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 				exr.setUserId(user.get(0).getId());
@@ -41,6 +42,7 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 				TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
 			}
 			
+
 		}
 		
 	}
