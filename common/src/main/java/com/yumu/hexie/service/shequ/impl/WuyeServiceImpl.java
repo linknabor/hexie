@@ -85,11 +85,20 @@ public class WuyeServiceImpl implements WuyeService {
 		BaseResult<String> result = WuyeUtil.deleteHouse(curruser, houseId);
 		if (result.isSuccess()) {
 			// 添加电话到user表
-			int totalBind = curruser.getTotalBind()-1;
+			String data = result.getData();
+			int totalBind = 0;
+			if (!StringUtils.isEmpty(data)) {
+				totalBind = Integer.valueOf(data);
+			}
 			if (totalBind < 0) {
 				totalBind = 0;
 			}
-			userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", curruser.getId());
+			if (totalBind == 0) {
+				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", curruser.getId());
+			}else {
+				userRepository.updateUserTotalBind(totalBind, curruser.getId());
+			}
+			
 		} else {
 			throw new BizValidateException("解绑房屋失败。");
 		}
