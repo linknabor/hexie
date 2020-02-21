@@ -32,19 +32,18 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 		String[] wuyeid = exr.getWuyeId().split(",");
 		for (int i = 0; i < wuyeid.length; i++) {
 			List<User> user = userRepository.findByWuyeId(wuyeid[i]);
-
 			if(user != null && !user.isEmpty()){
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-				exr.setUserId(user.get(0).getId());
-				exr.setDate_time(df.format(new Date()));
-				expressRepository.save(exr);
-				String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
-				TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
+				if(systemConfigService.coronaPreventionAvailable(user.get(0).getAppId())) {
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+					exr.setUserId(user.get(0).getId());
+					exr.setDate_time(df.format(new Date()));
+					exr.setWuyeId(wuyeid[i]);
+					expressRepository.save(exr);
+					String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
+					TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
+				}
 			}
-			
-
 		}
-		
 	}
 
 	@Override
