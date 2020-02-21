@@ -36,7 +36,6 @@ public class HexieMessageController extends BaseController{
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getMessage", method = RequestMethod.POST)
 	public BaseResult<List<HexieMessage>> getMessage(@RequestParam(required=false) String userId) {
-		
 		return BaseResult.successResult(messageService.getMessage(Long.parseLong(userId)));
 	}
 }
