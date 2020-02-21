@@ -43,7 +43,6 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 					TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
 				}
 			}
-
 		}
 	}
 
