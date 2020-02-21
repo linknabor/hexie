@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,7 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 	@Autowired
 	ExpressRepository expressRepository;
 	
+	@Transactional
 	@Override
 	public void pullWechat(Express exr) {
 		
@@ -35,10 +38,16 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 			if(user != null && !user.isEmpty()){
 				if(systemConfigService.coronaPreventionAvailable(user.get(0).getAppId())) {
 					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-					exr.setUserId(user.get(0).getId());
-					exr.setDate_time(df.format(new Date()));
-					exr.setWuyeId(wuyeid[i]);
-					expressRepository.save(exr);
+					Express express = new Express();
+					express.setCell_addr(exr.getCell_addr());
+					express.setDate_time(df.format(new Date()));
+					express.setMng_cell_id(exr.getMng_cell_id());
+					express.setSect_name(exr.getSect_name());
+					express.setType(exr.getType());
+					express.setUserId(user.get(0).getId());
+					express.setWuyeId(wuyeid[i]);
+					expressRepository.save(express);
+
 					String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
 					TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
 				}
