@@ -47,6 +47,7 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 					express.setUserId(user.get(0).getId());
 					express.setWuyeId(wuyeid[i]);
 					expressRepository.save(express);
+
 					String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
 					TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
 				}
