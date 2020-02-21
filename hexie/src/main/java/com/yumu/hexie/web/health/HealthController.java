@@ -32,24 +32,23 @@ public class HealthController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/report", method = RequestMethod.POST)
 	public BaseResult<String> report(@ModelAttribute(Constants.USER) User user, @RequestBody Thread thread) {
-		
-		healthService.healthReport(user, thread);
+		healthService.addHealthReport(user, thread);
 		return BaseResult.successResult("success");
 	}
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/maskResv", method = RequestMethod.POST)
 	public BaseResult<String> maskResv(@ModelAttribute(Constants.USER) User user, @RequestBody Thread thread) {
-		
-		healthService.maskReservation(user, thread);
+		healthService.addMaskReservation(user, thread);
 		return BaseResult.successResult("success");
 	}
 	
-	@RequestMapping(value = "/testTemplate", method = RequestMethod.GET)
-	public String testTemplate(@ModelAttribute(Constants.USER) User user) {
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/serviceResv", method = RequestMethod.POST)
+	public BaseResult<String> serviceResv(@ModelAttribute(Constants.USER) User user, @RequestBody Thread thread) {
 		
-		healthService.testTemplate(user);
-		return "ok";
+		healthService.addServiceReservation(user, thread);
+		return BaseResult.successResult("success");
 	}
 	
 }

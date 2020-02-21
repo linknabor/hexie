@@ -29,6 +29,7 @@ import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -416,7 +417,7 @@ public class RepairServiceImpl implements RepairService {
 		String name=map.get("name");
 		String tel=map.get("tel");
 		String sectId=map.get("sectIds");
-		Page<Object> list=serviceOperatorRepository.getServiceoperator(name,tel,sectId,sectList,pageable);
+		Page<Object> list=serviceOperatorRepository.getServiceoperator(ModelConstant.SERVICE_OPER_TYPE_WEIXIU, name, tel, sectId, sectList, pageable);
 		return list;
 	}
 
