@@ -6,9 +6,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
@@ -16,11 +18,12 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 import com.yumu.hexie.vo.SmsMessage;
 @Service
-public class HexieMessageServiceImpl implements HexieMessageService{
-
+public class HexieMessageServiceImpl<T> implements HexieMessageService{
+	
 	@Autowired
 	private SystemConfigService systemConfigService;
 	
@@ -33,36 +36,54 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 	@Inject
 	protected SmsService smsService;
 	
+	@Autowired
+	private TransactionUtil<T> transactionUtil;
+	
 	@Override
 	public void sendMessage(HexieMessage exr) {
 
 		String[] wuyeid = exr.getWuyeId().split(",");
-		if("0".equals(exr.getType())) {
-			for (int i = 0; i < wuyeid.length; i++) {
-				List<User> user = userRepository.findByWuyeId(wuyeid[i]);
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-				exr.setUserId(user.get(0).getId());
-				exr.setDate_time(df.format(new Date()));
-				hexieMessageRepository.save(exr);
-				String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
-				TemplateMsgService.sendHexieMessage(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getContent());
+		
+		for (int i = 0; i < wuyeid.length; i++) {
+			
+			List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
+			if (userList == null || userList.isEmpty()) {
+				continue;
 			}
-		}else if("1".equals(exr.getType())){
-			for (int i = 0; i < wuyeid.length; i++) {
-				List<User> user = userRepository.findByWuyeId(wuyeid[i]);
+			User user = userList.get(0);
+			if("0".equals(exr.getType())) {
+				
+				transactionUtil.transact(s -> saveHexieMessage(exr, user));
+			
+			}else if ("1".equals(exr.getType())) {
+				
 				SmsMessage smsMessage = new SmsMessage();
 				smsMessage.setMessage(exr.getContent());
-				smsMessage.setMobile(user.get(0).getTel());
+				smsMessage.setMobile(user.getTel());
 				smsMessage.setTitle(exr.getSect_name());
-				smsService.sendMsg(user.get(0), smsMessage, 0);//发送短信
+				smsService.sendMsg(user, smsMessage, 0);//发送短信
+				
 			}
+			
 		}
 
 	}
 	
+	private void saveHexieMessage(HexieMessage exr, User user) {
+		
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		TemplateMsgService.sendHexieMessage(user.getOpenid(), accessToken, user.getAppId(),user.getId(),exr.getContent());
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+		HexieMessage hexieMessage = new HexieMessage();
+		BeanUtils.copyProperties(exr, hexieMessage);
+		hexieMessage.setUserId(user.getId());
+		hexieMessage.setDate_time(df.format(new Date()));
+		hexieMessage.setWuyeId(user.getWuyeId());
+		hexieMessageRepository.save(hexieMessage);
+	}
+	
 	@Override
 	public List<HexieMessage> getMessage(long userId) {
-		// TODO Auto-generated method stub
 		return hexieMessageRepository.findByUserId(userId);
 	}
 
