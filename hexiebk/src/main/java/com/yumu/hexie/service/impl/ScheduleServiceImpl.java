@@ -54,6 +54,7 @@ import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.impl.CouponServiceImpl;
 import com.yumu.hexie.service.user.req.MemberVo;
+import com.yumu.hexie.vo.SmsMessage;
 
 @Service("scheduleService")
 public class ScheduleServiceImpl implements ScheduleService{
@@ -420,8 +421,10 @@ public class ScheduleServiceImpl implements ScheduleService{
 				}
 				
 				String sendMsg = msg.replace("amount", displayAmt);
-				
-				smsService.sendMsg(user, mobile, sendMsg, 12, 3);
+				SmsMessage smsMessage = new SmsMessage();
+				smsMessage.setMessage(sendMsg);
+				smsMessage.setMobile(mobile);
+				smsService.sendMsg(user, smsMessage, 12, 3);
 				SCHEDULE_LOG.debug("msg sent, mobile :" + mobile + ", userId: " + userId + "msg : " + sendMsg);
 				
 				userIdList.add(userId);

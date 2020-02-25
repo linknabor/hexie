@@ -49,6 +49,7 @@ public class TemplateMsgService {
 	public static final String TEMPLATE_TYPE_COMPLAIN = "complainTemplate";
 	public static final String TEMPLATE_TYPE_SERVICE = "serviceTemplate";
 	public static final String TEMPLATE_TYPE_MESSAGE = "messageTemplate";
+
 	
 	
 	/**
@@ -380,6 +381,7 @@ public class TemplateMsgService {
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);
   	
+
 	}
 
 
