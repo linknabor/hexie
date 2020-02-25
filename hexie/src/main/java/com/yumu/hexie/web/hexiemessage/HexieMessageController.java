@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yumu.hexie.model.community.Message;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 import com.yumu.hexie.web.BaseController;
@@ -26,15 +25,15 @@ public class HexieMessageController extends BaseController{
 	@Autowired
 	private HexieMessageService messageService;
 	
-	@RequestMapping(value = "/pullWechat", method = RequestMethod.POST)
+	@RequestMapping(value = "/send", method = RequestMethod.POST)
 	public String pullWechat(@RequestBody HexieMessage expr) {
-		log.info("pullWechat:--wuyeId:"+expr.getWuyeId()+"---type:"+expr.getType());
-		messageService.pullWechat(expr);
+		log.info("sendMessage:--wuyeId:"+expr.getWuyeId()+"---type:"+expr.getType());
+		messageService.sendMessage(expr);
 		return "ok";
 	}
 	
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getMessage", method = RequestMethod.POST)
+	@RequestMapping(value = "/get", method = RequestMethod.POST)
 	public BaseResult<List<HexieMessage>> getMessage(@RequestParam(required=false) String userId) {
 		return BaseResult.successResult(messageService.getMessage(Long.parseLong(userId)));
 	}
