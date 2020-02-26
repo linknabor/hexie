@@ -44,6 +44,7 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 			}
 		}else{
 			User userAccount = (User) request.getSession().getAttribute(Constants.USER);
+
 			if(StringUtils.isEmpty(userAccount.getWuyeId())) {
 				logger.info("user:" + userAccount + ", wuyeId has no value, will update !");
 				userService.bindWuYeId(userAccount);

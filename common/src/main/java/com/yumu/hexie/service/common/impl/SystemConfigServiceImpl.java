@@ -64,6 +64,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     @PostConstruct
     public void initSystemConfig() {
     	
+    	if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+    		return;
+    	}
+    	
     	List<SystemConfig> configList = systemConfigRepository.findAll();
     	if (configList == null || configList.isEmpty()) {
 			log.error("未配置系统参数表systemConfig!");

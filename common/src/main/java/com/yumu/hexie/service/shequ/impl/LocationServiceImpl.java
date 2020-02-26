@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.region.RegionUrlRepository;
 import com.yumu.hexie.service.shequ.LocationService;
@@ -43,6 +44,9 @@ public class LocationServiceImpl implements LocationService {
 	@PostConstruct
 	public void initRegionUrlCache() {
 		
+		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+    		return;
+    	}
 		List<RegionUrl> list = regionUrlRepository.findAll();
 		if (list != null) {
 			regionUrlList = list;
