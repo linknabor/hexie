@@ -140,9 +140,34 @@ public class SmsServiceImpl implements SmsService {
 		String mobilePhone = smsMessage.getMobile();
 		String message = smsMessage.getMessage();
 		String tilte = smsMessage.getTitle();
-		
-		SmsHis smsHis = getSmsFromCache(mobilePhone);
-        if (smsHis == null) {
+		LOGGER.info("title is : " + tilte);
+		boolean isValidCode = true;
+		if (!StringUtils.isEmpty(tilte)) {
+			isValidCode = false;
+		}
+		SmsHis smsHis = null;
+		if (isValidCode) {	//验证码走这里，不重复发
+			smsHis = getSmsFromCache(mobilePhone);
+	        if (smsHis == null) {
+				String sign = getMsgSignature(user.getAppId());
+				if (!StringUtils.isEmpty(tilte)) {
+					sign = "【" + tilte + "】";
+				}
+		        message = sign.concat(message);
+		        smsHis = new SmsHis();
+		        smsHis.setId(0l);
+		        smsHis.setCode(code);
+		        smsHis.setMsg(message);
+		        smsHis.setSendDate(new Date());
+		        smsHis.setPhone(mobilePhone);
+		        smsHis.setUserId(user.getId());
+		        if (!StringUtils.isEmpty(user.getName())) {
+		        	smsHis.setUserName(user.getName());
+				}
+		        saveSms2Cache(smsHis);
+		        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
+			}
+		}else {	//saas用户短信推送走这里
 			String sign = getMsgSignature(user.getAppId());
 			if (!StringUtils.isEmpty(tilte)) {
 				sign = "【" + tilte + "】";
@@ -158,7 +183,6 @@ public class SmsServiceImpl implements SmsService {
 	        if (!StringUtils.isEmpty(user.getName())) {
 	        	smsHis.setUserName(user.getName());
 			}
-	        saveSms2Cache(smsHis);
 	        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
 		}
         
