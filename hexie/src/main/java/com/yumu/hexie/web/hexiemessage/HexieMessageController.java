@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,7 +35,8 @@ public class HexieMessageController extends BaseController{
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/get", method = RequestMethod.POST)
-	public BaseResult<List<HexieMessage>> getMessage(@RequestParam(required=false) String userId) {
-		return BaseResult.successResult(messageService.getMessage(Long.parseLong(userId)));
+	public BaseResult<List<HexieMessage>> getMessage(@RequestParam(required=false) String messageId) {
+		Assert.hasLength(messageId, "消息id不能为空。");
+		return BaseResult.successResult(messageService.getMessage(Long.parseLong(messageId)));
 	}
 }
