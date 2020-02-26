@@ -70,15 +70,16 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	
 	private void saveHexieMessage(HexieMessage exr, User user) {
 		
-		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-		TemplateMsgService.sendHexieMessage(user.getOpenid(), accessToken, user.getAppId(),user.getId(),exr.getContent());
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 		HexieMessage hexieMessage = new HexieMessage();
 		BeanUtils.copyProperties(exr, hexieMessage);
 		hexieMessage.setUserId(user.getId());
 		hexieMessage.setDate_time(df.format(new Date()));
 		hexieMessage.setWuyeId(user.getWuyeId());
-		hexieMessageRepository.save(hexieMessage);
+		hexieMessage = hexieMessageRepository.save(hexieMessage);
+		
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		TemplateMsgService.sendHexieMessage(user.getOpenid(), accessToken, user.getAppId(),hexieMessage.getId(),exr.getContent());
 	}
 	
 	@Override
