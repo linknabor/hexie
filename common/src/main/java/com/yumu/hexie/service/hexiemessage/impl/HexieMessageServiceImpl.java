@@ -83,9 +83,9 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	}
 	
 	@Override
-	public List<HexieMessage> getMessage(long messageId) {
+	public HexieMessage getMessage(long messageId) {
 		
-		return hexieMessageRepository.findByMessageId(messageId);
+		return hexieMessageRepository.findOne(messageId);
 	}
 
 
