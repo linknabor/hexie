@@ -4,9 +4,8 @@ import com.yumu.hexie.model.user.User;
 
 public interface PointService {
 
-	public void addLvdou(User user,int point, String key);
+	void updatePoint(User user, String point, String key);
+
+	void updatePoint(User user, String point, String key, boolean notifyWechat);
 	
-	public void addZhima(User user,int point, String key);
-	
-	public void addZhimaAsync(User user, int point, String key);
 }

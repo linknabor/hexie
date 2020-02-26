@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -30,6 +31,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
+import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -60,23 +62,19 @@ public class WuyeController extends BaseController {
 	@Inject
 	private WuyeService wuyeService;
 	@Inject
-	private PointService pointService;
-	@Inject
 	protected SmsService smsService;
 	@Inject
 	protected CouponService couponService;
-
 	@Inject
 	protected UserService userService;
-
 	@Inject
 	protected AddressService addressService;
-
 	@Inject
 	protected UserRepository userRepository;
-
 	@Inject
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private PointService pointService;
 
 	/**
 	 * 根据用户身份查询其所绑定的房屋
@@ -109,25 +107,15 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouse/delete/{houseId}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<HexieHouse>> deleteHouse(@ModelAttribute(Constants.USER) User user,
+	public BaseResult<String> deleteHouse(HttpSession httpSession, @ModelAttribute(Constants.USER) User user,
 			@PathVariable String houseId) throws Exception {
-		if (StringUtil.isEmpty(user.getWuyeId())) {
-			return BaseResult.fail("删除房子失败！请重新访问页面并操作！");
-		}
-		com.yumu.hexie.integration.wuye.resp.BaseResult<String> r = wuyeService.deleteHouse(user, houseId);
-		// boolean r = wuyeService.deleteHouse(user.getWuyeId(), houseId);
-		if ((boolean) r.isSuccess()) {
-			// 添加电话到user表
-			log.error("这里是删除房子后保存的电话");
-			log.error("保存电话到user表==》开始");
-			user.setOfficeTel(r.getData());
-			user.setSectId("0");
-			user.setCspId("0");
-			userService.save(user);
-			log.error("保存电话到user表==》成功");
-			return BaseResult.successResult("删除房子成功！");
-		} else {
-			return BaseResult.fail("删除房子失败！");
+		
+		boolean isSuccess = wuyeService.deleteHouse(user, houseId);
+		if (isSuccess) {
+			httpSession.setAttribute(Constants.USER, user);
+			return BaseResult.successResult("解绑房子成功！");
+		}else {
+			return BaseResult.fail("解绑房子失败！");
 		}
 	}
 
@@ -170,12 +158,16 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String stmtId, 
 			@RequestParam(required = false) String houseId) throws Exception {
 		
-		HexieUser u = wuyeService.bindHouse(user, stmtId, houseId);
+		BindHouseDTO dto = wuyeService.bindHouse(user, stmtId, houseId);
+		HexieUser u = dto.getHexieUser();
+		User currUser = dto.getUser();
 		log.info("HexieUser u = " + u);
 		if (u != null) {
-			wuyeService.setDefaultAddress(user, u);
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
-			httpSession.setAttribute(Constants.USER, user);
+			currUser = wuyeService.setDefaultAddress(currUser, u);
+			if (!systemConfigService.isCardServiceAvailable(currUser.getAppId())) {
+				pointService.updatePoint(currUser, "1000", "zhima-house-" + currUser.getId() + "-" + houseId);
+			}
+			httpSession.setAttribute(Constants.USER, currUser);
 		}
 		return BaseResult.successResult(u);
 	}
@@ -196,12 +188,16 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String houseId, 
 			@RequestParam(required = false) String area) throws Exception {
 		
-		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
+		BindHouseDTO dto = wuyeService.bindHouseNoStmt(user, houseId, area);
+		HexieUser u = dto.getHexieUser();
+		User currUser = dto.getUser();
 		log.info("HexieUser : " + u);
 		if (u != null) {
-			wuyeService.setDefaultAddress(user, u);
-			pointService.addZhima(user, 1000, "zhima-house-" + user.getId() + "-" + houseId);
-			httpSession.setAttribute(Constants.USER, user);
+			currUser = wuyeService.setDefaultAddress(currUser, u);
+			if (!systemConfigService.isCardServiceAvailable(currUser.getAppId())) {
+				pointService.updatePoint(currUser, "1000", "zhima-house-" + currUser.getId() + "-" + houseId);
+			}
+			httpSession.setAttribute(Constants.USER, currUser);
 		}
 		return BaseResult.successResult(u);
 	}

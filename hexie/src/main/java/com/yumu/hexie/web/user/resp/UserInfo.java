@@ -72,7 +72,11 @@ public class UserInfo implements Serializable {
  	private List<BgImage> bgImageList = new ArrayList<>();
  	private List<WuyePayTabs> wuyeTabsList = new ArrayList<>();
  	private String qrCode;
-
+ 	
+ 	private int point;	//用户积分
+ 	private int cardStatus;	//用户会员卡状态
+ 	private boolean cardService;	//是否开通卡券服务
+ 	private boolean coronaPrevention;	//肺炎疫情板块
  	
 	public String getSectId() {
 		return sectId;
@@ -304,7 +308,31 @@ public class UserInfo implements Serializable {
 	public void setWuyeTabsList(List<WuyePayTabs> wuyeTabsList) {
 		this.wuyeTabsList = wuyeTabsList;
 	}
-    
-    
+	public int getPoint() {
+		return point;
+	}
+	public void setPoint(int point) {
+		this.point = point;
+	}
+	public int getCardStatus() {
+		return cardStatus;
+	}
+	public void setCardStatus(int cardStatus) {
+		this.cardStatus = cardStatus;
+	}
+	public boolean isCardService() {
+		return cardService;
+	}
+	public void setCardService(boolean cardService) {
+		this.cardService = cardService;
+	}
+	public boolean isCoronaPrevention() {
+		return coronaPrevention;
+	}
+	public void setCoronaPrevention(boolean coronaPrevention) {
+		this.coronaPrevention = coronaPrevention;
+	}
+	
+
 	
 }

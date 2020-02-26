@@ -251,8 +251,10 @@ public class DateUtil {
     
     public static void main(String[] args) {
 
-System.out.println(Math.ceil((1) / (3600000 * 24d)));
-		System.out.println(DateUtil.getSqlDateFromString("2015-07-28 10:36:44"));
+    	long date = System.currentTimeMillis();
+    	String format = "yyyy-MM-dd HH:mm:ss";
+    	String s = dtFormat(date, format);
+    	System.out.println(s);
 		
 	}
 }

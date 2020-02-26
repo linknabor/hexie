@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
@@ -41,12 +43,14 @@ public class AddressController extends BaseController{
     @Inject
     private UserService userService;
 	@Inject
-	private PointService pointService;
-	@Inject
 	private RegionService regionService;
 	@Inject
 	private RgroupAreaItemRepository rgroupAreaItemRepository;
-
+	@Autowired
+	private PointService pointService;
+	@Autowired
+	private SystemConfigService systemConfigService;
+	
 	@RequestMapping(value = "/address/delete/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<String> deleteAddress(@ModelAttribute(Constants.USER)User user,@PathVariable long addressId) throws Exception {
@@ -106,7 +110,9 @@ public class AddressController extends BaseController{
 		//本方法内调用无法异步
 		addressService.fillAmapInfo(addr);
 		user = userService.getById(user.getId());
-		pointService.addZhima(user, 50, "zhima-address-"+user.getId()+"-"+address.getId());
+		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+			pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
+		}
 		session.setAttribute(Constants.USER, user);
 		return new BaseResult<Address>().success(addr);
     }

@@ -31,9 +31,6 @@ public interface UserService {
 	
 	public User queryByShareCode(String code);
 	
-	//获取绑定过房子的用户
-	public List<User> getBindHouseUser(int pageNum,int pageSize);
-	
 	public List<String> getRepeatShareCodeUser();
 	
 	public List<User> getShareCodeIsNull();
@@ -43,6 +40,7 @@ public interface UserService {
 	User multiFindByOpenId(String openId);
 	void bindWuYeId(User user);
 	boolean checkDuplicateLogin(HttpSession httpSession);
-
-
+	
+	//注册
+	User simpleRegister(User user);
 }

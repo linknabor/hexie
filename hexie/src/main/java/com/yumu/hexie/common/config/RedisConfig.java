@@ -119,6 +119,21 @@ public class RedisConfig {
 		return redisTemplate;
 		
 	}
+	
+	@Bean(name = "subscribeRedisTemplate")
+	public RedisTemplate<String, Object> subscribeRedisTemplate() {
+		
+		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+		Jackson2JsonRedisSerializer<String> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(String.class);
+		redisTemplate.setConnectionFactory(redisConnectionFactory());
+		redisTemplate.setKeySerializer(getStringRedisTemplate().getStringSerializer());
+		redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);	//有泛型的对象先转换成json字符串再往redis里存，不然反序列化时会报错。
+		redisTemplate.setHashKeySerializer(getStringRedisTemplate().getStringSerializer());
+		redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);	//同上
+		return redisTemplate;
+		
+	}
+	
 
 	@Bean
 	public CacheManager getCacheManager() {

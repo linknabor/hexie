@@ -27,13 +27,17 @@ import com.yumu.hexie.common.util.RequestUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
+import com.yumu.hexie.service.card.WechatCardService;
+
 import com.yumu.hexie.service.common.SmsService;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
@@ -61,6 +65,10 @@ public class UserController extends BaseController{
     private ParamService paramService;
     @Autowired
     private PageConfigService pageConfigService;
+    @Autowired
+    private WechatCardService wechatCardService;
+    @Autowired
+    private SystemConfigService systemConfigService;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -101,6 +109,7 @@ public class UserController extends BaseController{
 					user = null;
 				}
 			}
+			log.info("user in db :" + user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
 			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
@@ -113,8 +122,19 @@ public class UserController extends BaseController{
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
+			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
+			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
+					//do nothing
+				}else {
+					userInfo.setPoint(wechatCard.getBonus());
+				}
+
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    userInfo.setQrCode(qrCode.getQrLink());
+			    
+			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
+			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
+			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
 			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
@@ -122,7 +142,7 @@ public class UserController extends BaseController{
 			} else {
 				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());
 				session.setMaxInactiveInterval(1);//将会话过期
-				Thread.sleep(500);
+				Thread.sleep(50);	//延时，因为上面设置了1秒。页面上也设置了延时，所以这里不需要1秒
 				return new BaseResult<UserInfo>().success(null);
 			}
 		} catch (Exception e) {
@@ -199,6 +219,8 @@ public class UserController extends BaseController{
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
 		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+
+
     }
 	
 	/**
@@ -281,7 +303,9 @@ public class UserController extends BaseController{
 
     @RequestMapping(value = "/simpleRegister", method = RequestMethod.POST)
     @ResponseBody
-    public BaseResult<UserInfo> simpleRegister(HttpSession session,@ModelAttribute(Constants.USER)User user,@RequestBody SimpleRegisterReq req) throws Exception {
+    public BaseResult<UserInfo> simpleRegister(HttpSession session, @ModelAttribute(Constants.USER)User user, 
+    		@RequestBody SimpleRegisterReq req) throws Exception {
+    	
         if(StringUtil.isEmpty(req.getMobile()) || StringUtil.isEmpty(req.getYzm())){
             return new BaseResult<UserInfo>().failMsg("信息请填写完整！");
         }
@@ -295,11 +319,10 @@ public class UserController extends BaseController{
             if (!StringUtils.isEmpty(req.getMobile())) {
             	 user.setTel(req.getMobile());
 			}
-            user.setRegisterDate(System.currentTimeMillis());
-            User savedUser = userService.save(user);
-            
+            User savedUser = userService.simpleRegister(user);
             session.setAttribute(Constants.USER, savedUser);
             return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
+
         }
     }
     

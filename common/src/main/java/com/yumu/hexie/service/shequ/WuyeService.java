@@ -1,11 +1,11 @@
 package com.yumu.hexie.service.shequ;
 
-import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
+import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -39,7 +39,7 @@ public interface WuyeService {
 	 * @param houseId
 	 * @return
 	 */
-	HexieUser bindHouse(User user, String stmtId, String houseId);
+	BindHouseDTO bindHouse(User user, String stmtId, String houseId);
 
 	/**
 	 * 无账单绑定房屋
@@ -48,7 +48,7 @@ public interface WuyeService {
 	 * @param area
 	 * @return
 	 */
-	HexieUser bindHouseNoStmt(User user, String houseId, String area);
+	BindHouseDTO bindHouseNoStmt(User user, String houseId, String area);
 
 	/**
 	 * 删除房产
@@ -56,7 +56,7 @@ public interface WuyeService {
 	 * @param houseId
 	 * @return
 	 */
-	BaseResult<String> deleteHouse(User user, String houseId);
+	boolean deleteHouse(User user, String houseId);
 
 	/**
 	 * 根据订单查询房产信息
@@ -66,15 +66,6 @@ public interface WuyeService {
 	 */
 	HexieHouse getHouse(User user, String stmtId);
 	
-	/**
-	 * 获取房屋信息
-	 * @param userId
-	 * @param stmtId
-	 * @param house_id
-	 * @return
-	 */
-	HexieHouse getHouse(String userId, String stmtId, String house_id);
-
 	/**
 	 * 用户登录
 	 * @param user
@@ -229,7 +220,7 @@ public interface WuyeService {
 	 * @param user
 	 * @param u
 	 */
-	void setDefaultAddress(User user, HexieUser u);
+	User setDefaultAddress(User user, HexieUser u);
 	
 	/**
 	 * 标准版账单记录

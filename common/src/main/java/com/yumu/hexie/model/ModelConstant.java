@@ -33,7 +33,11 @@ public class ModelConstant {
 	public static final int ORDER_TYPE_RGROUP = 4;
     public static final int ORDER_TYPE_YUYUE = 5;
     public static final int ORDER_TYPE_REPAIR = 6;
-
+    
+    //serviceOperator类型
+    public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
+    public static final int SERVICE_OPER_TYPE_WAITER = 2;	//店小二
+    public static final int SERVICE_OPER_TYPE_STAFF = 5;	//物业人员
 
 	//操作业务类型
 	public static final int OP_TYPE_SERVICE_ORDER = 1;
@@ -142,6 +146,7 @@ public class ModelConstant {
 	
 	public static final int POINT_TYPE_ZIMA = 0;
 	public static final int POINT_TYPE_LVDOU = 1;
+	public static final int POINT_TYPE_JIFEN = 2;
 	
 
 
@@ -150,15 +155,22 @@ public class ModelConstant {
 	public static final String THREAD_STATUS_DELETED = "1";
 	
 	//发布信息分类
-	public static final String THREAD_CATEGORY_OUTDOORS = "1";	//户外活动
-	public static final String THREAD_CATEGORY_PETS = "2";	//宠物宝贝
-	public static final String THREAD_CATEGORY_CATE = "3";	//吃货天地	
-	public static final String THREAD_CATEGORY_STORE = "4";	//二手市场
-	public static final String THREAD_CATEGORY_EDUCATION = "5";	//亲子教育
-	public static final String THREAD_CATEGORY_SPORTS = "6";	//运动达人
-	public static final String THREAD_CATEGORY_CHAT = "7";	//社区杂谈
-	public static final String THREAD_CATEGORY_BEAUTIES = "8";	//都市丽人
+	public static final int THREAD_CATEGORY_OUTDOORS = 1;	//户外活动
+	public static final int THREAD_CATEGORY_PETS = 2;	//宠物宝贝
+	public static final int THREAD_CATEGORY_CATE = 3;	//吃货天地	
+	public static final int THREAD_CATEGORY_STORE = 4;	//二手市场
+	public static final int THREAD_CATEGORY_EDUCATION = 5;	//亲子教育
+	public static final int THREAD_CATEGORY_SPORTS = 6;	//运动达人
+	public static final int THREAD_CATEGORY_CHAT = 7;	//社区杂谈
+	public static final int THREAD_CATEGORY_BEAUTIES = 8;	//都市丽人
+
+	public static final int THREAD_CATEGORY_SUGGESTION = 9;	//意见投诉
+	public static final int THREAD_CATEGORY_HEALTH_REPORT = 10;	//健康上报
+	public static final int THREAD_CATEGORY_MASK_RESV = 11;	//口罩预约
+	public static final int THREAD_CATEGORY_SERVICE_RESV = 12;	//服务预约
+
 			
+	
 	//帖子回复状态 0.正常 1.撤销
 	public static final String COMMENT_STATUS_NORMAL = "0";
 	public static final String COMMENT_STATUS_DELETED = "1";
@@ -306,9 +318,20 @@ public class ModelConstant {
 	public static final String KEY_TYPE_QRCODE = "qrcode";		//公众号二维码
 	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";	//页面配置
 	public static final String KEY_TYPE_WUYEPAY_TABS = "wuyePayTabs";	//物业缴费选项卡
-
+	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
+	
+	//微信会员卡领卡渠道
+	public static final String CARD_GET_SUBSCRIBE = "subscribe";	//关注领卡
+	public static final String CARD_GET_REGISTER = "register";	//注册领卡
+	public static final String CARD_GET_MENU = "menu";	//菜单领卡
+	
+	public static final int CARD_STATUS_NONE = 1;	//未领卡
+	public static final int CARD_STATUS_GET = 2;	//已领卡
+	public static final int CARD_STATUS_ACTIVATED = 3;	//已激活
+	public static final int CARD_STATUS_DELETED = 4;	//已删除
+	
 	//队列
-	public static final String KEY_POINT_QUEUE = "pointQueue";
+	public static final String KEY_ADD_POINT_QUEUE = "addPointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
 	public static final String KEY_USER_LOGIN = "userLoginSession_";
 
@@ -319,4 +342,14 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
 	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
+	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
+	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
+	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
+	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
+	
+	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
+	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
+	
+	public static final String KEY_MAINTANANCE_SWITCH = "maintananceSwitch";
+
 }		

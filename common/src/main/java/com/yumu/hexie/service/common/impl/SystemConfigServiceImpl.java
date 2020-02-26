@@ -57,8 +57,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private RedisRepository redisRepository;
     @Autowired
     private RedisTemplate<String, SystemConfig> redisTemplate;
-    
-    
+      
     /**
      * 启动时加载到redis缓存中
      */
@@ -241,12 +240,51 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	public static Map<String, String> getSysMap() {
 		return sysMap;
 	}
+	
+	/**
+	 * 公众号是否开启卡券功能
+	 */
+	@Override
+	public boolean isCardServiceAvailable (String appId){
+		
+		String appIds = getSysConfigByKey("CARD_SERVICE_APPS");
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
+		
+	}
+	
+	/**
+	 * 公众号是否开肺炎抗疫板块
+	 */
+	@Override
+	public boolean coronaPreventionAvailable (String appId){
+		
+		String appIds = getSysConfigByKey("CORONA_PREVENTION_APPS");
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
+	}
+	
     
 	public static void main(String[] args) {
 		
-		String str = "APP_SYS_wx6160b615066a9f78";
-		String key = str.substring(str.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), str.length());
-		System.out.println(key);
+//		String str = "APP_SYS_wx6160b615066a9f78";
+//		String key = str.substring(str.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), str.length());
+//		System.out.println(key);
+		
+		String appIds = "23456";
+		String a = null;
+		System.out.println(appIds.indexOf(a));
+
 	}
     
 }

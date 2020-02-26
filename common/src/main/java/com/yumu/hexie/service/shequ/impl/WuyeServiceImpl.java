@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.shequ.impl;
 
-import javax.annotation.PostConstruct;
+import java.util.concurrent.TimeUnit;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
+import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -30,14 +32,16 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
-import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.AddPointQueue;
 import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service("wuyeService")
@@ -52,34 +56,54 @@ public class WuyeServiceImpl implements WuyeService {
 	private UserService userService;
 	
 	@Autowired
-	private PointService pointService;
-	
-	@Autowired
 	private CouponService couponService;
 	
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	
 	@Autowired
-	private WuyeQueueTask wuyeQueueTask;
+	private LocationService locationService;
 	
 	@Autowired
-	private LocationService locationService;
+	private PointService pointService;
+	
+	@Autowired
+	private SystemConfigService systemConfigService;
+	
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
 		return WuyeUtil.queryHouse(user).getData();
 	}
 
-	@PostConstruct
-	public void init() {
-		wuyeQueueTask.bindHouseByQueue();
-	}
-	
 	@Override
-	public BaseResult<String> deleteHouse(User user, String houseId) {
-		BaseResult<String> r = WuyeUtil.deleteHouse(user, houseId);
-		return r;
+	@Transactional
+	public boolean deleteHouse(User user, String houseId) {
+		
+		User curruser = userService.getById(user.getId());
+		BaseResult<String> result = WuyeUtil.deleteHouse(curruser, houseId);
+		if (result.isSuccess()) {
+			// 添加电话到user表
+			String data = result.getData();
+			int totalBind = 0;
+			if (!StringUtils.isEmpty(data)) {
+				totalBind = Integer.valueOf(data);
+			}
+			if (totalBind < 0) {
+				totalBind = 0;
+			}
+			if (totalBind == 0) {
+				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", curruser.getId());
+			}else {
+				userRepository.updateUserTotalBind(totalBind, curruser.getId());
+			}
+			
+		} else {
+			throw new BizValidateException("解绑房屋失败。");
+		}
+		return result.isSuccess();
 	}
 	
 	@Override
@@ -87,12 +111,6 @@ public class WuyeServiceImpl implements WuyeService {
 		return WuyeUtil.getHouse(user, stmtId).getData();
 	}
 	
-	@Override
-	public HexieHouse getHouse(String userId, String stmtId, String house_id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public HexieUser userLogin(User user) {
 		return WuyeUtil.userLogin(user).getData();
@@ -167,9 +185,13 @@ public class WuyeServiceImpl implements WuyeService {
 			couponService.comsume(feePrice, Long.valueOf(couponId));
 		}
 		//2.添加芝麻积分
-		String pointKey = "zhima-bill-" + user.getId() + "-" + billId;
-		pointService.addZhima(user, 10, pointKey);
-		
+		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
+			String pointKey = "wuyePay-" + tradeWaterId;
+			addPointAsync(user, feePrice, pointKey);
+		}else {
+			String pointKey = "zhima-bill-" + user.getId() + "-" + billId;
+			pointService.updatePoint(user, "10", pointKey);
+		}
 		//3.绑定所缴纳物业费的房屋
 		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
 		
@@ -226,9 +248,10 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public HexieUser bindHouseNoStmt(User user, String houseId, String area) {
+	public BindHouseDTO bindHouseNoStmt(User user, String houseId, String area) {
 		
-		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(user, houseId, area);
+		User currUser = userService.getById(user.getId());
+		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(currUser, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -241,35 +264,46 @@ public class WuyeServiceImpl implements WuyeService {
 		if("06".equals(r.getResult())) {
 			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
 		}
-		return r.getData();
+		BindHouseDTO dto = new BindHouseDTO();
+		dto.setHexieUser(r.getData());
+		dto.setUser(currUser);
+		return dto;
 	}
 
 	@Override
 	@Transactional
-	public void setDefaultAddress(User user, HexieUser u) {
+	public User setDefaultAddress(User user, HexieUser u) {
 
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
-		addressService.updateDefaultAddress(user, hexieAddress);
-		Integer totalBind = user.getTotalBind();
+		User currUser = userService.getById(user.getId());
+		
+		addressService.updateDefaultAddress(currUser, hexieAddress);
+		Integer totalBind = currUser.getTotalBind();
 		if (totalBind == null) {
 			totalBind = 0;
 		}
 		if (!StringUtils.isEmpty(u.getTotal_bind())) {
-			totalBind = u.getTotal_bind();	//如果值不为空，说明是跑批程序返回回来的，直接取值即可，如果值是空，走下面的else累加即可
-		}else {
-			totalBind = totalBind+1;
+			if (u.getTotal_bind() > 0) {
+				totalBind = u.getTotal_bind();	//如果值不为空，说明是跑批程序返回回来的，直接取值即可，如果值是空，走下面的else累加即可
+			}
 		}
+		if (totalBind == 0) {
+			totalBind = totalBind + 1;
+		}
+		currUser.setTotalBind(totalBind);
+		currUser.setXiaoquName(u.getSect_name());
+		currUser.setProvince(u.getProvince_name());
+		currUser.setCity(u.getCity_name());
+		currUser.setCounty(u.getRegion_name());
+		currUser.setSectId(u.getSect_id());	
+		currUser.setCspId(u.getCsp_id());
+		currUser.setOfficeTel(u.getOffice_tel());
+		userRepository.updateUserByHouse(currUser.getXiaoquId(), currUser.getXiaoquName(), 
+				currUser.getTotalBind(), currUser.getProvince(), currUser.getCity(), currUser.getCountry(), 
+				currUser.getSectId(), currUser.getCspId(), currUser.getOfficeTel(), currUser.getId());
 		
-		user.setTotalBind(totalBind);
-		user.setXiaoquName(u.getSect_name());
-		user.setProvince(u.getProvince_name());
-		user.setCity(u.getCity_name());
-		user.setCounty(u.getRegion_name());
-		user.setSectId(u.getSect_id());	
-		user.setCspId(u.getCsp_id());
-		user.setOfficeTel(u.getOffice_tel());
-		userService.save(user);
+		return currUser;
 		
 	}
 
@@ -301,8 +335,10 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public HexieUser bindHouse(User user, String stmtId, String houseId) {
-		BaseResult<HexieUser> r= WuyeUtil.bindHouse(user, stmtId, houseId);
+	public BindHouseDTO bindHouse(User user, String stmtId, String houseId) {
+		
+		User currUser = userService.getById(user.getId());
+		BaseResult<HexieUser> r= WuyeUtil.bindHouse(currUser, stmtId, houseId);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -312,7 +348,10 @@ public class WuyeServiceImpl implements WuyeService {
 		if("01".equals(r.getResult())) {
 			throw new BizValidateException("账户不存在！");
 		}
-		return r.getData();
+		BindHouseDTO dto = new BindHouseDTO();
+		dto.setHexieUser(r.getData());
+		dto.setUser(currUser);
+		return dto;
 	}
 	
 	/**
@@ -331,8 +370,8 @@ public class WuyeServiceImpl implements WuyeService {
 			boolean isSuccess = false;
 			
 			while(!isSuccess && retryTimes < 3) {
-				
 				try {
+					Thread.sleep(3000);	//休息3秒，让积分的线程先跑完。
 					BindHouseQueue bindHouseQueue = new BindHouseQueue();
 					bindHouseQueue.setUser(user);
 					bindHouseQueue.setTradeWaterId(tradeWaterId);
@@ -341,10 +380,15 @@ public class WuyeServiceImpl implements WuyeService {
 					String value = objectMapper.writeValueAsString(bindHouseQueue);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, value);
 					isSuccess = true;
-				
+					
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 					retryTimes++;
+					try {
+						Thread.sleep(10000);
+					} catch (InterruptedException e1) {
+						log.error(e.getMessage(), e);
+					}
 				}
 			}
 		}
@@ -393,4 +437,49 @@ public class WuyeServiceImpl implements WuyeService {
 		
 	}
 	
+	/**
+	 * 异步添加积分
+	 * @param user
+	 * @param feePrice
+	 * @param pointKey
+	 */
+	public void addPointAsync(User user, String feePrice, String pointKey) {
+		
+		Assert.hasText(feePrice, "缴费金额为空。");
+
+		//防止重复添加卡券积分，半小时内只能提交队列一次。出队时也会校验重复性
+		Long increment = redisTemplate.opsForValue().increment(pointKey, 1);
+		log.info("addPoint, key[" + pointKey + "], add point[" + feePrice + "], increment : " + increment);
+		if (increment == 1) {
+			int retryTimes = 0;
+			boolean isSuccess = false;
+			while(!isSuccess && retryTimes < 3) {
+				
+				try {
+					AddPointQueue addPointQueue = new AddPointQueue();
+					addPointQueue.setUser(user);
+					addPointQueue.setPoint(feePrice);
+					addPointQueue.setKey(pointKey);
+					
+					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+					String value = objectMapper.writeValueAsString(addPointQueue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_ADD_POINT_QUEUE, value);
+					isSuccess = true;
+				
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					retryTimes++;
+					try {
+						Thread.sleep(10000);
+					} catch (InterruptedException e1) {
+						log.error(e.getMessage(), e);
+					}
+				}
+				
+			}
+		}
+		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
+	
+	}
+
 }

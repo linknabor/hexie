@@ -85,65 +85,30 @@ public class CommunityController extends BaseController{
 	public BaseResult<List<Thread>> getThreadList(@ModelAttribute(Constants.USER)User user, @RequestBody Thread thread, 
 				@PathVariable String filter,  @PathVariable int currPage ) throws Exception {
 		
-		log.debug("filter is : " + filter);
+		//filter 等于 y表示需要根据用户所在小区进行过滤
+		log.info("filter is : " + filter);
 		
 		Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
 		
 		List<Thread>list = new ArrayList<Thread>();
 		
 		Pageable page = new PageRequest(currPage, PAGE_SIZE, sort);
-		
-		if (StringUtil.isEmpty(thread.getThreadCategory())) {
-			
-			//查看本小区的
-			if ("y".equals(filter)) {
-			//	list = communityService.getThreadList(user.getXiaoquId(), page);
-				list = communityService.getThreadListByUserId(user.getId(), page);
+		//查看本小区的
+		if ("y".equals(filter)) {
+			if (ModelConstant.THREAD_CATEGORY_SUGGESTION == thread.getThreadCategory()) {
+				list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), String.valueOf(user.getXiaoquId()), page);
 			}else {
-				list = communityService.getThreadList(page);
+				list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), user.getSectId(), page);
 			}
 			
 		}else {
-			
-			//查看本小区的
-			if ("y".equals(filter)) {
-				
-				if ("4".equals(thread.getThreadCategory())) {
-					//二手市场
-					list = communityService.getThreadListByCategory(thread.getThreadCategory(), user.getXiaoquId(), page);
-				
-				}else {
-					//邻里叽歪
-					list = communityService.getThreadListByNewCategory("4", user.getXiaoquId(), page);
-					
-				}
-			
-			}else {
-				
-				if ("4".equals(thread.getThreadCategory())) {
-					//二手市场
-					list = communityService.getThreadListByCategory(thread.getThreadCategory(), page);
-				
-				}else {
-					
-					//邻里叽歪
-					list = communityService.getThreadListByNewCategory("4", page);
-					
-				}
-				
-				
-			}
-			
+			list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), page);
 		}
 		
 		for (int i = 0; i < list.size(); i++) {
 			
 			Thread td = list.get(i);
 			String attachmentUrl = td.getAttachmentUrl();
-			
-//			if (StringUtil.isEmpty(attachmentUrl)) {
-//				moveImgsFromTencent2Qiniu(td);
-//			}
 			
 			if (!StringUtil.isEmpty(attachmentUrl)) {
 				
@@ -218,11 +183,12 @@ public class CommunityController extends BaseController{
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
 		
+		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SUGGESTION);
 		communityService.addThread(user, thread);
 		
 		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
 		
-		return BaseResult.successResult("信息发布成功。");
+		return BaseResult.successResult("success");
 		
 		
 	}
@@ -737,7 +703,7 @@ public class CommunityController extends BaseController{
 				td.setImgUrlLink(imgLinkList);
 				td.setPreviewLink(previewLinkList);
 			}
-			if (ModelConstant.THREAD_CATEGORY_STORE.equals(td.getThreadCategory())) {
+			if (ModelConstant.THREAD_CATEGORY_STORE == (td.getThreadCategory())) {
 				td.setCategoryImgName("img_store_publish");
 				td.setCategoryCnName("二手市场");
 			}else {

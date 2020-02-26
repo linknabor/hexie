@@ -103,13 +103,12 @@ public class BatchController extends BaseController {
 		
 		if ("hexieCode".equals(code)) {
 			batchService.bindHouseBatch(appId);
-			logger.error("操作完成!!!");
+			logger.info("操作完成!!!");
 			return BaseResult.successResult("success");
 		} else {
 			return BaseResult.fail("unkown request !");
 		}
 		
 	}
-
-
+	
 }
