@@ -333,5 +333,6 @@ public class UserInfo implements Serializable {
 		this.coronaPrevention = coronaPrevention;
 	}
 	
+
 	
 }

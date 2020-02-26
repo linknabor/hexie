@@ -76,12 +76,12 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<Thread> getThreadListByCategory(long userId, int category, String userSectId, Pageable page) {
 
+
 		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, userId, page);
 	}
 
 	@Override
 	public List<Thread> getThreadListByCategory(long userId, int category, Pageable page) {
-		
 		return threadRepository.getThreadListByCategoryAndUserId(ModelConstant.THREAD_STATUS_NORMAL, category, userId, page);
 	}
 
@@ -112,6 +112,7 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
+
 		return thread;
 	}
 
@@ -243,7 +244,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public List<Thread> getThreadListByNewCategory(int category, String userSectId, Pageable page) {
-		
 		return threadRepository.getThreadListByNewCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, page); 
 	}
 
