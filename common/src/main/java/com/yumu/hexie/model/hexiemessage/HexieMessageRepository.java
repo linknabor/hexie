@@ -9,6 +9,4 @@ public interface HexieMessageRepository extends JpaRepository<HexieMessage, Long
 	
 	public List<HexieMessage> findByUserId(long userId);
 	
-	public List<HexieMessage> findByMessageId(long messageid);
-
 }
