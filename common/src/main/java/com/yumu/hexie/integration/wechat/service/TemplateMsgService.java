@@ -364,7 +364,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendHexieMessage(String openid, String accessToken, String appId,long userId,String content) {
+    public static void sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
 	  	vo.setOrderNum(new TemplateItem(content));
@@ -376,7 +376,7 @@ public class TemplateMsgService {
 	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_MESSAGE));
-    	String url = GotongServiceImpl.MESSAGE_URL + userId;
+    	String url = GotongServiceImpl.MESSAGE_URL + messageId;
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);
