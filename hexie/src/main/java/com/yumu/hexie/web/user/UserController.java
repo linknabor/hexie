@@ -35,6 +35,7 @@ import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.card.WechatCardService;
+
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -127,6 +128,7 @@ public class UserController extends BaseController{
 				}else {
 					userInfo.setPoint(wechatCard.getBonus());
 				}
+
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    userInfo.setQrCode(qrCode.getQrLink());
 			    
@@ -217,6 +219,7 @@ public class UserController extends BaseController{
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
 		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+
 
     }
 	

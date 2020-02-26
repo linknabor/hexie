@@ -9,7 +9,7 @@ public interface BatchService {
 	void fixBindHouse(String userId, String tradeWaterId);
 
 	void bindHouseBatch(String appId);
-	
+
 	void bindHouseZeroSect();
 	
 }
