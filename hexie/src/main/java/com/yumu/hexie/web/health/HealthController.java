@@ -32,7 +32,6 @@ public class HealthController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/report", method = RequestMethod.POST)
 	public BaseResult<String> report(@ModelAttribute(Constants.USER) User user, @RequestBody Thread thread) {
-		
 		healthService.addHealthReport(user, thread);
 		return BaseResult.successResult("success");
 	}
@@ -40,7 +39,6 @@ public class HealthController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/maskResv", method = RequestMethod.POST)
 	public BaseResult<String> maskResv(@ModelAttribute(Constants.USER) User user, @RequestBody Thread thread) {
-		
 		healthService.addMaskReservation(user, thread);
 		return BaseResult.successResult("success");
 	}
