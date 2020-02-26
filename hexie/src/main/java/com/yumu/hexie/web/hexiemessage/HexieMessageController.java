@@ -1,6 +1,5 @@
 package com.yumu.hexie.web.hexiemessage;
 
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class HexieMessageController extends BaseController{
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/get", method = RequestMethod.POST)
-	public BaseResult<List<HexieMessage>> getMessage(@RequestParam(required=false) String messageId) {
+	public BaseResult<HexieMessage> getMessage(@RequestParam(required=false) String messageId) {
 		Assert.hasLength(messageId, "消息id不能为空。");
 		return BaseResult.successResult(messageService.getMessage(Long.parseLong(messageId)));
 	}
