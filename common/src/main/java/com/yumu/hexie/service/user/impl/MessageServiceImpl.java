@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.ModelConstant;
@@ -21,6 +22,7 @@ import com.yumu.hexie.model.community.MessageSectRepository;
 import com.yumu.hexie.model.user.Feedback;
 import com.yumu.hexie.model.user.FeedbackRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.user.MessageService;
 
 @Service(value = "messageService")
@@ -33,6 +35,8 @@ public class MessageServiceImpl implements MessageService {
 	private FeedbackRepository feedbackRepository;
 	@Autowired
 	private MessageSectRepository messageSectRepository;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	@Override
 	public List<Message> queryMessages(int type, long provinceId, long cityId,
@@ -116,22 +120,16 @@ public class MessageServiceImpl implements MessageService {
 		List<Message> messageList = new ArrayList<Message>();
 		Pageable pageable = new PageRequest(page, pageSize);
 		switch (msgType) {
-		case 0:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;
-		case 1:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;
-		case 2:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;
-		case 3:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;	
 		case 9:
 			messageList = messageRepository.queryMessagesByStatusAndMsgType(pageable);
 			break;
 		default:
+			boolean isDonghu = systemConfigService.isDonghu(user.getAppId());
+			if (isDonghu && (StringUtils.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) ) {
+				messageList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, user.getAppId(), pageable);
+			}else {
+				messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
+			}
 			break;
 		}
 		
