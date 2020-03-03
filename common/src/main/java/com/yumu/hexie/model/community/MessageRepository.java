@@ -53,4 +53,16 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 	public List<Message> queryMessagesByUserAndType(String sectId, int msgType, Pageable pageable);
 	
 	
+//	@Query(value = "select distinct m.id,'' as content, m.createDate, m.msgType, m.title, m.summary, m.fromSite, "
+//			+ "m.regionType, m.regionId, m.publishDate, m.status, m.top, m.image, m.smallImage from message m "
+//			+ "where m.status = 0 and m.appid = ?1 and m.msgType = ?2 and m.regionType = ?3 "
+//			+ "order by m.top desc, m.createDate desc "
+//			+ "\n#pageable\n", nativeQuery = true)
+	@Query(value = "select id, '' as content, createDate, msgType, title, summary, fromSite, "
+			+ "regionType, regionId, publishDate, status, top, image, smallImage, appid from message  "
+			+ "where status = 0 and msgType = ?1 and regionType =?2 and appid = ?3  "
+			+ "order by top desc, createDate desc "
+			+ "\n#pageable\n", nativeQuery = true)
+	public List<Message> queryMessagesByAppidAndRegionType(int msgType, int regionType, String appId, Pageable pageable);
+	
 }

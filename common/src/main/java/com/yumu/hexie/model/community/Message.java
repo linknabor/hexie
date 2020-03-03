@@ -22,7 +22,7 @@ public class Message extends BaseModel{
 	private boolean top;	//是否置顶
 	private String image;	//资讯图片
 	private String smallImage;	//缩略图
-
+	private String appid;	//平台ID
 
 	public int getMsgType() {
 		return msgType;
@@ -118,6 +118,14 @@ public class Message extends BaseModel{
 
 	public void setSummary(String summary) {
 		this.summary = summary;
+	}
+
+	public String getAppid() {
+		return appid;
+	}
+
+	public void setAppid(String appid) {
+		this.appid = appid;
 	}
 	
 	
