@@ -128,8 +128,11 @@ public class UserController extends BaseController{
 					userInfo.setPoint(wechatCard.getBonus());
 				}
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
-			    userInfo.setQrCode(qrCode.getQrLink());
-			    
+			    String qrLink = "";
+			    if (qrCode != null) {
+			    	qrLink = qrCode.getQrLink();
+				}
+			    userInfo.setQrCode(qrLink);
 			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
