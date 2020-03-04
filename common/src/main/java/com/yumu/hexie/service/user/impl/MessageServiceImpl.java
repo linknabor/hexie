@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import com.yumu.hexie.service.user.MessageService;
 @Service(value = "messageService")
 public class MessageServiceImpl implements MessageService {
 
+	private static org.slf4j.Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
 
 	@Inject
 	private MessageRepository messageRepository;
@@ -125,6 +127,7 @@ public class MessageServiceImpl implements MessageService {
 			break;
 		default:
 			boolean isDonghu = systemConfigService.isDonghu(user.getAppId());
+			logger.info("isDonghu:" + isDonghu + ", appid : " + user.getAppId() + ", sectId : " + user.getSectId());
 			if (isDonghu && (StringUtils.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) ) {
 				messageList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, user.getAppId(), pageable);
 			}else {
