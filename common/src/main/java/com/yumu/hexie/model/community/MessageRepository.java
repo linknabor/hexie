@@ -44,10 +44,10 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 	 * @param pageable
 	 * @return
 	 */
-	@Query(value="select m.id,'' as content,m.createDate,m.msgType,m.title,m.summary,m.fromSite,m.regionType,m.regionId,m.publishDate,m.status,m.top,m.image,m.smallImage from message m where m.status = 0 and m.msgType = 9 order by m.top desc, m.createDate desc  \n#pageable\n ", nativeQuery = true)
+	@Query(value="select m.id,'' as content,m.createDate,m.msgType,m.title,m.summary,m.fromSite,m.regionType,m.regionId,m.publishDate,m.status,m.top,m.image,m.smallImage, m.appid from message m where m.status = 0 and m.msgType = 9 order by m.top desc, m.createDate desc  \n#pageable\n ", nativeQuery = true)
 	public List<Message> queryMessagesByStatusAndMsgType(Pageable pageable);
 	
-	@Query(value = "select distinct m.id,'' as content,m.createDate,m.msgType,m.title,m.summary,m.fromSite,m.regionType,m.regionId,m.publishDate,m.status,m.top,m.image,m.smallImage from message m join messageSect ms on m.id = ms.messageId "
+	@Query(value = "select distinct m.id,'' as content,m.createDate,m.msgType,m.title,m.summary,m.fromSite,m.regionType,m.regionId,m.publishDate,m.status,m.top,m.image,m.smallImage, m.appid from message m join messageSect ms on m.id = ms.messageId "
 			+ "where m.status = 0 and ms.sectId = ?1 and m.msgType = ?2 order by m.top desc, m.createDate desc "
 			+ "\n#pageable\n", nativeQuery = true)
 	public List<Message> queryMessagesByUserAndType(String sectId, int msgType, Pageable pageable);
