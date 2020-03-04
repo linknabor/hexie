@@ -23,6 +23,7 @@ import com.yumu.hexie.model.community.MessageSectRepository;
 import com.yumu.hexie.model.user.Feedback;
 import com.yumu.hexie.model.user.FeedbackRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.user.MessageService;
 
@@ -39,6 +40,8 @@ public class MessageServiceImpl implements MessageService {
 	private MessageSectRepository messageSectRepository;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Override
 	public List<Message> queryMessages(int type, long provinceId, long cityId,
@@ -121,17 +124,18 @@ public class MessageServiceImpl implements MessageService {
 
 		List<Message> messageList = new ArrayList<Message>();
 		Pageable pageable = new PageRequest(page, pageSize);
+		User currUser = userRepository.findById(user.getId());
 		switch (msgType) {
 		case 9:
 			messageList = messageRepository.queryMessagesByStatusAndMsgType(pageable);
 			break;
 		default:
-			boolean isDonghu = systemConfigService.isDonghu(user.getAppId());
-			logger.info("isDonghu:" + isDonghu + ", appid : " + user.getAppId() + ", sectId : " + user.getSectId());
-			if (isDonghu && (StringUtils.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) ) {
-				messageList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, user.getAppId(), pageable);
+			boolean isDonghu = systemConfigService.isDonghu(currUser.getAppId());
+			logger.info("isDonghu:" + isDonghu + ", appid : " + currUser.getAppId() + ", sectId : " + currUser.getSectId());
+			if (isDonghu && (StringUtils.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) ) {
+				messageList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, currUser.getAppId(), pageable);
 			}else {
-				messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
+				messageList = messageRepository.queryMessagesByUserAndType(currUser.getSectId(), msgType, pageable);
 			}
 			break;
 		}
