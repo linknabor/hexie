@@ -30,4 +30,7 @@ public interface MessageService {
 	public void saveMessage(BaseRequestDTO<Message> baseRequestDTO);
 	
 	public List<MessageSect> queryMessageSectList(Long messageId);
+
+	Message queryConvenienceInfo(User user, int msgType);
+
 }
