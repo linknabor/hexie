@@ -143,6 +143,25 @@ public class MessageServiceImpl implements MessageService {
 		return messageList;
 	}
 	
+	/**
+	 * 查询便民信息,msgType=3的
+	 */
+	@Override
+	public Message queryConvenienceInfo(User user, int msgType) {
+
+		Message message = null;
+		User currUser = userRepository.findById(user.getId());
+		boolean isDonghu = systemConfigService.isDonghu(currUser.getAppId());
+		logger.info("isDonghu:" + isDonghu + ", appid : " + currUser.getAppId() + ", sectId : " + currUser.getSectId());
+		if (isDonghu && (StringUtils.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) ) {
+			message = messageRepository.queryMessagesByAppidAndRegionTypeWithContent(msgType, 0, currUser.getAppId());
+		}else {
+			message = messageRepository.queryMessagesByUserAndTypeWithContent(currUser.getSectId(), msgType);
+		}
+		
+		return message;
+	}
+	
 	
 
 }
