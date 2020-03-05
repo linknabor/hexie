@@ -112,7 +112,7 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
-
+		threadRepository.save(thread);
 		return thread;
 	}
 
