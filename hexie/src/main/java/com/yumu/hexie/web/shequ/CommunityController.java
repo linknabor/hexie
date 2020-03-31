@@ -183,11 +183,8 @@ public class CommunityController extends BaseController{
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
 		
-		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SUGGESTION);
 		communityService.addThread(user, thread);
-		
 		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
-		
 		return BaseResult.successResult("success");
 		
 		
