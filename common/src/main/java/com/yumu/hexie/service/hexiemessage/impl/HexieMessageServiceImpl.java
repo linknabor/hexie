@@ -38,7 +38,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	private TransactionUtil<T> transactionUtil;
 	
 	@Override
-	public void pullWechat(HexieMessage exr) {
+	public void sendMessage(HexieMessage exr) {
 
 		String[] wuyeid = exr.getWuyeId().split(",");
 		if("0".equals(exr.getType())) {	//公众号只发模板消息，短信的在servplat发
@@ -69,8 +69,9 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	}
 	
 	@Override
-	public List<HexieMessage> getMessage(long userId) {
-		return hexieMessageRepository.findByUserId(userId);
+	public HexieMessage getMessage(long messageId) {
+		
+		return hexieMessageRepository.findOne(messageId);
 	}
 
 
