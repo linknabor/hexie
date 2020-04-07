@@ -7,4 +7,5 @@ public interface HexieMessageService {
 	void sendMessage(HexieMessage exr);
 	
 	HexieMessage getMessage(long messageId);
+
 }

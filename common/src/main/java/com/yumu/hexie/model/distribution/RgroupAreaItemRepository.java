@@ -10,17 +10,35 @@ import com.yumu.hexie.model.ModelConstant;
 
 public interface RgroupAreaItemRepository extends JpaRepository<RgroupAreaItem, Long> {
 
-	@Query("from RgroupAreaItem m where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and ((m.regionType=0) "
+	@Query(value = "select m.* from RgroupAreaItem m left join productplat pp on pp.productid = m.productId "
+			+ "where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and ((m.regionType=0) "
 			+ "or (m.regionType=1 and m.regionId=?1) "
 			+ "or (m.regionType=2 and m.regionId=?2) "
 			+ "or (m.regionType=3 and m.regionId=?3) "
 			+ "or (m.regionType=4 and m.regionId=?4)) "
 			+ "and m.ruleCloseTime>?5 "
-			+ "order by m.sortNo asc,m.id desc ")
-	public List<RgroupAreaItem> findAllByUserInfo(long provinceId,long cityId,long countyId,long xiaoquId,long current, Pageable pageable);
+			+ "and pp.appid = ?6 "
+			+ "order by m.sortNo asc,m.id desc \n#pageable\n ", 
+			countQuery = "select count(m.id) from RgroupAreaItem m left join productplat pp on pp.productid = m.productId "
+					+ "where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and ((m.regionType=0) "
+					+ "or (m.regionType=1 and m.regionId=?1) "
+					+ "or (m.regionType=2 and m.regionId=?2) "
+					+ "or (m.regionType=3 and m.regionId=?3) "
+					+ "or (m.regionType=4 and m.regionId=?4)) "
+					+ "and m.ruleCloseTime>?5 "
+					+ "and pp.appid = ?6 "
+					+ "\n#pageable\n ", 
+			nativeQuery = true)
+	public List<RgroupAreaItem> findAllByUserInfo(long provinceId,long cityId,long countyId,long xiaoquId,long current, String appid, Pageable pageable);
 
-	@Query("from RgroupAreaItem m where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and m.regionType!=4 and m.ruleCloseTime>?1 order by m.sortNo asc,m.id desc ")
-	public List<RgroupAreaItem> findAllDefalut(long current,Pageable pageable);
+	@Query(value = "select m.* from RgroupAreaItem m left join productplat pp on pp.productId = m.productId "
+			+ "where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON
+			+ " and m.regionType!=4 and m.ruleCloseTime>?1 and pp.appid= ?2 order by m.sortNo asc,m.id desc \n#pageable\n ",
+			countQuery = "select count(m.id) from RgroupAreaItem m left join productplat pp on pp.productId = m.productId "
+					+ " where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON
+					+ " and m.regionType!=4 and m.ruleCloseTime>?1 and pp.appid= ?2 \n#pageable\n ",
+			nativeQuery = true)
+	public List<RgroupAreaItem> findAllDefalut(long current, String appid, Pageable pageable);
 
 	@Query("select count(*) from RgroupAreaItem m where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and m.regionType!=4 and m.ruleCloseTime>?1")
 	public int countAllDefalut(long current);

@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ.impl;
 
 import java.util.concurrent.TimeUnit;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -480,5 +481,5 @@ public class WuyeServiceImpl implements WuyeService {
 		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
 	
 	}
-	
+
 }

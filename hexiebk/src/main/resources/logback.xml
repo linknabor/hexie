@@ -6,9 +6,9 @@
         </encoder>
     </appender>
     <appender name="COMMONERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/hexie/common-error.log</file>
+        <file>logs/hexiebk/common-error.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        	<FileNamePattern>logs/hexie/common-error.%d{yyyy-MM-dd}.log</FileNamePattern>
+        	<FileNamePattern>logs/hexiebk/common-error.%d{yyyy-MM-dd}.log</FileNamePattern>
       		<!-- keep 30 days' worth of history -->
       		<maxHistory>30</maxHistory>
    		</rollingPolicy>
@@ -18,9 +18,9 @@
         </encoder>
     </appender>
     <appender name="INTEGRATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/hexie/common-integration.log</file>
+        <file>logs/hexiebk/common-integration.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        	<FileNamePattern>logs/hexie/common-integration.%d{yyyy-MM-dd}.log</FileNamePattern>
+        	<FileNamePattern>logs/hexiebk/common-integration.%d{yyyy-MM-dd}.log</FileNamePattern>
       		<!-- keep 30 days' worth of history -->
       		<maxHistory>30</maxHistory>
    		</rollingPolicy>
@@ -30,9 +30,9 @@
         </encoder>
     </appender>
     <appender name="ORDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/hexie/common-biz.log</file>
+        <file>logs/hexiebk/common-biz.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        	<FileNamePattern>logs/hexie/common-biz.%d{yyyy-MM-dd}.log</FileNamePattern>
+        	<FileNamePattern>logs/hexiebk/common-biz.%d{yyyy-MM-dd}.log</FileNamePattern>
       		<!-- keep 30 days' worth of history -->
       		<maxHistory>30</maxHistory>
    		</rollingPolicy>
@@ -42,9 +42,9 @@
         </encoder>
     </appender>
     <appender name="SCHEDUE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/hexie/common-schedue.log</file>
+        <file>logs/hexiebk/common-schedue.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        	<FileNamePattern>logs/hexie/common-schedue.%d{yyyy-MM-dd}.log</FileNamePattern>
+        	<FileNamePattern>logs/hexiebk/common-schedue.%d{yyyy-MM-dd}.log</FileNamePattern>
       		<!-- keep 30 days' worth of history -->
       		<maxHistory>30</maxHistory>
    		</rollingPolicy>
@@ -54,9 +54,9 @@
         </encoder>
     </appender>
     <appender name="SPRING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/hexie/common-spring.log</file>
+        <file>logs/hexiebk/common-spring.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        	<FileNamePattern>logs/hexie/common-spring.%d{yyyy-MM-dd}.log</FileNamePattern>
+        	<FileNamePattern>logs/hexiebk/common-spring.%d{yyyy-MM-dd}.log</FileNamePattern>
       		<!-- keep 30 days' worth of history -->
       		<maxHistory>30</maxHistory>
    		</rollingPolicy>
@@ -66,9 +66,9 @@
         </encoder>
     </appender>
     <appender name="HIBERNATE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/hexie/common-db.log</file>
+        <file>logs/hexiebk/common-db.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        	<FileNamePattern>logs/hexie/common-db.%d{yyyy-MM-dd}.log</FileNamePattern>
+        	<FileNamePattern>logs/hexiebk/common-db.%d{yyyy-MM-dd}.log</FileNamePattern>
       		<!-- keep 30 days' worth of history -->
       		<maxHistory>30</maxHistory>
    		</rollingPolicy>
