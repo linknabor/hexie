@@ -5,5 +5,7 @@ import com.yumu.hexie.model.hexiemessage.HexieMessage;
 public interface HexieMessageService {
 	
 	void sendMessage(HexieMessage exr);
-	HexieMessage getMessage(long userId);
+	
+	HexieMessage getMessage(long messageId);
+
 }

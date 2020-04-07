@@ -22,7 +22,7 @@ import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 import com.yumu.hexie.vo.SmsMessage;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
-	
+
 	@Autowired
 	private SystemConfigService systemConfigService;
 	
@@ -42,26 +42,15 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	public void sendMessage(HexieMessage exr) {
 
 		String[] wuyeid = exr.getWuyeId().split(",");
-		
-		for (int i = 0; i < wuyeid.length; i++) {
-			
-			List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
-			if (userList == null || userList.isEmpty()) {
-				continue;
-			}
-			User user = userList.get(0);
-			if("0".equals(exr.getType())) {
-				
+		if("0".equals(exr.getType())) {	//公众号只发模板消息，短信的在servplat发
+			for (int i = 0; i < wuyeid.length; i++) {
+				List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
+				if (userList == null || userList.isEmpty()) {
+					continue;
+				}
+				User user = userList.get(0);
 				transactionUtil.transact(s -> saveHexieMessage(exr, user));
-			
-			}else if ("1".equals(exr.getType())) {
-				
-				SmsMessage smsMessage = new SmsMessage();
-				smsMessage.setMessage(exr.getContent());
-				smsMessage.setMobile(user.getTel());
-				smsMessage.setTitle(exr.getSect_name());
-				smsService.sendMsg(user, smsMessage, 0);//发送短信
-				
+
 			}
 			
 		}

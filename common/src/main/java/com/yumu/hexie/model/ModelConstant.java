@@ -167,6 +167,7 @@ public class ModelConstant {
 	public static final int THREAD_CATEGORY_HEALTH_REPORT = 10;	//健康上报
 	public static final int THREAD_CATEGORY_MASK_RESV = 11;	//口罩预约
 	public static final int THREAD_CATEGORY_SERVICE_RESV = 12;	//服务预约
+
 	//帖子回复状态 0.正常 1.撤销
 	public static final String COMMENT_STATUS_NORMAL = "0";
 	public static final String COMMENT_STATUS_DELETED = "1";
