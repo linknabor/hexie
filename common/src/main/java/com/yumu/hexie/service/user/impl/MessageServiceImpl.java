@@ -135,7 +135,11 @@ public class MessageServiceImpl implements MessageService {
 			if (isDonghu && (StringUtils.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) ) {
 				messageList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, currUser.getAppId(), pageable);
 			}else {
-				messageList = messageRepository.queryMessagesByUserAndType(currUser.getSectId(), msgType, pageable);
+				List<Message> sectList = messageRepository.queryMessagesByUserAndType(currUser.getSectId(), msgType, pageable);
+				List<Message> allList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, currUser.getAppId(), pageable);
+				messageList.addAll(sectList);
+				messageList.addAll(allList);
+
 			}
 			break;
 		}

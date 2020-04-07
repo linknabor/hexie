@@ -15,7 +15,6 @@ import com.yumu.hexie.model.user.UserNoticeRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
-import com.yumu.hexie.vo.SmsMessage;
 
 @Service("userNoticeService")
 public class UserNoticeServiceImpl implements UserNoticeService {
@@ -47,10 +46,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		userNoticeRepository.save(new UserNotice(userId, ModelConstant.NOTICE_TYPE_ORDER, ModelConstant.NOTICE_SUB_TYPE_ORDERSUCCESS,
 				msg, orderId));
 		User user = userService.getById(userId);
-		SmsMessage smsMessage = new SmsMessage();
-		smsMessage.setMessage(msg);
-		smsMessage.setMobile(tel);
-		smsService.sendMsg(user, smsMessage, getKey(userId,orderId,1));
+		smsService.sendMsg(user, tel, msg, getKey(userId,orderId,1));
 	}
 
 	@Override
@@ -61,10 +57,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 				ModelConstant.NOTICE_SUB_TYPE_ORDERSENDGOODS,msg, orderId));
 		
 		User user = userService.getById(userId);
-		SmsMessage smsMessage = new SmsMessage();
-		smsMessage.setMessage(msg);
-		smsMessage.setMobile(tel);
-		smsService.sendMsg(user, smsMessage, getKey(userId,orderId,2));
+		smsService.sendMsg(user, tel, msg, getKey(userId,orderId,2));
 	}
 
 	@Override
@@ -73,11 +66,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		String msg = "恭喜您，您参与的"+ruleName+"已经顺利成团，我们将尽快为您发货或服务。";
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPSUCCESS,
 				msg, groupId));
-		
-		SmsMessage smsMessage = new SmsMessage();
-		smsMessage.setMessage(msg);
-		smsMessage.setMobile(tel);
-		smsService.sendMsg(user, smsMessage, getKey(user.getId(),groupId,4));
+		smsService.sendMsg(user, tel, msg, getKey(user.getId(),groupId,4));
 		
 	}
 
@@ -86,11 +75,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		String msg = "非常遗憾，您参与的"+ruleName+"因未达到的目标份数，团购，系统将自动为您退款退款。您可以通过微信支付通知进行核实。";
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPFAIL,
 				msg, groupId));
-		
-		SmsMessage smsMessage = new SmsMessage();
-		smsMessage.setMessage(msg);
-		smsMessage.setMobile(tel);
-		smsService.sendMsg(user, smsMessage,  getKey(user.getId(),groupId,5));
+		smsService.sendMsg(user, tel, msg,  getKey(user.getId(),groupId,5));
 	}
 
 	@Override
@@ -99,11 +84,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		String msg = "您好，你参与的（"+productName+"）"+ruleMinNum+"人团还差"+needNum+"人才能成团，赶快约着您的朋友邻居一起加入吧。";
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPNOTIFY,
 				msg, groupId));
-		
-		SmsMessage smsMessage = new SmsMessage();
-		smsMessage.setMessage(msg);
-		smsMessage.setMobile(tel);
-		smsService.sendMsg(user, smsMessage,  getKey(user.getId(),groupId,6));
+		smsService.sendMsg(user, tel, msg,  getKey(user.getId(),groupId,6));
 		
 	}
 
@@ -118,11 +99,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		User user = userService.getById(userId);
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_YUYUE, 1,
 				msg, yuyueId));
-		
-		SmsMessage smsMessage = new SmsMessage();
-		smsMessage.setMessage(msg);
-		smsMessage.setMobile(tel);
-		smsService.sendMsg(user, smsMessage,  getKey(user.getId(),yuyueId,7));
+		smsService.sendMsg(user, tel, msg,  getKey(user.getId(),yuyueId,7));
 	}
 
 	@Override
