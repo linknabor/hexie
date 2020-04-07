@@ -28,4 +28,5 @@ public interface SystemConfigService {
 	boolean isCardServiceAvailable(String appId);
 	boolean coronaPreventionAvailable(String appId);
 
+	boolean isDonghu(String appId);
 }
