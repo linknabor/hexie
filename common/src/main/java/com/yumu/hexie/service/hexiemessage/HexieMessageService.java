@@ -8,4 +8,5 @@ public interface HexieMessageService {
 	void pullWechat(HexieMessage exr);
 	
 	public List<HexieMessage> getMessage(long userId);
+
 }

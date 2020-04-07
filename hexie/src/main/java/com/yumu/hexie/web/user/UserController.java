@@ -35,6 +35,7 @@ import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.card.WechatCardService;
+
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -137,6 +138,7 @@ public class UserController extends BaseController{
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
 			    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
+
 			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.express.Express;
 import com.yumu.hexie.model.express.ExpressRepository;
+
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
 import com.yumu.hexie.model.user.User;
@@ -22,6 +23,7 @@ import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
 public class HexieMessageServiceImpl implements HexieMessageService{
 
+
 	@Autowired
 	private SystemConfigService systemConfigService;
 	
@@ -30,6 +32,7 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 	
 	@Autowired
 	HexieMessageRepository hexieMessageRepository;
+
 	
 	@Inject
 	protected SmsService smsService;
@@ -53,6 +56,7 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 				List<User> user = userRepository.findByWuyeId(wuyeid[i]);
 				smsService.sendMsg(user.get(0), user.get(0).getTel(), exr.getContent(), 0);//发送短信
 			}
+
 		}
 
 	}
@@ -61,6 +65,7 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 	public List<HexieMessage> getMessage(long userId) {
 		// TODO Auto-generated method stub
 		return hexieMessageRepository.findByUserId(userId);
+
 	}
 
 

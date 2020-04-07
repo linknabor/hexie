@@ -480,5 +480,5 @@ public class WuyeServiceImpl implements WuyeService {
 		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
 	
 	}
-	
+
 }

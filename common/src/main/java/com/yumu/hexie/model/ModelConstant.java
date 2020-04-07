@@ -349,4 +349,5 @@ public class ModelConstant {
 	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
 	
 	public static final String KEY_MAINTANANCE_SWITCH = "maintananceSwitch";
+
 }		

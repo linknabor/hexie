@@ -180,7 +180,6 @@ public class TemplateMsgService {
     	
     }
     
-
     /**
      * 预约服务模板
      * @param openId
@@ -303,7 +302,6 @@ public class TemplateMsgService {
   	
 	}
     
-
     public static void main(String[] args) {
 		
     	System.out.println(DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
@@ -350,6 +348,7 @@ public class TemplateMsgService {
      * @param appId
      */
     public static void sendHexieMessage(String openid, String accessToken, String appId,long userId,String content) {
+
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
 	  	vo.setOrderNum(new TemplateItem(content));
@@ -362,6 +361,7 @@ public class TemplateMsgService {
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_MESSAGE));
     	String url = GotongServiceImpl.MESSAGE_URL + userId;
+
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);

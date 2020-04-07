@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -55,8 +56,6 @@ public class BatchServiceImpl implements BatchService {
 		wechatCardQueueTask.wuyeRefund();
 		
 	}
-
-
 
 	@Override
 	public void updateUserShareCode() {
@@ -119,6 +118,7 @@ public class BatchServiceImpl implements BatchService {
 			if (!StringUtils.isEmpty(user.getSectId())) {
 				continue;
 			}
+
 			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
 			HouseListVO vo = baseResult.getData();
 			if (vo!=null) {

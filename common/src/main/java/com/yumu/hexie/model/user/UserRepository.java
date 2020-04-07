@@ -88,6 +88,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public int updateUserByHouse(long xiaoquId, String xiaoquName, int totalBind, String province, String city, String county, 
 			String sectId, String cspId, String officeTel, long id);
 
+
 	
 	@Modifying
 	@Transactional
