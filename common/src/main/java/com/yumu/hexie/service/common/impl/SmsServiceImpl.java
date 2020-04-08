@@ -30,6 +30,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.vo.SmsMessage;
 
 /**
  * Created by Administrator on 2014/12/1.
@@ -66,7 +67,10 @@ public class SmsServiceImpl implements SmsService {
 //    	checkIpFrequency(requestIp);	TODO ip暂时不限制，可能一个公司200人都一个IP
     	checkMsgFrequency(mobilePhone);
     	checkMsgTotalLimit(mobilePhone);
-    	return sendMessage(user, mobilePhone, message, code);
+    	SmsMessage smsMessage = new SmsMessage();
+    	smsMessage.setMessage(message);
+    	smsMessage.setMobile(mobilePhone);
+    	return sendMessage(user, smsMessage, code);
     }
 
     /**
@@ -85,15 +89,15 @@ public class SmsServiceImpl implements SmsService {
     }
 
 	@Override
-	public boolean sendMsg(User user,String mobile, String msg,long id) {
+	public boolean sendMsg(User user, SmsMessage smsMessage, long id) {
 		
-		return sendMsg(user, mobile, msg, id, 0);
+		return sendMsg(user, smsMessage, id, 0);
 	}
 	
 	@Override
-	public boolean sendMsg(User user,String mobile, String msg,long id, int msgType) {
+	public boolean sendMsg(User user, SmsMessage smsMessage, long id, int msgType) {
 		
-		return sendMessage(user, mobile, msg, null);
+		return sendMessage(user, smsMessage, null);
 	}
 	
 	private String getMsgSignature(String appId){
@@ -131,11 +135,43 @@ public class SmsServiceImpl implements SmsService {
 	 * @param message
 	 * @return
 	 */
-	private boolean sendMessage(User user, String mobilePhone, String message, String code) {
+	private boolean sendMessage(User user, SmsMessage smsMessage, String code) {
 		
-		SmsHis smsHis = getSmsFromCache(mobilePhone);
-        if (smsHis == null) {
+		String mobilePhone = smsMessage.getMobile();
+		String message = smsMessage.getMessage();
+		String tilte = smsMessage.getTitle();
+		LOGGER.info("title is : " + tilte);
+		boolean isValidCode = true;
+		if (!StringUtils.isEmpty(tilte)) {
+			isValidCode = false;
+		}
+		SmsHis smsHis = null;
+		if (isValidCode) {	//验证码走这里，不重复发
+			smsHis = getSmsFromCache(mobilePhone);
+	        if (smsHis == null) {
+				String sign = getMsgSignature(user.getAppId());
+				if (!StringUtils.isEmpty(tilte)) {
+					sign = "【" + tilte + "】";
+				}
+		        message = sign.concat(message);
+		        smsHis = new SmsHis();
+		        smsHis.setId(0l);
+		        smsHis.setCode(code);
+		        smsHis.setMsg(message);
+		        smsHis.setSendDate(new Date());
+		        smsHis.setPhone(mobilePhone);
+		        smsHis.setUserId(user.getId());
+		        if (!StringUtils.isEmpty(user.getName())) {
+		        	smsHis.setUserName(user.getName());
+				}
+		        saveSms2Cache(smsHis);
+		        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
+			}
+		}else {	//saas用户短信推送走这里
 			String sign = getMsgSignature(user.getAppId());
+			if (!StringUtils.isEmpty(tilte)) {
+				sign = "【" + tilte + "】";
+			}
 	        message = sign.concat(message);
 	        smsHis = new SmsHis();
 	        smsHis.setId(0l);
@@ -147,7 +183,6 @@ public class SmsServiceImpl implements SmsService {
 	        if (!StringUtils.isEmpty(user.getName())) {
 	        	smsHis.setUserName(user.getName());
 			}
-	        saveSms2Cache(smsHis);
 	        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
 		}
         

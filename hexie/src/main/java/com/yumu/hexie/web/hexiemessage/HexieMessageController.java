@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.hexiemessage;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class HexieMessageController extends BaseController{
 	@RequestMapping(value = "/send", method = RequestMethod.POST)
 	public String pullWechat(@RequestBody HexieMessage expr) {
 		log.info("sendMessage:--wuyeId:"+expr.getWuyeId()+"---type:"+expr.getType());	//TODO expr中的wuyeId如果拼接过能，可能超长。
+
 		messageService.sendMessage(expr);
 		return "ok";
 	}

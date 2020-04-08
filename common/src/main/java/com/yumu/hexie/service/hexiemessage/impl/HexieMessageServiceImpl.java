@@ -19,6 +19,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
+import com.yumu.hexie.vo.SmsMessage;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
 
@@ -26,10 +27,10 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	private SystemConfigService systemConfigService;
 	
 	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
 	
 	@Autowired
-	HexieMessageRepository hexieMessageRepository;
+	private HexieMessageRepository hexieMessageRepository;
 	
 	@Inject
 	protected SmsService smsService;
@@ -51,6 +52,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 				transactionUtil.transact(s -> saveHexieMessage(exr, user));
 
 			}
+			
 		}
 
 	}

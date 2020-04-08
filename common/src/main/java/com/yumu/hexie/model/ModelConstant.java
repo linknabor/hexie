@@ -163,7 +163,6 @@ public class ModelConstant {
 	public static final int THREAD_CATEGORY_SPORTS = 6;	//运动达人
 	public static final int THREAD_CATEGORY_CHAT = 7;	//社区杂谈
 	public static final int THREAD_CATEGORY_BEAUTIES = 8;	//都市丽人
-
 	public static final int THREAD_CATEGORY_SUGGESTION = 9;	//意见投诉
 	public static final int THREAD_CATEGORY_HEALTH_REPORT = 10;	//健康上报
 	public static final int THREAD_CATEGORY_MASK_RESV = 11;	//口罩预约

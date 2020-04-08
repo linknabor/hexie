@@ -420,6 +420,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 				
 				String sendMsg = msg.replace("amount", displayAmt);
 				smsService.sendMsg(user, mobile, sendMsg, 12, 3);
+
 				SCHEDULE_LOG.debug("msg sent, mobile :" + mobile + ", userId: " + userId + "msg : " + sendMsg);
 				
 				userIdList.add(userId);

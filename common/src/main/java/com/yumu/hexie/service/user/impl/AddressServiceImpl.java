@@ -58,7 +58,7 @@ public class AddressServiceImpl implements AddressService {
     
     @PostConstruct
 	public void init() {
-    	
+
     	if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
     		return;
     	}
