@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -47,6 +48,9 @@ public class BatchServiceImpl implements BatchService {
 	@PostConstruct
 	public void runBatch() {
 		
+		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+			return;
+		}
 		wuyeQueueTask.bindHouseByTrade();
 		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
@@ -55,8 +59,6 @@ public class BatchServiceImpl implements BatchService {
 		wechatCardQueueTask.wuyeRefund();
 		
 	}
-
-
 
 	@Override
 	public void updateUserShareCode() {
@@ -143,5 +145,46 @@ public class BatchServiceImpl implements BatchService {
 		}
 		
 	}
+
+	/**
+	 * 补sectId不为空但为零的情况
+	 */
+	@Override
+	public void bindHouseZeroSect() {
+
+		String sectId = "0";
+		List<User> userList = userRepository.findBySectId(sectId);
+		
+		for (User user : userList) {
+			
+			if (StringUtils.isEmpty(user.getTel())) {
+				continue;
+			}
+			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
+			HouseListVO vo = baseResult.getData();
+			if (vo!=null) {
+				List<HexieHouse> houseList = vo.getHou_info();
+				if (houseList!=null && !houseList.isEmpty()) {
+					HexieHouse hexieHouse = houseList.get(0);
+					
+					user.setTotalBind(houseList.size());
+					user.setXiaoquName(hexieHouse.getSect_name());
+					user.setProvince(hexieHouse.getProvince_name());
+					user.setCity(hexieHouse.getCity_name());
+					user.setCounty(hexieHouse.getRegion_name());
+					user.setSectId(hexieHouse.getSect_id());	
+					user.setCspId(hexieHouse.getCsp_id());
+					if (!StringUtils.isEmpty(hexieHouse.getOffice_tel())) {
+						user.setOfficeTel(hexieHouse.getOffice_tel());
+					}
+					userService.save(user);
+					
+				}
+			}
+		}
+		
+	}
+
+
 
 }

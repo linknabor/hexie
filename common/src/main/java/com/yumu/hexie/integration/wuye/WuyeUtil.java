@@ -651,6 +651,7 @@ public class WuyeUtil {
 			if (!StringUtils.isEmpty(urlLink)) {
 				requestUri = urlLink;
 			}
+
 		}
 		return requestUri;
 	}

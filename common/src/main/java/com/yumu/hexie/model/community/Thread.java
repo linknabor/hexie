@@ -299,7 +299,6 @@ public class Thread implements Serializable{
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
-
 	}
 	public long getXiaoquId() {
 		return xiaoquId;

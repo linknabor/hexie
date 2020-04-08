@@ -67,6 +67,7 @@ public class SmsServiceImpl implements SmsService {
     	checkMsgFrequency(mobilePhone);
     	checkMsgTotalLimit(mobilePhone);
     	return sendMessage(user, mobilePhone, message, code);
+
     }
 
     /**
@@ -94,6 +95,7 @@ public class SmsServiceImpl implements SmsService {
 	public boolean sendMsg(User user,String mobile, String msg,long id, int msgType) {
 		
 		return sendMessage(user, mobile, msg, null);
+
 	}
 	
 	private String getMsgSignature(String appId){
@@ -136,6 +138,7 @@ public class SmsServiceImpl implements SmsService {
 		SmsHis smsHis = getSmsFromCache(mobilePhone);
         if (smsHis == null) {
 			String sign = getMsgSignature(user.getAppId());
+
 	        message = sign.concat(message);
 	        smsHis = new SmsHis();
 	        smsHis.setId(0l);
