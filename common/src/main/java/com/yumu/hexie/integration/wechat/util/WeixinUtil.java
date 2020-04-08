@@ -57,6 +57,7 @@ import com.yumu.hexie.service.exception.WechatException;
 /**
  * 微信通用接口工具类
  */
+@SuppressWarnings("deprecation")
 public class WeixinUtil {
 
 	private static final Logger log = LoggerFactory.getLogger(WeixinUtil.class);
@@ -135,7 +136,6 @@ public class WeixinUtil {
 		r.setTimestamp(""+timestamp);
 		return r;
 	}
-
 
 	/**
 	 * 获取token值
@@ -234,6 +234,7 @@ public class WeixinUtil {
 		return result;
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static Object httpsRequestXml(String requestUrl,
 			String requestMethod, String outputStr,Class c) {
 		Object jsonObject = null;
@@ -254,7 +255,7 @@ public class WeixinUtil {
 		httpsRequestXmlWithStore("https://api.mch.weixin.qq.com/secapi/pay/refund", "POST", "NONE", WxRefundResp.class);
 	}
 	
-
+	@SuppressWarnings("rawtypes")
 	public static Object httpsRequestXmlWithStore(String requestUrl,
 			String requestMethod, String outputStr,Class c) {
 		Object jsonObject = null;

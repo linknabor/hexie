@@ -129,15 +129,15 @@ public class DistributionServiceImpl implements DistributionService {
     public List<OnSaleAreaItem> queryOnsales(User user, int type,int page) {
         if(user.getProvinceId() != 0){
         if(type == ModelConstant.PRODUCT_FEATURED){
-            return onSaleAreaItemRepository.findFeatured(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),new PageRequest(page, 100));
+            return onSaleAreaItemRepository.findFeatured(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 100));
         } else if(type>0){
-            return onSaleAreaItemRepository.findByCusProductType(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type,new PageRequest(page, 100));
+            return onSaleAreaItemRepository.findByCusProductType(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), new PageRequest(page, 100));
         }
         }else{
             if(type == ModelConstant.PRODUCT_FEATURED){
-                return onSaleAreaItemRepository.findFeatured(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),new PageRequest(page, 100));
+                return onSaleAreaItemRepository.findFeatured(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 100));
             } else if(type>0){
-                return onSaleAreaItemRepository.findByCusProductType(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type,new PageRequest(page, 100));
+                return onSaleAreaItemRepository.findByCusProductType(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), new PageRequest(page, 100));
             }   
         }
 
@@ -146,10 +146,10 @@ public class DistributionServiceImpl implements DistributionService {
     
     public List<RgroupAreaItem> queryRgroups(User user,int page){
         List<RgroupAreaItem> result ;
-        if(user==null||user.getXiaoquId() == 0){
-            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), new PageRequest(page, 12));
+        if(user.getXiaoquId() == 0){
+            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 12));
         } else {
-            result = rgroupAreaItemRepository.findAllByUserInfo(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),new PageRequest(page, 12));
+            result = rgroupAreaItemRepository.findAllByUserInfo(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 12));
         }
         List<RgroupAreaItem> r = filterByRuleId(result);
         return r;

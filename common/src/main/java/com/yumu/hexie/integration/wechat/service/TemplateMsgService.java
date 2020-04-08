@@ -180,7 +180,6 @@ public class TemplateMsgService {
     	
     }
     
-
     /**
      * 预约服务模板
      * @param openId
@@ -193,6 +192,7 @@ public class TemplateMsgService {
      */
     public static void sendYuyueBillMsg(String orderId, String openId, String title,String billName, 
     			String requireTime, String url, String accessToken, String remark, String appId) {
+
         //更改为使用模版消息发送
         YuyueOrderVO vo = new YuyueOrderVO();
         vo.setTitle(new TemplateItem(title));
@@ -303,11 +303,26 @@ public class TemplateMsgService {
   	
 	}
     
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws JSONException {
 		
-    	System.out.println(DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+    	String appId = "wx95f46f41ca5e570e";
+    	String openid = "o_3DlwdnCLCz3AbTrZqj4HtKeQYY";
+    	WuyeServiceVO vo = new WuyeServiceVO();
+	  	vo.setTitle(new TemplateItem("已接收您的快递包裹！"));
+	  	vo.setOrderNum(new TemplateItem(String.valueOf(System.currentTimeMillis())));
+	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
+	  	vo.setRecvDate(new TemplateItem(recvDate));
+	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
+	  	
+	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
+    	String url = GotongServiceImpl.SERVICE_URL + "10086";
+    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
+    	msg.setTouser(openid);
     	
+    	String json = JacksonJsonUtil.beanToJson(msg);
+    	System.out.println(json);
 	}
     
     
@@ -349,7 +364,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendHexieMessage(String openid, String accessToken, String appId,long userId,String content) {
+    public static void sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
 	  	vo.setOrderNum(new TemplateItem(content));
@@ -361,7 +376,7 @@ public class TemplateMsgService {
 	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_MESSAGE));
-    	String url = GotongServiceImpl.MESSAGE_URL + userId;
+    	String url = GotongServiceImpl.MESSAGE_URL + messageId;
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);

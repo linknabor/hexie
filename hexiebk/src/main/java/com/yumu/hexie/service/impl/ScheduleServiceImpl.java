@@ -108,22 +108,26 @@ public class ScheduleServiceImpl implements ScheduleService{
 	
 	//1. 订单超时
 //    @Scheduled(cron = "50 1/3 * * * ?")
+    @Override
     public void executeOrderTimeoutJob() {
     	executeOrderTimeoutJob(serviceOrderRepository.findTimeoutServiceOrder(System.currentTimeMillis()));
     }
 	//2. 退款状态更新
 //    @Scheduled(cron = "10 10/30 * * * ?")
+    @Override
     public void executeRefundStatusJob() {
     	executeRefundStatusJob(refundOrderRepository.findAllApplyedRefund(System.currentTimeMillis()-1800*1000));
     }
 	//3. 商品支付状态更新
 //    @Scheduled(cron = "10 2/3 * * * ?")
+    @Override
     public void executePayOrderStatusJob() {
         executeMarketPayOrderStatusJob(paymentOrderRepository.queryAllUnpayMarketOrderIds());
     }
     
    //4. 团购团超时
 //    @Scheduled(cron = "11 2/5 * * * ?")
+    @Override
     public void executeRGroupTimeoutJob() {
     	SCHEDULE_LOG.error("--------------------executeGroupTimeoutJob[B][R]-------------------");
     	List<RgroupRule> rules = rgroupRuleRepository.findTimeoutGroup(new Date());
@@ -154,7 +158,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
     
   //4. 保洁超时  YunXiyiBillRepository
-//  @Scheduled(cron = "50 1/2 * * * ?")
+//    @Scheduled(cron = "50 1/2 * * * ?")
     @Override
     public void executeBaojieTimeoutJob() {
         SCHEDULE_LOG.debug("--------------------executeBaojieTimeoutJob[B][R]-------------------");
@@ -186,7 +190,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
     
     //4. 洗衣超时  YunXiyiBillRepository
-//  @Scheduled(cron = "20 1/2 * * * ?")
+//    @Scheduled(cron = "20 1/2 * * * ?")
     @Override
     public void executeXiyiTimeoutJob() {
         SCHEDULE_LOG.debug("--------------------executeXiyiTimeoutJob[B][R]-------------------");
