@@ -18,6 +18,10 @@ public interface ScheduleService {
     public void executeCoupinTimeoutHintJob();
     //8.会员定时 订单状态查询  及会员日期判断
     public void executeMemberTimtout();
+  //保洁超时
+  	void executeBaojieTimeoutJob();
+  	//洗衣超时
+  	void executeXiyiTimeoutJob();
     
 	
 }

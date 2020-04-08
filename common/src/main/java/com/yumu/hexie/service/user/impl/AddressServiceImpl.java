@@ -22,6 +22,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.amap.AmapUtil;
 import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
@@ -57,6 +58,10 @@ public class AddressServiceImpl implements AddressService {
     
     @PostConstruct
 	public void init() {
+    	
+    	if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+    		return;
+    	}
 		if(map == null){
 			getNeedRegion();
 		}
