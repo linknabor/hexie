@@ -48,9 +48,6 @@ public class BatchServiceImpl implements BatchService {
 	@PostConstruct
 	public void runBatch() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
-			return;
-		}
 		wuyeQueueTask.bindHouseByTrade();
 		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
@@ -232,14 +229,6 @@ public class BatchServiceImpl implements BatchService {
 	@Override
 	public void bindHouseZeroSect() {
 
-		String sectId = "0";
-		List<User> userList = userRepository.findBySectId(sectId);
-		
-		for (User user : userList) {
-			
-			if (StringUtils.isEmpty(user.getTel())) {
-				continue;
-			}
 			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
 			HouseListVO vo = baseResult.getData();
 			if (vo!=null) {

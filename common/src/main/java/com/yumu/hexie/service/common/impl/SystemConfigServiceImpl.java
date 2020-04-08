@@ -57,17 +57,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private RedisRepository redisRepository;
     @Autowired
     private RedisTemplate<String, SystemConfig> redisTemplate;
-    
-    
+
     /**
      * 启动时加载到redis缓存中
      */
     @PostConstruct
     public void initSystemConfig() {
-    	
-    	if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
-    		return;
-    	}
     	
     	List<SystemConfig> configList = systemConfigRepository.findAll();
     	if (configList == null || configList.isEmpty()) {
