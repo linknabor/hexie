@@ -48,6 +48,9 @@ public class BatchServiceImpl implements BatchService {
 	@PostConstruct
 	public void runBatch() {
 		
+		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+			return;
+		}
 		wuyeQueueTask.bindHouseByTrade();
 		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
@@ -142,7 +145,7 @@ public class BatchServiceImpl implements BatchService {
 		}
 		
 	}
-	
+
 	/**
 	 * 补sectId不为空但为零的情况
 	 */
@@ -181,6 +184,7 @@ public class BatchServiceImpl implements BatchService {
 		}
 		
 	}
+
 
 
 }
