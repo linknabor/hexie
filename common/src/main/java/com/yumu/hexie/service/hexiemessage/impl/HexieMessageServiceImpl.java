@@ -49,6 +49,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 				}
 				User user = userList.get(0);
 				transactionUtil.transact(s -> saveHexieMessage(exr, user));
+
 			}
 		}
 
