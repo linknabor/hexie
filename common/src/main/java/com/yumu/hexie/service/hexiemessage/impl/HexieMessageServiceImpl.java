@@ -26,10 +26,10 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	private SystemConfigService systemConfigService;
 	
 	@Autowired
-	private UserRepository userRepository;
+	UserRepository userRepository;
 	
 	@Autowired
-	private HexieMessageRepository hexieMessageRepository;
+	HexieMessageRepository hexieMessageRepository;
 	
 	@Inject
 	protected SmsService smsService;
@@ -51,7 +51,6 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 				transactionUtil.transact(s -> saveHexieMessage(exr, user));
 
 			}
-			
 		}
 
 	}

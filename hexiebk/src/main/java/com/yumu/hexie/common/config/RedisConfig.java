@@ -63,6 +63,7 @@ public class RedisConfig {
 		redisTemplate.setHashKeySerializer(getStringRedisTemplate().getStringSerializer());
 		redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);	//同上
 		return redisTemplate;
+		
 	}
     
     @Bean(name = "systemConfigRedisTemplate")

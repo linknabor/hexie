@@ -67,6 +67,7 @@ public class Product extends BaseModel {
 	private String secondType = "00";//二级类目
 	private float postageFee = 0;//快递费
 	
+	
 	public long getMerchantId() {
 		return merchantId;
 	}
@@ -316,5 +317,4 @@ public class Product extends BaseModel {
 	public void setPostageFee(float postageFee) {
 		this.postageFee = postageFee;
 	}
-	
 }
