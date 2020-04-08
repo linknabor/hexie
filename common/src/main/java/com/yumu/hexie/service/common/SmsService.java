@@ -3,7 +3,6 @@ package com.yumu.hexie.service.common;
 import java.util.Date;
 
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.vo.SmsMessage;
 
 
 /**
@@ -11,9 +10,9 @@ import com.yumu.hexie.vo.SmsMessage;
  */
 public interface SmsService {
 	
-	public boolean sendMsg(User user, SmsMessage smsMessage, long id);
+	public boolean sendMsg(User user,String mobile,String msg,long id);
 	
-	public boolean sendMsg(User user, SmsMessage smsMessage, long id, int msgType);
+	public boolean sendMsg(User user, String mobile, String msg, long id, int msgType);
 	
     public boolean sendVerificationCode(User user, String mobilePhone, String requestIp);
 

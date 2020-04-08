@@ -50,7 +50,6 @@ import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
-import com.yumu.hexie.vo.SmsMessage;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.UserInfo;
@@ -450,10 +449,7 @@ public class WuyeController extends BaseController {
 	@Async
 	private void sendMsg(User user) {
 		String msg = "您好，欢迎加入合协社区。您已获得价值10元红包一份。感谢您对合协社区的支持。";
-		SmsMessage smsMessage = new SmsMessage();
-		smsMessage.setMobile(user.getTel());
-		smsMessage.setMessage(msg);
-		smsService.sendMsg(user, smsMessage, 11, 3);
+		smsService.sendMsg(user, user.getTel(), msg, 11, 3);
 	}
 
 	@Async
