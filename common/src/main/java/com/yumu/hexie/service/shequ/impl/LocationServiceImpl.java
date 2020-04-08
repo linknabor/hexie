@@ -32,6 +32,8 @@ public class LocationServiceImpl implements LocationService {
 	private static List<RegionUrl> regionUrlList = new ArrayList<>();
 	
 	private static Map<String, RegionUrl> regionUrlMap = new HashMap<>();
+
+	public static Map<String, RegionUrl> codeUrlMap = new HashMap<>();
 	
 	private static final String DEFAULT_REGiON = "上海市";
 	
@@ -52,6 +54,7 @@ public class LocationServiceImpl implements LocationService {
 			regionUrlList = list;
 			for (RegionUrl regionUrl : list) {
 				regionUrlMap.put(regionUrl.getRegionName(), regionUrl);
+				codeUrlMap.put(regionUrl.getRegionCode(), regionUrl);
 			}
 		}
 	}
@@ -110,5 +113,12 @@ public class LocationServiceImpl implements LocationService {
 		initRegionUrlCache();
 		
 	}
+
+	public static Map<String, RegionUrl> getCodeUrlMap() {
+		return codeUrlMap;
+	}
+	
+	
+	
 
 }

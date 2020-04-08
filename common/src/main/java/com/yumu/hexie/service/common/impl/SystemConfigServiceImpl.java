@@ -57,16 +57,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private RedisRepository redisRepository;
     @Autowired
     private RedisTemplate<String, SystemConfig> redisTemplate;
-      
+
     /**
      * 启动时加载到redis缓存中
      */
     @PostConstruct
     public void initSystemConfig() {
-    	
-    	if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
-    		return;
-    	}
     	
     	List<SystemConfig> configList = systemConfigRepository.findAll();
     	if (configList == null || configList.isEmpty()) {
@@ -278,17 +274,21 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		return isAvailable;
 	}
 	
-    
-	public static void main(String[] args) {
+	/**
+	 * 物业首页社区生活板块是否开启。目前只有东湖是关闭
+	 */
+	@Override
+	public boolean isDonghu (String appId){
 		
-//		String str = "APP_SYS_wx6160b615066a9f78";
-//		String key = str.substring(str.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), str.length());
-//		System.out.println(key);
-		
-		String appIds = "23456";
-		String a = null;
-		System.out.println(appIds.indexOf(a));
-
+		String appIds = getSysConfigByKey("DONGHU_LIKE_APPS");	//类似东湖这种性质的公众号列表
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
 	}
+	
     
 }

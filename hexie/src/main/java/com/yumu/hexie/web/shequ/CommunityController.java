@@ -185,9 +185,8 @@ public class CommunityController extends BaseController{
 		
 		thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SUGGESTION);
 		communityService.addThread(user, thread);
-		
 		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
-		
+
 		return BaseResult.successResult("success");
 		
 		

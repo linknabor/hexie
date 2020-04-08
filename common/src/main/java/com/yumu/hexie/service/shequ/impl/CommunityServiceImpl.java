@@ -29,6 +29,8 @@ import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
+
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.CommunityService;
 
@@ -53,6 +55,9 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private AddressRepository addressRepository;
 	
+	@Autowired
+	private SystemConfigService systemConfigService;
+
 	@Override
 	public List<Thread> getThreadList(String userSectId, Pageable page) {
 		
@@ -76,7 +81,6 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public List<Thread> getThreadListByCategory(long userId, int category, String userSectId, Pageable page) {
 
-
 		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, userId, page);
 	}
 
@@ -98,7 +102,10 @@ public class CommunityServiceImpl implements CommunityService {
 				break;
 			}
 		}
-		
+		if (!systemConfigService.isDonghu(user.getAppId())) {	//东湖还具体分为意见、公共部位报修等，页面直接传上来。
+			thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SUGGESTION);
+		}
+
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
 		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
@@ -112,6 +119,7 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
+		threadRepository.save(thread);
 
 		return thread;
 	}

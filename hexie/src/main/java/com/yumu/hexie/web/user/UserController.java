@@ -128,13 +128,17 @@ public class UserController extends BaseController{
 				}else {
 					userInfo.setPoint(wechatCard.getBonus());
 				}
-
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
-			    userInfo.setQrCode(qrCode.getQrLink());
-			    
+			    String qrLink = "";
+			    if (qrCode != null) {
+			    	qrLink = qrCode.getQrLink();
+				}
+			    userInfo.setQrCode(qrLink);
 			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
+			    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
+
 			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
@@ -219,7 +223,6 @@ public class UserController extends BaseController{
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
 		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
-
 
     }
 	

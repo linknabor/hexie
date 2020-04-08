@@ -5,12 +5,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.ModelConstant;
@@ -21,11 +23,14 @@ import com.yumu.hexie.model.community.MessageSectRepository;
 import com.yumu.hexie.model.user.Feedback;
 import com.yumu.hexie.model.user.FeedbackRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.user.MessageService;
 
 @Service(value = "messageService")
 public class MessageServiceImpl implements MessageService {
 
+	private static org.slf4j.Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
 
 	@Inject
 	private MessageRepository messageRepository;
@@ -33,6 +38,10 @@ public class MessageServiceImpl implements MessageService {
 	private FeedbackRepository feedbackRepository;
 	@Autowired
 	private MessageSectRepository messageSectRepository;
+	@Autowired
+	private SystemConfigService systemConfigService;
+	@Autowired
+	private UserRepository userRepository;
 	
 	@Override
 	public List<Message> queryMessages(int type, long provinceId, long cityId,
@@ -115,27 +124,45 @@ public class MessageServiceImpl implements MessageService {
 
 		List<Message> messageList = new ArrayList<Message>();
 		Pageable pageable = new PageRequest(page, pageSize);
+		User currUser = userRepository.findById(user.getId());
 		switch (msgType) {
-		case 0:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;
-		case 1:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;
-		case 2:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;
-		case 3:
-			messageList = messageRepository.queryMessagesByUserAndType(user.getSectId(), msgType, pageable);
-			break;	
 		case 9:
 			messageList = messageRepository.queryMessagesByStatusAndMsgType(pageable);
 			break;
 		default:
+			boolean isDonghu = systemConfigService.isDonghu(currUser.getAppId());
+			logger.info("isDonghu:" + isDonghu + ", appid : " + currUser.getAppId() + ", sectId : " + currUser.getSectId());
+			if (isDonghu && (StringUtils.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) ) {
+				messageList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, currUser.getAppId(), pageable);
+			}else {
+				List<Message> sectList = messageRepository.queryMessagesByUserAndType(currUser.getSectId(), msgType, pageable);
+				List<Message> allList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, currUser.getAppId(), pageable);
+				messageList.addAll(sectList);
+				messageList.addAll(allList);
+			}
 			break;
 		}
 		
 		return messageList;
+	}
+	
+	/**
+	 * 查询便民信息,msgType=3的
+	 */
+	@Override
+	public Message queryConvenienceInfo(User user, int msgType) {
+
+		Message message = null;
+		User currUser = userRepository.findById(user.getId());
+		boolean isDonghu = systemConfigService.isDonghu(currUser.getAppId());
+		logger.info("isDonghu:" + isDonghu + ", appid : " + currUser.getAppId() + ", sectId : " + currUser.getSectId());
+		if (isDonghu && (StringUtils.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) ) {
+			message = messageRepository.queryMessagesByAppidAndRegionTypeWithContent(msgType, 0, currUser.getAppId());
+		}else {
+			message = messageRepository.queryMessagesByUserAndTypeWithContent(currUser.getSectId(), msgType);
+		}
+		
+		return message;
 	}
 	
 	

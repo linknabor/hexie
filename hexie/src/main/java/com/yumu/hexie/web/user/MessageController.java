@@ -44,8 +44,28 @@ public class MessageController extends BaseController {
 		List<Message> messageList = messageService.queryMessagesByUserAndType(user, msgType, currentPage, PAGE_SIZE);
 		return BaseResult.successResult(messageList);
 	}
+	
+	
+	/**
+	 * 移动端查询便民信息
+	 * @param user
+	 * @param currentPage
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings({ "unchecked" })
+	@RequestMapping(value = "/messages/{msgType}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Message> convenienceInfo(@ModelAttribute(Constants.USER)User user, @PathVariable int msgType)
+			throws Exception {
+		
+		Message message = messageService.queryConvenienceInfo(user, msgType);
+		return BaseResult.successResult(message);
+	}
+	
 
 	//消息详情
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/messageDetail/{messageId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Message> getMessageDetail(@ModelAttribute(Constants.USER) User user,@PathVariable long messageId)
@@ -56,6 +76,7 @@ public class MessageController extends BaseController {
 	
 
 	//feedback
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/feedbacks/{messageId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<Feedback>> queryFeedback(@PathVariable long messageId)
@@ -64,6 +85,7 @@ public class MessageController extends BaseController {
 		return BaseResult.successResult(messageService.queryReplays(messageId, 0, 20));
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/pushFeedback", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<Feedback> pushFeedback(@ModelAttribute(Constants.USER)User user,@RequestBody ReplyReq req)

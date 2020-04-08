@@ -111,25 +111,5 @@ public class BatchController extends BaseController {
 		
 	}
 	
-	/**
-	 * 手工修复绑定房屋sectId为0的情况
-	 * @param tradeWaterId
-	 * @param code
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/bindHouseZeroSect", method = RequestMethod.GET)
-	public BaseResult<String> bindHouseZeroSect( @RequestParam String code){
-		
-		if ("hexieCode".equals(code)) {
-			batchService.bindHouseZeroSect();
-			logger.info("操作完成!!!");
-			return BaseResult.successResult("success");
-		} else {
-			return BaseResult.fail("unkown request !");
-		}
-		
-	}
-	
-	
+
 }

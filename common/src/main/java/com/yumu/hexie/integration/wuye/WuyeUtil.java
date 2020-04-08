@@ -30,14 +30,15 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayResult;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.service.shequ.impl.LocationServiceImpl;
 
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
 
 	private static String REQUEST_ADDRESS;
-	private static String REQUEST_ADDRESS_GZ;
 	private static String SYSTEM_NAME;
 	private static Properties props = new Properties();
 	
@@ -50,7 +51,6 @@ public class WuyeUtil {
 			log.error(e.getMessage(), e);
 		}
 		REQUEST_ADDRESS = props.getProperty("requestUrl");
-		REQUEST_ADDRESS_GZ = props.getProperty("requestUrlGz");
 		SYSTEM_NAME = props.getProperty("sysName");
 	}
 
@@ -643,10 +643,15 @@ public class WuyeUtil {
 	
 	private static String getRequestUri(User user) {
 		
-		String appId = user.getAppId();
+		String userSysCode = SystemConfigServiceImpl.getSysMap().get(user.getAppId());
+		RegionUrl regionUrl = LocationServiceImpl.getCodeUrlMap().get(userSysCode);
 		String requestUri = REQUEST_ADDRESS;
-		if ("_guizhou".equals(SystemConfigServiceImpl.getSysMap().get(appId))) {
-			requestUri = REQUEST_ADDRESS_GZ;
+		if (regionUrl!=null) {
+			String urlLink = regionUrl.getRegionUrl();
+			if (!StringUtils.isEmpty(urlLink)) {
+				requestUri = urlLink;
+			}
+
 		}
 		return requestUri;
 	}

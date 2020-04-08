@@ -36,8 +36,11 @@ public class Thread implements Serializable{
 	private String userName;
 	private String userHead;	
 	private String userMobile;	//用户手机
-	private String userSectId;		//用户所在小区ID
-	private String userSectName; 	//用户所在小区名称
+	private long xiaoquId;	//对应region表的id
+	private String xiaoquName;	//对应region表的name
+	private String userSectId;		//用户所在小区ID,对应saas的sect_id
+	private String userSectName; 	//用户所在小区名称,对应的saas的sect_name_frst
+
 	private String userAddress;		//用户地址
 	private double userSectLatitude;	//用户所在小区纬度
 	private double userSectLongtitude;	//用户所在小区精度
@@ -284,6 +287,7 @@ public class Thread implements Serializable{
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+
 	}
 	public String getUserAddress() {
 		return userAddress;
@@ -296,6 +300,19 @@ public class Thread implements Serializable{
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+	public long getXiaoquId() {
+		return xiaoquId;
+	}
+	public void setXiaoquId(long xiaoquId) {
+		this.xiaoquId = xiaoquId;
+	}
+	public String getXiaoquName() {
+		return xiaoquName;
+	}
+	public void setXiaoquName(String xiaoquName) {
+		this.xiaoquName = xiaoquName;
+
 	}
 	
 	

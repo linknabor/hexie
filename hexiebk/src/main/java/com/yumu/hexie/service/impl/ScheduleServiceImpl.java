@@ -54,7 +54,6 @@ import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.impl.CouponServiceImpl;
 import com.yumu.hexie.service.user.req.MemberVo;
-import com.yumu.hexie.vo.SmsMessage;
 
 @Service("scheduleService")
 public class ScheduleServiceImpl implements ScheduleService{

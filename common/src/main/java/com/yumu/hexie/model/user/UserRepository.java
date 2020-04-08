@@ -37,8 +37,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public List<User> findByAppId(String appId);
 	
 	public List<User> findByAppId(String appId, Pageable pageable);
-	
-	public List<User> findBySectId(String sectId);
 
 	/**
 	 * 根据增量更新。更新语句的where 条件必须带上原积分值，这样可以解决多次调用带来的幂等性问题。
@@ -89,6 +87,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 			+ " where id = ?10 ", nativeQuery = true)
 	public int updateUserByHouse(long xiaoquId, String xiaoquName, int totalBind, String province, String city, String county, 
 			String sectId, String cspId, String officeTel, long id);
+
 
 	
 	@Modifying
