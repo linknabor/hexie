@@ -21,7 +21,7 @@ import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
-public class HexieMessageServiceImpl implements HexieMessageService{
+public class HexieMessageServiceImpl<T> implements HexieMessageService{
 
 
 	@Autowired
@@ -41,20 +41,15 @@ public class HexieMessageServiceImpl implements HexieMessageService{
 	public void pullWechat(HexieMessage exr) {
 
 		String[] wuyeid = exr.getWuyeId().split(",");
-		if("0".equals(exr.getType())) {
+		if("0".equals(exr.getType())) {	//公众号只发模板消息，短信的在servplat发
 			for (int i = 0; i < wuyeid.length; i++) {
-				List<User> user = userRepository.findByWuyeId(wuyeid[i]);
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-				exr.setUserId(user.get(0).getId());
-				exr.setDate_time(df.format(new Date()));
-				hexieMessageRepository.save(exr);
-				String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
-				TemplateMsgService.sendHexieMessage(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getContent());
-			}
-		}else if("1".equals(exr.getType())){
-			for (int i = 0; i < wuyeid.length; i++) {
-				List<User> user = userRepository.findByWuyeId(wuyeid[i]);
-				smsService.sendMsg(user.get(0), user.get(0).getTel(), exr.getContent(), 0);//发送短信
+				List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
+				if (userList == null || userList.isEmpty()) {
+					continue;
+				}
+				User user = userList.get(0);
+				transactionUtil.transact(s -> saveHexieMessage(exr, user));
+
 			}
 
 		}

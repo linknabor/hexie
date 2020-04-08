@@ -86,9 +86,9 @@ public class SmsServiceImpl implements SmsService {
     }
 
 	@Override
-	public boolean sendMsg(User user, SmsMessage smsMessage, long id) {
+	public boolean sendMsg(User user,String mobile, String msg,long id) {
 		
-		return sendMsg(user, smsMessage, id, 0);
+		return sendMsg(user, mobile, msg, id, 0);
 	}
 	
 	@Override

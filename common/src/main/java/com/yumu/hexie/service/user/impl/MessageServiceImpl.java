@@ -139,6 +139,7 @@ public class MessageServiceImpl implements MessageService {
 				List<Message> allList = messageRepository.queryMessagesByAppidAndRegionType(msgType, 0, currUser.getAppId(), pageable);
 				messageList.addAll(sectList);
 				messageList.addAll(allList);
+
 			}
 			break;
 		}

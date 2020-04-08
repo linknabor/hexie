@@ -35,7 +35,6 @@ import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.card.WechatCardService;
-
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;

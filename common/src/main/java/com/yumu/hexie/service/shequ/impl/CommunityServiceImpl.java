@@ -30,7 +30,6 @@ import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
-
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.CommunityService;
 
@@ -120,7 +119,6 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
 		threadRepository.save(thread);
-
 		return thread;
 	}
 
