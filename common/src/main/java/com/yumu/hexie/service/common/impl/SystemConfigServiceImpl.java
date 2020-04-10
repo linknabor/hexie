@@ -57,7 +57,8 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private RedisRepository redisRepository;
     @Autowired
     private RedisTemplate<String, SystemConfig> redisTemplate;
-      
+    
+    
     /**
      * 启动时加载到redis缓存中
      */
@@ -292,7 +293,6 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 			}
 		}
 		return isAvailable;
-
 	}
 	
     

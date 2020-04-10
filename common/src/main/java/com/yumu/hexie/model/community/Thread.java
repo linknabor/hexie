@@ -286,6 +286,7 @@ public class Thread implements Serializable{
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+
 	}
 	public String getUserAddress() {
 		return userAddress;
@@ -298,6 +299,18 @@ public class Thread implements Serializable{
 	}
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+	public long getXiaoquId() {
+		return xiaoquId;
+	}
+	public void setXiaoquId(long xiaoquId) {
+		this.xiaoquId = xiaoquId;
+	}
+	public String getXiaoquName() {
+		return xiaoquName;
+	}
+	public void setXiaoquName(String xiaoquName) {
+		this.xiaoquName = xiaoquName;
 	}
 	public long getXiaoquId() {
 		return xiaoquId;

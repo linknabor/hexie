@@ -51,7 +51,6 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 				transactionUtil.transact(s -> saveHexieMessage(exr, user));
 
 			}
-			
 		}
 
 	}

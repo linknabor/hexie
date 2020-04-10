@@ -1,10 +1,8 @@
 package com.yumu.hexie.integration.wuye.vo;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class WechatPayInfo implements Serializable {
+public class WechatPayInfo extends BaseResponse {
 
 	private static final long serialVersionUID = 2567954737062142484L;
 	private String appid;

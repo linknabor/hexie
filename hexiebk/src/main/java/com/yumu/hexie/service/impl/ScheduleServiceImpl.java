@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
@@ -330,7 +329,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     	}
 	}
 	@Override
-    @Scheduled(cron = "15 */2 0 * * ?")
+//    @Scheduled(cron = "15 */2 0 * * ?")
 	public void executeCouponTimeoutJob() {
 		List<Coupon> coupons = couponService.findTop100TimeoutCoupon();
 		for(Coupon coupon : coupons) {
@@ -421,6 +420,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 				
 				String sendMsg = msg.replace("amount", displayAmt);
 				smsService.sendMsg(user, mobile, sendMsg, 12, 3);
+
 				SCHEDULE_LOG.debug("msg sent, mobile :" + mobile + ", userId: " + userId + "msg : " + sendMsg);
 				
 				userIdList.add(userId);

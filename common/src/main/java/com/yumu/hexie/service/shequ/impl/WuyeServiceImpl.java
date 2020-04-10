@@ -2,7 +2,6 @@ package com.yumu.hexie.service.shequ.impl;
 
 import java.util.concurrent.TimeUnit;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -16,6 +15,8 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -72,6 +73,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -142,27 +146,17 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public WechatPayInfo getPrePayInfo(User user, String billId,
-			String stmtId, String couponUnit, String couponNum, 
-			String couponId,String mianBill,String mianAmt, String reduceAmt, String fee_mianBill,String fee_mianAmt,
-			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
+	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
-		String targetUrl = getRegionUrl(regionname);
-		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
-				invoice_title_type, credit_code, invoice_title,targetUrl)
-				.getData();
+		return wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
 	}
 	
 	@Override
-	public WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
-			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
-			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
-			throws Exception {
+	public WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception {
 		
-		String targetUrl = getRegionUrl(regionname);
-		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, invoice_title,targetUrl)
-				.getData();
+		String targetUrl = getRegionUrl(dto.getRegionName());
+		dto.setRegionUrl(targetUrl);
+		return WuyeUtil.getOtherPrePayInfo(dto).getData();
 	}
 
 	/**
@@ -177,7 +171,7 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Transactional
 	@Override
-	public void noticePayed(User user, String billId, String tradeWaterId, 
+	public void noticePayed(User user, String tradeWaterId, 
 			String couponId, String feePrice, String bindSwitch) {
 		
 		//1.更新红包状态
@@ -189,7 +183,7 @@ public class WuyeServiceImpl implements WuyeService {
 			String pointKey = "wuyePay-" + tradeWaterId;
 			addPointAsync(user, feePrice, pointKey);
 		}else {
-			String pointKey = "zhima-bill-" + user.getId() + "-" + billId;
+			String pointKey = "zhima-bill-" + user.getId() + "-" + tradeWaterId;
 			pointService.updatePoint(user, "10", pointKey);
 		}
 		//3.绑定所缴纳物业费的房屋
@@ -481,5 +475,5 @@ public class WuyeServiceImpl implements WuyeService {
 		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
 	
 	}
-
+	
 }
