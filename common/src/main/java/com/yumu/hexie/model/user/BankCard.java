@@ -1,5 +1,7 @@
 package com.yumu.hexie.model.user;
 
+import javax.persistence.Entity;
+
 import com.yumu.hexie.model.BaseModel;
 
 /**
@@ -7,6 +9,7 @@ import com.yumu.hexie.model.BaseModel;
  * @author david
  *
  */
+@Entity
 public class BankCard extends BaseModel {
 
 	/**

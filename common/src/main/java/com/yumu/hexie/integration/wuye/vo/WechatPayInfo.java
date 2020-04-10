@@ -9,6 +9,7 @@ public class WechatPayInfo extends BaseResponse {
 	private String trade_water_id;
 	private String timestamp;
 	private String noncestr;
+	@JsonProperty("package")
 	private String packageValue;//在后台及js端为package 关键字。。
 	private String signtype;
 	private String paysign;
