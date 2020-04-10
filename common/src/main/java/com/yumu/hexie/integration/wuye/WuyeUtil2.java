@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
@@ -83,13 +84,13 @@ public class WuyeUtil2 {
         HttpEntity<Object> httpEntity = new HttpEntity<>(null, headers);
         
         logger.info("getPrePayInfo request : " + requestUrl + ", param : " + paramsMap);
-        ResponseEntity<WechatPayInfo> respEntity = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, WechatPayInfo.class);
+        ResponseEntity<String> respEntity = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
         logger.info("getPrePayInfo response : " + respEntity);
         
 		if (!HttpStatus.OK.equals(respEntity.getStatusCode())) {
 			throw new BizValidateException("支付请求失败！ code : " + respEntity.getStatusCodeValue());
 		}
-		WechatPayInfo wechatPayInfo = respEntity.getBody();
+		WechatPayInfo wechatPayInfo = (WechatPayInfo) JacksonJsonUtil.jsonToBean(respEntity.getBody(), WechatPayInfo.class);
 		if (!"00".equals(wechatPayInfo.getResult())) {
 			String errMsg = wechatPayInfo.getErrMsg();
 			throw new BizValidateException(errMsg);
