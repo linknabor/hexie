@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.shequ;
 
+import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -113,27 +114,11 @@ public interface WuyeService {
 	 */
 	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName);
 
-/**
+	/**
 	 * 物业账单缴费
-	 * @param user
-	 * @param billId
-	 * @param stmtId
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionname
-	 * @return
-	 * @throws Exception
+	 * @param prepayRequestDTO
 	 */
-	WechatPayInfo getPrePayInfo(User user, String billId, String stmtId, String couponUnit, String couponNum,
-			String couponId, String mianBill, String mianAmt, String reduceAmt,String fee_mianBill,String fee_mianAmt, String invoice_title_type,
-			String credit_code, String invoice_title, String regionname) throws Exception;
+	WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
 
 	/**
 	 * 物业无账单缴费
@@ -154,9 +139,7 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception
 	 */
-	WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
-			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt, String reduceAmt,
-			String invoice_title_type, String credit_code, String invoice_title, String regionname) throws Exception;
+	WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception;
 
 	/**
 	 * 通知已支付
@@ -167,7 +150,7 @@ public interface WuyeService {
 	 * @param feePrice
 	 * @param bindSwitch
 	 */
-	void noticePayed(User user, String billId, String tradeWaterId, String couponId, String feePrice, String bindSwitch);
+	void noticePayed(User user, String tradeWaterId, String couponId, String feePrice, String bindSwitch);
 	
 	/**
 	 * 查询是否已经用过红包

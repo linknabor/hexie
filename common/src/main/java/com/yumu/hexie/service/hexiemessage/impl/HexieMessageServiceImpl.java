@@ -26,10 +26,10 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	private SystemConfigService systemConfigService;
 	
 	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
 	
 	@Autowired
-	HexieMessageRepository hexieMessageRepository;
+	private HexieMessageRepository hexieMessageRepository;
 	
 	@Inject
 	protected SmsService smsService;

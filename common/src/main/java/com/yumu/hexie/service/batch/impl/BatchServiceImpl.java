@@ -60,8 +60,6 @@ public class BatchServiceImpl implements BatchService {
 		
 	}
 
-
-
 	@Override
 	public void updateUserShareCode() {
 		List<User> list = userService.getShareCodeIsNull();
@@ -186,6 +184,47 @@ public class BatchServiceImpl implements BatchService {
 		}
 		
 	}
+
+
+	/**
+	 * 补sectId不为空但为零的情况
+	 */
+	@Override
+	public void bindHouseZeroSect() {
+
+		String sectId = "0";
+		List<User> userList = userRepository.findBySectId(sectId);
+		
+		for (User user : userList) {
+			
+			if (StringUtils.isEmpty(user.getTel())) {
+				continue;
+			}
+			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
+			HouseListVO vo = baseResult.getData();
+			if (vo!=null) {
+				List<HexieHouse> houseList = vo.getHou_info();
+				if (houseList!=null && !houseList.isEmpty()) {
+					HexieHouse hexieHouse = houseList.get(0);
+					
+					user.setTotalBind(houseList.size());
+					user.setXiaoquName(hexieHouse.getSect_name());
+					user.setProvince(hexieHouse.getProvince_name());
+					user.setCity(hexieHouse.getCity_name());
+					user.setCounty(hexieHouse.getRegion_name());
+					user.setSectId(hexieHouse.getSect_id());	
+					user.setCspId(hexieHouse.getCsp_id());
+					if (!StringUtils.isEmpty(hexieHouse.getOffice_tel())) {
+						user.setOfficeTel(hexieHouse.getOffice_tel());
+					}
+					userService.save(user);
+					
+				}
+			}
+		}
+		
+	}
+
 
 
 }
