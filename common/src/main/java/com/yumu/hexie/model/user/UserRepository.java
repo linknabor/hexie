@@ -95,4 +95,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Transactional
 	@Query(value = "update user set totalBind = ?1 where id = ?2 ", nativeQuery = true)
 	public int updateUserTotalBind(int totalBind, long id);
+	
+	
+	@Modifying
+	@Transactional
+	@Query(value = "update user set couponCount = ?1 where id = ?2 and couponCount = ?3 ", nativeQuery = true)
+	public int updateUserCoupon(int currCount, long id, int oriCount);
+	
 }

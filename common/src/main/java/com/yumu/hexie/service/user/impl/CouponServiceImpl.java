@@ -798,8 +798,7 @@ public class CouponServiceImpl implements CouponService {
         log.warn("comsume红包Bill[END]feePrice["+feePrice+"]["+couponId+"]");
 		User user = userRepository.findOne(coupon.getUserId());
 		if(user.getCouponCount()>0) {
-			user.setCouponCount(user.getCouponCount()-1);
-			userRepository.save(user);
+			userRepository.updateUserCoupon(user.getCouponCount()-1, user.getId(), user.getCouponCount());
 		}
 		
 		updateSeedAndRuleForCouponUse(coupon);

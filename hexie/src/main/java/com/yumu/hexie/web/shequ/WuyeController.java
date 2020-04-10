@@ -10,12 +10,14 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +27,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -41,17 +44,20 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
+import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
+import com.yumu.hexie.service.user.BankCardService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
+import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
 @Controller(value = "wuyeController")
@@ -75,6 +81,8 @@ public class WuyeController extends BaseController {
 	private SystemConfigService systemConfigService;
 	@Autowired
 	private PointService pointService;
+	@Autowired
+	private BankCardService bankCardService;
 
 	/**
 	 * 根据用户身份查询其所绑定的房屋
@@ -291,35 +299,34 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(paymentInfo);
 	}
 
-	// stmtId在快捷支付的时候会用到
+	/**
+	 * 创建交易，获取预支付ID
+	 * stmtId在快捷支付的时候会用到
+	 * @param user
+	 * @param prepayReq
+	 * @return
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getPrePayInfo", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<WechatPayInfo> getPrePayInfo(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId,
-			@RequestParam(required = false) String couponUnit, @RequestParam(required = false) String couponNum,
-			@RequestParam(required = false) String couponId, @RequestParam(required = false) String mianBill,
-			@RequestParam(required = false) String mianAmt, @RequestParam(required = false) String reduceAmt,
-			@RequestParam(required = false) String fee_mianBill,@RequestParam(required = false) String fee_mianAmt,
-			@RequestParam(required = false) String invoice_title_type,
-			@RequestParam(required = false) String credit_code, @RequestParam(required = false) String invoice_title,
-			@RequestParam(required = false) String regionname)
-			throws Exception {
-		WechatPayInfo result;
-		try {
-			if (StringUtils.isEmpty(fee_mianBill)) {
-				fee_mianBill = "0";
-			}
-			if (StringUtils.isEmpty(fee_mianAmt)) {
-				fee_mianAmt = "0";
-			}
-			result = wuyeService.getPrePayInfo(user, billId, stmtId, couponUnit,
-					couponNum, couponId, mianBill, mianAmt, reduceAmt,fee_mianBill,fee_mianAmt, invoice_title_type, credit_code,
-					invoice_title,regionname);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			return BaseResult.fail(e.getMessage());
+			@RequestBody PrepayReqVO prepayReqVo) throws Exception {
+		
+		WechatPayInfo result = new WechatPayInfo();
+		if (StringUtils.isEmpty(prepayReqVo.getFeeMianBill())) {
+			prepayReqVo.setFeeMianBill("0");
 		}
+		if (StringUtils.isEmpty(prepayReqVo.getFeeMianAmt())) {
+			prepayReqVo.setFeeMianAmt("0");
+		}
+		
+		log.info("prepayReqVo : " + prepayReqVo);
+		PrepayRequestDTO dto = new PrepayRequestDTO();
+		BeanUtils.copyProperties(prepayReqVo, dto);
+		dto.setUser(user);
+		log.info("prepayRequestDTO : " + dto);
+		result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 
@@ -346,21 +353,14 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/getOtherPrePayInfo", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<WechatPayInfo> getOtherPrePayInfo(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String houseId, @RequestParam(required = false) String start_date, @RequestParam(required = false) String end_date,
-			@RequestParam(required = false) String couponUnit, @RequestParam(required = false) String couponNum,
-			@RequestParam(required = false) String couponId, @RequestParam(required = false) String mianBill,
-			@RequestParam(required = false) String mianAmt, @RequestParam(required = false) String reduceAmt,
-			@RequestParam(required = false) String invoice_title_type,
-			@RequestParam(required = false) String credit_code, @RequestParam(required = false) String invoice_title, @RequestParam(required = false) String regionname)
-			throws Exception {
+			@RequestBody PrepayReqVO prepayReq) throws Exception {
 		WechatPayInfo result;
 		try {
-			result = wuyeService.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit,
-					couponNum, couponId, mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code,
-					invoice_title,regionname);
+			PrepayRequestDTO dto = new PrepayRequestDTO();
+			BeanUtils.copyProperties(prepayReq, dto);
+			dto.setUser(user);
+			result = wuyeService.getOtherPrePayInfo(dto);
 		} catch (Exception e) {
-
-			e.printStackTrace();
 			return BaseResult.fail(e.getMessage());
 		}
 		return BaseResult.successResult(result);
@@ -383,14 +383,13 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/noticePayed", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<String> noticePayed(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String billId, 
 			@RequestParam(required = false) String tradeWaterId, 
 			@RequestParam(required = false) String feePrice, 
 			@RequestParam(required = false) String couponId,
 			@RequestParam(value ="bind_switch", required = false) String bindSwitch)
 			throws Exception {
 		
-		wuyeService.noticePayed(user, billId, tradeWaterId, couponId, feePrice, bindSwitch);
+		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch);
 		return BaseResult.successResult("支付成功。");
 	}
 
@@ -712,5 +711,19 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(hexieHouse);
 	}
 	
+	/**
+	 * 获取用户绑定的银行卡信息
+	 * @param user
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/bankCard", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<BankCard>> bankCard(@ModelAttribute(Constants.USER) User user) {
+		
+		List<BankCard> cardList = bankCardService.getByUserId(user.getId());
+		return BaseResult.successResult(cardList);
+	}
+	
+
 
 }
