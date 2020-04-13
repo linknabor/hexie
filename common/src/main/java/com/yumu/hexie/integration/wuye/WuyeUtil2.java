@@ -3,7 +3,6 @@ package com.yumu.hexie.integration.wuye;
 import java.lang.reflect.Field;
 import java.net.URI;
 
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
@@ -62,7 +63,6 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public BaseResult<WechatPayInfo> getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
 		User user = prepayRequestDTO.getUser();
@@ -94,7 +94,9 @@ public class WuyeUtil2 {
 			throw new BizValidateException("支付请求失败！ code : " + respEntity.getStatusCodeValue());
 		}
 		
-		HexieResponse<WechatPayInfo> hexieResponse = (HexieResponse<WechatPayInfo>) JacksonJsonUtil.jsonToBean(respEntity.getBody(), HexieResponse.class);
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>() {};
+		HexieResponse<WechatPayInfo> hexieResponse = objectMapper.readValue(respEntity.getBody(), typeReference);
 		if (!"00".equals(hexieResponse.getResult())) {
 			String errMsg = hexieResponse.getErrMsg();
 			throw new BizValidateException(errMsg);
@@ -103,14 +105,6 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static void main(String[] args) throws JSONException {
-		
-		String json = "{\"result\":\"00\",\"data\":{\"package\":\"prepay_id=wx1310573182393204d63847101932447500\",\"trade_water_id\":\"200413105730953545\",\"appid\":\"wx8c0072a9504288f3\",\"signtype\":\"RSA\",\"paysign\":\"PEznFYY/19D3srWMT5eyDHW+eYqitCHq7vopPBPrhVPDSC5L3bsu0WPF7tKsEXmQLJa2Z9/dJVV/I/3+KyaMpbna00uGcc9FtbzeLgzAEwYVqS9b8HL4Ara8VEp51bzXektq698t7pro86j+59oPf4ld3xz80f1jYRAqtUNWgn5BiACcrFWcvsv6iVmXPOVmDhp2R1gzKQF3vNG3YJka/w66uwqaPC5YUWNrHeZ+1NDZfrc44MRybF49QMEZgrWmnIgIrkc/j359t7FKKMTOZJs3HUFrvMflRGg0WoPl0sANTUPZoHXmULDmrWz7DYoOX5hc6x2TwLTD9r1/4dilbQ==\",\"noncestr\":\"30d041a860624eedac2fa8f1ea8ba24d\",\"timestamp\":\"1586746651\",\"user_pay_type\":\"\"}}";
-		HexieResponse<WechatPayInfo> hexieResponse = (HexieResponse<WechatPayInfo>) JacksonJsonUtil.jsonToBean(json, HexieResponse.class);
-		System.out.println(hexieResponse.getData());
 	}
 	
 	/**
