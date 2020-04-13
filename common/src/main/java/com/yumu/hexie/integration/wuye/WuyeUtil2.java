@@ -60,8 +60,7 @@ public class WuyeUtil2 {
 	private RestTemplate restTemplate;
 	
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
-	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do?user_id=%s&mng_cell_id=%s&start_date=%s&end_date=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
-			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
+	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do"; // 微信支付请求
 
 	/**
 	 * 专业版缴费

@@ -46,6 +46,9 @@ public class PrepayRequestDTO implements Serializable {
 	private String quickToken;	//快捷支付token
 	private String veriCode;	//手机验证码
 	
+	private String remember;	//是否记住持卡人信息，0否1是
+	private String selAcctNo;	//选卡支付标记，选中的记录卡号
+	
 	public String getCouponUnit() {
 		return couponUnit;
 	}
@@ -201,6 +204,18 @@ public class PrepayRequestDTO implements Serializable {
 	}
 	public void setVeriCode(String veriCode) {
 		this.veriCode = veriCode;
+	}
+	public String getRemember() {
+		return remember;
+	}
+	public void setRemember(String remember) {
+		this.remember = remember;
+	}
+	public String getSelAcctNo() {
+		return selAcctNo;
+	}
+	public void setSelAcctNo(String selAcctNo) {
+		this.selAcctNo = selAcctNo;
 	}
 	
 	
