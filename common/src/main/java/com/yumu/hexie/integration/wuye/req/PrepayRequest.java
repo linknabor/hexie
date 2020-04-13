@@ -1,13 +1,11 @@
 package com.yumu.hexie.integration.wuye.req;
 
-import java.io.Serializable;
-
 import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 
-public class PrepayRequest implements Serializable {
+public class PrepayRequest extends WuyeRequest {
 
 	/**
 	 * 

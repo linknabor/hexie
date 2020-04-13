@@ -1,5 +1,6 @@
 package com.yumu.hexie.integration.wuye;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
 
@@ -19,12 +20,15 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
+import com.yumu.hexie.integration.wuye.req.WuyeRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieResponse;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -56,6 +60,8 @@ public class WuyeUtil2 {
 	private RestTemplate restTemplate;
 	
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
+	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do?user_id=%s&mng_cell_id=%s&start_date=%s&end_date=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
+			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 
 	/**
 	 * 专业版缴费
@@ -78,33 +84,80 @@ public class WuyeUtil2 {
 		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
 		prepayRequest.setFromSys(fromSys);
 		
+		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>(){};
+		HexieResponse<WechatPayInfo> hexieResponse = wuyeRest(requestUrl, prepayRequest, typeReference);
+		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+
+	/**
+	 * 标准版缴费
+	 * @param prepayRequestDTO
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<WechatPayInfo> getOtherPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
+		
+		User user = prepayRequestDTO.getUser();
+		String appid = user.getAppId();
+		String fromSys = wechatPropConfig.getSysName();
+		if (!StringUtils.isEmpty(appid)) {
+			//TODO 下面静态引用以后改注入
+			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
+		}
+		String requestUrl = getRequestUrl(user, prepayRequestDTO.getRegionName());
+		requestUrl += OTHER_WX_PAY_URL;
+		
+		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
+		prepayRequest.setFromSys(fromSys);
+		
+		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>(){};
+		HexieResponse<WechatPayInfo> hexieResponse = wuyeRest(requestUrl, prepayRequest, typeReference);
+		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 物业模块的rest请求公共函数
+	 * @param <V>
+	 * @param requestUrl	请求链接
+	 * @param jsonObject	请继承wuyeRequest
+	 * @param typeReference	HexieResponse类型的子类
+	 * @return
+	 * @throws IOException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 */
+	private <T extends WuyeRequest, V> HexieResponse<V> wuyeRest(String requestUrl, T jsonObject, TypeReference<HexieResponse<V>> typeReference)
+			throws IOException, JsonParseException, JsonMappingException {
+		
 		HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
         LinkedMultiValueMap<String, String>paramsMap = new LinkedMultiValueMap<>();
-        convertObject2Map(prepayRequest, paramsMap);
+        convertObject2Map(jsonObject, paramsMap);
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(requestUrl);
 		URI uri = builder.queryParams(paramsMap).build().encode().toUri();
         HttpEntity<Object> httpEntity = new HttpEntity<>(null, headers);
         
-        logger.info("getPrePayInfo request : " + requestUrl + ", param : " + paramsMap);
+        logger.info("requestUrl : " + requestUrl + ", param : " + paramsMap);
         ResponseEntity<String> respEntity = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
-        logger.info("getPrePayInfo response : " + respEntity);
+        logger.info("response : " + respEntity);
         
 		if (!HttpStatus.OK.equals(respEntity.getStatusCode())) {
 			throw new BizValidateException("支付请求失败！ code : " + respEntity.getStatusCodeValue());
 		}
 		
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>() {};
-		HexieResponse<WechatPayInfo> hexieResponse = objectMapper.readValue(respEntity.getBody(), typeReference);
+		HexieResponse<V> hexieResponse = objectMapper.readValue(respEntity.getBody(), typeReference);
 		if (!"00".equals(hexieResponse.getResult())) {
 			String errMsg = hexieResponse.getErrMsg();
 			throw new BizValidateException(errMsg);
 		}
-		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
-		baseResult.setData(hexieResponse.getData());
-		return baseResult;
-		
+		return hexieResponse;
 	}
 	
 	/**

@@ -156,7 +156,7 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		String targetUrl = getRegionUrl(dto.getRegionName());
 		dto.setRegionUrl(targetUrl);
-		return WuyeUtil.getOtherPrePayInfo(dto).getData();
+		return wuyeUtil2.getOtherPrePayInfo(dto).getData();
 	}
 
 	/**
