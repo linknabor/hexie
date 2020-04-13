@@ -730,13 +730,15 @@ public class WuyeController extends BaseController {
 	 * 获取用户绑定的银行卡信息
 	 * @param user
 	 */
+	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/unionPayCallBack", method = {RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
-	public String unionPayCallBack(HttpServletRequest request, @RequestBody Map<String, String> map) {
+	public String unionPayCallBack(HttpServletRequest request, @RequestBody(required = false) Map<String, String> map) {
 		
+		Map requestMap = request.getParameterMap();
 		log.info("request : " + request.getParameterMap());
-		log.info("map:" + map);
-		return map.toString();
+		log.info("bodyMap:" + map);
+		return "bodyMap:" + map.toString() + "\r\n" + "requestMap : " + requestMap;
 	}
 	
 
