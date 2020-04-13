@@ -154,7 +154,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
-		if (!StringUtils.isEmpty(prepayRequestDTO.getAcctNo()) || !StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//银行卡支付
+		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
 				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");
@@ -192,7 +192,8 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
-		if (!StringUtils.isEmpty(prepayRequestDTO.getAcctNo()) || !StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//银行卡支付
+		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
+			
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
 				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");

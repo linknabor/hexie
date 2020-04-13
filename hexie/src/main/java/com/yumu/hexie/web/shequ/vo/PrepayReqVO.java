@@ -44,6 +44,8 @@ public class PrepayReqVO implements Serializable {
 	@JsonProperty("regionname")
 	private String regionName;
 	
+	private String payType;	//支付类型，0微信支付，1银行卡支付
+	
 	//银行卡支付参数
 	private String customerName;	//持卡人姓名
 	private String certType;	//证件类型
@@ -212,6 +214,12 @@ public class PrepayReqVO implements Serializable {
 	}
 	public void setSelAcctNo(String selAcctNo) {
 		this.selAcctNo = selAcctNo;
+	}
+	public String getPayType() {
+		return payType;
+	}
+	public void setPayType(String payType) {
+		this.payType = payType;
 	}
 	
 	
