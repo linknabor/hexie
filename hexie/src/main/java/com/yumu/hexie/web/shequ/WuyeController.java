@@ -62,6 +62,7 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
+import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
 @Controller(value = "wuyeController")
@@ -722,10 +723,16 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/bankCard", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<BankCard>> bankCard(@ModelAttribute(Constants.USER) User user) {
+	public BaseResult<List<BankCardVO>> bankCard(@ModelAttribute(Constants.USER) User user) {
 		
 		List<BankCard> cardList = bankCardService.getByUserId(user.getId());
-		return BaseResult.successResult(cardList);
+		List<BankCardVO> voList = new ArrayList<>(cardList.size());
+		for (BankCard bankCard : cardList) {
+			BankCardVO vo = new BankCardVO();
+			BeanUtils.copyProperties(bankCard, vo);
+			voList.add(vo);
+		}
+		return BaseResult.successResult(voList);
 	}
 	
 	/**

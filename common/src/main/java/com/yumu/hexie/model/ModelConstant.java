@@ -349,4 +349,7 @@ public class ModelConstant {
 	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
 	
 	public static final String KEY_MAINTANANCE_SWITCH = "maintananceSwitch";
+
+	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
+	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
 }		
