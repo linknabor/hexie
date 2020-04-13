@@ -359,15 +359,14 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<WechatPayInfo> getOtherPrePayInfo(@ModelAttribute(Constants.USER) User user,
 			@RequestBody PrepayReqVO prepayReq) throws Exception {
-		WechatPayInfo result;
-		try {
-			PrepayRequestDTO dto = new PrepayRequestDTO();
-			BeanUtils.copyProperties(prepayReq, dto);
-			dto.setUser(user);
-			result = wuyeService.getOtherPrePayInfo(dto);
-		} catch (Exception e) {
-			return BaseResult.fail(e.getMessage());
-		}
+		
+		WechatPayInfo result = new WechatPayInfo();
+		log.info("other prepayReqVo : " + prepayReq);
+		PrepayRequestDTO dto = new PrepayRequestDTO();
+		BeanUtils.copyProperties(prepayReq, dto);
+		dto.setUser(user);
+		log.info("other prepayRequestDTO : " + dto);
+		result = wuyeService.getOtherPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 
