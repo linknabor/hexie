@@ -22,6 +22,7 @@ public class PrepayRequest implements Serializable {
 		BeanUtils.copyProperties(prepayRequestDTO, this);
 		this.wuyeId = prepayRequestDTO.getUser().getWuyeId();
 		this.mobile = prepayRequestDTO.getUser().getTel();
+		this.openid = prepayRequestDTO.getUser().getOpenid();
 	}
 	
 	//公用参数
@@ -42,6 +43,7 @@ public class PrepayRequest implements Serializable {
 	private String feeMianBill;
 	@JsonProperty("fee_mianAmt")
 	private String feeMianAmt;
+	private String openid;
 	
 	//开票参数
 	private String mobile;
@@ -231,6 +233,12 @@ public class PrepayRequest implements Serializable {
 	}
 	public void setVeriCode(String veriCode) {
 		this.veriCode = veriCode;
+	}
+	public String getOpenid() {
+		return openid;
+	}
+	public void setOpenid(String openid) {
+		this.openid = openid;
 	}
 	
 	

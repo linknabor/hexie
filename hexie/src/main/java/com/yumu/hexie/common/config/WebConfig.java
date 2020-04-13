@@ -60,8 +60,6 @@ public class WebConfig extends WebMvcConfigurationSupport {
         		} else if(MediaType.APPLICATION_FORM_URLENCODED.equals(mediaType)){
       				return true;
         		} else if(MediaType.APPLICATION_JSON.equals(mediaType)){
-        			return true;
-        		} else if (MediaType.TEXT_PLAIN.equals(mediaType)) {
       				return true;
         		} else {
         			return false;
@@ -124,4 +122,5 @@ public class WebConfig extends WebMvcConfigurationSupport {
     public ObjectMapper mapper() {
         return new ObjectMapper();
     }
+    
 }
