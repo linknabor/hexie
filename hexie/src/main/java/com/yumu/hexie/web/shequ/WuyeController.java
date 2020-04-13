@@ -1,7 +1,9 @@
 package com.yumu.hexie.web.shequ;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -730,15 +732,29 @@ public class WuyeController extends BaseController {
 	 * 获取用户绑定的银行卡信息
 	 * @param user
 	 */
-	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/unionPayCallBack", method = {RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
 	public String unionPayCallBack(HttpServletRequest request, @RequestBody(required = false) Map<String, String> map) {
 		
-		Map requestMap = request.getParameterMap();
-		log.info("request : " + request.getParameterMap());
+		Map<String, String[]> requestMap = request.getParameterMap();
+		Iterator<Map.Entry<String, String[]>> it = requestMap.entrySet().iterator();
+		StringBuffer buffer = new StringBuffer();
+		while (it.hasNext()) {
+			Map.Entry<String, String[]> entry = it.next();
+			String key = entry.getKey();
+			String[]value = entry.getValue();
+			List<String> list = Arrays.asList(value);
+			StringBuffer bf = new StringBuffer();
+			bf.append("value : ");
+			for (String string : list) {
+				bf.append(string).append(",");
+			}
+			log.info("key : " + key + ", " + bf);
+			buffer.append("key : " + key + ", " + bf).append("\r\n");
+		}
 		log.info("bodyMap:" + map);
-		return "bodyMap:" + map.toString() + "\r\n" + "requestMap : " + requestMap;
+		
+		return "bodyMap:" + map + "\r\n" + "requestMap : " + buffer;
 	}
 	
 
