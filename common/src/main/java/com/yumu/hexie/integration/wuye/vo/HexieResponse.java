@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class BaseResponse implements Serializable {
+public class HexieResponse<T> implements Serializable {
 
 	/**
 	 * 
@@ -14,6 +14,7 @@ public class BaseResponse implements Serializable {
 	private String result;
 	@JsonProperty("err_msg")
 	private String errMsg;
+	private T data;
 	
 	public String getResult() {
 		return result;
@@ -27,6 +28,12 @@ public class BaseResponse implements Serializable {
 	public void setErrMsg(String errMsg) {
 		this.errMsg = errMsg;
 	}
-
+	public T getData() {
+		return data;
+	}
+	public void setData(T data) {
+		this.data = data;
+	}
+	
 	
 }

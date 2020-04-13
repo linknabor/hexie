@@ -1,8 +1,10 @@
 package com.yumu.hexie.integration.wuye.vo;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class WechatPayInfo extends BaseResponse {
+public class WechatPayInfo implements Serializable {
 
 	private static final long serialVersionUID = 2567954737062142484L;
 	private String appid;
@@ -81,6 +83,13 @@ public class WechatPayInfo extends BaseResponse {
 	}
 	public void setPayurl(String payurl) {
 		this.payurl = payurl;
+	}
+	@Override
+	public String toString() {
+		return "WechatPayInfo [appid=" + appid + ", trade_water_id=" + trade_water_id + ", timestamp=" + timestamp
+				+ ", noncestr=" + noncestr + ", packageValue=" + packageValue + ", signtype=" + signtype + ", paysign="
+				+ paysign + ", user_pay_type=" + user_pay_type + ", packageId=" + packageId + ", payurl=" + payurl
+				+ "]";
 	}
 
 	
