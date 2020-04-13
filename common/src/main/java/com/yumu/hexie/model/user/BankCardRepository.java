@@ -10,4 +10,8 @@ public interface BankCardRepository extends JpaRepository<BankCard, Long> {
 
 	public List<BankCard> findByUserId(long userId);
 	
+	public BankCard findByAcctNo(String acctNo);	//卡号具有唯一性
+	
+	public BankCard findByAcctNoAndQuickTokenIsNull(String acctNo);	//卡号具有唯一性
+	
 }

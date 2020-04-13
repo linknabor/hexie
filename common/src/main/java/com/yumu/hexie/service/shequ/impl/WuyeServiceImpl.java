@@ -32,6 +32,8 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.region.RegionUrl;
+import com.yumu.hexie.model.user.BankCard;
+import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -76,6 +78,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private WuyeUtil2 wuyeUtil2;
+	
+	@Autowired
+	private BankCardRepository bankCardRepository;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -146,17 +151,78 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
+	@Transactional
 	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
+		if (!StringUtils.isEmpty(prepayRequestDTO.getAcctNo()) || !StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//银行卡支付
+			String remerber = prepayRequestDTO.getRemember();
+			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
+				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");
+				Assert.hasText(prepayRequestDTO.getAcctNo(), "卡号不能为空。");
+				Assert.hasText(prepayRequestDTO.getCertId(), "证件号不能为空。");
+				Assert.hasText(prepayRequestDTO.getPhoneNo(), "银行预留手机号不能为空。");
+				
+				BankCard bankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getAcctNo());
+				if (bankCard == null) {
+					bankCard = new BankCard();
+				}
+				bankCard.setAcctName(prepayRequestDTO.getCustomerName());
+				bankCard.setAcctNo(prepayRequestDTO.getAcctNo());
+				bankCard.setBankCode("");	//TODO 
+				bankCard.setBankName("");	//TODO
+				bankCard.setBranchName("");	//TODO
+				bankCard.setBranchNo("");	//TODO
+				bankCard.setPhoneNo(prepayRequestDTO.getPhoneNo());
+				bankCard.setUserId(prepayRequestDTO.getUser().getId());
+				bankCard.setUserName(prepayRequestDTO.getUser().getName());
+				//支付成功回调的时候还要保存quickToken
+				bankCardRepository.save(bankCard);
+			} 
+			if (StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
+				
+				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getSelAcctNo());
+				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
+			}
+		}
+
 		return wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
 	}
 	
 	@Override
-	public WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception {
+	@Transactional
+	public WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
-		String targetUrl = getRegionUrl(dto.getRegionName());
-		dto.setRegionUrl(targetUrl);
-		return wuyeUtil2.getOtherPrePayInfo(dto).getData();
+		if (!StringUtils.isEmpty(prepayRequestDTO.getAcctNo()) || !StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//银行卡支付
+			String remerber = prepayRequestDTO.getRemember();
+			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
+				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");
+				Assert.hasText(prepayRequestDTO.getAcctNo(), "卡号不能为空。");
+				Assert.hasText(prepayRequestDTO.getCertId(), "证件号不能为空。");
+				Assert.hasText(prepayRequestDTO.getPhoneNo(), "银行预留手机号不能为空。");
+				
+				BankCard bankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getAcctNo());
+				if (bankCard == null) {
+					bankCard = new BankCard();
+				}
+				bankCard.setAcctName(prepayRequestDTO.getCustomerName());
+				bankCard.setAcctNo(prepayRequestDTO.getAcctNo());
+				bankCard.setBankCode("");	//TODO 
+				bankCard.setBankName("");	//TODO
+				bankCard.setBranchName("");	//TODO
+				bankCard.setBranchNo("");	//TODO
+				bankCard.setPhoneNo(prepayRequestDTO.getPhoneNo());
+				bankCard.setUserId(prepayRequestDTO.getUser().getId());
+				bankCard.setUserName(prepayRequestDTO.getUser().getName());
+				//支付成功回调的时候还要保存quickToken
+				bankCardRepository.save(bankCard);
+			} 
+			if (StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
+				
+				BankCard selBankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getSelAcctNo());
+				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
+			}
+		}
+		return wuyeUtil2.getOtherPrePayInfo(prepayRequestDTO).getData();
 	}
 
 	/**

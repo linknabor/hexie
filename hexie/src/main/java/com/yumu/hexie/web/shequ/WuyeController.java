@@ -3,8 +3,10 @@ package com.yumu.hexie.web.shequ;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -722,6 +724,19 @@ public class WuyeController extends BaseController {
 		
 		List<BankCard> cardList = bankCardService.getByUserId(user.getId());
 		return BaseResult.successResult(cardList);
+	}
+	
+	/**
+	 * 获取用户绑定的银行卡信息
+	 * @param user
+	 */
+	@RequestMapping(value = "/unionPayCallBack", method = {RequestMethod.GET, RequestMethod.POST})
+	@ResponseBody
+	public String unionPayCallBack(HttpServletRequest request, @RequestBody Map<String, String> map) {
+		
+		log.info("request : " + request.getParameterMap());
+		log.info("map:" + map);
+		return map.toString();
 	}
 	
 
