@@ -16,19 +16,19 @@ import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CacheableService;
 import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.user.UserNoticeService;
-import com.yumu.hexie.service.user.UserService;
 
 @Service("customRgroupService")
 public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private static final Logger    log = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
 
     @Inject
-    private UserService         userService;
+    private UserRepository         userRepository;
     @Inject
     private CacheableService       cacheableService;
     @Inject
@@ -76,7 +76,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
             productService.saledCount(item.getProductId(), item.getCount());
         }
 
-        User u = userService.getById(so.getUserId());
+        User u = userRepository.findById(so.getUserId());
         RgroupRule rule = findSalePlan(so.getGroupRuleId());
 
         log.error("postPaySuccess:" + rule.getId());
@@ -102,7 +102,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
 
     @Override
     public void postOrderConfirm(ServiceOrder o) {
-        User u = userService.getById(o.getUserId());
+        User u = userRepository.findById(o.getUserId());
         RgroupRule rule = cacheableService.findRgroupRule(o.getGroupRuleId());
         userNoticeService.groupSuccess(u, u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
             rule.getProductName(), rule.getName());

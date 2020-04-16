@@ -65,7 +65,7 @@ public class PrepayRequest extends WuyeRequest {
 	private String startDate;
 	@JsonProperty("end_date")
 	private String endDate;
-	
+	@JsonProperty("pay_type")
 	private String payType;	//0微信支付，1银行卡支付
 	
 	//银行卡支付参数

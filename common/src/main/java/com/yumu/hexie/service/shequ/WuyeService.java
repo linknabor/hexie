@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.shequ;
 
+import java.util.List;
+
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -12,6 +14,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
@@ -241,6 +244,21 @@ public interface WuyeService {
 	 * @return
 	 */
 	HexieHouse getHouseByVerNo(User user, String verNo);
+
+	/**
+	 * 从种子添加红包
+	 * @param user
+	 * @param list
+	 */
+	void addCouponsFromSeed(User user, List<CouponCombination> list);
+
+	/**
+	 * 发送物业缴费红包的模板消息
+	 * @param user
+	 * @param tradeWaterId
+	 * @param feePrice
+	 */
+	void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice);
 	
 	
 }

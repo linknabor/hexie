@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -14,6 +16,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
@@ -31,6 +34,8 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
+import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.BankCardRepository;
@@ -157,6 +162,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
+				
 				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");
 				Assert.hasText(prepayRequestDTO.getAcctNo(), "卡号不能为空。");
 				Assert.hasText(prepayRequestDTO.getCertId(), "证件号不能为空。");
@@ -179,13 +185,22 @@ public class WuyeServiceImpl implements WuyeService {
 				bankCardRepository.save(bankCard);
 			} 
 			if (StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
-				
 				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getSelAcctNo());
 				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
 			}
 		}
-
-		return wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
+		//TODO 从卡库校验是否是贵州银行的卡
+		Coupon coupon = couponService.findOne(Long.valueOf(prepayRequestDTO.getCouponId()));
+		if (!couponService.isAvaible(prepayRequestDTO.getCouponUnit(), coupon)) {
+			throw new BizValidateException("优惠券不可用，id： " + coupon.getId());
+		}
+		WechatPayInfo wechatPayInfo = wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
+		//校验优惠券是否可用。
+		if (!StringUtils.isEmpty(prepayRequestDTO.getCouponId())) {	//锁优惠券
+//			couponService.lockWuyeCoupon(wechatPayInfo.getTrade_water_id(), coupon);	//TODO 暂时不锁
+			couponService.updateWuyeCouponOrderId(Long.valueOf(wechatPayInfo.getTrade_water_id()), coupon.getId());
+		}
+		return wechatPayInfo;
 	}
 	
 	@Override
@@ -541,6 +556,30 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
 	
+	}
+	
+	@Async
+	@Override
+	public void addCouponsFromSeed(User user, List<CouponCombination> list) {
+
+		try {
+
+			for (int i = 0; i < list.size(); i++) {
+				couponService.addCouponFromSeed(list.get(i).getSeedStr(), user);
+			}
+
+		} catch (Exception e) {
+
+			log.error("add Coupons for wuye Pay : " + e.getMessage());
+		}
+
+	}
+
+	@Async
+	@Override
+	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
+
+		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
 	}
 	
 }
