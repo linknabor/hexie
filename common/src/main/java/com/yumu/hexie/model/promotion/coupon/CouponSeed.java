@@ -58,6 +58,8 @@ public class CouponSeed extends BaseModel  {
 	private Float usedAmount = 0f;
 	private Integer usedCount = 0;
 	/*****汇总信息******/
+	
+	private String appid;	//公众号类别
 
 	@Transient
 	public String getState(){
@@ -254,6 +256,12 @@ public class CouponSeed extends BaseModel  {
 	}
 	public void setSeedImg(String seedImg) {
 		this.seedImg = seedImg;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
 	}
 	
 }
