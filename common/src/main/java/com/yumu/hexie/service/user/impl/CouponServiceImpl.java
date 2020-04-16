@@ -87,7 +87,7 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	@Async
-	private void updateSeedForRuleUpdate(long seedId){
+	public void updateSeedForRuleUpdate(long seedId){
 		CouponSeed oriSeed = couponSeedRepository.findOne(seedId);
 		oriSeed.getSeedStr();
 		oriSeed.updateTotal(couponRuleRepository.findBySeedId(seedId));
@@ -95,12 +95,12 @@ public class CouponServiceImpl implements CouponService {
 	}
 
 	@Async
-	private void updateSeedAndRuleForCouponReceive(CouponSeed seed,CouponRule rule,Coupon coupon){
+	public void updateSeedAndRuleForCouponReceive(CouponSeed seed,CouponRule rule,Coupon coupon){
 		rule.addReceived();
 		saveRule(rule);
 	}
 	@Async
-	private void updateSeedAndRuleForCouponUse(Coupon coupon){
+	public void updateSeedAndRuleForCouponUse(Coupon coupon){
 		CouponRule rule = couponRuleRepository.findOne(coupon.getRuleId());
 		rule.addUsed();
 		saveRule(rule);
@@ -812,11 +812,38 @@ public class CouponServiceImpl implements CouponService {
 	
 	}
 	
-	
-	public static void main(String[] args) {
+	/**
+	 * 锁定物业优惠券
+	 * @param orderId传tradeWaterId
+	 * @param coupon
+	 */
+	@Override
+	public void lockWuyeCoupon(String orderId, Coupon coupon) {
 		
-		System.out.println(new Long(0) == 0);
+		log.warn("lock红包["+orderId+"]Coupon["+coupon.getId()+"]");
+		log.info("coupon : " + coupon);
+		if(!isAvaible(String.valueOf(coupon.getAmount()), coupon)){
+			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON, coupon.getId(),"该现金券不可用于本订单");
+		}
+		couponRepository.lockWuyeCoupon(Long.valueOf(orderId), ModelConstant.COUPON_STATUS_LOCKED, coupon.getId(), ModelConstant.COUPON_STATUS_AVAILABLE);
 		
 	}
+
+	@Override
+	public void updateWuyeCouponOrderId(long orderId, long couponId) {
+		couponRepository.updateWuyeCouponOrderId(orderId, couponId);
+	}
+
+	/**
+	 * 根据orderId消费优惠券
+	 */
+	@Override
+	public void consume(long orderId) {
+		
+		Coupon coupon = couponRepository.findByOrderId(orderId);
+		couponRepository.consumeWuyeCoupon(ModelConstant.COUPON_STATUS_USED, coupon.getId(), orderId, ModelConstant.COUPON_STATUS_AVAILABLE);
+	}
+	
+	
 	
 }

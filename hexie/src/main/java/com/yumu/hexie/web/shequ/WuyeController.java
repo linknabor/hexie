@@ -45,7 +45,6 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
-import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.BankCard;
@@ -450,13 +449,13 @@ public class WuyeController extends BaseController {
 	}
 
 	@Async
-	private void sendMsg(User user) {
+	public void sendMsg(User user) {
 		String msg = "您好，欢迎加入合协社区。您已获得价值10元红包一份。感谢您对合协社区的支持。";
 		smsService.sendMsg(user, user.getTel(), msg, 11, 3);
 	}
 
 	@Async
-	private void sendRegTemplateMsg(User user) {
+	public void sendRegTemplateMsg(User user) {
 		TemplateMsgService.sendRegisterSuccessMsg(user, systemConfigService.queryWXAToken(user.getAppId()));
 	}
 
@@ -482,7 +481,7 @@ public class WuyeController extends BaseController {
 
 	/**
 	 * 为物业缴费成功的用户发放红包
-	 * 
+	 * TODO 这个函数前端目前没有调用了
 	 * @param session
 	 * @return
 	 */
@@ -496,83 +495,14 @@ public class WuyeController extends BaseController {
 		int couponCombination = 1;
 		List<CouponCombination> list = couponService.findCouponCombination(couponCombination);
 
-		addCouponsFromSeed(user, list);
+		wuyeService.addCouponsFromSeed(user, list);
 
-		sendPayTemplateMsg(user, tradeWaterId, feePrice);
+		wuyeService.sendPayTemplateMsg(user, tradeWaterId, feePrice);
 
 		return BaseResult.successResult("send succeeded !");
 	}
 
-	@SuppressWarnings({ "rawtypes" })
-	@RequestMapping(value = "updateCouponStatus", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult updateCouponStatus(HttpSession session) {
-
-		if (session == null) {
-			return BaseResult.fail("no session info ...");
-		}
-
-		User user = (User) session.getAttribute(Constants.USER);
-		if (user == null) {
-			return BaseResult.fail("user is null ...");
-		}
-		List<Coupon> list = couponService.findAvaibleCouponForWuye(user.getId());
-
-		if (list.size() > 0) {
-			String result = wuyeService.queryCouponIsUsed(user);
-			for (int i = 0; i < list.size(); i++) {
-				Coupon coupon = list.get(i);
-				if ((coupon.getStatus() == ModelConstant.COUPON_STATUS_AVAILABLE)) {
-
-					if (!StringUtil.isEmpty(result)) {
-
-						if ("99".equals(result)) {
-							return BaseResult.fail("网络异常，请刷新后重试");
-						}
-
-						String[] couponArr = result.split(",");
-
-						for (int j = 0; j < couponArr.length; j++) {
-							String coupon_id = couponArr[j];
-							try {
-								couponService.comsume("20", Integer.parseInt(coupon_id)); // 这里写死20
-							} catch (Exception e) {
-								log.error("couponId : " + coupon_id + ", " + e.getMessage());
-							}
-						}
-
-					}
-
-				}
-
-			}
-		}
-
-		return BaseResult.successResult("succeeded");
-
-	}
-
-	@Async
-	private void addCouponsFromSeed(User user, List<CouponCombination> list) {
-
-		try {
-
-			for (int i = 0; i < list.size(); i++) {
-				couponService.addCouponFromSeed(list.get(i).getSeedStr(), user);
-			}
-
-		} catch (Exception e) {
-
-			log.error("add Coupons for wuye Pay : " + e.getMessage());
-		}
-
-	}
-
-	@Async
-	private void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
-
-		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
-	}
+	
 
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)

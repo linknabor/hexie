@@ -1,22 +1,20 @@
 package com.yumu.hexie.common.util;
 
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
-
 public class AppUtil {
 
 	 /**
      * 是否为主公众号的appId
+     * 20200416 合协 也要授权给第三方了，没有主公众号了。方反全部返回false
      * @param appId
      * @return
      */
     public static boolean isMainApp(String appId) {
-    	
-    	boolean flag = false;
-    	String mainAppId = ConstantWeChat.APPID;
-    	if (mainAppId.equals(appId)) {
-			flag = true;
-		}
-    	return flag;
+//    	boolean flag = false;
+//    	String mainAppId = ConstantWeChat.APPID;
+//    	if (mainAppId.equals(appId)) {
+//			flag = true;
+//		}
+    	return false;
     }
     
     /**

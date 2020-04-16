@@ -126,7 +126,7 @@ public class GotongServiceImpl implements GotongService {
     	if (!StringUtils.isEmpty(cardServiceApps)) {
     		if (cardServiceApps.indexOf(user.getAppId()) > -1) {
     			Article article = new Article();
-    			article.setTitle("欢迎加入合协社区！");
+    			article.setTitle("欢迎您的加入！");
     			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
     			article.setPicurl(SUBSCRIBE_IMG);
     			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
@@ -146,6 +146,27 @@ public class GotongServiceImpl implements GotongService {
 		return CustomService.sendCustomerMessage(msg, accessToken);
          
 	}
+    
+    /**
+     * 注册红包
+     */
+    @Override
+	public void sendRegiserMsg(User user) {
+
+         Article article = new Article();
+         article.setTitle("欢迎您的加入！");
+         article.setDescription("您已获得注册红包，点击查看。");
+         article.setPicurl(SUBSCRIBE_IMG);
+         article.setUrl(SUBSCRIBE_DETAIL);
+         News news = new News(new ArrayList<Article>());
+         news.getArticles().add(article);
+         NewsMessage msg = new NewsMessage(news);
+         msg.setTouser(user.getOpenid());
+         msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+         CustomService.sendCustomerMessage(msg, accessToken);
+	}
+    
 
     /** 
      * @param opId

@@ -23,7 +23,6 @@ import com.yumu.hexie.service.batch.BatchService;
 import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
-import com.yumu.hexie.service.user.UserService;
 
 @Service
 public class BatchServiceImpl implements BatchService {
@@ -31,13 +30,10 @@ public class BatchServiceImpl implements BatchService {
 	private static Logger logger = LoggerFactory.getLogger(BatchServiceImpl.class);
 
 	@Autowired
-	UserService userService;
+	private WuyeService wuyeService;
 	
 	@Autowired
-	WuyeService wuyeService;
-	
-	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
 	
 	@Autowired
 	private WechatCardQueueTask wechatCardQueueTask;
@@ -62,12 +58,12 @@ public class BatchServiceImpl implements BatchService {
 
 	@Override
 	public void updateUserShareCode() {
-		List<User> list = userService.getShareCodeIsNull();
+		List<User> list = userRepository.getShareCodeIsNull();
 		for (User user : list) {
 			try {
 				String shareCode = DigestUtils.md5Hex("UID[" + user.getId() + "]");
 				user.setShareCode(shareCode);
-				userService.save(user);
+				userRepository.save(user);
 			} catch (Exception e) {
 				logger.error("user保存失败：" + user.getId());
 			}
@@ -77,14 +73,14 @@ public class BatchServiceImpl implements BatchService {
 
 	@Override
 	public void updateRepeatUserShareCode() {
-		List<String> repeatUserList = userService.getRepeatShareCodeUser();
+		List<String> repeatUserList = userRepository.getRepeatShareCodeUser();
 		for (String string : repeatUserList) {
-			List<User> uList = userService.getUserByShareCode(string);
+			List<User> uList = userRepository.getUserByShareCode(string);
 			for (User user2 : uList) {
 				try {
 					String shareCode = DigestUtils.md5Hex("UID[" + user2.getId() + "]");
 					user2.setShareCode(shareCode);
-					userService.save(user2);
+					userRepository.save(user2);
 				} catch (Exception e) {
 					logger.error("user保存失败：" + user2.getId());
 				}
@@ -101,7 +97,7 @@ public class BatchServiceImpl implements BatchService {
 	@Override
 	public void fixBindHouse(String userId, String tradeWaterId) {
 
-		User user = userService.getById(Long.valueOf(userId));
+		User user = userRepository.findById(Long.valueOf(userId));
 		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
 	}
 
@@ -138,7 +134,7 @@ public class BatchServiceImpl implements BatchService {
 					if (!StringUtils.isEmpty(hexieHouse.getOffice_tel())) {
 						user.setOfficeTel(hexieHouse.getOffice_tel());
 					}
-					userService.save(user);
+					userRepository.save(user);
 					
 				}
 			}
@@ -177,7 +173,7 @@ public class BatchServiceImpl implements BatchService {
 					if (!StringUtils.isEmpty(hexieHouse.getOffice_tel())) {
 						user.setOfficeTel(hexieHouse.getOffice_tel());
 					}
-					userService.save(user);
+					userRepository.save(user);
 					
 				}
 			}
