@@ -186,19 +186,26 @@ public class WuyeServiceImpl implements WuyeService {
 			} 
 			if (StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
 				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getSelAcctNo());
+				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
+					throw new BizValidateException("");
+				}
 				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
 			}
 		}
 		//TODO 从卡库校验是否是贵州银行的卡
-		Coupon coupon = couponService.findOne(Long.valueOf(prepayRequestDTO.getCouponId()));
-		if (!couponService.isAvaible(prepayRequestDTO.getCouponUnit(), coupon)) {
-			throw new BizValidateException("优惠券不可用，id： " + coupon.getId());
+		String couponId = prepayRequestDTO.getCouponId();
+		if (!StringUtils.isEmpty(couponId)) {
+			Coupon coupon = couponService.findOne(Long.valueOf(couponId));
+			if (!couponService.isAvaible(prepayRequestDTO.getCouponUnit(), coupon)) {
+				throw new BizValidateException("优惠券不可用，id： " + coupon.getId());
+			}
 		}
+		
 		WechatPayInfo wechatPayInfo = wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
 		//校验优惠券是否可用。
-		if (!StringUtils.isEmpty(prepayRequestDTO.getCouponId())) {	//锁优惠券
+		if (!StringUtils.isEmpty(couponId)) {	//锁优惠券
 //			couponService.lockWuyeCoupon(wechatPayInfo.getTrade_water_id(), coupon);	//TODO 暂时不锁
-			couponService.updateWuyeCouponOrderId(Long.valueOf(wechatPayInfo.getTrade_water_id()), coupon.getId());
+			couponService.updateWuyeCouponOrderId(Long.valueOf(wechatPayInfo.getTrade_water_id()), Long.valueOf(couponId));
 		}
 		return wechatPayInfo;
 	}
