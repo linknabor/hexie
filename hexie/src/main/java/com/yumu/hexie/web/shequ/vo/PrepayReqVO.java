@@ -221,6 +221,17 @@ public class PrepayReqVO implements Serializable {
 	public void setPayType(String payType) {
 		this.payType = payType;
 	}
+	@Override
+	public String toString() {
+		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", houseId=" + houseId + ", startDate="
+				+ startDate + ", endDate=" + endDate + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
+				+ ", couponId=" + couponId + ", mianBill=" + mianBill + ", mianAmt=" + mianAmt + ", reduceAmt="
+				+ reduceAmt + ", feeMianBill=" + feeMianBill + ", feeMianAmt=" + feeMianAmt + ", invoiceTitleType="
+				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", regionName="
+				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
+				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
+				+ ", veriCode=" + veriCode + ", remerber=" + remerber + ", selAcctNo=" + selAcctNo + "]";
+	}
 	
 	
 }
