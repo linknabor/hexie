@@ -94,12 +94,11 @@ public class CouponServiceImpl implements CouponService {
 		couponSeedRepository.save(oriSeed);
 	}
 
-	@Async
 	public void updateSeedAndRuleForCouponReceive(CouponSeed seed,CouponRule rule,Coupon coupon){
 		rule.addReceived();
 		saveRule(rule);
 	}
-	@Async
+	
 	public void updateSeedAndRuleForCouponUse(Coupon coupon){
 		CouponRule rule = couponRuleRepository.findOne(coupon.getRuleId());
 		rule.addUsed();
