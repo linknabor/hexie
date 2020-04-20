@@ -700,11 +700,12 @@ public class WuyeController extends BaseController {
 	public String unionPayCallBack(HttpServletRequest request) throws Exception {
 		
 		String transAmt = request.getParameter("transAmt");
+		log.info("transAmt : " + transAmt);
 		String desc = request.getParameter("desc");
-		byte[]bytes = Base64Utils.decodeFromString(desc);
-		String decodedStr = new String(bytes, "utf-8");
-		String defaultStr = new String(bytes);
-		return "desc utf8 : " + decodedStr + ", desc default : " + defaultStr;
+		log.info("desc : " + desc);
+		byte[]utf8bytes = Base64Utils.decode(desc.getBytes());
+		String decodedStr = new String(utf8bytes, "utf-8");
+		return "desc utf8 : " + decodedStr;
 	}
 	
 
