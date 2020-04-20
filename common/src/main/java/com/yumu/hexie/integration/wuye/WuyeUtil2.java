@@ -26,10 +26,13 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.config.WechatPropConfig;
+import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
+import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
 import com.yumu.hexie.integration.wuye.vo.HexieResponse;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.region.RegionUrl;
@@ -61,6 +64,7 @@ public class WuyeUtil2 {
 	
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
 	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do"; // 微信支付请求
+	private static final String DISCOUNT_URL = "getBillPayDetailSDO.do";	//获取优惠明细
 
 	/**
 	 * 专业版缴费
@@ -115,6 +119,27 @@ public class WuyeUtil2 {
 		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>(){};
 		HexieResponse<WechatPayInfo> hexieResponse = wuyeRest(requestUrl, prepayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 获取优惠支付明细
+	 * @param prepayRequestDTO
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<DiscountDetail> getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
+		
+		User user = discountViewRequestDTO.getUser();
+		String requestUrl = getRequestUrl(user, discountViewRequestDTO.getRegionName());
+		requestUrl += DISCOUNT_URL;
+		
+		DiscountViewRequest discountViewRequest = new DiscountViewRequest(discountViewRequestDTO);
+		TypeReference<HexieResponse<DiscountDetail>> typeReference = new TypeReference<HexieResponse<DiscountDetail>>(){};
+		HexieResponse<DiscountDetail> hexieResponse = wuyeRest(requestUrl, discountViewRequest, typeReference);
+		BaseResult<DiscountDetail> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		

@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -9,6 +10,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
+import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -260,5 +262,10 @@ public interface WuyeService {
 	 */
 	void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice);
 	
-	
+	/**
+	 * 获取支付的优惠明细
+	 * @param prepayRequestDTO
+	 * @throws Exception 
+	 */
+	DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
 }

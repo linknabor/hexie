@@ -19,6 +19,7 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -27,6 +28,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
+import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -587,6 +589,14 @@ public class WuyeServiceImpl implements WuyeService {
 	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
 
 		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
+	}
+
+	@Override
+	public DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
+		
+		DiscountDetail discountDetail = wuyeUtil2.getDiscountDetail(discountViewRequestDTO).getData();
+		return discountDetail;
+	
 	}
 	
 }

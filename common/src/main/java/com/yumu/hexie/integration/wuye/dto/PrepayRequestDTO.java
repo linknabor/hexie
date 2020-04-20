@@ -12,18 +12,22 @@ public class PrepayRequestDTO implements Serializable {
 	private static final long serialVersionUID = 9222329098194603371L;
 
 	private User user;
-	//公用参数
+	//优惠减免
 	private String couponUnit;
 	private String couponNum;
 	private String couponId;
 	private String mianBill;
 	private String mianAmt;
-	private String reduceAmt;
 	private String feeMianBill;
 	private String feeMianAmt;
+	private String reduceAmt;
+	
+	//发票
 	private String invoiceTitle;
 	private String invoiceTitleType;
 	private String creditCode;
+	
+	//定位用
 	private String regionUrl;
 	private String regionName;
 	
