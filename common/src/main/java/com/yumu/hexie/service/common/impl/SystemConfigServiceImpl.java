@@ -296,12 +296,28 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	}
 	
 	/**
-	 * 物业首页社区生活板块是否开启。目前只有东湖是关闭
+	 * 当前公众号是否发放注册红包
 	 */
 	@Override
 	public boolean registerCouponServiceAvailabe (String appId){
 		
 		String appIds = getSysConfigByKey("REGISTER_COUPON_SERVICE_APPS");	//类似东湖这种性质的公众号列表
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
+	}
+	
+	/**
+	 * 当前公众号是否开启银行卡支付
+	 */
+	@Override
+	public boolean isCardPayServiceAvailabe (String appId){
+		
+		String appIds = getSysConfigByKey("CARD_PAY_SERVICE_APPS");	//类似东湖这种性质的公众号列表
 		boolean isAvailable = false;
 		if (!StringUtils.isEmpty(appIds)) {
 			if (appIds.indexOf(appId) > -1) {
