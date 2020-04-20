@@ -31,6 +31,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -39,6 +40,7 @@ import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
+import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -60,6 +62,7 @@ import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
+import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
@@ -662,6 +665,27 @@ public class WuyeController extends BaseController {
 			voList.add(vo);
 		}
 		return BaseResult.successResult(voList);
+	}
+	
+	/**
+	 * 获取用户绑定的银行卡信息
+	 * @param user
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getDiscountDetail", method = {RequestMethod.GET, RequestMethod.POST})
+	@ResponseBody
+	public BaseResult<DiscountDetail> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
+			@RequestBody DiscountViewReqVO discountViewReqVO) throws Exception {
+		
+		DiscountDetail discountDetail = new DiscountDetail();
+		log.info("discountViewReqVO : " + discountViewReqVO);
+		DiscountViewRequestDTO dto = new DiscountViewRequestDTO();
+		BeanUtils.copyProperties(discountViewReqVO, dto);
+		dto.setUser(user);
+		log.info("discountViewRequestDTO : " + dto);
+		discountDetail = wuyeService.getDiscountDetail(dto);
+		return BaseResult.successResult(discountDetail);
 	}
 	
 	/**

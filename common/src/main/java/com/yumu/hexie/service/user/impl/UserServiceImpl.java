@@ -343,7 +343,6 @@ public class UserServiceImpl implements UserService {
 		
 		CouponStrategy registerCouponStrategy = couponStrategyFactory.getRegisterStrategy(user);
 		registerCouponStrategy.sendCoupon(user);
-		logger.info("main thead send ");
 		user.setRegisterDate(System.currentTimeMillis());
         User savedUser = save(user);
         return savedUser;
