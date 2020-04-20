@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.coupon;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -9,6 +11,8 @@ import com.yumu.hexie.service.common.SystemConfigService;
 
 @Component
 public class CouponStrategyFactory {
+	
+	private static Logger logger = LoggerFactory.getLogger(CouponStrategyFactory.class);
 
 	@Autowired
 	private SystemConfigService systemConfigService;
@@ -24,6 +28,7 @@ public class CouponStrategyFactory {
 	 */
 	public CouponStrategy getRegisterStrategy(User user) {
 		
+		logger.info(user.getAppId());
 		if (systemConfigService.registerCouponServiceAvailabe(user.getAppId())) {
 			return registerCouponStrategy;
 		}
