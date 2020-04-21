@@ -29,7 +29,9 @@ import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
+import com.yumu.hexie.integration.wuye.req.PayResultRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
+import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
@@ -140,6 +142,48 @@ public class WuyeUtil2 {
 		TypeReference<HexieResponse<DiscountDetail>> typeReference = new TypeReference<HexieResponse<DiscountDetail>>(){};
 		HexieResponse<DiscountDetail> hexieResponse = wuyeRest(requestUrl, discountViewRequest, typeReference);
 		BaseResult<DiscountDetail> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 获取优惠支付明细
+	 * @param prepayRequestDTO
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> getPayResult(User user, String orderNo) throws Exception {
+		
+		String requestUrl = getRequestUrl(user, "");
+		requestUrl += DISCOUNT_URL;
+		
+		PayResultRequest payResultRequest = new PayResultRequest();
+		payResultRequest.setOrderNo(orderNo);
+		TypeReference<HexieResponse<String>> typeReference = new TypeReference<HexieResponse<String>>(){};
+		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, payResultRequest, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 获取优惠支付明细
+	 * @param prepayRequestDTO
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> getPaySmsCode(User user, String orderNo, String mobile) throws Exception {
+		
+		String requestUrl = getRequestUrl(user, "");
+		requestUrl += DISCOUNT_URL;
+		
+		PaySmsCodeRequest paySmsCodeRequest = new PaySmsCodeRequest();
+		paySmsCodeRequest.setOrderNo(orderNo);
+		TypeReference<HexieResponse<String>> typeReference = new TypeReference<HexieResponse<String>>(){};
+		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, paySmsCodeRequest, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		

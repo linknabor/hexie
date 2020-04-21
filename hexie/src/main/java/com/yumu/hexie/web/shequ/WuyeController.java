@@ -2,11 +2,8 @@ package com.yumu.hexie.web.shequ;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +16,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -394,10 +392,13 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String tradeWaterId, 
 			@RequestParam(required = false) String feePrice, 
 			@RequestParam(required = false) String couponId,
-			@RequestParam(value ="bind_switch", required = false) String bindSwitch)
+			@RequestParam(value ="bind_switch", required = false) String bindSwitch,
+			@RequestParam(required = false) String wuyeId,
+			@RequestParam(required = false) String cardNo,
+			@RequestParam(required = false) String quickToken)
 			throws Exception {
 		
-		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch);
+		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch, wuyeId, cardNo, quickToken);
 		return BaseResult.successResult("支付成功。");
 	}
 
@@ -675,7 +676,7 @@ public class WuyeController extends BaseController {
 	 * @throws Exception 
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getDiscountDetail", method = {RequestMethod.GET, RequestMethod.POST})
+	@RequestMapping(value = "/getDiscountDetail", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<DiscountDetail> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
 			@RequestBody DiscountViewReqVO discountViewReqVO) throws Exception {
@@ -691,6 +692,37 @@ public class WuyeController extends BaseController {
 	}
 	
 	/**
+	 * 获取绑卡支付时的短信验证码，非首次支付需要
+	 * @param user
+	 * @param orderNo
+	 * @param mobile
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/getPaySmsCode", method = RequestMethod.GET)
+	@ResponseBody
+	public String getSmsCode(@ModelAttribute(Constants.USER) User user, @RequestParam
+			String cardId, @RequestParam String orderNo) throws Exception {
+		
+		return wuyeService.getPaySmsCode(user, cardId, orderNo);
+		
+	}
+	
+	/**
+	 * 获取用户绑定的银行卡信息
+	 * @param user
+	 * @throws UnsupportedEncodingException 
+	 */
+	@RequestMapping(value = "/getPayResult/{orderNo}", method = RequestMethod.GET)
+	@ResponseBody
+	public String getPayResult(@ModelAttribute(Constants.USER) User user, @PathVariable String orderNo) throws Exception {
+		
+		Assert.hasText(orderNo, "订单号不能为空。");
+		String result = wuyeService.getPayResult(user, orderNo);
+		return result;
+	}
+	
+	/**
 	 * 获取用户绑定的银行卡信息
 	 * @param user
 	 * @throws UnsupportedEncodingException 
@@ -699,11 +731,8 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public String unionPayCallBack(HttpServletRequest request) throws Exception {
 		
-		String transAmt = request.getParameter("transAmt");
-		log.info("transAmt : " + transAmt);
-		String desc = request.getParameter("desc");
-		log.info("desc : " + desc);
-		byte[]utf8bytes = Base64Utils.decode(desc.getBytes());
+		String orderNo = request.getParameter("orderNo");
+		byte[]utf8bytes = Base64Utils.decode(orderNo.getBytes());
 		String decodedStr = new String(utf8bytes, "utf-8");
 		return "desc utf8 : " + decodedStr;
 	}

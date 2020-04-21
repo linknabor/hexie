@@ -186,7 +186,7 @@ public class WuyeServiceImpl implements WuyeService {
 				//支付成功回调的时候还要保存quickToken
 				bankCardRepository.save(bankCard);
 			} 
-			if (StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
+			if (!StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
 				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getSelAcctNo());
 				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
 					throw new BizValidateException("");
@@ -263,11 +263,24 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	@Override
 	public void noticePayed(User user, String tradeWaterId, 
-			String couponId, String feePrice, String bindSwitch) {
+			String couponId, String feePrice, String bindSwitch, String wuyeId, String cardNo, String quickToken) {
 		
 		//1.更新红包状态
 		if (!StringUtils.isEmpty(couponId)) {
-			couponService.comsume(feePrice, Long.valueOf(couponId));
+			try {
+				couponService.comsume(feePrice, Long.valueOf(couponId));
+			} catch (Exception e) {
+				//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
+				log.error(e.getMessage(), e);
+			}
+		}
+		
+		if (user == null) {
+			List<User> userList = userRepository.findByWuyeId(wuyeId);
+			user = userList.get(0);
+		}
+		if (user == null) {
+			return;
 		}
 		//2.添加芝麻积分
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
@@ -277,7 +290,13 @@ public class WuyeServiceImpl implements WuyeService {
 			String pointKey = "zhima-bill-" + user.getId() + "-" + tradeWaterId;
 			pointService.updatePoint(user, "10", pointKey);
 		}
-		//3.绑定所缴纳物业费的房屋
+		
+		//3.如果是绑卡支付，记录用户的quicktoken
+		if (!StringUtils.isEmpty(cardNo) && !StringUtils.isEmpty(quickToken)) {
+			bankCardRepository.updateBankCardByAcctNoAndUserId(quickToken, cardNo, user.getId());
+		}
+		
+		//4.绑定所缴纳物业费的房屋
 		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
 		
 	}
@@ -598,5 +617,19 @@ public class WuyeServiceImpl implements WuyeService {
 		return discountDetail;
 	
 	}
+	
+	@Override
+	public String getPayResult(User user, String orderNo) throws Exception {
+		return wuyeUtil2.getPayResult(user, orderNo).getData();
+	}
+	
+	@Override
+	public String getPaySmsCode(User user, String cardId, String orderNo) throws Exception {
+	
+		Assert.hasText(cardId, "银行卡id不能为空。");
+		BankCard bankCard = bankCardRepository.findOne(Long.valueOf(cardId));
+		return wuyeUtil2.getPaySmsCode(user, orderNo, bankCard.getPhoneNo()).getData();
+	}
+	
 	
 }
