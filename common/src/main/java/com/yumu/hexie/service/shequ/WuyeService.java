@@ -155,7 +155,8 @@ public interface WuyeService {
 	 * @param feePrice
 	 * @param bindSwitch
 	 */
-	void noticePayed(User user, String tradeWaterId, String couponId, String feePrice, String bindSwitch);
+	void noticePayed(User user, String tradeWaterId, String couponId, 
+			String feePrice, String bindSwitch, String wuyeId, String cardNo, String quickToken);
 	
 	/**
 	 * 查询是否已经用过红包
@@ -268,4 +269,23 @@ public interface WuyeService {
 	 * @throws Exception 
 	 */
 	DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
+
+	/**
+	 * 根据物业订单号查询交易结果
+	 * @param user
+	 * @param orderNo
+	 * @throws Exception 
+	 */
+	String getPayResult(User user, String orderNo) throws Exception;
+
+	/**
+	 * 获取绑卡支付的短信验证码
+	 * @param user
+	 * @param orderNo
+	 * @param mobile
+	 * @return
+	 * @throws Exception
+	 */
+	String getPaySmsCode(User user, String orderNo, String mobile) throws Exception;
+
 }
