@@ -189,7 +189,7 @@ public class WuyeServiceImpl implements WuyeService {
 			if (!StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
 				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getSelAcctNo());
 				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
-					throw new BizValidateException("");
+					throw new BizValidateException("未绑定的银行卡。");
 				}
 				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
 			}
@@ -263,7 +263,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	@Override
 	public void noticePayed(User user, String tradeWaterId, 
-			String couponId, String feePrice, String bindSwitch, String cardNo, String quickToken) {
+			String couponId, String feePrice, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
 		
 		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
 		
@@ -283,6 +283,11 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		if (user == null) {
+			List<User> userList = userRepository.findByWuyeId(wuyeId);
+			user = userList.get(0);
+		}
+		if (user == null) {
+			log.info("can not find user, wuyeId : " + wuyeId);
 			return;
 		}
 		
