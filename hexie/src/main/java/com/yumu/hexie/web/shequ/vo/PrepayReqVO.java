@@ -56,7 +56,7 @@ public class PrepayReqVO implements Serializable {
 	private String quickToken;	//快捷支付token
 	private String veriCode;	//手机验证码
 	
-	private String remerber;	//是否记住持卡人信息，0否1是 
+	private String remember;	//是否记住持卡人信息，0否1是 
 	private String selAcctNo;	//选卡支付标记，选中的记录卡号
 	
 	public String getBillId() {
@@ -203,11 +203,11 @@ public class PrepayReqVO implements Serializable {
 	public void setVeriCode(String veriCode) {
 		this.veriCode = veriCode;
 	}
-	public String getRemerber() {
-		return remerber;
+	public String getRemember() {
+		return remember;
 	}
-	public void setRemerber(String remerber) {
-		this.remerber = remerber;
+	public void setRemember(String remember) {
+		this.remember = remember;
 	}
 	public String getSelAcctNo() {
 		return selAcctNo;
@@ -230,7 +230,7 @@ public class PrepayReqVO implements Serializable {
 				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", regionName="
 				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
 				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
-				+ ", veriCode=" + veriCode + ", remerber=" + remerber + ", selAcctNo=" + selAcctNo + "]";
+				+ ", veriCode=" + veriCode + ", remember=" + remember + ", selAcctNo=" + selAcctNo + "]";
 	}
 	
 	
