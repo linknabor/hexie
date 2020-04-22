@@ -88,6 +88,7 @@ public class WuyeUtil2 {
 		
 		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
 		prepayRequest.setFromSys(fromSys);
+		prepayRequest.setAppid(user.getAppId());
 		
 		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>(){};
 		HexieResponse<WechatPayInfo> hexieResponse = wuyeRest(requestUrl, prepayRequest, typeReference);
@@ -117,6 +118,7 @@ public class WuyeUtil2 {
 		
 		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
 		prepayRequest.setFromSys(fromSys);
+		prepayRequest.setAppid(user.getAppId());
 		
 		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>(){};
 		HexieResponse<WechatPayInfo> hexieResponse = wuyeRest(requestUrl, prepayRequest, typeReference);

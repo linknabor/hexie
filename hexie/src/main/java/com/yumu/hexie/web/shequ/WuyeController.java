@@ -735,7 +735,7 @@ public class WuyeController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/noticeCardPay", method = RequestMethod.GET)
+	@RequestMapping(value = "/servplat/noticeCardPay", method = RequestMethod.GET)
 	@ResponseBody
 	public String noticeCardPay(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String tradeWaterId, 
