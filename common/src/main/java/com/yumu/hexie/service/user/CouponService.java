@@ -74,4 +74,6 @@ public interface CouponService {
 	public List<CouponCombination> findCouponCombination(int combinationType);	//获取现金券组合
 	
 	public void updateWuyeCouponOrderId(long orderId, long couponId);
+
+	Coupon findByOrderId(long orderId);
 }
