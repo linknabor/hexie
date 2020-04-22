@@ -55,6 +55,7 @@ public class PrepayRequest extends WuyeRequest {
 	@JsonProperty("fee_mianAmt")
 	private String feeMianAmt;
 	private String openid;
+	private String appid;
 	
 	//开票参数
 	private String mobile;
@@ -258,6 +259,12 @@ public class PrepayRequest extends WuyeRequest {
 	}
 	public void setPayType(String payType) {
 		this.payType = payType;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
 	}
 	
 	
