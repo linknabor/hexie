@@ -266,9 +266,11 @@ public class WuyeServiceImpl implements WuyeService {
 			String couponId, String feePrice, String bindSwitch, String wuyeId, String cardNo, String quickToken) {
 		
 		//1.更新红包状态
+		Coupon coupon = null;
 		if (!StringUtils.isEmpty(couponId)) {
 			try {
-				couponService.comsume(feePrice, Long.valueOf(couponId));
+				coupon = couponService.findOne(Long.valueOf(couponId));
+				couponService.comsume(feePrice, coupon.getId());
 			} catch (Exception e) {
 				//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
 				log.error(e.getMessage(), e);
@@ -279,9 +281,15 @@ public class WuyeServiceImpl implements WuyeService {
 			List<User> userList = userRepository.findByWuyeId(wuyeId);
 			user = userList.get(0);
 		}
+		if (user == null ) {
+			if (coupon!=null) {
+				user = userRepository.findOne(coupon.getUserId());
+			}
+		}
 		if (user == null) {
 			return;
 		}
+		
 		//2.添加芝麻积分
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			String pointKey = "wuyePay-" + tradeWaterId;

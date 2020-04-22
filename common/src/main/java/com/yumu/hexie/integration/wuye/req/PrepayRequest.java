@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
@@ -25,11 +26,13 @@ public class PrepayRequest extends WuyeRequest {
 		this.wuyeId = prepayRequestDTO.getUser().getWuyeId();
 		this.mobile = prepayRequestDTO.getUser().getTel();
 		this.openid = prepayRequestDTO.getUser().getOpenid();
-		try {
-			//中文打码
-			this.customerName = URLEncoder.encode(prepayRequestDTO.getCustomerName(),"GBK");
-		} catch (UnsupportedEncodingException e) {
-			throw new BizValidateException(e.getMessage(), e);	
+		if (!StringUtils.isEmpty(prepayRequestDTO.getCustomerName())) {
+			try {
+				//中文打码
+				this.customerName = URLEncoder.encode(prepayRequestDTO.getCustomerName(),"GBK");
+			} catch (UnsupportedEncodingException e) {
+				throw new BizValidateException(e.getMessage(), e);	
+			}
 		}
 	}
 	
