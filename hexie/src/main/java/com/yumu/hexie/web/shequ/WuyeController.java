@@ -723,6 +723,35 @@ public class WuyeController extends BaseController {
 	}
 	
 	/**
+	 * 接收servplat过来的请求，消优惠券，增加积分
+	 * @param user
+	 * @param tradeWaterId
+	 * @param feePrice
+	 * @param couponId
+	 * @param bindSwitch
+	 * @param wuyeId
+	 * @param cardNo
+	 * @param quickToken
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/noticeCardPay", method = RequestMethod.GET)
+	@ResponseBody
+	public String noticeCardPay(@ModelAttribute(Constants.USER) User user,
+			@RequestParam(required = false) String tradeWaterId, 
+			@RequestParam(required = false) String feePrice, 
+			@RequestParam(required = false) String couponId,
+			@RequestParam(required = false) String wuyeId,
+			@RequestParam(required = false) String cardNo,
+			@RequestParam(required = false) String quickToken)
+			throws Exception {
+		
+		String bindSwitch = "1";	//默认绑定
+		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch, wuyeId, cardNo, quickToken);
+		return "SUCCESS";
+	}
+	
+	/**
 	 * 获取用户绑定的银行卡信息
 	 * @param user
 	 * @throws UnsupportedEncodingException 
