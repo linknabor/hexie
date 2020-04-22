@@ -843,6 +843,14 @@ public class CouponServiceImpl implements CouponService {
 		couponRepository.consumeWuyeCoupon(ModelConstant.COUPON_STATUS_USED, coupon.getId(), orderId, ModelConstant.COUPON_STATUS_AVAILABLE);
 	}
 	
-	
+	/**
+	 * 根据orderId查找优惠券
+	 * @param orderId
+	 * @return
+	 */
+	@Override
+	public Coupon findByOrderId(long orderId) {
+		return couponRepository.findByOrderId(orderId);
+	}
 	
 }

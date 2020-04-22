@@ -156,7 +156,7 @@ public interface WuyeService {
 	 * @param bindSwitch
 	 */
 	void noticePayed(User user, String tradeWaterId, String couponId, 
-			String feePrice, String bindSwitch, String wuyeId, String cardNo, String quickToken);
+			String feePrice, String bindSwitch, String cardNo, String quickToken);
 	
 	/**
 	 * 查询是否已经用过红包

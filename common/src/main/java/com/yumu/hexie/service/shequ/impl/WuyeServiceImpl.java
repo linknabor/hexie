@@ -263,23 +263,19 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	@Override
 	public void noticePayed(User user, String tradeWaterId, 
-			String couponId, String feePrice, String bindSwitch, String wuyeId, String cardNo, String quickToken) {
+			String couponId, String feePrice, String bindSwitch, String cardNo, String quickToken) {
+		
+		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
 		
 		//1.更新红包状态
-		Coupon coupon = null;
-		if (!StringUtils.isEmpty(couponId)) {
+		Coupon coupon = couponService.findByOrderId(Long.valueOf(tradeWaterId));
+		if (coupon != null) {
 			try {
-				coupon = couponService.findOne(Long.valueOf(couponId));
 				couponService.comsume(feePrice, coupon.getId());
 			} catch (Exception e) {
 				//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
 				log.error(e.getMessage(), e);
 			}
-		}
-		
-		if (user == null) {
-			List<User> userList = userRepository.findByWuyeId(wuyeId);
-			user = userList.get(0);
 		}
 		if (user == null ) {
 			if (coupon!=null) {

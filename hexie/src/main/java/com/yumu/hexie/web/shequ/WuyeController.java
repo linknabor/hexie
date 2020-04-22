@@ -392,13 +392,10 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String tradeWaterId, 
 			@RequestParam(required = false) String feePrice, 
 			@RequestParam(required = false) String couponId,
-			@RequestParam(value ="bind_switch", required = false) String bindSwitch,
-			@RequestParam(required = false) String wuyeId,
-			@RequestParam(required = false) String cardNo,
-			@RequestParam(required = false) String quickToken)
+			@RequestParam(value ="bind_switch", required = false) String bindSwitch)
 			throws Exception {
 		
-		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch, wuyeId, cardNo, quickToken);
+		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch, "", "");
 		return BaseResult.successResult("支付成功。");
 	}
 
@@ -737,17 +734,18 @@ public class WuyeController extends BaseController {
 	 */
 	@RequestMapping(value = "/servplat/noticeCardPay", method = RequestMethod.GET)
 	@ResponseBody
-	public String noticeCardPay(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String tradeWaterId, 
+	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId, 
 			@RequestParam(required = false) String feePrice, 
-			@RequestParam(required = false) String couponId,
-			@RequestParam(required = false) String wuyeId,
 			@RequestParam(required = false) String cardNo,
 			@RequestParam(required = false) String quickToken)
 			throws Exception {
 		
+		log.info("tradeWaterId:" + tradeWaterId);
+		log.info("feePrice:" + feePrice);
+		log.info("quickToken:" + quickToken);
+		
 		String bindSwitch = "1";	//默认绑定
-		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch, wuyeId, cardNo, quickToken);
+		wuyeService.noticePayed(null, tradeWaterId, null, feePrice, bindSwitch, cardNo, quickToken);
 		return "SUCCESS";
 	}
 	
