@@ -3,7 +3,9 @@ package com.yumu.hexie.web.shequ;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -689,19 +691,21 @@ public class WuyeController extends BaseController {
 	}
 	
 	/**
-	 * 获取绑卡支付时的短信验证码，非首次支付需要
+	 * 获取绑卡支付时的短信验证码，非首次支付需要，根据用户已绑定的卡选择相应的银行预留手机
 	 * @param user
-	 * @param orderNo
-	 * @param mobile
+	 * @param cardId
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getPaySmsCode", method = RequestMethod.GET)
 	@ResponseBody
-	public String getSmsCode(@ModelAttribute(Constants.USER) User user, @RequestParam
-			String cardId, @RequestParam String orderNo) throws Exception {
+	public BaseResult<Map<String, String>> getSmsCode(@ModelAttribute(Constants.USER) User user, @RequestParam String cardId) throws Exception {
 		
-		return wuyeService.getPaySmsCode(user, cardId, orderNo);
+		String orderNo = wuyeService.getPaySmsCode(user, cardId);
+		Map<String, String> map = new HashMap<>();
+		map.put("orderNo", orderNo);
+		return BaseResult.successResult(map);
 		
 	}
 	

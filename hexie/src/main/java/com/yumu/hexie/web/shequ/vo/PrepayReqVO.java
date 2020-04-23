@@ -57,7 +57,8 @@ public class PrepayReqVO implements Serializable {
 	private String veriCode;	//手机验证码
 	
 	private String remember;	//是否记住持卡人信息，0否1是 
-	private String selAcctNo;	//选卡支付标记，选中的记录卡号
+	private String cardId;	//选卡支付标记，选中的记录卡号
+	private String orderNo;	//绑卡支付需要
 	
 	public String getBillId() {
 		return billId;
@@ -209,11 +210,12 @@ public class PrepayReqVO implements Serializable {
 	public void setRemember(String remember) {
 		this.remember = remember;
 	}
-	public String getSelAcctNo() {
-		return selAcctNo;
+	
+	public String getCardId() {
+		return cardId;
 	}
-	public void setSelAcctNo(String selAcctNo) {
-		this.selAcctNo = selAcctNo;
+	public void setCardId(String cardId) {
+		this.cardId = cardId;
 	}
 	public String getPayType() {
 		return payType;
@@ -221,16 +223,23 @@ public class PrepayReqVO implements Serializable {
 	public void setPayType(String payType) {
 		this.payType = payType;
 	}
+	public String getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
 	@Override
 	public String toString() {
 		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", houseId=" + houseId + ", startDate="
-				+ startDate + ", endDate=" + endDate + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
-				+ ", couponId=" + couponId + ", mianBill=" + mianBill + ", mianAmt=" + mianAmt + ", reduceAmt="
-				+ reduceAmt + ", feeMianBill=" + feeMianBill + ", feeMianAmt=" + feeMianAmt + ", invoiceTitleType="
-				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", regionName="
-				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
-				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
-				+ ", veriCode=" + veriCode + ", remember=" + remember + ", selAcctNo=" + selAcctNo + "]";
+				+ startDate + ", endDate=" + endDate + ", orderNo=" + orderNo + ", couponUnit=" + couponUnit
+				+ ", couponNum=" + couponNum + ", couponId=" + couponId + ", mianBill=" + mianBill + ", mianAmt="
+				+ mianAmt + ", reduceAmt=" + reduceAmt + ", feeMianBill=" + feeMianBill + ", feeMianAmt=" + feeMianAmt
+				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle="
+				+ invoiceTitle + ", regionName=" + regionName + ", payType=" + payType + ", customerName="
+				+ customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo="
+				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", remember=" + remember
+				+ ", cardId=" + cardId + "]";
 	}
 	
 	

@@ -186,8 +186,8 @@ public class WuyeServiceImpl implements WuyeService {
 				//支付成功回调的时候还要保存quickToken
 				bankCardRepository.save(bankCard);
 			} 
-			if (!StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
-				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getSelAcctNo());
+			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
+				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getCardId());
 				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
 					throw new BizValidateException("未绑定的银行卡。");
 				}
@@ -241,9 +241,8 @@ public class WuyeServiceImpl implements WuyeService {
 				//支付成功回调的时候还要保存quickToken
 				bankCardRepository.save(bankCard);
 			} 
-			if (StringUtils.isEmpty(prepayRequestDTO.getSelAcctNo())) {	//选卡支付
-				
-				BankCard selBankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getSelAcctNo());
+			if (StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
+				BankCard selBankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getCardId());
 				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
 			}
 		}
@@ -633,11 +632,11 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public String getPaySmsCode(User user, String cardId, String orderNo) throws Exception {
+	public String getPaySmsCode(User user, String cardId) throws Exception {
 	
-		Assert.hasText(cardId, "银行卡id不能为空。");
+		Assert.hasText(cardId, "卡ID不能为空。");
 		BankCard bankCard = bankCardRepository.findOne(Long.valueOf(cardId));
-		return wuyeUtil2.getPaySmsCode(user, orderNo, bankCard.getPhoneNo()).getData();
+		return wuyeUtil2.getPaySmsCode(user, bankCard).getData();
 	}
 	
 	
