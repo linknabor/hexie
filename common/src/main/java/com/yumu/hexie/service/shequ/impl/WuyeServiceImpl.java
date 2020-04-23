@@ -192,6 +192,7 @@ public class WuyeServiceImpl implements WuyeService {
 					throw new BizValidateException("未绑定的银行卡。");
 				}
 				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
+				prepayRequestDTO.setPhoneNo(selBankCard.getPhoneNo());
 			}
 		}
 		//TODO 从卡库校验是否是贵州银行的卡
