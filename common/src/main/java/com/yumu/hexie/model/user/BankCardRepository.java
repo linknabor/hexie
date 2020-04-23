@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface BankCardRepository extends JpaRepository<BankCard, Long> {
 
-	public List<BankCard> findByUserId(long userId);
+	public List<BankCard> findByUserIdAndQuickTokenIsNotNull(long userId);
 	
 	public BankCard findByAcctNo(String acctNo);	//卡号具有唯一性
 	

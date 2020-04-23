@@ -20,7 +20,7 @@ public class BankCardServiceImpl implements BankCardService {
 	public List<BankCard> getByUserId(long userId) {
 
 		Assert.notNull(userId, "用户id不能为空");
-		return bankCardRepository.findByUserId(userId);
+		return bankCardRepository.findByUserIdAndQuickTokenIsNotNull(userId);
 	}
 
 }
