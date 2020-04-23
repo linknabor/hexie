@@ -30,14 +30,15 @@ import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.PayResultRequest;
-import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
+import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
 import com.yumu.hexie.integration.wuye.vo.HexieResponse;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.region.RegionUrl;
+import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -67,6 +68,7 @@ public class WuyeUtil2 {
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
 	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do"; // 微信支付请求
 	private static final String DISCOUNT_URL = "getBillPayDetailSDO.do";	//获取优惠明细
+	private static final String CARD_PAY_SMS_URL = "getCardPaySmsCodeSDO.do";	//获取优惠明细
 
 	/**
 	 * 专业版缴费
@@ -176,13 +178,14 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<String> getPaySmsCode(User user, String orderNo, String mobile) throws Exception {
+	public BaseResult<String> getPaySmsCode(User user, BankCard bankCard) throws Exception {
 		
 		String requestUrl = getRequestUrl(user, "");
-		requestUrl += DISCOUNT_URL;
+		requestUrl += CARD_PAY_SMS_URL;
 		
 		PaySmsCodeRequest paySmsCodeRequest = new PaySmsCodeRequest();
-		paySmsCodeRequest.setOrderNo(orderNo);
+		paySmsCodeRequest.setMobile(bankCard.getPhoneNo());
+		paySmsCodeRequest.setQuickToken(bankCard.getQuickToken());
 		TypeReference<HexieResponse<String>> typeReference = new TypeReference<HexieResponse<String>>(){};
 		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, paySmsCodeRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();

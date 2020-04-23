@@ -91,6 +91,7 @@ public class PrepayRequest extends WuyeRequest {
 	
 	private String quickToken;	//快捷支付token
 	private String veriCode;	//手机验证码
+	private String orderNo;		//绑卡支付非首次需要传
 	
 	public String getCouponUnit() {
 		return couponUnit;
@@ -265,6 +266,12 @@ public class PrepayRequest extends WuyeRequest {
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+	}
+	public String getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
 	}
 	
 	

@@ -286,6 +286,6 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception
 	 */
-	String getPaySmsCode(User user, String orderNo, String mobile) throws Exception;
+	String getPaySmsCode(User user, String cardId) throws Exception;
 
 }

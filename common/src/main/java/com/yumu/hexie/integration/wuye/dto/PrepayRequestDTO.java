@@ -12,6 +12,7 @@ public class PrepayRequestDTO implements Serializable {
 	private static final long serialVersionUID = 9222329098194603371L;
 
 	private User user;
+	
 	//优惠减免
 	private String couponUnit;
 	private String couponNum;
@@ -53,7 +54,8 @@ public class PrepayRequestDTO implements Serializable {
 	private String veriCode;	//手机验证码
 	
 	private String remember;	//是否记住持卡人信息，0否1是
-	private String selAcctNo;	//选卡支付标记，选中的记录卡号
+	private String cardId;	//选卡支付标记，选中的记录卡号
+	private String orderNo;	//绑卡支付非首次支付需要传入
 	
 	public String getCouponUnit() {
 		return couponUnit;
@@ -217,11 +219,11 @@ public class PrepayRequestDTO implements Serializable {
 	public void setRemember(String remember) {
 		this.remember = remember;
 	}
-	public String getSelAcctNo() {
-		return selAcctNo;
+	public String getCardId() {
+		return cardId;
 	}
-	public void setSelAcctNo(String selAcctNo) {
-		this.selAcctNo = selAcctNo;
+	public void setCardId(String cardId) {
+		this.cardId = cardId;
 	}
 	public String getPayType() {
 		return payType;
@@ -229,6 +231,23 @@ public class PrepayRequestDTO implements Serializable {
 	public void setPayType(String payType) {
 		this.payType = payType;
 	}
-	
+	public String getOrderNo() {
+		return orderNo;
+	}
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
+	@Override
+	public String toString() {
+		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
+				+ ", couponId=" + couponId + ", mianBill=" + mianBill + ", mianAmt=" + mianAmt + ", feeMianBill="
+				+ feeMianBill + ", feeMianAmt=" + feeMianAmt + ", reduceAmt=" + reduceAmt + ", invoiceTitle="
+				+ invoiceTitle + ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode
+				+ ", regionUrl=" + regionUrl + ", regionName=" + regionName + ", billId=" + billId + ", stmtId="
+				+ stmtId + ", houseId=" + houseId + ", startDate=" + startDate + ", endDate=" + endDate + ", payType="
+				+ payType + ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId
+				+ ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode="
+				+ veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + "]";
+	}
 	
 }
