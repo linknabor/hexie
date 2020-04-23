@@ -24,7 +24,7 @@ public class CouponStrategyFactory {
 	private CouponStrategy NoCouponStrategy;
 	
 	/**
-	 * 注册类优惠券策略
+	 * 注册优惠券策略
 	 */
 	public CouponStrategy getRegisterStrategy(User user) {
 		

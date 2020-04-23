@@ -50,7 +50,7 @@ public interface CouponService {
     public List<Coupon> findAvaibleCoupon(long userId,HomeCart cart);
     //查看服务类型是否支持红包
     public List<Coupon> findAvaibleCoupon4ServiceType(long userId,long homeServiceType,Long parentType, Long itemId);
-	public List<Coupon> findAvaibleCouponForWuye(long userId);
+	public List<Coupon> findAvaibleCouponForWuye(User user, String payType);
 	
 	public List<Coupon> findInvalidCoupons(long userId,int page);
 	public CouponsSummary findCouponSummary(long userId);
@@ -76,4 +76,6 @@ public interface CouponService {
 	public void updateWuyeCouponOrderId(long orderId, long couponId);
 
 	Coupon findByOrderId(long orderId);
+
+	boolean isAvaible(String appId, String payType);
 }

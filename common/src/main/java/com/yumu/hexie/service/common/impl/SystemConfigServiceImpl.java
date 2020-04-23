@@ -301,7 +301,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	@Override
 	public boolean registerCouponServiceAvailabe (String appId){
 		
-		String appIds = getSysConfigByKey("REGISTER_COUPON_SERVICE_APPS");	//类似东湖这种性质的公众号列表
+		String appIds = getSysConfigByKey("REGISTER_COUPON_SERVICE_APPS");	//开启注册发优惠券的APP列表
 		boolean isAvailable = false;
 		if (!StringUtils.isEmpty(appIds)) {
 			if (appIds.indexOf(appId) > -1) {
@@ -317,7 +317,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	@Override
 	public boolean isCardPayServiceAvailabe (String appId){
 		
-		String appIds = getSysConfigByKey("CARD_PAY_SERVICE_APPS");	//类似东湖这种性质的公众号列表
+		String appIds = getSysConfigByKey("CARD_PAY_SERVICE_APPS");	//开启银行卡支付的公众号APP列表
 		boolean isAvailable = false;
 		if (!StringUtils.isEmpty(appIds)) {
 			if (appIds.indexOf(appId) > -1) {

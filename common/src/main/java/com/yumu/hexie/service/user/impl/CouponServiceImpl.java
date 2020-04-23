@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.user.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -517,6 +518,21 @@ public class CouponServiceImpl implements CouponService {
         log.warn("可以用（全部通过）");
 		return true;
 	}
+	
+	/**
+	 * 根据卡库指定策略 TODO
+	 * @param payType
+	 * @return
+	 */
+	@Override
+	public boolean isAvaible(String appId, String payType) {
+		
+		if (systemConfigService.registerCouponServiceAvailabe(appId) && systemConfigService.isCardPayServiceAvailabe(appId)) {
+			return true;
+		}
+		return false;
+		
+	}
 
 	//itemType:1, serviceType:-0, productId:10
 	public Long getMerchatId(Long mainType, Long subType, Long itemId) {
@@ -564,7 +580,7 @@ public class CouponServiceImpl implements CouponService {
     	if(coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
     		return false;
     	}
-    	if (Float.parseFloat(feePrice) < 0.01){
+    	if (new BigDecimal(feePrice).compareTo(new BigDecimal("0.01"))<0){
     		return false;
     	}
     	if(coupon.isAvailableForAll()){
@@ -759,16 +775,20 @@ public class CouponServiceImpl implements CouponService {
 	}
 
 	@Override
-	public List<Coupon> findAvaibleCouponForWuye(long userId) {
-
+	public List<Coupon> findAvaibleCouponForWuye(User user, String payType) {
+		
 		List<Coupon> result = new ArrayList<Coupon>();
         List<Integer> status = new ArrayList<Integer>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, new PageRequest(0,200));
+        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(user.getId(), status, new PageRequest(0,200));
         for(Coupon coupon : coupons) {
             if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_WUYE, 0l, 0l, 
                 0l, null, coupon,false)){
-                result.add(coupon);
+            	
+            	if (isAvaible(user.getAppId(), payType)) {
+            		result.add(coupon);
+            		
+            	}
             }
         }
         return result;
