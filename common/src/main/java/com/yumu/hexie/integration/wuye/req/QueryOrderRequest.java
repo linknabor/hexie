@@ -1,6 +1,6 @@
 package com.yumu.hexie.integration.wuye.req;
 
-public class PayResultRequest extends WuyeRequest {
+public class QueryOrderRequest extends WuyeRequest {
 
 	/**
 	 * 

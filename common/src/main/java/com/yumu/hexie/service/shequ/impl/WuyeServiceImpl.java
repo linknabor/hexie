@@ -628,8 +628,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public String getPayResult(User user, String orderNo) throws Exception {
-		return wuyeUtil2.getPayResult(user, orderNo).getData();
+	public String queyrOrder(User user, String orderNo) throws Exception {
+		return wuyeUtil2.queryOrder(user, orderNo).getData();
 	}
 	
 	@Override

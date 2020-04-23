@@ -276,7 +276,7 @@ public interface WuyeService {
 	 * @param orderNo
 	 * @throws Exception 
 	 */
-	String getPayResult(User user, String orderNo) throws Exception;
+	String queyrOrder(User user, String orderNo) throws Exception;
 
 	/**
 	 * 获取绑卡支付的短信验证码

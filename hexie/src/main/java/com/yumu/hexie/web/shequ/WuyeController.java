@@ -473,10 +473,11 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getCouponsPayWuYe", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<Coupon>> getCoupons(HttpSession session) {
+	public BaseResult<List<Coupon>> getCoupons(HttpSession session, @RequestParam(required = false)String payType) {
+		
+		log.info("payType is : " + payType);
 		User user = (User) session.getAttribute(Constants.USER);
-		List<Coupon> list = couponService.findAvaibleCouponForWuye(user.getId());
-
+		List<Coupon> list = couponService.findAvaibleCouponForWuye(user, payType);
 		if (list == null) {
 			list = new ArrayList<Coupon>();
 		}
@@ -714,12 +715,12 @@ public class WuyeController extends BaseController {
 	 * @param user
 	 * @throws UnsupportedEncodingException 
 	 */
-	@RequestMapping(value = "/getPayResult/{orderNo}", method = RequestMethod.GET)
+	@RequestMapping(value = "/queryOrder/{orderNo}", method = RequestMethod.GET)
 	@ResponseBody
-	public String getPayResult(@ModelAttribute(Constants.USER) User user, @PathVariable String orderNo) throws Exception {
+	public String queryOrder(@ModelAttribute(Constants.USER) User user, @PathVariable String orderNo) throws Exception {
 		
 		Assert.hasText(orderNo, "订单号不能为空。");
-		String result = wuyeService.getPayResult(user, orderNo);
+		String result = wuyeService.queyrOrder(user, orderNo);
 		return result;
 	}
 	

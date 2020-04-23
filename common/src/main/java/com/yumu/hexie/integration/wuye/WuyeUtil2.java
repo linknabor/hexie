@@ -29,7 +29,7 @@ import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
-import com.yumu.hexie.integration.wuye.req.PayResultRequest;
+import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeRequest;
@@ -69,6 +69,7 @@ public class WuyeUtil2 {
 	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do"; // 微信支付请求
 	private static final String DISCOUNT_URL = "getBillPayDetailSDO.do";	//获取优惠明细
 	private static final String CARD_PAY_SMS_URL = "getCardPaySmsCodeSDO.do";	//获取优惠明细
+	private static final String QUERY_ORDER_URL = "queryOrderSDO.do";
 
 	/**
 	 * 专业版缴费
@@ -157,15 +158,15 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<String> getPayResult(User user, String orderNo) throws Exception {
+	public BaseResult<String> queryOrder(User user, String orderNo) throws Exception {
 		
 		String requestUrl = getRequestUrl(user, "");
-		requestUrl += DISCOUNT_URL;
+		requestUrl += QUERY_ORDER_URL;
 		
-		PayResultRequest payResultRequest = new PayResultRequest();
-		payResultRequest.setOrderNo(orderNo);
+		QueryOrderRequest queryOrderRequest = new QueryOrderRequest();
+		queryOrderRequest.setOrderNo(orderNo);
 		TypeReference<HexieResponse<String>> typeReference = new TypeReference<HexieResponse<String>>(){};
-		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, payResultRequest, typeReference);
+		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, queryOrderRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
