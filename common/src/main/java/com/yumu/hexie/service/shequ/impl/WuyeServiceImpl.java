@@ -187,7 +187,7 @@ public class WuyeServiceImpl implements WuyeService {
 				bankCardRepository.save(bankCard);
 			} 
 			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
-				BankCard selBankCard = bankCardRepository.findByAcctNoAndQuickTokenIsNull(prepayRequestDTO.getCardId());
+				BankCard selBankCard = bankCardRepository.findOne(Long.valueOf(prepayRequestDTO.getCardId()));
 				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
 					throw new BizValidateException("未绑定的银行卡。");
 				}
