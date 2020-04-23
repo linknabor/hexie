@@ -19,6 +19,8 @@ public class WechatPayInfo implements Serializable {
 	private String packageId;
 	@JsonProperty("PAYURL")
 	private String payurl;
+	@JsonProperty("pay_result")	
+	private String payResult;	//中投绑卡支付，非首次支付成功后有这个字段
 	
 	public String getAppid() {
 		return appid;
@@ -84,14 +86,20 @@ public class WechatPayInfo implements Serializable {
 	public void setPayurl(String payurl) {
 		this.payurl = payurl;
 	}
+	public String getPayResult() {
+		return payResult;
+	}
+	public void setPayResult(String payResult) {
+		this.payResult = payResult;
+	}
 	@Override
 	public String toString() {
 		return "WechatPayInfo [appid=" + appid + ", trade_water_id=" + trade_water_id + ", timestamp=" + timestamp
 				+ ", noncestr=" + noncestr + ", packageValue=" + packageValue + ", signtype=" + signtype + ", paysign="
 				+ paysign + ", user_pay_type=" + user_pay_type + ", packageId=" + packageId + ", payurl=" + payurl
-				+ "]";
+				+ ", payResult=" + payResult + "]";
 	}
-
+	
 	
 	
 }
