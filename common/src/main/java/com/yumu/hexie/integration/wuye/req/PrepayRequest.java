@@ -45,7 +45,7 @@ public class PrepayRequest extends WuyeRequest {
 	private String couponUnit;
 	@JsonProperty("coupon_num")
 	private String couponNum;
-	@JsonProperty("conpoin_id")
+	@JsonProperty("coupon_id")
 	private String couponId;
 	private String mianBill;
 	private String mianAmt;
