@@ -205,11 +205,6 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		
 		WechatPayInfo wechatPayInfo = wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
-		//校验优惠券是否可用。
-		if (!StringUtils.isEmpty(couponId)) {	//锁优惠券
-//			couponService.lockWuyeCoupon(wechatPayInfo.getTrade_water_id(), coupon);	//TODO 暂时不锁
-			couponService.updateWuyeCouponOrderId(Long.valueOf(wechatPayInfo.getTrade_water_id()), Long.valueOf(couponId));
-		}
 		return wechatPayInfo;
 	}
 	
@@ -272,15 +267,19 @@ public class WuyeServiceImpl implements WuyeService {
 		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
 		
 		//1.更新红包状态
-		Coupon coupon = couponService.findByOrderId(Long.valueOf(tradeWaterId));
-		if (coupon != null) {
-			try {
-				couponService.comsume(feePrice, coupon.getId());
-			} catch (Exception e) {
-				//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
-				log.error(e.getMessage(), e);
+		Coupon coupon = null;
+		if (StringUtils.isEmpty(couponId)) {
+			coupon = couponService.findOne(Long.valueOf(couponId));
+			if (coupon != null) {
+				try {
+					couponService.comsume(feePrice, coupon.getId());
+				} catch (Exception e) {
+					//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
+					log.error(e.getMessage(), e);
+				}
 			}
 		}
+		
 		if (user == null ) {
 			if (coupon!=null) {
 				user = userRepository.findOne(coupon.getUserId());
