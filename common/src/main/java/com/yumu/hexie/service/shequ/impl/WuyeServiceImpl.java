@@ -242,9 +242,13 @@ public class WuyeServiceImpl implements WuyeService {
 				//支付成功回调的时候还要保存quickToken
 				bankCardRepository.save(bankCard);
 			} 
-			if (StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
-				BankCard selBankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getCardId());
+			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
+				BankCard selBankCard = bankCardRepository.findOne(Long.valueOf(prepayRequestDTO.getCardId()));
+				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
+					throw new BizValidateException("未绑定的银行卡。");
+				}
 				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
+				prepayRequestDTO.setPhoneNo(selBankCard.getPhoneNo());
 			}
 		}
 		return wuyeUtil2.getOtherPrePayInfo(prepayRequestDTO).getData();
