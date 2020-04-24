@@ -744,8 +744,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String feePrice, 
 			@RequestParam(required = false) String cardNo,
 			@RequestParam(required = false) String quickToken,
-			@RequestParam(required = false) String wuyeId)
-			throws Exception {
+			@RequestParam(required = false) String wuyeId) {
 		
 		log.info("tradeWaterId:" + tradeWaterId);
 		log.info("feePrice:" + feePrice);
@@ -757,6 +756,7 @@ public class WuyeController extends BaseController {
 		try {
 			wuyeService.noticePayed(null, tradeWaterId, null, feePrice, bindSwitch, cardNo, quickToken, wuyeId);
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			return e.getMessage();
 		}
 		return "SUCCESS";
