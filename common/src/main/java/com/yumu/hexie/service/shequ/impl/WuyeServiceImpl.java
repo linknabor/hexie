@@ -268,7 +268,7 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		//1.更新红包状态
 		Coupon coupon = null;
-		if (StringUtils.isEmpty(couponId)) {
+		if (!StringUtils.isEmpty(couponId)) {
 			coupon = couponService.findOne(Long.valueOf(couponId));
 			if (coupon != null) {
 				try {
