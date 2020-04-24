@@ -715,13 +715,14 @@ public class WuyeController extends BaseController {
 	 * @param user
 	 * @throws UnsupportedEncodingException 
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/queryOrder/{orderNo}", method = RequestMethod.GET)
 	@ResponseBody
-	public String queryOrder(@ModelAttribute(Constants.USER) User user, @PathVariable String orderNo) throws Exception {
+	public BaseResult<String> queryOrder(@ModelAttribute(Constants.USER) User user, @PathVariable String orderNo) throws Exception {
 		
 		Assert.hasText(orderNo, "订单号不能为空。");
 		String result = wuyeService.queyrOrder(user, orderNo);
-		return result;
+		return BaseResult.successResult(result);
 	}
 	
 	/**
