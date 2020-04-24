@@ -754,7 +754,11 @@ public class WuyeController extends BaseController {
 		log.info("wuyeId:" + wuyeId);
 		
 		String bindSwitch = "1";	//默认绑定
-		wuyeService.noticePayed(null, tradeWaterId, null, feePrice, bindSwitch, cardNo, quickToken, wuyeId);
+		try {
+			wuyeService.noticePayed(null, tradeWaterId, null, feePrice, bindSwitch, cardNo, quickToken, wuyeId);
+		} catch (Exception e) {
+			return e.getMessage();
+		}
 		return "SUCCESS";
 	}
 	
