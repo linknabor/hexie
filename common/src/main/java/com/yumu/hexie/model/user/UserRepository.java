@@ -102,4 +102,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query(value = "update user set couponCount = ?1 where id = ?2 and couponCount = ?3 ", nativeQuery = true)
 	public int updateUserCoupon(int currCount, long id, int oriCount);
 	
+	@Modifying
+	@Transactional
+	@Query(value = "update user set zhima = zhima + ?1 where id = ?2 ", nativeQuery = true)
+	public int updateUserZhima(int increase, long id);
+	
 }
