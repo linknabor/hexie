@@ -526,12 +526,8 @@ public class CouponServiceImpl implements CouponService {
 	 */
 	@Override
 	public boolean isAvaible(String appId, String payType) {
-		
-		if (systemConfigService.registerCouponServiceAvailabe(appId) && systemConfigService.isCardPayServiceAvailabe(appId)) {
-			return true;
-		}
-		return false;
-		
+		//TODO
+		return true;
 	}
 
 	//itemType:1, serviceType:-0, productId:10
@@ -806,15 +802,15 @@ public class CouponServiceImpl implements CouponService {
 
 		Coupon coupon = couponRepository.findOne(couponId);
 
-        log.warn("comsume红包Bill[BEG]feePrice["+feePrice+"]["+couponId+"]");
+        log.info("comsume红包Bill[BEG]feePrice["+feePrice+"]["+couponId+"]");
 		if(!isAvaible(feePrice, coupon)){
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
 		}
-		log.error("consume coupon:" + coupon.getId());
+		log.info("consume coupon:" + coupon.getId());
 		coupon.cousume(0);
 		couponRepository.save(coupon);
 
-        log.warn("comsume红包Bill[END]feePrice["+feePrice+"]["+couponId+"]");
+        log.info("comsume红包Bill[END]feePrice["+feePrice+"]["+couponId+"]");
 		User user = userRepository.findOne(coupon.getUserId());
 		if(user.getCouponCount()>0) {
 			userRepository.updateUserCoupon(user.getCouponCount()-1, user.getId(), user.getCouponCount());

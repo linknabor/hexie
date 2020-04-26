@@ -268,14 +268,11 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		//1.更新红包状态
 		Coupon coupon = null;
-		User currUser = null;
 		if (!StringUtils.isEmpty(couponId)) {
 			coupon = couponService.findOne(Long.valueOf(couponId));
 			if (coupon != null) {
 				try {
 					couponService.comsume(feePrice, coupon.getId());
-					currUser = userRepository.findOne(coupon.getUserId());
-					userRepository.updateUserCoupon((currUser.getCouponCount()-1), user.getId(), currUser.getCouponCount());
 				} catch (Exception e) {
 					//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
 					log.error(e.getMessage(), e);
@@ -283,7 +280,9 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		if (user == null) {
-			user = currUser;
+			if (coupon != null) {
+				user = userRepository.findById(coupon.getUserId());
+			}
 		}
 		if (user == null) {
 			List<User> userList = userRepository.findByWuyeId(wuyeId);
