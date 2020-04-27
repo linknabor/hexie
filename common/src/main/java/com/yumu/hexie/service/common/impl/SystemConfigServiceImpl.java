@@ -189,7 +189,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	public String queryJsTickets(String appId) {
         
     	String tickets = "";
-    	log.info("appId is : " + appId, "is main :" + AppUtil.isMainApp(appId));
+    	log.info("appId is : " + appId + ", is main :" + AppUtil.isMainApp(appId));
         if (AppUtil.isMainApp(appId) || StringUtils.isEmpty(appId)) {
         	SystemConfig config = getConfigFromCache(JS_TOKEN);
 	        if (config != null) {
@@ -286,6 +286,38 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	public boolean isDonghu (String appId){
 		
 		String appIds = getSysConfigByKey("DONGHU_LIKE_APPS");	//类似东湖这种性质的公众号列表
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
+	}
+	
+	/**
+	 * 当前公众号是否发放注册红包
+	 */
+	@Override
+	public boolean registerCouponServiceAvailabe (String appId){
+		
+		String appIds = getSysConfigByKey("REGISTER_COUPON_SERVICE_APPS");	//开启注册发优惠券的APP列表
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
+	}
+	
+	/**
+	 * 当前公众号是否开启银行卡支付
+	 */
+	@Override
+	public boolean isCardPayServiceAvailabe (String appId){
+		
+		String appIds = getSysConfigByKey("CARD_PAY_SERVICE_APPS");	//开启银行卡支付的公众号APP列表
 		boolean isAvailable = false;
 		if (!StringUtils.isEmpty(appIds)) {
 			if (appIds.indexOf(appId) > -1) {

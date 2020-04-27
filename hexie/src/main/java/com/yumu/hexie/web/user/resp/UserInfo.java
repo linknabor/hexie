@@ -78,7 +78,7 @@ public class UserInfo implements Serializable {
  	private boolean cardService;	//是否开通卡券服务
  	private boolean coronaPrevention;	//肺炎疫情板块
  	private boolean isDonghu;	//是否东湖版本的公众号
-
+ 	private boolean cardPayService;	//公众号是否支持银行卡支付
  	
 	public String getSectId() {
 		return sectId;
@@ -340,6 +340,12 @@ public class UserInfo implements Serializable {
 	public void setDonghu(boolean isDonghu) {
 		this.isDonghu = isDonghu;
 	}
-
+	public boolean isCardPayService() {
+		return cardPayService;
+	}
+	public void setCardPayService(boolean cardPayService) {
+		this.cardPayService = cardPayService;
+	}
+	
 	
 }

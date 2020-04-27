@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.user.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -87,20 +88,19 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	@Async
-	private void updateSeedForRuleUpdate(long seedId){
+	public void updateSeedForRuleUpdate(long seedId){
 		CouponSeed oriSeed = couponSeedRepository.findOne(seedId);
 		oriSeed.getSeedStr();
 		oriSeed.updateTotal(couponRuleRepository.findBySeedId(seedId));
 		couponSeedRepository.save(oriSeed);
 	}
 
-	@Async
-	private void updateSeedAndRuleForCouponReceive(CouponSeed seed,CouponRule rule,Coupon coupon){
+	public void updateSeedAndRuleForCouponReceive(CouponSeed seed,CouponRule rule,Coupon coupon){
 		rule.addReceived();
 		saveRule(rule);
 	}
-	@Async
-	private void updateSeedAndRuleForCouponUse(Coupon coupon){
+	
+	public void updateSeedAndRuleForCouponUse(Coupon coupon){
 		CouponRule rule = couponRuleRepository.findOne(coupon.getRuleId());
 		rule.addUsed();
 		saveRule(rule);
@@ -518,6 +518,17 @@ public class CouponServiceImpl implements CouponService {
         log.warn("可以用（全部通过）");
 		return true;
 	}
+	
+	/**
+	 * 根据卡库指定策略 TODO
+	 * @param payType
+	 * @return
+	 */
+	@Override
+	public boolean isAvaible(String appId, String payType) {
+		//TODO
+		return true;
+	}
 
 	//itemType:1, serviceType:-0, productId:10
 	public Long getMerchatId(Long mainType, Long subType, Long itemId) {
@@ -565,7 +576,7 @@ public class CouponServiceImpl implements CouponService {
     	if(coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
     		return false;
     	}
-    	if (Float.parseFloat(feePrice) < 0.01){
+    	if (new BigDecimal(feePrice).compareTo(new BigDecimal("0.01"))<0){
     		return false;
     	}
     	if(coupon.isAvailableForAll()){
@@ -760,16 +771,20 @@ public class CouponServiceImpl implements CouponService {
 	}
 
 	@Override
-	public List<Coupon> findAvaibleCouponForWuye(long userId) {
-
+	public List<Coupon> findAvaibleCouponForWuye(User user, String payType) {
+		
 		List<Coupon> result = new ArrayList<Coupon>();
         List<Integer> status = new ArrayList<Integer>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, new PageRequest(0,200));
+        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(user.getId(), status, new PageRequest(0,200));
         for(Coupon coupon : coupons) {
             if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_WUYE, 0l, 0l, 
                 0l, null, coupon,false)){
-                result.add(coupon);
+            	
+            	if (isAvaible(user.getAppId(), payType)) {
+            		result.add(coupon);
+            		
+            	}
             }
         }
         return result;
@@ -787,19 +802,18 @@ public class CouponServiceImpl implements CouponService {
 
 		Coupon coupon = couponRepository.findOne(couponId);
 
-        log.warn("comsume红包Bill[BEG]feePrice["+feePrice+"]["+couponId+"]");
+        log.info("comsume红包Bill[BEG]feePrice["+feePrice+"]["+couponId+"]");
 		if(!isAvaible(feePrice, coupon)){
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
 		}
-		log.error("consume coupon:" + coupon.getId());
+		log.info("consume coupon:" + coupon.getId());
 		coupon.cousume(0);
 		couponRepository.save(coupon);
 
-        log.warn("comsume红包Bill[END]feePrice["+feePrice+"]["+couponId+"]");
+        log.info("comsume红包Bill[END]feePrice["+feePrice+"]["+couponId+"]");
 		User user = userRepository.findOne(coupon.getUserId());
 		if(user.getCouponCount()>0) {
-			user.setCouponCount(user.getCouponCount()-1);
-			userRepository.save(user);
+			userRepository.updateUserCoupon(user.getCouponCount()-1, user.getId(), user.getCouponCount());
 		}
 		
 		updateSeedAndRuleForCouponUse(coupon);
@@ -813,11 +827,46 @@ public class CouponServiceImpl implements CouponService {
 	
 	}
 	
+	/**
+	 * 锁定物业优惠券
+	 * @param orderId传tradeWaterId
+	 * @param coupon
+	 */
+	@Override
+	public void lockWuyeCoupon(String orderId, Coupon coupon) {
+		
+		log.warn("lock红包["+orderId+"]Coupon["+coupon.getId()+"]");
+		log.info("coupon : " + coupon);
+		if(!isAvaible(String.valueOf(coupon.getAmount()), coupon)){
+			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON, coupon.getId(),"该现金券不可用于本订单");
+		}
+		couponRepository.lockWuyeCoupon(Long.valueOf(orderId), ModelConstant.COUPON_STATUS_LOCKED, coupon.getId(), ModelConstant.COUPON_STATUS_AVAILABLE);
+		
+	}
+
+	@Override
+	public void updateWuyeCouponOrderId(long orderId, long couponId) {
+		couponRepository.updateWuyeCouponOrderId(orderId, couponId);
+	}
+
+	/**
+	 * 根据orderId消费优惠券
+	 */
+	@Override
+	public void consume(long orderId) {
+		
+		Coupon coupon = couponRepository.findByOrderId(orderId);
+		couponRepository.consumeWuyeCoupon(ModelConstant.COUPON_STATUS_USED, coupon.getId(), orderId, ModelConstant.COUPON_STATUS_AVAILABLE);
+	}
 	
-	public static void main(String[] args) {
-		
-		System.out.println(new Long(0) == 0);
-		
+	/**
+	 * 根据orderId查找优惠券
+	 * @param orderId
+	 * @return
+	 */
+	@Override
+	public Coupon findByOrderId(long orderId) {
+		return couponRepository.findByOrderId(orderId);
 	}
 	
 }

@@ -1,16 +1,22 @@
 package com.yumu.hexie.service.shequ;
 
+import java.util.List;
+
+import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
+import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
 
 public interface WuyeService {
@@ -113,27 +119,11 @@ public interface WuyeService {
 	 */
 	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName);
 
-/**
+	/**
 	 * 物业账单缴费
-	 * @param user
-	 * @param billId
-	 * @param stmtId
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionname
-	 * @return
-	 * @throws Exception
+	 * @param prepayRequestDTO
 	 */
-	WechatPayInfo getPrePayInfo(User user, String billId, String stmtId, String couponUnit, String couponNum,
-			String couponId, String mianBill, String mianAmt, String reduceAmt,String fee_mianBill,String fee_mianAmt, String invoice_title_type,
-			String credit_code, String invoice_title, String regionname) throws Exception;
+	WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
 
 	/**
 	 * 物业无账单缴费
@@ -154,9 +144,7 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception
 	 */
-	WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
-			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt, String reduceAmt,
-			String invoice_title_type, String credit_code, String invoice_title, String regionname) throws Exception;
+	WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception;
 
 	/**
 	 * 通知已支付
@@ -167,7 +155,8 @@ public interface WuyeService {
 	 * @param feePrice
 	 * @param bindSwitch
 	 */
-	void noticePayed(User user, String billId, String tradeWaterId, String couponId, String feePrice, String bindSwitch);
+	void noticePayed(User user, String tradeWaterId, String couponId, 
+			String feePrice, String bindSwitch, String cardNo, String quickToken, String wuyeId);
 	
 	/**
 	 * 查询是否已经用过红包
@@ -258,6 +247,45 @@ public interface WuyeService {
 	 * @return
 	 */
 	HexieHouse getHouseByVerNo(User user, String verNo);
+
+	/**
+	 * 从种子添加红包
+	 * @param user
+	 * @param list
+	 */
+	void addCouponsFromSeed(User user, List<CouponCombination> list);
+
+	/**
+	 * 发送物业缴费红包的模板消息
+	 * @param user
+	 * @param tradeWaterId
+	 * @param feePrice
+	 */
+	void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice);
 	
-	
+	/**
+	 * 获取支付的优惠明细
+	 * @param prepayRequestDTO
+	 * @throws Exception 
+	 */
+	DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
+
+	/**
+	 * 根据物业订单号查询交易结果
+	 * @param user
+	 * @param orderNo
+	 * @throws Exception 
+	 */
+	String queyrOrder(User user, String orderNo) throws Exception;
+
+	/**
+	 * 获取绑卡支付的短信验证码
+	 * @param user
+	 * @param orderNo
+	 * @param mobile
+	 * @return
+	 * @throws Exception
+	 */
+	String getPaySmsCode(User user, String cardId) throws Exception;
+
 }

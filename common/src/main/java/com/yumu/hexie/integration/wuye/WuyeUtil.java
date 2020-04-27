@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
+import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -67,8 +68,6 @@ public class WuyeUtil {
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
 	private static final String QUICK_PAY_URL = "quickPaySDO.do?stmt_id=%s&curr_page=%s&total_count=%s"; // 快捷支付
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
-	private static final String WX_PAY_URL = "wechatPayRequestSDO.do?user_id=%s&bill_id=%s&stmt_id=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
-			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&fee_mianBill=%s&fee_mianAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do?user_id=%s&mng_cell_id=%s&start_date=%s&end_date=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
 			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
@@ -281,52 +280,6 @@ public class WuyeUtil {
 	}
 	
 	/**
-	 * 缴费
-	 * @param user
-	 * @param billId
-	 * @param stmtId
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionurl
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static BaseResult<WechatPayInfo> getPrePayInfo(User user,String billId,String stmtId,
-		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,String fee_mianBill,String fee_mianAmt,
-		String invoice_title_type, String credit_code, String invoice_title,String regionurl) throws Exception {
-		
-		String appid = user.getAppId();
-		String fromSys = SYSTEM_NAME;
-		if (StringUtils.isEmpty(appid)) {
-			//do nothing
-		}else {
-			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
-		}
-		
-		if (StringUtils.isEmpty(regionurl)) {
-			regionurl = getRequestUri(user);
-		}
-		
-		invoice_title = URLEncoder.encode(invoice_title,"GBK");
-		String url = regionurl + String.format(WX_PAY_URL, user.getWuyeId(),billId,stmtId,user.getOpenid(),
-					couponUnit,couponNum,couponId,fromSys,mianBill, mianAmt, reduceAmt,fee_mianBill,fee_mianAmt, invoice_title_type, credit_code, user.getTel(), invoice_title);
-	
-		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
-		if (!baseResult.isSuccess()) {
-			throw new ValidationException(baseResult.getData().toString());
-		}
-		return (BaseResult<WechatPayInfo>)baseResult;
-	}
-	
-	/**
 	 * 无账单缴费
 	 * @param user
 	 * @param houseId
@@ -346,10 +299,10 @@ public class WuyeUtil {
 	 * @throws Exception
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static BaseResult<WechatPayInfo> getOtherPrePayInfo(User user,String houseId,String start_date,String end_date,
-		String couponUnit, String couponNum, String couponId,String mianBill,String mianAmt, String reduceAmt,
-		String invoice_title_type, String credit_code, String invoice_title,String regionurl) throws Exception {
-		invoice_title = URLEncoder.encode(invoice_title,"GBK");
+	public static BaseResult<WechatPayInfo> getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception {
+		
+		User user = dto.getUser();
+		String invoiceTitle = URLEncoder.encode(dto.getInvoiceTitleType(),"GBK");
 		
 		String appid = user.getAppId();
 		String fromSys = SYSTEM_NAME;
@@ -358,13 +311,25 @@ public class WuyeUtil {
 		}else {
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
-		
+		String regionurl = dto.getRegionUrl();
 		if (StringUtils.isEmpty(regionurl)) {
 			regionurl = getRequestUri(user);
 		}
 		
-		String url = regionurl + String.format(OTHER_WX_PAY_URL, user.getWuyeId(),houseId,start_date,end_date,user.getOpenid(),
-					couponUnit,couponNum,couponId,fromSys,mianBill, mianAmt, reduceAmt, invoice_title_type, credit_code, user.getTel(), invoice_title);
+		String houseId = dto.getHouseId();
+		String startDate = dto.getStartDate();
+		String endDate = dto.getEndDate();
+		String couponUnit = dto.getCouponUnit();
+		String couponNum = dto.getCouponNum();
+		String couponId = dto.getCouponId();
+		String mianBill = dto.getMianBill();
+		String mianAmt = dto.getMianAmt();
+		String reduceAmt = dto.getReduceAmt();
+		String invoiceTitleType = dto.getInvoiceTitleType();
+		String creditCode = dto.getCreditCode();
+		
+		String url = regionurl + String.format(OTHER_WX_PAY_URL, user.getWuyeId(),houseId,startDate,endDate,user.getOpenid(),
+					couponUnit,couponNum,couponId,fromSys,mianBill, mianAmt, reduceAmt, invoiceTitleType, creditCode, user.getTel(), invoiceTitle);
 	
 		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
 		if (!baseResult.isSuccess()) {
@@ -651,7 +616,6 @@ public class WuyeUtil {
 			if (!StringUtils.isEmpty(urlLink)) {
 				requestUri = urlLink;
 			}
-
 		}
 		return requestUri;
 	}

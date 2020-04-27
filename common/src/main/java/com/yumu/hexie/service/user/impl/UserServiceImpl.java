@@ -32,6 +32,8 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
+import com.yumu.hexie.service.coupon.CouponStrategy;
+import com.yumu.hexie.service.coupon.CouponStrategyFactory;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
@@ -61,6 +63,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private PointService pointService;
+	
+	@Autowired
+	private CouponStrategyFactory couponStrategyFactory;
 	
 	@Override
 	public User getById(long uId) {
@@ -335,9 +340,12 @@ public class UserServiceImpl implements UserService {
 			}
 			
 		}
+		
+		CouponStrategy registerCouponStrategy = couponStrategyFactory.getRegisterStrategy(user);
+		registerCouponStrategy.sendCoupon(user);
 		user.setRegisterDate(System.currentTimeMillis());
-        User savedUser = userRepository.save(user);
-        return save(savedUser);
+        User savedUser = save(user);
+        return savedUser;
 		
 	}
 

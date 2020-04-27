@@ -59,8 +59,7 @@ public class PointServiceImpl implements PointService {
 		pr.setPoint(point);
 		pr.setKeyStr(key);
 		pointRecordRepository.save(pr);
-		user.setZhima(user.getZhima()+point);
-		userRepository.save(user);
+		userRepository.updateUserZhima(point, user.getId());
 	}
 	
 	/**
