@@ -26,7 +26,7 @@ public class ParamServiceImpl implements ParamService {
 	public final static String CACHED_KEY = "param";
 	
 	@Autowired
-	private SystemConfigService SystemConfigService;
+	private SystemConfigService systemConfigService;
 	
 	@Autowired
 	private RedisTemplate<String, Map<String, String>> redisTemplate;
@@ -85,7 +85,7 @@ public class ParamServiceImpl implements ParamService {
 	@Override
 	public void updateSysParam() {
 		
-		SystemConfigService.reloadSysConfigCache();
+		systemConfigService.reloadSysConfigCache();
 	}
 	
 

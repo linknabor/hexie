@@ -12,9 +12,9 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserNotice;
 import com.yumu.hexie.model.user.UserNoticeRepository;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.user.UserNoticeService;
-import com.yumu.hexie.service.user.UserService;
 
 @Service("userNoticeService")
 public class UserNoticeServiceImpl implements UserNoticeService {
@@ -24,7 +24,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 	@Inject
 	protected SmsService smsService;
 	@Autowired
-	private UserService userService;
+	private UserRepository userRepository;
 	
 
 	@Override
@@ -45,7 +45,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		String msg = "您好，您购买的"+productName+"已支付成功，支付总额" + prices + "元,关注微信号“合协社区”,了解更多订单信息。";
 		userNoticeRepository.save(new UserNotice(userId, ModelConstant.NOTICE_TYPE_ORDER, ModelConstant.NOTICE_SUB_TYPE_ORDERSUCCESS,
 				msg, orderId));
-		User user = userService.getById(userId);
+		User user = userRepository.findById(userId);
 		smsService.sendMsg(user, tel, msg, getKey(userId,orderId,1));
 	}
 
@@ -56,7 +56,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		userNoticeRepository.save(new UserNotice(userId, ModelConstant.NOTICE_TYPE_ORDER, 
 				ModelConstant.NOTICE_SUB_TYPE_ORDERSENDGOODS,msg, orderId));
 		
-		User user = userService.getById(userId);
+		User user = userRepository.findById(userId);
 		smsService.sendMsg(user, tel, msg, getKey(userId,orderId,2));
 	}
 
@@ -96,7 +96,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 		}else{
 			msg ="您好，您的"+serviceName+"服务已成功预约，感谢您的信任。关注微信公众号“合协社区”，了解更多服务信息";
 		}
-		User user = userService.getById(userId);
+		User user = userRepository.findById(userId);
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_YUYUE, 1,
 				msg, yuyueId));
 		smsService.sendMsg(user, tel, msg,  getKey(user.getId(),yuyueId,7));

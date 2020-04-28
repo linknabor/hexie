@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -7,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -14,7 +16,11 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -22,6 +28,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
+import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -29,7 +36,11 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
+import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.region.RegionUrl;
+import com.yumu.hexie.model.user.BankCard;
+import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -71,6 +82,12 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
+	
+	@Autowired
+	private BankCardRepository bankCardRepository;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -141,27 +158,95 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public WechatPayInfo getPrePayInfo(User user, String billId,
-			String stmtId, String couponUnit, String couponNum, 
-			String couponId,String mianBill,String mianAmt, String reduceAmt, String fee_mianBill,String fee_mianAmt,
-			String invoice_title_type, String credit_code, String invoice_title,String regionname) throws Exception {
+	@Transactional
+	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
-		String targetUrl = getRegionUrl(regionname);
-		return WuyeUtil.getPrePayInfo(user, billId, stmtId, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, fee_mianBill,fee_mianAmt,
-				invoice_title_type, credit_code, invoice_title,targetUrl)
-				.getData();
+		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
+			String remerber = prepayRequestDTO.getRemember();
+			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
+				
+				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");
+				Assert.hasText(prepayRequestDTO.getAcctNo(), "卡号不能为空。");
+				Assert.hasText(prepayRequestDTO.getCertId(), "证件号不能为空。");
+				Assert.hasText(prepayRequestDTO.getPhoneNo(), "银行预留手机号不能为空。");
+				
+				BankCard bankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getAcctNo());
+				if (bankCard == null) {
+					bankCard = new BankCard();
+				}
+				bankCard.setAcctName(prepayRequestDTO.getCustomerName());
+				bankCard.setAcctNo(prepayRequestDTO.getAcctNo());
+				bankCard.setBankCode("");	//TODO 
+				bankCard.setBankName("");	//TODO
+				bankCard.setBranchName("");	//TODO
+				bankCard.setBranchNo("");	//TODO
+				bankCard.setPhoneNo(prepayRequestDTO.getPhoneNo());
+				bankCard.setUserId(prepayRequestDTO.getUser().getId());
+				bankCard.setUserName(prepayRequestDTO.getUser().getName());
+				//支付成功回调的时候还要保存quickToken
+				bankCardRepository.save(bankCard);
+			} 
+			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
+				BankCard selBankCard = bankCardRepository.findOne(Long.valueOf(prepayRequestDTO.getCardId()));
+				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
+					throw new BizValidateException("未绑定的银行卡。");
+				}
+				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
+				prepayRequestDTO.setPhoneNo(selBankCard.getPhoneNo());
+			}
+		}
+		//TODO 从卡库校验是否是贵州银行的卡
+		String couponId = prepayRequestDTO.getCouponId();
+		if (!StringUtils.isEmpty(couponId)) {
+			Coupon coupon = couponService.findOne(Long.valueOf(couponId));
+			if (!couponService.isAvaible(prepayRequestDTO.getCouponUnit(), coupon)) {
+				throw new BizValidateException("优惠券不可用，id： " + coupon.getId());
+			}
+		}
+		
+		WechatPayInfo wechatPayInfo = wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
+		return wechatPayInfo;
 	}
 	
 	@Override
-	public WechatPayInfo getOtherPrePayInfo(User user, String houseId, String start_date, String end_date,
-			String couponUnit, String couponNum, String couponId, String mianBill, String mianAmt,
-			String reduceAmt, String invoice_title_type, String credit_code, String invoice_title,String regionname)
-			throws Exception {
+	@Transactional
+	public WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
-		String targetUrl = getRegionUrl(regionname);
-		return WuyeUtil.getOtherPrePayInfo(user, houseId, start_date,end_date, couponUnit, couponNum, couponId,mianBill,mianAmt, reduceAmt, 
-				invoice_title_type, credit_code, invoice_title,targetUrl)
-				.getData();
+		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
+			
+			String remerber = prepayRequestDTO.getRemember();
+			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
+				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");
+				Assert.hasText(prepayRequestDTO.getAcctNo(), "卡号不能为空。");
+				Assert.hasText(prepayRequestDTO.getCertId(), "证件号不能为空。");
+				Assert.hasText(prepayRequestDTO.getPhoneNo(), "银行预留手机号不能为空。");
+				
+				BankCard bankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getAcctNo());
+				if (bankCard == null) {
+					bankCard = new BankCard();
+				}
+				bankCard.setAcctName(prepayRequestDTO.getCustomerName());
+				bankCard.setAcctNo(prepayRequestDTO.getAcctNo());
+				bankCard.setBankCode("");	//TODO 
+				bankCard.setBankName("");	//TODO
+				bankCard.setBranchName("");	//TODO
+				bankCard.setBranchNo("");	//TODO
+				bankCard.setPhoneNo(prepayRequestDTO.getPhoneNo());
+				bankCard.setUserId(prepayRequestDTO.getUser().getId());
+				bankCard.setUserName(prepayRequestDTO.getUser().getName());
+				//支付成功回调的时候还要保存quickToken
+				bankCardRepository.save(bankCard);
+			} 
+			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
+				BankCard selBankCard = bankCardRepository.findOne(Long.valueOf(prepayRequestDTO.getCardId()));
+				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
+					throw new BizValidateException("未绑定的银行卡。");
+				}
+				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
+				prepayRequestDTO.setPhoneNo(selBankCard.getPhoneNo());
+			}
+		}
+		return wuyeUtil2.getOtherPrePayInfo(prepayRequestDTO).getData();
 	}
 
 	/**
@@ -176,22 +261,52 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Transactional
 	@Override
-	public void noticePayed(User user, String billId, String tradeWaterId, 
-			String couponId, String feePrice, String bindSwitch) {
+	public void noticePayed(User user, String tradeWaterId, 
+			String couponId, String feePrice, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
+		
+		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
 		
 		//1.更新红包状态
+		Coupon coupon = null;
 		if (!StringUtils.isEmpty(couponId)) {
-			couponService.comsume(feePrice, Long.valueOf(couponId));
+			coupon = couponService.findOne(Long.valueOf(couponId));
+			if (coupon != null) {
+				try {
+					couponService.comsume(feePrice, coupon.getId());
+				} catch (Exception e) {
+					//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		if (user == null) {
+			if (coupon != null) {
+				user = userRepository.findById(coupon.getUserId());
+			}
+		}
+		if (user == null) {
+			List<User> userList = userRepository.findByWuyeId(wuyeId);
+			user = userList.get(0);
+		}
+		if (user == null) {
+			log.info("can not find user, wuyeId : " + wuyeId);
+			return;
 		}
 		//2.添加芝麻积分
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			String pointKey = "wuyePay-" + tradeWaterId;
 			addPointAsync(user, feePrice, pointKey);
 		}else {
-			String pointKey = "zhima-bill-" + user.getId() + "-" + billId;
+			String pointKey = "zhima-bill-" + user.getId() + "-" + tradeWaterId;
 			pointService.updatePoint(user, "10", pointKey);
 		}
-		//3.绑定所缴纳物业费的房屋
+		
+		//3.如果是绑卡支付，记录用户的quicktoken
+		if (!StringUtils.isEmpty(cardNo) && !StringUtils.isEmpty(quickToken)) {
+			bankCardRepository.updateBankCardByAcctNoAndUserId(quickToken, cardNo, user.getId());
+		}
+		
+		//4.绑定所缴纳物业费的房屋
 		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
 		
 	}
@@ -480,5 +595,51 @@ public class WuyeServiceImpl implements WuyeService {
 		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
 	
 	}
+	
+	@Async
+	@Override
+	public void addCouponsFromSeed(User user, List<CouponCombination> list) {
+
+		try {
+
+			for (int i = 0; i < list.size(); i++) {
+				couponService.addCouponFromSeed(list.get(i).getSeedStr(), user);
+			}
+
+		} catch (Exception e) {
+
+			log.error("add Coupons for wuye Pay : " + e.getMessage());
+		}
+
+	}
+
+	@Async
+	@Override
+	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
+
+		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
+	}
+
+	@Override
+	public DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
+		
+		DiscountDetail discountDetail = wuyeUtil2.getDiscountDetail(discountViewRequestDTO).getData();
+		return discountDetail;
+	
+	}
+	
+	@Override
+	public String queyrOrder(User user, String orderNo) throws Exception {
+		return wuyeUtil2.queryOrder(user, orderNo).getData();
+	}
+	
+	@Override
+	public String getPaySmsCode(User user, String cardId) throws Exception {
+	
+		Assert.hasText(cardId, "卡ID不能为空。");
+		BankCard bankCard = bankCardRepository.findOne(Long.valueOf(cardId));
+		return wuyeUtil2.getPaySmsCode(user, bankCard).getData();
+	}
+	
 	
 }

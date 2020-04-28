@@ -48,11 +48,12 @@ public class KeyToNameUtil {
 		keyName = new HashMap<String, String>();
 		keyName.put("01","现金");
 		keyName.put("02","转账");
-		keyName.put( "03","POS");
+		keyName.put("03","POS");
 		keyName.put("04","支付宝");
 		keyName.put("05","财付通");
 		keyName.put("06","微信支付");
 		keyName.put("07","微信支付");
+		keyName.put("11","银行卡支付");
 		keyNameConfig.put(PAYMETHOD_TYPE, keyName);
 		
 		keyName = new HashMap<String, String>();

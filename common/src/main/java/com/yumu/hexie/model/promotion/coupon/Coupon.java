@@ -68,6 +68,8 @@ public class Coupon extends BaseModel {
 	/**************现金券适用范围**************/
 
 	private String suggestUrl;
+	private String appid;	//所属平台
+	
 	@Transient
 	public String getUseStartDateStr(){
 		return DateUtil.dtFormat(useStartDate, "yyyy.MM.dd");
@@ -391,4 +393,29 @@ public class Coupon extends BaseModel {
     public void setuMerchantId(Long uMerchantId) {
         this.uMerchantId = uMerchantId;
     }
+    
+
+	public String getAppid() {
+		return appid;
+	}
+
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+
+	@Override
+	public String toString() {
+		return "Coupon [seedId=" + seedId + ", userId=" + userId + ", ruleId=" + ruleId + ", empty=" + empty
+				+ ", orderId=" + orderId + ", useStartDate=" + useStartDate + ", expiredDate=" + expiredDate
+				+ ", status=" + status + ", usedDate=" + usedDate + ", selected=" + selected + ", title=" + title
+				+ ", amount=" + amount + ", userHeadImg=" + userHeadImg + ", userName=" + userName + ", seedType="
+				+ seedType + ", seedStr=" + seedStr + ", couponDesc=" + couponDesc + ", usageCondition="
+				+ usageCondition + ", availableForAll=" + availableForAll + ", itemType=" + itemType + ", subItemType="
+				+ subItemType + ", serviceType=" + serviceType + ", productId=" + productId + ", merchantId="
+				+ merchantId + ", uItemType=" + uItemType + ", uSubItemType=" + uSubItemType + ", uServiceType="
+				+ uServiceType + ", uProductId=" + uProductId + ", uMerchantId=" + uMerchantId + ", suggestUrl="
+				+ suggestUrl + ", appid=" + appid + "]";
+	}
+
+	
 }
