@@ -15,24 +15,11 @@ public class PrepayReqVO implements Serializable {
 	private String billId;
 	private String stmtId;
 	
-	//标准版参数
-	private String houseId;
-	@JsonProperty("start_date")
-	private String startDate;
-	@JsonProperty("end_date")
-	private String endDate;
-	
 	//公用参数
 	private String couponUnit;
 	private String couponNum;
 	private String couponId;
-	private String mianBill;
-	private String mianAmt;
 	private String reduceAmt;
-	@JsonProperty("fee_mianBill")
-	private String feeMianBill;
-	@JsonProperty("fee_mianAmt")
-	private String feeMianAmt;
 	@JsonProperty("invoice_title_type")
 	private String invoiceTitleType;
 	@JsonProperty("credit_code")
@@ -60,6 +47,9 @@ public class PrepayReqVO implements Serializable {
 	private String cardId;	//选卡支付标记，选中的记录卡号
 	private String orderNo;	//绑卡支付需要
 	
+	private String ruleType;	//减免规则类型
+	private String reductionAmt;	//减免金额
+	
 	public String getBillId() {
 		return billId;
 	}
@@ -71,24 +61,6 @@ public class PrepayReqVO implements Serializable {
 	}
 	public void setStmtId(String stmtId) {
 		this.stmtId = stmtId;
-	}
-	public String getHouseId() {
-		return houseId;
-	}
-	public void setHouseId(String houseId) {
-		this.houseId = houseId;
-	}
-	public String getStartDate() {
-		return startDate;
-	}
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-	public String getEndDate() {
-		return endDate;
-	}
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
 	}
 	public String getCouponUnit() {
 		return couponUnit;
@@ -108,35 +80,11 @@ public class PrepayReqVO implements Serializable {
 	public void setCouponId(String couponId) {
 		this.couponId = couponId;
 	}
-	public String getMianBill() {
-		return mianBill;
-	}
-	public void setMianBill(String mianBill) {
-		this.mianBill = mianBill;
-	}
-	public String getMianAmt() {
-		return mianAmt;
-	}
-	public void setMianAmt(String mianAmt) {
-		this.mianAmt = mianAmt;
-	}
 	public String getReduceAmt() {
 		return reduceAmt;
 	}
 	public void setReduceAmt(String reduceAmt) {
 		this.reduceAmt = reduceAmt;
-	}
-	public String getFeeMianBill() {
-		return feeMianBill;
-	}
-	public void setFeeMianBill(String feeMianBill) {
-		this.feeMianBill = feeMianBill;
-	}
-	public String getFeeMianAmt() {
-		return feeMianAmt;
-	}
-	public void setFeeMianAmt(String feeMianAmt) {
-		this.feeMianAmt = feeMianAmt;
 	}
 	public String getInvoiceTitleType() {
 		return invoiceTitleType;
@@ -229,17 +177,27 @@ public class PrepayReqVO implements Serializable {
 	public void setOrderNo(String orderNo) {
 		this.orderNo = orderNo;
 	}
+	public String getRuleType() {
+		return ruleType;
+	}
+	public void setRuleType(String ruleType) {
+		this.ruleType = ruleType;
+	}
+	public String getReductionAmt() {
+		return reductionAmt;
+	}
+	public void setReductionAmt(String reductionAmt) {
+		this.reductionAmt = reductionAmt;
+	}
 	@Override
 	public String toString() {
-		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", houseId=" + houseId + ", startDate="
-				+ startDate + ", endDate=" + endDate + ", orderNo=" + orderNo + ", couponUnit=" + couponUnit
-				+ ", couponNum=" + couponNum + ", couponId=" + couponId + ", mianBill=" + mianBill + ", mianAmt="
-				+ mianAmt + ", reduceAmt=" + reduceAmt + ", feeMianBill=" + feeMianBill + ", feeMianAmt=" + feeMianAmt
-				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle="
-				+ invoiceTitle + ", regionName=" + regionName + ", payType=" + payType + ", customerName="
-				+ customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo="
-				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", remember=" + remember
-				+ ", cardId=" + cardId + "]";
+		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
+				+ couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitleType="
+				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", regionName="
+				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
+				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
+				+ ", veriCode=" + veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo
+				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + "]";
 	}
 	
 	

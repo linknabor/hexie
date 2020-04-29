@@ -28,14 +28,18 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
+import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
-import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
+import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieResponse;
+import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.BankCard;
@@ -65,11 +69,69 @@ public class WuyeUtil2 {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	private static final String QUICK_PAY_URL = "quickPaySDO.do"; // 快捷支付
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
 	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do"; // 微信支付请求
 	private static final String DISCOUNT_URL = "getBillPayDetailSDO.do";	//获取优惠明细
 	private static final String CARD_PAY_SMS_URL = "getCardPaySmsCodeSDO.do";	//获取优惠明细
-	private static final String QUERY_ORDER_URL = "queryOrderSDO.do";
+	private static final String QUERY_ORDER_URL = "queryOrderSDO.do";	//订单查询
+	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do?user_id=%s&stmt_id=%s&bill_id=%s"; // 获取账单详情
+	
+	
+	/**
+	 * 账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
+	 * @param user
+	 * @param stmtId
+	 * @param anotherbillIds
+	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public BaseResult<PaymentInfo> getBillDetail(User user,String stmtId,String anotherbillIds, String regionName) throws Exception {
+		
+		String requestUrl = getRequestUrl(user, regionName);
+		requestUrl += BILL_DETAIL_URL;
+		BillDetailRequest billDetailRequest = new BillDetailRequest();
+		billDetailRequest.setWuyeId(user.getWuyeId());
+		billDetailRequest.setStmtId(stmtId);
+		billDetailRequest.setBillId(anotherbillIds);
+		
+		TypeReference<HexieResponse<PaymentInfo>> typeReference = new TypeReference<HexieResponse<PaymentInfo>>(){};
+		HexieResponse<PaymentInfo> hexieResponse = wuyeRest(requestUrl, billDetailRequest, typeReference);
+		BaseResult<PaymentInfo> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 账单快捷缴费
+	 * @param user
+	 * @param stmtId
+	 * @param currPage
+	 * @param totalCount
+	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public BaseResult<BillListVO> quickPayInfo(User user, String stmtId, String currPage, String totalCount) throws Exception {
+		
+		String requestUrl = getRequestUrl(user, "");
+		requestUrl += QUICK_PAY_URL;
+		
+		QuickPayRequest quickPayRequest = new QuickPayRequest();
+		quickPayRequest.setStmtId(stmtId);
+		quickPayRequest.setCurrPage(currPage);
+		quickPayRequest.setTotalCount(totalCount);
+		
+		TypeReference<HexieResponse<BillListVO>> typeReference = new TypeReference<HexieResponse<BillListVO>>(){};
+		HexieResponse<BillListVO> hexieResponse = wuyeRest(requestUrl, quickPayRequest, typeReference);
+		BaseResult<BillListVO> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
 
 	/**
 	 * 专业版缴费
@@ -137,16 +199,16 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<DiscountDetail> getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
+	public BaseResult<Discounts> getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
 		
 		User user = discountViewRequestDTO.getUser();
 		String requestUrl = getRequestUrl(user, discountViewRequestDTO.getRegionName());
 		requestUrl += DISCOUNT_URL;
 		
 		DiscountViewRequest discountViewRequest = new DiscountViewRequest(discountViewRequestDTO);
-		TypeReference<HexieResponse<DiscountDetail>> typeReference = new TypeReference<HexieResponse<DiscountDetail>>(){};
-		HexieResponse<DiscountDetail> hexieResponse = wuyeRest(requestUrl, discountViewRequest, typeReference);
-		BaseResult<DiscountDetail> baseResult = new BaseResult<>();
+		TypeReference<HexieResponse<Discounts>> typeReference = new TypeReference<HexieResponse<Discounts>>(){};
+		HexieResponse<Discounts> hexieResponse = wuyeRest(requestUrl, discountViewRequest, typeReference);
+		BaseResult<Discounts> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		

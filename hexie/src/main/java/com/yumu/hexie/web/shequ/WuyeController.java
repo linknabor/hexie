@@ -42,7 +42,7 @@ import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
-import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
+import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -296,13 +296,14 @@ public class WuyeController extends BaseController {
 		}
 	}
 
-	/***************** [BEGIN]缴费 ********************/
+	/***************** [BEGIN]缴费 
+	 * @throws Exception ********************/
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getBillDetail", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<PaymentInfo> getBillDetail(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId,
-			@RequestParam(required = false) String regionname) {
+			@RequestParam(required = false) String regionname) throws Exception {
 		
 		PaymentInfo paymentInfo = wuyeService.getBillDetail(user, stmtId, billId, regionname);
 		return BaseResult.successResult(paymentInfo);
@@ -323,13 +324,6 @@ public class WuyeController extends BaseController {
 			@RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
 		WechatPayInfo result = new WechatPayInfo();
-		if (StringUtils.isEmpty(prepayReqVo.getFeeMianBill())) {
-			prepayReqVo.setFeeMianBill("0");
-		}
-		if (StringUtils.isEmpty(prepayReqVo.getFeeMianAmt())) {
-			prepayReqVo.setFeeMianAmt("0");
-		}
-		
 		log.info("prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
@@ -676,18 +670,18 @@ public class WuyeController extends BaseController {
 	 * @throws Exception 
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getDiscountDetail", method = RequestMethod.GET)
+	@RequestMapping(value = "/getDiscounts", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<DiscountDetail> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
+	public BaseResult<Discounts> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
 			@RequestBody DiscountViewReqVO discountViewReqVO) throws Exception {
 		
-		DiscountDetail discountDetail = new DiscountDetail();
+		Discounts discountDetail = new Discounts();
 		log.info("discountViewReqVO : " + discountViewReqVO);
 		DiscountViewRequestDTO dto = new DiscountViewRequestDTO();
 		BeanUtils.copyProperties(discountViewReqVO, dto);
 		dto.setUser(user);
 		log.info("discountViewRequestDTO : " + dto);
-		discountDetail = wuyeService.getDiscountDetail(dto);
+		discountDetail = wuyeService.getDiscounts(dto);
 		return BaseResult.successResult(discountDetail);
 	}
 	
