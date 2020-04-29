@@ -10,7 +10,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
-import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
+import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -28,8 +28,9 @@ public interface WuyeService {
 	 * @param currPage
 	 * @param totalCount
 	 * @return
+	 * @throws Exception 
 	 */
-	BillListVO quickPayInfo(User uesr, String stmtId, String currPage, String totalCount);
+	BillListVO quickPayInfo(User uesr, String stmtId, String currPage, String totalCount) throws Exception;
 
 	/**
 	 * 查询房屋
@@ -116,8 +117,9 @@ public interface WuyeService {
 	 * @param stmtId
 	 * @param anotherbillIds
 	 * @return
+	 * @throws Exception 
 	 */
-	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName);
+	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName) throws Exception;
 
 	/**
 	 * 物业账单缴费
@@ -268,7 +270,7 @@ public interface WuyeService {
 	 * @param prepayRequestDTO
 	 * @throws Exception 
 	 */
-	DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
+	Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
 
 	/**
 	 * 根据物业订单号查询交易结果

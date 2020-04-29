@@ -28,7 +28,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
-import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
+import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -151,10 +151,10 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName) {
+	public PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName) throws Exception {
 		
 		String targetUrl = getRegionUrl(regionName);
-		return WuyeUtil.getBillDetail(user, stmtId, anotherbillIds, targetUrl).getData();
+		return wuyeUtil2.getBillDetail(user, stmtId, anotherbillIds, targetUrl).getData();
 	}
 
 	@Override
@@ -312,8 +312,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public BillListVO quickPayInfo(User user, String stmtId, String currPage, String totalCount) {
-		return WuyeUtil.quickPayInfo(user, stmtId, currPage, totalCount).getData();
+	public BillListVO quickPayInfo(User user, String stmtId, String currPage, String totalCount) throws Exception {
+		return wuyeUtil2.quickPayInfo(user, stmtId, currPage, totalCount).getData();
 	}
 
 	@Override
@@ -621,9 +621,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
+	public Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
 		
-		DiscountDetail discountDetail = wuyeUtil2.getDiscountDetail(discountViewRequestDTO).getData();
+		Discounts discountDetail = wuyeUtil2.getDiscounts(discountViewRequestDTO).getData();
 		return discountDetail;
 	
 	}

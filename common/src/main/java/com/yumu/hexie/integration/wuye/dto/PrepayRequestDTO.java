@@ -36,14 +36,8 @@ public class PrepayRequestDTO implements Serializable {
 	private String billId;
 	private String stmtId;
 	
-	//标准版参数
-	private String houseId;
-	private String startDate;
-	private String endDate;
-	
-	private String payType;	//支付类型，0微信支付，1银行卡支付
-	
 	//银行卡支付参数
+	private String payType;	//支付类型，0微信支付，1银行卡支付
 	private String customerName;	//持卡人姓名
 	private String certType;	//证件类型
 	private String certId;		//证件号
@@ -56,6 +50,9 @@ public class PrepayRequestDTO implements Serializable {
 	private String remember;	//是否记住持卡人信息，0否1是
 	private String cardId;	//选卡支付标记，选中的记录卡号
 	private String orderNo;	//绑卡支付非首次支付需要传入
+	
+	private String ruleType;	//减免规则类型
+	private String reductionAmt;	//减免金额
 	
 	public String getCouponUnit() {
 		return couponUnit;
@@ -147,24 +144,6 @@ public class PrepayRequestDTO implements Serializable {
 	public void setStmtId(String stmtId) {
 		this.stmtId = stmtId;
 	}
-	public String getHouseId() {
-		return houseId;
-	}
-	public void setHouseId(String houseId) {
-		this.houseId = houseId;
-	}
-	public String getStartDate() {
-		return startDate;
-	}
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-	public String getEndDate() {
-		return endDate;
-	}
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
-	}
 	public String getCustomerName() {
 		return customerName;
 	}
@@ -237,6 +216,18 @@ public class PrepayRequestDTO implements Serializable {
 	public void setOrderNo(String orderNo) {
 		this.orderNo = orderNo;
 	}
+	public String getRuleType() {
+		return ruleType;
+	}
+	public void setRuleType(String ruleType) {
+		this.ruleType = ruleType;
+	}
+	public String getReductionAmt() {
+		return reductionAmt;
+	}
+	public void setReductionAmt(String reductionAmt) {
+		this.reductionAmt = reductionAmt;
+	}
 	@Override
 	public String toString() {
 		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
@@ -244,10 +235,10 @@ public class PrepayRequestDTO implements Serializable {
 				+ feeMianBill + ", feeMianAmt=" + feeMianAmt + ", reduceAmt=" + reduceAmt + ", invoiceTitle="
 				+ invoiceTitle + ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode
 				+ ", regionUrl=" + regionUrl + ", regionName=" + regionName + ", billId=" + billId + ", stmtId="
-				+ stmtId + ", houseId=" + houseId + ", startDate=" + startDate + ", endDate=" + endDate + ", payType="
-				+ payType + ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId
-				+ ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode="
-				+ veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + "]";
+				+ stmtId + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
+				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
+				+ ", veriCode=" + veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo
+				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + "]";
 	}
 	
 }

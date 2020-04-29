@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.xml.bind.ValidationException;
 
 import org.apache.http.client.methods.HttpGet;
 import org.hibernate.bytecode.buildtime.spi.ExecutionException;
@@ -16,7 +15,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
-import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -40,7 +38,6 @@ public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
 
 	private static String REQUEST_ADDRESS;
-	private static String SYSTEM_NAME;
 	private static Properties props = new Properties();
 	
 	static {
@@ -52,7 +49,6 @@ public class WuyeUtil {
 			log.error(e.getMessage(), e);
 		}
 		REQUEST_ADDRESS = props.getProperty("requestUrl");
-		SYSTEM_NAME = props.getProperty("sysName");
 	}
 
 	// 接口地址
@@ -63,13 +59,9 @@ public class WuyeUtil {
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String BILL_LIST_STD_URL = "getPayListStdSDO.do?user_id=%s&start_date=%s&end_date=%s&mng_cell_id=%s&sect_id=%s"; // 获取账单列表
-	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do?user_id=%s&stmt_id=%s&bill_id=%s"; // 获取账单详情
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
-	private static final String QUICK_PAY_URL = "quickPaySDO.do?stmt_id=%s&curr_page=%s&total_count=%s"; // 快捷支付
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
-	private static final String OTHER_WX_PAY_URL = "otherWechatPayRequestSDO.do?user_id=%s&mng_cell_id=%s&start_date=%s&end_date=%s&openid=%s&coupon_unit=%s&coupon_num=%s"
-			+ "&coupon_id=%s&from_sys=%s&mianBill=%s&mianAmt=%s&reduceAmt=%s&invoice_title_type=%s&credit_code=%s&mobile=%s&invoice_title=%s"; // 微信支付请求
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&trade_water_id=%s"; // 微信支付返回
@@ -86,20 +78,6 @@ public class WuyeUtil {
 	private static final String GET_HOUSE_VERNO_URL = "queryHouByVouNoSDO.do?user_id=%s&ver_no=%s"; //根据户号查询房屋
 	
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
-	
-	/**
-	 * 账单快捷缴费
-	 * @param user
-	 * @param stmtId
-	 * @param currPage
-	 * @param totalCount
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static BaseResult<BillListVO> quickPayInfo(User user, String stmtId, String currPage, String totalCount) {
-		String url = getRequestUri(user) + String.format(QUICK_PAY_URL, stmtId, currPage, totalCount);
-		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
-	}
 	
 	/**
 	 * 查询房屋列表
@@ -260,82 +238,6 @@ public class WuyeUtil {
 		}
 		String url = regionurl + String.format(BILL_LIST_STD_URL, user.getWuyeId(),startDate,endDate,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
-	}
-	
-	/**
-	 * 账单详情 anotherbillIds(逗号分隔) 汇总了去支付,来自BillInfo的bill_id
-	 * @param user
-	 * @param stmtId
-	 * @param anotherbillIds
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static BaseResult<PaymentInfo> getBillDetail(User user,String stmtId,String anotherbillIds, String regionurl){
-		
-		if (StringUtils.isEmpty(regionurl)) {
-			regionurl = getRequestUri(user);
-		}
-		String url = getRequestUri(user) + String.format(BILL_DETAIL_URL,user.getWuyeId(),stmtId,anotherbillIds);
-		return (BaseResult<PaymentInfo>)httpGet(url,PaymentInfo.class);
-	}
-	
-	/**
-	 * 无账单缴费
-	 * @param user
-	 * @param houseId
-	 * @param start_date
-	 * @param end_date
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionurl
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static BaseResult<WechatPayInfo> getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception {
-		
-		User user = dto.getUser();
-		String invoiceTitle = URLEncoder.encode(dto.getInvoiceTitleType(),"GBK");
-		
-		String appid = user.getAppId();
-		String fromSys = SYSTEM_NAME;
-		if (StringUtils.isEmpty(appid)) {
-			//do nothing
-		}else {
-			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
-		}
-		String regionurl = dto.getRegionUrl();
-		if (StringUtils.isEmpty(regionurl)) {
-			regionurl = getRequestUri(user);
-		}
-		
-		String houseId = dto.getHouseId();
-		String startDate = dto.getStartDate();
-		String endDate = dto.getEndDate();
-		String couponUnit = dto.getCouponUnit();
-		String couponNum = dto.getCouponNum();
-		String couponId = dto.getCouponId();
-		String mianBill = dto.getMianBill();
-		String mianAmt = dto.getMianAmt();
-		String reduceAmt = dto.getReduceAmt();
-		String invoiceTitleType = dto.getInvoiceTitleType();
-		String creditCode = dto.getCreditCode();
-		
-		String url = regionurl + String.format(OTHER_WX_PAY_URL, user.getWuyeId(),houseId,startDate,endDate,user.getOpenid(),
-					couponUnit,couponNum,couponId,fromSys,mianBill, mianAmt, reduceAmt, invoiceTitleType, creditCode, user.getTel(), invoiceTitle);
-	
-		BaseResult baseResult = httpGet(url,WechatPayInfo.class);
-		if (!baseResult.isSuccess()) {
-			throw new ValidationException(baseResult.getData().toString());
-		}
-		return (BaseResult<WechatPayInfo>)baseResult;
 	}
 	
 	/**
