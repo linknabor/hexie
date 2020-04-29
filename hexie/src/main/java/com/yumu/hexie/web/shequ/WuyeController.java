@@ -670,7 +670,7 @@ public class WuyeController extends BaseController {
 	 * @throws Exception 
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getDiscounts", method = RequestMethod.GET)
+	@RequestMapping(value = "/getDiscounts", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<Discounts> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
 			@RequestBody DiscountViewReqVO discountViewReqVO) throws Exception {
