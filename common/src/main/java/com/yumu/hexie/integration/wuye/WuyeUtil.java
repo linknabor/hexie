@@ -58,14 +58,12 @@ public class WuyeUtil {
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s&house_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
-	private static final String BILL_LIST_STD_URL = "getPayListStdSDO.do?user_id=%s&start_date=%s&end_date=%s&mng_cell_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&trade_water_id=%s"; // 微信支付返回
-	//private static final String GET_LOCATION_URL = "getGeographicalPositionSDO.do"; // 用户地理位置
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
 	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s";
 	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
@@ -217,26 +215,6 @@ public class WuyeUtil {
 			regionurl = getRequestUri(user);
 		}
 		String url = regionurl + String.format(BILL_LIST_URL,user.getWuyeId(),payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
-		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
-	}
-	
-	/**
-	 * 无账单查询账单
-	 * @param userId
-	 * @param startDate
-	 * @param endDate
-	 * @param house_id
-	 * @param sect_id
-	 * @param regionurl
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static BaseResult<BillListVO> queryBillList(User user, String startDate, String endDate, String house_id,String sect_id,String regionurl){
-		log.info("startDate:"+startDate+", endDate"+endDate);
-		if (StringUtils.isEmpty(regionurl)) {
-			regionurl = getRequestUri(user);
-		}
-		String url = regionurl + String.format(BILL_LIST_STD_URL, user.getWuyeId(),startDate,endDate,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
 	

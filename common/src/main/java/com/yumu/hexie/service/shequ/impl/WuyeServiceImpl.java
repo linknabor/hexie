@@ -195,60 +195,10 @@ public class WuyeServiceImpl implements WuyeService {
 				prepayRequestDTO.setPhoneNo(selBankCard.getPhoneNo());
 			}
 		}
-		//TODO 从卡库校验是否是贵州银行的卡
-		String couponId = prepayRequestDTO.getCouponId();
-		if (!StringUtils.isEmpty(couponId)) {
-			Coupon coupon = couponService.findOne(Long.valueOf(couponId));
-			if (!couponService.isAvaible(prepayRequestDTO.getCouponUnit(), coupon)) {
-				throw new BizValidateException("优惠券不可用，id： " + coupon.getId());
-			}
-		}
-		
 		WechatPayInfo wechatPayInfo = wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
 		return wechatPayInfo;
 	}
 	
-	@Override
-	@Transactional
-	public WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
-		
-		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
-			
-			String remerber = prepayRequestDTO.getRemember();
-			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
-				Assert.hasText(prepayRequestDTO.getCustomerName(), "持卡人姓名不能为空。");
-				Assert.hasText(prepayRequestDTO.getAcctNo(), "卡号不能为空。");
-				Assert.hasText(prepayRequestDTO.getCertId(), "证件号不能为空。");
-				Assert.hasText(prepayRequestDTO.getPhoneNo(), "银行预留手机号不能为空。");
-				
-				BankCard bankCard = bankCardRepository.findByAcctNo(prepayRequestDTO.getAcctNo());
-				if (bankCard == null) {
-					bankCard = new BankCard();
-				}
-				bankCard.setAcctName(prepayRequestDTO.getCustomerName());
-				bankCard.setAcctNo(prepayRequestDTO.getAcctNo());
-				bankCard.setBankCode("");	//TODO 
-				bankCard.setBankName("");	//TODO
-				bankCard.setBranchName("");	//TODO
-				bankCard.setBranchNo("");	//TODO
-				bankCard.setPhoneNo(prepayRequestDTO.getPhoneNo());
-				bankCard.setUserId(prepayRequestDTO.getUser().getId());
-				bankCard.setUserName(prepayRequestDTO.getUser().getName());
-				//支付成功回调的时候还要保存quickToken
-				bankCardRepository.save(bankCard);
-			} 
-			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
-				BankCard selBankCard = bankCardRepository.findOne(Long.valueOf(prepayRequestDTO.getCardId()));
-				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
-					throw new BizValidateException("未绑定的银行卡。");
-				}
-				prepayRequestDTO.setQuickToken(selBankCard.getQuickToken());
-				prepayRequestDTO.setPhoneNo(selBankCard.getPhoneNo());
-			}
-		}
-		return wuyeUtil2.getOtherPrePayInfo(prepayRequestDTO).getData();
-	}
-
 	/**
 	 * 支付完成后的一些操作
 	 * 步骤：
@@ -422,11 +372,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, 
-			String sect_id, String regionName) {
+	public BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String regionName) throws Exception {
 		
-		String targetUrl = getRegionUrl(regionName);
-		return WuyeUtil.queryBillList(user, startDate, endDate,house_id,sect_id,targetUrl).getData();
+		return wuyeUtil2.queryBillList(user, startDate, endDate, house_id, regionName).getData();
 	}
 	
 	/**

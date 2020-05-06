@@ -128,27 +128,6 @@ public interface WuyeService {
 	WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
 
 	/**
-	 * 物业无账单缴费
-	 * @param user
-	 * @param houseId
-	 * @param start_date
-	 * @param end_date
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionname
-	 * @return
-	 * @throws Exception
-	 */
-	WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception;
-
-	/**
 	 * 通知已支付
 	 * @param user
 	 * @param billId
@@ -222,8 +201,9 @@ public interface WuyeService {
 	 * @param sect_id
 	 * @param regionname
 	 * @return
+	 * @throws Exception 
 	 */
-	BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String sect_id, String regionname);
+	BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String regionname) throws Exception;
 
 	/**
 	 * 获取无账单开始日期

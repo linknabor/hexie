@@ -49,6 +49,7 @@ public class PrepayReqVO implements Serializable {
 	
 	private String ruleType;	//减免规则类型
 	private String reductionAmt;	//减免金额
+	private String payFeeType;	//01：管理费 02：停车费
 	
 	public String getBillId() {
 		return billId;
@@ -189,6 +190,12 @@ public class PrepayReqVO implements Serializable {
 	public void setReductionAmt(String reductionAmt) {
 		this.reductionAmt = reductionAmt;
 	}
+	public String getPayFeeType() {
+		return payFeeType;
+	}
+	public void setPayFeeType(String payFeeType) {
+		this.payFeeType = payFeeType;
+	}
 	@Override
 	public String toString() {
 		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
@@ -197,7 +204,7 @@ public class PrepayReqVO implements Serializable {
 				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
 				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
 				+ ", veriCode=" + veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo
-				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + "]";
+				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + "]";
 	}
 	
 	
