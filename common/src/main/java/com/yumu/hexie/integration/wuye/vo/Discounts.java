@@ -12,7 +12,11 @@ public class Discounts implements Serializable {
 	 */
 	private static final long serialVersionUID = 6923935581841948790L;
 	
-	private List<DiscountDetail> list;
+	@JsonProperty("total_fee_price")
+	private String totalFeePrice;
+	@JsonProperty("reduction_type")
+	private String reductionType;
+	private List<DiscountDetail> reduction;
 	
 	public static class DiscountDetail {
 		
@@ -44,14 +48,29 @@ public class Discounts implements Serializable {
 		
 	}
 
-	public List<DiscountDetail> getList() {
-		return list;
+	public String getTotalFeePrice() {
+		return totalFeePrice;
 	}
 
-	public void setList(List<DiscountDetail> list) {
-		this.list = list;
+	public void setTotalFeePrice(String totalFeePrice) {
+		this.totalFeePrice = totalFeePrice;
 	}
-	
-	
+
+	public String getReductionType() {
+		return reductionType;
+	}
+
+	public void setReductionType(String reductionType) {
+		this.reductionType = reductionType;
+	}
+
+	public List<DiscountDetail> getReduction() {
+		return reduction;
+	}
+
+	public void setReduction(List<DiscountDetail> reduction) {
+		this.reduction = reduction;
+	}
+
 
 }
