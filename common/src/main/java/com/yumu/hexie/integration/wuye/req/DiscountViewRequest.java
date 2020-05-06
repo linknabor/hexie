@@ -12,6 +12,8 @@ public class DiscountViewRequest extends WuyeRequest {
 	 */
 	private static final long serialVersionUID = -6102273680557624524L;
 	
+	@JsonProperty("user_id")
+	private String wuyeId;
 	@JsonProperty("bill_id")
 	private String billId;
 	@JsonProperty("stmt_id")
@@ -27,6 +29,7 @@ public class DiscountViewRequest extends WuyeRequest {
 	public DiscountViewRequest(DiscountViewRequestDTO discountViewRequestDTO) {
 		
 		BeanUtils.copyProperties(discountViewRequestDTO, this);
+		this.wuyeId = discountViewRequestDTO.getUser().getWuyeId();
 	}
 	public String getBillId() {
 		return billId;
@@ -52,7 +55,12 @@ public class DiscountViewRequest extends WuyeRequest {
 	public void setPayFeeType(String payFeeType) {
 		this.payFeeType = payFeeType;
 	}
-	
+	public String getWuyeId() {
+		return wuyeId;
+	}
+	public void setWuyeId(String wuyeId) {
+		this.wuyeId = wuyeId;
+	}
 	
 	
 
