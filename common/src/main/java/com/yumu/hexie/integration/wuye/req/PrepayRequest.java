@@ -74,10 +74,18 @@ public class PrepayRequest extends WuyeRequest {
 	private String certId;		//证件号
 	private String acctNo;		//银行卡号
 	private String phoneNo;		//银行预留手机
-	
+	//下列参数在绑卡记住卡号二次支付时使用
 	private String quickToken;	//快捷支付token
 	private String veriCode;	//手机验证码
 	private String orderNo;		//绑卡支付非首次需要传
+	
+	//减免参数
+	@JsonProperty("rule_type")
+	private String ruleType;	//减免类型，多个以半角逗号分隔
+	@JsonProperty("reduction_amt")
+	private String reductionAmt;	//减免金额，多个以半角逗号分隔
+	@JsonProperty("pay_fee_type")
+	private String payFeeType;	//01：管理费 02：停车费
 	
 	public String getCouponUnit() {
 		return couponUnit;
@@ -216,6 +224,24 @@ public class PrepayRequest extends WuyeRequest {
 	}
 	public void setOrderNo(String orderNo) {
 		this.orderNo = orderNo;
+	}
+	public String getRuleType() {
+		return ruleType;
+	}
+	public void setRuleType(String ruleType) {
+		this.ruleType = ruleType;
+	}
+	public String getReductionAmt() {
+		return reductionAmt;
+	}
+	public void setReductionAmt(String reductionAmt) {
+		this.reductionAmt = reductionAmt;
+	}
+	public String getPayFeeType() {
+		return payFeeType;
+	}
+	public void setPayFeeType(String payFeeType) {
+		this.payFeeType = payFeeType;
 	}
 	
 	

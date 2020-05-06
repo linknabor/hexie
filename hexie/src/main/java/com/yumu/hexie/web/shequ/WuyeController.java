@@ -286,9 +286,14 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<BillListVO> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String start_date,
 			@RequestParam(required = false) String end_date,  @RequestParam(required = false) String house_id, 
-			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
+			@RequestParam(required = false) String regionname)
 			throws Exception {
-		BillListVO listVo = wuyeService.queryBillListStd(user, start_date, end_date,house_id,sect_id,regionname);
+		
+		log.info("start_date : " + start_date);
+		log.info("end_date : " + end_date);
+		log.info("house_id : " + house_id);
+		log.info("regionname : " + regionname);
+		BillListVO listVo = wuyeService.queryBillListStd(user, start_date, end_date,house_id,regionname);
 		if (listVo != null && !listVo.getOther_bill_info().isEmpty()) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -330,41 +335,6 @@ public class WuyeController extends BaseController {
 		dto.setUser(user);
 		log.info("prepayRequestDTO : " + dto);
 		result = wuyeService.getPrePayInfo(dto);
-		return BaseResult.successResult(result);
-	}
-
-	/**
-	 * 无账单缴费唤起支付
-	 * @param user
-	 * @param houseId
-	 * @param start_date
-	 * @param end_date
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionname
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getOtherPrePayInfo", method = RequestMethod.POST)
-	@ResponseBody
-	public BaseResult<WechatPayInfo> getOtherPrePayInfo(@ModelAttribute(Constants.USER) User user,
-			@RequestBody PrepayReqVO prepayReq) throws Exception {
-		
-		WechatPayInfo result = new WechatPayInfo();
-		log.info("other prepayReqVo : " + prepayReq);
-		PrepayRequestDTO dto = new PrepayRequestDTO();
-		BeanUtils.copyProperties(prepayReq, dto);
-		dto.setUser(user);
-		log.info("other prepayRequestDTO : " + dto);
-		result = wuyeService.getOtherPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 
