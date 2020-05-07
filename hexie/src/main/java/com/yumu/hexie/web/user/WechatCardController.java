@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.PreActivateResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
@@ -100,6 +101,9 @@ public class WechatCardController extends BaseController {
 	public BaseResult<String> getCardOnMenu(@RequestParam String oriApp){
 		
 		User user = new User();
+		if (StringUtil.isEmpty(oriApp)) {
+			oriApp = ConstantWeChat.APPID;	//合协社区取默认appid，因为合协菜单上没有带oriApp
+		}
 		user.setAppId(oriApp);
 		String url = wechatCardService.getActivateUrlOnPage(user);
 		return BaseResult.successResult(url);
