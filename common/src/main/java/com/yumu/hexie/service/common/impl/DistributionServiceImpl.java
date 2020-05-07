@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.YuyueRule;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.exception.BizValidateException;
 
@@ -50,6 +52,8 @@ public class DistributionServiceImpl implements DistributionService {
     private RgroupAreaItemRepository rgroupAreaItemRepository;
     @Inject
     private HomeDistributionRepository homeDistributionRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     /** 
      * @param rule
@@ -144,12 +148,14 @@ public class DistributionServiceImpl implements DistributionService {
         return new ArrayList<OnSaleAreaItem>();
     }
     
-    public List<RgroupAreaItem> queryRgroups(User user,int page){
-        List<RgroupAreaItem> result ;
-        if(user.getXiaoquId() == 0){
-            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 12));
+    public List<RgroupAreaItem> queryRgroups(User user, int page){
+        
+    	User currUser = userRepository.findById(user.getId());
+    	List<RgroupAreaItem> result ;
+        if(currUser.getXiaoquId() == 0){
+            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), currUser.getAppId(), new PageRequest(page, 12));
         } else {
-            result = rgroupAreaItemRepository.findAllByUserInfo(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 12));
+            result = rgroupAreaItemRepository.findAllByUserInfo(currUser.getProvinceId(), currUser.getCityId(), currUser.getCountyId(), currUser.getXiaoquId(),System.currentTimeMillis(), currUser.getAppId(), new PageRequest(page, 12));
         }
         List<RgroupAreaItem> r = filterByRuleId(result);
         return r;
