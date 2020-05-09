@@ -355,6 +355,9 @@ public class WechatCardServiceImpl implements WechatCardService {
 	public String getActivateUrlOnPage(User user) {
 
 		WechatCardCatagory weCardCatagory = getWechatCardCatagoryByCardTypeAndAppId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getAppId());
+		if (weCardCatagory == null) {
+			logger.info("getActivateUrlOnPage : current app doesn't support wechat member card !, appid : " + user.getAppId());
+		}
 		ActivateUrlReq activateUrlReq = new ActivateUrlReq();
 		activateUrlReq.setCardId(weCardCatagory.getCardId());
 		activateUrlReq.setOuterStr(ModelConstant.CARD_GET_REGISTER);
