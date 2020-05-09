@@ -361,7 +361,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(value ="bind_switch", required = false) String bindSwitch)
 			throws Exception {
 		
-		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch, "", "", "");
+		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, feePrice, bindSwitch, "", "", "");
 		return BaseResult.successResult("支付成功。");
 	}
 
@@ -709,7 +709,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String cardNo,
 			@RequestParam(required = false) String quickToken,
 			@RequestParam(required = false) String wuyeId,
-			@RequestParam(required = false) String couponId) {
+			@RequestParam(required = false) String couponId,
+			@RequestParam(required = false, name = "integral") String points) {
 		
 		log.info("tradeWaterId:" + tradeWaterId);
 		log.info("feePrice:" + feePrice);
@@ -717,9 +718,10 @@ public class WuyeController extends BaseController {
 		log.info("cardNo:" + cardNo);
 		log.info("wuyeId:" + wuyeId);
 		log.info("couponId:" + couponId);
+		log.info("points:" + points);
 		
 		String bindSwitch = "1";	//默认绑定
-		wuyeService.noticePayed(null, tradeWaterId, couponId, feePrice, bindSwitch, cardNo, quickToken, wuyeId);
+		wuyeService.noticePayed(null, tradeWaterId, couponId, feePrice, points, bindSwitch, cardNo, quickToken, wuyeId);
 		return "SUCCESS";
 	}
 	

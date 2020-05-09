@@ -17,6 +17,10 @@ public class Discounts implements Serializable {
 	@JsonProperty("reduction_type")
 	private String reductionType;
 	private List<DiscountDetail> reduction;
+	@JsonProperty("is_enable_integral")
+	private String isEnableIntegral;
+	@JsonProperty("integral")
+	private String integral;
 	
 	public static class DiscountDetail {
 		
@@ -72,5 +76,21 @@ public class Discounts implements Serializable {
 		this.reduction = reduction;
 	}
 
+	public String getIsEnableIntegral() {
+		return isEnableIntegral;
+	}
+
+	public void setIsEnableIntegral(String isEnableIntegral) {
+		this.isEnableIntegral = isEnableIntegral;
+	}
+
+	public String getIntegral() {
+		return integral;
+	}
+
+	public void setIntegral(String integral) {
+		this.integral = integral;
+	}
+	
 
 }

@@ -130,14 +130,17 @@ public interface WuyeService {
 	/**
 	 * 通知已支付
 	 * @param user
-	 * @param billId
 	 * @param tradeWaterId
 	 * @param couponId
 	 * @param feePrice
+	 * @param points
 	 * @param bindSwitch
+	 * @param cardNo
+	 * @param quickToken
+	 * @param wuyeId
 	 */
 	void noticePayed(User user, String tradeWaterId, String couponId, 
-			String feePrice, String bindSwitch, String cardNo, String quickToken, String wuyeId);
+			String feePrice, String points, String bindSwitch, String cardNo, String quickToken, String wuyeId);
 	
 	/**
 	 * 查询是否已经用过红包

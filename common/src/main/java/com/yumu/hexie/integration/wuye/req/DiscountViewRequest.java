@@ -22,6 +22,7 @@ public class DiscountViewRequest extends WuyeRequest {
 	private String payType;		//0微信,1卡
 	@JsonProperty("pay_fee_type")
 	private String payFeeType;		//01管理费，02停车费
+	private String appid;
 	
 	public DiscountViewRequest() {
 		super();
@@ -30,6 +31,7 @@ public class DiscountViewRequest extends WuyeRequest {
 		
 		BeanUtils.copyProperties(discountViewRequestDTO, this);
 		this.wuyeId = discountViewRequestDTO.getUser().getWuyeId();
+		this.appid = discountViewRequestDTO.getUser().getAppId();
 	}
 	public String getBillId() {
 		return billId;
@@ -60,6 +62,17 @@ public class DiscountViewRequest extends WuyeRequest {
 	}
 	public void setWuyeId(String wuyeId) {
 		this.wuyeId = wuyeId;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+	@Override
+	public String toString() {
+		return "DiscountViewRequest [wuyeId=" + wuyeId + ", billId=" + billId + ", stmtId=" + stmtId + ", payType="
+				+ payType + ", payFeeType=" + payFeeType + ", appid=" + appid + "]";
 	}
 	
 	

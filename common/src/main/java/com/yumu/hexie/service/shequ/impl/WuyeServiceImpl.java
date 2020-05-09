@@ -212,7 +212,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	@Override
 	public void noticePayed(User user, String tradeWaterId, 
-			String couponId, String feePrice, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
+			String couponId, String feePrice, String points, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
 		
 		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
 		
