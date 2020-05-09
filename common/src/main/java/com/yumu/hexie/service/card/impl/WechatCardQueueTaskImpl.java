@@ -216,12 +216,12 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				RefundDTO refundDTO = objectMapper.readValue(json, RefundDTO.class);
 				logger.info("strat to consume wuyeRefund queue : " + refundDTO);
-				String refundAmt = "-" + refundDTO.getTranAmt();	//退款传入负数
+				String point = "-" + refundDTO.getPoint();	//退款传入负数
 				boolean isSuccess = false;
 				try {
 					User user = new User();
 					user.setWuyeId(refundDTO.getWuyeId());
-					pointService.updatePoint(user, refundAmt, "wuyeRefund-" + refundDTO.getTradeWaterId() , true);	//true标识需要通知微信扣减积分
+					pointService.updatePoint(user, point, "wuyeRefund-" + refundDTO.getTradeWaterId() , true);	//true标识需要通知微信扣减积分
 					isSuccess = true;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理

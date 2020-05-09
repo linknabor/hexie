@@ -361,7 +361,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(value ="bind_switch", required = false) String bindSwitch)
 			throws Exception {
 		
-		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, feePrice, bindSwitch, "", "", "");
+//		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, feePrice, bindSwitch, "", "", "");
 		return BaseResult.successResult("支付成功。");
 	}
 

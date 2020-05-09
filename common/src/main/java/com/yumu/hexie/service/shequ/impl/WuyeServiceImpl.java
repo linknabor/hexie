@@ -212,7 +212,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	@Override
 	public void noticePayed(User user, String tradeWaterId, 
-			String couponId, String feePrice, String points, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
+			String couponId, String feePrice, String point, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
 		
 		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
 		
@@ -245,7 +245,7 @@ public class WuyeServiceImpl implements WuyeService {
 		//2.添加芝麻积分
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			String pointKey = "wuyePay-" + tradeWaterId;
-			addPointAsync(user, feePrice, pointKey);
+			addPointAsync(user, point, pointKey);
 		}else {
 			String pointKey = "zhima-bill-" + user.getId() + "-" + tradeWaterId;
 			pointService.updatePoint(user, "10", pointKey);
@@ -502,16 +502,16 @@ public class WuyeServiceImpl implements WuyeService {
 	/**
 	 * 异步添加积分
 	 * @param user
-	 * @param feePrice
+	 * @param point
 	 * @param pointKey
 	 */
-	public void addPointAsync(User user, String feePrice, String pointKey) {
+	public void addPointAsync(User user, String point, String pointKey) {
 		
-		Assert.hasText(feePrice, "缴费金额为空。");
+		Assert.hasText(point, "缴费金额为空。");
 
 		//防止重复添加卡券积分，半小时内只能提交队列一次。出队时也会校验重复性
 		Long increment = redisTemplate.opsForValue().increment(pointKey, 1);
-		log.info("addPoint, key[" + pointKey + "], add point[" + feePrice + "], increment : " + increment);
+		log.info("addPoint, key[" + pointKey + "], add point[" + point + "], increment : " + increment);
 		if (increment == 1) {
 			int retryTimes = 0;
 			boolean isSuccess = false;
@@ -520,7 +520,7 @@ public class WuyeServiceImpl implements WuyeService {
 				try {
 					AddPointQueue addPointQueue = new AddPointQueue();
 					addPointQueue.setUser(user);
-					addPointQueue.setPoint(feePrice);
+					addPointQueue.setPoint(point);
 					addPointQueue.setKey(pointKey);
 					
 					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
