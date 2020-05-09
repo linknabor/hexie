@@ -17,6 +17,8 @@ public class RefundDTO implements Serializable {
 	private String tradeWaterId;
 	@JsonProperty("tran_amt")
 	private String tranAmt;
+	@JsonProperty("integral")
+	private String point;	//积分
 	
 	public String getWuyeId() {
 		return wuyeId;
@@ -35,6 +37,12 @@ public class RefundDTO implements Serializable {
 	}
 	public void setTranAmt(String tranAmt) {
 		this.tranAmt = tranAmt;
+	}
+	public String getPoint() {
+		return point;
+	}
+	public void setPoint(String point) {
+		this.point = point;
 	}
 	
 	
