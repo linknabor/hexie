@@ -191,6 +191,9 @@ public class UserController extends BaseController{
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
 		String oriApp = postData.get("oriApp");
+		if (StringUtils.isEmpty(oriApp)) {
+			oriApp = ConstantWeChat.APPID;
+		}
     	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
     	
 		if (StringUtil.isNotEmpty(code)) {
