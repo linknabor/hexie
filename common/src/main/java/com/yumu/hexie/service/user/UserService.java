@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.user.User;
 
@@ -43,4 +44,5 @@ public interface UserService {
 	
 	//注册
 	User simpleRegister(User user);
+	AccessTokenOAuth getAccessTokenOAuth(String code, String appid);
 }
