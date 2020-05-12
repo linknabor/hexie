@@ -7,11 +7,17 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestConfig {
+	
+	private static final int REST_READ_TIME_OUT = 15000;
+	private static final int REST_CONNECT_TIME_OUT = 10000;
 
 	@Bean(name="restTemplate")
     public RestTemplate httpClientRestTemplate(){
 		
-        RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());	//以后改连接池
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+        requestFactory.setReadTimeout(REST_READ_TIME_OUT);
+        requestFactory.setConnectTimeout(REST_CONNECT_TIME_OUT);
+        RestTemplate restTemplate = new RestTemplate(requestFactory);
         return restTemplate;
     }
 	
