@@ -219,9 +219,9 @@ public class PointServiceImpl implements PointService {
 			}
 			updateUserCardReq.setBonus(displayPoint);
 			if (addPoint > 0) {
-				updateUserCardReq.setRecordBonus("本次消费" + point + "元，获得" + addPoint + "积分。");
+				updateUserCardReq.setRecordBonus("本次消费获得" + addPoint + "积分。");
 			}else {
-				updateUserCardReq.setRecordBonus("本次退款" + point + "元，扣除" + addPoint + "积分。");
+				updateUserCardReq.setRecordBonus("本次退款扣除" + addPoint + "积分。");
 			}
 			String accessToken = systemConfigService.queryWXAToken(wechatCard.getUserAppId());
 			UpdateUserCardResp updateUserCardResp = cardService.updateUserMemeberCard(updateUserCardReq, accessToken);
