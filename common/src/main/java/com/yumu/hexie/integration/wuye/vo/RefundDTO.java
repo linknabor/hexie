@@ -44,6 +44,11 @@ public class RefundDTO implements Serializable {
 	public void setPoint(String point) {
 		this.point = point;
 	}
+	@Override
+	public String toString() {
+		return "RefundDTO [wuyeId=" + wuyeId + ", tradeWaterId=" + tradeWaterId + ", tranAmt=" + tranAmt + ", point="
+				+ point + "]";
+	}
 	
 	
 	
