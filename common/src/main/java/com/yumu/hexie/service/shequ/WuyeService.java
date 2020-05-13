@@ -10,7 +10,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
-import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
+import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -28,8 +28,9 @@ public interface WuyeService {
 	 * @param currPage
 	 * @param totalCount
 	 * @return
+	 * @throws Exception 
 	 */
-	BillListVO quickPayInfo(User uesr, String stmtId, String currPage, String totalCount);
+	BillListVO quickPayInfo(User uesr, String stmtId, String currPage, String totalCount) throws Exception;
 
 	/**
 	 * 查询房屋
@@ -116,8 +117,9 @@ public interface WuyeService {
 	 * @param stmtId
 	 * @param anotherbillIds
 	 * @return
+	 * @throws Exception 
 	 */
-	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName);
+	PaymentInfo getBillDetail(User user, String stmtId, String anotherbillIds, String regionName) throws Exception;
 
 	/**
 	 * 物业账单缴费
@@ -125,38 +127,22 @@ public interface WuyeService {
 	 */
 	WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
 
-	/**
-	 * 物业无账单缴费
-	 * @param user
-	 * @param houseId
-	 * @param start_date
-	 * @param end_date
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionname
-	 * @return
-	 * @throws Exception
-	 */
-	WechatPayInfo getOtherPrePayInfo(PrepayRequestDTO dto) throws Exception;
 
 	/**
 	 * 通知已支付
 	 * @param user
-	 * @param billId
 	 * @param tradeWaterId
 	 * @param couponId
 	 * @param feePrice
+	 * @param points
 	 * @param bindSwitch
+	 * @param cardNo
+	 * @param quickToken
+	 * @param wuyeId
 	 */
 	void noticePayed(User user, String tradeWaterId, String couponId, 
-			String feePrice, String bindSwitch, String cardNo, String quickToken, String wuyeId);
+			String feePrice, String points, String bindSwitch, String cardNo, String quickToken, String wuyeId);
+
 	
 	/**
 	 * 查询是否已经用过红包
@@ -220,8 +206,9 @@ public interface WuyeService {
 	 * @param sect_id
 	 * @param regionname
 	 * @return
+	 * @throws Exception 
 	 */
-	BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String sect_id, String regionname);
+	BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String regionname) throws Exception;
 
 	/**
 	 * 获取无账单开始日期
@@ -268,7 +255,8 @@ public interface WuyeService {
 	 * @param prepayRequestDTO
 	 * @throws Exception 
 	 */
-	DiscountDetail getDiscountDetail(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
+	Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
+
 
 	/**
 	 * 根据物业订单号查询交易结果

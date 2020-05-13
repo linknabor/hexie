@@ -13,9 +13,6 @@ public class DiscountViewReqVO implements Serializable {
 	private String stmtId;
 	private String payType;		//0微信,1卡
 	private String payFeeType;	//01管理费，02停车费
-	private String startDate;
-	private String endDate;
-	private String houseId;		//房屋ID
 	private String regionName;	//定位地区
 	
 	public String getBillId() {
@@ -41,24 +38,6 @@ public class DiscountViewReqVO implements Serializable {
 	}
 	public void setPayFeeType(String payFeeType) {
 		this.payFeeType = payFeeType;
-	}
-	public String getStartDate() {
-		return startDate;
-	}
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-	public String getEndDate() {
-		return endDate;
-	}
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
-	}
-	public String getHouseId() {
-		return houseId;
-	}
-	public void setHouseId(String houseId) {
-		this.houseId = houseId;
 	}
 	public String getRegionName() {
 		return regionName;

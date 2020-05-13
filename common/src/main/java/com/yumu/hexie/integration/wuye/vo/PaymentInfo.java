@@ -15,10 +15,6 @@ public class PaymentInfo implements Serializable {
 	private String bill_tran_amt;
 	private String sect_name;
 	private String paymethod;
-	private String mianBill;
-	private String mianAmt;
-	private String fee_mianBill;
-	private String fee_mianAmt;
 	private String show_invoice_flag;//是否开通电子发票功能
 	private String show_com_flag;//是否允许公司开票功能
 	private String show_invoice;//是否开票
@@ -27,18 +23,6 @@ public class PaymentInfo implements Serializable {
 	@Transient
 	public String getPaymethodStr(){
 		return KeyToNameUtil.keyToName(KeyToNameUtil.PAYMETHOD_TYPE, paymethod);
-	}
-	public String getMianBill() {
-		return mianBill;
-	}
-	public void setMianBill(String mianBill) {
-		this.mianBill = mianBill;
-	}
-	public String getMianAmt() {
-		return mianAmt;
-	}
-	public void setMianAmt(String mianAmt) {
-		this.mianAmt = mianAmt;
 	}
 	public String getTran_time() {
 		return tran_time;
@@ -93,18 +77,6 @@ public class PaymentInfo implements Serializable {
 	}
 	public void setShow_invoice(String show_invoice) {
 		this.show_invoice = show_invoice;
-	}
-	public String getFee_mianBill() {
-		return fee_mianBill;
-	}
-	public void setFee_mianBill(String fee_mianBill) {
-		this.fee_mianBill = fee_mianBill;
-	}
-	public String getFee_mianAmt() {
-		return fee_mianAmt;
-	}
-	public void setFee_mianAmt(String fee_mianAmt) {
-		this.fee_mianAmt = fee_mianAmt;
 	}
 	
 	
