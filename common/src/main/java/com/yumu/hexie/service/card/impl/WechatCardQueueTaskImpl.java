@@ -216,7 +216,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				RefundDTO refundDTO = objectMapper.readValue(json, RefundDTO.class);
 				logger.info("strat to consume wuyeRefund queue : " + refundDTO);
-				String point = "-" + refundDTO.getPoint();	//退款传入负数
+				String point = refundDTO.getPoint();	//退款传入负数
 				boolean isSuccess = false;
 				try {
 					User user = new User();
