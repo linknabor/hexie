@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.user;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.RequestUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
@@ -189,6 +191,9 @@ public class UserController extends BaseController{
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
 		String oriApp = postData.get("oriApp");
+		if (StringUtils.isEmpty(oriApp)) {
+			oriApp = ConstantWeChat.APPID;
+		}
     	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
     	
 		if (StringUtil.isNotEmpty(code)) {
@@ -362,4 +367,24 @@ public class UserController extends BaseController{
    		
     	 
     }
+    
+    
+    /**
+     * 静默授权获取用户openid
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/authorize/{code}/{appid}", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<Map<String, String>> authorize(@PathVariable String code, @PathVariable String appid) throws Exception {
+		
+		Map<String, String> map = new HashMap<>();
+		if (StringUtil.isNotEmpty(code)) {
+			AccessTokenOAuth oauth = userService.getAccessTokenOAuth(code, appid);
+	    	map.put("openid", oauth.getOpenid());
+		}
+		return new BaseResult<Map<String, String>>().success(map);
+    }
+    
 }

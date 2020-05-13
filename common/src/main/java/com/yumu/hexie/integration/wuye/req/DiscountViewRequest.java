@@ -12,18 +12,17 @@ public class DiscountViewRequest extends WuyeRequest {
 	 */
 	private static final long serialVersionUID = -6102273680557624524L;
 	
+	@JsonProperty("user_id")
+	private String wuyeId;
 	@JsonProperty("bill_id")
 	private String billId;
 	@JsonProperty("stmt_id")
 	private String stmtId;
-	@JsonProperty("pay_method")
-	private String payMethod;		//0微信,1卡
+	@JsonProperty("pay_type")
+	private String payType;		//0微信,1卡
 	@JsonProperty("pay_fee_type")
 	private String payFeeType;		//01管理费，02停车费
-	private String startDate;
-	private String endDate;
-	@JsonProperty("house_id")
-	private String houseId;			//房屋ID
+	private String appid;
 	
 	public DiscountViewRequest() {
 		super();
@@ -31,9 +30,9 @@ public class DiscountViewRequest extends WuyeRequest {
 	public DiscountViewRequest(DiscountViewRequestDTO discountViewRequestDTO) {
 		
 		BeanUtils.copyProperties(discountViewRequestDTO, this);
-		this.payMethod = discountViewRequestDTO.getPayType();
+		this.wuyeId = discountViewRequestDTO.getUser().getWuyeId();
+		this.appid = discountViewRequestDTO.getUser().getAppId();
 	}
-	
 	public String getBillId() {
 		return billId;
 	}
@@ -46,11 +45,11 @@ public class DiscountViewRequest extends WuyeRequest {
 	public void setStmtId(String stmtId) {
 		this.stmtId = stmtId;
 	}
-	public String getPayMethod() {
-		return payMethod;
+	public String getPayType() {
+		return payType;
 	}
-	public void setPayMethod(String payMethod) {
-		this.payMethod = payMethod;
+	public void setPayType(String payType) {
+		this.payType = payType;
 	}
 	public String getPayFeeType() {
 		return payFeeType;
@@ -58,23 +57,23 @@ public class DiscountViewRequest extends WuyeRequest {
 	public void setPayFeeType(String payFeeType) {
 		this.payFeeType = payFeeType;
 	}
-	public String getStartDate() {
-		return startDate;
+	public String getWuyeId() {
+		return wuyeId;
 	}
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
+	public void setWuyeId(String wuyeId) {
+		this.wuyeId = wuyeId;
 	}
-	public String getEndDate() {
-		return endDate;
+	public String getAppid() {
+		return appid;
 	}
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
+	public void setAppid(String appid) {
+		this.appid = appid;
 	}
-	public String getHouseId() {
-		return houseId;
-	}
-	public void setHouseId(String houseId) {
-		this.houseId = houseId;
+	@Override
+	public String toString() {
+		return "DiscountViewRequest [wuyeId=" + wuyeId + ", billId=" + billId + ", stmtId=" + stmtId + ", payType="
+				+ payType + ", payFeeType=" + payFeeType + ", appid=" + appid + "]";
+
 	}
 	
 	

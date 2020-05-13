@@ -42,7 +42,7 @@ import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
-import com.yumu.hexie.integration.wuye.vo.DiscountDetail;
+import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -286,9 +286,14 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<BillListVO> getPayListStd(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String start_date,
 			@RequestParam(required = false) String end_date,  @RequestParam(required = false) String house_id, 
-			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
+			@RequestParam(required = false) String regionname)
 			throws Exception {
-		BillListVO listVo = wuyeService.queryBillListStd(user, start_date, end_date,house_id,sect_id,regionname);
+		
+		log.info("start_date : " + start_date);
+		log.info("end_date : " + end_date);
+		log.info("house_id : " + house_id);
+		log.info("regionname : " + regionname);
+		BillListVO listVo = wuyeService.queryBillListStd(user, start_date, end_date,house_id,regionname);
 		if (listVo != null && !listVo.getOther_bill_info().isEmpty()) {
 			return BaseResult.successResult(listVo);
 		} else {
@@ -296,13 +301,14 @@ public class WuyeController extends BaseController {
 		}
 	}
 
-	/***************** [BEGIN]缴费 ********************/
+	/***************** [BEGIN]缴费 
+	 * @throws Exception ********************/
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getBillDetail", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<PaymentInfo> getBillDetail(@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String billId, @RequestParam(required = false) String stmtId,
-			@RequestParam(required = false) String regionname) {
+			@RequestParam(required = false) String regionname) throws Exception {
 		
 		PaymentInfo paymentInfo = wuyeService.getBillDetail(user, stmtId, billId, regionname);
 		return BaseResult.successResult(paymentInfo);
@@ -323,54 +329,12 @@ public class WuyeController extends BaseController {
 			@RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
 		WechatPayInfo result = new WechatPayInfo();
-		if (StringUtils.isEmpty(prepayReqVo.getFeeMianBill())) {
-			prepayReqVo.setFeeMianBill("0");
-		}
-		if (StringUtils.isEmpty(prepayReqVo.getFeeMianAmt())) {
-			prepayReqVo.setFeeMianAmt("0");
-		}
-		
 		log.info("prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
 		dto.setUser(user);
 		log.info("prepayRequestDTO : " + dto);
 		result = wuyeService.getPrePayInfo(dto);
-		return BaseResult.successResult(result);
-	}
-
-	/**
-	 * 无账单缴费唤起支付
-	 * @param user
-	 * @param houseId
-	 * @param start_date
-	 * @param end_date
-	 * @param couponUnit
-	 * @param couponNum
-	 * @param couponId
-	 * @param mianBill
-	 * @param mianAmt
-	 * @param reduceAmt
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param invoice_title
-	 * @param regionname
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getOtherPrePayInfo", method = RequestMethod.POST)
-	@ResponseBody
-	public BaseResult<WechatPayInfo> getOtherPrePayInfo(@ModelAttribute(Constants.USER) User user,
-			@RequestBody PrepayReqVO prepayReq) throws Exception {
-		
-		WechatPayInfo result = new WechatPayInfo();
-		log.info("other prepayReqVo : " + prepayReq);
-		PrepayRequestDTO dto = new PrepayRequestDTO();
-		BeanUtils.copyProperties(prepayReq, dto);
-		dto.setUser(user);
-		log.info("other prepayRequestDTO : " + dto);
-		result = wuyeService.getOtherPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 
@@ -397,7 +361,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(value ="bind_switch", required = false) String bindSwitch)
 			throws Exception {
 		
-		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, bindSwitch, "", "", "");
+//		wuyeService.noticePayed(user, tradeWaterId, couponId, feePrice, feePrice, bindSwitch, "", "", "");
 		return BaseResult.successResult("支付成功。");
 	}
 
@@ -676,18 +640,19 @@ public class WuyeController extends BaseController {
 	 * @throws Exception 
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getDiscountDetail", method = RequestMethod.GET)
+	@RequestMapping(value = "/getDiscounts", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<DiscountDetail> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
+	public BaseResult<Discounts> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
 			@RequestBody DiscountViewReqVO discountViewReqVO) throws Exception {
 		
-		DiscountDetail discountDetail = new DiscountDetail();
+		Discounts discountDetail = new Discounts();
 		log.info("discountViewReqVO : " + discountViewReqVO);
 		DiscountViewRequestDTO dto = new DiscountViewRequestDTO();
 		BeanUtils.copyProperties(discountViewReqVO, dto);
 		dto.setUser(user);
 		log.info("discountViewRequestDTO : " + dto);
-		discountDetail = wuyeService.getDiscountDetail(dto);
+		discountDetail = wuyeService.getDiscounts(dto);
+
 		return BaseResult.successResult(discountDetail);
 	}
 	
@@ -745,7 +710,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String cardNo,
 			@RequestParam(required = false) String quickToken,
 			@RequestParam(required = false) String wuyeId,
-			@RequestParam(required = false) String couponId) {
+			@RequestParam(required = false) String couponId,
+			@RequestParam(required = false, name = "integral") String points) {
 		
 		log.info("tradeWaterId:" + tradeWaterId);
 		log.info("feePrice:" + feePrice);
@@ -753,9 +719,10 @@ public class WuyeController extends BaseController {
 		log.info("cardNo:" + cardNo);
 		log.info("wuyeId:" + wuyeId);
 		log.info("couponId:" + couponId);
+		log.info("points:" + points);
 		
 		String bindSwitch = "1";	//默认绑定
-		wuyeService.noticePayed(null, tradeWaterId, couponId, feePrice, bindSwitch, cardNo, quickToken, wuyeId);
+		wuyeService.noticePayed(null, tradeWaterId, couponId, feePrice, points, bindSwitch, cardNo, quickToken, wuyeId);
 		return "SUCCESS";
 	}
 	

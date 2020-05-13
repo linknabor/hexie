@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.HomeDistributionRepository;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
@@ -24,6 +25,8 @@ import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.RuleDistribution;
 import com.yumu.hexie.model.distribution.YuyueAreaItem;
 import com.yumu.hexie.model.distribution.YuyueAreaItemRepository;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.YuyueRule;
@@ -54,6 +57,8 @@ public class DistributionServiceImpl implements DistributionService {
     private HomeDistributionRepository homeDistributionRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private RegionRepository regionRepository;
 
     /** 
      * @param rule
@@ -151,6 +156,14 @@ public class DistributionServiceImpl implements DistributionService {
     public List<RgroupAreaItem> queryRgroups(User user, int page){
         
     	User currUser = userRepository.findById(user.getId());
+    	if(currUser.getXiaoquId() == 0){
+    		if (!StringUtil.isEmpty(currUser.getSectId()) && !"0".equals(currUser.getSectId())) {
+    			List<Region> regionList = regionRepository.findAllBySectId(currUser.getSectId());
+    			Region region = regionList.get(0);
+    			currUser.setXiaoquId(region.getId());
+			}
+    	}
+
     	List<RgroupAreaItem> result ;
         if(currUser.getXiaoquId() == 0){
             result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), currUser.getAppId(), new PageRequest(page, 12));

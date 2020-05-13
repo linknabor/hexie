@@ -8,4 +8,5 @@ public interface HexieMessageService {
 	
 	HexieMessage getMessage(long messageId);
 
+
 }

@@ -11,6 +11,7 @@ import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
+import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
  * oAuth服务
@@ -97,6 +98,10 @@ public class OAuthService {
 			accessTokenOAuth.setRefreshToken(jsonObject.getRefresh_token());
 			accessTokenOAuth.setOpenid(jsonObject.getOpenid());
 			accessTokenOAuth.setScope(jsonObject.getScope());
+		}else {
+			if (null != jsonObject&&jsonObject.getErrcode() != 0) {
+				throw new BizValidateException("errcode: " + jsonObject.getErrcode() + ", errmsg : " + jsonObject.getErrmsg());
+			}
 		}
 		return accessTokenOAuth;
 	}

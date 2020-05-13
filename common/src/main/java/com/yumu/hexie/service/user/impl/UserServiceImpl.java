@@ -14,20 +14,25 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.integration.wechat.service.CardService;
+import com.yumu.hexie.integration.wechat.service.OAuthService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
+import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -66,6 +71,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private CouponStrategyFactory couponStrategyFactory;
+	
+	@Autowired
+	private RedisRepository redisRepository;
 	
 	@Override
 	public User getById(long uId) {
@@ -347,6 +355,25 @@ public class UserServiceImpl implements UserService {
         User savedUser = save(user);
         return savedUser;
 		
+	}
+	
+	/**
+	 * 获取用户授权信息(静默)
+	 * @param code
+	 * @param appid
+	 * @return
+	 */
+	@Override
+	public AccessTokenOAuth getAccessTokenOAuth(String code, String appid){
+		
+		Assert.hasText(code, "code不能为空。");
+		Assert.hasText(appid, "appid不能为空。");
+		AccessTokenOAuth  auth = null;
+		if (!AppUtil.isMainApp(appid)) {
+			String componentAccessToken = redisRepository.getComponentAccessToken(ConstantWeChat.KEY_COMPONENT_ACESS_TOKEN);
+			auth = OAuthService.getOAuthAccessToken(code, appid, componentAccessToken);
+		}
+		return auth;
 	}
 
 

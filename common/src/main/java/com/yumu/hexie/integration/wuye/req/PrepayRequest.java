@@ -47,13 +47,7 @@ public class PrepayRequest extends WuyeRequest {
 	private String couponNum;
 	@JsonProperty("coupon_id")
 	private String couponId;
-	private String mianBill;
-	private String mianAmt;
 	private String reduceAmt;
-	@JsonProperty("fee_mianBill")
-	private String feeMianBill;
-	@JsonProperty("fee_mianAmt")
-	private String feeMianAmt;
 	private String openid;
 	private String appid;
 	
@@ -72,27 +66,28 @@ public class PrepayRequest extends WuyeRequest {
 	@JsonProperty("stmt_id")
 	private String stmtId;
 	
-	//标准版参数
-	@JsonProperty("mng_cell_id")
-	private String houseId;
-	@JsonProperty("start_date")
-	private String startDate;
-	@JsonProperty("end_date")
-	private String endDate;
+	//银行卡支付参数
 	@JsonProperty("pay_type")
 	private String payType;	//0微信支付，1银行卡支付
-	
-	//银行卡支付参数
 	private String customerName;	//持卡人姓名
 	private String certType;	//证件类型
 	private String certId;		//证件号
 	private String acctNo;		//银行卡号
 	private String phoneNo;		//银行预留手机
-	
+  
+	//下列参数在绑卡记住卡号二次支付时使用
 	private String quickToken;	//快捷支付token
 	private String veriCode;	//手机验证码
 	private String orderNo;		//绑卡支付非首次需要传
 	
+	//减免参数
+	@JsonProperty("rule_type")
+	private String ruleType;	//减免类型，多个以半角逗号分隔
+	@JsonProperty("reduction_amt")
+	private String reductionAmt;	//减免金额，多个以半角逗号分隔
+	@JsonProperty("pay_fee_type")
+	private String payFeeType;	//01：管理费 02：停车费
+
 	public String getCouponUnit() {
 		return couponUnit;
 	}
@@ -111,35 +106,11 @@ public class PrepayRequest extends WuyeRequest {
 	public void setCouponId(String couponId) {
 		this.couponId = couponId;
 	}
-	public String getMianBill() {
-		return mianBill;
-	}
-	public void setMianBill(String mianBill) {
-		this.mianBill = mianBill;
-	}
-	public String getMianAmt() {
-		return mianAmt;
-	}
-	public void setMianAmt(String mianAmt) {
-		this.mianAmt = mianAmt;
-	}
 	public String getReduceAmt() {
 		return reduceAmt;
 	}
 	public void setReduceAmt(String reduceAmt) {
 		this.reduceAmt = reduceAmt;
-	}
-	public String getFeeMianBill() {
-		return feeMianBill;
-	}
-	public void setFeeMianBill(String feeMianBill) {
-		this.feeMianBill = feeMianBill;
-	}
-	public String getFeeMianAmt() {
-		return feeMianAmt;
-	}
-	public void setFeeMianAmt(String feeMianAmt) {
-		this.feeMianAmt = feeMianAmt;
 	}
 	public String getInvoiceTitle() {
 		return invoiceTitle;
@@ -170,24 +141,6 @@ public class PrepayRequest extends WuyeRequest {
 	}
 	public void setStmtId(String stmtId) {
 		this.stmtId = stmtId;
-	}
-	public String getHouseId() {
-		return houseId;
-	}
-	public void setHouseId(String houseId) {
-		this.houseId = houseId;
-	}
-	public String getStartDate() {
-		return startDate;
-	}
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-	public String getEndDate() {
-		return endDate;
-	}
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
 	}
 	public String getCustomerName() {
 		return customerName;
@@ -273,6 +226,25 @@ public class PrepayRequest extends WuyeRequest {
 	public void setOrderNo(String orderNo) {
 		this.orderNo = orderNo;
 	}
+	public String getRuleType() {
+		return ruleType;
+	}
+	public void setRuleType(String ruleType) {
+		this.ruleType = ruleType;
+	}
+	public String getReductionAmt() {
+		return reductionAmt;
+	}
+	public void setReductionAmt(String reductionAmt) {
+		this.reductionAmt = reductionAmt;
+	}
+	public String getPayFeeType() {
+		return payFeeType;
+	}
+	public void setPayFeeType(String payFeeType) {
+		this.payFeeType = payFeeType;
+	}
+
 	
 	
 }

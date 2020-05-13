@@ -1,12 +1,11 @@
 package com.yumu.hexie.integration.wuye.vo;
 
 public class OtherBillInfo {
+	
 	private String start_date;
 	private String end_date;
 	private String bill_fee_type;
 	private String fee_price;
-	private String paid_bills;
-	private String unpaid_bills;
 	private String fee_type_show_name;
 	private String ver_no;
 	private String show_invoice_flag;//是否开通电子发票功能
@@ -15,8 +14,8 @@ public class OtherBillInfo {
 	private String invoice_title;//发票抬头（回显使用）
 	private String cell_addr;//房屋地址
 	private String cnst_area;//房屋平米
-	private boolean selected =false;//为了展示用
-	private String mian_amt;//物业费减免金额
+	private boolean selected = false;//为了展示用
+	private String bills;
 	
 	public String getCnst_area() {
 		return cnst_area;
@@ -90,29 +89,17 @@ public class OtherBillInfo {
 	public void setFee_price(String fee_price) {
 		this.fee_price = fee_price;
 	}
-	public String getPaid_bills() {
-		return paid_bills;
-	}
-	public void setPaid_bills(String paid_bills) {
-		this.paid_bills = paid_bills;
-	}
-	public String getUnpaid_bills() {
-		return unpaid_bills;
-	}
-	public void setUnpaid_bills(String unpaid_bills) {
-		this.unpaid_bills = unpaid_bills;
-	}
 	public String getFee_type_show_name() {
 		return fee_type_show_name;
 	}
 	public void setFee_type_show_name(String fee_type_show_name) {
 		this.fee_type_show_name = fee_type_show_name;
 	}
-	public String getMian_amt() {
-		return mian_amt;
+	public String getBills() {
+		return bills;
 	}
-	public void setMian_amt(String mian_amt) {
-		this.mian_amt = mian_amt;
+	public void setBills(String bills) {
+		this.bills = bills;
 	}
 	
 	
