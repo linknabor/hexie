@@ -712,8 +712,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String wuyeId,
 			@RequestParam(required = false) String couponId,
 			@RequestParam(required = false, name = "integral") String points) {
-
-				log.info("tradeWaterId:" + tradeWaterId);
+		
+		log.info("tradeWaterId:" + tradeWaterId);
 		log.info("feePrice:" + feePrice);
 		log.info("quickToken:" + quickToken);
 		log.info("cardNo:" + cardNo);

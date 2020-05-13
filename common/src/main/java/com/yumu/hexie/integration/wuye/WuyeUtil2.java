@@ -206,8 +206,8 @@ public class WuyeUtil2 {
 	 * @throws Exception
 	 */
 	public BaseResult<Discounts> getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
-
-				User user = discountViewRequestDTO.getUser();
+		
+		User user = discountViewRequestDTO.getUser();
 		String requestUrl = getRequestUrl(user, discountViewRequestDTO.getRegionName());
 		requestUrl += DISCOUNT_URL;
 		
