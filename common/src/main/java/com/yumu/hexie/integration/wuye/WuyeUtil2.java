@@ -33,6 +33,7 @@ import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
+
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeRequest;
@@ -41,6 +42,7 @@ import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieResponse;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
+
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.BankCard;
@@ -173,6 +175,7 @@ public class WuyeUtil2 {
 	 * @throws Exception
 	 */
 	public BaseResult<WechatPayInfo> getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
+
 		
 		User user = prepayRequestDTO.getUser();
 		String appid = user.getAppId();
@@ -203,8 +206,8 @@ public class WuyeUtil2 {
 	 * @throws Exception
 	 */
 	public BaseResult<Discounts> getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
-		
-		User user = discountViewRequestDTO.getUser();
+
+				User user = discountViewRequestDTO.getUser();
 		String requestUrl = getRequestUrl(user, discountViewRequestDTO.getRegionName());
 		requestUrl += DISCOUNT_URL;
 		
@@ -359,6 +362,7 @@ public class WuyeUtil2 {
 			}
 			try {
 				destMap.add(fieldName, field.get(fromObject)==null?"":String.valueOf(field.get(fromObject)));
+
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				logger.error(e.getMessage(), e);
 			}

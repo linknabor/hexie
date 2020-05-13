@@ -20,6 +20,7 @@ public class PrepayReqVO implements Serializable {
 	private String couponNum;
 	private String couponId;
 	private String reduceAmt;
+
 	@JsonProperty("invoice_title_type")
 	private String invoiceTitleType;
 	@JsonProperty("credit_code")
@@ -205,6 +206,7 @@ public class PrepayReqVO implements Serializable {
 				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
 				+ ", veriCode=" + veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo
 				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + "]";
+
 	}
 	
 	

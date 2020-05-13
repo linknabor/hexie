@@ -127,6 +127,7 @@ public interface WuyeService {
 	 */
 	WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
 
+
 	/**
 	 * 通知已支付
 	 * @param user
@@ -141,6 +142,7 @@ public interface WuyeService {
 	 */
 	void noticePayed(User user, String tradeWaterId, String couponId, 
 			String feePrice, String points, String bindSwitch, String cardNo, String quickToken, String wuyeId);
+
 	
 	/**
 	 * 查询是否已经用过红包
@@ -254,6 +256,7 @@ public interface WuyeService {
 	 * @throws Exception 
 	 */
 	Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
+
 
 	/**
 	 * 根据物业订单号查询交易结果

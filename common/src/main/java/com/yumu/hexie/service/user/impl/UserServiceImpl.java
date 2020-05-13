@@ -75,7 +75,6 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private RedisRepository redisRepository;
 	
-	
 	@Override
 	public User getById(long uId) {
 		return userRepository.findOne(uId);
