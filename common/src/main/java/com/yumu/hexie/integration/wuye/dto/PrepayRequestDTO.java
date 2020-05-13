@@ -51,7 +51,7 @@ public class PrepayRequestDTO implements Serializable {
 	private String ruleType;	//减免规则类型
 	private String reductionAmt;	//减免金额
 	private String payFeeType;	//费用类型，01：管理费 02：停车费
-	
+
 	public String getCouponUnit() {
 		return couponUnit;
 	}

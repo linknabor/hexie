@@ -73,6 +73,7 @@ public class DiscountViewRequest extends WuyeRequest {
 	public String toString() {
 		return "DiscountViewRequest [wuyeId=" + wuyeId + ", billId=" + billId + ", stmtId=" + stmtId + ", payType="
 				+ payType + ", payFeeType=" + payFeeType + ", appid=" + appid + "]";
+
 	}
 	
 	

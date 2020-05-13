@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
+import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -219,6 +220,7 @@ public class WuyeUtil {
 	}
 	
 	/**
+
 	 * 通知已支付
 	 * @param user
 	 * @param tradeWaterId
