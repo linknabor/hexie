@@ -326,7 +326,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 			//从未关注过公众号号的用户走其他途径(二维码领券等其他渠道)进入公众号领券激活会进到这里。
 			logger.error("微信卡券尚未创建。 card_id : " + preActivateReq.getCardId() + ", openid : " + preActivateReq.getOpenid() + ", 将会新建卡片。");
 			wechatCard = new WechatCard();
-			wechatCard.setCardCode(preActivateReq.getCardId());
+			wechatCard.setCardId(preActivateReq.getCardId());
 			wechatCard.setUserOpenId(preActivateReq.getOpenid());
 			wechatCard.setCardType(ModelConstant.WECHAT_CARD_TYPE_MEMBER);
 			wechatCard.setOuterStr(preActivateReq.getOuterStr());	//未设置过的途径的应该是0
