@@ -595,7 +595,7 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public String requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
+	public WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
 
 		//TODO create user 
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();

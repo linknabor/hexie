@@ -272,15 +272,15 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<String> requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
+	public BaseResult<WechatPayInfo> requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
 		
 		String requestUrl = getRequestUrl(otherPayDTO.getUser(), "");
 		requestUrl += OTHER_PAY_URL;
 		OtherPayRequest otherPayRequest = new OtherPayRequest(otherPayDTO);
 		
-		TypeReference<HexieResponse<String>> typeReference = new TypeReference<HexieResponse<String>>(){};
-		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, otherPayRequest, typeReference);
-		BaseResult<String> baseResult = new BaseResult<>();
+		TypeReference<HexieResponse<WechatPayInfo>> typeReference = new TypeReference<HexieResponse<WechatPayInfo>>(){};
+		HexieResponse<WechatPayInfo> hexieResponse = wuyeRest(requestUrl, otherPayRequest, typeReference);
+		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
