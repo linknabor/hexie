@@ -219,6 +219,7 @@ public class WuyeUtil {
 	}
 	
 	/**
+
 	 * 通知已支付
 	 * @param user
 	 * @param tradeWaterId

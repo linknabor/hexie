@@ -20,6 +20,7 @@ import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -236,6 +237,10 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		if (user == null) {
 			List<User> userList = userRepository.findByWuyeId(wuyeId);
+			if (userList == null || userList.isEmpty()) {
+				log.info("can not find user, wuyeId : " + wuyeId + ", tradeWaterId : " + tradeWaterId);
+				return;
+			}
 			user = userList.get(0);
 		}
 		if (user == null) {
@@ -589,5 +594,11 @@ public class WuyeServiceImpl implements WuyeService {
 		return wuyeUtil2.getPaySmsCode(user, bankCard).getData();
 	}
 	
+	@Override
+	public String requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
+
+		//TODO create user 
+		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
+	}
 	
 }

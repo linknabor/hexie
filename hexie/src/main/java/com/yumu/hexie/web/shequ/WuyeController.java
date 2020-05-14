@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +32,7 @@ import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -65,6 +64,7 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
+import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
@@ -652,6 +652,7 @@ public class WuyeController extends BaseController {
 		dto.setUser(user);
 		log.info("discountViewRequestDTO : " + dto);
 		discountDetail = wuyeService.getDiscounts(dto);
+
 		return BaseResult.successResult(discountDetail);
 	}
 	
@@ -730,14 +731,21 @@ public class WuyeController extends BaseController {
 	 * @param user
 	 * @throws UnsupportedEncodingException 
 	 */
-	@RequestMapping(value = "/unionPayCallBack", method = {RequestMethod.GET, RequestMethod.POST})
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/requestOtherPay", method = {RequestMethod.POST})
 	@ResponseBody
-	public String unionPayCallBack(HttpServletRequest request) throws Exception {
+	public BaseResult<String> unionPayCallBack(@RequestBody OtherPayVO otherPayVo) throws Exception {
 		
-		String orderNo = request.getParameter("orderNo");
-		byte[]utf8bytes = Base64Utils.decode(orderNo.getBytes());
-		String decodedStr = new String(utf8bytes, "utf-8");
-		return "desc utf8 : " + decodedStr;
+		log.info("requestOtherPay : " + otherPayVo);
+		
+		OtherPayDTO dto = new OtherPayDTO();
+		BeanUtils.copyProperties(otherPayVo, dto);
+		User user = new User();
+		dto.setUser(user);
+		user.setAppId(otherPayVo.getAppid());
+		user.setOpenid(otherPayVo.getOpenid());
+		wuyeService.requestOtherPay(dto);
+		return BaseResult.successResult("success");
 	}
 	
 
