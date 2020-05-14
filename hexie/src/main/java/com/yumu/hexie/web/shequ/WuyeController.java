@@ -734,7 +734,7 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/requestOtherPay", method = {RequestMethod.POST})
 	@ResponseBody
-	public BaseResult<String> unionPayCallBack(@RequestBody OtherPayVO otherPayVo) throws Exception {
+	public BaseResult<WechatPayInfo> requestOtherPay(@RequestBody OtherPayVO otherPayVo) throws Exception {
 		
 		log.info("requestOtherPay : " + otherPayVo);
 		
@@ -744,8 +744,8 @@ public class WuyeController extends BaseController {
 		dto.setUser(user);
 		user.setAppId(otherPayVo.getAppid());
 		user.setOpenid(otherPayVo.getOpenid());
-		wuyeService.requestOtherPay(dto);
-		return BaseResult.successResult("success");
+		WechatPayInfo wechatPayInfo = wuyeService.requestOtherPay(dto);
+		return BaseResult.successResult(wechatPayInfo);
 	}
 	
 

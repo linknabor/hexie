@@ -277,6 +277,6 @@ public interface WuyeService {
 	 */
 	String getPaySmsCode(User user, String cardId) throws Exception;
 
-	String requestOtherPay(OtherPayDTO otherPayDTO) throws Exception;
+	WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception;
 
 }
