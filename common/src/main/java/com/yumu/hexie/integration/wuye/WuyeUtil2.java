@@ -81,7 +81,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_ORDER_URL = "queryOrderSDO.do";	//订单查询
 	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do"; // 获取账单详情
 	private static final String BILL_LIST_STD_URL = "getPayListStdSDO.do"; // 获取账单列表
-	private static final String OTHER_PAY_URL = "otherPaySDO";	//其他收入支付
+	private static final String OTHER_PAY_URL = "otherPaySDO.do";	//其他收入支付
 	
 	
 	/**
