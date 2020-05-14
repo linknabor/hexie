@@ -236,6 +236,10 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		if (user == null) {
 			List<User> userList = userRepository.findByWuyeId(wuyeId);
+			if (userList == null || userList.isEmpty()) {
+				log.info("can not find user, wuyeId : " + wuyeId + ", tradeWaterId : " + tradeWaterId);
+				return;
+			}
 			user = userList.get(0);
 		}
 		if (user == null) {
