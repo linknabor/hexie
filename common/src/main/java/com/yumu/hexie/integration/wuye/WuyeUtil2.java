@@ -27,10 +27,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
 import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
+import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 
@@ -79,6 +81,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_ORDER_URL = "queryOrderSDO.do";	//订单查询
 	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do"; // 获取账单详情
 	private static final String BILL_LIST_STD_URL = "getPayListStdSDO.do"; // 获取账单列表
+	private static final String OTHER_PAY_URL = "otherPaySDO";	//其他收入支付
 	
 	
 	/**
@@ -261,6 +264,25 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		
+	}
+	
+	/**
+	 * 其他收入支付
+	 * @param otherPayDTO
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
+		
+		String requestUrl = getRequestUrl(otherPayDTO.getUser(), "");
+		requestUrl += OTHER_PAY_URL;
+		OtherPayRequest otherPayRequest = new OtherPayRequest(otherPayDTO);
+		
+		TypeReference<HexieResponse<String>> typeReference = new TypeReference<HexieResponse<String>>(){};
+		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, otherPayRequest, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
 	}
 	
 	/**
