@@ -387,4 +387,22 @@ public class UserController extends BaseController{
 		return new BaseResult<Map<String, String>>().success(map);
     }
     
+    /**
+     * 静默授权获取用户openid-alipay
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/authorizeAlipay/{code}", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<Map<String, String>> authorizeAlipay(@PathVariable String code) throws Exception {
+		
+		Map<String, String> map = new HashMap<>();
+		if (StringUtil.isNotEmpty(code)) {
+			AccessTokenOAuth oauth = userService.getAlipayAuth(code);
+	    	map.put("userid", oauth.getOpenid());
+		}
+		return new BaseResult<Map<String, String>>().success(map);
+    }
+    
 }

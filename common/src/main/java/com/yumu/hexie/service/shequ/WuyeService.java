@@ -277,6 +277,12 @@ public interface WuyeService {
 	 */
 	String getPaySmsCode(User user, String cardId) throws Exception;
 
+	/**
+	 * 其他收入支付
+	 * @param otherPayDTO
+	 * @return
+	 * @throws Exception
+	 */
 	WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception;
 
 }
