@@ -404,7 +404,7 @@ public class UserServiceImpl implements UserService {
 		AccessTokenOAuth oAuth = new AccessTokenOAuth();
 		try {
 		    AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
-		    oAuth.setOpenid(oauthTokenResponse.getAlipayUserId());
+		    oAuth.setOpenid(oauthTokenResponse.getUserId());
 		    oAuth.setAccessToken(oauthTokenResponse.getAccessToken());
 		} catch (AlipayApiException e) {
 			throw new BizValidateException(e.getMessage(), e);
