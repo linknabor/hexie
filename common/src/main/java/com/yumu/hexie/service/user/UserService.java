@@ -45,4 +45,5 @@ public interface UserService {
 	//注册
 	User simpleRegister(User user);
 	AccessTokenOAuth getAccessTokenOAuth(String code, String appid);
+	AccessTokenOAuth getAlipayAuth(String code);
 }

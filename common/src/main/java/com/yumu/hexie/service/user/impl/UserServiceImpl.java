@@ -3,6 +3,7 @@ package com.yumu.hexie.service.user.impl;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
@@ -17,8 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
+import com.alipay.api.request.AlipaySystemOauthTokenRequest;
+import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
@@ -74,6 +81,17 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private RedisRepository redisRepository;
+	
+	private AlipayClient alipayClient;
+	
+	@PostConstruct
+	public void initAlipay() {
+		
+		alipayClient = new DefaultAlipayClient(ConstantAlipay.ALIPAY_GATEWAY, ConstantAlipay.APPID, 
+				ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
+				ConstantAlipay.ALIPAY_PUBLIC_KEY, ConstantAlipay.SIGNTYPE); 
+		
+	}
 	
 	@Override
 	public User getById(long uId) {
@@ -374,6 +392,25 @@ public class UserServiceImpl implements UserService {
 			auth = OAuthService.getOAuthAccessToken(code, appid, componentAccessToken);
 		}
 		return auth;
+	}
+	
+	@Override
+	public AccessTokenOAuth getAlipayAuth(String code) {
+		
+		Assert.hasText(code, "code不能为空。");
+		AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
+		request.setCode(code);
+		request.setGrantType(ConstantAlipay.AUTHORIZATION_TYPE);
+		AccessTokenOAuth oAuth = new AccessTokenOAuth();
+		try {
+		    AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
+		    oAuth.setOpenid(oauthTokenResponse.getAlipayUserId());
+		    oAuth.setAccessToken(oauthTokenResponse.getAccessToken());
+		} catch (AlipayApiException e) {
+			throw new BizValidateException(e.getMessage(), e);
+		}
+		return oAuth;
+		
 	}
 
 
