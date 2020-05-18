@@ -16,6 +16,7 @@ public class OtherBillInfo {
 	private String cnst_area;//房屋平米
 	private boolean selected = false;//为了展示用
 	private String bills;
+	private String support_card_pay;	//是否支持绑卡支付
 	
 	public String getCnst_area() {
 		return cnst_area;
@@ -100,6 +101,12 @@ public class OtherBillInfo {
 	}
 	public void setBills(String bills) {
 		this.bills = bills;
+	}
+	public String getSupport_card_pay() {
+		return support_card_pay;
+	}
+	public void setSupport_card_pay(String support_card_pay) {
+		this.support_card_pay = support_card_pay;
 	}
 	
 	
