@@ -17,6 +17,7 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.PayNotifyMsgVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
@@ -26,6 +27,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
@@ -279,54 +281,6 @@ public class TemplateMsgService {
     }
     
     /**
-     * 测试模板
-     * @param openid
-     * @param accessToken
-     * @param appId
-     */
-    public static void testSend(String openid, String accessToken, String appId) {
-	
-    	WuyeServiceVO vo = new WuyeServiceVO();
-	  	vo.setTitle(new TemplateItem("已接收您的快递包裹！"));
-	  	vo.setOrderNum(new TemplateItem(String.valueOf(System.currentTimeMillis())));
-	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
-	  	vo.setRecvDate(new TemplateItem(recvDate));
-	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
-	  	
-	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
-    	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
-    	String url = GotongServiceImpl.SERVICE_URL + "10086";
-    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
-    	msg.setTouser(openid);
-    	TemplateMsgService.sendMsg(msg, accessToken);
-  	
-	}
-    
-    public static void main(String[] args) throws JSONException {
-		
-    	String appId = "wx95f46f41ca5e570e";
-    	String openid = "o_3DlwdnCLCz3AbTrZqj4HtKeQYY";
-    	WuyeServiceVO vo = new WuyeServiceVO();
-	  	vo.setTitle(new TemplateItem("已接收您的快递包裹！"));
-	  	vo.setOrderNum(new TemplateItem(String.valueOf(System.currentTimeMillis())));
-	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
-	  	vo.setRecvDate(new TemplateItem(recvDate));
-	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
-	  	
-	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
-    	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
-    	String url = GotongServiceImpl.SERVICE_URL + "10086";
-    	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
-    	msg.setTouser(openid);
-    	
-    	String json = JacksonJsonUtil.beanToJson(msg);
-    	System.out.println(json);
-	}
-    
-    
-    /**
      * 快递外卖
      * @param openid
      * @param accessToken
@@ -359,7 +313,7 @@ public class TemplateMsgService {
 	}
     
     /**
-     * 快递外卖
+     * 平台群发通知
      * @param openid
      * @param accessToken
      * @param appId
@@ -381,6 +335,33 @@ public class TemplateMsgService {
     	msg.setTouser(openid);
     	TemplateMsgService.sendMsg(msg, accessToken);
   	
+
+	}
+    
+    
+    /**
+     * 支付到账通知
+     * @param openid
+     * @param accessToken
+     * @param appId
+     */
+    public static void sendPayNotify(PayNotifyDTO payNotifyDTO, String accessToken) {
+    	
+    	PayNotifyMsgVO vo = new PayNotifyMsgVO();
+		vo.setTitle(new TemplateItem("您好，你有一笔订单收款成功。"));
+	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
+	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
+	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
+	  	vo.setOrderId(new TemplateItem(payNotifyDTO.getOrderId()));
+	  	vo.setRemark(new TemplateItem("详情请点击查看"));
+    	
+	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_MESSAGE));
+    	String url = GotongServiceImpl.MESSAGE_URL + payNotifyDTO.getOrderId();
+    	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
+    	msg.setTouser(payNotifyDTO.getOpenid());
+    	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}
 
