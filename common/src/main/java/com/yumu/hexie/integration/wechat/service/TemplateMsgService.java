@@ -51,6 +51,7 @@ public class TemplateMsgService {
 	public static final String TEMPLATE_TYPE_COMPLAIN = "complainTemplate";
 	public static final String TEMPLATE_TYPE_SERVICE = "serviceTemplate";
 	public static final String TEMPLATE_TYPE_MESSAGE = "messageTemplate";
+	public static final String TEMPLATE_TYPE_PAY_NOTIFY = "payNotifyTemplate";
 
 	
 	
@@ -357,7 +358,7 @@ public class TemplateMsgService {
     	
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_MESSAGE));
+    	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
     	String url = GotongServiceImpl.MESSAGE_URL + payNotifyDTO.getOrderId();
     	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
     	msg.setTouser(payNotifyDTO.getOpenid());
