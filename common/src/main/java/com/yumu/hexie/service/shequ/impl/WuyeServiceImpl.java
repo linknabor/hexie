@@ -600,5 +600,6 @@ public class WuyeServiceImpl implements WuyeService {
 		//TODO create user 
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
 	}
+
 	
 }

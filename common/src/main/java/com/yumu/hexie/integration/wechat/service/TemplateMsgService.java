@@ -54,7 +54,6 @@ public class TemplateMsgService {
 	public static final String TEMPLATE_TYPE_PAY_NOTIFY = "payNotifyTemplate";
 
 	
-	
 	/**
 	 * 模板消息发送
 	 */
@@ -338,7 +337,7 @@ public class TemplateMsgService {
   	
 
 	}
-    
+   
     
     /**
      * 支付到账通知
