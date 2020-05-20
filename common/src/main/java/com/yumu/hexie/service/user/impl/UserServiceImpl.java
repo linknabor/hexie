@@ -411,14 +411,6 @@ public class UserServiceImpl implements UserService {
 		}
 		return oAuth;
 		
-		Assert.hasText(code, "code不能为空。");
-		Assert.hasText(appid, "appid不能为空。");
-		AccessTokenOAuth  auth = null;
-		if (!AppUtil.isMainApp(appid)) {
-			String componentAccessToken = redisRepository.getComponentAccessToken(ConstantWeChat.KEY_COMPONENT_ACESS_TOKEN);
-			auth = OAuthService.getOAuthAccessToken(code, appid, componentAccessToken);
-		}
-		return auth;
 	}
 
 
