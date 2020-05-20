@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -746,6 +747,7 @@ public class WuyeController extends BaseController {
 		user.setOpenid(otherPayVo.getOpenid());
 		WechatPayInfo wechatPayInfo = wuyeService.requestOtherPay(dto);
 		return BaseResult.successResult(wechatPayInfo);
+
 	}
 	
 

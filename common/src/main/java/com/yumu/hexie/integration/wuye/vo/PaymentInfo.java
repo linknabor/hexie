@@ -86,6 +86,7 @@ public class PaymentInfo implements Serializable {
 	public void setSupport_card_pay(String support_card_pay) {
 		this.support_card_pay = support_card_pay;
 	}
+
 	
 	
 }

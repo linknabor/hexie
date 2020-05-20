@@ -17,7 +17,7 @@ public class OtherBillInfo {
 	private boolean selected = false;//为了展示用
 	private String bills;
 	private String support_card_pay;	//是否支持绑卡支付
-	
+
 	public String getCnst_area() {
 		return cnst_area;
 	}

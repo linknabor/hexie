@@ -37,5 +37,5 @@ public interface GotongService {
 	void sendGroupMessage(String openId, String appId, long msgId, String content);
 
 	void sendPayNotify(PayNotifyDTO payNotifyDTO);
-	
+
 }
