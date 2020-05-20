@@ -9,6 +9,7 @@ public class OtherPayDTO {
 	private String sectId;
 	private String feeId;
 	private String remark;
+	private String qrCodeId;
 	
 	public User getUser() {
 		return user;
@@ -40,12 +41,17 @@ public class OtherPayDTO {
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
+	public String getQrCodeId() {
+		return qrCodeId;
+	}
+	public void setQrCodeId(String qrCodeId) {
+		this.qrCodeId = qrCodeId;
+	}
 	@Override
 	public String toString() {
 		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
-				+ ", remark=" + remark + "]";
+				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + "]";
 	}
-	
 	
 
 }
