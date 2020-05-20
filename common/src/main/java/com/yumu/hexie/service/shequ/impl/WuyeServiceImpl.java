@@ -20,6 +20,7 @@ import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -593,5 +594,12 @@ public class WuyeServiceImpl implements WuyeService {
 		return wuyeUtil2.getPaySmsCode(user, bankCard).getData();
 	}
 	
+	@Override
+	public WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
+
+		//TODO create user 
+		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
+	}
+
 	
 }

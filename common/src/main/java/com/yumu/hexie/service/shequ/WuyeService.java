@@ -3,6 +3,7 @@ package com.yumu.hexie.service.shequ;
 import java.util.List;
 
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -275,5 +276,13 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	String getPaySmsCode(User user, String cardId) throws Exception;
+
+	/**
+	 * 其他收入支付
+	 * @param otherPayDTO
+	 * @return
+	 * @throws Exception
+	 */
+	WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception;
 
 }
