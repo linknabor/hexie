@@ -18,13 +18,11 @@ import org.springframework.util.StringUtils;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
-import com.yumu.hexie.integration.wechat.entity.customer.DataJsonVo;
-import com.yumu.hexie.integration.wechat.entity.customer.DataVo;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
-import com.yumu.hexie.integration.wechat.entity.customer.Template;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -211,28 +209,9 @@ public class GotongServiceImpl implements GotongService {
         
     }
     
-    @Override
-    public void pushweixinAll() {
-		List<User> useropenId = userRepository.findAll();
-		for (int i = 0; i < useropenId.size(); i++) {
-			
-			Template msg = new Template();
-	    	msg.setTouser(useropenId.get(i).getOpenid());
-	    	msg.setUrl("");//跳转地址 threadid
-	    	msg.setTemplate_id("");//模板id template
-			DataVo data = new DataVo();
-			data.setFirst(new DataJsonVo(""));
-			data.setKeyword1(new DataJsonVo(""));
-			data.setKeyword2(new DataJsonVo(""));
-			data.setKeyword3(new DataJsonVo(""));
-			data.setKeyword4(new DataJsonVo(""));
-			data.setRemark(new DataJsonVo(""));
-			msg.setData(data);
-			String accessToken = systemConfigService.queryWXAToken(useropenId.get(i).getAppId());
-			CustomService.sendCustomerMessage(msg, accessToken);
-		}
-		
-    }
+    /**
+     * 服务预约模板消息
+     */
 	@Override
 	public void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String remark, String appId) {
 		
@@ -240,4 +219,27 @@ public class GotongServiceImpl implements GotongService {
 		TemplateMsgService.sendYuyueBillMsg(String.valueOf(threadId), openId, title, content, requireTime, "", accessToken, remark, appId);    
 		
 	}
+	
+	/**
+     * 平台公告通知群发
+     */
+	@Override
+	public void sendGroupMessage(String openId, String appId, long msgId, String content) {
+		
+		String accessToken = systemConfigService.queryWXAToken(appId);
+		TemplateMsgService.sendHexieMessage(openId, accessToken, appId, msgId, content);
+	}
+	
+	/**
+	 * 交易到账通知
+	 */
+	@Override
+	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
+		
+		String accessToken = systemConfigService.queryWXAToken(payNotifyDTO.getUser().getAppId());
+		TemplateMsgService.sendPayNotify(payNotifyDTO, accessToken);
+		
+	}
+	
+
 }

@@ -4,6 +4,7 @@
  */
 package com.yumu.hexie.service.common;
 
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
@@ -29,9 +30,12 @@ public interface GotongService {
     
     public void sendCommonYuyueBillMsg(int serviceType,String title,String billName, String requireTime, String url, String remark);
     
-    public void pushweixinAll();
-    
 	void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String remark, String appId);
 
 	void sendRegiserMsg(User user);
+
+	void sendGroupMessage(String openId, String appId, long msgId, String content);
+
+	void sendPayNotify(PayNotifyDTO payNotifyDTO);
+
 }

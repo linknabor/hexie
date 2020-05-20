@@ -163,6 +163,7 @@ public class DistributionServiceImpl implements DistributionService {
     			currUser.setXiaoquId(region.getId());
 			}
     	}
+
     	List<RgroupAreaItem> result ;
         if(currUser.getXiaoquId() == 0){
             result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), currUser.getAppId(), new PageRequest(page, 12));

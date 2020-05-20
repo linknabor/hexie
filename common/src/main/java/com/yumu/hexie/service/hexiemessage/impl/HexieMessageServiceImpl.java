@@ -4,39 +4,45 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.inject.Inject;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.yumu.hexie.common.util.TransactionUtil;
-import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
-import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
-
-	@Autowired
-	private SystemConfigService systemConfigService;
 	
+	private static Logger logger = LoggerFactory.getLogger(HexieMessageServiceImpl.class);
+
 	@Autowired
 	private UserRepository userRepository;
 	
 	@Autowired
 	private HexieMessageRepository hexieMessageRepository;
 	
-	@Inject
+	@Autowired
 	protected SmsService smsService;
 	
 	@Autowired
 	private TransactionUtil<T> transactionUtil;
 	
+	@Autowired
+	private GotongService gotongService;
+	
+	/**
+	 * 公众号群发消息通知功能
+	 */
 	@Override
 	public void sendMessage(HexieMessage exr) {
 
@@ -55,6 +61,11 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 
 	}
 	
+	/**
+	 * 公众号群发消息通知功能
+	 * @param exr
+	 * @param user
+	 */
 	private void saveHexieMessage(HexieMessage exr, User user) {
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
@@ -65,8 +76,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		hexieMessage.setWuyeId(user.getWuyeId());
 		hexieMessage = hexieMessageRepository.save(hexieMessage);
 		
-		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-		TemplateMsgService.sendHexieMessage(user.getOpenid(), accessToken, user.getAppId(),hexieMessage.getId(),exr.getContent());
+		gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
 	}
 	
 	@Override
@@ -75,6 +85,28 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		return hexieMessageRepository.findOne(messageId);
 	}
 
+	/**
+	 * 到账消息推送
+	 */
+	@Override
+	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
+
+		Assert.hasText(payNotifyDTO.getOpenid(), "用户openid不能为空。");
+		
+		User user = null;
+		List<User> userList = userRepository.findByOpenid(payNotifyDTO.getOpenid());
+		if (userList!=null && !userList.isEmpty()) {
+			user = userList.get(0);
+		}else {
+			logger.warn("can not find user, openid : " + payNotifyDTO.getOpenid());
+		}
+		if (user!=null) {
+			payNotifyDTO.setUser(user);
+			gotongService.sendPayNotify(payNotifyDTO);
+		}
+			
+		
+	}
 
 	
 }
