@@ -713,7 +713,7 @@ public class WuyeController extends BaseController {
 	 * @throws JsonParseException 
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/servplat/noticeCardPay", method = RequestMethod.GET)
+	@RequestMapping(value = "/servplat/noticeCardPay", method = {RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
 	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId, 
 			@RequestParam(required = false) String feePrice, 
