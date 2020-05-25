@@ -722,7 +722,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String wuyeId,
 			@RequestParam(required = false) String couponId,
 			@RequestParam(required = false, name = "integral") String points,
-			@RequestParam(required = false) String openids) throws Exception {
+			@RequestParam(required = false) String openids,
+			@RequestParam(required = false, name = "pay_method") String payMethod) throws Exception {
 		
 		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
 		payNotifyDTO.setOrderId(tradeWaterId);
@@ -733,6 +734,7 @@ public class WuyeController extends BaseController {
 		payNotifyDTO.setCardNo(cardNo);
 		payNotifyDTO.setQuickToken(quickToken);
 		payNotifyDTO.setWuyeId(wuyeId);
+		payNotifyDTO.setPayMethod(payMethod);
 		
 		log.info("openids" + openids);
 		log.info("payNotifyDto :" + payNotifyDTO);
