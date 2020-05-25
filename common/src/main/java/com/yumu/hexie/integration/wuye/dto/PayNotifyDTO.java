@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.util.StringUtils;
 
@@ -29,7 +30,7 @@ public class PayNotifyDTO implements Serializable {
 	private String bindSwitch;	//是否自动绑定房屋标识
 	private String cardNo;	//卡号，绑卡支付用
 	private String quickToken;	//绑卡支付使用，二次支付时的token
-	private List<String> notifyOpenids;	//本次支付需要通知的用户id列表
+	private List<Map<String, String>> notifyOpenids;	//本次支付需要通知的用户id列表
 	
 	public User getUser() {
 		return user;
@@ -104,10 +105,10 @@ public class PayNotifyDTO implements Serializable {
 	public void setQuickToken(String quickToken) {
 		this.quickToken = quickToken;
 	}
-	public List<String> getNotifyOpenids() {
+	public List<Map<String, String>> getNotifyOpenids() {
 		return notifyOpenids;
 	}
-	public void setNotifyOpenids(List<String> notifyOpenids) {
+	public void setNotifyOpenids(List<Map<String, String>> notifyOpenids) {
 		this.notifyOpenids = notifyOpenids;
 	}
 	@Override

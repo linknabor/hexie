@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.shequ.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -516,7 +517,10 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	public void addPointAsync(User user, String point, String pointKey) {
 		
-		Assert.hasText(point, "缴费金额为空。");
+		if (StringUtils.isEmpty(pointKey)) {
+			log.info("本次缴费积分 为零，不作处理。pointKey : " + pointKey);
+			return;
+		}
 
 		//防止重复添加卡券积分，半小时内只能提交队列一次。出队时也会校验重复性
 		Long increment = redisTemplate.opsForValue().increment(pointKey, 1);
@@ -613,9 +617,14 @@ public class WuyeServiceImpl implements WuyeService {
 
 		Assert.notEmpty(payNotifyDTO.getNotifyOpenids(), "用户openid不能为空。");
 		
-		for (String openid : payNotifyDTO.getNotifyOpenids()) {
+		for (Map<String, String> openidMap : payNotifyDTO.getNotifyOpenids()) {
 			
 			User user = null;
+			String openid = openidMap.get("openid");
+			if (StringUtils.isEmpty(openid)) {
+				log.warn("openid is empty, will skip. ");
+				continue;
+			}
 			List<User> userList = userRepository.findByOpenid(openid);
 			if (userList!=null && !userList.isEmpty()) {
 				user = userList.get(0);
