@@ -2,6 +2,7 @@ package com.yumu.hexie.web.shequ;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -728,7 +729,11 @@ public class WuyeController extends BaseController {
 		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
 		payNotifyDTO.setOrderId(tradeWaterId);
 		payNotifyDTO.setCouponId(couponId);
-		payNotifyDTO.setTranAmt(feePrice);
+		BigDecimal tranAmt = BigDecimal.ZERO;
+		if (!StringUtils.isEmpty(feePrice)) {
+			tranAmt = new BigDecimal(feePrice).divide(new BigDecimal("100"));
+		}
+		payNotifyDTO.setTranAmt(tranAmt.toString());
 		payNotifyDTO.setPoints(points);
 		payNotifyDTO.setBindSwitch("1");	//默认绑定
 		payNotifyDTO.setCardNo(cardNo);
