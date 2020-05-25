@@ -741,13 +741,12 @@ public class WuyeController extends BaseController {
 		payNotifyDTO.setWuyeId(wuyeId);
 		payNotifyDTO.setPayMethod(payMethod);
 		
-		log.info("openids" + openids);
+		log.info("openids:" + openids);
 		log.info("payNotifyDto :" + payNotifyDTO);
 		
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		TypeReference<Map<String, List<String>>> typeReference = new TypeReference<Map<String,List<String>>>() {};
-		Map<String, List<String>> dataMap = objectMapper.readValue(openids, typeReference);
-		List<String> openidList = dataMap.get("data");
+		TypeReference<List<Map<String, String>>> typeReference = new TypeReference<List<Map<String, String>>>() {};
+		List<Map<String, String>> openidList = objectMapper.readValue(openids, typeReference);
 		payNotifyDTO.setNotifyOpenids(openidList);
 		wuyeService.noticePayed(payNotifyDTO);
 		return "SUCCESS";
