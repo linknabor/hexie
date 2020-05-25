@@ -1,9 +1,14 @@
 package com.yumu.hexie.integration.wuye.dto;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.List;
 
+import org.springframework.util.StringUtils;
+
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.exception.BizValidateException;
 
 public class PayNotifyDTO implements Serializable {
 
@@ -42,6 +47,13 @@ public class PayNotifyDTO implements Serializable {
 		return payMethod;
 	}
 	public void setPayMethod(String payMethod) {
+		if (!StringUtils.isEmpty(payMethod)) {
+			try {
+				payMethod = URLDecoder.decode(payMethod, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new BizValidateException(e.getMessage(), e);
+			}
+		}
 		this.payMethod = payMethod;
 	}
 	public String getTranDateTime() {
