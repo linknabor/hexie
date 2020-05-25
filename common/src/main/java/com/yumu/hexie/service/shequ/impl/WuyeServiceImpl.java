@@ -244,33 +244,29 @@ public class WuyeServiceImpl implements WuyeService {
 			List<User> userList = userRepository.findByWuyeId(payNotifyDTO.getWuyeId());
 			if (userList == null || userList.isEmpty()) {
 				log.info("can not find user, wuyeId : " + payNotifyDTO.getWuyeId() + ", tradeWaterId : " + payNotifyDTO.getOrderId());
-				return;
+			}else {
+				user = userList.get(0);
 			}
-			user = userList.get(0);
+			
 		}
-		if (user == null) {
-			log.info("can not find user, wuyeId : " + payNotifyDTO.getWuyeId());
-			return;
+		if (user != null) {
+			//2.添加芝麻积分
+			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				String pointKey = "wuyePay-" + payNotifyDTO.getOrderId();
+				addPointAsync(user, payNotifyDTO.getPoints(), pointKey);
+			}else {
+				String pointKey = "zhima-bill-" + user.getId() + "-" + payNotifyDTO.getOrderId();
+				pointService.updatePoint(user, "10", pointKey);
+			}
+			//3.如果是绑卡支付，记录用户的quicktoken
+			if (!StringUtils.isEmpty(payNotifyDTO.getCardNo()) && !StringUtils.isEmpty(payNotifyDTO.getQuickToken())) {
+				bankCardRepository.updateBankCardByAcctNoAndUserId(payNotifyDTO.getQuickToken(), payNotifyDTO.getQuickToken(), user.getId());
+			}
+			//5.绑定所缴纳物业费的房屋
+			bindHouseByTradeAsync(payNotifyDTO.getBindSwitch(), user, payNotifyDTO.getOrderId());
 		}
-		//2.添加芝麻积分
-		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
-			String pointKey = "wuyePay-" + payNotifyDTO.getOrderId();
-			addPointAsync(user, payNotifyDTO.getPoints(), pointKey);
-		}else {
-			String pointKey = "zhima-bill-" + user.getId() + "-" + payNotifyDTO.getOrderId();
-			pointService.updatePoint(user, "10", pointKey);
-		}
-		
-		//3.如果是绑卡支付，记录用户的quicktoken
-		if (!StringUtils.isEmpty(payNotifyDTO.getCardNo()) && !StringUtils.isEmpty(payNotifyDTO.getQuickToken())) {
-			bankCardRepository.updateBankCardByAcctNoAndUserId(payNotifyDTO.getQuickToken(), payNotifyDTO.getQuickToken(), user.getId());
-		}
-		
 		//4.通知物业相关人员，收费到账
 		sendPayNotify(payNotifyDTO);
-		
-		//5.绑定所缴纳物业费的房屋
-		bindHouseByTradeAsync(payNotifyDTO.getBindSwitch(), user, payNotifyDTO.getOrderId());
 		
 	}
 
