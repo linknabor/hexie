@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.shequ;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -28,12 +28,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -702,6 +708,9 @@ public class WuyeController extends BaseController {
 	 * @param cardNo
 	 * @param quickToken
 	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/servplat/noticeCardPay", method = RequestMethod.GET)
@@ -712,18 +721,28 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String quickToken,
 			@RequestParam(required = false) String wuyeId,
 			@RequestParam(required = false) String couponId,
-			@RequestParam(required = false, name = "integral") String points) {
+			@RequestParam(required = false, name = "integral") String points,
+			@RequestParam(required = false) String openids) throws Exception {
 		
-		log.info("tradeWaterId:" + tradeWaterId);
-		log.info("feePrice:" + feePrice);
-		log.info("quickToken:" + quickToken);
-		log.info("cardNo:" + cardNo);
-		log.info("wuyeId:" + wuyeId);
-		log.info("couponId:" + couponId);
-		log.info("points:" + points);
+		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
+		payNotifyDTO.setOrderId(tradeWaterId);
+		payNotifyDTO.setCouponId(couponId);
+		payNotifyDTO.setTranAmt(feePrice);
+		payNotifyDTO.setPoints(points);
+		payNotifyDTO.setBindSwitch("1");	//默认绑定
+		payNotifyDTO.setCardNo(cardNo);
+		payNotifyDTO.setQuickToken(quickToken);
+		payNotifyDTO.setWuyeId(wuyeId);
 		
-		String bindSwitch = "1";	//默认绑定
-		wuyeService.noticePayed(null, tradeWaterId, couponId, feePrice, points, bindSwitch, cardNo, quickToken, wuyeId);
+		log.info("openids" + openids);
+		log.info("payNotifyDto :" + payNotifyDTO);
+		
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		TypeReference<Map<String, List<String>>> typeReference = new TypeReference<Map<String,List<String>>>() {};
+		Map<String, List<String>> dataMap = objectMapper.readValue(openids, typeReference);
+		List<String> openidList = dataMap.get("data");
+		payNotifyDTO.setNotifyOpenids(openidList);
+		wuyeService.noticePayed(payNotifyDTO);
 		return "SUCCESS";
 	}
 	

@@ -21,6 +21,7 @@ import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -44,6 +45,7 @@ import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
@@ -89,6 +91,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private BankCardRepository bankCardRepository;
+	
+	@Autowired
+	private GotongService gotongService;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -212,18 +217,18 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Transactional
 	@Override
-	public void noticePayed(User user, String tradeWaterId, 
-			String couponId, String feePrice, String point, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
+	public void noticePayed(PayNotifyDTO payNotifyDTO) {
 		
-		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
+		Assert.hasText(payNotifyDTO.getOrderId(), "交易订单号不能为空。");
 		
+		User user = payNotifyDTO.getUser();
 		//1.更新红包状态
 		Coupon coupon = null;
-		if (!StringUtils.isEmpty(couponId)) {
-			coupon = couponService.findOne(Long.valueOf(couponId));
+		if (!StringUtils.isEmpty(payNotifyDTO.getCouponId())) {
+			coupon = couponService.findOne(Long.valueOf(payNotifyDTO.getCouponId()));
 			if (coupon != null) {
 				try {
-					couponService.comsume(feePrice, coupon.getId());
+					couponService.comsume(payNotifyDTO.getTranAmt(), coupon.getId());
 				} catch (Exception e) {
 					//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
 					log.error(e.getMessage(), e);
@@ -236,33 +241,36 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		if (user == null) {
-			List<User> userList = userRepository.findByWuyeId(wuyeId);
+			List<User> userList = userRepository.findByWuyeId(payNotifyDTO.getWuyeId());
 			if (userList == null || userList.isEmpty()) {
-				log.info("can not find user, wuyeId : " + wuyeId + ", tradeWaterId : " + tradeWaterId);
+				log.info("can not find user, wuyeId : " + payNotifyDTO.getWuyeId() + ", tradeWaterId : " + payNotifyDTO.getOrderId());
 				return;
 			}
 			user = userList.get(0);
 		}
 		if (user == null) {
-			log.info("can not find user, wuyeId : " + wuyeId);
+			log.info("can not find user, wuyeId : " + payNotifyDTO.getWuyeId());
 			return;
 		}
 		//2.添加芝麻积分
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
-			String pointKey = "wuyePay-" + tradeWaterId;
-			addPointAsync(user, point, pointKey);
+			String pointKey = "wuyePay-" + payNotifyDTO.getOrderId();
+			addPointAsync(user, payNotifyDTO.getPoints(), pointKey);
 		}else {
-			String pointKey = "zhima-bill-" + user.getId() + "-" + tradeWaterId;
+			String pointKey = "zhima-bill-" + user.getId() + "-" + payNotifyDTO.getOrderId();
 			pointService.updatePoint(user, "10", pointKey);
 		}
 		
 		//3.如果是绑卡支付，记录用户的quicktoken
-		if (!StringUtils.isEmpty(cardNo) && !StringUtils.isEmpty(quickToken)) {
-			bankCardRepository.updateBankCardByAcctNoAndUserId(quickToken, cardNo, user.getId());
+		if (!StringUtils.isEmpty(payNotifyDTO.getCardNo()) && !StringUtils.isEmpty(payNotifyDTO.getQuickToken())) {
+			bankCardRepository.updateBankCardByAcctNoAndUserId(payNotifyDTO.getQuickToken(), payNotifyDTO.getQuickToken(), user.getId());
 		}
 		
-		//4.绑定所缴纳物业费的房屋
-		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
+		//4.通知物业相关人员，收费到账
+		sendPayNotify(payNotifyDTO);
+		
+		//5.绑定所缴纳物业费的房屋
+		bindHouseByTradeAsync(payNotifyDTO.getBindSwitch(), user, payNotifyDTO.getOrderId());
 		
 	}
 
@@ -599,6 +607,33 @@ public class WuyeServiceImpl implements WuyeService {
 
 		//TODO create user 
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
+	}
+	
+	/**
+	 * 到账消息推送
+	 */
+	@Override
+	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
+
+		Assert.notEmpty(payNotifyDTO.getNotifyOpenids(), "用户openid不能为空。");
+		
+		for (String openid : payNotifyDTO.getNotifyOpenids()) {
+			
+			User user = null;
+			List<User> userList = userRepository.findByOpenid(openid);
+			if (userList!=null && !userList.isEmpty()) {
+				user = userList.get(0);
+			}else {
+				log.warn("can not find user, openid : " + openid);
+			}
+			if (user!=null) {
+				payNotifyDTO.setUser(user);
+				gotongService.sendPayNotify(payNotifyDTO);
+			}
+			
+		}
+			
+		
 	}
 
 	

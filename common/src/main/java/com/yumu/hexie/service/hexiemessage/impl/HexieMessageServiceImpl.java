@@ -4,15 +4,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import com.yumu.hexie.common.util.TransactionUtil;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
 import com.yumu.hexie.model.user.User;
@@ -23,8 +19,6 @@ import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	
-	private static Logger logger = LoggerFactory.getLogger(HexieMessageServiceImpl.class);
-
 	@Autowired
 	private UserRepository userRepository;
 	
@@ -83,29 +77,6 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	public HexieMessage getMessage(long messageId) {
 		
 		return hexieMessageRepository.findOne(messageId);
-	}
-
-	/**
-	 * 到账消息推送
-	 */
-	@Override
-	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
-
-		Assert.hasText(payNotifyDTO.getOpenid(), "用户openid不能为空。");
-		
-		User user = null;
-		List<User> userList = userRepository.findByOpenid(payNotifyDTO.getOpenid());
-		if (userList!=null && !userList.isEmpty()) {
-			user = userList.get(0);
-		}else {
-			logger.warn("can not find user, openid : " + payNotifyDTO.getOpenid());
-		}
-		if (user!=null) {
-			payNotifyDTO.setUser(user);
-			gotongService.sendPayNotify(payNotifyDTO);
-		}
-			
-		
 	}
 
 	

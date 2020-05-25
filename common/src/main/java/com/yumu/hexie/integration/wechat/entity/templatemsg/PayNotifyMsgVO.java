@@ -8,17 +8,17 @@ public class PayNotifyMsgVO {
 	private TemplateItem title;
 	
 	@JsonProperty("keyword1")
-	private TemplateItem tranAmt;	//交易金额
+	private TemplateItem tranType;	//交易类型
 	
 	@JsonProperty("keyword2")
-	private TemplateItem payMethod;	//支付方式
+	private TemplateItem payMethod;	//交易方式
 	
 	@JsonProperty("keyword3")
-	private TemplateItem tranDateTime;	//支付时间,yyyy-MM-dddd hh:mm:ss
+	private TemplateItem tranAmt;	//交易金额
 	
 	@JsonProperty("keyword4")
-	private TemplateItem orderId;	//订单编号
-
+	private TemplateItem tranDateTime;	//支付时间,yyyy-MM-dddd hh:mm:ss
+	
 	private TemplateItem remark;	//备注
 
 	public TemplateItem getTitle() {
@@ -29,12 +29,12 @@ public class PayNotifyMsgVO {
 		this.title = title;
 	}
 
-	public TemplateItem getTranAmt() {
-		return tranAmt;
+	public TemplateItem getTranType() {
+		return tranType;
 	}
 
-	public void setTranAmt(TemplateItem tranAmt) {
-		this.tranAmt = tranAmt;
+	public void setTranType(TemplateItem tranType) {
+		this.tranType = tranType;
 	}
 
 	public TemplateItem getPayMethod() {
@@ -45,20 +45,20 @@ public class PayNotifyMsgVO {
 		this.payMethod = payMethod;
 	}
 
+	public TemplateItem getTranAmt() {
+		return tranAmt;
+	}
+
+	public void setTranAmt(TemplateItem tranAmt) {
+		this.tranAmt = tranAmt;
+	}
+
 	public TemplateItem getTranDateTime() {
 		return tranDateTime;
 	}
 
 	public void setTranDateTime(TemplateItem tranDateTime) {
 		this.tranDateTime = tranDateTime;
-	}
-
-	public TemplateItem getOrderId() {
-		return orderId;
-	}
-
-	public void setOrderId(TemplateItem orderId) {
-		this.orderId = orderId;
 	}
 
 	public TemplateItem getRemark() {
@@ -68,6 +68,7 @@ public class PayNotifyMsgVO {
 	public void setRemark(TemplateItem remark) {
 		this.remark = remark;
 	}
+
 	
 	
 }

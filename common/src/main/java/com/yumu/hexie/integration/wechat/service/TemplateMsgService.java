@@ -352,7 +352,7 @@ public class TemplateMsgService {
 	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
 	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
 	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
-	  	vo.setOrderId(new TemplateItem(payNotifyDTO.getOrderId()));
+	  	vo.setTranType(new TemplateItem("消费"));
 	  	vo.setRemark(new TemplateItem("详情请点击查看"));
     	
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
@@ -360,7 +360,7 @@ public class TemplateMsgService {
     	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
     	String url = GotongServiceImpl.MESSAGE_URL + payNotifyDTO.getOrderId();
     	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
-    	msg.setTouser(payNotifyDTO.getOpenid());
+    	msg.setTouser(payNotifyDTO.getUser().getOpenid());
     	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}
