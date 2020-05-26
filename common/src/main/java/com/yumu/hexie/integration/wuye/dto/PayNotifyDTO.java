@@ -30,6 +30,7 @@ public class PayNotifyDTO implements Serializable {
 	private String bindSwitch;	//是否自动绑定房屋标识
 	private String cardNo;	//卡号，绑卡支付用
 	private String quickToken;	//绑卡支付使用，二次支付时的token
+	private String feeName;	//费项名称
 	private List<Map<String, String>> notifyOpenids;	//本次支付需要通知的用户id列表
 	
 	public User getUser() {
@@ -111,12 +112,19 @@ public class PayNotifyDTO implements Serializable {
 	public void setNotifyOpenids(List<Map<String, String>> notifyOpenids) {
 		this.notifyOpenids = notifyOpenids;
 	}
+	public String getFeeName() {
+		return feeName;
+	}
+	public void setFeeName(String feeName) {
+		this.feeName = feeName;
+	}
 	@Override
 	public String toString() {
 		return "PayNotifyDTO [user=" + user + ", orderId=" + orderId + ", payMethod=" + payMethod + ", tranDateTime="
 				+ tranDateTime + ", wuyeId=" + wuyeId + ", couponId=" + couponId + ", tranAmt=" + tranAmt + ", points="
 				+ points + ", bindSwitch=" + bindSwitch + ", cardNo=" + cardNo + ", quickToken=" + quickToken
-				+ ", notifyOpenids=" + notifyOpenids + "]";
+				+ ", feeName=" + feeName + ", notifyOpenids=" + notifyOpenids + "]";
 	}
+	
 	
 }

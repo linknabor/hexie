@@ -55,6 +55,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
@@ -725,7 +726,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false, name = "integral") String points,
 			@RequestParam(required = false) String openids,
 			@RequestParam(required = false, name = "pay_method") String payMethod,
-			@RequestParam(required =false, name = "tran_date") String tranDate) throws Exception {
+			@RequestParam(required = false, name = "tran_date") String tranDate,
+			@RequestParam(required = false, name = "fee_name") String feeName) throws Exception {
 		
 		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
 		payNotifyDTO.setOrderId(tradeWaterId);
@@ -742,6 +744,7 @@ public class WuyeController extends BaseController {
 		payNotifyDTO.setWuyeId(wuyeId);
 		payNotifyDTO.setPayMethod(payMethod);
 		payNotifyDTO.setTranDateTime(tranDate);
+		payNotifyDTO.setFeeName(feeName);
 		
 		log.info("openids:" + openids);
 		log.info("payNotifyDto :" + payNotifyDTO);
@@ -776,6 +779,23 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(wechatPayInfo);
 
 	}
+	
+	/**
+	 *获取当前操作员所在小区二维码支付服务的相关信息
+	 * @param user
+	 * @throws UnsupportedEncodingException 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/qrCodePayService", method = {RequestMethod.GET})
+	@ResponseBody
+	public BaseResult<QrCodePayService> getQrCodePayService(@ModelAttribute(Constants.USER) User user) throws Exception {
+		
+		QrCodePayService qrCodePayService = wuyeService.getQrCodePayService(user);
+		return BaseResult.successResult(qrCodePayService);
+
+	} 
+	
+	
 	
 
 

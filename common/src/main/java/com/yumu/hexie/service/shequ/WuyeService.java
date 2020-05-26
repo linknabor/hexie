@@ -17,6 +17,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
@@ -290,5 +291,13 @@ public interface WuyeService {
 	 * @param payNotifyDTO
 	 */
 	void sendPayNotify(PayNotifyDTO payNotifyDTO);
+
+	/**
+	 * 获取二维码支付服务信息
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	QrCodePayService getQrCodePayService(User user) throws Exception;
 
 }

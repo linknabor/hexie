@@ -33,18 +33,18 @@ import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
 import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
-import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
-import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
-
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
+import com.yumu.hexie.integration.wuye.req.QrCodePayServiceRequest;
+import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
+import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieResponse;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
-
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.BankCard;
@@ -82,6 +82,7 @@ public class WuyeUtil2 {
 	private static final String BILL_DETAIL_URL = "getBillInfoMSDO.do"; // 获取账单详情
 	private static final String BILL_LIST_STD_URL = "getPayListStdSDO.do"; // 获取账单列表
 	private static final String OTHER_PAY_URL = "otherPaySDO.do";	//其他收入支付
+	private static final String QRCODE_PAY_SERVICE_URL = "getServiceSDO.do";	//二维码支付服务信息
 	
 	
 	/**
@@ -283,6 +284,23 @@ public class WuyeUtil2 {
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
+	}
+	
+	public BaseResult<QrCodePayService> getQrCodePayService(User user) throws Exception {
+		
+		String requestUrl = getRequestUrl(user, "");
+		requestUrl += QRCODE_PAY_SERVICE_URL;
+
+		QrCodePayServiceRequest qrCodePayServiceRequest = new QrCodePayServiceRequest();
+		qrCodePayServiceRequest.setOpenid(user.getOpenid());
+		qrCodePayServiceRequest.setTel(user.getTel());
+		
+		TypeReference<HexieResponse<QrCodePayService>> typeReference = new TypeReference<HexieResponse<QrCodePayService>>(){};
+		HexieResponse<QrCodePayService> hexieResponse = wuyeRest(requestUrl, qrCodePayServiceRequest, typeReference);
+		BaseResult<QrCodePayService> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
 	}
 	
 	/**

@@ -37,6 +37,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
@@ -638,6 +639,15 @@ public class WuyeServiceImpl implements WuyeService {
 			
 		}
 			
+	}
+	
+	@Override
+	public QrCodePayService getQrCodePayService(User user) throws Exception {
+		
+		if (StringUtils.isEmpty(user.getTel())) {
+			user = userRepository.getOne(user.getId());
+		}
+		return wuyeUtil2.getQrCodePayService(user).getData();
 		
 	}
 
