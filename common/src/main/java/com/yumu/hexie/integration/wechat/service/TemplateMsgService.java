@@ -353,7 +353,7 @@ public class TemplateMsgService {
 	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
 	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
 	  	vo.setTranType(new TemplateItem(payNotifyDTO.getFeeName()));
-	  	vo.setRemark(new TemplateItem("详情请点击查看"));
+	  	vo.setRemark(new TemplateItem(payNotifyDTO.getRemark()));
     	
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);

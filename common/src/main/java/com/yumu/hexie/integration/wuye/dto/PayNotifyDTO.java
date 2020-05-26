@@ -1,15 +1,10 @@
 package com.yumu.hexie.integration.wuye.dto;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.util.StringUtils;
-
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.exception.BizValidateException;
 
 public class PayNotifyDTO implements Serializable {
 
@@ -31,6 +26,7 @@ public class PayNotifyDTO implements Serializable {
 	private String cardNo;	//卡号，绑卡支付用
 	private String quickToken;	//绑卡支付使用，二次支付时的token
 	private String feeName;	//费项名称
+	private String remark;	//备注
 	private List<Map<String, String>> notifyOpenids;	//本次支付需要通知的用户id列表
 	
 	public User getUser() {
@@ -49,13 +45,6 @@ public class PayNotifyDTO implements Serializable {
 		return payMethod;
 	}
 	public void setPayMethod(String payMethod) {
-		if (!StringUtils.isEmpty(payMethod)) {
-			try {
-				payMethod = URLDecoder.decode(payMethod, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new BizValidateException(e.getMessage(), e);
-			}
-		}
 		this.payMethod = payMethod;
 	}
 	public String getTranDateTime() {
@@ -118,12 +107,18 @@ public class PayNotifyDTO implements Serializable {
 	public void setFeeName(String feeName) {
 		this.feeName = feeName;
 	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
 	@Override
 	public String toString() {
 		return "PayNotifyDTO [user=" + user + ", orderId=" + orderId + ", payMethod=" + payMethod + ", tranDateTime="
 				+ tranDateTime + ", wuyeId=" + wuyeId + ", couponId=" + couponId + ", tranAmt=" + tranAmt + ", points="
 				+ points + ", bindSwitch=" + bindSwitch + ", cardNo=" + cardNo + ", quickToken=" + quickToken
-				+ ", feeName=" + feeName + ", notifyOpenids=" + notifyOpenids + "]";
+				+ ", feeName=" + feeName + ", remark=" + remark + ", notifyOpenids=" + notifyOpenids + "]";
 	}
 	
 	

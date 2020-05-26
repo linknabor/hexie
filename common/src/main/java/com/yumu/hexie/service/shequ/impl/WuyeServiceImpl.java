@@ -24,6 +24,7 @@ import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -648,6 +649,21 @@ public class WuyeServiceImpl implements WuyeService {
 			user = userRepository.getOne(user.getId());
 		}
 		return wuyeUtil2.getQrCodePayService(user).getData();
+		
+	}
+	
+	@Override
+	public String getQrCode(User user, String qrCodeId) throws Exception {
+		
+		Assert.hasText(qrCodeId, "二维码ID不能为空。");
+		return wuyeUtil2.getQrCode(user, qrCodeId).getData();
+		
+	}
+	
+	@Override
+	public void signInOut(SignInOutDTO signInOutDTO) throws Exception {
+		
+		wuyeUtil2.signInOut(signInOutDTO);
 		
 	}
 

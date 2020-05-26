@@ -42,6 +42,7 @@ import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -75,6 +76,7 @@ import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
 import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
+import com.yumu.hexie.web.shequ.vo.SignInOutVO;
 import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
@@ -727,7 +729,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String openids,
 			@RequestParam(required = false, name = "pay_method") String payMethod,
 			@RequestParam(required = false, name = "tran_date") String tranDate,
-			@RequestParam(required = false, name = "fee_name") String feeName) throws Exception {
+			@RequestParam(required = false, name = "fee_name") String feeName,
+			@RequestParam(required = false) String remark) throws Exception {
 		
 		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
 		payNotifyDTO.setOrderId(tradeWaterId);
@@ -745,6 +748,7 @@ public class WuyeController extends BaseController {
 		payNotifyDTO.setPayMethod(payMethod);
 		payNotifyDTO.setTranDateTime(tranDate);
 		payNotifyDTO.setFeeName(feeName);
+		payNotifyDTO.setRemark(remark);
 		
 		log.info("openids:" + openids);
 		log.info("payNotifyDto :" + payNotifyDTO);
@@ -793,10 +797,43 @@ public class WuyeController extends BaseController {
 		QrCodePayService qrCodePayService = wuyeService.getQrCodePayService(user);
 		return BaseResult.successResult(qrCodePayService);
 
-	} 
+	}
 	
+	/**
+	 *获取支付二维码
+	 * @param user
+	 * @throws UnsupportedEncodingException 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/qrCode", method = {RequestMethod.GET})
+	@ResponseBody
+	public BaseResult<String> getQrCodePayService(@ModelAttribute(Constants.USER) User user, @RequestParam String qrCodeId) throws Exception {
+		
+		String qrCode = wuyeService.getQrCode(user, qrCodeId);
+		return BaseResult.successResult(qrCode);
+
+	}
 	
-	
+	/**
+	 *获取支付二维码
+	 * @param user
+	 * @throws UnsupportedEncodingException 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/signInOut", method = {RequestMethod.POST})
+	@ResponseBody
+	public BaseResult<String> signInOut(@ModelAttribute(Constants.USER) User user, @RequestBody SignInOutVO signInOutVO) throws Exception {
+		
+		log.info("signInOutVO :" + signInOutVO);
+		SignInOutDTO dto = new SignInOutDTO();
+		BeanUtils.copyProperties(signInOutVO, dto);
+		dto.setUser(user);
+		log.info("signInOutDTO : " + dto);
+		
+		wuyeService.signInOut(dto);
+		return BaseResult.successResult("succeeded");
+
+	}
 
 
 }

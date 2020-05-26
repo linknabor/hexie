@@ -6,6 +6,7 @@ import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -299,5 +300,21 @@ public interface WuyeService {
 	 * @throws Exception 
 	 */
 	QrCodePayService getQrCodePayService(User user) throws Exception;
+
+	/**
+	 * 根据二维码ID获取二维码
+	 * @param user
+	 * @param qrCodeId
+	 * @return
+	 * @throws Exception
+	 */
+	String getQrCode(User user, String qrCodeId) throws Exception;
+
+	/**
+	 * 签到签退
+	 * @param signInOutDTO
+	 * @throws Exception
+	 */
+	void signInOut(SignInOutDTO signInOutDTO) throws Exception;
 
 }
