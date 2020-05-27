@@ -9,6 +9,4 @@ public interface HexieMessageService {
 	
 	HexieMessage getMessage(long messageId);
 
-	void sendPayNotify(PayNotifyDTO payNotifyDTO);
-	
 }

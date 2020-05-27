@@ -348,19 +348,19 @@ public class TemplateMsgService {
     public static void sendPayNotify(PayNotifyDTO payNotifyDTO, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
-		vo.setTitle(new TemplateItem("您好，你有一笔订单收款成功。"));
+		  vo.setTitle(new TemplateItem("您好，你有一笔订单收款成功。"));
 	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
 	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
 	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
-	  	vo.setOrderId(new TemplateItem(payNotifyDTO.getOrderId()));
-	  	vo.setRemark(new TemplateItem("详情请点击查看"));
+	  	vo.setTranType(new TemplateItem(payNotifyDTO.getFeeName()));
+	  	vo.setRemark(new TemplateItem(payNotifyDTO.getRemark()));
     	
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
     	String url = GotongServiceImpl.MESSAGE_URL + payNotifyDTO.getOrderId();
     	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
-    	msg.setTouser(payNotifyDTO.getOpenid());
+    	msg.setTouser(payNotifyDTO.getUser().getOpenid());
     	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}

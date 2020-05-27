@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.shequ.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -21,7 +22,10 @@ import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
+
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -35,6 +39,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
@@ -44,6 +49,7 @@ import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
@@ -89,6 +95,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private BankCardRepository bankCardRepository;
+	
+	@Autowired
+	private GotongService gotongService;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -212,18 +221,18 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Transactional
 	@Override
-	public void noticePayed(User user, String tradeWaterId, 
-			String couponId, String feePrice, String point, String bindSwitch, String cardNo, String quickToken, String wuyeId) {
+	public void noticePayed(PayNotifyDTO payNotifyDTO) {
 		
-		Assert.hasText(tradeWaterId, "交易订单号不能为空。");
+		Assert.hasText(payNotifyDTO.getOrderId(), "交易订单号不能为空。");
 		
+		User user = payNotifyDTO.getUser();
 		//1.更新红包状态
 		Coupon coupon = null;
-		if (!StringUtils.isEmpty(couponId)) {
-			coupon = couponService.findOne(Long.valueOf(couponId));
+		if (!StringUtils.isEmpty(payNotifyDTO.getCouponId())) {
+			coupon = couponService.findOne(Long.valueOf(payNotifyDTO.getCouponId()));
 			if (coupon != null) {
 				try {
-					couponService.comsume(feePrice, coupon.getId());
+					couponService.comsume(payNotifyDTO.getTranAmt(), coupon.getId());
 				} catch (Exception e) {
 					//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
 					log.error(e.getMessage(), e);
@@ -236,33 +245,32 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		if (user == null) {
-			List<User> userList = userRepository.findByWuyeId(wuyeId);
+			List<User> userList = userRepository.findByWuyeId(payNotifyDTO.getWuyeId());
 			if (userList == null || userList.isEmpty()) {
-				log.info("can not find user, wuyeId : " + wuyeId + ", tradeWaterId : " + tradeWaterId);
-				return;
+				log.info("can not find user, wuyeId : " + payNotifyDTO.getWuyeId() + ", tradeWaterId : " + payNotifyDTO.getOrderId());
+			}else {
+				user = userList.get(0);
 			}
-			user = userList.get(0);
+			
 		}
-		if (user == null) {
-			log.info("can not find user, wuyeId : " + wuyeId);
-			return;
+		if (user != null) {
+			//2.添加芝麻积分
+			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				String pointKey = "wuyePay-" + payNotifyDTO.getOrderId();
+				addPointAsync(user, payNotifyDTO.getPoints(), pointKey);
+			}else {
+				String pointKey = "zhima-bill-" + user.getId() + "-" + payNotifyDTO.getOrderId();
+				pointService.updatePoint(user, "10", pointKey);
+			}
+			//3.如果是绑卡支付，记录用户的quicktoken
+			if (!StringUtils.isEmpty(payNotifyDTO.getCardNo()) && !StringUtils.isEmpty(payNotifyDTO.getQuickToken())) {
+				bankCardRepository.updateBankCardByAcctNoAndUserId(payNotifyDTO.getQuickToken(), payNotifyDTO.getQuickToken(), user.getId());
+			}
+			//5.绑定所缴纳物业费的房屋
+			bindHouseByTradeAsync(payNotifyDTO.getBindSwitch(), user, payNotifyDTO.getOrderId());
 		}
-		//2.添加芝麻积分
-		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
-			String pointKey = "wuyePay-" + tradeWaterId;
-			addPointAsync(user, point, pointKey);
-		}else {
-			String pointKey = "zhima-bill-" + user.getId() + "-" + tradeWaterId;
-			pointService.updatePoint(user, "10", pointKey);
-		}
-		
-		//3.如果是绑卡支付，记录用户的quicktoken
-		if (!StringUtils.isEmpty(cardNo) && !StringUtils.isEmpty(quickToken)) {
-			bankCardRepository.updateBankCardByAcctNoAndUserId(quickToken, cardNo, user.getId());
-		}
-		
-		//4.绑定所缴纳物业费的房屋
-		bindHouseByTradeAsync(bindSwitch, user, tradeWaterId);
+		//4.通知物业相关人员，收费到账
+		sendPayNotify(payNotifyDTO);
 		
 	}
 
@@ -512,7 +520,10 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	public void addPointAsync(User user, String point, String pointKey) {
 		
-		Assert.hasText(point, "缴费金额为空。");
+		if (StringUtils.isEmpty(pointKey)) {
+			log.info("本次缴费积分 为零，不作处理。pointKey : " + pointKey);
+			return;
+		}
 
 		//防止重复添加卡券积分，半小时内只能提交队列一次。出队时也会校验重复性
 		Long increment = redisTemplate.opsForValue().increment(pointKey, 1);
@@ -599,6 +610,62 @@ public class WuyeServiceImpl implements WuyeService {
 
 		//TODO create user 
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
+	}
+	
+	/**
+	 * 到账消息推送
+	 */
+	@Override
+	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
+
+		Assert.notEmpty(payNotifyDTO.getNotifyOpenids(), "用户openid不能为空。");
+		
+		for (Map<String, String> openidMap : payNotifyDTO.getNotifyOpenids()) {
+			
+			User user = null;
+			String openid = openidMap.get("openid");
+			if (StringUtils.isEmpty(openid)) {
+				log.warn("openid is empty, will skip. ");
+				continue;
+			}
+			List<User> userList = userRepository.findByOpenid(openid);
+			if (userList!=null && !userList.isEmpty()) {
+				user = userList.get(0);
+			}else {
+				log.warn("can not find user, openid : " + openid);
+			}
+			if (user!=null) {
+				payNotifyDTO.setUser(user);
+				gotongService.sendPayNotify(payNotifyDTO);
+			}
+			
+		}
+			
+	}
+	
+	@Override
+	public QrCodePayService getQrCodePayService(User user) throws Exception {
+		
+		if (StringUtils.isEmpty(user.getTel())) {
+			user = userRepository.getOne(user.getId());
+		}
+		return wuyeUtil2.getQrCodePayService(user).getData();
+		
+	}
+	
+	@Override
+	public byte[] getQrCode(User user, String qrCodeId) throws Exception {
+		
+		Assert.hasText(qrCodeId, "二维码ID不能为空。");
+		return wuyeUtil2.getQrCode(user, qrCodeId).getData();
+		
+	}
+	
+	@Override
+	public void signInOut(SignInOutDTO signInOutDTO) throws Exception {
+		
+		wuyeUtil2.signInOut(signInOutDTO);
+		
 	}
 
 	
