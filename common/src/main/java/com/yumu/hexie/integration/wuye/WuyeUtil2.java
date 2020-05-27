@@ -323,7 +323,7 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<String> getQrCode(User user, String qrCodeId) throws Exception {
+	public BaseResult<byte[]> getQrCode(User user, String qrCodeId) throws Exception {
 		
 		String requestUrl = getRequestUrl(user, "");
 		requestUrl += QRCODE_URL;
@@ -331,9 +331,9 @@ public class WuyeUtil2 {
 		QrCodeRequest qrCodeRequest = new QrCodeRequest();
 		qrCodeRequest.setQrCodeId(qrCodeId);
 		
-		TypeReference<HexieResponse<String>> typeReference = new TypeReference<HexieResponse<String>>(){};
-		HexieResponse<String> hexieResponse = wuyeRest(requestUrl, qrCodeRequest, typeReference);
-		BaseResult<String> baseResult = new BaseResult<>();
+		TypeReference<HexieResponse<byte[]>> typeReference = new TypeReference<HexieResponse<byte[]>>(){};
+		HexieResponse<byte[]> hexieResponse = wuyeRest4Resource(requestUrl, qrCodeRequest, typeReference);
+		BaseResult<byte[]> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		
@@ -414,7 +414,7 @@ public class WuyeUtil2 {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 */
-	private <T extends WuyeRequest, V> HexieResponse<V> wuyeRest4binary(String requestUrl, T jsonObject, TypeReference<HexieResponse<V>> typeReference)
+	private <T extends WuyeRequest> HexieResponse<byte[]> wuyeRest4Resource(String requestUrl, T jsonObject, TypeReference<HexieResponse<byte[]>> typeReference)
 			throws IOException, JsonParseException, JsonMappingException {
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -432,16 +432,13 @@ public class WuyeUtil2 {
 		if (!HttpStatus.OK.equals(respEntity.getStatusCode())) {
 			throw new BizValidateException("支付请求失败！ code : " + respEntity.getStatusCodeValue());
 		}
-		
 		InputStream inputStream = respEntity.getBody().getInputStream();
-		
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-//		HexieResponse<V> hexieResponse = objectMapper.readValue(respEntity.getBody(), typeReference);
-//		if (!"00".equals(hexieResponse.getResult())) {
-//			String errMsg = hexieResponse.getErrMsg();
-//			throw new BizValidateException(errMsg);
-//		}
-		return null;
+		HexieResponse<byte[]> hexieResponse = new HexieResponse<>();
+		byte[] bytes = new byte[inputStream.available()];
+		inputStream.read(bytes, 0, inputStream.available());
+		hexieResponse.setData(bytes);
+		hexieResponse.setResult("00");
+		return hexieResponse;
 	}
 	
 	

@@ -653,7 +653,7 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public String getQrCode(User user, String qrCodeId) throws Exception {
+	public byte[] getQrCode(User user, String qrCodeId) throws Exception {
 		
 		Assert.hasText(qrCodeId, "二维码ID不能为空。");
 		return wuyeUtil2.getQrCode(user, qrCodeId).getData();

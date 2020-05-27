@@ -308,7 +308,7 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception
 	 */
-	String getQrCode(User user, String qrCodeId) throws Exception;
+	byte[] getQrCode(User user, String qrCodeId) throws Exception;
 
 	/**
 	 * 签到签退

@@ -1,6 +1,5 @@
 package com.yumu.hexie.web.shequ;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -29,9 +29,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
@@ -804,14 +802,12 @@ public class WuyeController extends BaseController {
 	 * @param user
 	 * @throws UnsupportedEncodingException 
 	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/qrCode", method = {RequestMethod.GET})
+	@RequestMapping(value = "/qrCode", method = {RequestMethod.GET}, produces = MediaType.IMAGE_JPEG_VALUE)
 	@ResponseBody
-	public BaseResult<String> getQrCodePayService(@ModelAttribute(Constants.USER) User user, @RequestParam String qrCodeId) throws Exception {
+	public byte[] getQrCode(@ModelAttribute(Constants.USER) User user, 
+			@RequestParam String qrCodeId, HttpServletResponse response) throws Exception {
 		
-		String qrCode = wuyeService.getQrCode(user, qrCodeId);
-		return BaseResult.successResult(qrCode);
-
+		return wuyeService.getQrCode(user, qrCodeId);
 	}
 	
 	/**

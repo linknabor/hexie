@@ -29,6 +29,9 @@ public class QrCodePayService implements Serializable {
 		private String operType;
 		@JsonProperty("service_type_cn")
 		private String serviceTypeCn;
+		@JsonProperty("sginin_flag")
+		private String sginInFlag;
+		
 		public String getSectId() {
 			return sectId;
 		}
@@ -65,10 +68,17 @@ public class QrCodePayService implements Serializable {
 		public void setServiceTypeCn(String serviceTypeCn) {
 			this.serviceTypeCn = serviceTypeCn;
 		}
+		public String getSginInFlag() {
+			return sginInFlag;
+		}
+		public void setSginInFlag(String sginInFlag) {
+			this.sginInFlag = sginInFlag;
+		}
 		@Override
 		public String toString() {
 			return "PayCfg [sectId=" + sectId + ", sectName=" + sectName + ", cfgId=" + cfgId + ", qrcodeId=" + qrcodeId
-					+ ", operType=" + operType + ", serviceTypeCn=" + serviceTypeCn + "]";
+					+ ", operType=" + operType + ", serviceTypeCn=" + serviceTypeCn + ", sginInFlag=" + sginInFlag
+					+ "]";
 		}
 		
 	}
