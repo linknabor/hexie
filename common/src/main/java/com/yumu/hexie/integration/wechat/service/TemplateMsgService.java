@@ -361,6 +361,7 @@ public class TemplateMsgService {
     	String url = GotongServiceImpl.MESSAGE_URL + payNotifyDTO.getOrderId();
     	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
     	msg.setTouser(payNotifyDTO.getUser().getOpenid());
+
     	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}
