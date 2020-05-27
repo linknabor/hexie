@@ -4,7 +4,10 @@ import java.util.List;
 
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
+
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -16,6 +19,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
@@ -141,8 +145,7 @@ public interface WuyeService {
 	 * @param quickToken
 	 * @param wuyeId
 	 */
-	void noticePayed(User user, String tradeWaterId, String couponId, 
-			String feePrice, String points, String bindSwitch, String cardNo, String quickToken, String wuyeId);
+	void noticePayed(PayNotifyDTO payNotifyDTO);
 
 	
 	/**
@@ -284,5 +287,35 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception;
+
+	/**
+	 * 通知支付到账
+	 * @param payNotifyDTO
+	 */
+	void sendPayNotify(PayNotifyDTO payNotifyDTO);
+
+	/**
+	 * 获取二维码支付服务信息
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	QrCodePayService getQrCodePayService(User user) throws Exception;
+
+	/**
+	 * 根据二维码ID获取二维码
+	 * @param user
+	 * @param qrCodeId
+	 * @return
+	 * @throws Exception
+	 */
+	byte[] getQrCode(User user, String qrCodeId) throws Exception;
+
+	/**
+	 * 签到签退
+	 * @param signInOutDTO
+	 * @throws Exception
+	 */
+	void signInOut(SignInOutDTO signInOutDTO) throws Exception;
 
 }

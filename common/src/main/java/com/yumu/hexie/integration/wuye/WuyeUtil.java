@@ -15,7 +15,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.JavaType;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
-import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -419,7 +418,7 @@ public class WuyeUtil {
 	@SuppressWarnings("unchecked")
 	public static BaseResult<HexieHouse> getHouseByVerNo(User user, String verNo) {
 		String url = getRequestUri(user) + String.format(GET_HOUSE_VERNO_URL, user.getWuyeId(), verNo);
-		BaseResult<HexieHouse> baseResult = httpGet(url,HexieHouse.class);;
+		BaseResult<HexieHouse> baseResult = httpGet(url,HexieHouse.class);
 		return baseResult;
 	}
 	

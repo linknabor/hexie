@@ -53,7 +53,7 @@ public class LocationServiceImpl implements LocationService {
 		if (list != null) {
 			regionUrlList = list;
 			for (RegionUrl regionUrl : list) {
-				regionUrlMap.put(regionUrl.getRegionName(), regionUrl);
+				regionUrlMap.put(regionUrl.getRegionName(), regionUrl);//上海的有2条，后一条会覆盖前一条，但是value是一样的
 				codeUrlMap.put(regionUrl.getRegionCode(), regionUrl);
 			}
 		}
@@ -84,7 +84,11 @@ public class LocationServiceImpl implements LocationService {
 			vo.setAddress(keyName);
 			vo.setRegionurl(regionUrlList);
 		}else {
-			RegionUrl regionUrl = regionUrlRepository.findByRegionName(keyName);
+			RegionUrl regionUrl = null;
+			List<RegionUrl> regionList = regionUrlRepository.findByRegionName(keyName);
+			if (regionList != null && !regionUrlList.isEmpty()) {
+				regionUrl = regionList.get(0);
+			}
 			if (regionUrl != null) {
 				regionSet.add(regionUrl.getRegionName());
 				vo.setAddress(regionUrl.getRegionName());

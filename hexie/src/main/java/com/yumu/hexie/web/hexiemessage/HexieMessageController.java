@@ -54,14 +54,4 @@ public class HexieMessageController extends BaseController{
 		return BaseResult.successResult(messageService.getMessage(Long.parseLong(messageId)));
 	}
 	
-	@RequestMapping(value = "/payNotify", method = RequestMethod.POST)
-	public String send(@RequestBody PayNotifyVO payNotifyVO) {
-		
-		log.info("payNotifyVO : " + payNotifyVO);
-		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
-		BeanUtils.copyProperties(payNotifyVO, payNotifyDTO);
-		log.info("payNotifyDTO: " + payNotifyDTO);
-		messageService.sendPayNotify(payNotifyDTO);
-		return Constants.SUCCESS;
-	}
 }

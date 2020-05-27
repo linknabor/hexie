@@ -1,6 +1,7 @@
 package com.yumu.hexie.web.shequ;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -28,13 +29,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
+import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
+
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -48,6 +55,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
@@ -67,6 +75,7 @@ import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
 import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
+import com.yumu.hexie.web.shequ.vo.SignInOutVO;
 import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
@@ -702,9 +711,12 @@ public class WuyeController extends BaseController {
 	 * @param cardNo
 	 * @param quickToken
 	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/servplat/noticeCardPay", method = RequestMethod.GET)
+	@RequestMapping(value = "/servplat/noticeCardPay", method = {RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
 	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId, 
 			@RequestParam(required = false) String feePrice, 
@@ -712,18 +724,39 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String quickToken,
 			@RequestParam(required = false) String wuyeId,
 			@RequestParam(required = false) String couponId,
-			@RequestParam(required = false, name = "integral") String points) {
+			@RequestParam(required = false, name = "integral") String points,
+			@RequestParam(required = false) String openids,
+			@RequestParam(required = false, name = "pay_method") String payMethod,
+			@RequestParam(required = false, name = "tran_date") String tranDate,
+			@RequestParam(required = false, name = "fee_name") String feeName,
+			@RequestParam(required = false) String remark) throws Exception {
 		
-		log.info("tradeWaterId:" + tradeWaterId);
-		log.info("feePrice:" + feePrice);
-		log.info("quickToken:" + quickToken);
-		log.info("cardNo:" + cardNo);
-		log.info("wuyeId:" + wuyeId);
-		log.info("couponId:" + couponId);
-		log.info("points:" + points);
+		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
+		payNotifyDTO.setOrderId(tradeWaterId);
+		payNotifyDTO.setCouponId(couponId);
+		BigDecimal tranAmt = BigDecimal.ZERO;
+		if (!StringUtils.isEmpty(feePrice)) {
+			tranAmt = new BigDecimal(feePrice).divide(new BigDecimal("100"));
+		}
+		payNotifyDTO.setTranAmt(tranAmt.toString());
+		payNotifyDTO.setPoints(points);
+		payNotifyDTO.setBindSwitch("1");	//默认绑定
+		payNotifyDTO.setCardNo(cardNo);
+		payNotifyDTO.setQuickToken(quickToken);
+		payNotifyDTO.setWuyeId(wuyeId);
+		payNotifyDTO.setPayMethod(payMethod);
+		payNotifyDTO.setTranDateTime(tranDate);
+		payNotifyDTO.setFeeName(feeName);
+		payNotifyDTO.setRemark(remark);
 		
-		String bindSwitch = "1";	//默认绑定
-		wuyeService.noticePayed(null, tradeWaterId, couponId, feePrice, points, bindSwitch, cardNo, quickToken, wuyeId);
+		log.info("openids:" + openids);
+		log.info("payNotifyDto :" + payNotifyDTO);
+		
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		TypeReference<List<Map<String, String>>> typeReference = new TypeReference<List<Map<String, String>>>() {};
+		List<Map<String, String>> openidList = objectMapper.readValue(openids, typeReference);
+		payNotifyDTO.setNotifyOpenids(openidList);
+		wuyeService.noticePayed(payNotifyDTO);
 		return "SUCCESS";
 	}
 	
@@ -750,6 +783,54 @@ public class WuyeController extends BaseController {
 
 	}
 	
+	/**
+	 *获取当前操作员所在小区二维码支付服务的相关信息
+	 * @param user
+	 * @throws UnsupportedEncodingException 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/qrCodePayService", method = {RequestMethod.GET})
+	@ResponseBody
+	public BaseResult<QrCodePayService> getQrCodePayService(@ModelAttribute(Constants.USER) User user) throws Exception {
+		
+		QrCodePayService qrCodePayService = wuyeService.getQrCodePayService(user);
+		return BaseResult.successResult(qrCodePayService);
+
+	}
+	
+	/**
+	 *获取支付二维码
+	 * @param user
+	 * @throws UnsupportedEncodingException 
+	 */
+	@RequestMapping(value = "/qrCode", method = {RequestMethod.GET}, produces = MediaType.IMAGE_JPEG_VALUE)
+	@ResponseBody
+	public byte[] getQrCode(@ModelAttribute(Constants.USER) User user, 
+			@RequestParam String qrCodeId, HttpServletResponse response) throws Exception {
+		
+		return wuyeService.getQrCode(user, qrCodeId);
+	}
+	
+	/**
+	 *获取支付二维码
+	 * @param user
+	 * @throws UnsupportedEncodingException 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/signInOut", method = {RequestMethod.POST})
+	@ResponseBody
+	public BaseResult<String> signInOut(@ModelAttribute(Constants.USER) User user, @RequestBody SignInOutVO signInOutVO) throws Exception {
+		
+		log.info("signInOutVO :" + signInOutVO);
+		SignInOutDTO dto = new SignInOutDTO();
+		BeanUtils.copyProperties(signInOutVO, dto);
+		dto.setUser(user);
+		log.info("signInOutDTO : " + dto);
+		
+		wuyeService.signInOut(dto);
+		return BaseResult.successResult("succeeded");
+
+	}
 
 
 }
