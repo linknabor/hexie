@@ -621,7 +621,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if (payNotifyDTO.getNotifyOpenids() == null || payNotifyDTO.getNotifyOpenids().isEmpty()) {
 			return;
 		}
-		
+	
 		for (Map<String, String> openidMap : payNotifyDTO.getNotifyOpenids()) {
 			
 			User user = null;
