@@ -618,8 +618,10 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
 
-		Assert.notEmpty(payNotifyDTO.getNotifyOpenids(), "用户openid不能为空。");
-		
+		if (payNotifyDTO.getNotifyOpenids() == null || payNotifyDTO.getNotifyOpenids().isEmpty()) {
+			return;
+		}
+	
 		for (Map<String, String> openidMap : payNotifyDTO.getNotifyOpenids()) {
 			
 			User user = null;
