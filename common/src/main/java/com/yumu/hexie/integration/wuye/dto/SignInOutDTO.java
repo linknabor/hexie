@@ -16,6 +16,9 @@ public class SignInOutDTO {
 	}
 	public void setUser(User user) {
 		this.user = user;
+		if (user!=null) {
+			this.openid = user.getOpenid();
+		}
 	}
 	public String getOpenid() {
 		return openid;
