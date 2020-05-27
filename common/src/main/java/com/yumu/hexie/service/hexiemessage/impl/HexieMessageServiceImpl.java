@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
@@ -20,8 +19,6 @@ import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	
-	private static Logger logger = LoggerFactory.getLogger(HexieMessageServiceImpl.class);
-
 	@Autowired
 	private UserRepository userRepository;
 	
