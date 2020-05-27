@@ -68,7 +68,6 @@ public class PayNotifyMsgVO {
 	public void setRemark(TemplateItem remark) {
 		this.remark = remark;
 	}
-
 	
 	
 }

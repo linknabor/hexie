@@ -348,7 +348,7 @@ public class TemplateMsgService {
     public static void sendPayNotify(PayNotifyDTO payNotifyDTO, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
-		vo.setTitle(new TemplateItem("您好，你有一笔订单收款成功。"));
+		  vo.setTitle(new TemplateItem("您好，你有一笔订单收款成功。"));
 	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
 	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
 	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));

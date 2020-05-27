@@ -121,5 +121,4 @@ public class PayNotifyDTO implements Serializable {
 				+ ", feeName=" + feeName + ", remark=" + remark + ", notifyOpenids=" + notifyOpenids + "]";
 	}
 	
-	
 }
