@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.alipay.api.msg.Message;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
@@ -358,10 +359,9 @@ public class TemplateMsgService {
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
-    	String url = "javascript:void(0);";
-    	msg.setUrl(url);
+    	String url = GotongServiceImpl.PAY_NOTIFY_URL;
+    	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
     	msg.setTouser(payNotifyDTO.getUser().getOpenid());
-
     	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}
