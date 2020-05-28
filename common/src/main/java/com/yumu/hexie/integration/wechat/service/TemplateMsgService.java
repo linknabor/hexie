@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.alipay.api.msg.Message;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
@@ -348,7 +349,7 @@ public class TemplateMsgService {
     public static void sendPayNotify(PayNotifyDTO payNotifyDTO, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
-		  vo.setTitle(new TemplateItem("您好，你有一笔订单收款成功。"));
+		vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));
 	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
 	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
 	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
@@ -358,10 +359,9 @@ public class TemplateMsgService {
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
-    	String url = "#";
-    	msg.setUrl(url);
+    	String url = GotongServiceImpl.PAY_NOTIFY_URL;
+    	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
     	msg.setTouser(payNotifyDTO.getUser().getOpenid());
-
     	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}

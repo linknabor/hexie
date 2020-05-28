@@ -69,6 +69,8 @@ public class GotongServiceImpl implements GotongService {
 
     public static String SERVICE_RESV_URL = ConfigUtil.get("serviceResvUrl");
 
+    public static String PAY_NOTIFY_URL = ConfigUtil.get("payNotifyUrl");
+
     
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
