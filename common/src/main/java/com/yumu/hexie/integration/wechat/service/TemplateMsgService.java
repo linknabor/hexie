@@ -348,7 +348,7 @@ public class TemplateMsgService {
     public static void sendPayNotify(PayNotifyDTO payNotifyDTO, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
-		  vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));
+		vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));
 	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
 	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
 	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
@@ -358,7 +358,7 @@ public class TemplateMsgService {
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
-    	String url = "#";
+    	String url = "javascript:void(0);";
     	msg.setUrl(url);
     	msg.setTouser(payNotifyDTO.getUser().getOpenid());
 
