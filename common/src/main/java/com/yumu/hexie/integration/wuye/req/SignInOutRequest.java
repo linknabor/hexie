@@ -16,6 +16,9 @@ public class SignInOutRequest extends WuyeRequest {
 	private String sectId;
 	@JsonProperty("sign_in")
 	private String signFlag;
+	@JsonProperty("fee_id")
+	private String feeId;
+	
 	public String getOpenid() {
 		return openid;
 	}
@@ -40,10 +43,16 @@ public class SignInOutRequest extends WuyeRequest {
 	public void setSignFlag(String signFlag) {
 		this.signFlag = signFlag;
 	}
+	public String getFeeId() {
+		return feeId;
+	}
+	public void setFeeId(String feeId) {
+		this.feeId = feeId;
+	}
 	@Override
 	public String toString() {
 		return "SignInOutRequest [openid=" + openid + ", cfgId=" + cfgId + ", sectId=" + sectId + ", signFlag="
-				+ signFlag + "]";
+				+ signFlag + ", feeId=" + feeId + "]";
 	}
 	
 	

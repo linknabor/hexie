@@ -18,6 +18,8 @@ public class SignInOutVO implements Serializable {
 	private String sectId;
 	@JsonProperty("sign_in")
 	private String signFlag;
+	@JsonProperty("fee_id")
+	private String feeId;
 	
 	public String getOpenid() {
 		return openid;
@@ -43,10 +45,16 @@ public class SignInOutVO implements Serializable {
 	public void setSignFlag(String signFlag) {
 		this.signFlag = signFlag;
 	}
+	public String getFeeId() {
+		return feeId;
+	}
+	public void setFeeId(String feeId) {
+		this.feeId = feeId;
+	}
 	@Override
 	public String toString() {
 		return "SignInOutVO [openid=" + openid + ", cfgId=" + cfgId + ", sectId=" + sectId + ", signFlag=" + signFlag
-				+ "]";
+				+ ", feeId=" + feeId + "]";
 	}
-
+	
 }

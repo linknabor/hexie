@@ -10,6 +10,7 @@ public class SignInOutDTO {
 	private String cfgId;
 	private String sectId;
 	private String signFlag;
+	private String feeId;
 	
 	public User getUser() {
 		return user;
@@ -44,10 +45,16 @@ public class SignInOutDTO {
 	public void setSignFlag(String signFlag) {
 		this.signFlag = signFlag;
 	}
+	public String getFeeId() {
+		return feeId;
+	}
+	public void setFeeId(String feeId) {
+		this.feeId = feeId;
+	}
 	@Override
 	public String toString() {
 		return "SignInOutDTO [user=" + user + ", openid=" + openid + ", cfgId=" + cfgId + ", sectId=" + sectId
-				+ ", signFlag=" + signFlag + "]";
+				+ ", signFlag=" + signFlag + ", feeId=" + feeId + "]";
 	}
 
 	
