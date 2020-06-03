@@ -79,5 +79,4 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		return hexieMessageRepository.findOne(messageId);
 	}
 
-
 }

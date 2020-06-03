@@ -611,8 +611,8 @@ public class WuyeServiceImpl implements WuyeService {
 		//TODO create user 
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
 	}
-  
-	/**
+
+  /**
 	 * 到账消息推送
 	 */
 	@Override
