@@ -92,7 +92,6 @@ public class WuyeUtil2 {
 	private static final String QRCODE_URL = "getQRCodeSDO.do";	//二维码支付服务信息
 	private static final String SIGN_IN_OUT_URL = "signInSDO.do";	//二维码支付服务信息
 	
-	
 	/**
 	 * 标准版查询账单
 	 * @param userId

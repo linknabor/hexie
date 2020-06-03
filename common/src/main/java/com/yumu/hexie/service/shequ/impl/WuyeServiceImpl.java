@@ -611,15 +611,17 @@ public class WuyeServiceImpl implements WuyeService {
 		//TODO create user 
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
 	}
-	
-	/**
+
+  /**
 	 * 到账消息推送
 	 */
 	@Override
 	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
 
-		Assert.notEmpty(payNotifyDTO.getNotifyOpenids(), "用户openid不能为空。");
-		
+		if (payNotifyDTO.getNotifyOpenids() == null || payNotifyDTO.getNotifyOpenids().isEmpty()) {
+			return;
+		}
+	
 		for (Map<String, String> openidMap : payNotifyDTO.getNotifyOpenids()) {
 			
 			User user = null;

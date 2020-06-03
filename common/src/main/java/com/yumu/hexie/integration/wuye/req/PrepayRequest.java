@@ -30,6 +30,23 @@ public class PrepayRequest extends WuyeRequest {
 			try {
 				//中文打码
 				this.customerName = URLEncoder.encode(prepayRequestDTO.getCustomerName(),"GBK");
+				this.invoiceTitle = URLEncoder.encode(prepayRequestDTO.getInvoiceTitle(), "GBK");
+			} catch (UnsupportedEncodingException e) {
+				throw new BizValidateException(e.getMessage(), e);	
+			}
+		}
+		if (!StringUtils.isEmpty(prepayRequestDTO.getInvoiceTitle())) {
+			try {
+				//中文打码
+				this.invoiceTitle = URLEncoder.encode(prepayRequestDTO.getInvoiceTitle(), "GBK");
+			} catch (UnsupportedEncodingException e) {
+				throw new BizValidateException(e.getMessage(), e);	
+			}
+		}
+		if (!StringUtils.isEmpty(prepayRequestDTO.getInvoiceTitle())) {
+			try {
+				//中文打码
+				this.invoiceTitle = URLEncoder.encode(prepayRequestDTO.getInvoiceTitle(), "GBK");
 			} catch (UnsupportedEncodingException e) {
 				throw new BizValidateException(e.getMessage(), e);	
 			}
