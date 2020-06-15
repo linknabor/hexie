@@ -62,6 +62,7 @@ public class ServiceOrder  extends BaseModel {
 	
 	/**用户信息**/
 	private String openId;
+	private String appid;
 	
 	/**地址信息**/
 	private long serviceAddressId;//FIXME 服务地址
@@ -510,7 +511,12 @@ public class ServiceOrder  extends BaseModel {
 		this.openId = openId;
 	}
 
-
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
 	public long getMerchantId() {
 		return merchantId;
 	}

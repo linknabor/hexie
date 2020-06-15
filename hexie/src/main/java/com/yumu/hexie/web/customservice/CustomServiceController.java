@@ -51,7 +51,7 @@ public class CustomServiceController extends BaseController {
 	}
 	
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/createOrder", method = RequestMethod.POST)
+	@RequestMapping(value = "/order", method = RequestMethod.POST)
 	public BaseResult<CreateOrderResponseVO> createOrder(@ModelAttribute(Constants.USER) User user, @RequestBody CustomServiceOrderVO customServiceOrderVO) throws Exception {
 		
 		logger.info("customServiceOrderVO : " + customServiceOrderVO);

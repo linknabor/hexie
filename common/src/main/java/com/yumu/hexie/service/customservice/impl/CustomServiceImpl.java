@@ -12,6 +12,7 @@ import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.customservice.CustomService;
@@ -21,9 +22,11 @@ public class CustomServiceImpl implements CustomService {
 	
 	@Autowired
 	private UserRepository userRepository;
-
 	@Autowired
 	private CustomServiceUtil customServiceUtil;
+	@Autowired
+	private ServiceOrderRepository serviceOrderRepository;
+	
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -52,7 +55,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setProductName(customerServiceOrderDTO.getServiceName());
 		serviceOrder.setProductPic(customerServiceOrderDTO.getImage());
 		serviceOrder.setOrderNo(data.getOrderId());
-		
+		serviceOrder.setAppid(currUser.getAppId());
+		serviceOrderRepository.save(serviceOrder);
 		return data;
 		
 	}
