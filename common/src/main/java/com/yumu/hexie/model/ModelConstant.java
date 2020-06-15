@@ -26,13 +26,14 @@ public class ModelConstant {
 	public static final int REGION_XIAOQU = 4;
 	
 	//订单类型
-	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）
+	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）,6维修单，11自定义服务订单
 	public static final int ORDER_TYPE_GROUP = 0;
 	public static final int ORDER_TYPE_GROUP_SINGLE = 1;
 	public static final int ORDER_TYPE_ONSALE = 3;
 	public static final int ORDER_TYPE_RGROUP = 4;
     public static final int ORDER_TYPE_YUYUE = 5;
     public static final int ORDER_TYPE_REPAIR = 6;
+    public static final int ORDER_TYPE_SERVICE = 11;
     
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工

@@ -1,8 +1,8 @@
 package com.yumu.hexie.integration.wuye.req;
 
-import java.io.Serializable;
+import com.yumu.hexie.integration.common.CommonRequest;
 
-public class WuyeRequest implements Serializable {
+public class WuyeRequest extends CommonRequest {
 
 	/**
 	 * 

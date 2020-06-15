@@ -811,7 +811,7 @@ public class WuyeController extends BaseController {
 	}
 	
 	/**
-	 *获取支付二维码
+	 *签到签退
 	 * @param user
 	 * @throws UnsupportedEncodingException 
 	 */
