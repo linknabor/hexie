@@ -16,7 +16,7 @@ public class CreateOrderResponseVO implements Serializable {
 	@JsonProperty("token_id")
 	private String token;
 	@JsonProperty("trade_water_id")
-	private String orderId;
+	private String tradeWaterId;
 	private String appid;
 	private String signtype;
 	private String paysign;
@@ -24,6 +24,9 @@ public class CreateOrderResponseVO implements Serializable {
 	private String timestamp;
 	@JsonProperty("user_pay_type")
 	private String payType;
+	
+	private String orderId;
+	
 	public String getPack() {
 		return pack;
 	}
@@ -78,13 +81,18 @@ public class CreateOrderResponseVO implements Serializable {
 	public void setPayType(String payType) {
 		this.payType = payType;
 	}
+	public String getTradeWaterId() {
+		return tradeWaterId;
+	}
+	public void setTradeWaterId(String tradeWaterId) {
+		this.tradeWaterId = tradeWaterId;
+	}
 	@Override
 	public String toString() {
-		return "CreateOrderResponseVO [pack=" + pack + ", token=" + token + ", orderId=" + orderId + ", appid=" + appid
-				+ ", signtype=" + signtype + ", paysign=" + paysign + ", noncestr=" + noncestr + ", timestamp="
-				+ timestamp + ", payType=" + payType + "]";
+		return "CreateOrderResponseVO [pack=" + pack + ", token=" + token + ", tradeWaterId=" + tradeWaterId
+				+ ", appid=" + appid + ", signtype=" + signtype + ", paysign=" + paysign + ", noncestr=" + noncestr
+				+ ", timestamp=" + timestamp + ", payType=" + payType + ", orderId=" + orderId + "]";
 	}
-	
 	
 
 }

@@ -71,6 +71,7 @@ public class CustomServiceImpl implements CustomService {
 			serviceOrder.setXiaoquId(regionList.get(0).getId());
 		}
 		serviceOrderRepository.save(serviceOrder);
+		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		return data;
 		
 	}

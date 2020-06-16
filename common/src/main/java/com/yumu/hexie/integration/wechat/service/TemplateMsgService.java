@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.alipay.api.msg.Message;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotify;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
@@ -28,7 +28,6 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
@@ -339,29 +338,28 @@ public class TemplateMsgService {
 
 	}
    
-    
     /**
      * 支付到账通知
      * @param openid
      * @param accessToken
      * @param appId
      */
-    public static void sendPayNotify(PayNotifyDTO payNotifyDTO, String accessToken) {
+    public static void sendPayNotify(AccountNotify accountNotify, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
 		vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));
-	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
-	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
-	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
-	  	vo.setTranType(new TemplateItem(payNotifyDTO.getFeeName()));
-	  	vo.setRemark(new TemplateItem(payNotifyDTO.getRemark()));
+	  	vo.setTranAmt(new TemplateItem(accountNotify.getFeePrice().toString()));
+	  	vo.setPayMethod(new TemplateItem(accountNotify.getPayMethod()));
+	  	vo.setTranDateTime(new TemplateItem(accountNotify.getTranDate()));
+	  	vo.setTranType(new TemplateItem(accountNotify.getFeeName()));
+	  	vo.setRemark(new TemplateItem(accountNotify.getRemark()));
     	
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
+    	msg.setTemplate_id(getTemplateByAppId(accountNotify.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
     	String url = GotongServiceImpl.PAY_NOTIFY_URL;
-    	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
-    	msg.setTouser(payNotifyDTO.getUser().getOpenid());
+    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotify.getUser().getAppId()));
+    	msg.setTouser(accountNotify.getUser().getOpenid());
     	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}

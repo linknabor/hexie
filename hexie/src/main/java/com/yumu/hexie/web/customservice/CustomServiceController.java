@@ -65,7 +65,13 @@ public class CustomServiceController extends BaseController {
 		return BaseResult.successResult(vo);
 	}
 	
-	
+	/**
+	 * 确认订单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/confirm", method = RequestMethod.POST)
 	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {

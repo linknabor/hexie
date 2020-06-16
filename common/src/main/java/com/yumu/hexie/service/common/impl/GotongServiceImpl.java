@@ -16,13 +16,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ConfigUtil;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotify;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotify;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -236,10 +237,15 @@ public class GotongServiceImpl implements GotongService {
 	 * 交易到账通知
 	 */
 	@Override
-	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
+	public void sendPayNotify(AccountNotify accountNotify) {
 		
-		String accessToken = systemConfigService.queryWXAToken(payNotifyDTO.getUser().getAppId());
-		TemplateMsgService.sendPayNotify(payNotifyDTO, accessToken);
+		String accessToken = systemConfigService.queryWXAToken(accountNotify.getUser().getAppId());
+		TemplateMsgService.sendPayNotify(accountNotify, accessToken);
+		
+	}
+	@Override
+	public void sendServiceNotify(ServiceNotify serviceNotify) {
+		// TODO Auto-generated method stub
 		
 	}
 	

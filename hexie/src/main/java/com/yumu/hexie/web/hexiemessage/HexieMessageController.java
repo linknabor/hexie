@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
+import com.yumu.hexie.integration.notify.PayNotifyDTO;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 import com.yumu.hexie.web.BaseController;
