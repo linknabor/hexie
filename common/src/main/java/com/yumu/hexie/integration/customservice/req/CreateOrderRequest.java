@@ -1,9 +1,14 @@
 package com.yumu.hexie.integration.customservice.req;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.service.exception.BizValidateException;
 
 public class CreateOrderRequest extends CustomServiceRequest {
 
@@ -37,6 +42,18 @@ public class CreateOrderRequest extends CustomServiceRequest {
 		this.sectId = dto.getUser().getSectId();
 		this.userId = dto.getUser().getWuyeId();
 		this.openid = dto.getUser().getOpenid();
+		//中文打码
+		try {
+			if (!StringUtils.isEmpty(dto.getLinkman())) {
+				this.linkman = URLEncoder.encode(dto.getLinkman(),"GBK");
+			}
+			if (!StringUtils.isEmpty(dto.getServiceAddr())) {
+				this.serviceAddr = URLEncoder.encode(dto.getServiceAddr(),"GBK");
+			}
+		} catch (UnsupportedEncodingException e) {
+			throw new BizValidateException(e.getMessage(), e);	
+		}
+		
 	}
 	
 	public String getServiceId() {

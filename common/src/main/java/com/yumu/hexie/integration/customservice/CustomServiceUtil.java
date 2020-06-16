@@ -10,6 +10,7 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.req.ConfirmOrderRequest;
 import com.yumu.hexie.integration.customservice.req.CreateOrderRequest;
 import com.yumu.hexie.integration.customservice.req.GetServiceRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
@@ -27,8 +28,9 @@ public class CustomServiceUtil {
 	@Autowired
 	private RestUtil restUtil;
 	
-	private static final String GET_SERVICE_URL = "getCustomServiceSDO.do"; // 快捷支付
-	private static final String CREATE_ORDER_URL = "createCustomServiceSDO.do"; // 微信支付请求
+	private static final String GET_SERVICE_URL = "getCustomServiceSDO.do"; //获取自定义服务
+	private static final String CREATE_ORDER_URL = "createCustomServiceSDO.do"; //订单创建
+	private static final String CONFIRM_ORDER_URL = "setCustomReceiverSDO.do"; //确认订单
 	
 	public BaseResult<List<CustomServiceVO>> getCustomService(User user) throws Exception {
 		
@@ -64,6 +66,21 @@ public class CustomServiceUtil {
 		BaseResult<CreateOrderResponseVO> baseResult = new BaseResult<>();
 		baseResult.setData(commonResponse.getData());
 		return baseResult;
+		
+	}
+	
+	/**
+	 * 服务订单创建
+	 * @param dto
+	 * @return
+	 * @throws Exception
+	 */
+	public void confirmOrder(User user, ConfirmOrderRequest confirmOrderRequest) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += CONFIRM_ORDER_URL;
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		restUtil.exchange(requestUrl, confirmOrderRequest, typeReference);
 		
 	}
 	

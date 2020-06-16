@@ -64,6 +64,11 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				logger.info("strat to consume to queue : " + queue);
 				
 				User user = queue.getUser();
+				
+				//该用户是某小区停车费收费员，这个用户ID统统出队，不作绑房屋操作
+				if (4731 == user.getId()) {
+					continue;
+				}
 				int totalFailed = 0;
 				boolean isSuccess = false;
 				

@@ -1,21 +1,29 @@
 package com.yumu.hexie.service.customservice.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
+import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.req.ConfirmOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.customservice.CustomService;
+import com.yumu.hexie.service.exception.BizValidateException;
 
 @Service
 public class CustomServiceImpl implements CustomService {
@@ -26,6 +34,8 @@ public class CustomServiceImpl implements CustomService {
 	private CustomServiceUtil customServiceUtil;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
+	@Autowired
+	private RegionRepository regionRepository;
 	
 	
 	@Override
@@ -56,8 +66,50 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setProductPic(customerServiceOrderDTO.getImage());
 		serviceOrder.setOrderNo(data.getOrderId());
 		serviceOrder.setAppid(currUser.getAppId());
+		List<Region> regionList = regionRepository.findAllBySectId(currUser.getSectId());
+		if (regionList!=null && !regionList.isEmpty()) {
+			serviceOrder.setXiaoquId(regionList.get(0).getId());
+		}
 		serviceOrderRepository.save(serviceOrder);
 		return data;
+		
+	}
+
+	/**
+	 * 确认订单
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public void confirmOrder(User user, String orderId) throws Exception {
+		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+
+		Date date = new Date();
+		ConfirmOrderRequest confirmOrderRequest = new ConfirmOrderRequest();
+		confirmOrderRequest.setConfirmDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
+		confirmOrderRequest.setOpenid(user.getOpenid());
+		confirmOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
+		customServiceUtil.confirmOrder(user, confirmOrderRequest);
+		
+		confirm(serviceOrder);
+		serviceOrder.setConfirmDate(date);
+		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
+		serviceOrderRepository.save(serviceOrder);
+		
+	}
+	
+	//TODO
+	/**
+	 * 校验状态
+	 * @param serviceOrder
+	 */
+	public void confirm(ServiceOrder serviceOrder) {
+		
 		
 	}
 

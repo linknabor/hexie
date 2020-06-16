@@ -12,4 +12,6 @@ public interface CustomService {
 	List<CustomServiceVO> getService(User user) throws Exception;
 
 	CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception;
+	
+	void confirmOrder(User user, String orderId) throws Exception;
 }

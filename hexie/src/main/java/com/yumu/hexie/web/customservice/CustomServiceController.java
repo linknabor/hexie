@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
@@ -62,6 +63,17 @@ public class CustomServiceController extends BaseController {
 		
 		CreateOrderResponseVO vo = customService.createOrder(dto);
 		return BaseResult.successResult(vo);
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/confirm", method = RequestMethod.POST)
+	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
+		
+		logger.info("user : " + user);
+		logger.info("confirmOrder orderId : " + orderId);
+		customService.confirmOrder(user, orderId);
+		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	
 }
