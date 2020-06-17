@@ -76,6 +76,12 @@ public class ServiceOrder  extends BaseModel {
 	private double lng;
 	private long xiaoquId;
 	
+	/**操作员信息*/
+	private long operatorId;
+	private String operatorName;
+	private long operatorUserId;
+	private String operatorTel;
+	private String operatorOpenId;
 	
 	/**团购状态*/
 	private int groupStatus = ModelConstant.GROUP_STAUS_GROUPING;//拼单状态
@@ -672,6 +678,36 @@ public class ServiceOrder  extends BaseModel {
 		this.items = items;
 	}
 	
+	public long getOperatorId() {
+		return operatorId;
+	}
+	public void setOperatorId(long operatorId) {
+		this.operatorId = operatorId;
+	}
+	public String getOperatorName() {
+		return operatorName;
+	}
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+	public long getOperatorUserId() {
+		return operatorUserId;
+	}
+	public void setOperatorUserId(long operatorUserId) {
+		this.operatorUserId = operatorUserId;
+	}
+	public String getOperatorTel() {
+		return operatorTel;
+	}
+	public void setOperatorTel(String operatorTel) {
+		this.operatorTel = operatorTel;
+	}
+	public String getOperatorOpenId() {
+		return operatorOpenId;
+	}
+	public void setOperatorOpenId(String operatorOpenId) {
+		this.operatorOpenId = operatorOpenId;
+	}
 	@Transient
 	@JsonIgnore
 	public List<Long> getProductIds(){

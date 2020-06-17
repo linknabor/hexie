@@ -17,6 +17,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
+import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.web.BaseController;
@@ -66,20 +67,75 @@ public class CustomServiceController extends BaseController {
 	}
 	
 	/**
-	 * 确认订单
+	 * 确认订单完工--用户
 	 * @param user
 	 * @param orderId
 	 * @return
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/confirm", method = RequestMethod.POST)
+	@RequestMapping(value = "/order/confirm", method = RequestMethod.POST)
 	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
 		logger.info("user : " + user);
 		logger.info("confirmOrder orderId : " + orderId);
-		customService.confirmOrder(user, orderId);
+		String operType = "0";
+		customService.confirmOrder(user, orderId, operType);	//用户自己确认operType填0
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
+	
+	/**
+	 * 确认订单完工--维修工
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/confirmByOper", method = RequestMethod.POST)
+	public BaseResult<String> confirmByOper(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
+		
+		logger.info("user : " + user);
+		logger.info("confirmOrder orderId : " + orderId);
+		String operType = "1";
+		customService.confirmOrder(user, orderId, operType);	//维修工确认operType填1
+		return BaseResult.successResult(Constants.SUCCESS);
+	}
+	
+	/**
+	 * 查询订单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order", method = RequestMethod.GET)
+	public BaseResult<ServiceOrder> queryOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
+		
+		logger.info("user : " + user);
+		logger.info("queryOrder orderId : " + orderId);
+		ServiceOrder serviceOrder = customService.queryOrder(user, orderId);
+		return BaseResult.successResult(serviceOrder);
+	}
+	
+	/**
+	 * 查询订单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/accept", method = RequestMethod.GET)
+	public BaseResult<String> acceptOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
+		
+		logger.info("user : " + user);
+		logger.info("acceptOrder orderId : " + orderId);
+		customService.acceptOrder(user, orderId);
+		return BaseResult.successResult(Constants.SUCCESS);
+	}
+	
+	
 	
 }

@@ -14,6 +14,8 @@ public class ConfirmOrderRequest extends CustomServiceRequest {
 	private String openid;
 	@JsonProperty("approval_date")
 	private String confirmDate;
+	@JsonProperty("oper_type")
+	private String operType;
 	
 	public String getTradeWaterId() {
 		return tradeWaterId;
@@ -33,12 +35,17 @@ public class ConfirmOrderRequest extends CustomServiceRequest {
 	public void setConfirmDate(String confirmDate) {
 		this.confirmDate = confirmDate;
 	}
+	public String getOperType() {
+		return operType;
+	}
+	public void setOperType(String operType) {
+		this.operType = operType;
+	}
 	@Override
 	public String toString() {
 		return "ConfirmOrderRequest [tradeWaterId=" + tradeWaterId + ", openid=" + openid + ", confirmDate="
-				+ confirmDate + "]";
+				+ confirmDate + ", operType=" + operType + "]";
 	}
-	
 	
 	
 }

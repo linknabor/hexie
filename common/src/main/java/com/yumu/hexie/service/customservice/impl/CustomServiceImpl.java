@@ -82,7 +82,7 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Override
 	@Transactional
-	public void confirmOrder(User user, String orderId) throws Exception {
+	public void confirmOrder(User user, String orderId, String operType) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
@@ -97,20 +97,43 @@ public class CustomServiceImpl implements CustomService {
 		confirmOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
 		customServiceUtil.confirmOrder(user, confirmOrderRequest);
 		
-		confirm(serviceOrder);
+		if (serviceOrder.getUserId()!=user.getId() || serviceOrder.getOperatorUserId() != user.getId()) {
+			throw new BizValidateException("非当前用户订单，无法查看。orderId : " + orderId + ", userId : " + user.getId());
+		}
+		
 		serviceOrder.setConfirmDate(date);
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
 	
-	//TODO
 	/**
-	 * 校验状态
-	 * @param serviceOrder
+	 * 订单查询
 	 */
-	public void confirm(ServiceOrder serviceOrder) {
+	@Override
+	public ServiceOrder queryOrder(User user, String orderId) {
 		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder!=null) {
+			if (serviceOrder.getUserId()!=user.getId() || serviceOrder.getOperatorUserId() != user.getId()) {
+				throw new BizValidateException("非当前用户订单，无法查看。orderId : " + orderId + ", userId : " + user.getId());
+			}
+		}
+		return serviceOrder;
+	}
+
+	/**
+	 * 接单
+	 */
+	@Override
+	public void acceptOrder(User user, String orderId) {
+		
+//		Assert.hasText(orderId, "订单ID不能为空。");
+//		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+//		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+//			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+//		}
 		
 	}
 
