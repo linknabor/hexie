@@ -2,7 +2,7 @@ package com.yumu.hexie.integration.customservice.req;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ConfirmOrderRequest extends CustomServiceRequest {
+public class OperOrderRequest extends CustomServiceRequest {
 
 	/**
 	 * 
@@ -13,9 +13,9 @@ public class ConfirmOrderRequest extends CustomServiceRequest {
 	private String tradeWaterId;
 	private String openid;
 	@JsonProperty("approval_date")
-	private String confirmDate;
+	private String operDate;
 	@JsonProperty("oper_type")
-	private String operType;
+	private String operType;	//0接单，1确认，9取消
 	
 	public String getTradeWaterId() {
 		return tradeWaterId;
@@ -29,22 +29,22 @@ public class ConfirmOrderRequest extends CustomServiceRequest {
 	public void setOpenid(String openid) {
 		this.openid = openid;
 	}
-	public String getConfirmDate() {
-		return confirmDate;
-	}
-	public void setConfirmDate(String confirmDate) {
-		this.confirmDate = confirmDate;
-	}
 	public String getOperType() {
 		return operType;
 	}
 	public void setOperType(String operType) {
 		this.operType = operType;
 	}
+	public String getOperDate() {
+		return operDate;
+	}
+	public void setOperDate(String operDate) {
+		this.operDate = operDate;
+	}
 	@Override
 	public String toString() {
-		return "ConfirmOrderRequest [tradeWaterId=" + tradeWaterId + ", openid=" + openid + ", confirmDate="
-				+ confirmDate + ", operType=" + operType + "]";
+		return "UpdateOrderStatusRequest [tradeWaterId=" + tradeWaterId + ", openid=" + openid + ", operDate="
+				+ operDate + ", operType=" + operType + "]";
 	}
 	
 	

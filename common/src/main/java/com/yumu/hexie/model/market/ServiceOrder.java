@@ -83,6 +83,8 @@ public class ServiceOrder  extends BaseModel {
 	private String operatorTel;
 	private String operatorOpenId;
 	
+	private String confirmer;		//确认完工人
+	
 	/**团购状态*/
 	private int groupStatus = ModelConstant.GROUP_STAUS_GROUPING;//拼单状态
 	/**团购状态*/
@@ -111,7 +113,8 @@ public class ServiceOrder  extends BaseModel {
 	private Date payDate;
 	private Date refundDate;
 	private Date returnDate;
-	private Date confirmDate;
+	private Date acceptedDate;	//接单日期
+	private Date confirmDate;	//确认完工日期
 	private Date sendDate;
 	private Date signDate;
 	private Date cancelDate;
@@ -707,6 +710,18 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setOperatorOpenId(String operatorOpenId) {
 		this.operatorOpenId = operatorOpenId;
+	}
+	public String getConfirmer() {
+		return confirmer;
+	}
+	public void setConfirmer(String confirmer) {
+		this.confirmer = confirmer;
+	}
+	public Date getAcceptedDate() {
+		return acceptedDate;
+	}
+	public void setAcceptedDate(Date acceptedDate) {
+		this.acceptedDate = acceptedDate;
 	}
 	@Transient
 	@JsonIgnore

@@ -127,6 +127,23 @@ public class CustomServiceController extends BaseController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/queryByStatus", method = RequestMethod.GET)
+	public BaseResult<List<ServiceOrder>> queryOrderByStatus(@ModelAttribute(Constants.USER) User user, @RequestParam String orderStatus) throws Exception {
+		
+		logger.info("user : " + user);
+		logger.info("queryOrder orderStatus : " + orderStatus);
+		List<ServiceOrder> orderList = customService.queryOrderByStatus(user, orderStatus);
+		return BaseResult.successResult(orderList);
+	}
+	
+	/**
+	 * 查询订单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/accept", method = RequestMethod.POST)
 	public BaseResult<String> acceptOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		

@@ -18,5 +18,7 @@ public interface CustomService {
 	
 	ServiceOrder queryOrder(User user, String orderId);
 	
-	void acceptOrder(User user, String orderId);
+	List<ServiceOrder> queryOrderByStatus(User user, String status);
+	
+	void acceptOrder(User user, String orderId) throws Exception;
 }

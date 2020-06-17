@@ -10,7 +10,7 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
-import com.yumu.hexie.integration.customservice.req.ConfirmOrderRequest;
+import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.req.CreateOrderRequest;
 import com.yumu.hexie.integration.customservice.req.GetServiceRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
@@ -75,12 +75,12 @@ public class CustomServiceUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public void confirmOrder(User user, ConfirmOrderRequest confirmOrderRequest) throws Exception {
+	public void operatorOrder(User user, OperOrderRequest operOrderRequest) throws Exception {
 		
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += CONFIRM_ORDER_URL;
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		restUtil.exchange(requestUrl, confirmOrderRequest, typeReference);
+		restUtil.exchange(requestUrl, operOrderRequest, typeReference);
 		
 	}
 	

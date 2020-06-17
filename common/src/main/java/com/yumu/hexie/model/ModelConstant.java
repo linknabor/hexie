@@ -70,6 +70,7 @@ public class ModelConstant {
 	public static final int ORDER_STATUS_CONFIRM = 9;
 	public static final int ORDER_STATUS_RETURNED = 10;
 	public static final int ORDER_STATUS_REFUNDED = 11;
+	public static final int ORDER_STATUS_ACCEPTED = 15;
 	
 	public static final int ORDER_ASYNC_STATUS_N = 0;//未同步
 	public static final int ORDER_ASYNC_STATUS_Y = 1;//已同步
