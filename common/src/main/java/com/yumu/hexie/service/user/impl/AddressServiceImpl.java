@@ -326,8 +326,8 @@ public class AddressServiceImpl implements AddressService {
 			if (addr.getSect_id() != null) {
 				re = regionService.findAllBySectId(addr.getSect_id());
 				if(re.size()==0){
-					log.info("根据小区id["+addr.getSect_id()+"]未查询到相对应的小区，开始按名字查询，名称：" + addr.getRegion_name());
-					re = regionRepository.findByNameAndRegionType(addr.getRegion_name(), 3);
+					log.info("根据小区id["+addr.getSect_id()+"]未查询到相对应的小区，开始按名字查询，名称：" + addr.getSect_name());
+					re = regionRepository.findByNameAndRegionType(addr.getSect_name(), 3);
 				}
 				if(re.size()==0){
 					log.info("未查询到小区！"+addr.getSect_name() + ",开始创建。");
