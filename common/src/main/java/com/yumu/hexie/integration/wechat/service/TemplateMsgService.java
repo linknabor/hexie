@@ -14,7 +14,7 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotify;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
@@ -344,7 +344,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendPayNotify(AccountNotify accountNotify, String accessToken) {
+    public static void sendPayNotify(AccountNotification accountNotify, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
 		vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));

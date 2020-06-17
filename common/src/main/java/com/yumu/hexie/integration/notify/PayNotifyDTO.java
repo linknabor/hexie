@@ -26,23 +26,23 @@ public class PayNotifyDTO implements Serializable {
 	private String bindSwitch = "1";
 	
 	@JsonProperty("account_notify")
-	private AccountNotify accountNotify;	//入账通知
+	private AccountNotification accountNotify;	//入账通知
 	@JsonProperty("receivOrder")
-	private ServiceNotify serviceNotify;	//服务通知
+	private ServiceNotification serviceNotify;	//服务通知
 	
-	public AccountNotify getAccountNotify() {
+	public AccountNotification getAccountNotify() {
 		return accountNotify;
 	}
 
-	public void setAccountNotify(AccountNotify accountNotify) {
+	public void setAccountNotify(AccountNotification accountNotify) {
 		this.accountNotify = accountNotify;
 	}
 
-	public ServiceNotify getServiceNotify() {
+	public ServiceNotification getServiceNotify() {
 		return serviceNotify;
 	}
 
-	public void setServiceNotify(ServiceNotify serviceNotify) {
+	public void setServiceNotify(ServiceNotification serviceNotify) {
 		this.serviceNotify = serviceNotify;
 	}
 
@@ -51,9 +51,15 @@ public class PayNotifyDTO implements Serializable {
 	 * @author david
 	 *
 	 */
-	public static class AccountNotify {
+	public static class AccountNotification implements Serializable {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 6495284769612816058L;
 		
 		private User user;
+		private String orderId;
 		@JsonProperty("tran_date")
 		private String tranDate;
 		private BigDecimal feePrice;
@@ -68,6 +74,12 @@ public class PayNotifyDTO implements Serializable {
 		}
 		public void setUser(User user) {
 			this.user = user;
+		}
+		public String getOrderId() {
+			return orderId;
+		}
+		public void setOrderId(String orderId) {
+			this.orderId = orderId;
 		}
 		public String getPayMethod() {
 			return payMethod;
@@ -123,7 +135,12 @@ public class PayNotifyDTO implements Serializable {
 	 * @author david
 	 *
 	 */
-	public static class ServiceNotify {
+	public static class ServiceNotification implements Serializable {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8381624394203118088L;
 		
 		private User user;
 		private String orderId;
@@ -222,6 +239,6 @@ public class PayNotifyDTO implements Serializable {
 				+ wuyeId + ", couponId=" + couponId + ", points=" + points + ", bindSwitch=" + bindSwitch
 				+ ", accountNotify=" + accountNotify + ", serviceNotify=" + serviceNotify + "]";
 	}
-	
+
 	
 }

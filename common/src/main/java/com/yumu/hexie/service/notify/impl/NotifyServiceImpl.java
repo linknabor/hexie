@@ -1,23 +1,25 @@
 package com.yumu.hexie.service.notify.impl;
 
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.notify.PayNotifyDTO;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotify;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotify;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotification;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
-import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.service.shequ.WuyeService;
@@ -42,21 +44,20 @@ public class NotifyServiceImpl implements NotifyService {
 	@Autowired
 	private WuyeService wuyeService;
 	@Autowired
-	private GotongService gotongService;
+	private RedisTemplate<String, String> redisTemplate;
+	
 
 	/**
-	 * 支付完成后的一些操作
-	 * 步骤：
-	 *  1.有红包的更新红包状态，
-	 *	2.绑定缴费房屋（bindStich==1，需要远程请求，双边事务），
-	 *	3.+芝麻，
-	 *
-	 *其中1,2实时完成,3可异步完成(队列)。
-	 *
+	 * 	1.优惠券核销
+		2.积分
+		3.绑卡记录quickToken和卡号
+		4.绑定房屋
+		5.缴费到账通知
+		6.自定服务
 	 */
 	@Transactional
 	@Override
-	public void noticePayed(PayNotifyDTO payNotifyDTO) {
+	public void notify(PayNotifyDTO payNotifyDTO) {
 		
 		//1.更新红包状态
 		User user = null;
@@ -99,23 +100,19 @@ public class NotifyServiceImpl implements NotifyService {
 			if (!StringUtils.isEmpty(payNotifyDTO.getCardNo()) && !StringUtils.isEmpty(payNotifyDTO.getQuickToken())) {
 				bankCardRepository.updateBankCardByAcctNoAndUserId(payNotifyDTO.getQuickToken(), payNotifyDTO.getQuickToken(), user.getId());
 			}
-			//5.绑定所缴纳物业费的房屋
+			//4.绑定所缴纳物业费的房屋
 			wuyeService.bindHouseByTradeAsync(payNotifyDTO.getBindSwitch(), user, payNotifyDTO.getOrderId());
 		}
 		
+		//5.通知物业相关人员，收费到账
+		AccountNotification accountNotify = payNotifyDTO.getAccountNotify();
+		accountNotify.setOrderId(payNotifyDTO.getOrderId());
+		sendPayNotificationAsync(accountNotify);
 		
-		AccountNotify accountNotify = payNotifyDTO.getAccountNotify();
-		if (accountNotify!=null) {
-			
-			//4.通知物业相关人员，收费到账
-			sendPayNotify(accountNotify);
-		}
-		
-		ServiceNotify serviceNotify = payNotifyDTO.getServiceNotify();
-		if (serviceNotify!=null) {
-			serviceNotify.setOrderId(payNotifyDTO.getOrderId());
-			sendServiceNotify(serviceNotify);
-		}
+		//6.自定义服务
+		ServiceNotification serviceNotification = payNotifyDTO.getServiceNotify();
+		serviceNotification.setOrderId(payNotifyDTO.getOrderId());
+		sendServiceNotificationAsync(serviceNotification);
 		
 	}
 	
@@ -123,69 +120,64 @@ public class NotifyServiceImpl implements NotifyService {
 	 * 到账消息推送
 	 */
 	@Override
-	public void sendPayNotify(AccountNotify accountNotify) {
+	public void sendPayNotificationAsync(AccountNotification accountNotification) {
 		
-		List<Map<String, String>> openidList = accountNotify.getOpenids();
-
-		if (openidList == null || openidList.isEmpty()) {
+		if (accountNotification == null) {
 			return;
 		}
-	
-		for (Map<String, String> openidMap : openidList) {
-			
-			User user = null;
-			String openid = openidMap.get("openid");
-			if (StringUtils.isEmpty(openid)) {
-				log.warn("openid is empty, will skip. ");
-				continue;
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(accountNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_PAY_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
 			}
-			List<User> userList = userRepository.findByOpenid(openid);
-			if (userList!=null && !userList.isEmpty()) {
-				user = userList.get(0);
-			}else {
-				log.warn("can not find user, openid : " + openid);
-			}
-			if (user!=null) {
-				accountNotify.setUser(user);
-				gotongService.sendPayNotify(accountNotify);
-			}
-			
 		}
-			
+		
 	}
 	
 	/**
 	 * 服务消息推送
 	 */
 	@Override
-	public void sendServiceNotify(ServiceNotify serviceNotify) {
+	public void sendServiceNotificationAsync(ServiceNotification serviceNotification) {
 		
-		List<Map<String, String>> openidList = serviceNotify.getOpenids();
-
-		if (openidList == null || openidList.isEmpty()) {
+		if (serviceNotification == null) {
 			return;
 		}
-	
-		for (Map<String, String> openidMap : openidList) {
-			
-			User user = null;
-			String openid = openidMap.get("openid");
-			if (StringUtils.isEmpty(openid)) {
-				log.warn("openid is empty, will skip. ");
-				continue;
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(serviceNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
 			}
-			List<User> userList = userRepository.findByOpenid(openid);
-			if (userList!=null && !userList.isEmpty()) {
-				user = userList.get(0);
-			}else {
-				log.warn("can not find user, openid : " + openid);
-			}
-			if (user!=null) {
-				serviceNotify.setUser(user);
-				gotongService.sendServiceNotify(serviceNotify);
-			}
-			
 		}
+		
 			
 	}
 	

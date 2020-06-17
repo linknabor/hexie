@@ -58,7 +58,7 @@ public class NotifyController extends BaseController {
 		payNotifyDTO.setWuyeId(wuyeId);
 		
 		log.info("payNotifyDto :" + payNotifyDTO);
-		notifyService.noticePayed(payNotifyDTO);
+		notifyService.notify(payNotifyDTO);
 		return "SUCCESS";
 	}
 }

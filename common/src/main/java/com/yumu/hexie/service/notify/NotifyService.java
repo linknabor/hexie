@@ -1,15 +1,15 @@
 package com.yumu.hexie.service.notify;
 
 import com.yumu.hexie.integration.notify.PayNotifyDTO;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotify;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotify;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotification;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
 
 public interface NotifyService {
 
-	void noticePayed(PayNotifyDTO payNotifyDTO);
+	void notify(PayNotifyDTO payNotifyDTO);
 
-	void sendPayNotify(AccountNotify accountNotify);
+	void sendPayNotificationAsync(AccountNotification accountNotification);
 
-	void sendServiceNotify(ServiceNotify serviceNotify);
+	void sendServiceNotificationAsync(ServiceNotification serviceNotification);
 
 }

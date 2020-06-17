@@ -353,4 +353,7 @@ public class ModelConstant {
 
 	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
 	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
+	
+	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";
+	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";
 }		
