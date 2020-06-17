@@ -20,7 +20,6 @@ public class SignInOutDTO {
 		if (user!=null) {
 			this.openid = user.getOpenid();
 		}
-
 	}
 	public String getOpenid() {
 		return openid;
