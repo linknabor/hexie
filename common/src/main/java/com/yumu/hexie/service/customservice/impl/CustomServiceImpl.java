@@ -97,8 +97,8 @@ public class CustomServiceImpl implements CustomService {
 		confirmOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
 		customServiceUtil.confirmOrder(user, confirmOrderRequest);
 		
-		if (serviceOrder.getUserId()!=user.getId() || serviceOrder.getOperatorUserId() != user.getId()) {
-			throw new BizValidateException("非当前用户订单，无法查看。orderId : " + orderId + ", userId : " + user.getId());
+		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
+			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
 		}
 		
 		serviceOrder.setConfirmDate(date);
@@ -116,8 +116,8 @@ public class CustomServiceImpl implements CustomService {
 		Assert.hasText(orderId, "订单ID不能为空。");
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder!=null) {
-			if (serviceOrder.getUserId()!=user.getId() || serviceOrder.getOperatorUserId() != user.getId()) {
-				throw new BizValidateException("非当前用户订单，无法查看。orderId : " + orderId + ", userId : " + user.getId());
+			if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
+				throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
 			}
 		}
 		return serviceOrder;
