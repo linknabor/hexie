@@ -221,11 +221,36 @@ public class ServiceOrder  extends BaseModel {
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"配货中");    
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");    
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");        
-
 	}
+	
+	private static Map<Integer,String> SERVICE_ORDER_STATUSMAP = new HashMap<Integer,String>();
+	static{
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"可接单");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT,"已取消");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"确认完工");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");        
+	}
+	
+	
 	@Transient
 	public String getStatusStr(){
-		return STATUSMAP.get(status);
+		
+		String statusStr = "";
+		if (ModelConstant.ORDER_TYPE_SERVICE == this.orderType) {
+			statusStr = SERVICE_ORDER_STATUSMAP.get(status);
+		}else {
+			statusStr = STATUSMAP.get(status);
+		}
+		return statusStr;
+		
 	}
 	@Transient
 	public static String getStatusStr(int status) {
