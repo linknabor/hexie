@@ -47,6 +47,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/service", method = RequestMethod.GET)
 	public BaseResult<List<CustomServiceVO>> getService(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
+		logger.info("user : " + user);
 		List<CustomServiceVO> data = customService.getService(user);
 		return BaseResult.successResult(data);
 		

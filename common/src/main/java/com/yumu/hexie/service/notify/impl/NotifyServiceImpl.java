@@ -117,6 +117,7 @@ public class NotifyServiceImpl implements NotifyService {
 		serviceNotification.setOrderId(payNotifyDTO.getOrderId());
 		sendServiceNotificationAsync(serviceNotification);
 		
+		//7.更新自定义服务订单状态
 		customService.notifyPayByServplat(payNotifyDTO.getOrderId());
 		
 	}
