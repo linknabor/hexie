@@ -198,6 +198,21 @@ public class CustomServiceImpl implements CustomService {
 	}
 	
 	/**
+	 * 根据状态查询订单
+	 * @param status 0可接单，9确认完工，15已接单
+	 */
+	@Override
+	public List<ServiceOrder> queryOrderByUser(User user) {
+
+		Assert.notNull(user, "用户信息不能为空。");
+
+		List<Integer> orderTypes = new ArrayList<>();
+		orderTypes.add(ModelConstant.ORDER_TYPE_SERVICE);
+		List<ServiceOrder> orderList = serviceOrderRepository.findByUserIdAndOrderType(user.getId(), orderTypes);
+		return orderList;
+	}
+	
+	/**
 	 * 用户撤销订单
 	 * @throws Exception 
 	 */

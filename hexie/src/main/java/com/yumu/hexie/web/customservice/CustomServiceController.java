@@ -47,7 +47,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/service", method = RequestMethod.GET)
 	public BaseResult<List<CustomServiceVO>> getService(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("getService, user : " + user);
 		List<CustomServiceVO> data = customService.getService(user);
 		return BaseResult.successResult(data);
 		
@@ -78,7 +78,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/order/confirm", method = RequestMethod.POST)
 	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("confirmOrder, user : " + user);
 		logger.info("confirmOrder orderId : " + orderId);
 		String operType = "0";
 		customService.confirmOrder(user, orderId, operType);	//用户自己确认operType填0
@@ -96,7 +96,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/order/confirmByOper", method = RequestMethod.POST)
 	public BaseResult<String> confirmByOper(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("confirmByOper, user : " + user);
 		logger.info("confirmByOper orderId : " + orderId);
 		String operType = "1";
 		customService.confirmOrder(user, orderId, operType);	//维修工确认operType填1
@@ -114,7 +114,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/order", method = RequestMethod.GET)
 	public BaseResult<ServiceOrder> queryOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("queryOrder, user : " + user);
 		logger.info("queryOrder orderId : " + orderId);
 		ServiceOrder serviceOrder = customService.queryOrder(user, orderId);
 		return BaseResult.successResult(serviceOrder);
@@ -131,9 +131,25 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/order/queryByStatus", method = RequestMethod.GET)
 	public BaseResult<List<ServiceOrder>> queryOrderByStatus(@ModelAttribute(Constants.USER) User user, @RequestParam String orderStatus) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("queryOrderByStatus, user : " + user);
 		logger.info("queryOrder orderStatus : " + orderStatus);
 		List<ServiceOrder> orderList = customService.queryOrderByStatus(user, orderStatus);
+		return BaseResult.successResult(orderList);
+	}
+	
+	/**
+	 * 查询订单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/queryByUser", method = RequestMethod.GET)
+	public BaseResult<List<ServiceOrder>> queryOrderByUser(@ModelAttribute(Constants.USER) User user) throws Exception {
+		
+		logger.info("queryOrderByUser, user : " + user);
+		List<ServiceOrder> orderList = customService.queryOrderByUser(user);
 		return BaseResult.successResult(orderList);
 	}
 	
@@ -148,7 +164,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/order/accept", method = RequestMethod.POST)
 	public BaseResult<String> acceptOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("acceptOrder user : " + user);
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.acceptOrder(user, orderId);
 		return BaseResult.successResult(Constants.SUCCESS);
@@ -165,7 +181,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/order/reverse", method = RequestMethod.POST)
 	public BaseResult<String> reverseOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("reverseOrder, user : " + user);
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.reverseOrder(user, orderId);
 		return BaseResult.successResult(Constants.SUCCESS);
@@ -182,7 +198,7 @@ public class CustomServiceController extends BaseController {
 	@RequestMapping(value = "/order/notifyPay", method = RequestMethod.POST)
 	public BaseResult<String> notifyPay(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
-		logger.info("user : " + user);
+		logger.info("notifyPay, user : " + user);
 		logger.info("notifyPay orderId : " + orderId);
 		customService.notifyPay(user, orderId);
 		return BaseResult.successResult(Constants.SUCCESS);

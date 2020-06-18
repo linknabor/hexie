@@ -27,4 +27,6 @@ public interface CustomService {
 	void notifyPay(User user, String orderId) throws Exception;
 
 	void notifyPayByServplat(String tradeWaterId);
+
+	List<ServiceOrder> queryOrderByUser(User user);
 }
