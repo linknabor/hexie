@@ -21,4 +21,6 @@ public interface CustomService {
 	List<ServiceOrder> queryOrderByStatus(User user, String status);
 	
 	void acceptOrder(User user, String orderId) throws Exception;
+
+	void reverseOrder(User user, String orderId) throws Exception;
 }

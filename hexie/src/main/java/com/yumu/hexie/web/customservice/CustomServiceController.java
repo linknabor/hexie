@@ -153,6 +153,21 @@ public class CustomServiceController extends BaseController {
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	
-	
+	/**
+	 * 撤销订单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/reverse", method = RequestMethod.POST)
+	public BaseResult<String> reverseOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
+		
+		logger.info("user : " + user);
+		logger.info("acceptOrder orderId : " + orderId);
+		customService.reverseOrder(user, orderId);
+		return BaseResult.successResult(Constants.SUCCESS);
+	}
 	
 }

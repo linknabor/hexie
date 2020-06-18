@@ -30,6 +30,8 @@ public class CustomServiceOrderVO implements Serializable {
 	@JsonProperty("trade_water_id")
 	private String tradeWaterId;
 	private String memo;
+	@JsonProperty("sect_name")
+	private String sectName;
 	
 	public String getServiceId() {
 		return serviceId;
@@ -91,13 +93,19 @@ public class CustomServiceOrderVO implements Serializable {
 	public void setMemo(String memo) {
 		this.memo = memo;
 	}
+	public String getSectName() {
+		return sectName;
+	}
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
 	@Override
 	public String toString() {
 		return "CustomServiceOrderVO [serviceId=" + serviceId + ", serviceName=" + serviceName + ", image=" + image
 				+ ", sectId=" + sectId + ", linkman=" + linkman + ", linktel=" + linktel + ", serviceAddr="
-				+ serviceAddr + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", memo=" + memo + "]";
+				+ serviceAddr + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", memo=" + memo
+				+ ", sectName=" + sectName + "]";
 	}
-	
 	
 
 }

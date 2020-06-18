@@ -68,6 +68,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setOrderNo(data.getTradeWaterId());
 		serviceOrder.setAppid(currUser.getAppId());
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
+		serviceOrder.setXiaoquName(customerServiceOrderDTO.getSectName());
+		serviceOrder.setXiaoquId(Long.valueOf(customerServiceOrderDTO.getSectId()));
 		List<Region> regionList = regionRepository.findAllBySectId(currUser.getSectId());
 		if (regionList!=null && !regionList.isEmpty()) {
 			serviceOrder.setXiaoquId(regionList.get(0).getId());
@@ -180,6 +182,33 @@ public class CustomServiceImpl implements CustomService {
 			orderList = serviceOrderRepository.findByOperAndStatusAndOrderType(user.getId(), statusList, ModelConstant.ORDER_TYPE_SERVICE);
 		}
 		return orderList;
+	}
+	
+	/**
+	 * 用户撤销订单
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public void reverseOrder(User user, String orderId) throws Exception {
+		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+		
+//		Date date = new Date();
+//		OperOrderRequest operOrderRequest = new OperOrderRequest();
+//		operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
+//		operOrderRequest.setOpenid(user.getOpenid());
+//		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
+//		operOrderRequest.setOperType("0");
+//		customServiceUtil.operatorOrder(user, operOrderRequest);
+		
+		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CANCEL);
+		serviceOrderRepository.save(serviceOrder);
+		
 	}
 
 }

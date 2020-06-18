@@ -16,6 +16,7 @@ public class CustomerServiceOrderDTO {
 	private String tranAmt;
 	private String tradeWaterId;
 	private String memo;
+	private String sectName;
 	
 	public User getUser() {
 		return user;
@@ -83,12 +84,18 @@ public class CustomerServiceOrderDTO {
 	public void setMemo(String memo) {
 		this.memo = memo;
 	}
+	public String getSectName() {
+		return sectName;
+	}
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
 	@Override
 	public String toString() {
 		return "CustomerServiceOrderDTO [user=" + user + ", serviceId=" + serviceId + ", serviceName=" + serviceName
 				+ ", image=" + image + ", sectId=" + sectId + ", linkman=" + linkman + ", linktel=" + linktel
 				+ ", serviceAddr=" + serviceAddr + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", memo="
-				+ memo + "]";
+				+ memo + ", sectName=" + sectName + "]";
 	}
 	
 }

@@ -75,6 +75,7 @@ public class ServiceOrder  extends BaseModel {
 	private double lat;
 	private double lng;
 	private long xiaoquId;
+	private String xiaoquName;
 	
 	/**操作员信息*/
 	private long operatorId;
@@ -748,6 +749,12 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setAcceptedDate(Date acceptedDate) {
 		this.acceptedDate = acceptedDate;
+	}
+	public String getXiaoquName() {
+		return xiaoquName;
+	}
+	public void setXiaoquName(String xiaoquName) {
+		this.xiaoquName = xiaoquName;
 	}
 	@Transient
 	@JsonIgnore
