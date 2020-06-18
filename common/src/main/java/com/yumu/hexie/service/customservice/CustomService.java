@@ -23,4 +23,8 @@ public interface CustomService {
 	void acceptOrder(User user, String orderId) throws Exception;
 
 	void reverseOrder(User user, String orderId) throws Exception;
+
+	void notifyPay(User user, String orderId) throws Exception;
+
+	void notifyPayByServplat(String tradeWaterId);
 }

@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
@@ -25,6 +25,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.notify.NotifyService;
 
 @Service
 public class CustomServiceImpl implements CustomService {
@@ -37,6 +38,8 @@ public class CustomServiceImpl implements CustomService {
 	private ServiceOrderRepository serviceOrderRepository;
 	@Autowired
 	private RegionRepository regionRepository;
+	@Autowired
+	private NotifyService notifyService;
 	
 	
 	@Override
@@ -44,12 +47,20 @@ public class CustomServiceImpl implements CustomService {
 		return customServiceUtil.getCustomService(user).getData();
 	}
 
+	/**
+	 * 创建订单交易
+	 */
 	@Transactional
 	@Override
 	public CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
 		
+		//1.调用API创建接口
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
 		
+		//2.如果是非一口价的订单，需要分发抢单的信息给操作员
+		notifyService.sendServiceNotificationAsync(data.getServiceNotification());
+		
+		//3.保存本地订单
 		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
 		ServiceOrder serviceOrder = new ServiceOrder();
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
@@ -75,6 +86,8 @@ public class CustomServiceImpl implements CustomService {
 			serviceOrder.setXiaoquId(regionList.get(0).getId());
 		}
 		serviceOrderRepository.save(serviceOrder);
+		
+		//单列字段，前端需要。这里就不单独弄一个VO了
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		return data;
 		
@@ -198,15 +211,53 @@ public class CustomServiceImpl implements CustomService {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
 		
-//		Date date = new Date();
-//		OperOrderRequest operOrderRequest = new OperOrderRequest();
-//		operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
-//		operOrderRequest.setOpenid(user.getOpenid());
-//		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
-//		operOrderRequest.setOperType("0");
-//		customServiceUtil.operatorOrder(user, operOrderRequest);
+		Date date = new Date();
+		OperOrderRequest operOrderRequest = new OperOrderRequest();
+		operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
+		operOrderRequest.setOpenid(user.getOpenid());
+		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
+		operOrderRequest.setOperType("9");
+		customServiceUtil.operatorOrder(user, operOrderRequest);
 		
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CANCEL);
+		serviceOrderRepository.save(serviceOrder);
+		
+	}
+	
+	/**
+	 * 通知入账
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public void notifyPay(User user, String orderId) throws Exception {
+		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+		serviceOrder.setPayDate(new Date());
+		serviceOrderRepository.save(serviceOrder);
+		
+	}
+	
+	/**
+	 * 通知入账
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public void notifyPayByServplat(String tradeWaterId) {
+		
+		if (org.springframework.util.StringUtils.isEmpty(tradeWaterId)) {
+			return;
+		}
+		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			return;
+		}
+		serviceOrder.setPayDate(new Date());
 		serviceOrderRepository.save(serviceOrder);
 		
 	}

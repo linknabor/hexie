@@ -3,6 +3,7 @@ package com.yumu.hexie.integration.customservice.resp;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
 
 public class CreateOrderResponseVO implements Serializable {
 	
@@ -24,8 +25,10 @@ public class CreateOrderResponseVO implements Serializable {
 	private String timestamp;
 	@JsonProperty("user_pay_type")
 	private String payType;
+	@JsonProperty("receivOrder")
+	private ServiceNotification serviceNotification;	//服务通知
 	
-	private String orderId;
+	private String orderId;	//这个字段是给前端用的，并非接收json的一部分
 	
 	public String getPack() {
 		return pack;
@@ -87,11 +90,18 @@ public class CreateOrderResponseVO implements Serializable {
 	public void setTradeWaterId(String tradeWaterId) {
 		this.tradeWaterId = tradeWaterId;
 	}
+	public ServiceNotification getServiceNotification() {
+		return serviceNotification;
+	}
+	public void setServiceNotification(ServiceNotification serviceNotification) {
+		this.serviceNotification = serviceNotification;
+	}
 	@Override
 	public String toString() {
 		return "CreateOrderResponseVO [pack=" + pack + ", token=" + token + ", tradeWaterId=" + tradeWaterId
 				+ ", appid=" + appid + ", signtype=" + signtype + ", paysign=" + paysign + ", noncestr=" + noncestr
-				+ ", timestamp=" + timestamp + ", payType=" + payType + ", orderId=" + orderId + "]";
+				+ ", timestamp=" + timestamp + ", payType=" + payType + ", serviceNotification=" + serviceNotification
+				+ ", orderId=" + orderId + "]";
 	}
 	
 

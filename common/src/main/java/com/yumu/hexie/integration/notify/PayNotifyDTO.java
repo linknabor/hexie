@@ -26,24 +26,24 @@ public class PayNotifyDTO implements Serializable {
 	private String bindSwitch = "1";
 	
 	@JsonProperty("account_notify")
-	private AccountNotification accountNotify;	//入账通知
+	private AccountNotification accountNotification;	//入账通知
 	@JsonProperty("receivOrder")
-	private ServiceNotification serviceNotify;	//服务通知
+	private ServiceNotification serviceNotification;	//服务通知
 	
 	public AccountNotification getAccountNotify() {
-		return accountNotify;
+		return accountNotification;
 	}
 
-	public void setAccountNotify(AccountNotification accountNotify) {
-		this.accountNotify = accountNotify;
+	public void setAccountNotify(AccountNotification accountNotification) {
+		this.accountNotification = accountNotification;
 	}
 
 	public ServiceNotification getServiceNotify() {
-		return serviceNotify;
+		return serviceNotification;
 	}
 
-	public void setServiceNotify(ServiceNotification serviceNotify) {
-		this.serviceNotify = serviceNotify;
+	public void setServiceNotify(ServiceNotification serviceNotification) {
+		this.serviceNotification = serviceNotification;
 	}
 
 	/**
@@ -237,7 +237,7 @@ public class PayNotifyDTO implements Serializable {
 	public String toString() {
 		return "PayNotifyDTO [orderId=" + orderId + ", cardNo=" + cardNo + ", quickToken=" + quickToken + ", wuyeId="
 				+ wuyeId + ", couponId=" + couponId + ", points=" + points + ", bindSwitch=" + bindSwitch
-				+ ", accountNotify=" + accountNotify + ", serviceNotify=" + serviceNotify + "]";
+				+ ", accountNotify=" + accountNotification + ", serviceNotify=" + serviceNotification + "]";
 	}
 
 	

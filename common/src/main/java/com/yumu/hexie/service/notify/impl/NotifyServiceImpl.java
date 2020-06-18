@@ -21,6 +21,7 @@ import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
@@ -45,6 +46,8 @@ public class NotifyServiceImpl implements NotifyService {
 	private WuyeService wuyeService;
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
+	private CustomService customService;
 	
 
 	/**
@@ -113,6 +116,8 @@ public class NotifyServiceImpl implements NotifyService {
 		ServiceNotification serviceNotification = payNotifyDTO.getServiceNotify();
 		serviceNotification.setOrderId(payNotifyDTO.getOrderId());
 		sendServiceNotificationAsync(serviceNotification);
+		
+		customService.notifyPayByServplat(payNotifyDTO.getOrderId());
 		
 	}
 	

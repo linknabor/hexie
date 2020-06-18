@@ -170,4 +170,21 @@ public class CustomServiceController extends BaseController {
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	
+	/**
+	 * 前端微信支付成功
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/notifyPay", method = RequestMethod.POST)
+	public BaseResult<String> notifyPay(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
+		
+		logger.info("user : " + user);
+		logger.info("notifyPay orderId : " + orderId);
+		customService.notifyPay(user, orderId);
+		return BaseResult.successResult(Constants.SUCCESS);
+	}
+	
 }

@@ -66,7 +66,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					
 					List<Map<String, String>> openidList = queue.getOpenids();
 					if (openidList == null || openidList.isEmpty()) {
-						return;
+						continue;
 					}
 					for (Map<String, String> openidMap : openidList) {
 						
@@ -135,7 +135,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					List<Map<String, String>> openidList = queue.getOpenids();
 					
 					if (openidList == null || openidList.isEmpty()) {
-						return;
+						continue;
 					}
 				
 					for (Map<String, String> openidMap : openidList) {
