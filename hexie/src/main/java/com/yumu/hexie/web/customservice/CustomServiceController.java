@@ -204,4 +204,22 @@ public class CustomServiceController extends BaseController {
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	
+	/**
+	 * 非一口价支付订单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/pay", method = RequestMethod.POST)
+	public BaseResult<CreateOrderResponseVO> orderPay(@ModelAttribute(Constants.USER) User user, 
+			@RequestParam String orderId, @RequestParam String amount) throws Exception {
+		
+		logger.info("orderPay, user : " + user);
+		logger.info("orderPay orderId : " + orderId + ", amout : " + amount);
+		CreateOrderResponseVO vo = customService.orderPay(user, orderId, amount);
+		return BaseResult.successResult(vo);
+	} 
+	
 }

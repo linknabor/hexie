@@ -29,4 +29,6 @@ public interface CustomService {
 	void notifyPayByServplat(String tradeWaterId);
 
 	List<ServiceOrder> queryOrderByUser(User user);
+
+	CreateOrderResponseVO orderPay(User user, String orderId, String amount) throws Exception;
 }

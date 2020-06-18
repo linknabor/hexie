@@ -16,9 +16,8 @@ import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
+import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.distribution.region.Region;
-import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
@@ -36,9 +35,7 @@ public class CustomServiceImpl implements CustomService {
 	private CustomServiceUtil customServiceUtil;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
-	@Autowired
-	private RegionRepository regionRepository;
-	@Autowired
+		@Autowired
 	private NotifyService notifyService;
 	
 	
@@ -57,10 +54,7 @@ public class CustomServiceImpl implements CustomService {
 		//1.调用API创建接口
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
 		
-		//2.如果是非一口价的订单，需要分发抢单的信息给操作员
-		notifyService.sendServiceNotificationAsync(data.getServiceNotification());
-		
-		//3.保存本地订单
+		//2.保存本地订单
 		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
 		ServiceOrder serviceOrder = new ServiceOrder();
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
@@ -81,17 +75,51 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setXiaoquName(customerServiceOrderDTO.getSectName());
 		serviceOrder.setXiaoquId(Long.valueOf(customerServiceOrderDTO.getSectId()));
-		List<Region> regionList = regionRepository.findAllBySectId(currUser.getSectId());
-		if (regionList!=null && !regionList.isEmpty()) {
-			serviceOrder.setXiaoquId(regionList.get(0).getId());
-		}
-		serviceOrderRepository.save(serviceOrder);
+		serviceOrder = serviceOrderRepository.save(serviceOrder);
+		
+		//3.如果是非一口价的订单，需要分发抢单的信息给操作员,异步
+		ServiceNotification serviceNotification = data.getServiceNotification();
+		serviceNotification.setOrderId(String.valueOf(serviceOrder.getId()));
+		notifyService.sendServiceNotificationAsync(data.getServiceNotification());
 		
 		//单列字段，前端需要。这里就不单独弄一个VO了
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		return data;
 		
 	}
+	
+	/**
+	 * 非一口价支付
+	 */
+	@Override
+	public CreateOrderResponseVO orderPay(User user, String orderId, String amount) throws Exception {
+		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder == null) {
+			throw new BizValidateException("未查询到订单，orderId: " + orderId);
+		}
+		
+		//1.调用API创建接口
+		CustomerServiceOrderDTO dto = new CustomerServiceOrderDTO();
+		dto.setLinkman(serviceOrder.getReceiverName());
+		dto.setLinktel(serviceOrder.getTel());
+		dto.setSectId(String.valueOf(serviceOrder.getXiaoquId()));
+		dto.setServiceAddr(serviceOrder.getAddress());
+		dto.setServiceId(String.valueOf(serviceOrder.getProductId()));
+		dto.setTradeWaterId(serviceOrder.getOrderNo());
+		dto.setTranAmt(amount);
+		dto.setUser(user);
+		CreateOrderResponseVO data = customServiceUtil.createOrder(dto).getData();
+		
+		//单列字段，前端需要。这里就不单独弄一个VO了
+		data.setOrderId(String.valueOf(serviceOrder.getId()));
+		return data;
+		
+	}
+	
+	
 
 	/**
 	 * 确认订单
