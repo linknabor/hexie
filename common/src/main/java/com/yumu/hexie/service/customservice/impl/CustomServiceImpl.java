@@ -67,6 +67,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setProductPic(customerServiceOrderDTO.getImage());
 		serviceOrder.setOrderNo(data.getTradeWaterId());
 		serviceOrder.setAppid(currUser.getAppId());
+		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		List<Region> regionList = regionRepository.findAllBySectId(currUser.getSectId());
 		if (regionList!=null && !regionList.isEmpty()) {
 			serviceOrder.setXiaoquId(regionList.get(0).getId());

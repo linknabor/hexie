@@ -236,7 +236,8 @@ public class ServiceOrder  extends BaseModel {
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT,"已取消");    
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"确认完工");    
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");        
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_ACCEPTED  ,"已接单");    
 	}
 	
 	
