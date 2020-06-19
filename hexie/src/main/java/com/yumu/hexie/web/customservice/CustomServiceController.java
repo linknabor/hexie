@@ -220,6 +220,25 @@ public class CustomServiceController extends BaseController {
 		logger.info("orderPay orderId : " + orderId + ", amout : " + amount);
 		CreateOrderResponseVO vo = customService.orderPay(user, orderId, amount);
 		return BaseResult.successResult(vo);
-	} 
+	}
+	
+	/**
+	 * 服务评价
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/comment", method = RequestMethod.POST)
+	public BaseResult<String> comment(@ModelAttribute(Constants.USER) User user, 
+			@RequestParam String orderId, @RequestParam String comment) throws Exception {
+		
+		logger.info("orderPay, user : " + user);
+		logger.info("orderPay orderId : " + orderId + ", comment : " + comment);
+		customService.comment(user, orderId, comment);
+		return BaseResult.successResult(Constants.SUCCESS);
+	}
+	
 	
 }

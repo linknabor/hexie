@@ -31,4 +31,6 @@ public interface CustomService {
 	List<ServiceOrder> queryOrderByUser(User user);
 
 	CreateOrderResponseVO orderPay(User user, String orderId, String amount) throws Exception;
+	
+	void comment(User user, String orderId, String comment);
 }

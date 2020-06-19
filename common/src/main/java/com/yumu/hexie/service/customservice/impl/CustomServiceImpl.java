@@ -293,7 +293,7 @@ public class CustomServiceImpl implements CustomService {
 	@Transactional
 	public void notifyPayByServplat(String tradeWaterId) {
 		
-		if (org.springframework.util.StringUtils.isEmpty(tradeWaterId)) {
+		if (StringUtils.isEmpty(tradeWaterId)) {
 			return;
 		}
 		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
@@ -303,6 +303,25 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setPayDate(new Date());
 		serviceOrderRepository.save(serviceOrder);
 		
+	}
+
+	@Transactional
+	@Override
+	public void comment(User user, String orderId, String comment) {
+		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		Assert.hasText(comment, "平路内容不能为空。");
+		
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+		if (ModelConstant.ORDER_PINGJIA_TYPE_Y == serviceOrder.getStatus()) {
+			throw new BizValidateException("订单已评价，订单ID：" + orderId);
+		}
+		serviceOrder.setComment(comment);
+		serviceOrder.setPingjiaStatus(ModelConstant.ORDER_PINGJIA_TYPE_Y);
+		serviceOrderRepository.save(serviceOrder);
 	}
 
 }

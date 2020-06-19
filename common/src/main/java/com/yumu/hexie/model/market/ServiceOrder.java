@@ -121,6 +121,8 @@ public class ServiceOrder  extends BaseModel {
 	private Date cancelDate;
 	private Date closeDate;
 	private Date asyncDate;
+	
+	private String comment;
 
 
 	@JsonIgnore
@@ -755,6 +757,12 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setXiaoquName(String xiaoquName) {
 		this.xiaoquName = xiaoquName;
+	}
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 	@Transient
 	@JsonIgnore
