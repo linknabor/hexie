@@ -3,7 +3,7 @@ package com.yumu.hexie.integration.customservice.resp;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
+import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 
 public class CreateOrderResponseVO implements Serializable {
 	

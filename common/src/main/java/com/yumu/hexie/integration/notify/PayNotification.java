@@ -10,7 +10,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.user.User;
 
-public class PayNotifyDTO implements Serializable {
+public class PayNotification implements Serializable {
 
 	/**
 	 * 
