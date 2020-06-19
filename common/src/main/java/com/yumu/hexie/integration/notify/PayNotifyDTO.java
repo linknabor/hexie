@@ -22,6 +22,7 @@ public class PayNotifyDTO implements Serializable {
 	private String quickToken;
 	private String wuyeId;
 	private String couponId;
+	@JsonProperty("integral")
 	private String points;
 	private String bindSwitch = "1";
 	
