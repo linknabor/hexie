@@ -19,6 +19,8 @@ import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
@@ -36,13 +38,17 @@ public class CustomServiceImpl implements CustomService {
 	private CustomServiceUtil customServiceUtil;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
-		@Autowired
+	@Autowired
 	private NotifyService notifyService;
+	@Autowired
+	private RegionRepository regionRepository;
 	
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
-		return customServiceUtil.getCustomService(user).getData();
+		
+		User currUser = userRepository.findOne(user.getId());
+		return customServiceUtil.getCustomService(currUser).getData();
 	}
 
 	/**
@@ -75,14 +81,20 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setAppid(currUser.getAppId());
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setXiaoquName(customerServiceOrderDTO.getSectName());
-		serviceOrder.setXiaoquId(Long.valueOf(customerServiceOrderDTO.getSectId()));
+		String xiaoquId = customerServiceOrderDTO.getSectId();
+		List<Region> regionList = regionRepository.findAllBySectId(xiaoquId);
+		if (regionList != null && !regionList.isEmpty()) {
+			Region region = regionList.get(0);
+			serviceOrder.setXiaoquId(region.getId());
+		}
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
 		
 		//3.如果是非一口价的订单，需要分发抢单的信息给操作员,异步
 		ServiceNotification serviceNotification = data.getServiceNotification();
-		serviceNotification.setOrderId(String.valueOf(serviceOrder.getId()));
-		notifyService.sendServiceNotificationAsync(data.getServiceNotification());
-		
+		if (serviceNotification != null) {
+			serviceNotification.setOrderId(String.valueOf(serviceOrder.getId()));
+			notifyService.sendServiceNotificationAsync(data.getServiceNotification());
+		}
 		//单列字段，前端需要。这里就不单独弄一个VO了
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		return data;
@@ -106,7 +118,11 @@ public class CustomServiceImpl implements CustomService {
 		CustomerServiceOrderDTO dto = new CustomerServiceOrderDTO();
 		dto.setLinkman(serviceOrder.getReceiverName());
 		dto.setLinktel(serviceOrder.getTel());
-		dto.setSectId(String.valueOf(serviceOrder.getXiaoquId()));
+		Region region = regionRepository.findOne(serviceOrder.getXiaoquId());
+		if (region == null) {
+			throw new BizValidateException("为查询到小区, region id : " + serviceOrder.getXiaoquId());
+		}
+		dto.setSectId(String.valueOf(region.getSectId()));
 		dto.setServiceAddr(serviceOrder.getAddress());
 		dto.setServiceId(String.valueOf(serviceOrder.getProductId()));
 		dto.setTradeWaterId(serviceOrder.getOrderNo());
