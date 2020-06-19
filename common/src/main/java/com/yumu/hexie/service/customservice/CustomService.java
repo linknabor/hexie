@@ -3,6 +3,7 @@ package com.yumu.hexie.service.customservice;
 import java.util.List;
 
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -32,5 +33,5 @@ public interface CustomService {
 
 	CreateOrderResponseVO orderPay(User user, String orderId, String amount) throws Exception;
 	
-	void comment(User user, String orderId, String comment);
+	void comment(ServiceCommentDTO serviceCommentDTO);
 }

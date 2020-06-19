@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -23,6 +24,7 @@ import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.customservice.vo.CustomServiceOrderVO;
+import com.yumu.hexie.web.customservice.vo.ServiceCommentVO;
 /**
  * 自定义服务
  * @author david
@@ -232,11 +234,16 @@ public class CustomServiceController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/comment", method = RequestMethod.POST)
 	public BaseResult<String> comment(@ModelAttribute(Constants.USER) User user, 
-			@RequestParam String orderId, @RequestParam String comment) throws Exception {
+			@RequestBody ServiceCommentVO serviceCommentVO) throws Exception {
 		
-		logger.info("orderPay, user : " + user);
-		logger.info("orderPay orderId : " + orderId + ", comment : " + comment);
-		customService.comment(user, orderId, comment);
+		logger.info("comment, user : " + user);
+		logger.info("comment serviceCommentVO : " + serviceCommentVO);
+		
+		ServiceCommentDTO dto = new ServiceCommentDTO();
+		BeanUtils.copyProperties(serviceCommentVO, dto);
+		dto.setUser(user);
+		
+		customService.comment(dto);
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	

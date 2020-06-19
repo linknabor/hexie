@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
@@ -305,22 +306,30 @@ public class CustomServiceImpl implements CustomService {
 		
 	}
 
+	/**
+	 * 服务订单评论
+	 */
 	@Transactional
 	@Override
-	public void comment(User user, String orderId, String comment) {
+	public void comment(ServiceCommentDTO serviceCommentDTO) {
 		
-		Assert.hasText(orderId, "订单ID不能为空。");
-		Assert.hasText(comment, "平路内容不能为空。");
+		Assert.hasText(serviceCommentDTO.getOrderId(), "订单ID不能为空。");
+		Assert.hasText(serviceCommentDTO.getComment(), "平路内容不能为空。");
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(serviceCommentDTO.getOrderId()));
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
-			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+			throw new BizValidateException("未查询到订单, orderId : " + serviceCommentDTO.getOrderId());
 		}
 		if (ModelConstant.ORDER_PINGJIA_TYPE_Y == serviceOrder.getStatus()) {
-			throw new BizValidateException("订单已评价，订单ID：" + orderId);
+			throw new BizValidateException("订单已评价，订单ID：" + serviceCommentDTO.getOrderId());
 		}
-		serviceOrder.setComment(comment);
+		serviceOrder.setComment(serviceCommentDTO.getComment());
+		serviceOrder.setCommentAttitude(serviceCommentDTO.getCommentAttitude());
+		serviceOrder.setCommentQuality(serviceCommentDTO.getCommentQuality());
+		serviceOrder.setCommentService(serviceCommentDTO.getCommentService());
+		serviceOrder.setCommentImgUrls(serviceCommentDTO.getCommentImgUrls());
 		serviceOrder.setPingjiaStatus(ModelConstant.ORDER_PINGJIA_TYPE_Y);
+		serviceOrder.setCommentDate(new Date());
 		serviceOrderRepository.save(serviceOrder);
 	}
 

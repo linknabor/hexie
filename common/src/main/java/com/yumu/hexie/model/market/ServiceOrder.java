@@ -123,6 +123,11 @@ public class ServiceOrder  extends BaseModel {
 	private Date asyncDate;
 	
 	private String comment;
+	private int commentQuality;
+    private int commentAttitude;
+    private int commentService;
+    private String commentImgUrls;
+    private Date commentDate;
 
 
 	@JsonIgnore
@@ -763,6 +768,36 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	public int getCommentQuality() {
+		return commentQuality;
+	}
+	public void setCommentQuality(int commentQuality) {
+		this.commentQuality = commentQuality;
+	}
+	public int getCommentAttitude() {
+		return commentAttitude;
+	}
+	public void setCommentAttitude(int commentAttitude) {
+		this.commentAttitude = commentAttitude;
+	}
+	public int getCommentService() {
+		return commentService;
+	}
+	public void setCommentService(int commentService) {
+		this.commentService = commentService;
+	}
+	public String getCommentImgUrls() {
+		return commentImgUrls;
+	}
+	public void setCommentImgUrls(String commentImgUrls) {
+		this.commentImgUrls = commentImgUrls;
+	}
+	public Date getCommentDate() {
+		return commentDate;
+	}
+	public void setCommentDate(Date commentDate) {
+		this.commentDate = commentDate;
 	}
 	@Transient
 	@JsonIgnore
