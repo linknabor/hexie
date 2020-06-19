@@ -88,10 +88,24 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setOrderNo(data.getTradeWaterId());
 		serviceOrder.setAppid(currUser.getAppId());
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
-		serviceOrder.setXiaoquName(customerServiceOrderDTO.getSectName());
 		String xiaoquId = customerServiceOrderDTO.getSectId();
+		String xiaoquName = customerServiceOrderDTO.getSectName();
 		logger.info("createOrder, xiaoquId : " + xiaoquId);
-		serviceOrder.setXiaoquId(Long.valueOf(xiaoquId));
+		if (StringUtils.isEmpty(xiaoquId)) {
+			String sectId = currUser.getSectId();
+			List<Region> regionList = regionRepository.findAllBySectId(sectId);
+			if (regionList!=null && !regionList.isEmpty()) {
+				Region region = regionList.get(0);
+				xiaoquId = String.valueOf(region.getId());
+				xiaoquName = region.getName();
+			}else {
+				logger.warn("cannot find region, region sect id : " + sectId);
+			}
+		}
+		if (!StringUtils.isEmpty(xiaoquId)) {
+			serviceOrder.setXiaoquId(Long.valueOf(xiaoquId));
+			serviceOrder.setXiaoquName(xiaoquName);
+		}
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
 		
 		//3.如果是非一口价的订单，需要分发抢单的信息给操作员,异步
