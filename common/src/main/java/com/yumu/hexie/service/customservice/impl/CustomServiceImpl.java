@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,8 @@ import com.yumu.hexie.service.notify.NotifyService;
 
 @Service
 public class CustomServiceImpl implements CustomService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(CustomServiceImpl.class);
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -85,11 +89,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setXiaoquName(customerServiceOrderDTO.getSectName());
 		String xiaoquId = customerServiceOrderDTO.getSectId();
-		List<Region> regionList = regionRepository.findAllBySectId(xiaoquId);
-		if (regionList != null && !regionList.isEmpty()) {
-			Region region = regionList.get(0);
-			serviceOrder.setXiaoquId(region.getId());
-		}
+		logger.info("createOrder, xiaoquId : " + xiaoquId);
+		serviceOrder.setXiaoquId(Long.valueOf(xiaoquId));
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
 		
 		//3.如果是非一口价的订单，需要分发抢单的信息给操作员,异步

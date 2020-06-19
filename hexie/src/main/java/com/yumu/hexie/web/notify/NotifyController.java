@@ -43,19 +43,7 @@ public class NotifyController extends BaseController {
 	 */
 	@RequestMapping(value = "/servplat/noticeCardPay", method = {RequestMethod.GET, RequestMethod.POST})
 	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId,
-			@RequestParam(required = false) String cardNo,
-			@RequestParam(required = false) String quickToken,
-			@RequestParam(required = false) String wuyeId,
-			@RequestParam(required = false) String couponId,
-			@RequestParam(required = false, name = "integral") String points,
 			@RequestBody PayNotifyDTO payNotifyDTO) throws Exception {
-		
-		payNotifyDTO.setCardNo(cardNo);
-		payNotifyDTO.setCouponId(couponId);
-		payNotifyDTO.setPoints(points);
-		payNotifyDTO.setQuickToken(quickToken);
-		payNotifyDTO.setOrderId(tradeWaterId);
-		payNotifyDTO.setWuyeId(wuyeId);
 		
 		log.info("payNotifyDto :" + payNotifyDTO);
 		notifyService.notify(payNotifyDTO);
