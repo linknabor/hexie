@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.hexiemessage;
 
-import com.yumu.hexie.integration.notify.PayNotifyDTO;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 
 public interface HexieMessageService {

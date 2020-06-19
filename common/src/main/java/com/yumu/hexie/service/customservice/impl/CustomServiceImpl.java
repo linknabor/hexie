@@ -8,7 +8,11 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -22,7 +26,7 @@ import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
+import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
@@ -215,6 +219,24 @@ public class CustomServiceImpl implements CustomService {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		String key = ModelConstant.KEY_ORDER_ACCEPTED + orderId;
+		
+//		SessionCallback<List> sessionCallback = new SessionCallback<List>() {
+//            @Override
+//            public List execute(RedisOperations operations) throws DataAccessException {
+//                operations.multi();
+//                operations.delete(standardKey);
+//                ListOperations<String, Object> opsForList = redisTemplate.opsForList();
+//                valueList.stream().forEach(value -> {
+//                    opsForList.rightPush(standardKey, value);
+//                });
+//                operations.expire(standardKey,SECONDS_OF_ONE_DAY, TimeUnit.MINUTES);
+//                return operations.exec();
+//            }
+//        };
+// 
+		
+		
+		
 		boolean exists = redisTemplate.opsForValue().setIfAbsent(key, 0);
 		if (!exists) {
 			throw new BizValidateException("出手慢了，订单["+orderId+"]已被抢。");

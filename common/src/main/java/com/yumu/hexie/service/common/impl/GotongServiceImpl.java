@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ConfigUtil;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotification;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
+import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;

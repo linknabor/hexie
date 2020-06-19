@@ -12,9 +12,9 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.notify.PayNotifyDTO;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotification;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
+import com.yumu.hexie.integration.notify.PayNotification;
+import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCardRepository;
@@ -60,13 +60,13 @@ public class NotifyServiceImpl implements NotifyService {
 	 */
 	@Transactional
 	@Override
-	public void notify(PayNotifyDTO payNotifyDTO) {
+	public void notify(PayNotification payNotification) {
 		
 		//1.更新红包状态
 		User user = null;
 		Coupon coupon = null;
-		if (!StringUtils.isEmpty(payNotifyDTO.getCouponId())) {
-			coupon = couponService.findOne(Long.valueOf(payNotifyDTO.getCouponId()));
+		if (!StringUtils.isEmpty(payNotification.getCouponId())) {
+			coupon = couponService.findOne(Long.valueOf(payNotification.getCouponId()));
 			if (coupon != null) {
 				try {
 					couponService.comsume("999999", coupon.getId());
@@ -82,9 +82,9 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 		}
 		if (user == null) {
-			List<User> userList = userRepository.findByWuyeId(payNotifyDTO.getWuyeId());
+			List<User> userList = userRepository.findByWuyeId(payNotification.getWuyeId());
 			if (userList == null || userList.isEmpty()) {
-				log.info("can not find user, wuyeId : " + payNotifyDTO.getWuyeId() + ", tradeWaterId : " + payNotifyDTO.getOrderId());
+				log.info("can not find user, wuyeId : " + payNotification.getWuyeId() + ", tradeWaterId : " + payNotification.getOrderId());
 			}else {
 				user = userList.get(0);
 			}
@@ -93,34 +93,34 @@ public class NotifyServiceImpl implements NotifyService {
 		if (user != null) {
 			//2.添加芝麻积分
 			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
-				String pointKey = "wuyePay-" + payNotifyDTO.getOrderId();
-				pointService.addPointAsync(user, payNotifyDTO.getPoints(), pointKey);
+				String pointKey = "wuyePay-" + payNotification.getOrderId();
+				pointService.addPointAsync(user, payNotification.getPoints(), pointKey);
 			}else {
-				String pointKey = "zhima-bill-" + user.getId() + "-" + payNotifyDTO.getOrderId();
+				String pointKey = "zhima-bill-" + user.getId() + "-" + payNotification.getOrderId();
 				pointService.updatePoint(user, "10", pointKey);
 			}
 			//3.如果是绑卡支付，记录用户的quicktoken
-			if (!StringUtils.isEmpty(payNotifyDTO.getCardNo()) && !StringUtils.isEmpty(payNotifyDTO.getQuickToken())) {
-				bankCardRepository.updateBankCardByAcctNoAndUserId(payNotifyDTO.getQuickToken(), payNotifyDTO.getQuickToken(), user.getId());
+			if (!StringUtils.isEmpty(payNotification.getCardNo()) && !StringUtils.isEmpty(payNotification.getQuickToken())) {
+				bankCardRepository.updateBankCardByAcctNoAndUserId(payNotification.getQuickToken(), payNotification.getQuickToken(), user.getId());
 			}
 			//4.绑定所缴纳物业费的房屋
-			wuyeService.bindHouseByTradeAsync(payNotifyDTO.getBindSwitch(), user, payNotifyDTO.getOrderId());
+			wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId());
 		}
 		
 		//5.通知物业相关人员，收费到账
-		AccountNotification accountNotify = payNotifyDTO.getAccountNotify();
-		accountNotify.setOrderId(payNotifyDTO.getOrderId());
+		AccountNotification accountNotify = payNotification.getAccountNotify();
+		accountNotify.setOrderId(payNotification.getOrderId());
 		sendPayNotificationAsync(accountNotify);
 		
 		//6.自定义服务
-		ServiceNotification serviceNotification = payNotifyDTO.getServiceNotify();
+		ServiceNotification serviceNotification = payNotification.getServiceNotify();
 		if (serviceNotification!=null) {
-			serviceNotification.setOrderId(payNotifyDTO.getOrderId());
+			serviceNotification.setOrderId(payNotification.getOrderId());
 			sendServiceNotificationAsync(serviceNotification);
 		}
 		
 		//7.更新自定义服务订单状态
-		customService.notifyPayByServplat(payNotifyDTO.getOrderId());
+		customService.notifyPayByServplat(payNotification.getOrderId());
 		
 	}
 	

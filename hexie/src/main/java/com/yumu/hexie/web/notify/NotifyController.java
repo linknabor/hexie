@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.yumu.hexie.integration.notify.PayNotifyDTO;
+import com.yumu.hexie.integration.notify.PayNotification;
+import com.yumu.hexie.integration.notify.PayNotificationResponse;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.web.BaseController;
 
@@ -43,10 +44,14 @@ public class NotifyController extends BaseController {
 	 */
 	@RequestMapping(value = "/servplat/noticeCardPay", method = {RequestMethod.GET, RequestMethod.POST})
 	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId,
-			@RequestBody PayNotifyDTO payNotifyDTO) throws Exception {
+			@RequestBody PayNotificationResponse<PayNotification> payNotificationResponse) throws Exception {
 		
-		log.info("payNotifyDto :" + payNotifyDTO);
-		notifyService.notify(payNotifyDTO);
+		log.info("payNotificationResponse :" + payNotificationResponse);
+		if ("00".equals(payNotificationResponse.getResult())) {
+			notifyService.notify(payNotificationResponse.getData());
+		}else {
+			log.error("result : " + payNotificationResponse.getResult() + ", data : " + payNotificationResponse.getData());
+		}
 		return "SUCCESS";
 	}
 }

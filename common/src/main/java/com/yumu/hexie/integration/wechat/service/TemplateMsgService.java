@@ -14,7 +14,7 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotification;
+import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;

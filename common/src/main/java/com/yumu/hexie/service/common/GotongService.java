@@ -4,8 +4,8 @@
  */
 package com.yumu.hexie.service.common;
 
-import com.yumu.hexie.integration.notify.PayNotifyDTO.AccountNotification;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
+import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
