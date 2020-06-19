@@ -21,6 +21,7 @@ import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -63,7 +64,7 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Transactional
 	@Override
-	public CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
+	public ServiceOrderPrepayVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
 		
 		//1.调用API创建接口
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
@@ -100,8 +101,9 @@ public class CustomServiceImpl implements CustomService {
 			notifyService.sendServiceNotificationAsync(data.getServiceNotification());
 		}
 		//单列字段，前端需要。这里就不单独弄一个VO了
-		data.setOrderId(String.valueOf(serviceOrder.getId()));
-		return data;
+		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
+		vo.setOrderId(String.valueOf(serviceOrder.getId()));
+		return vo;
 		
 	}
 	
@@ -109,7 +111,7 @@ public class CustomServiceImpl implements CustomService {
 	 * 非一口价支付
 	 */
 	@Override
-	public CreateOrderResponseVO orderPay(User user, String orderId, String amount) throws Exception {
+	public ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		
@@ -133,13 +135,11 @@ public class CustomServiceImpl implements CustomService {
 		dto.setTranAmt(amount);
 		dto.setUser(user);
 		CreateOrderResponseVO data = customServiceUtil.createOrder(dto).getData();
-		
-		//单列字段，前端需要。这里就不单独弄一个VO了
-		data.setOrderId(String.valueOf(serviceOrder.getId()));
-		return data;
+		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
+		vo.setOrderId(orderId);
+		return vo;
 		
 	}
-	
 	
 
 	/**

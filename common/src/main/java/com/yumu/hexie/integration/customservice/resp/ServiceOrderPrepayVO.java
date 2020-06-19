@@ -2,31 +2,36 @@ package com.yumu.hexie.integration.customservice.resp;
 
 import java.io.Serializable;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yumu.hexie.integration.notify.PayNotifyDTO.ServiceNotification;
+import org.springframework.beans.BeanUtils;
 
-public class CreateOrderResponseVO implements Serializable {
-	
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class ServiceOrderPrepayVO implements Serializable {
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2249103405156659481L;
-	
+	private static final long serialVersionUID = -3491495123484805322L;
+
 	@JsonProperty("package")
 	private String pack;
 	@JsonProperty("token_id")
 	private String token;
-	@JsonProperty("trade_water_id")
-	private String tradeWaterId;
 	private String appid;
 	private String signtype;
 	private String paysign;
 	private String noncestr;
 	private String timestamp;
-	@JsonProperty("user_pay_type")
-	private String payType;
-	@JsonProperty("receivOrder")
-	private ServiceNotification serviceNotification;	//服务通知
+	private String orderId;
+	
+	public ServiceOrderPrepayVO() {
+	
+	}
+	
+	public ServiceOrderPrepayVO(CreateOrderResponseVO createOrderResponseVO) {
+		
+		BeanUtils.copyProperties(createOrderResponseVO, this);
+	}
 	
 	public String getPack() {
 		return pack;
@@ -70,31 +75,18 @@ public class CreateOrderResponseVO implements Serializable {
 	public void setTimestamp(String timestamp) {
 		this.timestamp = timestamp;
 	}
-	public String getPayType() {
-		return payType;
+	public String getOrderId() {
+		return orderId;
 	}
-	public void setPayType(String payType) {
-		this.payType = payType;
-	}
-	public String getTradeWaterId() {
-		return tradeWaterId;
-	}
-	public void setTradeWaterId(String tradeWaterId) {
-		this.tradeWaterId = tradeWaterId;
-	}
-	public ServiceNotification getServiceNotification() {
-		return serviceNotification;
-	}
-	public void setServiceNotification(ServiceNotification serviceNotification) {
-		this.serviceNotification = serviceNotification;
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 	@Override
 	public String toString() {
-		return "CreateOrderResponseVO [pack=" + pack + ", token=" + token + ", tradeWaterId=" + tradeWaterId
-				+ ", appid=" + appid + ", signtype=" + signtype + ", paysign=" + paysign + ", noncestr=" + noncestr
-				+ ", timestamp=" + timestamp + ", payType=" + payType + ", serviceNotification=" + serviceNotification
-				+ "]";
+		return "ServiceOrderPrepayVO [pack=" + pack + ", token=" + token + ", appid=" + appid + ", signtype=" + signtype
+				+ ", paysign=" + paysign + ", noncestr=" + noncestr + ", timestamp=" + timestamp + ", orderId="
+				+ orderId + "]";
 	}
 	
-
+	
 }

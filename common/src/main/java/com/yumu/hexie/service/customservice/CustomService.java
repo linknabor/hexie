@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
-import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 
@@ -13,7 +13,7 @@ public interface CustomService {
 	
 	List<CustomServiceVO> getService(User user) throws Exception;
 
-	CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception;
+	ServiceOrderPrepayVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception;
 	
 	void confirmOrder(User user, String orderId, String operType) throws Exception;
 	
@@ -31,7 +31,7 @@ public interface CustomService {
 
 	List<ServiceOrder> queryOrderByUser(User user);
 
-	CreateOrderResponseVO orderPay(User user, String orderId, String amount) throws Exception;
+	ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception;
 	
 	void comment(ServiceCommentDTO serviceCommentDTO);
 }

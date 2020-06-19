@@ -18,6 +18,7 @@ import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.customservice.CustomService;
@@ -65,7 +66,7 @@ public class CustomServiceController extends BaseController {
 		dto.setUser(user);
 		logger.info("customerServiceOrderDTO : " + dto);
 		
-		CreateOrderResponseVO vo = customService.createOrder(dto);
+		ServiceOrderPrepayVO vo = customService.createOrder(dto);
 		return BaseResult.successResult(vo);
 	}
 	
@@ -220,7 +221,7 @@ public class CustomServiceController extends BaseController {
 		
 		logger.info("orderPay, user : " + user);
 		logger.info("orderPay orderId : " + orderId + ", amout : " + amount);
-		CreateOrderResponseVO vo = customService.orderPay(user, orderId, amount);
+		ServiceOrderPrepayVO vo = customService.orderPay(user, orderId, amount);
 		return BaseResult.successResult(vo);
 	}
 	
