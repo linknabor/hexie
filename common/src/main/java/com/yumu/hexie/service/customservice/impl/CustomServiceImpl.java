@@ -124,7 +124,7 @@ public class CustomServiceImpl implements CustomService {
 		dto.setLinktel(serviceOrder.getTel());
 		Region region = regionRepository.findOne(serviceOrder.getXiaoquId());
 		if (region == null) {
-			throw new BizValidateException("为查询到小区, region id : " + serviceOrder.getXiaoquId());
+			throw new BizValidateException("未查询到小区, region id : " + serviceOrder.getXiaoquId());
 		}
 		dto.setSectId(String.valueOf(region.getSectId()));
 		dto.setServiceAddr(serviceOrder.getAddress());

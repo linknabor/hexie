@@ -17,6 +17,7 @@ public class PayNotifyDTO implements Serializable {
 	 */
 	private static final long serialVersionUID = 2053345074969873725L;
 	
+	@JsonProperty("tradeWaterId")
 	private String orderId;
 	private String cardNo;
 	private String quickToken;
@@ -24,6 +25,7 @@ public class PayNotifyDTO implements Serializable {
 	private String couponId;
 	@JsonProperty("integral")
 	private String points;
+	private String tranType;
 	private String bindSwitch = "1";
 	
 	@JsonProperty("account_notify")
@@ -178,6 +180,14 @@ public class PayNotifyDTO implements Serializable {
 
 	}
 	
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
 	public String getCardNo() {
 		return cardNo;
 	}
@@ -217,7 +227,15 @@ public class PayNotifyDTO implements Serializable {
 	public void setPoints(String points) {
 		this.points = points;
 	}
-	
+
+	public String getTranType() {
+		return tranType;
+	}
+
+	public void setTranType(String tranType) {
+		this.tranType = tranType;
+	}
+
 	public String getBindSwitch() {
 		return bindSwitch;
 	}
@@ -226,12 +244,20 @@ public class PayNotifyDTO implements Serializable {
 		this.bindSwitch = bindSwitch;
 	}
 
-	public String getOrderId() {
-		return orderId;
+	public AccountNotification getAccountNotification() {
+		return accountNotification;
 	}
 
-	public void setOrderId(String orderId) {
-		this.orderId = orderId;
+	public void setAccountNotification(AccountNotification accountNotification) {
+		this.accountNotification = accountNotification;
+	}
+
+	public ServiceNotification getServiceNotification() {
+		return serviceNotification;
+	}
+
+	public void setServiceNotification(ServiceNotification serviceNotification) {
+		this.serviceNotification = serviceNotification;
 	}
 
 	@Override
