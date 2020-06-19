@@ -1,6 +1,5 @@
 package com.yumu.hexie.model.market;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -395,11 +394,6 @@ public class ServiceOrder  extends BaseModel {
 	}
 
 	public float getPrice() {
-		BigDecimal b = new BigDecimal(price);  
-		price = b.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
-		if(price < 0.01f) {
-            price = 0.01f;
-        }
 		return price;
 	}
 
