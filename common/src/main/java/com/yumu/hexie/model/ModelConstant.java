@@ -357,4 +357,6 @@ public class ModelConstant {
 	
 	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";
 	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";
+	
+	public static final String KEY_ORDER_ACCEPTED = "lock:serviceOrder:";
 }		

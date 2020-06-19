@@ -3,8 +3,10 @@ package com.yumu.hexie.service.customservice.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -42,7 +44,8 @@ public class CustomServiceImpl implements CustomService {
 	private NotifyService notifyService;
 	@Autowired
 	private RegionRepository regionRepository;
-	
+	@Autowired
+	private RedisTemplate<String, Integer> redisTemplate;
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -195,11 +198,21 @@ public class CustomServiceImpl implements CustomService {
 	@Transactional
 	public void acceptOrder(User user, String orderId) throws Exception {
 		
-		//TODO redis抢单
 		Assert.hasText(orderId, "订单ID不能为空。");
+		String key = ModelConstant.KEY_ORDER_ACCEPTED + orderId;
+		boolean exists = redisTemplate.opsForValue().setIfAbsent(key, 0);
+		if (!exists) {
+			throw new BizValidateException("出手慢了，订单["+orderId+"]已被抢。");
+		}else {
+			redisTemplate.expire(key, 1, TimeUnit.HOURS);
+		}
+		
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+		if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+			throw new BizValidateException("订单["+orderId+"]已被抢。");
 		}
 		
 		Date date = new Date();
