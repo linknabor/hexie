@@ -84,6 +84,11 @@ public class PointServiceImpl implements PointService {
 	@Transactional
 	public void updatePoint(User user, String point, String key) {
 		
+		if (StringUtils.isEmpty(point)) {
+			logger.info("key : " + key + ", point is null, will return .");
+			return;
+		}
+		
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			updatePoint(user, point, key, true);
 		}else {
