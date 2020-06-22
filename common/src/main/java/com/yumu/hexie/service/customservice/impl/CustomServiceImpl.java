@@ -19,6 +19,8 @@ import org.springframework.util.StringUtils;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
@@ -28,6 +30,9 @@ import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.localservice.HomeServiceConstant;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
@@ -53,6 +58,8 @@ public class CustomServiceImpl implements CustomService {
 	private RegionRepository regionRepository;
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private ServiceOperatorRepository serviceOperatorRepository;
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -378,6 +385,67 @@ public class CustomServiceImpl implements CustomService {
 	}
 	
 	/**
+	 * 取消支付
+	 * @param user
+	 * @param orderId
+	 * @throws Exception 
+	 */
+	@Override
+	public void cancelPay(User user, String orderId) throws Exception {
+		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+		customServiceUtil.cancelPay(user, serviceOrder.getOrderNo());
+		
+	}
+	
+	/**
+	 * 获取服务人员
+	 * @param user
+	 * @param orderId
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public void operator(OperatorDTO operatorDTO) {
+		
+		List<Operator> operList = operatorDTO.getOperatorList();
+		if (operList!=null && !operList.isEmpty()) {
+			ServiceOperator serviceOperator = new ServiceOperator();
+			serviceOperator.setType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
+			serviceOperatorRepository.delete(serviceOperator);
+		}
+		
+		for (Operator operator : operList) {
+			
+			if (StringUtils.isEmpty(operator.getTel()) || StringUtils.isEmpty(operator.getOpenid())) {
+				logger.warn("operator tel or openid is null, oper : " + operator);
+				continue;
+			}
+			List<User> userList = userRepository.findByTelAndOpenid(operator.getTel(), operator.getOpenid());
+			User user = null;
+			if (userList!=null && !userList.isEmpty()) {
+				user = userList.get(0);
+			}
+			if (user == null) {
+				logger.warn("user not exists, openid : " + operator.getOpenid());
+			}
+			ServiceOperator serviceOperator = new ServiceOperator();
+			serviceOperator.setName(user.getName());
+			serviceOperator.setOpenId(operator.getOpenid());
+			serviceOperator.setTel(operator.getTel());
+			serviceOperator.setType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
+			serviceOperator.setUserId(user.getId());
+			serviceOperatorRepository.save(serviceOperator);
+		}
+		
+	}
+	
+	/**
 	 * 获取订单锁
 	 * @param key
 	 */
@@ -412,5 +480,6 @@ public class CustomServiceImpl implements CustomService {
         logger.info("result : " + result);
         return false;
     }
+    
 
 }

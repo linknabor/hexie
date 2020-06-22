@@ -113,7 +113,9 @@ public class UserController extends BaseController{
 			log.info("user in db :" + user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
-			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
+			    boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
+			    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
+			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
@@ -177,8 +179,11 @@ public class UserController extends BaseController{
 		user = userService.saveProfile(user.getId(), nickName, sex);
 		if(user != null){
 			session.setAttribute(Constants.USER, user);
-	        return new BaseResult<UserInfo>().success(new UserInfo(user,
-	            operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId())));
+			
+			boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
+		    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
+		    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+	        return new BaseResult<UserInfo>().success(userInfo);
 		} else {
             return new BaseResult<UserInfo>().failMsg("用户不存在！");
         }
@@ -226,8 +231,11 @@ public class UserController extends BaseController{
 		}
 		long endTime = System.currentTimeMillis();
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
-		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
-		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+		
+		boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId());
+	    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,userAccount.getId());
+	    UserInfo userInfo = new UserInfo(userAccount,isRepariOper, isServiceOper);
+		return new BaseResult<UserInfo>().success(userInfo);
 
     }
 	

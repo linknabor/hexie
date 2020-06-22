@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
@@ -248,5 +249,37 @@ public class CustomServiceController extends BaseController {
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	
+	/**
+	 * 取消唤起支付
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/cancelPay", method = RequestMethod.POST)
+	public BaseResult<String> comment(@ModelAttribute(Constants.USER) User user, 
+			String orderId) throws Exception {
+		
+		logger.info("cancelPay, user : " + user);
+		logger.info("cancelPay orderId : " + orderId);
+		
+		customService.cancelPay(user, orderId);
+		return BaseResult.successResult(Constants.SUCCESS);
+	}
+	
+	/**
+	 * 更新服务人员列表（全量）
+	 * @param operatorDTO
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/operator", method = RequestMethod.POST)
+	public BaseResult<String> operator(@RequestBody OperatorDTO operatorDTO){
+		
+		logger.info("operatorDTO : " + operatorDTO);
+		customService.operator(operatorDTO);
+		return BaseResult.successResult(Constants.SUCCESS);
+	}
 	
 }

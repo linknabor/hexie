@@ -10,9 +10,10 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
-import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.req.CreateOrderRequest;
 import com.yumu.hexie.integration.customservice.req.GetServiceRequest;
+import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
+import com.yumu.hexie.integration.customservice.req.ServiceOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -31,6 +32,7 @@ public class CustomServiceUtil {
 	private static final String GET_SERVICE_URL = "getCustomServiceSDO.do"; //获取自定义服务
 	private static final String CREATE_ORDER_URL = "createCustomServiceSDO.do"; //订单创建
 	private static final String CONFIRM_ORDER_URL = "setCustomReceiverSDO.do"; //确认订单
+	private static final String CANCEL_PAY_URL = "cancelCustomOrderSDO.do"; //支付取消
 	
 	public BaseResult<List<CustomServiceVO>> getCustomService(User user) throws Exception {
 		
@@ -81,6 +83,24 @@ public class CustomServiceUtil {
 		requestUrl += CONFIRM_ORDER_URL;
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		restUtil.exchange(requestUrl, operOrderRequest, typeReference);
+		
+	}
+	
+	/**
+	 * 支付订单取消
+	 * @param dto
+	 * @return
+	 * @throws Exception
+	 */
+	public void cancelPay(User user, String tradeWaterId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += CANCEL_PAY_URL;
+		
+		ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
+		serviceOrderRequest.setTradeWaterId(tradeWaterId);
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		restUtil.exchange(requestUrl, serviceOrderRequest, typeReference);
 		
 	}
 	
