@@ -1,18 +1,16 @@
 package com.yumu.hexie.service.customservice.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SessionCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -54,7 +52,7 @@ public class CustomServiceImpl implements CustomService {
 	@Autowired
 	private RegionRepository regionRepository;
 	@Autowired
-	private RedisTemplate<String, Integer> redisTemplate;
+	private StringRedisTemplate stringRedisTemplate;
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -216,34 +214,14 @@ public class CustomServiceImpl implements CustomService {
 	@Override
 	@Transactional
 	public void acceptOrder(User user, String orderId) throws Exception {
-		
-		Assert.hasText(orderId, "订单ID不能为空。");
+
 		String key = ModelConstant.KEY_ORDER_ACCEPTED + orderId;
-		
-//		SessionCallback<List> sessionCallback = new SessionCallback<List>() {
-//            @Override
-//            public List execute(RedisOperations operations) throws DataAccessException {
-//                operations.multi();
-//                operations.delete(standardKey);
-//                ListOperations<String, Object> opsForList = redisTemplate.opsForList();
-//                valueList.stream().forEach(value -> {
-//                    opsForList.rightPush(standardKey, value);
-//                });
-//                operations.expire(standardKey,SECONDS_OF_ONE_DAY, TimeUnit.MINUTES);
-//                return operations.exec();
-//            }
-//        };
-// 
-		
-		
-		
-		boolean exists = redisTemplate.opsForValue().setIfAbsent(key, 0);
+
+		Assert.hasText(orderId, "订单ID不能为空。");
+		boolean exists = stringRedisTemplate.opsForValue().setIfAbsent(key, orderId);
 		if (!exists) {
 			throw new BizValidateException("出手慢了，订单["+orderId+"]已被抢。");
-		}else {
-			redisTemplate.expire(key, 1, TimeUnit.HOURS);
 		}
-		
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
@@ -251,13 +229,12 @@ public class CustomServiceImpl implements CustomService {
 		if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
 			throw new BizValidateException("订单["+orderId+"]已被抢。");
 		}
-		
 		Date date = new Date();
 		OperOrderRequest operOrderRequest = new OperOrderRequest();
 		operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
 		operOrderRequest.setOpenid(user.getOpenid());
 		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
-		operOrderRequest.setOperType("0");
+		operOrderRequest.setOperType("0");	//0接单，1确认，9取消
 		customServiceUtil.operatorOrder(user, operOrderRequest);
 		
 		serviceOrder.setOperatorName(user.getName());
@@ -267,7 +244,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setAcceptedDate(date);
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_ACCEPTED);
 		serviceOrderRepository.save(serviceOrder);
-		
+	
+		 
 	}
 
 	/**
@@ -386,7 +364,7 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + serviceCommentDTO.getOrderId());
 		}
-		if (ModelConstant.ORDER_PINGJIA_TYPE_Y == serviceOrder.getStatus()) {
+		if (ModelConstant.ORDER_PINGJIA_TYPE_Y == serviceOrder.getPingjiaStatus()) {
 			throw new BizValidateException("订单已评价，订单ID：" + serviceCommentDTO.getOrderId());
 		}
 		serviceOrder.setComment(serviceCommentDTO.getComment());
@@ -398,5 +376,41 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setCommentDate(new Date());
 		serviceOrderRepository.save(serviceOrder);
 	}
+	
+	/**
+	 * 获取订单锁
+	 * @param key
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void getLock(String key) {
+		
+		//rua script保证setnx 跟expire 在一个操作里，保证了原子性
+		String script = "if redis.call('setNx',KEYS[1],ARGV[1]) then if redis.call('get',KEYS[1])==ARGV[1] then return redis.call('expire',KEYS[1],ARGV[2]) else return 0 end end";
+		RedisScript redisScript = new DefaultRedisScript<>(script, Long.class);
+		
+		Object result = stringRedisTemplate.execute(redisScript, stringRedisTemplate.getKeySerializer(), stringRedisTemplate.getValueSerializer(), 
+				Collections.singletonList(key), "0000", "3600");
+		
+		logger.info("result : " + result);
+	}
+	
+	 /**
+     * 释放锁
+     * @param lockKey
+     * @param value
+     * @return
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public boolean releaseLock(String key){
+ 
+        String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+ 
+        RedisScript redisScript = new DefaultRedisScript<>(script, Long.class);
+ 
+        Object result = stringRedisTemplate.execute(redisScript, stringRedisTemplate.getKeySerializer(), stringRedisTemplate.getValueSerializer(), 
+        		Collections.singletonList(key), "1111");
+        logger.info("result : " + result);
+        return false;
+    }
 
 }

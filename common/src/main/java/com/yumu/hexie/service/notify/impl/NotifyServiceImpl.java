@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.notify.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -108,13 +109,18 @@ public class NotifyServiceImpl implements NotifyService {
 				bankCardRepository.updateBankCardByAcctNoAndUserId(payNotification.getQuickToken(), payNotification.getQuickToken(), user.getId());
 			}
 			//4.绑定所缴纳物业费的房屋
-			wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId());
+			if ("0".equals(payNotification.getTranType())) {	//0管理费， 1其他收费
+				wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId());
+			}
+			
 		}
 		
 		//5.通知物业相关人员，收费到账
 		AccountNotification accountNotify = payNotification.getAccountNotify();
 		if (accountNotify!=null) {
 			accountNotify.setOrderId(payNotification.getOrderId());
+			BigDecimal feePrice = accountNotify.getFeePrice().divide(new BigDecimal("100"));
+			accountNotify.setFeePrice(feePrice);	//交易金额需要除以100。 不放在实体的set函数里，因为多次序列化会反复除
 			sendPayNotificationAsync(accountNotify);
 		}
 		//6.自定义服务

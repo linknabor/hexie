@@ -5,8 +5,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.util.StringUtils;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.user.User;
 
@@ -118,10 +116,7 @@ public class PayNotification implements Serializable {
 			return feePrice;
 		}
 		public void setFeePrice(BigDecimal feePrice) {
-			this.feePrice = BigDecimal.ZERO;
-			if (!StringUtils.isEmpty(feePrice)) {
-				this.feePrice = feePrice.divide(new BigDecimal("100"));
-			}
+			this.feePrice = feePrice;
 		}
 		
 		@Override

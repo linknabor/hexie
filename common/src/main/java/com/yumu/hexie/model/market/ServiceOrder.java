@@ -14,6 +14,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.common.util.DateUtil;
@@ -850,29 +851,46 @@ public class ServiceOrder  extends BaseModel {
 	public boolean cancelable() {
         return ModelConstant.ORDER_STATUS_INIT==getStatus();
     }
-
     public boolean asyncable() {
         return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
     }
     public boolean sendable() {
         return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
     }
-
     public boolean signable() {
         return (ModelConstant.ORDER_STATUS_SENDED == getStatus()
             || ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
             || ModelConstant.ORDER_STATUS_CONFIRM == getStatus());
     }
-
     public boolean returnable() {
         return ModelConstant.ORDER_STATUS_RECEIVED == getStatus();
     }
-    
-
-    
     public boolean refundable() {
         return (ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
                 || ModelConstant.ORDER_STATUS_RETURNED == getStatus()
                 | ModelConstant.ORDER_STATUS_PAYED == getStatus());
     }
+    
+    @Transient
+    public String getShowStatus() {
+    	
+    	String showStatus = "";
+    	if (ModelConstant.ORDER_STATUS_INIT == this.status) {
+			showStatus = "1";
+		}else if (ModelConstant.ORDER_STATUS_ACCEPTED == this.status) {
+			showStatus = "2";
+		}else if (ModelConstant.ORDER_STATUS_CONFIRM == this.status) {
+			if (StringUtils.isEmpty(this.payDate)) {
+				showStatus = "3";
+			}else if (ModelConstant.ORDER_PINGJIA_TYPE_N == this.pingjiaStatus) {
+				showStatus = "4";
+			}
+		}else if (ModelConstant.ORDER_PINGJIA_TYPE_Y == this.pingjiaStatus) {
+			showStatus = "5";
+		}
+    	return showStatus;
+    	
+    }
+    
+    
 }
