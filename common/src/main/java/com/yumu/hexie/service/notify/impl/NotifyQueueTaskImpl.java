@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.notify.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -59,41 +60,46 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				
 				logger.info("strat to consume to queue : " + queue);
 				
-				int totalFailed = 0;
 				boolean isSuccess = false;
-				
-				while(!isSuccess && totalFailed < 3) {
+				List<Map<String, String>> openidList = queue.getOpenids();
+				if (openidList == null || openidList.isEmpty()) {
+					continue;
+				}
+				List<Map<String, String>> resendList = new ArrayList<>();
+				for (Map<String, String> openidMap : openidList) {
 					
-					List<Map<String, String>> openidList = queue.getOpenids();
-					if (openidList == null || openidList.isEmpty()) {
+					User user = null;
+					String openid = openidMap.get("openid");
+					if (StringUtils.isEmpty(openid)) {
+						logger.warn("openid is empty, will skip. ");
 						continue;
 					}
-					for (Map<String, String> openidMap : openidList) {
-						
-						User user = null;
-						String openid = openidMap.get("openid");
-						if (StringUtils.isEmpty(openid)) {
-							logger.warn("openid is empty, will skip. ");
-							continue;
-						}
-						List<User> userList = userRepository.findByOpenid(openid);
-						if (userList!=null && !userList.isEmpty()) {
-							user = userList.get(0);
-						}else {
-							logger.warn("can not find user, openid : " + openid);
-						}
-						if (user!=null) {
+					List<User> userList = userRepository.findByOpenid(openid);
+					if (userList!=null && !userList.isEmpty()) {
+						user = userList.get(0);
+					}else {
+						logger.warn("can not find user, openid : " + openid);
+					}
+					if (user!=null) {
+						try {
 							queue.setUser(user);
 							gotongService.sendPayNotification(queue);
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);	//发送失败的，需要重发
+							resendList.add(openidMap);
+							
 						}
-						
 					}
 					
-					
+				}
+				if (resendList.isEmpty()) {
+					isSuccess = true;
 				}
 				
-				if (!isSuccess && totalFailed >= 3) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, json);
+				if (!isSuccess) {
+					queue.setOpenids(resendList);
+					String value = objectMapper.writeValueAsString(queue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_PAY_QUEUE, value);
 				}
 			
 			} catch (Exception e) {
@@ -127,43 +133,45 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				
 				logger.info("strat to consume to queue : " + queue);
 				
-				int totalFailed = 0;
 				boolean isSuccess = false;
-				
-				while(!isSuccess && totalFailed < 3) {
+				List<Map<String, String>> openidList = queue.getOpenids();
+				if (openidList == null || openidList.isEmpty()) {
+					continue;
+				}
+				List<Map<String, String>> resendList = new ArrayList<>();
+				for (Map<String, String> openidMap : openidList) {
 					
-					List<Map<String, String>> openidList = queue.getOpenids();
-					
-					if (openidList == null || openidList.isEmpty()) {
+					User user = null;
+					String openid = openidMap.get("openid");
+					if (StringUtils.isEmpty(openid)) {
+						logger.warn("openid is empty, will skip. ");
 						continue;
 					}
-				
-					for (Map<String, String> openidMap : openidList) {
-						
-						User user = null;
-						String openid = openidMap.get("openid");
-						if (StringUtils.isEmpty(openid)) {
-							logger.warn("openid is empty, will skip. ");
-							continue;
-						}
-						List<User> userList = userRepository.findByOpenid(openid);
-						if (userList!=null && !userList.isEmpty()) {
-							user = userList.get(0);
-						}else {
-							logger.warn("can not find user, openid : " + openid);
-						}
-						if (user!=null) {
+					List<User> userList = userRepository.findByOpenid(openid);
+					if (userList!=null && !userList.isEmpty()) {
+						user = userList.get(0);
+					}else {
+						logger.warn("can not find user, openid : " + openid);
+					}
+					if (user!=null) {
+						try {
 							queue.setUser(user);
 							gotongService.sendServiceNotification(queue);
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);	//发送失败的，需要重发
+							resendList.add(openidMap);
 						}
-						
 					}
 					
-					
+				}
+				if (resendList.isEmpty()) {
+					isSuccess = true;
 				}
 				
-				if (!isSuccess && totalFailed >= 3) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, json);
+				if (!isSuccess) {
+					queue.setOpenids(resendList);
+					String value = objectMapper.writeValueAsString(queue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
 				}
 			
 			} catch (Exception e) {

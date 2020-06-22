@@ -93,6 +93,10 @@ public class NotifyServiceImpl implements NotifyService {
 		if (user != null) {
 			//2.添加芝麻积分
 			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				if (StringUtils.isEmpty(payNotification.getOrderId())) {
+					log.warn("orderId is null, will skip ! payNotification : " + payNotification);
+					return;
+				}
 				String pointKey = "wuyePay-" + payNotification.getOrderId();
 				pointService.addPointAsync(user, payNotification.getPoints(), pointKey);
 			}else {
@@ -109,9 +113,10 @@ public class NotifyServiceImpl implements NotifyService {
 		
 		//5.通知物业相关人员，收费到账
 		AccountNotification accountNotify = payNotification.getAccountNotify();
-		accountNotify.setOrderId(payNotification.getOrderId());
-		sendPayNotificationAsync(accountNotify);
-		
+		if (accountNotify!=null) {
+			accountNotify.setOrderId(payNotification.getOrderId());
+			sendPayNotificationAsync(accountNotify);
+		}
 		//6.自定义服务
 		ServiceNotification serviceNotification = payNotification.getServiceNotify();
 		if (serviceNotification!=null) {
