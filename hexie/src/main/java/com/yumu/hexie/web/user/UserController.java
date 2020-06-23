@@ -110,6 +110,10 @@ public class UserController extends BaseController{
 					user = null;
 				}
 			}
+			
+			long endTime = System.currentTimeMillis();
+			log.info("location 1，耗时：" + ((endTime-beginTime)/1000));
+			
 			log.info("user in db :" + user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
@@ -118,6 +122,9 @@ public class UserController extends BaseController{
 			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
+			    
+			    endTime = System.currentTimeMillis();
+				log.info("location 2，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
@@ -137,13 +144,21 @@ public class UserController extends BaseController{
 			    	qrLink = qrCode.getQrLink();
 				}
 			    userInfo.setQrCode(qrLink);
+			    
+			    endTime = System.currentTimeMillis();
+				log.info("location 3，耗时：" + ((endTime-beginTime)/1000));
+			    
+			    
 			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
 			    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
 			    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
+			    
+			    endTime = System.currentTimeMillis();
+				log.info("location 4，耗时：" + ((endTime-beginTime)/1000));
 
-			    long endTime = System.currentTimeMillis();
+//			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
 			    return new BaseResult<UserInfo>().success(userInfo);
