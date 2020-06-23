@@ -273,13 +273,12 @@ public class CustomServiceController extends BaseController {
 	 * @param operatorDTO
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/operator", method = RequestMethod.POST)
-	public BaseResult<String> operator(@RequestBody OperatorDTO operatorDTO){
+	public String operator(@RequestBody OperatorDTO operatorDTO){
 		
 		logger.info("operatorDTO : " + operatorDTO);
 		customService.operator(operatorDTO);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return "success";
 	}
 	
 }
