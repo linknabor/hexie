@@ -119,6 +119,9 @@ public class NotifyServiceImpl implements NotifyService {
 		AccountNotification accountNotify = payNotification.getAccountNotify();
 		if (accountNotify!=null) {
 			accountNotify.setOrderId(payNotification.getOrderId());
+			if (accountNotify.getFeePrice() == null) {
+				log.warn("tranAmt is null, accountNotify : " + accountNotify);
+			}
 			BigDecimal feePrice = accountNotify.getFeePrice().divide(new BigDecimal("100"));
 			accountNotify.setFeePrice(feePrice);	//交易金额需要除以100。 不放在实体的set函数里，因为多次序列化会反复除
 			sendPayNotificationAsync(accountNotify);

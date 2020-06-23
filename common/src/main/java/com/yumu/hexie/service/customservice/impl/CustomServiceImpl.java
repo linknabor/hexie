@@ -133,6 +133,7 @@ public class CustomServiceImpl implements CustomService {
 	 * 非一口价支付
 	 */
 	@Override
+	@Transactional
 	public ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
@@ -159,6 +160,9 @@ public class CustomServiceImpl implements CustomService {
 		CreateOrderResponseVO data = customServiceUtil.createOrder(dto).getData();
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
 		vo.setOrderId(orderId);
+		
+		serviceOrder.setPrice(Float.valueOf(amount));
+		serviceOrderRepository.save(serviceOrder);
 		return vo;
 		
 	}
@@ -224,10 +228,8 @@ public class CustomServiceImpl implements CustomService {
 		String key = ModelConstant.KEY_ORDER_ACCEPTED + orderId;
 
 		Assert.hasText(orderId, "订单ID不能为空。");
-		boolean exists = stringRedisTemplate.opsForValue().setIfAbsent(key, orderId);
-		if (!exists) {
-			throw new BizValidateException("出手慢了，订单["+orderId+"]已被抢。");
-		}
+		getLock(key);
+		
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
@@ -251,6 +253,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_ACCEPTED);
 		serviceOrderRepository.save(serviceOrder);
 	
+		releaseLock(key);
 		 
 	}
 
@@ -449,8 +452,9 @@ public class CustomServiceImpl implements CustomService {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void getLock(String key) {
 		
-		//rua script保证setnx 跟expire 在一个操作里，保证了原子性
-		String script = "if redis.call('setNx',KEYS[1],ARGV[1]) then if redis.call('get',KEYS[1])==ARGV[1] then return redis.call('expire',KEYS[1],ARGV[2]) else return 0 end end";
+		//rua script保证setnx 跟expire 在一个操作里，保证了原子性,新版本setIfAbsent直接支持，老版本无法保证原子性
+//		String script = "if redis.call('setNx',KEYS[1],ARGV[1])==1 then return 1 else return 0 end"; 
+		String script = "if redis.call('setNx',KEYS[1],ARGV[1])==1 then return redis.call('expire',KEYS[1],ARGV[2]) else return 0 end "; 
 		RedisScript redisScript = new DefaultRedisScript<>(script, Long.class);
 		
 		Object result = stringRedisTemplate.execute(redisScript, stringRedisTemplate.getKeySerializer(), stringRedisTemplate.getValueSerializer(), 
