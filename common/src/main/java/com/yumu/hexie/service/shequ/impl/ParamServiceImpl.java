@@ -75,7 +75,7 @@ public class ParamServiceImpl implements ParamService {
 			return new HashMap<String, String>();
 		}
 		Map<String, String> paramMap = (Map<String, String>) redisTemplate.opsForHash().get(CACHED_KEY, cspId);
-		if (paramMap == null || paramMap.entrySet().isEmpty()) {
+		if (paramMap == null) {
 			cacheWuyeParam(user, cspId, ModelConstant.PARA_TYPE_CSP);
 			paramMap = (Map<String, String>) redisTemplate.opsForHash().get(CACHED_KEY, cspId);
 		}

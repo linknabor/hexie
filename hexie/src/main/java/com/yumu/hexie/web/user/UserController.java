@@ -157,7 +157,7 @@ public class UserController extends BaseController{
 			    endTime = System.currentTimeMillis();
 				log.info("location 5，耗时：" + ((endTime-beginTime)/1000));
 			    
-			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
+			    userInfo.setCardStatus(wechatCard.getStatus());
 			    
 			    endTime = System.currentTimeMillis();
 				log.info("location 6，耗时：" + ((endTime-beginTime)/1000));

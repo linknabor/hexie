@@ -91,10 +91,13 @@ public class PageConfigServiceImpl implements PageConfigService {
 			appId = ConstantWeChat.APPID;
 		}
 		final String sysAppId = appId;
-		Supplier<PageConfigView> supplier = ()-> pageConfigViewRepository.findByTempKeyAndAppId(key, sysAppId);
 		TypeReference typeReference = new TypeReference<PageConfigView>() {};
 		String field = appId + "_" + key;
-		PageConfigView pageConfigView = (PageConfigView) getConfigFromCache(ModelConstant.KEY_TYPE_PAGECONFIG, field, typeReference, supplier);
+		PageConfigView pageConfigView = (PageConfigView) getConfigFromCache(ModelConstant.KEY_TYPE_PAGECONFIG, field, typeReference);
+		if (pageConfigView == null) {
+			Supplier<PageConfigView> supplier = ()-> pageConfigViewRepository.findByTempKeyAndAppId(key, sysAppId);
+			pageConfigView = (PageConfigView)setConfigCache(ModelConstant.KEY_TYPE_PAGECONFIG, field, supplier);
+		}
 		if (pageConfigView != null) {
 			return pageConfigView.getPageConfig();
 		}
@@ -113,11 +116,14 @@ public class PageConfigServiceImpl implements PageConfigService {
 		if (StringUtil.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
 		}
-		Sort sort = new Sort(Direction.ASC, "sort");
 		final String sysAppId = appId;
-		Supplier<List<BottomIcon>> supplier = ()-> bottomIconRepository.findByAppId(sysAppId, sort);
 		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
-		List<BottomIcon> iconList = (List<BottomIcon>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference, supplier);
+		List<BottomIcon> iconList = (List<BottomIcon>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference);
+		if (iconList == null) {
+			Sort sort = new Sort(Direction.ASC, "sort");
+			Supplier<List<BottomIcon>> supplier = ()-> bottomIconRepository.findByAppId(sysAppId, sort);
+			iconList = (List<BottomIcon>)setConfigCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, supplier);
+		}
 		return iconList;
 	}
 
@@ -170,11 +176,14 @@ public class PageConfigServiceImpl implements PageConfigService {
 		if (StringUtil.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
 		}
-		Sort sort = new Sort(Direction.ASC, "type");
 		final String sysAppId = appId;
-		Supplier<List<BgImage>> supplier = ()-> bgImageRepository.findByAppId(sysAppId, sort);
 		TypeReference typeReference = new TypeReference<List<BgImage>>() {};
-		List<BgImage> imageList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, typeReference, supplier);
+		List<BgImage> imageList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, typeReference);
+		if (imageList == null) {
+			Sort sort = new Sort(Direction.ASC, "type");
+			Supplier<List<BgImage>> supplier = ()-> bgImageRepository.findByAppId(sysAppId, sort);
+			imageList = (List<BgImage>)setConfigCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, supplier);
+		}
 		return imageList;
 	}
 	
@@ -199,10 +208,12 @@ public class PageConfigServiceImpl implements PageConfigService {
 			appId = ConstantWeChat.APPID;
 		}
 		final String sysAppId = appId;
-		Supplier<QrCode> supplier = ()->qrCodeRepository.findByFromSys(sysAppId);
-		
 		TypeReference typeReference = new TypeReference<QrCode>() {};
-		QrCode qrCode = (QrCode) getConfigFromCache(ModelConstant.KEY_TYPE_QRCODE, appId, typeReference, supplier);
+		QrCode qrCode = (QrCode) getConfigFromCache(ModelConstant.KEY_TYPE_QRCODE, appId, typeReference);
+		if (qrCode == null) {
+			Supplier<QrCode> supplier = ()->qrCodeRepository.findByFromSys(sysAppId);
+			qrCode = (QrCode) setConfigCache(ModelConstant.KEY_TYPE_QRCODE, appId, supplier);
+		}
 		return qrCode;
 	}
 	
@@ -220,15 +231,16 @@ public class PageConfigServiceImpl implements PageConfigService {
 		if (StringUtils.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
 		}
-		Sort sort = new Sort(Direction.ASC, "sortNo");
-		
 		final String sysAppId = appId;
-		Supplier<List<Banner>> supplier = ()-> bannerRepository.findByBannerTypeAndStatusAndRegionTypeAndAppId(bannerType, ModelConstant.BANNER_STATUS_VALID, 
-				ModelConstant.REGION_ALL, sysAppId, sort);
-
-		String filed = appId + "_" + bannerType;
+		String field = appId + "_" + bannerType;
 		TypeReference typeReference = new TypeReference<List<Banner>>() {};
-		List<Banner> bannerList = (List<Banner>) getConfigFromCache(ModelConstant.KEY_TYPE_BANNER, filed, typeReference, supplier);
+		List<Banner> bannerList = (List<Banner>) getConfigFromCache(ModelConstant.KEY_TYPE_BANNER, field, typeReference);
+		if (bannerList == null) {
+			Sort sort = new Sort(Direction.ASC, "sortNo");
+			Supplier<List<Banner>> supplier = ()-> bannerRepository.findByBannerTypeAndStatusAndRegionTypeAndAppId(bannerType, ModelConstant.BANNER_STATUS_VALID, 
+					ModelConstant.REGION_ALL, sysAppId, sort);
+			bannerList = (List<Banner>) setConfigCache(ModelConstant.KEY_TYPE_BANNER, field, supplier);
+		}
 		return bannerList;
 		
 	}
@@ -244,7 +256,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @throws JsonMappingException
 	 * @throws JsonProcessingException
 	 */
-	private <T> Object getConfigFromCache(String redisKey, String filed, TypeReference<T> typeReference, Supplier<T> supplier)
+	private <T> Object getConfigFromCache(String redisKey, String filed, TypeReference<T> typeReference)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException {
 		
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
@@ -256,12 +268,17 @@ public class PageConfigServiceImpl implements PageConfigService {
 				object = objectMapper.readValue(objStr, typeReference);
 			}
 		}
-		if (object == null) {
-			object = supplier.get();
-			objStr = objectMapper.writeValueAsString(object);
-			redisTemplate.opsForHash().put(redisKey, filed, objStr);
-		}
 		return object;
+	}
+	
+	private <T> Object setConfigCache(String redisKey, String field, Supplier<T> supplier) throws JsonProcessingException {
+		
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		Object object = supplier.get();
+		String objStr = objectMapper.writeValueAsString(object);
+		redisTemplate.opsForHash().put(redisKey, field, objStr);
+		return object;
+		
 	}
 
 	/**
@@ -274,13 +291,15 @@ public class PageConfigServiceImpl implements PageConfigService {
 		if (StringUtils.isEmpty(appId)) {
 			appId = ConstantWeChat.APPID;
 		}
-		Sort sort = new Sort(Direction.ASC, "sort");
 		
 		final String sysAppId = appId;
-		Supplier<List<WuyePayTabs>> supplier = ()-> wuyePayTabsRepository.findByAppId(sysAppId, sort);
-
 		TypeReference typeReference = new TypeReference<List<WuyePayTabs>>() {};
-		List<WuyePayTabs> tabList = (List<WuyePayTabs>) getConfigFromCache(ModelConstant.KEY_TYPE_WUYEPAY_TABS, appId, typeReference, supplier);
+		List<WuyePayTabs> tabList = (List<WuyePayTabs>) getConfigFromCache(ModelConstant.KEY_TYPE_WUYEPAY_TABS, appId, typeReference);
+		if (tabList == null) {
+			Sort sort = new Sort(Direction.ASC, "sort");
+			Supplier<List<WuyePayTabs>> supplier = ()-> wuyePayTabsRepository.findByAppId(sysAppId, sort);
+			tabList = (List<WuyePayTabs>) setConfigCache(ModelConstant.KEY_TYPE_WUYEPAY_TABS, appId, supplier);
+		}
 		return tabList;
 	}
 
