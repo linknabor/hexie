@@ -5,5 +5,7 @@ public interface NotifyQueueTask {
 	void sendWuyeNotificationAysc();
 	
 	void sendCustomServiceNotificationAysc();
+
+	void updateOpereratorAysc();
 	
 }

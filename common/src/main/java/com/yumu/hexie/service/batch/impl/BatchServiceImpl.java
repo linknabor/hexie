@@ -59,6 +59,7 @@ public class BatchServiceImpl implements BatchService {
 		wechatCardQueueTask.wuyeRefund();
 		notifyQueueTask.sendWuyeNotificationAysc();
 		notifyQueueTask.sendCustomServiceNotificationAysc();
+		notifyQueueTask.updateOpereratorAysc();
 		
 	}
 

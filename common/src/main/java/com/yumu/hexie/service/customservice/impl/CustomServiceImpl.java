@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -16,11 +17,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
-import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
@@ -30,9 +32,6 @@ import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
-import com.yumu.hexie.model.localservice.ServiceOperator;
-import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
@@ -59,7 +58,7 @@ public class CustomServiceImpl implements CustomService {
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
-	private ServiceOperatorRepository serviceOperatorRepository;
+	private RedisTemplate<String, String> redisTemplate;
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -391,6 +390,7 @@ public class CustomServiceImpl implements CustomService {
 	 * @throws Exception 
 	 */
 	@Override
+	@Transactional
 	public void cancelPay(User user, String orderId) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
@@ -400,6 +400,10 @@ public class CustomServiceImpl implements CustomService {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
 		customServiceUtil.cancelPay(user, serviceOrder.getOrderNo());
+		
+		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
+			serviceOrderRepository.delete(serviceOrder.getId());
+		}
 		
 	}
 	
@@ -413,34 +417,27 @@ public class CustomServiceImpl implements CustomService {
 	@Transactional
 	public void operator(OperatorDTO operatorDTO) {
 		
-		List<Operator> operList = operatorDTO.getOperatorList();
-		if (operList!=null && !operList.isEmpty()) {
-			ServiceOperator serviceOperator = new ServiceOperator();
-			serviceOperator.setType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
-			serviceOperatorRepository.delete(serviceOperator);
+		if (operatorDTO == null) {
+			return;
 		}
+		int retryTimes = 0;
+		boolean isSuccess = false;
 		
-		for (Operator operator : operList) {
-			
-			if (StringUtils.isEmpty(operator.getTel()) || StringUtils.isEmpty(operator.getOpenid())) {
-				logger.warn("operator tel or openid is null, oper : " + operator);
-				continue;
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(operatorDTO);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_OPERATOR_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					logger.error(e.getMessage(), e);
+				}
 			}
-			List<User> userList = userRepository.findByTelAndOpenid(operator.getTel(), operator.getOpenid());
-			User user = null;
-			if (userList!=null && !userList.isEmpty()) {
-				user = userList.get(0);
-			}
-			if (user == null) {
-				logger.warn("user not exists, openid : " + operator.getOpenid());
-			}
-			ServiceOperator serviceOperator = new ServiceOperator();
-			serviceOperator.setName(user.getName());
-			serviceOperator.setOpenId(operator.getOpenid());
-			serviceOperator.setTel(operator.getTel());
-			serviceOperator.setType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
-			serviceOperator.setUserId(user.getId());
-			serviceOperatorRepository.save(serviceOperator);
 		}
 		
 	}
@@ -457,7 +454,7 @@ public class CustomServiceImpl implements CustomService {
 		RedisScript redisScript = new DefaultRedisScript<>(script, Long.class);
 		
 		Object result = stringRedisTemplate.execute(redisScript, stringRedisTemplate.getKeySerializer(), stringRedisTemplate.getValueSerializer(), 
-				Collections.singletonList(key), "0000", "3600");
+				Collections.singletonList(key), "1", "3600");
 		
 		logger.info("result : " + result);
 	}
@@ -476,7 +473,7 @@ public class CustomServiceImpl implements CustomService {
         RedisScript redisScript = new DefaultRedisScript<>(script, Long.class);
  
         Object result = stringRedisTemplate.execute(redisScript, stringRedisTemplate.getKeySerializer(), stringRedisTemplate.getValueSerializer(), 
-        		Collections.singletonList(key), "1111");
+        		Collections.singletonList(key), "1");
         logger.info("result : " + result);
         return false;
     }
