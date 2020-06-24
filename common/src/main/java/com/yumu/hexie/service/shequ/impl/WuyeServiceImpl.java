@@ -507,6 +507,7 @@ public class WuyeServiceImpl implements WuyeService {
 		ServiceOperator serviceOperator = null;
 		List<PayCfg> serviceList = new ArrayList<>();
 		if (ops!=null && !ops.isEmpty()) {
+			log.info("ops count : " + ops.size());
 			serviceOperator = ops.get(0);
 			if (serviceOperator != null) {
 				String subTypes = serviceOperator.getSubTypes();
