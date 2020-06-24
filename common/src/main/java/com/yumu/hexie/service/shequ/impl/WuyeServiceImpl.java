@@ -1,5 +1,8 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -36,8 +39,12 @@ import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.localservice.HomeServiceConstant;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.BankCard;
@@ -85,6 +92,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private BankCardRepository bankCardRepository;
+	
+	@Autowired
+	private ServiceOperatorRepository serviceOperatorRepository;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -492,7 +502,28 @@ public class WuyeServiceImpl implements WuyeService {
 		if (StringUtils.isEmpty(user.getTel())) {
 			user = userRepository.getOne(user.getId());
 		}
-		return wuyeUtil2.getQrCodePayService(user).getData();
+		QrCodePayService service = wuyeUtil2.getQrCodePayService(user).getData();
+		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(HomeServiceConstant.SERVICE_TYPE_CUSTOM, user.getId());
+		ServiceOperator serviceOperator = null;
+		List<PayCfg> serviceList = new ArrayList<>();
+		if (ops!=null && !ops.isEmpty()) {
+			serviceOperator = ops.get(0);
+			if (serviceOperator != null) {
+				String subTypes = serviceOperator.getSubTypes();
+				Object[]sTypes = subTypes.split(",");
+				Collection<Object> collection = Arrays.asList(sTypes);
+				List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
+				for (int i = 0; i < sTypes.length; i++) {
+					PayCfg payCfg = new PayCfg();
+					payCfg.setServiceTypeCn((String) objList.get(i));
+					payCfg.setServiceId((String)sTypes[i]);
+					payCfg.setServiceType("1");
+					serviceList.add(payCfg);
+				}
+			}
+		}
+		service.getServiceList().addAll(serviceList);
+		return service;
 		
 	}
 	

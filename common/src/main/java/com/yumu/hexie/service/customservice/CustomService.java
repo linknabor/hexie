@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
@@ -39,4 +40,7 @@ public interface CustomService {
 	void cancelPay(User user, String orderId) throws Exception;
 
 	void operator(OperatorDTO operatorDTO);
+
+	void updateServiceCfg(ServiceCfgDTO serviceCfgDTO);
+
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
@@ -279,6 +280,14 @@ public class CustomServiceController extends BaseController {
 		logger.info("operatorDTO : " + operatorDTO);
 		customService.operator(operatorDTO);
 		return "success";
+	}
+	
+	@RequestMapping(value = "/cfg", method = {RequestMethod.POST})
+	public String updateCustomServiceCfg(@RequestBody ServiceCfgDTO serviceCfgDTO) throws Exception {
+		
+		logger.info("cfg : " + serviceCfgDTO);
+		customService.updateServiceCfg(serviceCfgDTO);
+		return "SUCCESS";
 	}
 	
 }

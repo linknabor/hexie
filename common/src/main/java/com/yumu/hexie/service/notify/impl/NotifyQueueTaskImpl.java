@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.notify.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +18,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
+import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
+import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
@@ -219,12 +222,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					serviceOperatorRepository.delete(serviceOperator);
 				}
 				
-				for (Operator operator : operList) {
-					
+				operList.stream().forEach(operator->{
 					try {
 						if (StringUtils.isEmpty(operator.getTel()) || StringUtils.isEmpty(operator.getOpenid())) {
 							logger.warn("operator tel or openid is null, oper : " + operator);
-							continue;
+							return;
 						}
 						List<User> userList = userRepository.findByTelAndOpenid(operator.getTel(), operator.getOpenid());
 						User user = null;
@@ -240,12 +242,78 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						serviceOperator.setTel(operator.getTel());
 						serviceOperator.setType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
 						serviceOperator.setUserId(user.getId());
+						serviceOperator.setSubTypes(operator.getServiceId());
 						serviceOperatorRepository.save(serviceOperator);
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}
-				}
+				});
 				
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+	
+		
+	}
+	
+	/**
+	 * 异步更新服务人员信息
+	 */
+	@Override
+	@Async
+	public void updateServiceCfgAysc() {
+		
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_UPDATE_SERVICE_CFG_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				ServiceCfgDTO dto = objectMapper.readValue(json, new TypeReference<ServiceCfgDTO>(){});
+				logger.info("strat to consume to service cfg queue : " + dto);
+				List<ServiceCfg> cfgList = dto.getCfgList();
+				//不要循环操作redisTemplate，有TCP成本
+				Map<Object, Object> cfgMap = redisTemplate.opsForHash().entries(ModelConstant.KEY_CUSTOM_SERVICE);
+				List<String> delList = new ArrayList<>();
+				cfgList.stream().forEach(cfg->{
+					String operType = cfg.getOperType();
+					if ("add".equals(operType) || "edit".equals(operType)) {
+						cfgMap.put(cfg.getServiceId(), cfg.getServiceName());
+					}else if ("delete".equals(operType)) {
+						cfgMap.remove(cfg.getServiceId());
+						delList.add(cfg.getServiceId());
+					}
+				});
+				redisTemplate.opsForHash().putAll(ModelConstant.KEY_CUSTOM_SERVICE, cfgMap);
+				
+				if (!delList.isEmpty()) {
+					List <ServiceOperator> opList = serviceOperatorRepository.findByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
+					opList.forEach(oper->{
+						String subTypes = oper.getSubTypes();
+						if (StringUtils.isEmpty(subTypes)) {
+							return;
+						}
+						String[]subTypeArr = subTypes.split(",");
+						List<String> opSubList = Arrays.asList(subTypeArr);
+						opSubList.removeAll(delList);
+						StringBuffer bf = new StringBuffer();
+						for (String subType : opSubList) {
+							bf.append(subType).append(",");
+						}
+						String subs = bf.substring(0, bf.length()-1);
+						oper.setSubTypes(subs);
+						serviceOperatorRepository.save(oper);
+						
+					});
+				}
 			
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);

@@ -54,4 +54,6 @@ public class NotifyController extends BaseController {
 		}
 		return "SUCCESS";
 	}
+	
+	
 }

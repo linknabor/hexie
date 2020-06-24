@@ -23,6 +23,7 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
@@ -64,7 +65,14 @@ public class CustomServiceImpl implements CustomService {
 	public List<CustomServiceVO> getService(User user) throws Exception {
 		
 		User currUser = userRepository.findOne(user.getId());
-		return customServiceUtil.getCustomService(currUser).getData();
+		List<CustomServiceVO> list = customServiceUtil.getCustomService(currUser).getData();
+		
+		//考虑把redis操作放在循环外，频繁操作有序列化和网络交互成本 TODO
+		list.stream().forEach(customServicevo->{
+			redisTemplate.opsForHash().put(ModelConstant.KEY_CUSTOM_SERVICE, customServicevo.getServiceId(), 
+					customServicevo.getServiceTitle());
+		});
+		return list;
 	}
 
 	/**
@@ -96,6 +104,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setOrderNo(data.getTradeWaterId());
 		serviceOrder.setAppid(currUser.getAppId());
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
+		serviceOrder.setSubType(Integer.valueOf(customerServiceOrderDTO.getServiceId()));
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
 		logger.info("createOrder, xiaoquId : " + xiaoquId);
@@ -482,5 +491,30 @@ public class CustomServiceImpl implements CustomService {
         return false;
     }
     
-
+    @Override
+    public void updateServiceCfg(ServiceCfgDTO serviceCfgDTO) {
+    	
+    	int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(serviceCfgDTO);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_SERVICE_CFG_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
+    	
+    }
+    
+    
 }

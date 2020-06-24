@@ -19,6 +19,8 @@ public class OperatorDTO implements Serializable {
 		
 		private String openid;
 		private String tel;
+		@JsonProperty("service_id")
+		private String serviceId;
 		
 		public String getOpenid() {
 			return openid;
@@ -32,9 +34,15 @@ public class OperatorDTO implements Serializable {
 		public void setTel(String tel) {
 			this.tel = tel;
 		}
+		public String getServiceId() {
+			return serviceId;
+		}
+		public void setServiceId(String serviceId) {
+			this.serviceId = serviceId;
+		}
 		@Override
 		public String toString() {
-			return "OperatorDTO [openid=" + openid + ", tel=" + tel + "]";
+			return "Operator [openid=" + openid + ", tel=" + tel + ", serviceId=" + serviceId + "]";
 		}
 		
 	}

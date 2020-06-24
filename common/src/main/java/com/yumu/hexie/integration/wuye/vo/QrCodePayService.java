@@ -33,6 +33,10 @@ public class QrCodePayService implements Serializable {
 		private String signinFlag;
 		@JsonProperty("fee_id")
 		private String feeId;
+		@JsonProperty("service_id")
+		private String serviceId;
+		@JsonProperty("service_type")
+		private String serviceType = "0";	//默认0，扫码支付服务,1自定义服务
 		
 		public String getSectId() {
 			return sectId;
@@ -83,12 +87,26 @@ public class QrCodePayService implements Serializable {
 		public void setFeeId(String feeId) {
 			this.feeId = feeId;
 		}
+		public String getServiceId() {
+			return serviceId;
+		}
+		public void setServiceId(String serviceId) {
+			this.serviceId = serviceId;
+		}
+		public String getServiceType() {
+			return serviceType;
+		}
+		public void setServiceType(String serviceType) {
+			this.serviceType = serviceType;
+		}
 		@Override
 		public String toString() {
 			return "PayCfg [sectId=" + sectId + ", sectName=" + sectName + ", personId=" + personId + ", qrcodeId="
 					+ qrcodeId + ", operType=" + operType + ", serviceTypeCn=" + serviceTypeCn + ", signinFlag="
-					+ signinFlag + ", feeId=" + feeId + "]";
+					+ signinFlag + ", feeId=" + feeId + ", serviceId=" + serviceId + ", serviceType=" + serviceType
+					+ "]";
 		}
+		
 		
 	}
 

@@ -122,13 +122,15 @@ public class ServiceOrder  extends BaseModel {
 	private Date closeDate;
 	private Date asyncDate;
 	
+	//评论相关
 	private String comment;
 	private int commentQuality;
     private int commentAttitude;
     private int commentService;
     private String commentImgUrls;
     private Date commentDate;
-
+    
+    private int subType;	//子类，对于自定义服务列说，有子类
 
 	@JsonIgnore
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
@@ -793,6 +795,13 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setCommentDate(Date commentDate) {
 		this.commentDate = commentDate;
+	}
+	
+	public int getSubType() {
+		return subType;
+	}
+	public void setSubType(int subType) {
+		this.subType = subType;
 	}
 	@Transient
 	@JsonIgnore

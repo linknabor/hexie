@@ -35,6 +35,8 @@ public class ServiceOperator  extends BaseModel {
     private double longitude;
     private double latitude;
     
+    private String subTypes;
+    
     public String getCompanyName() {
         return companyName;
     }
@@ -95,11 +97,17 @@ public class ServiceOperator  extends BaseModel {
     public void setType(int type) {
         this.type = type;
     }
+	public String getSubTypes() {
+		return subTypes;
+	}
+	public void setSubTypes(String subTypes) {
+		this.subTypes = subTypes;
+	}
 	@Override
 	public String toString() {
 		return "ServiceOperator [type=" + type + ", companyName=" + companyName + ", name=" + name + ", tel=" + tel
 				+ ", openId=" + openId + ", userId=" + userId + ", regionId=" + regionId + ", fromWuye=" + fromWuye
-				+ ", longitude=" + longitude + ", latitude=" + latitude + "]";
+				+ ", longitude=" + longitude + ", latitude=" + latitude + ", subTypes=" + subTypes + "]";
 	}
     
 }
