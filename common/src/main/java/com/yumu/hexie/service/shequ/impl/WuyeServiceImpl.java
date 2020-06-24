@@ -511,6 +511,7 @@ public class WuyeServiceImpl implements WuyeService {
 			serviceOperator = ops.get(0);
 			if (serviceOperator != null) {
 				String subTypes = serviceOperator.getSubTypes();
+				log.info("subTypes : " + subTypes);
 				if (!StringUtils.isEmpty(subTypes)) {
 					Object[]sTypes = subTypes.split(",");
 					Collection<Object> collection = Arrays.asList(sTypes);
