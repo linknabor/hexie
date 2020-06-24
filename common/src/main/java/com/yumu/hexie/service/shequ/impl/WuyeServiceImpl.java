@@ -510,16 +510,19 @@ public class WuyeServiceImpl implements WuyeService {
 			serviceOperator = ops.get(0);
 			if (serviceOperator != null) {
 				String subTypes = serviceOperator.getSubTypes();
-				Object[]sTypes = subTypes.split(",");
-				Collection<Object> collection = Arrays.asList(sTypes);
-				List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
-				for (int i = 0; i < sTypes.length; i++) {
-					PayCfg payCfg = new PayCfg();
-					payCfg.setServiceTypeCn((String) objList.get(i));
-					payCfg.setServiceId((String)sTypes[i]);
-					payCfg.setServiceType("1");
-					serviceList.add(payCfg);
+				if (!StringUtils.isEmpty(subTypes)) {
+					Object[]sTypes = subTypes.split(",");
+					Collection<Object> collection = Arrays.asList(sTypes);
+					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
+					for (int i = 0; i < sTypes.length; i++) {
+						PayCfg payCfg = new PayCfg();
+						payCfg.setServiceTypeCn((String) objList.get(i));
+						payCfg.setServiceId((String)sTypes[i]);
+						payCfg.setServiceType("1");
+						serviceList.add(payCfg);
+					}
 				}
+				
 			}
 		}
 		service.getServiceList().addAll(serviceList);
