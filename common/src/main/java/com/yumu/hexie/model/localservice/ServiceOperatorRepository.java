@@ -77,4 +77,7 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     
     public ServiceOperator findByTypeAndTelAndOpenId(int type, String tel, String openId);
     
+    @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 ")
+    public int deleteByType(int type);
+
 }

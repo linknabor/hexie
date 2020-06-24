@@ -1,7 +1,6 @@
 package com.yumu.hexie.integration.customservice.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -13,7 +12,7 @@ public class ServiceCfgDTO implements Serializable {
 	private static final long serialVersionUID = -439592087613660435L;
 
 	@JsonProperty("data")
-	private List<ServiceCfg> cfgList;
+	private ServiceCfg serviceCfg;
 	
 	public static class ServiceCfg{
 		
@@ -50,18 +49,17 @@ public class ServiceCfgDTO implements Serializable {
 		
 	}
 
-	public List<ServiceCfg> getCfgList() {
-		return cfgList;
+	public ServiceCfg getServiceCfg() {
+		return serviceCfg;
 	}
-
-	public void setCfgList(List<ServiceCfg> cfgList) {
-		this.cfgList = cfgList;
+	public void setServiceCfg(ServiceCfg serviceCfg) {
+		this.serviceCfg = serviceCfg;
 	}
-
 	@Override
 	public String toString() {
-		return "ServiceCfgDTO [cfgList=" + cfgList + "]";
+		return "ServiceCfgDTO [serviceCfg=" + serviceCfg + "]";
 	}
+	
 	
 	
 }

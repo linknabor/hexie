@@ -217,9 +217,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				
 				List<Operator> operList = queue.getOperatorList();
 				if (operList!=null && !operList.isEmpty()) {
-					ServiceOperator serviceOperator = new ServiceOperator();
-					serviceOperator.setType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
-					serviceOperatorRepository.delete(serviceOperator);
+					serviceOperatorRepository.deleteByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
 				}
 				
 				operList.stream().forEach(operator->{
@@ -279,22 +277,16 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				ServiceCfgDTO dto = objectMapper.readValue(json, new TypeReference<ServiceCfgDTO>(){});
 				logger.info("strat to consume to service cfg queue : " + dto);
-				List<ServiceCfg> cfgList = dto.getCfgList();
+				ServiceCfg cfg = dto.getServiceCfg();
 				//不要循环操作redisTemplate，有TCP成本
-				Map<Object, Object> cfgMap = redisTemplate.opsForHash().entries(ModelConstant.KEY_CUSTOM_SERVICE);
-				List<String> delList = new ArrayList<>();
-				cfgList.stream().forEach(cfg->{
-					String operType = cfg.getOperType();
-					if ("add".equals(operType) || "edit".equals(operType)) {
-						cfgMap.put(cfg.getServiceId(), cfg.getServiceName());
-					}else if ("delete".equals(operType)) {
-						cfgMap.remove(cfg.getServiceId());
-						delList.add(cfg.getServiceId());
-					}
-				});
-				redisTemplate.opsForHash().putAll(ModelConstant.KEY_CUSTOM_SERVICE, cfgMap);
-				
-				if (!delList.isEmpty()) {
+				String operType = cfg.getOperType();
+				if ("add".equals(operType) || "edit".equals(operType)) {
+					redisTemplate.opsForHash().put(ModelConstant.KEY_CUSTOM_SERVICE, cfg.getServiceId(), cfg.getServiceName());
+				}else if ("delete".equals(operType)) {
+					redisTemplate.opsForHash().delete(ModelConstant.KEY_CUSTOM_SERVICE, cfg.getServiceId());
+				}
+			
+				if ("delete".equals(operType)) {
 					List <ServiceOperator> opList = serviceOperatorRepository.findByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
 					opList.forEach(oper->{
 						String subTypes = oper.getSubTypes();
@@ -303,7 +295,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						}
 						String[]subTypeArr = subTypes.split(",");
 						List<String> opSubList = Arrays.asList(subTypeArr);
-						opSubList.removeAll(delList);
+						opSubList.remove(cfg.getServiceId());
 						StringBuffer bf = new StringBuffer();
 						for (String subType : opSubList) {
 							bf.append(subType).append(",");
