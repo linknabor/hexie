@@ -340,7 +340,6 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericodeTotalLimit_";
 	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
-	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
 	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
 	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列

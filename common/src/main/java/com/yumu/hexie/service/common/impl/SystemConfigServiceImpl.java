@@ -16,8 +16,6 @@ import javax.inject.Inject;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -26,7 +24,6 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
-import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.system.SystemConfig;
 import com.yumu.hexie.model.system.SystemConfigRepository;
@@ -50,13 +47,12 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private static final String ACC_TOKEN = "ACCESS_TOKEN";
     private static final String KEY_APP_SYS = "APP_SYS_";
 	private static Map<String, String> sysMap = new HashMap<>();
+	private static Map<String, SystemConfig> sysConfigParam = new HashMap<>();
     
     @Inject
     private SystemConfigRepository systemConfigRepository;
     @Inject
     private RedisRepository redisRepository;
-    @Autowired
-    private RedisTemplate<String, SystemConfig> redisTemplate;
     
     
     /**
@@ -75,7 +71,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		}
     	for (SystemConfig systemConfig : configList) {
     		String sysKey = systemConfig.getSysKey();
-    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, sysKey, systemConfig);
+    		
+    		sysConfigParam.put(sysKey, systemConfig);
+    		
     		
     		try {
 				if (sysKey.indexOf(KEY_APP_SYS) > -1) {
@@ -206,7 +204,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	public String getSysConfigByKey(String key) {
 		
     	String value = "";
-    	SystemConfig systemConfig = (SystemConfig) redisTemplate.opsForHash().get(ModelConstant.KEY_SYS_CONFIG, key);
+    	SystemConfig systemConfig = sysConfigParam.get(key);
     	if (systemConfig != null) {
 			value = systemConfig.getSysValue();
 		}
@@ -219,7 +217,8 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     @Override
     public void reloadSysConfigCache() {
     	
-    	redisTemplate.delete(ModelConstant.KEY_SYS_CONFIG);
+    	sysConfigParam = null;
+    	sysConfigParam = new HashMap<>();
     	List<SystemConfig> configList = systemConfigRepository.findAll();
     	if (configList == null) {
 			log.error("未配置系统参数表systemConfig!");
@@ -228,7 +227,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     	for (SystemConfig systemConfig : configList) {
     		
     		String sysKey = systemConfig.getSysKey();
-    		redisTemplate.opsForHash().put(ModelConstant.KEY_SYS_CONFIG, sysKey, systemConfig);
+    		sysConfigParam.put(sysKey, systemConfig);
     		try {
 				if (sysKey.indexOf(KEY_APP_SYS) > -1) {
 					String key = sysKey.substring(sysKey.indexOf(KEY_APP_SYS) + KEY_APP_SYS.length(), sysKey.length());

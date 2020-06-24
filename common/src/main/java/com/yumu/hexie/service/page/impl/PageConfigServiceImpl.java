@@ -64,6 +64,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private BgImageRepository bgImageRepository;
 	@Autowired
 	private WuyePayTabsRepository wuyePayTabsRepository;
+	
+	private static Map<String, Map<String, Object>> pageConfigMap = new HashMap<>();
 
 	/**
 	 * 根据banner类型动态获取
@@ -94,7 +96,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		TypeReference typeReference = new TypeReference<PageConfigView>() {};
 		String field = appId + "_" + key;
 		PageConfigView pageConfigView = (PageConfigView) getConfigFromCache(ModelConstant.KEY_TYPE_PAGECONFIG, field, typeReference);
-		if (pageConfigView == null) {
+		if (pageConfigView == null || pageConfigView.getId() == 0) {
 			Supplier<PageConfigView> supplier = ()-> pageConfigViewRepository.findByTempKeyAndAppId(key, sysAppId);
 			pageConfigView = (PageConfigView)setConfigCache(ModelConstant.KEY_TYPE_PAGECONFIG, field, supplier);
 		}
@@ -119,7 +121,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		final String sysAppId = appId;
 		TypeReference typeReference = new TypeReference<List<BottomIcon>>() {};
 		List<BottomIcon> iconList = (List<BottomIcon>) getConfigFromCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, typeReference);
-		if (iconList == null) {
+		if (iconList == null || iconList.isEmpty()) {
 			Sort sort = new Sort(Direction.ASC, "sort");
 			Supplier<List<BottomIcon>> supplier = ()-> bottomIconRepository.findByAppId(sysAppId, sort);
 			iconList = (List<BottomIcon>)setConfigCache(ModelConstant.KEY_TYPE_BOTTOM_ICON, appId, supplier);
@@ -179,7 +181,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		final String sysAppId = appId;
 		TypeReference typeReference = new TypeReference<List<BgImage>>() {};
 		List<BgImage> imageList = (List<BgImage>) getConfigFromCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, typeReference);
-		if (imageList == null) {
+		if (imageList == null || imageList.isEmpty()) {
 			Sort sort = new Sort(Direction.ASC, "type");
 			Supplier<List<BgImage>> supplier = ()-> bgImageRepository.findByAppId(sysAppId, sort);
 			imageList = (List<BgImage>)setConfigCache(ModelConstant.KEY_TYPE_BGIMAGE, appId, supplier);
@@ -210,7 +212,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		final String sysAppId = appId;
 		TypeReference typeReference = new TypeReference<QrCode>() {};
 		QrCode qrCode = (QrCode) getConfigFromCache(ModelConstant.KEY_TYPE_QRCODE, appId, typeReference);
-		if (qrCode == null) {
+		if (qrCode == null || qrCode.getId() == 0) {
 			Supplier<QrCode> supplier = ()->qrCodeRepository.findByFromSys(sysAppId);
 			qrCode = (QrCode) setConfigCache(ModelConstant.KEY_TYPE_QRCODE, appId, supplier);
 		}
@@ -235,7 +237,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		String field = appId + "_" + bannerType;
 		TypeReference typeReference = new TypeReference<List<Banner>>() {};
 		List<Banner> bannerList = (List<Banner>) getConfigFromCache(ModelConstant.KEY_TYPE_BANNER, field, typeReference);
-		if (bannerList == null) {
+		if (bannerList == null || bannerList.isEmpty()) {
 			Sort sort = new Sort(Direction.ASC, "sortNo");
 			Supplier<List<Banner>> supplier = ()-> bannerRepository.findByBannerTypeAndStatusAndRegionTypeAndAppId(bannerType, ModelConstant.BANNER_STATUS_VALID, 
 					ModelConstant.REGION_ALL, sysAppId, sort);
@@ -256,27 +258,23 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @throws JsonMappingException
 	 * @throws JsonProcessingException
 	 */
-	private <T> Object getConfigFromCache(String redisKey, String filed, TypeReference<T> typeReference)
+	private <T> Object getConfigFromCache(String redisKey, String field, TypeReference<T> typeReference)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException {
 		
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 		Object object = null;
-		String objStr = (String) redisTemplate.opsForHash().get(redisKey, filed);
-		if (!StringUtils.isEmpty(objStr)) {
-			String valueStr = objStr.replace("[", "").replace("]", "");
-			if (!StringUtils.isEmpty(valueStr)) {
-				object = objectMapper.readValue(objStr, typeReference);
-			}
+		Map<String, Object> map = pageConfigMap.get(redisKey);
+		if (map != null) {
+			object = map.get(field);
 		}
 		return object;
 	}
 	
 	private <T> Object setConfigCache(String redisKey, String field, Supplier<T> supplier) throws JsonProcessingException {
 		
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 		Object object = supplier.get();
-		String objStr = objectMapper.writeValueAsString(object);
-		redisTemplate.opsForHash().put(redisKey, field, objStr);
+		Map<String, Object> configMap = new HashMap<>();
+		configMap.put(field, object);
+		pageConfigMap.put(redisKey, configMap);
 		return object;
 		
 	}

@@ -137,6 +137,9 @@ public class UserController extends BaseController{
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
+			    
+			    log.info("location 4，耗时：" + ((endTime-beginTime)/1000));
+			    
 			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
 			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
 					//do nothing
@@ -144,7 +147,7 @@ public class UserController extends BaseController{
 					userInfo.setPoint(wechatCard.getBonus());
 				}
 			    endTime = System.currentTimeMillis();
-				log.info("location 4，耗时：" + ((endTime-beginTime)/1000));
+				log.info("location 5，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
@@ -155,32 +158,32 @@ public class UserController extends BaseController{
 			    userInfo.setQrCode(qrLink);
 			    
 			    endTime = System.currentTimeMillis();
-				log.info("location 5，耗时：" + ((endTime-beginTime)/1000));
+				log.info("location 6，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    userInfo.setCardStatus(wechatCard.getStatus());
 			    
 			    endTime = System.currentTimeMillis();
-				log.info("location 6，耗时：" + ((endTime-beginTime)/1000));
+				log.info("location 7，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    
 			    endTime = System.currentTimeMillis();
-				log.info("location 7，耗时：" + ((endTime-beginTime)/1000));
+				log.info("location 8，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
 			    
 			    endTime = System.currentTimeMillis();
-				log.info("location 8，耗时：" + ((endTime-beginTime)/1000));
+				log.info("location 9，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
 			    
 			    endTime = System.currentTimeMillis();
-				log.info("location 9，耗时：" + ((endTime-beginTime)/1000));
+				log.info("location 10，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
 			    
 			    endTime = System.currentTimeMillis();
-				log.info("location 10，耗时：" + ((endTime-beginTime)/1000));
+				log.info("location 11，耗时：" + ((endTime-beginTime)/1000));
 
 //			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
