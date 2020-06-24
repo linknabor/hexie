@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 
@@ -77,6 +78,7 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     
     public ServiceOperator findByTypeAndTelAndOpenId(int type, String tel, String openId);
     
+    @Modifying
     @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 ")
     public void deleteByType(int type);
 
