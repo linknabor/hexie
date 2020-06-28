@@ -40,10 +40,10 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
 	public List<ServiceOrder> findAllByProductId(long productId);
 	
-	@Query(" from ServiceOrder p where p.operatorUserId =?1 and p.status in ?2 and p.orderType = ?3 and if (?4!='', p.subType =?4, 1=1) order by p.id desc ")
+	@Query(" from ServiceOrder p where p.operatorUserId =?1 and p.status in ?2 and p.orderType = ?3 and p.subType =?4 order by p.id desc ")
 	public List<ServiceOrder> findByOperAndStatusAndOrderTypeAndSubType(long userId, List<Integer> statuses, int orderType, long subType);
 	
-	@Query(value = "select p.* from ServiceOrder p where p.status in ?1 and p.orderType = ?2 and if (?3!='', p.subType =?3, 1=1) order by p.id desc ", nativeQuery = true)
+	@Query(value = "select p.* from ServiceOrder p where p.status in ?1 and p.orderType = ?2 and p.subType =?3 order by p.id desc ", nativeQuery = true)
 	public List<ServiceOrder> findByOrderStatusAndOrderTypeAndSubType(List<Integer> statuses, int orderType, long subType);
 	
 	@Query(" from ServiceOrder p where p.userId =?1 and p.status in ?2 and p.merchantId = ?3 and p.orderType = ?4 ")
