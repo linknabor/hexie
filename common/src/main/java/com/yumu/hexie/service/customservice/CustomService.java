@@ -21,7 +21,7 @@ public interface CustomService {
 	
 	ServiceOrder queryOrder(User user, String orderId);
 	
-	List<ServiceOrder> queryOrderByStatus(User user, String status);
+	List<ServiceOrder> queryOrderByStatus(User user, String status, String serviceId);
 	
 	void acceptOrder(User user, String orderId) throws Exception;
 
@@ -42,5 +42,7 @@ public interface CustomService {
 	void operator(OperatorDTO operatorDTO);
 
 	void updateServiceCfg(ServiceCfgDTO serviceCfgDTO);
+
+	
 
 }

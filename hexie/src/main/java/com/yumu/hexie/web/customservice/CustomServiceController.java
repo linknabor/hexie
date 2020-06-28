@@ -134,11 +134,12 @@ public class CustomServiceController extends BaseController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/queryByStatus", method = RequestMethod.GET)
-	public BaseResult<List<ServiceOrder>> queryOrderByStatus(@ModelAttribute(Constants.USER) User user, @RequestParam String orderStatus) throws Exception {
+	public BaseResult<List<ServiceOrder>> queryOrderByStatus(@ModelAttribute(Constants.USER) User user, 
+			@RequestParam String orderStatus, @RequestParam(required = false, value = "service_id") String serivceId) throws Exception {
 		
 		logger.info("queryOrderByStatus, user : " + user);
 		logger.info("queryOrder orderStatus : " + orderStatus);
-		List<ServiceOrder> orderList = customService.queryOrderByStatus(user, orderStatus);
+		List<ServiceOrder> orderList = customService.queryOrderByStatus(user, orderStatus, serivceId);
 		return BaseResult.successResult(orderList);
 	}
 	

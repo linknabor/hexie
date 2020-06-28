@@ -271,19 +271,21 @@ public class CustomServiceImpl implements CustomService {
 	 * @param status 0可接单，9确认完工，15已接单
 	 */
 	@Override
-	public List<ServiceOrder> queryOrderByStatus(User user, String status) {
+	public List<ServiceOrder> queryOrderByStatus(User user, String status, String serviceId) {
 
 		Assert.notNull(user, "用户信息不能为空。");
 		Assert.hasText(status, "订单状态不能为空");
-
 		
+		if (StringUtils.isEmpty(serviceId)) {
+			serviceId = "0";
+		}
 		List<Integer> statusList = new ArrayList<>();
 		statusList.add(Integer.valueOf(status));
 		List<ServiceOrder> orderList  = null;
 		if ("0".equals(status)) {
-			orderList = serviceOrderRepository.findByOrderStatusAndOrderType(statusList, ModelConstant.ORDER_TYPE_SERVICE);
+			orderList = serviceOrderRepository.findByOrderStatusAndOrderTypeAndSubType(statusList, ModelConstant.ORDER_TYPE_SERVICE, Long.valueOf(serviceId));
 		}else {
-			orderList = serviceOrderRepository.findByOperAndStatusAndOrderType(user.getId(), statusList, ModelConstant.ORDER_TYPE_SERVICE);
+			orderList = serviceOrderRepository.findByOperAndStatusAndOrderTypeAndSubType(user.getId(), statusList, ModelConstant.ORDER_TYPE_SERVICE, Long.valueOf(serviceId));
 		}
 		return orderList;
 	}
