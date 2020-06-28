@@ -37,6 +37,7 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.notify.NotifyService;
@@ -60,6 +61,9 @@ public class CustomServiceImpl implements CustomService {
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
+	private GotongService gotongService;
+	
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -105,6 +109,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setAppid(currUser.getAppId());
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setSubType(Long.valueOf(customerServiceOrderDTO.getServiceId()));
+		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
 		logger.info("createOrder, xiaoquId : " + xiaoquId);
@@ -262,6 +267,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_ACCEPTED);
 		serviceOrderRepository.save(serviceOrder);
 	
+		//发送客服消息，告知客户已接单。应该做异步队列TODO
+		gotongService.sendCustomServiceAssignedMsg(serviceOrder);
 		releaseLock(key);
 		 
 	}

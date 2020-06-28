@@ -131,6 +131,7 @@ public class ServiceOrder  extends BaseModel {
     private Date commentDate;
     
     private long subType;	//子类，对于自定义服务列说，有子类
+    private String subTypeName;	//子类中文名称
 
 	@JsonIgnore
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
@@ -801,6 +802,12 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setSubType(long subType) {
 		this.subType = subType;
+	}
+	public String getSubTypeName() {
+		return subTypeName;
+	}
+	public void setSubTypeName(String subTypeName) {
+		this.subTypeName = subTypeName;
 	}
 	@Transient
 	@JsonIgnore

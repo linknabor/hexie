@@ -27,6 +27,8 @@ import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.maintenance.MaintenanceService;
+import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -46,6 +48,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private GotongService gotongService;
 	@Autowired
 	private ServiceOperatorRepository serviceOperatorRepository;
+	@Autowired
+	private ServiceOrderRepository serviceOrderRepository;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -68,7 +72,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				AccountNotification queue = objectMapper.readValue(json, new TypeReference<AccountNotification>(){});
 				
-				logger.info("strat to consume wuyeNotificatione queue : " + queue);
+				logger.info("start to consume wuyeNotificatione queue : " + queue);
 				
 				boolean isSuccess = false;
 				List<Map<String, String>> openidList = queue.getOpenids();
@@ -141,13 +145,25 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				ServiceNotification queue = objectMapper.readValue(json, new TypeReference<ServiceNotification>(){});
 				
-				logger.info("strat to consume customServiceNotification queue : " + queue);
+				logger.info("start to consume customServiceNotification queue : " + queue);
 				
 				boolean isSuccess = false;
 				List<Map<String, String>> openidList = queue.getOpenids();
 				if (openidList == null || openidList.isEmpty()) {
+					logger.info("openIdList is empty, will skip !");
 					continue;
 				}
+				
+				if (StringUtils.isEmpty(queue.getOrderId())) {
+					logger.info("order id is null, will skip !");
+					continue;
+				}
+				ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(queue.getOrderId()));
+				if (serviceOrder == null || serviceOrder.getId() == 0) {
+					logger.info("can not find order : " + queue.getOrderId());
+					continue;
+				}
+				
 				List<Map<String, String>> resendList = new ArrayList<>();
 				for (Map<String, String> openidMap : openidList) {
 					
@@ -165,8 +181,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					}
 					if (user!=null) {
 						try {
-							queue.setUser(user);
-							gotongService.sendServiceNotification(queue);
+							gotongService.sendServiceNotification(user, serviceOrder);
 						} catch (Exception e) {
 							logger.error(e.getMessage(), e);	//发送失败的，需要重发
 							resendList.add(openidMap);
@@ -213,7 +228,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				OperatorDTO queue = objectMapper.readValue(json, new TypeReference<OperatorDTO>(){});
 				
-				logger.info("strat to consume opererator queue : " + queue);
+				logger.info("start to consume opererator queue : " + queue);
 				
 				List<Operator> operList = queue.getOperatorList();
 				if (operList!=null && !operList.isEmpty()) {
@@ -276,7 +291,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				ServiceCfgDTO dto = objectMapper.readValue(json, new TypeReference<ServiceCfgDTO>(){});
-				logger.info("strat to consume service cfg queue : " + dto);
+				logger.info("start to consume service cfg queue : " + dto);
 				ServiceCfg cfg = dto.getServiceCfg();
 				//不要循环操作redisTemplate，有TCP成本
 				String operType = cfg.getOperType();
