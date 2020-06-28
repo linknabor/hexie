@@ -229,10 +229,11 @@ public class CustomServiceImpl implements CustomService {
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder!=null) {
 			boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
+			logger.info("isServiceOper : " + isServiceOper);
 			if (serviceOrder.getUserId()!=user.getId() && !isServiceOper) {
 				throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
 			}else if (serviceOrder.getUserId()!=user.getId() && isServiceOper) {
-				if (serviceOrder.getOperatorUserId() != user.getId()) {
+				if(serviceOrder.getOperatorUserId() != 0 && serviceOrder.getOperatorUserId() != user.getId()) {
 					throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
 				}
 			}
