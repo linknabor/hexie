@@ -158,7 +158,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.info("order id is null, will skip !");
 					continue;
 				}
-				ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(queue.getOrderId()));
+				ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(String.valueOf(queue.getOrderId()));
 				if (serviceOrder == null || serviceOrder.getId() == 0) {
 					logger.info("can not find order : " + queue.getOrderId());
 					continue;
