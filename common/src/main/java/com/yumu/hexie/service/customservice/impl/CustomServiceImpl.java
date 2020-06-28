@@ -104,7 +104,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setOrderNo(data.getTradeWaterId());
 		serviceOrder.setAppid(currUser.getAppId());
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
-		serviceOrder.setSubType(Integer.valueOf(customerServiceOrderDTO.getServiceId()));
+		serviceOrder.setSubType(Long.valueOf(customerServiceOrderDTO.getServiceId()));
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
 		logger.info("createOrder, xiaoquId : " + xiaoquId);

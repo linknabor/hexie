@@ -517,8 +517,9 @@ public class WuyeServiceImpl implements WuyeService {
 					Collection<Object> collection = Arrays.asList(sTypes);
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
 					if (objList.size() > 0) {
-						log.info("objList count : " + objList.size());
 						for (int i = 0; i < sTypes.length; i++) {
+							
+							log.info("service name : "  + objList.get(i));
 							PayCfg payCfg = new PayCfg();
 							payCfg.setServiceTypeCn((String) objList.get(i));
 							payCfg.setServiceId((String)sTypes[i]);

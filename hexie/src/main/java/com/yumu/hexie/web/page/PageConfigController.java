@@ -81,7 +81,7 @@ public class PageConfigController extends BaseController{
 	 */
 	@RequestMapping(value = "/pageConfig", method = RequestMethod.POST)
 	@ResponseBody
-	public String updateWuyePayTabs(@ModelAttribute(Constants.USER) User user) throws Exception {
+	public String updatePageConfig(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
 		pageConfigService.updatePageConfig();
 		return Constants.SUCCESS;

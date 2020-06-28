@@ -159,7 +159,7 @@ public class CustomServiceController extends BaseController {
 	}
 	
 	/**
-	 * 查询订单
+	 * 接单
 	 * @param user
 	 * @param orderId
 	 * @return
