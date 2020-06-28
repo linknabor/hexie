@@ -60,6 +60,7 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.sendWuyeNotificationAysc();
 		notifyQueueTask.sendCustomServiceNotificationAysc();
 		notifyQueueTask.updateOpereratorAysc();
+		notifyQueueTask.updateServiceCfgAysc();
 		
 	}
 

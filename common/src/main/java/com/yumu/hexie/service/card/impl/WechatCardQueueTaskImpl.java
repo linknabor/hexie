@@ -47,7 +47,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 	 * 关注事件 1.发送关注客服消息，推送会员卡 2.记录推送出去的会员卡到表里
 	 */
 	@SuppressWarnings("unchecked")
-	@Async
+	@Async("taskExecutor")
 	@Override
 	public void eventSubscribe() {
 
@@ -105,7 +105,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 	/**
 	 * 领卡事件 根据推送的cardCode查看卡是否已经创建，没创建的建新卡
 	 */
-	@Async
+	@Async("taskExecutor")
 	@Override
 	public void eventUserGetCard() {
 
@@ -152,7 +152,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		}
 	}
 
-	@Async
+	@Async("taskExecutor")
 	@Override
 	public void updatePointAsync() {
 		
@@ -195,7 +195,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		
 	}
 	
-	@Async
+	@Async("taskExecutor")
 	@Override
 	public void wuyeRefund() {
 		
@@ -239,7 +239,7 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 		
 	}
 
-	@Async
+	@Async("taskExecutor")
 	@Override
 	public void eventUpdateCard() {
 		

@@ -20,7 +20,7 @@ public class ServiceCfgDTO implements Serializable {
 		private String serviceId;
 		@JsonProperty("service_name")
 		private String serviceName;
-		@JsonProperty("oper_tpye")
+		@JsonProperty("oper_type")
 		private String operType;
 		
 		public String getServiceId() {

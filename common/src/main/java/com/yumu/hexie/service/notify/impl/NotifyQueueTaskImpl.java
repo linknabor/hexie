@@ -51,7 +51,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	 * 异步发送到账模板消息
 	 */
 	@Override
-	@Async
+	@Async("taskExecutor")
 	public void sendWuyeNotificationAysc() {
 		
 		while(true) {
@@ -124,7 +124,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	 * 异步发送自定义服务模板消息
 	 */
 	@Override
-	@Async
+	@Async("taskExecutor")
 	public void sendCustomServiceNotificationAysc() {
 		
 		while(true) {
@@ -196,7 +196,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	 * 异步更新服务人员信息
 	 */
 	@Override
-	@Async
+	@Async("taskExecutor")
 	public void updateOpereratorAysc() {
 		
 		while(true) {
@@ -260,7 +260,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	 * 异步更新服务人员信息
 	 */
 	@Override
-	@Async
+	@Async("taskExecutor")
 	public void updateServiceCfgAysc() {
 		
 		while(true) {
