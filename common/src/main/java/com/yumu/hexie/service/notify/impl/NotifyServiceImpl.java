@@ -146,6 +146,7 @@ public class NotifyServiceImpl implements NotifyService {
 	public void sendPayNotificationAsync(AccountNotification accountNotification) {
 		
 		if (accountNotification == null) {
+			log.info("accountNotification is null, will return ! ");
 			return;
 		}
 		

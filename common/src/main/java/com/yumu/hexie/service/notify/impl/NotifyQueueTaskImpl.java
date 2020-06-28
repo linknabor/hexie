@@ -68,7 +68,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				AccountNotification queue = objectMapper.readValue(json, new TypeReference<AccountNotification>(){});
 				
-				logger.info("strat to consume to queue : " + queue);
+				logger.info("strat to consume wuyeNotificatione queue : " + queue);
 				
 				boolean isSuccess = false;
 				List<Map<String, String>> openidList = queue.getOpenids();
@@ -141,7 +141,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				ServiceNotification queue = objectMapper.readValue(json, new TypeReference<ServiceNotification>(){});
 				
-				logger.info("strat to consume to queue : " + queue);
+				logger.info("strat to consume customServiceNotification queue : " + queue);
 				
 				boolean isSuccess = false;
 				List<Map<String, String>> openidList = queue.getOpenids();
@@ -213,7 +213,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				OperatorDTO queue = objectMapper.readValue(json, new TypeReference<OperatorDTO>(){});
 				
-				logger.info("strat to consume to opererator queue : " + queue);
+				logger.info("strat to consume opererator queue : " + queue);
 				
 				List<Operator> operList = queue.getOperatorList();
 				if (operList!=null && !operList.isEmpty()) {
@@ -276,7 +276,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				ServiceCfgDTO dto = objectMapper.readValue(json, new TypeReference<ServiceCfgDTO>(){});
-				logger.info("strat to consume to service cfg queue : " + dto);
+				logger.info("strat to consume service cfg queue : " + dto);
 				ServiceCfg cfg = dto.getServiceCfg();
 				//不要循环操作redisTemplate，有TCP成本
 				String operType = cfg.getOperType();
