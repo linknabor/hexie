@@ -31,5 +31,5 @@ public interface PageConfigService {
 	
 	List<WuyePayTabs> getWuyePayTabs(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
 	
-	void updateWuyePayTabs(String appId);
+	void updatePageConfig();
 }

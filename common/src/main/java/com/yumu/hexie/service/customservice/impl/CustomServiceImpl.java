@@ -68,10 +68,10 @@ public class CustomServiceImpl implements CustomService {
 		List<CustomServiceVO> list = customServiceUtil.getCustomService(currUser).getData();
 		
 		//考虑把redis操作放在循环外，频繁操作有序列化和网络交互成本 TODO
-		list.stream().forEach(customServicevo->{
-			redisTemplate.opsForHash().put(ModelConstant.KEY_CUSTOM_SERVICE, customServicevo.getServiceId(), 
-					customServicevo.getServiceTitle());
-		});
+//		list.stream().forEach(customServicevo->{
+//			redisTemplate.opsForHash().put(ModelConstant.KEY_CUSTOM_SERVICE, customServicevo.getServiceId(), 
+//					customServicevo.getServiceTitle());
+//		});
 		return list;
 	}
 

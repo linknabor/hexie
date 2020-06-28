@@ -79,13 +79,12 @@ public class PageConfigController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/wuyePayTabs/{appId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/pageConfig", method = RequestMethod.POST)
 	@ResponseBody
-	public String updateWuyePayTabs(@ModelAttribute(Constants.USER) User user,
-			@PathVariable String appId) throws Exception {
+	public String updateWuyePayTabs(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
-		pageConfigService.updateWuyePayTabs(appId);
-		return "success";
+		pageConfigService.updatePageConfig();
+		return Constants.SUCCESS;
 	}
    
 }

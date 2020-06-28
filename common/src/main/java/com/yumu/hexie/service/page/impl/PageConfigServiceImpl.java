@@ -305,9 +305,9 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * 更新物业缴费选款卡配置
 	 */
 	@Override
-	public void updateWuyePayTabs(String appId) {
-		// TODO Auto-generated method stub
-		
+	public void updatePageConfig() {
+
+		pageConfigMap.clear();
 	}
 	
 	
