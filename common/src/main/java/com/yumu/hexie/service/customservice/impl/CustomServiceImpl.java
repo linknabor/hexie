@@ -33,6 +33,7 @@ import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
@@ -41,6 +42,7 @@ import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.notify.NotifyService;
+import com.yumu.hexie.service.o2o.OperatorService;
 
 @Service
 public class CustomServiceImpl implements CustomService {
@@ -63,6 +65,8 @@ public class CustomServiceImpl implements CustomService {
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private GotongService gotongService;
+	@Autowired
+	private OperatorService operatorService;
 	
 	
 	@Override
@@ -224,8 +228,13 @@ public class CustomServiceImpl implements CustomService {
 		Assert.hasText(orderId, "订单ID不能为空。");
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder!=null) {
-			if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
+			boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
+			if (serviceOrder.getUserId()!=user.getId() && !isServiceOper) {
 				throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
+			}else if (serviceOrder.getUserId()!=user.getId() && isServiceOper) {
+				if (serviceOrder.getOperatorUserId() != user.getId()) {
+					throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
+				}
 			}
 		}
 		return serviceOrder;
