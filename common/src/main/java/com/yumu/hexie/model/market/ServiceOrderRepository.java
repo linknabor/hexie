@@ -1,10 +1,13 @@
 package com.yumu.hexie.model.market;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.model.ModelConstant;
 
@@ -59,6 +62,14 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 	@Query(" from ServiceOrder p where p.userId =?1 and p.status in ?2 and p.groupRuleId = ?3 and p.orderType = ?4 ")
 	public List<ServiceOrder> CheckByUserAndStatusAndRuleIdAndOrderType(long userId, List<Integer> statuses, long ruleId, int orderType);
 	
-	@Query(value=" select s.id from serviceorder s join orderitem i on s.id = i.orderId where s.userId = ?1 and i.productId = ?2 and s.status =?3 group by s.id ", nativeQuery = true)
+	@Query(value = "select s.id from serviceorder s join orderitem i on s.id = i.orderId where s.userId = ?1 and i.productId = ?2 and s.status =?3 group by s.id ", nativeQuery = true)
 	public List<ServiceOrder> findAllByUserAndStatusAndProductIdAndOrderType(long userId, long productId, List<Integer> statuses);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update serviceorder set comment = ?1,  commentAttitude = ?2, commentQuality = ?3, "
+			+ "commentService = ?4, commentImgUrls = ?5, pingJiaStatus = ?6, "
+			+ "commentDate = ?7 where id = ?8 ", nativeQuery = true)
+	public void updateComment(String comment, int commentAttitude, int commentQuality, int commentService, 
+			String commentImrUrls, int commentStatus, Date commentDate, long id);
 }

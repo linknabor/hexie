@@ -434,13 +434,9 @@ public class CustomServiceImpl implements CustomService {
 		if (ModelConstant.ORDER_PINGJIA_TYPE_Y == serviceOrder.getPingjiaStatus()) {
 			throw new BizValidateException("订单已评价，订单ID：" + serviceCommentDTO.getOrderId());
 		}
-		serviceOrder.setComment(serviceCommentDTO.getComment());
-		serviceOrder.setCommentAttitude(serviceCommentDTO.getCommentAttitude());
-		serviceOrder.setCommentQuality(serviceCommentDTO.getCommentQuality());
-		serviceOrder.setCommentService(serviceCommentDTO.getCommentService());
-		serviceOrder.setCommentImgUrls(serviceCommentDTO.getCommentImgUrls());
-		serviceOrder.setPingjiaStatus(ModelConstant.ORDER_PINGJIA_TYPE_Y);
-		serviceOrder.setCommentDate(new Date());
+		serviceOrderRepository.updateComment(serviceCommentDTO.getComment(), serviceCommentDTO.getCommentAttitude(), serviceCommentDTO.getCommentQuality(), 
+				serviceCommentDTO.getCommentService(), serviceCommentDTO.getCommentImgUrls(), ModelConstant.ORDER_PINGJIA_TYPE_Y, new Date(), serviceOrder.getId());
+		
 		serviceOrderRepository.save(serviceOrder);
 	}
 	
