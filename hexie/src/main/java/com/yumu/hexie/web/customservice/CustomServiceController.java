@@ -68,7 +68,9 @@ public class CustomServiceController extends BaseController {
 		dto.setUser(user);
 		logger.info("customerServiceOrderDTO : " + dto);
 		
-		ServiceOrderPrepayVO vo = customService.createOrder(dto);
+		CreateOrderResponseVO cvo = customService.createOrder(dto);
+		customService.assginOrder(cvo);	//异步分派消息
+		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(cvo);
 		return BaseResult.successResult(vo);
 	}
 	

@@ -1,7 +1,6 @@
 package com.yumu.hexie.service.customservice.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -9,9 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -20,6 +16,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
@@ -60,8 +57,6 @@ public class CustomServiceImpl implements CustomService {
 	@Autowired
 	private RegionRepository regionRepository;
 	@Autowired
-	private StringRedisTemplate stringRedisTemplate;
-	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private GotongService gotongService;
@@ -88,7 +83,7 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Transactional
 	@Override
-	public ServiceOrderPrepayVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
+	public CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
 		
 		long begin = System.currentTimeMillis();
 		
@@ -138,25 +133,31 @@ public class CustomServiceImpl implements CustomService {
 			serviceOrder.setXiaoquName(xiaoquName);
 		}
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
-		
+		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		end = System.currentTimeMillis();
 		logger.info("createOrder location 2 : " + (end - begin)/1000);
+		return data;
 		
-		//3.如果是非一口价的订单，需要分发抢单的信息给操作员,异步
+	}
+	
+	/**
+	 * 非一口价分派订单
+	 */
+	@Override
+	public void assginOrder(CreateOrderResponseVO data) {
+		
+		long begin = System.currentTimeMillis();
+		
+		//如果是非一口价的订单，需要分发抢单的信息给操作员,异步
 		ServiceNotification serviceNotification = data.getServiceNotification();
 		logger.info("receivOrder : " + serviceNotification);
 		if (serviceNotification != null) {
-			serviceNotification.setOrderId(String.valueOf(serviceOrder.getId()));
+			serviceNotification.setOrderId(data.getOrderId());
 			notifyService.sendServiceNotificationAsync(data.getServiceNotification());
 		}
 		
-		end = System.currentTimeMillis();
-		logger.info("createOrder location 3 : " + (end - begin)/1000);
-		
-		//单列字段，前端需要。这里就不单独弄一个VO了
-		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
-		vo.setOrderId(String.valueOf(serviceOrder.getId()));
-		return vo;
+		long end = System.currentTimeMillis();
+		logger.info("assginOrder location 1 : " + (end - begin)/1000);
 		
 	}
 	
@@ -276,10 +277,12 @@ public class CustomServiceImpl implements CustomService {
 	@Transactional
 	public void acceptOrder(User user, String orderId) throws Exception {
 
-		String key = ModelConstant.KEY_ORDER_ACCEPTED + orderId;
-
 		Assert.hasText(orderId, "订单ID不能为空。");
-		getLock(key);
+		String key = ModelConstant.KEY_ORDER_ACCEPTED + orderId;
+		String result = RedisLock.lock(key, redisTemplate, 3600l);
+		if ("0".equals(result)) {
+			throw new BizValidateException("请稍后再试。");
+		}
 		
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
@@ -306,7 +309,7 @@ public class CustomServiceImpl implements CustomService {
 	
 		//发送客服消息，告知客户已接单。应该做异步队列TODO
 		gotongService.sendCustomServiceAssignedMsg(serviceOrder);
-		releaseLock(key);
+		RedisLock.releaseLock(key, redisTemplate);
 		 
 	}
 
@@ -500,43 +503,6 @@ public class CustomServiceImpl implements CustomService {
 		
 	}
 	
-	/**
-	 * 获取订单锁
-	 * @param key
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void getLock(String key) {
-		
-		//rua script保证setnx 跟expire 在一个操作里，保证了原子性,新版本setIfAbsent直接支持，老版本无法保证原子性
-//		String script = "if redis.call('setNx',KEYS[1],ARGV[1])==1 then return 1 else return 0 end"; 
-		String script = "if redis.call('setNx',KEYS[1],ARGV[1])==1 then return redis.call('expire',KEYS[1],ARGV[2]) else return 0 end "; 
-		RedisScript redisScript = new DefaultRedisScript<>(script, Long.class);
-		
-		Object result = stringRedisTemplate.execute(redisScript, stringRedisTemplate.getKeySerializer(), stringRedisTemplate.getValueSerializer(), 
-				Collections.singletonList(key), "1", "3600");
-		
-		logger.info("result : " + result);
-	}
-	
-	 /**
-     * 释放锁
-     * @param lockKey
-     * @param value
-     * @return
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	public boolean releaseLock(String key){
- 
-        String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
- 
-        RedisScript redisScript = new DefaultRedisScript<>(script, Long.class);
- 
-        Object result = stringRedisTemplate.execute(redisScript, stringRedisTemplate.getKeySerializer(), stringRedisTemplate.getValueSerializer(), 
-        		Collections.singletonList(key), "1");
-        logger.info("result : " + result);
-        return false;
-    }
-    
     @Override
     public void updateServiceCfg(ServiceCfgDTO serviceCfgDTO) {
     	

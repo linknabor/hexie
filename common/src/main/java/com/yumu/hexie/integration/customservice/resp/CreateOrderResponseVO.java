@@ -25,6 +25,7 @@ public class CreateOrderResponseVO implements Serializable {
 	private String timestamp;
 	@JsonProperty("user_pay_type")
 	private String payType;
+	private String orderId;
 	@JsonProperty("receivOrder")
 	private ServiceNotification serviceNotification;	//服务通知
 	
@@ -88,12 +89,18 @@ public class CreateOrderResponseVO implements Serializable {
 	public void setServiceNotification(ServiceNotification serviceNotification) {
 		this.serviceNotification = serviceNotification;
 	}
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
 	@Override
 	public String toString() {
 		return "CreateOrderResponseVO [pack=" + pack + ", token=" + token + ", tradeWaterId=" + tradeWaterId
 				+ ", appid=" + appid + ", signtype=" + signtype + ", paysign=" + paysign + ", noncestr=" + noncestr
-				+ ", timestamp=" + timestamp + ", payType=" + payType + ", serviceNotification=" + serviceNotification
-				+ "]";
+				+ ", timestamp=" + timestamp + ", payType=" + payType + ", orderId=" + orderId
+				+ ", serviceNotification=" + serviceNotification + "]";
 	}
 	
 

@@ -144,7 +144,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				ServiceNotification queue = objectMapper.readValue(json, new TypeReference<ServiceNotification>(){});
-				
 				logger.info("start to consume customServiceNotification queue : " + queue);
 				
 				boolean isSuccess = false;

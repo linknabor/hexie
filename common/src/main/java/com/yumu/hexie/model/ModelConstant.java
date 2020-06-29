@@ -361,4 +361,6 @@ public class ModelConstant {
 	public static final String KEY_ORDER_ACCEPTED = "lock:serviceOrder:";
 	
 	public static final String KEY_CUSTOM_SERVICE = "cfg:customservice";
+	public static final String KEY_NOITFY_PAY_DUPLICATION_CHECK = "lock:payNotification:";
+	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
 }		

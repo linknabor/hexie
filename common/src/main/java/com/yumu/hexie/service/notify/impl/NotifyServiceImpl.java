@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
@@ -64,8 +65,12 @@ public class NotifyServiceImpl implements NotifyService {
 	public void notify(PayNotification payNotification) {
 		
 		String tradeWaterId = payNotification.getOrderId();
-		//TODO 去重操作
-		
+		String key = ModelConstant.KEY_NOITFY_PAY_DUPLICATION_CHECK + tradeWaterId;
+		String result = RedisLock.lock(key, redisTemplate, 3600l);
+		if ("1".equals(result)) {
+			log.info("tradeWaterId : " + tradeWaterId + ", already notified, will skip ! ");
+			return;
+		}
 		//1.更新红包状态
 		User user = null;
 		Coupon coupon = null;
@@ -185,6 +190,14 @@ public class NotifyServiceImpl implements NotifyService {
 			return;
 		}
 		
+		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + serviceNotification.getOrderId();
+		String result = RedisLock.lock(key, redisTemplate, 3600l);
+		log.info("result : " + result);
+		if ("0".equals(result)) {
+			log.info("trade : " + serviceNotification.getOrderId() + ", already in the send queue, will skip .");
+			return;
+		}
+		
 		int retryTimes = 0;
 		boolean isSuccess = false;
 		
@@ -205,7 +218,6 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 		}
 		
-			
 	}
 	
 	
