@@ -279,8 +279,8 @@ public class CustomServiceImpl implements CustomService {
 
 		Assert.hasText(orderId, "订单ID不能为空。");
 		String key = ModelConstant.KEY_ORDER_ACCEPTED + orderId;
-		String result = RedisLock.lock(key, redisTemplate, 3600l);
-		if ("0".equals(result)) {
+		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		if (0 == result) {
 			throw new BizValidateException("请稍后再试。");
 		}
 		

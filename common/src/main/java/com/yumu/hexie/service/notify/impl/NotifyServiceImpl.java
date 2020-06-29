@@ -66,8 +66,8 @@ public class NotifyServiceImpl implements NotifyService {
 		
 		String tradeWaterId = payNotification.getOrderId();
 		String key = ModelConstant.KEY_NOITFY_PAY_DUPLICATION_CHECK + tradeWaterId;
-		String result = RedisLock.lock(key, redisTemplate, 3600l);
-		if ("1".equals(result)) {
+		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		if (0 == result) {
 			log.info("tradeWaterId : " + tradeWaterId + ", already notified, will skip ! ");
 			return;
 		}
@@ -191,9 +191,9 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		
 		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + serviceNotification.getOrderId();
-		String result = RedisLock.lock(key, redisTemplate, 3600l);
+		Long result = RedisLock.lock(key, redisTemplate, 3600l);
 		log.info("result : " + result);
-		if ("0".equals(result)) {
+		if (0 == result) {
 			log.info("trade : " + serviceNotification.getOrderId() + ", already in the send queue, will skip .");
 			return;
 		}

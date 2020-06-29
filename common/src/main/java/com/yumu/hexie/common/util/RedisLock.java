@@ -21,7 +21,7 @@ public class RedisLock {
 	 * @return 1表示成功，0表示KEY已经添加过了
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static String lock(String key, RedisTemplate redisTemplate, long lockTime) {
+	public static Long lock(String key, RedisTemplate redisTemplate, long lockTime) {
 		
 		//rua script保证setnx 跟expire 在一个操作里，保证了原子性,新版本setIfAbsent直接支持，老版本无法保证原子性
 //		String script = "if redis.call('setNx',KEYS[1],ARGV[1])==1 then return 1 else return 0 end"; 
@@ -31,7 +31,7 @@ public class RedisLock {
 		Object result = redisTemplate.execute(redisScript, redisTemplate.getKeySerializer(), redisTemplate.getValueSerializer(), 
 				Collections.singletonList(key), "1", String.valueOf(lockTime));
 		
-		return (String)result;
+		return (Long)result;
 	}
 	
 	 /**
@@ -41,7 +41,7 @@ public class RedisLock {
      * @return 1表示成功
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-	public static String releaseLock(String key, RedisTemplate redisTemplate){
+	public static Long releaseLock(String key, RedisTemplate redisTemplate){
  
         String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
  
@@ -49,7 +49,7 @@ public class RedisLock {
  
         Object result = redisTemplate.execute(redisScript, redisTemplate.getKeySerializer(), redisTemplate.getValueSerializer(), 
         		Collections.singletonList(key), "1");
-        return (String)result;
+        return (Long)result;
     }
 	
 	
