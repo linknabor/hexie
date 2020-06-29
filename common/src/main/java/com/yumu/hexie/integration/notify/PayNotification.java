@@ -141,7 +141,7 @@ public class PayNotification implements Serializable {
 		private static final long serialVersionUID = -8381624394203118088L;
 		
 		private User user;
-		private String orderId;
+		private String orderId;	//放tradeWaterId
 		private List<Map<String, String>> openids;	//本次支付需要通知的用户id列表 
 
 		public User getUser() {

@@ -152,7 +152,7 @@ public class CustomServiceImpl implements CustomService {
 		ServiceNotification serviceNotification = data.getServiceNotification();
 		logger.info("receivOrder : " + serviceNotification);
 		if (serviceNotification != null) {
-			serviceNotification.setOrderId(data.getOrderId());
+			serviceNotification.setOrderId(data.getTradeWaterId());
 			notifyService.sendServiceNotificationAsync(data.getServiceNotification());
 		}
 		

@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.notify.impl;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -131,8 +130,6 @@ public class NotifyServiceImpl implements NotifyService {
 				log.warn("tranAmt is null, accountNotify : " + accountNotify);
 				return;
 			}
-			BigDecimal feePrice = accountNotify.getFeePrice().divide(new BigDecimal("100"));
-			accountNotify.setFeePrice(feePrice);	//交易金额需要除以100。 不放在实体的set函数里，因为多次序列化会反复除
 			sendPayNotificationAsync(accountNotify);
 		}
 		//6.自定义服务
