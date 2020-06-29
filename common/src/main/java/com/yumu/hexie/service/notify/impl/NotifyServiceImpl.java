@@ -63,6 +63,9 @@ public class NotifyServiceImpl implements NotifyService {
 	@Override
 	public void notify(PayNotification payNotification) {
 		
+		String tradeWaterId = payNotification.getOrderId();
+		//TODO 去重操作
+		
 		//1.更新红包状态
 		User user = null;
 		Coupon coupon = null;

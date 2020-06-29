@@ -236,7 +236,7 @@ public class ServiceOrder  extends BaseModel {
 	
 	private static Map<Integer,String> SERVICE_ORDER_STATUSMAP = new HashMap<Integer,String>();
 	static{
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"可接单");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"未接单");    
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");    
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");    
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");    

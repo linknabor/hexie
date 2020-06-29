@@ -90,8 +90,13 @@ public class CustomServiceImpl implements CustomService {
 	@Override
 	public ServiceOrderPrepayVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
 		
+		long begin = System.currentTimeMillis();
+		
 		//1.调用API创建接口
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
+		
+		long end = System.currentTimeMillis();
+		logger.info("location 1 : " + (end - begin)/1000);
 		
 		//2.保存本地订单
 		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
@@ -134,12 +139,20 @@ public class CustomServiceImpl implements CustomService {
 		}
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
 		
+		end = System.currentTimeMillis();
+		logger.info("location 2 : " + (end - begin)/1000);
+		
 		//3.如果是非一口价的订单，需要分发抢单的信息给操作员,异步
 		ServiceNotification serviceNotification = data.getServiceNotification();
+		logger.info("receivOrder : " + serviceNotification);
 		if (serviceNotification != null) {
 			serviceNotification.setOrderId(String.valueOf(serviceOrder.getId()));
 			notifyService.sendServiceNotificationAsync(data.getServiceNotification());
 		}
+		
+		end = System.currentTimeMillis();
+		logger.info("location 3 : " + (end - begin)/1000);
+		
 		//单列字段，前端需要。这里就不单独弄一个VO了
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
 		vo.setOrderId(String.valueOf(serviceOrder.getId()));
@@ -153,13 +166,17 @@ public class CustomServiceImpl implements CustomService {
 	@Override
 	@Transactional
 	public ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception {
+
+		long begin = System.currentTimeMillis();
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder == null) {
 			throw new BizValidateException("未查询到订单，orderId: " + orderId);
 		}
+		
+		long end = System.currentTimeMillis();
+		logger.info("location 1 : " + (end - begin)/1000);
 		
 		//1.调用API创建接口
 		CustomerServiceOrderDTO dto = new CustomerServiceOrderDTO();
@@ -169,6 +186,9 @@ public class CustomServiceImpl implements CustomService {
 		if (region == null) {
 			throw new BizValidateException("未查询到小区, region id : " + serviceOrder.getXiaoquId());
 		}
+		end = System.currentTimeMillis();
+		logger.info("location 2 : " + (end - begin)/1000);
+		
 		dto.setSectId(String.valueOf(region.getSectId()));
 		dto.setServiceAddr(serviceOrder.getAddress());
 		dto.setServiceId(String.valueOf(serviceOrder.getProductId()));
@@ -176,11 +196,18 @@ public class CustomServiceImpl implements CustomService {
 		dto.setTranAmt(amount);
 		dto.setUser(user);
 		CreateOrderResponseVO data = customServiceUtil.createOrder(dto).getData();
+		
+		end = System.currentTimeMillis();
+		logger.info("location 3 : " + (end - begin)/1000);
+		
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
 		vo.setOrderId(orderId);
-		
 		serviceOrder.setPrice(Float.valueOf(amount));
 		serviceOrderRepository.save(serviceOrder);
+		
+		end = System.currentTimeMillis();
+		logger.info("location 4 : " + (end - begin)/1000);
+		
 		return vo;
 		
 	}
