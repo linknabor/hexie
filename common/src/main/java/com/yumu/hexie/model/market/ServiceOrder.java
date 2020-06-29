@@ -17,6 +17,8 @@ import org.hibernate.annotations.FetchMode;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.model.BaseModel;
@@ -37,7 +39,7 @@ public class ServiceOrder  extends BaseModel {
 	/** 商品相关 **/
 	//主商品ID
 	private int orderType;//0.拼单单 1.单个订单 2.预约单 3. 特卖单 4.团购单
-
+	@JsonSerialize(using = ToStringSerializer.class)
 	private long productId;
 	private long groupRuleId;
 	private long userId;
