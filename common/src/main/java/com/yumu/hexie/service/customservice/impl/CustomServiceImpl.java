@@ -96,7 +96,7 @@ public class CustomServiceImpl implements CustomService {
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
 		
 		long end = System.currentTimeMillis();
-		logger.info("location 1 : " + (end - begin)/1000);
+		logger.info("createOrder location 1 : " + (end - begin)/1000);
 		
 		//2.保存本地订单
 		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
@@ -140,7 +140,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
 		
 		end = System.currentTimeMillis();
-		logger.info("location 2 : " + (end - begin)/1000);
+		logger.info("createOrder location 2 : " + (end - begin)/1000);
 		
 		//3.如果是非一口价的订单，需要分发抢单的信息给操作员,异步
 		ServiceNotification serviceNotification = data.getServiceNotification();
@@ -151,7 +151,7 @@ public class CustomServiceImpl implements CustomService {
 		}
 		
 		end = System.currentTimeMillis();
-		logger.info("location 3 : " + (end - begin)/1000);
+		logger.info("createOrder location 3 : " + (end - begin)/1000);
 		
 		//单列字段，前端需要。这里就不单独弄一个VO了
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
@@ -176,7 +176,7 @@ public class CustomServiceImpl implements CustomService {
 		}
 		
 		long end = System.currentTimeMillis();
-		logger.info("location 1 : " + (end - begin)/1000);
+		logger.info("orderPay location 1 : " + (end - begin)/1000);
 		
 		//1.调用API创建接口
 		CustomerServiceOrderDTO dto = new CustomerServiceOrderDTO();
@@ -187,7 +187,7 @@ public class CustomServiceImpl implements CustomService {
 			throw new BizValidateException("未查询到小区, region id : " + serviceOrder.getXiaoquId());
 		}
 		end = System.currentTimeMillis();
-		logger.info("location 2 : " + (end - begin)/1000);
+		logger.info("orderPay location 2 : " + (end - begin)/1000);
 		
 		dto.setSectId(String.valueOf(region.getSectId()));
 		dto.setServiceAddr(serviceOrder.getAddress());
@@ -198,7 +198,7 @@ public class CustomServiceImpl implements CustomService {
 		CreateOrderResponseVO data = customServiceUtil.createOrder(dto).getData();
 		
 		end = System.currentTimeMillis();
-		logger.info("location 3 : " + (end - begin)/1000);
+		logger.info("orderPay location 3 : " + (end - begin)/1000);
 		
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
 		vo.setOrderId(orderId);
@@ -206,7 +206,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrderRepository.save(serviceOrder);
 		
 		end = System.currentTimeMillis();
-		logger.info("location 4 : " + (end - begin)/1000);
+		logger.info("orderPay location 4 : " + (end - begin)/1000);
 		
 		return vo;
 		
