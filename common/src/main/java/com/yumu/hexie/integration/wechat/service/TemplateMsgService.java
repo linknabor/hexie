@@ -386,7 +386,6 @@ public class TemplateMsgService {
     	vo.setOrderId(new TemplateItem(String.valueOf(serviceOrder.getId())));
     	vo.setServiceType(new TemplateItem(serviceOrder.getSubTypeName()));
     	String customerName = serviceOrder.getReceiverName();
-    	customerName = customerName.substring(0, 1) + "先生/女士";
     	vo.setCustomerName(new TemplateItem(customerName));
     	vo.setCustomerTel(new TemplateItem(serviceOrder.getTel()));
     	vo.setRemark(new TemplateItem(serviceOrder.getAddress()));
