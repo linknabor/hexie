@@ -248,6 +248,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						if (user == null) {
 							logger.warn("user not exists, openid : " + operator.getOpenid());
 						}
+						if ("0".equals(operator.getServiceId())) {
+							return;
+						}
 						ServiceOperator serviceOperator = new ServiceOperator();
 						serviceOperator.setName(user.getName());
 						serviceOperator.setOpenId(operator.getOpenid());
