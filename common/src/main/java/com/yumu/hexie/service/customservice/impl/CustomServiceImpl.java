@@ -93,7 +93,7 @@ public class CustomServiceImpl implements CustomService {
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
 		
 		long end = System.currentTimeMillis();
-		logger.info("createOrder location 1 : " + (end - begin)/1000);
+		logger.info("createOrderService location 1 : " + (end - begin)/1000);
 		
 		//2.保存本地订单
 		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
@@ -138,7 +138,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		end = System.currentTimeMillis();
-		logger.info("createOrder location 2 : " + (end - begin)/1000);
+		logger.info("createOrderService location 2 : " + (end - begin)/1000);
 		return data;
 		
 	}
@@ -148,8 +148,11 @@ public class CustomServiceImpl implements CustomService {
 	@Async("taskExecutor")
 	public void saveServiceImages(String appId, long orderId, List<String>imgUrls) {
 		
+		long begin = System.currentTimeMillis();
 		Map<String, String> uploaded = uploadService.uploadImages(appId, imgUrls);
-		logger.info("saveServiceImages, uploaded : " + uploaded);
+		long end = System.currentTimeMillis();
+		logger.info("upload time : " + (end - begin)/1000);
+		
 		ServiceOrder serviceOrder = null;
 		int count = 0;
 		while (serviceOrder == null && count < 3) {
@@ -172,6 +175,9 @@ public class CustomServiceImpl implements CustomService {
 			}
 		}
 		serviceOrderRepository.updateImgUrls(bf.toString(), orderId);
+		
+		end = System.currentTimeMillis();
+		logger.info("save img2db time : " + (end - begin)/1000);
 		
 	}
 	

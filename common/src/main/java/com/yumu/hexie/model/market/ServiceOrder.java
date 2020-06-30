@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -70,6 +71,7 @@ public class ServiceOrder  extends BaseModel {
 	private long serviceAddressId;//FIXME 服务地址
 	private int receiveTimeType;//周一至周五、周六周日、全周
 	private String memo;
+	@Column(length=1023)
 	private String imgUrls;	//上传图片链接，服务内容链接
 	
 	private String address;
@@ -130,6 +132,7 @@ public class ServiceOrder  extends BaseModel {
 	private int commentQuality;
     private int commentAttitude;
     private int commentService;
+    @Column(length=1023)
     private String commentImgUrls;
     private Date commentDate;
     

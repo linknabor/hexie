@@ -79,13 +79,13 @@ public class CustomServiceController extends BaseController {
 		logger.info("customerServiceOrderDTO : " + dto);
 		
 		long end = System.currentTimeMillis();
-		logger.info("createOrder location 1 : " + (end-begin)/1000);
+		logger.info("createOrderController location 1 : " + (end-begin)/1000);
 		
 		CreateOrderResponseVO cvo = customService.createOrder(dto);
 		customService.assginOrder(cvo);	//异步分派消息
 		
 		end = System.currentTimeMillis();
-		logger.info("createOrder location 2 : " + (end-begin)/1000);
+		logger.info("createOrderController location 2 : " + (end-begin)/1000);
 		
 		String imgUrls = customServiceOrderVO.getImgUrls();
 		if (!StringUtils.isEmpty(imgUrls)) {
