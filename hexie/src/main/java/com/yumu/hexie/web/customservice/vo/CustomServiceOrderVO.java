@@ -33,7 +33,7 @@ public class CustomServiceOrderVO implements Serializable {
 	@JsonProperty("sect_name")
 	private String sectName;
 	@JsonProperty
-	private String imageUrls;	//本次下单用户上传的图片
+	private String imgUrls;	//本次下单用户上传的图片
 	
 	public String getServiceId() {
 		return serviceId;
@@ -101,18 +101,18 @@ public class CustomServiceOrderVO implements Serializable {
 	public void setSectName(String sectName) {
 		this.sectName = sectName;
 	}
-	public String getImageUrls() {
-		return imageUrls;
+	public String getImgUrls() {
+		return imgUrls;
 	}
-	public void setImageUrls(String imageUrls) {
-		this.imageUrls = imageUrls;
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
 	}
 	@Override
 	public String toString() {
 		return "CustomServiceOrderVO [serviceId=" + serviceId + ", serviceName=" + serviceName + ", image=" + image
 				+ ", sectId=" + sectId + ", linkman=" + linkman + ", linktel=" + linktel + ", serviceAddr="
 				+ serviceAddr + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", memo=" + memo
-				+ ", sectName=" + sectName + ", imageUrls=" + imageUrls + "]";
+				+ ", sectName=" + sectName + ", imgUrls=" + imgUrls + "]";
 	}
 	
 

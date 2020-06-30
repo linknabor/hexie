@@ -87,7 +87,7 @@ public class CustomServiceController extends BaseController {
 		end = System.currentTimeMillis();
 		logger.info("createOrder location 2 : " + (end-begin)/1000);
 		
-		String imgUrls = customServiceOrderVO.getImageUrls();
+		String imgUrls = customServiceOrderVO.getImgUrls();
 		if (!StringUtils.isEmpty(imgUrls)) {
 			String[]imgArr = imgUrls.split(",");
 			List<String> imgList = Arrays.asList(imgArr);
