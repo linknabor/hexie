@@ -344,7 +344,7 @@ public class CustomServiceImpl implements CustomService {
 				throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
 			}else if (serviceOrder.getUserId()!=user.getId() && isServiceOper) {
 				if(serviceOrder.getOperatorUserId() != 0 && serviceOrder.getOperatorUserId() != user.getId()) {
-					throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
+					throw new BizValidateException("订单已被抢。orderId : " + orderId);
 				}
 			}
 		}
