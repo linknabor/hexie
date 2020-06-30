@@ -516,6 +516,40 @@ public class CustomServiceImpl implements CustomService {
 	}
 	
 	/**
+	 * 保存评论时上传的图片
+	 */
+	@Transactional
+	@Override
+	@Async("taskExecutor")
+	public void saveCommentImages(String appId, long orderId, List<String>imgUrls) {
+		
+		Map<String, String> uploaded = uploadService.uploadImages(appId, imgUrls);
+		ServiceOrder serviceOrder = null;
+		int count = 0;
+		while (serviceOrder == null && count < 3) {
+			serviceOrder = serviceOrderRepository.findOne(orderId);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				logger.error(e.getMessage(), e);
+			}
+			count++;
+		}
+		StringBuffer bf = new StringBuffer();
+		for (int i = 0; i < imgUrls.size(); i++) {
+			String uploadedUrl = uploaded.get(imgUrls.get(i));
+			if (!StringUtils.isEmpty(uploadedUrl)) {
+				bf.append(uploadedUrl);
+				if (i!=imgUrls.size()-1) {
+					bf.append(",");
+				}
+			}
+		}
+		serviceOrderRepository.updateCommentImgUrls(bf.toString(), orderId);
+		
+	}
+	
+	/**
 	 * 取消支付
 	 * @param user
 	 * @param orderId

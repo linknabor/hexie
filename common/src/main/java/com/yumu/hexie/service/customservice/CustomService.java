@@ -48,6 +48,8 @@ public interface CustomService {
 
 	void saveServiceImages(String appId, long orderId, List<String> imgUrls);
 
+	void saveCommentImages(String appId, long orderId, List<String> imgUrls);
+
 	
 
 }

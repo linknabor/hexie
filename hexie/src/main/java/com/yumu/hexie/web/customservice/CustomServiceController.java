@@ -275,8 +275,15 @@ public class CustomServiceController extends BaseController {
 		ServiceCommentDTO dto = new ServiceCommentDTO();
 		BeanUtils.copyProperties(serviceCommentVO, dto);
 		dto.setUser(user);
-		
 		customService.comment(dto);
+		
+		String imgUrls = serviceCommentVO.getCommentImgUrls();
+		if (!StringUtils.isEmpty(imgUrls)) {
+			String[]imgArr = imgUrls.split(",");
+			List<String> imgList = Arrays.asList(imgArr);
+			customService.saveCommentImages(user.getAppId(), Long.valueOf(serviceCommentVO.getOrderId()), imgList);	//异步保存上传的图片	
+		}
+		
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	
@@ -289,7 +296,7 @@ public class CustomServiceController extends BaseController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/cancelPay", method = RequestMethod.POST)
-	public BaseResult<String> comment(@ModelAttribute(Constants.USER) User user, 
+	public BaseResult<String> cancelPay(@ModelAttribute(Constants.USER) User user, 
 			String orderId) throws Exception {
 		
 		logger.info("cancelPay, user : " + user);

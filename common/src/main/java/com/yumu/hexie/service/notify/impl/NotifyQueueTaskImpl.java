@@ -233,8 +233,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				if (operList!=null && !operList.isEmpty()) {
 					serviceOperatorRepository.deleteByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
 				}
-				
-				operList.stream().forEach(operator->{
+				List<Operator> failedList = new ArrayList<>();
+				operList.forEach(operator->{
 					try {
 						if (StringUtils.isEmpty(operator.getTel()) || StringUtils.isEmpty(operator.getOpenid())) {
 							logger.warn("operator tel or openid is null, oper : " + operator);
@@ -257,10 +257,17 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						serviceOperator.setSubTypes(operator.getServiceId());
 						serviceOperatorRepository.save(serviceOperator);
 					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
+						logger.error("save serviceOperator failed ! oper : " + operator);
+						failedList.add(operator);
+					
 					}
 				});
 				
+				if (failedList.size() == operList.size() && operList.size() > 0) {
+					queue.setOperatorList(failedList);
+					String value = objectMapper.writeValueAsString(queue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_OPERATOR_QUEUE, value);
+				}
 			
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
@@ -296,35 +303,48 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				if ("0".equals(serviceId)) {
 					continue;
 				}
-				//不要循环操作redisTemplate，有TCP成本
-				String operType = cfg.getOperType();
-				if ("add".equals(operType) || "edit".equals(operType)) {
-					redisTemplate.opsForHash().put(ModelConstant.KEY_CUSTOM_SERVICE, serviceId, cfg.getServiceName());
-				}else if ("delete".equals(operType)) {
-					redisTemplate.opsForHash().delete(ModelConstant.KEY_CUSTOM_SERVICE, serviceId);
+				
+				boolean isSuccess = false;
+				try {
+					//不要循环操作redisTemplate，有TCP成本
+					String operType = cfg.getOperType();
+					if ("add".equals(operType) || "edit".equals(operType)) {
+						redisTemplate.opsForHash().put(ModelConstant.KEY_CUSTOM_SERVICE, serviceId, cfg.getServiceName());
+					}else if ("delete".equals(operType)) {
+						redisTemplate.opsForHash().delete(ModelConstant.KEY_CUSTOM_SERVICE, serviceId);
+					}
+
+					if ("delete".equals(operType)) {
+						List <ServiceOperator> opList = serviceOperatorRepository.findByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
+						opList.forEach(oper->{
+							String subTypes = oper.getSubTypes();
+							if (StringUtils.isEmpty(subTypes)) {
+								return;
+							}
+							String[]subTypeArr = subTypes.split(",");
+							List<String> tepmList = new ArrayList<>();
+							List<String> opSubList = Arrays.asList(subTypeArr);	//返回的list不是java.util.list，是一个内部类，不能使用remove等操作。所以外面套一层
+							tepmList.addAll(opSubList);
+							tepmList.remove(serviceId);
+							StringBuffer bf = new StringBuffer();
+							for (String subType : tepmList) {
+								bf.append(subType).append(",");
+							}
+							String subs = bf.substring(0, bf.length()-1);
+							oper.setSubTypes(subs);
+							serviceOperatorRepository.save(oper);
+							
+						});
+					}
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
 				}
-			
-				if ("delete".equals(operType)) {
-					List <ServiceOperator> opList = serviceOperatorRepository.findByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
-					opList.forEach(oper->{
-						String subTypes = oper.getSubTypes();
-						if (StringUtils.isEmpty(subTypes)) {
-							return;
-						}
-						String[]subTypeArr = subTypes.split(",");
-						List<String> tepmList = new ArrayList<>();
-						List<String> opSubList = Arrays.asList(subTypeArr);	//返回的list不是java.util.list，是一个内部类，不能使用remove等操作。所以外面套一层
-						tepmList.addAll(opSubList);
-						tepmList.remove(serviceId);
-						StringBuffer bf = new StringBuffer();
-						for (String subType : tepmList) {
-							bf.append(subType).append(",");
-						}
-						String subs = bf.substring(0, bf.length()-1);
-						oper.setSubTypes(subs);
-						serviceOperatorRepository.save(oper);
-						
-					});
+				
+				isSuccess = true;
+				if (!isSuccess) {
+					String value = objectMapper.writeValueAsString(json);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
 				}
 			
 			} catch (Exception e) {
