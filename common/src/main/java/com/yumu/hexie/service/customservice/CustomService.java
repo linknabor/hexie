@@ -46,6 +46,8 @@ public interface CustomService {
 
 	void assginOrder(CreateOrderResponseVO data);
 
+	void saveServiceImages(String appId, long orderId, List<String> imgUrls);
+
 	
 
 }

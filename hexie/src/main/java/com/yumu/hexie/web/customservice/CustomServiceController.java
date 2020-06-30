@@ -1,11 +1,13 @@
 package com.yumu.hexie.web.customservice;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,18 +60,43 @@ public class CustomServiceController extends BaseController {
 		
 	}
 	
+	/**
+	 * 创建自定义服务订单
+	 * @param user
+	 * @param customServiceOrderVO
+	 * @return
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order", method = RequestMethod.POST)
 	public BaseResult<CreateOrderResponseVO> createOrder(@ModelAttribute(Constants.USER) User user, @RequestBody CustomServiceOrderVO customServiceOrderVO) throws Exception {
 		
+		long begin = System.currentTimeMillis();
 		logger.info("customServiceOrderVO : " + customServiceOrderVO);
 		CustomerServiceOrderDTO dto = new CustomerServiceOrderDTO();
 		BeanUtils.copyProperties(customServiceOrderVO, dto);
 		dto.setUser(user);
 		logger.info("customerServiceOrderDTO : " + dto);
 		
+		long end = System.currentTimeMillis();
+		logger.info("createOrder location 1 : " + (end-begin)/1000);
+		
 		CreateOrderResponseVO cvo = customService.createOrder(dto);
 		customService.assginOrder(cvo);	//异步分派消息
+		
+		end = System.currentTimeMillis();
+		logger.info("createOrder location 2 : " + (end-begin)/1000);
+		
+		String imgUrls = customServiceOrderVO.getImageUrls();
+		if (!StringUtils.isEmpty(imgUrls)) {
+			String[]imgArr = imgUrls.split(",");
+			List<String> imgList = Arrays.asList(imgArr);
+			customService.saveServiceImages(user.getAppId(), Long.valueOf(cvo.getOrderId()), imgList);	//异步保存上传的图片	
+		}
+		
+		end = System.currentTimeMillis();
+		logger.info("createOrder location 3 : " + (end-begin)/1000);
+		
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(cvo);
 		return BaseResult.successResult(vo);
 	}

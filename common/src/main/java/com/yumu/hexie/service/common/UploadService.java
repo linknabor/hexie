@@ -4,6 +4,9 @@
  */
 package com.yumu.hexie.service.common;
 
+import java.util.List;
+import java.util.Map;
+
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 
 /**
@@ -17,4 +20,6 @@ import com.yumu.hexie.model.localservice.repair.RepairOrder;
 public interface UploadService {
 
     public void updateRepairImg(RepairOrder order);
+
+    Map<String, String> uploadImages(String appId, List<String> imgUrlList);
 }

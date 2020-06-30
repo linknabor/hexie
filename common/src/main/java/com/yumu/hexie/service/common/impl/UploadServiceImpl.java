@@ -7,6 +7,9 @@ package com.yumu.hexie.service.common.impl;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -80,6 +83,37 @@ public class UploadServiceImpl implements UploadService {
         nOrder.setCommentImgUrls(commentImgUrls);
         repairOrderRepository.save(nOrder);
     }
+    
+    /**
+     * 上传图片
+     */
+    @Override
+    public Map<String, String> uploadImages(String appId, List<String> imgUrlList) {
+    	
+    	Map<String, String> returnMap = new HashMap<String, String>();
+    	if (imgUrlList == null || imgUrlList.isEmpty()) {
+    		return returnMap;
+		}
+    	//多线程并行，同时上传多个图片
+    	imgUrlList.parallelStream().forEach(imgUrl->{
+    		if (StringUtils.isEmpty(imgUrl)) {
+				return;
+			}
+    		if (imgUrl.indexOf("http") == -1) {
+    			String qiniuUrl = uploadFileToQiniu(downloadFromWechat(appId, imgUrl));
+    			if(!StringUtils.isEmpty(qiniuUrl)) {
+    				returnMap.put(imgUrl, qiniuUrl);
+                } else {
+                	returnMap.put(imgUrl, imgUrl);
+                }
+			}else {
+				returnMap.put(imgUrl, imgUrl);
+			}
+    	});
+    	return returnMap;
+    	
+    }
+    
 
     private String moveImges(String appId, String imgUrls) {
         if(StringUtil.isEmpty(imgUrls)) {

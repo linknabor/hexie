@@ -70,6 +70,7 @@ public class ServiceOrder  extends BaseModel {
 	private long serviceAddressId;//FIXME 服务地址
 	private int receiveTimeType;//周一至周五、周六周日、全周
 	private String memo;
+	private String imgUrls;	//上传图片链接，服务内容链接
 	
 	private String address;
 	private String tel;
@@ -810,6 +811,12 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setSubTypeName(String subTypeName) {
 		this.subTypeName = subTypeName;
+	}
+	public String getImgUrls() {
+		return imgUrls;
+	}
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
 	}
 	@Transient
 	@JsonIgnore

@@ -3,11 +3,13 @@ package com.yumu.hexie.service.customservice.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -36,9 +38,9 @@ import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.common.UploadService;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.exception.BizValidateException;
-import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.service.o2o.OperatorService;
 
 @Service
@@ -53,8 +55,6 @@ public class CustomServiceImpl implements CustomService {
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
 	@Autowired
-	private NotifyService notifyService;
-	@Autowired
 	private RegionRepository regionRepository;
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
@@ -62,6 +62,8 @@ public class CustomServiceImpl implements CustomService {
 	private GotongService gotongService;
 	@Autowired
 	private OperatorService operatorService;
+	@Autowired
+	private UploadService uploadService;
 	
 	
 	@Override
@@ -114,6 +116,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setSubType(Long.valueOf(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
+		
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
 		logger.info("createOrder, xiaoquId : " + xiaoquId);
@@ -140,6 +143,37 @@ public class CustomServiceImpl implements CustomService {
 		
 	}
 	
+	@Transactional
+	@Override
+	@Async("taskExecutor")
+	public void saveServiceImages(String appId, long orderId, List<String>imgUrls) {
+		
+		Map<String, String> uploaded = uploadService.uploadImages(appId, imgUrls);
+		ServiceOrder serviceOrder = null;
+		int count = 0;
+		while (serviceOrder == null && count < 3) {
+			serviceOrder = serviceOrderRepository.findOne(orderId);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				logger.error(e.getMessage(), e);
+			}
+			count++;
+		}
+		StringBuffer bf = new StringBuffer();
+		for (int i = 0; i < imgUrls.size(); i++) {
+			String uploadedUrl = uploaded.get(imgUrls.get(i));
+			if (!StringUtils.isEmpty(uploadedUrl)) {
+				bf.append(uploadedUrl);
+				if (i!=imgUrls.size()-1) {
+					bf.append(",");
+				}
+			}
+		}
+		serviceOrderRepository.updateImgUrls(bf.toString(), orderId);
+		
+	}
+	
 	/**
 	 * 非一口价分派订单
 	 */
@@ -153,13 +187,54 @@ public class CustomServiceImpl implements CustomService {
 		logger.info("receivOrder : " + serviceNotification);
 		if (serviceNotification != null) {
 			serviceNotification.setOrderId(data.getTradeWaterId());
-			notifyService.sendServiceNotificationAsync(data.getServiceNotification());
+			sendServiceNotificationAsync(data.getServiceNotification());
 		}
 		
 		long end = System.currentTimeMillis();
 		logger.info("assginOrder location 1 : " + (end - begin)/1000);
 		
 	}
+	
+	/**
+	 * 服务消息推送
+	 */
+	public void sendServiceNotificationAsync(ServiceNotification serviceNotification) {
+		
+		if (serviceNotification == null) {
+			return;
+		}
+		
+		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + serviceNotification.getOrderId();
+		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		logger.info("result : " + result);
+		if (0 == result) {
+			logger.info("trade : " + serviceNotification.getOrderId() + ", already in the send queue, will skip .");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(serviceNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+	
 	
 	/**
 	 * 非一口价支付

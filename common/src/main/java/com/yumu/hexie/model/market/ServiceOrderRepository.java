@@ -72,4 +72,12 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 			+ "commentDate = ?7 where id = ?8 ", nativeQuery = true)
 	public void updateComment(String comment, int commentAttitude, int commentQuality, int commentService, 
 			String commentImrUrls, int commentStatus, Date commentDate, long id);
+
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update serviceorder set imgUrls = ?1 where id = ?2 ", nativeQuery = true)
+	public void updateImgUrls(String imgUrls, long orderId);
+
+
 }
