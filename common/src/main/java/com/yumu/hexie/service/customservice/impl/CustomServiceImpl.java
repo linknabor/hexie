@@ -149,6 +149,7 @@ public class CustomServiceImpl implements CustomService {
 	public void saveServiceImages(String appId, long orderId, List<String>imgUrls) {
 		
 		Map<String, String> uploaded = uploadService.uploadImages(appId, imgUrls);
+		logger.info("saveServiceImages, uploaded : " + uploaded);
 		ServiceOrder serviceOrder = null;
 		int count = 0;
 		while (serviceOrder == null && count < 3) {
