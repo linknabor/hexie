@@ -6,6 +6,7 @@ package com.yumu.hexie.service.common.impl;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +91,7 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public Map<String, String> uploadImages(String appId, List<String> imgUrlList) {
     	
-    	Map<String, String> returnMap = new HashMap<String, String>();
+    	Map<String, String> returnMap = Collections.synchronizedMap(new HashMap<>());
     	if (imgUrlList == null || imgUrlList.isEmpty()) {
     		return returnMap;
 		}
