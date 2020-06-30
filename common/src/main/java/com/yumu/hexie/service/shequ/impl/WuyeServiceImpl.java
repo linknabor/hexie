@@ -520,6 +520,10 @@ public class WuyeServiceImpl implements WuyeService {
 						for (int i = 0; i < sTypes.length; i++) {
 							
 							log.info("service name : "  + objList.get(i));
+							if (StringUtils.isEmpty(objList.get(i))) {
+								log.info("service id : " + sTypes[i] + ", cannot find related service name ! will skip !");
+								continue;
+							}
 							PayCfg payCfg = new PayCfg();
 							payCfg.setServiceTypeCn((String) objList.get(i));
 							payCfg.setServiceId((String)sTypes[i]);
