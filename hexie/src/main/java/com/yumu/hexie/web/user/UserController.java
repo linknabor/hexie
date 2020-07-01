@@ -123,6 +123,7 @@ public class UserController extends BaseController{
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    pageConfigService.filterBottomIcon(user, iconList);
+			    log.info("iconList : " + iconList);
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(iconList);
