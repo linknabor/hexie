@@ -1,12 +1,9 @@
 package com.yumu.hexie.service.page.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -17,16 +14,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumu.hexie.common.Constants;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
@@ -43,7 +35,6 @@ import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.QrCodeRepository;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.model.view.WuyePayTabsRepository;
-import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.page.PageConfigService;
 
 @Service("pageConfigService")
@@ -129,42 +120,6 @@ public class PageConfigServiceImpl implements PageConfigService {
 		return iconList;
 	}
 
-	/**
-	 * 更新bottomicon缓存
-	 */
-	@Override
-	public void updateBottomIcon() throws JsonProcessingException {
-
-		redisTemplate.expire(ModelConstant.KEY_TYPE_BOTTOM_ICON, 1l, TimeUnit.MILLISECONDS); // 先把原来的过期
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		Sort sort = new Sort(Direction.ASC, "appId", "sort");
-		List<BottomIcon> iconList = bottomIconRepository.findAll(sort);
-		if (iconList == null || iconList.isEmpty()) {
-			throw new BizValidateException("尚未配置任何bottom icon.");
-		}
-		Map<String, List<BottomIcon>> iconMap = new HashMap<String, List<BottomIcon>>();
-		for (BottomIcon bottomIcon : iconList) {
-			if (!iconMap.containsKey(bottomIcon.getAppId())) {
-				List<BottomIcon> list = new ArrayList<>();
-				list.add(bottomIcon);
-				iconMap.put(bottomIcon.getAppId(), list);
-			} else {
-				List<BottomIcon> list = iconMap.get(bottomIcon.getAppId());
-				list.add(bottomIcon);
-			}
-		}
-
-		Map<String, String> strMap = new HashMap<>();
-		Iterator<Map.Entry<String, List<BottomIcon>>> it = iconMap.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, List<BottomIcon>> entry = it.next();
-			String key = entry.getKey();
-			List<BottomIcon> value = entry.getValue();
-			String valueStr = objectMapper.writeValueAsString(value);
-			strMap.put(key, valueStr);
-		}
-		redisTemplate.opsForHash().putAll(ModelConstant.KEY_TYPE_BOTTOM_ICON, strMap);
-	}
 	
 	/**
 	 * 根据不同sys动态获取空白背景地图
@@ -189,12 +144,6 @@ public class PageConfigServiceImpl implements PageConfigService {
 		return imageList;
 	}
 	
-	//TODO
-	public void updateBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) {
-		
-		
-	}
-
 	/**
 	 * 动态获取公众号二维码
 	 * @throws IOException 
@@ -308,6 +257,29 @@ public class PageConfigServiceImpl implements PageConfigService {
 	public void updatePageConfig() {
 
 		pageConfigMap.clear();
+	}
+
+	@Override
+	public void filterBottomIcon(User user, List<BottomIcon>iconList) {
+
+		String sectId = user.getSectId();
+		if (StringUtils.isEmpty(sectId) || "0".equals(sectId)) {
+			return;
+		}
+		Map<Object, Object> map = redisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
+		if (map.isEmpty()) {
+			int index = Integer.MAX_VALUE;
+			for (int i = 0; i < iconList.size(); i++) {
+				BottomIcon bottomIcon = iconList.get(i);
+				if ("到家".equals(bottomIcon.getIconName())) {
+					index = i;
+					break;
+				}
+			}
+			if (index != Integer.MAX_VALUE) {
+				iconList.remove(index);
+			}
+		}
 	}
 	
 	

@@ -281,7 +281,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	}
 	
 	/**
-	 * 异步更新服务人员信息
+	 * 异步更新服务配置信息
 	 */
 	@Override
 	@Async("taskExecutor")
@@ -313,8 +313,30 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					String operType = cfg.getOperType();
 					if ("add".equals(operType) || "edit".equals(operType)) {
 						redisTemplate.opsForHash().put(ModelConstant.KEY_CUSTOM_SERVICE, serviceId, cfg.getServiceName());
+						
+						String sectIds = cfg.getSectId();
+						if (!StringUtils.isEmpty(sectIds)) {
+							String[]sectArr = sectIds.split(",");
+							for (String sectId : sectArr) {
+								Map<Object, Object> csMap = redisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
+								csMap.put(sectId, cfg.getServiceId());
+								redisTemplate.opsForHash().putAll(ModelConstant.KEY_CS_SERVED_SECT + sectId, csMap);
+							}
+						}
+						
+						
 					}else if ("delete".equals(operType)) {
 						redisTemplate.opsForHash().delete(ModelConstant.KEY_CUSTOM_SERVICE, serviceId);
+						
+						String sectIds = cfg.getSectId();
+						if (!StringUtils.isEmpty(sectIds)) {
+							String[]sectArr = sectIds.split(",");
+							for (String sectId : sectArr) {
+								Map<Object, Object> csMap = redisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
+								csMap.remove(sectId);
+								redisTemplate.opsForHash().putAll(ModelConstant.KEY_CS_SERVED_SECT + sectId, csMap);
+							}
+						}
 					}
 
 					if ("delete".equals(operType)) {

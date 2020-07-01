@@ -21,8 +21,6 @@ public interface PageConfigService {
 
 	List<BottomIcon> getBottomIcon(String appId) throws JsonParseException, JsonMappingException, IOException;
 
-	void updateBottomIcon() throws JsonProcessingException;
-
 	QrCode getQrCode(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
 	
 	List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
@@ -32,4 +30,6 @@ public interface PageConfigService {
 	List<WuyePayTabs> getWuyePayTabs(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
 	
 	void updatePageConfig();
+	
+	void filterBottomIcon(User user, List<BottomIcon> iconList);
 }

@@ -22,6 +22,8 @@ public class ServiceCfgDTO implements Serializable {
 		private String serviceName;
 		@JsonProperty("oper_type")
 		private String operType;
+		@JsonProperty("sect_id")
+		private String sectId;	//多个小区逗号分割
 		
 		public String getServiceId() {
 			return serviceId;
@@ -41,10 +43,16 @@ public class ServiceCfgDTO implements Serializable {
 		public void setOperType(String operType) {
 			this.operType = operType;
 		}
+		public String getSectId() {
+			return sectId;
+		}
+		public void setSectId(String sectId) {
+			this.sectId = sectId;
+		}
 		@Override
 		public String toString() {
-			return "ServiceCfgDTO [serviceId=" + serviceId + ", serviceName=" + serviceName + ", operType=" + operType
-					+ "]";
+			return "ServiceCfg [serviceId=" + serviceId + ", serviceName=" + serviceName + ", operType=" + operType
+					+ ", sectId=" + sectId + "]";
 		}
 		
 	}
