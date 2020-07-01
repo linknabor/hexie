@@ -90,13 +90,14 @@ public class CustomServiceImpl implements CustomService {
 		long begin = System.currentTimeMillis();
 		
 		//1.调用API创建接口
+		User currUser = userRepository.findOne(customerServiceOrderDTO.getUser().getId());
+		customerServiceOrderDTO.setUser(currUser);
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
 		
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
 		
 		//2.保存本地订单
-		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
 		ServiceOrder serviceOrder = new ServiceOrder();
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
 		serviceOrder.setProductId(Long.valueOf(customerServiceOrderDTO.getServiceId()));
