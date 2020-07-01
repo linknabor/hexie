@@ -11,7 +11,9 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -49,6 +51,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private BottomIconRepository bottomIconRepository;
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private QrCodeRepository qrCodeRepository;
 	@Autowired
@@ -266,7 +270,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		if (StringUtils.isEmpty(sectId) || "0".equals(sectId)) {
 			return;
 		}
-		Map<Object, Object> map = redisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
+		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
 		if (!map.isEmpty()) {
 			int index = Integer.MAX_VALUE;
 			for (int i = 0; i < iconList.size(); i++) {
