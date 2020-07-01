@@ -280,7 +280,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 		int index = Integer.MAX_VALUE;
 		for (int i = 0; i < showList.size(); i++) {
 			BottomIcon bottomIcon = showList.get(i);
-			if ("到家".equals(bottomIcon.getIconName())) {
+			if ("customService".equals(bottomIcon.getIconKey())) {
 				index = i;
 				break;
 			}
