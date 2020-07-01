@@ -1,7 +1,6 @@
 package com.yumu.hexie.web.shequ;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,16 +28,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -699,65 +694,7 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(result);
 	}
 	
-	/**
-	 * 接收servplat过来的请求，消优惠券，增加积分
-	 * @param user
-	 * @param tradeWaterId
-	 * @param feePrice
-	 * @param couponId
-	 * @param bindSwitch
-	 * @param wuyeId
-	 * @param cardNo
-	 * @param quickToken
-	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/servplat/noticeCardPay", method = {RequestMethod.GET, RequestMethod.POST})
-	@ResponseBody
-	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId, 
-			@RequestParam(required = false) String feePrice, 
-			@RequestParam(required = false) String cardNo,
-			@RequestParam(required = false) String quickToken,
-			@RequestParam(required = false) String wuyeId,
-			@RequestParam(required = false) String couponId,
-			@RequestParam(required = false, name = "integral") String points,
-			@RequestParam(required = false) String openids,
-			@RequestParam(required = false, name = "pay_method") String payMethod,
-			@RequestParam(required = false, name = "tran_date") String tranDate,
-			@RequestParam(required = false, name = "fee_name") String feeName,
-			@RequestParam(required = false) String remark) throws Exception {
-		
-		PayNotifyDTO payNotifyDTO = new PayNotifyDTO();
-		payNotifyDTO.setOrderId(tradeWaterId);
-		payNotifyDTO.setCouponId(couponId);
-		BigDecimal tranAmt = BigDecimal.ZERO;
-		if (!StringUtils.isEmpty(feePrice)) {
-			tranAmt = new BigDecimal(feePrice).divide(new BigDecimal("100"));
-		}
-		payNotifyDTO.setTranAmt(tranAmt.toString());
-		payNotifyDTO.setPoints(points);
-		payNotifyDTO.setBindSwitch("1");	//默认绑定
-		payNotifyDTO.setCardNo(cardNo);
-		payNotifyDTO.setQuickToken(quickToken);
-		payNotifyDTO.setWuyeId(wuyeId);
-		payNotifyDTO.setPayMethod(payMethod);
-		payNotifyDTO.setTranDateTime(tranDate);
-		payNotifyDTO.setFeeName(feeName);
-		payNotifyDTO.setRemark(remark);
-		
-		log.info("openids:" + openids);
-		log.info("payNotifyDto :" + payNotifyDTO);
-		
-		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-		TypeReference<List<Map<String, String>>> typeReference = new TypeReference<List<Map<String, String>>>() {};
-		List<Map<String, String>> openidList = objectMapper.readValue(openids, typeReference);
-		payNotifyDTO.setNotifyOpenids(openidList);
-		wuyeService.noticePayed(payNotifyDTO);
-		return "SUCCESS";
-	}
+	
 	
 	/**
 	 * 获取用户绑定的银行卡信息
@@ -811,7 +748,7 @@ public class WuyeController extends BaseController {
 	}
 	
 	/**
-	 *获取支付二维码
+	 *签到签退
 	 * @param user
 	 * @throws UnsupportedEncodingException 
 	 */

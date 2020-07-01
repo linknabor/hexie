@@ -12,7 +12,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
-import com.yumu.hexie.model.ModelConstant;
 
 @Entity
 public class User extends BaseModel{

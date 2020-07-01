@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +40,8 @@ import com.yumu.hexie.web.BaseController;
  */
 @RestController(value = "pageConfigController")
 public class PageConfigController extends BaseController{
+	
+	private static Logger logger = LoggerFactory.getLogger(PageConfigController.class);
     
     @Inject
     private PageConfigService pageConfigService;
@@ -57,13 +61,6 @@ public class PageConfigController extends BaseController{
         return pageConfigService.findByTempKey(tempKey, appId);
     }
     
-    @RequestMapping(value = "/iconList/{appId}", method = RequestMethod.PUT )
-    public String updateIconBottom(@PathVariable String appId) throws Exception {
-      
-    	pageConfigService.updateBottomIcon();
-    	return "success";
-    }
-    
     @RequestMapping(value = "/bgImage/{type}", method = RequestMethod.GET )
     public List<BgImage> getBgImage(@ModelAttribute(Constants.USER)User user, @PathVariable String type) 
     		throws JsonParseException, JsonMappingException, IOException {
@@ -79,13 +76,16 @@ public class PageConfigController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/wuyePayTabs/{appId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/pageConfig", method = RequestMethod.POST)
 	@ResponseBody
-	public String updateWuyePayTabs(@ModelAttribute(Constants.USER) User user,
-			@PathVariable String appId) throws Exception {
+	public String updatePageConfig(@RequestParam(required = false) String sysCode) throws Exception {
 		
-		pageConfigService.updateWuyePayTabs(appId);
-		return "success";
+		if (!"hexie".equals(sysCode)) {
+			return "";
+		}
+		logger.info("will update pageConfig ...");
+		pageConfigService.updatePageConfig();
+		return Constants.SUCCESS;
 	}
    
 }

@@ -9,7 +9,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -74,4 +76,12 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     		+ "join serviceoperatorSect b on a.id = b.operatorId "
     		+ "where a.type = ?1 and b.sectId = ?2 ")
     public List<ServiceOperator> findByTypeAndSectId(int type, String sectId);
+    
+    public ServiceOperator findByTypeAndTelAndOpenId(int type, String tel, String openId);
+    
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 ")
+    public void deleteByType(int type);
+
 }

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
@@ -131,22 +130,6 @@ public interface WuyeService {
 	 */
 	WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
 
-
-	/**
-	 * 通知已支付
-	 * @param user
-	 * @param tradeWaterId
-	 * @param couponId
-	 * @param feePrice
-	 * @param points
-	 * @param bindSwitch
-	 * @param cardNo
-	 * @param quickToken
-	 * @param wuyeId
-	 */
-	void noticePayed(PayNotifyDTO payNotifyDTO);
-
-	
 	/**
 	 * 查询是否已经用过红包
 	 * @param user
@@ -286,12 +269,6 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception;
-
-	/**
-	 * 通知支付到账
-	 * @param payNotifyDTO
-	 */
-	void sendPayNotify(PayNotifyDTO payNotifyDTO);
 
 	/**
 	 * 获取二维码支付服务信息

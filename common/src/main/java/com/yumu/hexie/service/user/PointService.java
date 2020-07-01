@@ -7,5 +7,7 @@ public interface PointService {
 	void updatePoint(User user, String point, String key);
 
 	void updatePoint(User user, String point, String key, boolean notifyWechat);
+
+	void addPointAsync(User user, String point, String pointKey);
 	
 }

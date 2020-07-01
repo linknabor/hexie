@@ -6,56 +6,32 @@ public class SignInOutDTO {
 	
 	private User user;
 
-	private String openid;
-	private String cfgId;
-	private String sectId;
+	private String personId;
 	private String signFlag;
 	private String feeId;
 	
 	public User getUser() {
 		return user;
 	}
-	public void setUser(User user) {
-		this.user = user;
-		if (user!=null) {
-			this.openid = user.getOpenid();
-		}
+	public String getPersonId() {
+		return personId;
 	}
-	public String getOpenid() {
-		return openid;
+
+	public void setPersonId(String personId) {
+		this.personId = personId;
 	}
-	public void setOpenid(String openid) {
-		this.openid = openid;
-	}
-	public String getCfgId() {
-		return cfgId;
-	}
-	public void setCfgId(String cfgId) {
-		this.cfgId = cfgId;
-	}
-	public String getSectId() {
-		return sectId;
-	}
-	public void setSectId(String sectId) {
-		this.sectId = sectId;
-	}
+
 	public String getSignFlag() {
 		return signFlag;
 	}
+
 	public void setSignFlag(String signFlag) {
 		this.signFlag = signFlag;
 	}
-	public String getFeeId() {
-		return feeId;
-	}
-	public void setFeeId(String feeId) {
-		this.feeId = feeId;
-	}
-	@Override
-	public String toString() {
-		return "SignInOutDTO [user=" + user + ", openid=" + openid + ", cfgId=" + cfgId + ", sectId=" + sectId
-				+ ", signFlag=" + signFlag + ", feeId=" + feeId + "]";
-	}
 
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
 	
 }

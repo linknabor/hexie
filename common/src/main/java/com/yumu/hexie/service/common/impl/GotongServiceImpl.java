@@ -16,18 +16,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ConfigUtil;
+import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
+import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -70,6 +71,10 @@ public class GotongServiceImpl implements GotongService {
     public static String SERVICE_RESV_URL = ConfigUtil.get("serviceResvUrl");
 
     public static String PAY_NOTIFY_URL = ConfigUtil.get("payNotifyUrl");
+    
+    public static String CUSTOM_SERVICE_ASSIGN_URL = ConfigUtil.get("customServiceUrl");	//自定义服务抢单
+    
+    public static String CUSTOM_SERVICE_DETAIL = ConfigUtil.get("customServiceDetail");
 
     
     @Inject
@@ -96,6 +101,7 @@ public class GotongServiceImpl implements GotongService {
         String accessToken = systemConfigService.queryWXAToken(opUser.getAppId());
         TemplateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
     }
+    
     @Async
     @Override
     public void sendRepairAssignedMsg(RepairOrder order){
@@ -236,12 +242,44 @@ public class GotongServiceImpl implements GotongService {
 	 * 交易到账通知
 	 */
 	@Override
-	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
+	public void sendPayNotification(AccountNotification accountNotify) {
 		
-		String accessToken = systemConfigService.queryWXAToken(payNotifyDTO.getUser().getAppId());
-		TemplateMsgService.sendPayNotify(payNotifyDTO, accessToken);
+		String accessToken = systemConfigService.queryWXAToken(accountNotify.getUser().getAppId());
+		TemplateMsgService.sendPayNotification(accountNotify, accessToken);
 		
 	}
+	
+	/**
+	 * 自定义服务通知
+	 */
+	@Override
+	public void sendServiceNotification(User sendUser, ServiceOrder serviceOrder) {
+
+		LOG.info("发送自定义服务通知！ sendUser : " + sendUser);
+		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+		TemplateMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
+	}
+	
+	
+	@Async
+    @Override
+    public void sendCustomServiceAssignedMsg(ServiceOrder serviceOrder){
+		
+		LOG.info("发送自定服务接单通知， serviceOrder : " + serviceOrder.getId());
+		
+        User user = userRepository.findOne(serviceOrder.getUserId());
+        News news = new News(new ArrayList<Article>());
+        Article article = new Article();
+        article.setTitle("您的服务订单已被受理");
+        article.setDescription("点击查看详情");
+        article.setUrl(CUSTOM_SERVICE_DETAIL + serviceOrder.getId());
+        news.getArticles().add(article);
+        NewsMessage msg = new NewsMessage(news);
+        msg.setTouser(user.getOpenid());
+        msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+        String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+        CustomService.sendCustomerMessage(msg, accessToken);
+    }
 	
 
 }
