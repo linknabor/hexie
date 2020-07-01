@@ -105,6 +105,7 @@ public class QrCodePayService implements Serializable {
 					+ qrcodeId + ", operType=" + operType + ", serviceTypeCn=" + serviceTypeCn + ", signinFlag="
 					+ signinFlag + ", feeId=" + feeId + ", serviceId=" + serviceId + ", serviceType=" + serviceType
 					+ "]";
+
 		}
 		
 		
