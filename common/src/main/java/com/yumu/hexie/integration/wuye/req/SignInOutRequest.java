@@ -9,33 +9,15 @@ public class SignInOutRequest extends WuyeRequest {
 	 */
 	private static final long serialVersionUID = -3990593875560346815L;
 
-	private String openid;
-	@JsonProperty("cfg_id")
-	private String cfgId;
-	@JsonProperty("sect_id")
-	private String sectId;
+	@JsonProperty("person_id")
+	private String personId;
 	@JsonProperty("sign_in")
 	private String signFlag;
-	@JsonProperty("fee_id")
-	private String feeId;
-	
-	public String getOpenid() {
-		return openid;
+	public String getPersonId() {
+		return personId;
 	}
-	public void setOpenid(String openid) {
-		this.openid = openid;
-	}
-	public String getCfgId() {
-		return cfgId;
-	}
-	public void setCfgId(String cfgId) {
-		this.cfgId = cfgId;
-	}
-	public String getSectId() {
-		return sectId;
-	}
-	public void setSectId(String sectId) {
-		this.sectId = sectId;
+	public void setPersonId(String personId) {
+		this.personId = personId;
 	}
 	public String getSignFlag() {
 		return signFlag;
@@ -51,8 +33,7 @@ public class SignInOutRequest extends WuyeRequest {
 	}
 	@Override
 	public String toString() {
-		return "SignInOutRequest [openid=" + openid + ", cfgId=" + cfgId + ", sectId=" + sectId + ", signFlag="
-				+ signFlag + ", feeId=" + feeId + "]";
+		return "SignInOutRequest [personId=" + personId + ", signFlag=" + signFlag + "]";
 	}
 	
 	

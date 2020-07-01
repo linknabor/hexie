@@ -1,6 +1,5 @@
 package com.yumu.hexie.model.market;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -15,8 +15,11 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.model.BaseModel;
@@ -37,7 +40,7 @@ public class ServiceOrder  extends BaseModel {
 	/** 商品相关 **/
 	//主商品ID
 	private int orderType;//0.拼单单 1.单个订单 2.预约单 3. 特卖单 4.团购单
-
+	@JsonSerialize(using = ToStringSerializer.class)
 	private long productId;
 	private long groupRuleId;
 	private long userId;
@@ -62,11 +65,14 @@ public class ServiceOrder  extends BaseModel {
 	
 	/**用户信息**/
 	private String openId;
+	private String appid;
 	
 	/**地址信息**/
 	private long serviceAddressId;//FIXME 服务地址
 	private int receiveTimeType;//周一至周五、周六周日、全周
 	private String memo;
+	@Column(length=1023)
+	private String imgUrls;	//上传图片链接，服务内容链接
 	
 	private String address;
 	private String tel;
@@ -74,7 +80,16 @@ public class ServiceOrder  extends BaseModel {
 	private double lat;
 	private double lng;
 	private long xiaoquId;
+	private String xiaoquName;
 	
+	/**操作员信息*/
+	private long operatorId;
+	private String operatorName;
+	private long operatorUserId;
+	private String operatorTel;
+	private String operatorOpenId;
+	
+	private String confirmer;		//确认完工人
 	
 	/**团购状态*/
 	private int groupStatus = ModelConstant.GROUP_STAUS_GROUPING;//拼单状态
@@ -104,13 +119,25 @@ public class ServiceOrder  extends BaseModel {
 	private Date payDate;
 	private Date refundDate;
 	private Date returnDate;
-	private Date confirmDate;
+	private Date acceptedDate;	//接单日期
+	private Date confirmDate;	//确认完工日期
 	private Date sendDate;
 	private Date signDate;
 	private Date cancelDate;
 	private Date closeDate;
 	private Date asyncDate;
-
+	
+	//评论相关
+	private String comment;
+	private int commentQuality;
+    private int commentAttitude;
+    private int commentService;
+    @Column(length=1023)
+    private String commentImgUrls;
+    private Date commentDate;
+    
+    private long subType;	//子类，对于自定义服务列说，有子类
+    private String subTypeName;	//子类中文名称
 
 	@JsonIgnore
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
@@ -211,11 +238,37 @@ public class ServiceOrder  extends BaseModel {
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"配货中");    
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");    
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");        
-
 	}
+	
+	private static Map<Integer,String> SERVICE_ORDER_STATUSMAP = new HashMap<Integer,String>();
+	static{
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"未接单");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT,"已取消");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"已完工");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_ACCEPTED  ,"已接单");    
+	}
+	
+	
 	@Transient
 	public String getStatusStr(){
-		return STATUSMAP.get(status);
+		
+		String statusStr = "";
+		if (ModelConstant.ORDER_TYPE_SERVICE == this.orderType) {
+			statusStr = SERVICE_ORDER_STATUSMAP.get(status);
+		}else {
+			statusStr = STATUSMAP.get(status);
+		}
+		return statusStr;
+		
 	}
 	@Transient
 	public static String getStatusStr(int status) {
@@ -351,11 +404,6 @@ public class ServiceOrder  extends BaseModel {
 	}
 
 	public float getPrice() {
-		BigDecimal b = new BigDecimal(price);  
-		price = b.setScale(2, BigDecimal.ROUND_HALF_UP).floatValue();
-		if(price < 0.01f) {
-            price = 0.01f;
-        }
 		return price;
 	}
 
@@ -510,7 +558,12 @@ public class ServiceOrder  extends BaseModel {
 		this.openId = openId;
 	}
 
-
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
 	public long getMerchantId() {
 		return merchantId;
 	}
@@ -666,6 +719,108 @@ public class ServiceOrder  extends BaseModel {
 		this.items = items;
 	}
 	
+	public long getOperatorId() {
+		return operatorId;
+	}
+	public void setOperatorId(long operatorId) {
+		this.operatorId = operatorId;
+	}
+	public String getOperatorName() {
+		return operatorName;
+	}
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+	public long getOperatorUserId() {
+		return operatorUserId;
+	}
+	public void setOperatorUserId(long operatorUserId) {
+		this.operatorUserId = operatorUserId;
+	}
+	public String getOperatorTel() {
+		return operatorTel;
+	}
+	public void setOperatorTel(String operatorTel) {
+		this.operatorTel = operatorTel;
+	}
+	public String getOperatorOpenId() {
+		return operatorOpenId;
+	}
+	public void setOperatorOpenId(String operatorOpenId) {
+		this.operatorOpenId = operatorOpenId;
+	}
+	public String getConfirmer() {
+		return confirmer;
+	}
+	public void setConfirmer(String confirmer) {
+		this.confirmer = confirmer;
+	}
+	public Date getAcceptedDate() {
+		return acceptedDate;
+	}
+	public void setAcceptedDate(Date acceptedDate) {
+		this.acceptedDate = acceptedDate;
+	}
+	public String getXiaoquName() {
+		return xiaoquName;
+	}
+	public void setXiaoquName(String xiaoquName) {
+		this.xiaoquName = xiaoquName;
+	}
+	public String getComment() {
+		return comment;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	public int getCommentQuality() {
+		return commentQuality;
+	}
+	public void setCommentQuality(int commentQuality) {
+		this.commentQuality = commentQuality;
+	}
+	public int getCommentAttitude() {
+		return commentAttitude;
+	}
+	public void setCommentAttitude(int commentAttitude) {
+		this.commentAttitude = commentAttitude;
+	}
+	public int getCommentService() {
+		return commentService;
+	}
+	public void setCommentService(int commentService) {
+		this.commentService = commentService;
+	}
+	public String getCommentImgUrls() {
+		return commentImgUrls;
+	}
+	public void setCommentImgUrls(String commentImgUrls) {
+		this.commentImgUrls = commentImgUrls;
+	}
+	public Date getCommentDate() {
+		return commentDate;
+	}
+	public void setCommentDate(Date commentDate) {
+		this.commentDate = commentDate;
+	}
+	public long getSubType() {
+		return subType;
+	}
+	public void setSubType(long subType) {
+		this.subType = subType;
+	}
+	public String getSubTypeName() {
+		return subTypeName;
+	}
+	public void setSubTypeName(String subTypeName) {
+		this.subTypeName = subTypeName;
+	}
+	public String getImgUrls() {
+		return imgUrls;
+	}
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
+	}
 	@Transient
 	@JsonIgnore
 	public List<Long> getProductIds(){
@@ -723,29 +878,46 @@ public class ServiceOrder  extends BaseModel {
 	public boolean cancelable() {
         return ModelConstant.ORDER_STATUS_INIT==getStatus();
     }
-
     public boolean asyncable() {
         return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
     }
     public boolean sendable() {
         return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
     }
-
     public boolean signable() {
         return (ModelConstant.ORDER_STATUS_SENDED == getStatus()
             || ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
             || ModelConstant.ORDER_STATUS_CONFIRM == getStatus());
     }
-
     public boolean returnable() {
         return ModelConstant.ORDER_STATUS_RECEIVED == getStatus();
     }
-    
-
-    
     public boolean refundable() {
         return (ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
                 || ModelConstant.ORDER_STATUS_RETURNED == getStatus()
                 | ModelConstant.ORDER_STATUS_PAYED == getStatus());
     }
+    
+    @Transient
+    public String getShowStatus() {
+    	
+    	String showStatus = "";
+    	if (ModelConstant.ORDER_STATUS_INIT == this.status) {
+			showStatus = "1";
+		}else if (ModelConstant.ORDER_STATUS_ACCEPTED == this.status) {
+			showStatus = "2";
+		}else if (ModelConstant.ORDER_STATUS_CONFIRM == this.status) {
+			if (StringUtils.isEmpty(this.payDate)) {
+				showStatus = "3";
+			}else if (ModelConstant.ORDER_PINGJIA_TYPE_N == this.pingjiaStatus) {
+				showStatus = "4";
+			}
+		}else if (ModelConstant.ORDER_PINGJIA_TYPE_Y == this.pingjiaStatus) {
+			showStatus = "5";
+		}
+    	return showStatus;
+    	
+    }
+    
+    
 }

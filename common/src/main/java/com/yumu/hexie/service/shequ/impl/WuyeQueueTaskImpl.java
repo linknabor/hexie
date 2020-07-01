@@ -44,7 +44,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	 * @throws InterruptedException 
 	 */
 	@Override
-	@Async
+	@Async("taskExecutor")
 	public void bindHouseByTrade() {
 		
 		while(true) {

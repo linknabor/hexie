@@ -26,13 +26,14 @@ public class ModelConstant {
 	public static final int REGION_XIAOQU = 4;
 	
 	//订单类型
-	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）
+	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）,6维修单，11自定义服务订单
 	public static final int ORDER_TYPE_GROUP = 0;
 	public static final int ORDER_TYPE_GROUP_SINGLE = 1;
 	public static final int ORDER_TYPE_ONSALE = 3;
 	public static final int ORDER_TYPE_RGROUP = 4;
     public static final int ORDER_TYPE_YUYUE = 5;
     public static final int ORDER_TYPE_REPAIR = 6;
+    public static final int ORDER_TYPE_SERVICE = 11;
     
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
@@ -69,6 +70,7 @@ public class ModelConstant {
 	public static final int ORDER_STATUS_CONFIRM = 9;
 	public static final int ORDER_STATUS_RETURNED = 10;
 	public static final int ORDER_STATUS_REFUNDED = 11;
+	public static final int ORDER_STATUS_ACCEPTED = 15;
 	
 	public static final int ORDER_ASYNC_STATUS_N = 0;//未同步
 	public static final int ORDER_ASYNC_STATUS_Y = 1;//已同步
@@ -338,7 +340,6 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericodeTotalLimit_";
 	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
-	public static final String KEY_SYS_CONFIG = "sysConfig";
 	
 	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
 	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
@@ -352,4 +353,15 @@ public class ModelConstant {
 
 	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
 	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
+	
+	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";
+	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";
+	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";
+	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";
+	public static final String KEY_ORDER_ACCEPTED = "lock:serviceOrder:";
+	
+	public static final String KEY_CUSTOM_SERVICE = "cfg:customservice";
+	public static final String KEY_NOITFY_PAY_DUPLICATION_CHECK = "lock:payNotification:";
+	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
+	public static final String KEY_CS_SERVED_SECT = "cfg:customservice:sect:";
 }		

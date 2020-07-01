@@ -3,7 +3,6 @@ package com.yumu.hexie.web.hexiemessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,13 +11,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yumu.hexie.common.Constants;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
-import com.yumu.hexie.web.hexiemessage.vo.PayNotifyVO;
 
 @RestController
 @RequestMapping(value = "/servplat")

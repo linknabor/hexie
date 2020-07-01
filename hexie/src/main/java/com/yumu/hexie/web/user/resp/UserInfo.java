@@ -32,6 +32,7 @@ public class UserInfo implements Serializable {
     private String tel;
     
     private boolean isRepairOperator = false;
+    private boolean isServiceOperator = false;
     
     private Double longitude;
     private Double latitude;
@@ -103,9 +104,10 @@ public class UserInfo implements Serializable {
         BeanUtils.copyProperties(user, this);
     }
 
-    public UserInfo(User user,boolean isOperator){
+    public UserInfo(User user,boolean isOperator, boolean isServiceOperator){
         BeanUtils.copyProperties(user, this);
         this.isRepairOperator = isOperator;
+        this.isServiceOperator = isServiceOperator;
     }
     public String getRealName() {
         return realName;
@@ -268,7 +270,14 @@ public class UserInfo implements Serializable {
     public void setRepairOperator(boolean isRepairOperator) {
         this.isRepairOperator = isRepairOperator;
     }
-    public String getXiaoquName() {
+    
+    public boolean isServiceOperator() {
+		return isServiceOperator;
+	}
+	public void setServiceOperator(boolean isServiceOperator) {
+		this.isServiceOperator = isServiceOperator;
+	}
+	public String getXiaoquName() {
         return xiaoquName;
     }
     public void setXiaoquName(String xiaoquName) {

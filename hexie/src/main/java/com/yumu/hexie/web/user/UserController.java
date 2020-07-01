@@ -110,37 +110,45 @@ public class UserController extends BaseController{
 					user = null;
 				}
 			}
+			
 			log.info("user in db :" + user);
 			if(user != null){
 			    session.setAttribute(Constants.USER, user);
-			    UserInfo userInfo = new UserInfo(user,operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId()));
+			    boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
+			    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
+			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+			    
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
+			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
+			    log.info("iconList : " + showIconList);
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
-			    userInfo.setIconList(iconList);
+			    userInfo.setIconList(showIconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
+			    
 			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
 			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
 					//do nothing
 				}else {
 					userInfo.setPoint(wechatCard.getBonus());
 				}
+			    
 			    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
 			    String qrLink = "";
 			    if (qrCode != null) {
 			    	qrLink = qrCode.getQrLink();
 				}
 			    userInfo.setQrCode(qrLink);
-			    userInfo.setCardStatus(wechatCardService.getWechatMemberCard(user.getOpenid()).getStatus());
+			    userInfo.setCardStatus(wechatCard.getStatus());
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
 			    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
 			    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
-
+			    
 			    long endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
@@ -177,8 +185,11 @@ public class UserController extends BaseController{
 		user = userService.saveProfile(user.getId(), nickName, sex);
 		if(user != null){
 			session.setAttribute(Constants.USER, user);
-	        return new BaseResult<UserInfo>().success(new UserInfo(user,
-	            operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId())));
+			
+			boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
+		    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
+		    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+	        return new BaseResult<UserInfo>().success(userInfo);
 		} else {
             return new BaseResult<UserInfo>().failMsg("用户不存在！");
         }
@@ -226,8 +237,11 @@ public class UserController extends BaseController{
 		}
 		long endTime = System.currentTimeMillis();
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
-		return new BaseResult<UserInfo>().success(new UserInfo(userAccount,
-		    operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId())));
+		
+		boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId());
+	    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,userAccount.getId());
+	    UserInfo userInfo = new UserInfo(userAccount,isRepariOper, isServiceOper);
+		return new BaseResult<UserInfo>().success(userInfo);
 
     }
 	

@@ -548,7 +548,7 @@ public class RepairServiceImpl implements RepairService {
 		
         if(addrs!=null && !addrs.isEmpty()){
             for(Address addr : addrs) {
-                if(addr.isBind()) {
+                if(addr.isMain()) {
                 	defaultAddr = addr;
                     break;
                 }

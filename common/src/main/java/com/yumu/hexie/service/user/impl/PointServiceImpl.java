@@ -3,17 +3,19 @@ package com.yumu.hexie.service.user.impl;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardReq;
 import com.yumu.hexie.integration.wechat.entity.card.UpdateUserCardResp;
@@ -28,6 +30,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.vo.AddPointQueue;
 
 @Service("pointService")
 public class PointServiceImpl implements PointService {
@@ -44,6 +47,8 @@ public class PointServiceImpl implements PointService {
 	private CardService cardService;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 	
 	
 	private void addZhima(User user, int point, String key) {
@@ -78,6 +83,11 @@ public class PointServiceImpl implements PointService {
 	@Override
 	@Transactional
 	public void updatePoint(User user, String point, String key) {
+		
+		if (StringUtils.isEmpty(point)) {
+			logger.info("key : " + key + ", point is null, will return .");
+			return;
+		}
 		
 		if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			updatePoint(user, point, key, true);
@@ -234,16 +244,53 @@ public class PointServiceImpl implements PointService {
 		
 	}
 	
-	public static void main(String[] args) throws JSONException {
+	/**
+	 * 异步添加积分
+	 * @param user
+	 * @param point
+	 * @param pointKey
+	 */
+	@Override
+	public void addPointAsync(User user, String point, String pointKey) {
 		
-		UpdateUserCardReq updateUserCardReq = new UpdateUserCardReq();
-		updateUserCardReq.setCode("333811823730");
-		updateUserCardReq.setCardId("phZbVwDCWR5PBv99JjKmRzlVosn0");
-		updateUserCardReq.setAddBonus("10000");
-		updateUserCardReq.setRecordBonus("for test");
-		
-		String json = JacksonJsonUtil.beanToJson(updateUserCardReq);
-		System.out.println(json);
+		if (StringUtils.isEmpty(pointKey)) {
+			logger.info("本次缴费积分 为零，不作处理。pointKey : " + pointKey);
+			return;
+		}
+
+		//防止重复添加卡券积分，半小时内只能提交队列一次。出队时也会校验重复性
+		Long increment = redisTemplate.opsForValue().increment(pointKey, 1);
+		logger.info("addPoint, key[" + pointKey + "], add point[" + point + "], increment : " + increment);
+		if (increment == 1) {
+			int retryTimes = 0;
+			boolean isSuccess = false;
+			while(!isSuccess && retryTimes < 3) {
+				
+				try {
+					AddPointQueue addPointQueue = new AddPointQueue();
+					addPointQueue.setUser(user);
+					addPointQueue.setPoint(point);
+					addPointQueue.setKey(pointKey);
+					
+					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+					String value = objectMapper.writeValueAsString(addPointQueue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_ADD_POINT_QUEUE, value);
+					isSuccess = true;
+				
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+					retryTimes++;
+					try {
+						Thread.sleep(10000);
+					} catch (InterruptedException e1) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+				
+			}
+		}
+		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
+	
 	}
 	
 	

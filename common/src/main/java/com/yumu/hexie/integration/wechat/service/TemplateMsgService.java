@@ -15,7 +15,9 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.CsOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PayNotifyMsgVO;
@@ -28,7 +30,6 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
@@ -53,6 +54,7 @@ public class TemplateMsgService {
 	public static final String TEMPLATE_TYPE_SERVICE = "serviceTemplate";
 	public static final String TEMPLATE_TYPE_MESSAGE = "messageTemplate";
 	public static final String TEMPLATE_TYPE_PAY_NOTIFY = "payNotifyTemplate";
+	public static final String TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN = "customServiceAssginTemplate";
 
 	
 	/**
@@ -339,32 +341,68 @@ public class TemplateMsgService {
 
 	}
    
-    
     /**
      * 支付到账通知
      * @param openid
      * @param accessToken
      * @param appId
      */
-    public static void sendPayNotify(PayNotifyDTO payNotifyDTO, String accessToken) {
+    public static void sendPayNotification(AccountNotification accountNotification, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
 		vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));
-	  	vo.setTranAmt(new TemplateItem(payNotifyDTO.getTranAmt()));
-	  	vo.setPayMethod(new TemplateItem(payNotifyDTO.getPayMethod()));
-	  	vo.setTranDateTime(new TemplateItem(payNotifyDTO.getTranDateTime()));
-	  	vo.setTranType(new TemplateItem(payNotifyDTO.getFeeName()));
-	  	vo.setRemark(new TemplateItem(payNotifyDTO.getRemark()));
+	  	vo.setTranAmt(new TemplateItem(accountNotification.getFeePrice().toString()));
+	  	vo.setPayMethod(new TemplateItem(accountNotification.getPayMethod()));
+	  	vo.setTranDateTime(new TemplateItem(accountNotification.getTranDate()));
+	  	vo.setTranType(new TemplateItem(accountNotification.getFeeName()));
+	  	vo.setRemark(new TemplateItem(accountNotification.getRemark()));
     	
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(payNotifyDTO.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
+    	msg.setTemplate_id(getTemplateByAppId(accountNotification.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
     	String url = GotongServiceImpl.PAY_NOTIFY_URL;
-    	msg.setUrl(AppUtil.addAppOnUrl(url, payNotifyDTO.getUser().getAppId()));
-    	msg.setTouser(payNotifyDTO.getUser().getOpenid());
+    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()));
+    	msg.setTouser(accountNotification.getUser().getOpenid());
     	TemplateMsgService.sendMsg(msg, accessToken);
 
 	}
 
+    /**
+     * 预约服务模板
+     * @param openId
+     * @param title
+     * @param billName
+     * @param requireTime
+     * @param url
+     * @param accessToken
+     * @param appId
+     */
+    public static void sendServiceNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
+
+        //更改为使用模版消息发送
+    	User user = sendUser;
+    	CsOrderVO vo = new CsOrderVO();
+    	String title = "您有一个新的服务订单，请及时处理。";
+    	vo.setTitle(new TemplateItem(title));
+    	vo.setOrderId(new TemplateItem(String.valueOf(serviceOrder.getId())));
+    	vo.setServiceType(new TemplateItem(serviceOrder.getSubTypeName()));
+    	String customerName = serviceOrder.getReceiverName();
+    	vo.setCustomerName(new TemplateItem(customerName));
+    	vo.setCustomerTel(new TemplateItem(serviceOrder.getTel()));
+    	vo.setRemark(new TemplateItem(serviceOrder.getAddress()));
+    	
+        TemplateMsg<CsOrderVO>msg = new TemplateMsg<CsOrderVO>();
+        msg.setData(vo);
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN));
+        String url = GotongServiceImpl.CUSTOM_SERVICE_ASSIGN_URL;
+        if (!StringUtils.isEmpty(url)) {
+			url = GotongServiceImpl.CUSTOM_SERVICE_ASSIGN_URL + serviceOrder.getId();
+			url = AppUtil.addAppOnUrl(url, user.getAppId());
+		}
+        msg.setUrl(url);
+        msg.setTouser(user.getOpenid());
+        TemplateMsgService.sendMsg(msg, accessToken);
+        
+    }
 
 }

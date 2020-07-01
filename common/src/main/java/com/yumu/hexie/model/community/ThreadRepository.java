@@ -55,7 +55,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " and IF (?4!='', userSectId = ?4, 1=1)"
 			+ " and userSectId in ?5"
 			,nativeQuery = true)
-	public Page<Thread> getThreadList(String nickName, int threadCategory, String createDate,String sectId,List<String> sectIds,Pageable pageable);
+	public Page<Thread> getThreadList(int threadCategory, String nickName, String createDate,String sectId,List<String> sectIds,Pageable pageable);
 	
 	@Modifying
 	@Query(nativeQuery = true,value="update thread set threadStatus=1 where threadId in ?1")

@@ -261,7 +261,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public Page<Thread> getThreadList(String nickName, String createDate,String sectId, List<String> sectIds,Pageable pageable) {
-		return threadRepository.getThreadList(nickName,ModelConstant.THREAD_CATEGORY_SUGGESTION, createDate,sectId,sectIds,pageable);
+		return threadRepository.getThreadList(ModelConstant.THREAD_CATEGORY_SUGGESTION, nickName, createDate,sectId,sectIds,pageable);
 	}
 
 	@Override

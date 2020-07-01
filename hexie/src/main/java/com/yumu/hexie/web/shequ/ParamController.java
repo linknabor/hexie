@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,9 +38,12 @@ public class ParamController extends BaseController {
 	@RequestMapping(value = "/wuye/{oriSys}", method = RequestMethod.GET)
 	public void initWuyeParam(HttpServletResponse response, 
 			@PathVariable String oriSys,
-			@RequestParam(value="info_id") String infoId, 
+			@RequestParam(value="info_id", required=false) String infoId, 
 			@RequestParam(value="type") String type) throws IOException {
 		
+		if (StringUtils.isEmpty(infoId)) {
+			return;
+		}
 		Runnable runnable = ()->{
 			try {
 				//先休息1分钟，因为平台重新加载参数需要时间

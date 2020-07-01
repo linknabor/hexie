@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 public interface UserRepository extends JpaRepository<User, Long> {
 	public List<User> findByOpenid(String openid);
 	public List<User> findByTel(String tel);
-	
+	public List<User> findByTelAndOpenid(String tel, String openid);
 	public List<User> findByShareCode(String shareCode);
 	
 	@Query(nativeQuery=true ,value="select *  from user where shareCode is null")

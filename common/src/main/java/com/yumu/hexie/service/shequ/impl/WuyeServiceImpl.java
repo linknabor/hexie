@@ -1,8 +1,9 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,6 @@ import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
-import com.yumu.hexie.integration.wuye.dto.PayNotifyDTO;
-
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -40,25 +39,25 @@ import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.promotion.coupon.Coupon;
+import com.yumu.hexie.model.localservice.HomeServiceConstant;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
-import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
-import com.yumu.hexie.vo.AddPointQueue;
 import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service("wuyeService")
@@ -81,8 +80,6 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private LocationService locationService;
 	
-	@Autowired
-	private PointService pointService;
 	
 	@Autowired
 	private SystemConfigService systemConfigService;
@@ -97,7 +94,7 @@ public class WuyeServiceImpl implements WuyeService {
 	private BankCardRepository bankCardRepository;
 	
 	@Autowired
-	private GotongService gotongService;
+	private ServiceOperatorRepository serviceOperatorRepository;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -209,71 +206,6 @@ public class WuyeServiceImpl implements WuyeService {
 		return wechatPayInfo;
 	}
 	
-	/**
-	 * 支付完成后的一些操作
-	 * 步骤：
-	 *  1.有红包的更新红包状态，
-	 *	2.绑定缴费房屋（bindStich==1，需要远程请求，双边事务），
-	 *	3.+芝麻，
-	 *
-	 *其中1,2实时完成,3可异步完成(队列)。
-	 *
-	 */
-	@Transactional
-	@Override
-	public void noticePayed(PayNotifyDTO payNotifyDTO) {
-		
-		Assert.hasText(payNotifyDTO.getOrderId(), "交易订单号不能为空。");
-		
-		User user = payNotifyDTO.getUser();
-		//1.更新红包状态
-		Coupon coupon = null;
-		if (!StringUtils.isEmpty(payNotifyDTO.getCouponId())) {
-			coupon = couponService.findOne(Long.valueOf(payNotifyDTO.getCouponId()));
-			if (coupon != null) {
-				try {
-					couponService.comsume(payNotifyDTO.getTranAmt(), coupon.getId());
-				} catch (Exception e) {
-					//如果优惠券已经消过一次，里面会抛异常提示券已使用，但是步骤2和3还是需要进行的
-					log.error(e.getMessage(), e);
-				}
-			}
-		}
-		if (user == null) {
-			if (coupon != null) {
-				user = userRepository.findById(coupon.getUserId());
-			}
-		}
-		if (user == null) {
-			List<User> userList = userRepository.findByWuyeId(payNotifyDTO.getWuyeId());
-			if (userList == null || userList.isEmpty()) {
-				log.info("can not find user, wuyeId : " + payNotifyDTO.getWuyeId() + ", tradeWaterId : " + payNotifyDTO.getOrderId());
-			}else {
-				user = userList.get(0);
-			}
-			
-		}
-		if (user != null) {
-			//2.添加芝麻积分
-			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
-				String pointKey = "wuyePay-" + payNotifyDTO.getOrderId();
-				addPointAsync(user, payNotifyDTO.getPoints(), pointKey);
-			}else {
-				String pointKey = "zhima-bill-" + user.getId() + "-" + payNotifyDTO.getOrderId();
-				pointService.updatePoint(user, "10", pointKey);
-			}
-			//3.如果是绑卡支付，记录用户的quicktoken
-			if (!StringUtils.isEmpty(payNotifyDTO.getCardNo()) && !StringUtils.isEmpty(payNotifyDTO.getQuickToken())) {
-				bankCardRepository.updateBankCardByAcctNoAndUserId(payNotifyDTO.getQuickToken(), payNotifyDTO.getQuickToken(), user.getId());
-			}
-			//5.绑定所缴纳物业费的房屋
-			bindHouseByTradeAsync(payNotifyDTO.getBindSwitch(), user, payNotifyDTO.getOrderId());
-		}
-		//4.通知物业相关人员，收费到账
-		sendPayNotify(payNotifyDTO);
-		
-	}
-
 	@Override
 	public BillListVO quickPayInfo(User user, String stmtId, String currPage, String totalCount) throws Exception {
 		return wuyeUtil2.quickPayInfo(user, stmtId, currPage, totalCount).getData();
@@ -512,54 +444,6 @@ public class WuyeServiceImpl implements WuyeService {
 		
 	}
 	
-	/**
-	 * 异步添加积分
-	 * @param user
-	 * @param point
-	 * @param pointKey
-	 */
-	public void addPointAsync(User user, String point, String pointKey) {
-		
-		if (StringUtils.isEmpty(pointKey)) {
-			log.info("本次缴费积分 为零，不作处理。pointKey : " + pointKey);
-			return;
-		}
-
-		//防止重复添加卡券积分，半小时内只能提交队列一次。出队时也会校验重复性
-		Long increment = redisTemplate.opsForValue().increment(pointKey, 1);
-		log.info("addPoint, key[" + pointKey + "], add point[" + point + "], increment : " + increment);
-		if (increment == 1) {
-			int retryTimes = 0;
-			boolean isSuccess = false;
-			while(!isSuccess && retryTimes < 3) {
-				
-				try {
-					AddPointQueue addPointQueue = new AddPointQueue();
-					addPointQueue.setUser(user);
-					addPointQueue.setPoint(point);
-					addPointQueue.setKey(pointKey);
-					
-					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-					String value = objectMapper.writeValueAsString(addPointQueue);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_ADD_POINT_QUEUE, value);
-					isSuccess = true;
-				
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-					retryTimes++;
-					try {
-						Thread.sleep(10000);
-					} catch (InterruptedException e1) {
-						log.error(e.getMessage(), e);
-					}
-				}
-				
-			}
-		}
-		redisTemplate.expire(pointKey, 24, TimeUnit.HOURS);	//24小时过期
-	
-	}
-	
 	@Async
 	@Override
 	public void addCouponsFromSeed(User user, List<CouponCombination> list) {
@@ -611,47 +495,49 @@ public class WuyeServiceImpl implements WuyeService {
 		//TODO create user 
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
 	}
-  
-	/**
-	 * 到账消息推送
-	 */
-	@Override
-	public void sendPayNotify(PayNotifyDTO payNotifyDTO) {
 
-		if (payNotifyDTO.getNotifyOpenids() == null || payNotifyDTO.getNotifyOpenids().isEmpty()) {
-			return;
-		}
-	
-		for (Map<String, String> openidMap : payNotifyDTO.getNotifyOpenids()) {
-			
-			User user = null;
-			String openid = openidMap.get("openid");
-			if (StringUtils.isEmpty(openid)) {
-				log.warn("openid is empty, will skip. ");
-				continue;
-			}
-			List<User> userList = userRepository.findByOpenid(openid);
-			if (userList!=null && !userList.isEmpty()) {
-				user = userList.get(0);
-			}else {
-				log.warn("can not find user, openid : " + openid);
-			}
-			if (user!=null) {
-				payNotifyDTO.setUser(user);
-				gotongService.sendPayNotify(payNotifyDTO);
-			}
-			
-		}
-			
-	}
-	
 	@Override
 	public QrCodePayService getQrCodePayService(User user) throws Exception {
 		
 		if (StringUtils.isEmpty(user.getTel())) {
 			user = userRepository.getOne(user.getId());
 		}
-		return wuyeUtil2.getQrCodePayService(user).getData();
+		QrCodePayService service = wuyeUtil2.getQrCodePayService(user).getData();
+		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(HomeServiceConstant.SERVICE_TYPE_CUSTOM, user.getId());
+		ServiceOperator serviceOperator = null;
+		List<PayCfg> serviceList = new ArrayList<>();
+		if (ops!=null && !ops.isEmpty()) {
+			log.info("ops count : " + ops.size());
+			serviceOperator = ops.get(0);
+			if (serviceOperator != null) {
+				String subTypes = serviceOperator.getSubTypes();
+				log.info("subTypes : " + subTypes);
+				if (!StringUtils.isEmpty(subTypes)) {
+					Object[]sTypes = subTypes.split(",");
+					Collection<Object> collection = Arrays.asList(sTypes);
+					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
+					if (objList.size() > 0) {
+						for (int i = 0; i < sTypes.length; i++) {
+							
+							log.info("service name : "  + objList.get(i));
+							if (StringUtils.isEmpty(objList.get(i))) {
+								log.info("service id : " + sTypes[i] + ", cannot find related service name ! will skip !");
+								continue;
+							}
+							PayCfg payCfg = new PayCfg();
+							payCfg.setServiceTypeCn((String) objList.get(i));
+							payCfg.setServiceId((String)sTypes[i]);
+							payCfg.setServiceType("1");
+							serviceList.add(payCfg);
+						}
+					}
+					
+				}
+				
+			}
+		}
+		service.getServiceList().addAll(serviceList);
+		return service;
 		
 	}
 	
