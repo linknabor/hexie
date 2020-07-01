@@ -25,6 +25,12 @@ public class SignInOutRequest extends WuyeRequest {
 	public void setSignFlag(String signFlag) {
 		this.signFlag = signFlag;
 	}
+	public String getFeeId() {
+		return feeId;
+	}
+	public void setFeeId(String feeId) {
+		this.feeId = feeId;
+	}
 	@Override
 	public String toString() {
 		return "SignInOutRequest [personId=" + personId + ", signFlag=" + signFlag + "]";
