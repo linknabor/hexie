@@ -272,8 +272,9 @@ public class PageConfigServiceImpl implements PageConfigService {
 		}
 		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
 		logger.info("filterBottomIcon , map : " + map);
-		
+		logger.info("filterBottomIcon map.size : " + map.size());
 		if (map.size()>0) {
+			logger.info("filterBottomIcon will return .");
 			return;
 		}
 		
