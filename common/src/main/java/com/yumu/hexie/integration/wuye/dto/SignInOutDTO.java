@@ -8,6 +8,7 @@ public class SignInOutDTO {
 
 	private String personId;
 	private String signFlag;
+	private String feeId;
 	
 	public User getUser() {
 		return user;
