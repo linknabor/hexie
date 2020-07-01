@@ -122,11 +122,11 @@ public class UserController extends BaseController{
 			    userInfo.setCfgParam(paramMap);
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-			    pageConfigService.filterBottomIcon(user, iconList);
-			    log.info("iconList : " + iconList);
+			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
+			    log.info("iconList : " + showIconList);
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
-			    userInfo.setIconList(iconList);
+			    userInfo.setIconList(showIconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
 			    

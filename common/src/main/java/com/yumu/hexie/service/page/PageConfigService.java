@@ -31,5 +31,5 @@ public interface PageConfigService {
 	
 	void updatePageConfig();
 	
-	void filterBottomIcon(User user, List<BottomIcon> iconList);
+	List<BottomIcon> filterBottomIcon(User user, List<BottomIcon> iconList);
 }

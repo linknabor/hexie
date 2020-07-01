@@ -1,6 +1,8 @@
 package com.yumu.hexie.service.page.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -264,31 +266,32 @@ public class PageConfigServiceImpl implements PageConfigService {
 	}
 
 	@Override
-	public void filterBottomIcon(User user, List<BottomIcon>iconList) {
+	public List<BottomIcon> filterBottomIcon(User user, List<BottomIcon>iconList) {
 
 		String sectId = user.getSectId();
 		if (StringUtils.isEmpty(sectId) || "0".equals(sectId)) {
-			return;
+			return iconList;
 		}
 		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
 		logger.info("filterBottomIcon , map : " + map);
-		logger.info("filterBottomIcon map.size : " + map.size());
 		if (map.size()>0) {
-			logger.info("filterBottomIcon will return .");
-			return;
+			return iconList;
 		}
+		List<BottomIcon> showList = new ArrayList<>();
+		Collections.copy(showList, iconList);
 		
 		int index = Integer.MAX_VALUE;
-		for (int i = 0; i < iconList.size(); i++) {
-			BottomIcon bottomIcon = iconList.get(i);
+		for (int i = 0; i < showList.size(); i++) {
+			BottomIcon bottomIcon = showList.get(i);
 			if ("到家".equals(bottomIcon.getIconName())) {
 				index = i;
 				break;
 			}
 		}
 		if (index != Integer.MAX_VALUE) {
-			iconList.remove(index);
+			showList.remove(index);
 		}
+		return showList;
 	}
 	
 	
