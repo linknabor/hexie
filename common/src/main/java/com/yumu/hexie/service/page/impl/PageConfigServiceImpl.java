@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -21,6 +23,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.mysql.jdbc.log.Log;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
@@ -41,6 +44,8 @@ import com.yumu.hexie.service.page.PageConfigService;
 
 @Service("pageConfigService")
 public class PageConfigServiceImpl implements PageConfigService {
+	
+	private static Logger logger = LoggerFactory.getLogger(PageConfigServiceImpl.class);
 
 	@Inject
 	private PageConfigViewRepository pageConfigViewRepository;
@@ -49,8 +54,6 @@ public class PageConfigServiceImpl implements PageConfigService {
 
 	@Autowired
 	private BottomIconRepository bottomIconRepository;
-	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
@@ -271,7 +274,9 @@ public class PageConfigServiceImpl implements PageConfigService {
 			return;
 		}
 		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
-		if (!map.isEmpty()) {
+		logger.info("filterBottomIcon , map : " + map);
+		
+		if (map.isEmpty()) {
 			int index = Integer.MAX_VALUE;
 			for (int i = 0; i < iconList.size(); i++) {
 				BottomIcon bottomIcon = iconList.get(i);
