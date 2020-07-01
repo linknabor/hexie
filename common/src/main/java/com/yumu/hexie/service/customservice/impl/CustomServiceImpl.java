@@ -517,7 +517,7 @@ public class CustomServiceImpl implements CustomService {
 			throw new BizValidateException("订单已评价，订单ID：" + serviceCommentDTO.getOrderId());
 		}
 		serviceOrderRepository.updateComment(serviceCommentDTO.getComment(), serviceCommentDTO.getCommentAttitude(), serviceCommentDTO.getCommentQuality(), 
-				serviceCommentDTO.getCommentService(), serviceCommentDTO.getCommentImgUrls(), ModelConstant.ORDER_PINGJIA_TYPE_Y, new Date(), serviceOrder.getId());
+				serviceCommentDTO.getCommentService(), "", ModelConstant.ORDER_PINGJIA_TYPE_Y, new Date(), serviceOrder.getId());
 		
 		serviceOrderRepository.save(serviceOrder);
 	}

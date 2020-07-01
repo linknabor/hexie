@@ -2,7 +2,6 @@ package com.yumu.hexie.service.page.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -267,18 +266,16 @@ public class PageConfigServiceImpl implements PageConfigService {
 
 	@Override
 	public List<BottomIcon> filterBottomIcon(User user, List<BottomIcon>iconList) {
-
+		
+		List<BottomIcon> showList = new ArrayList<>();
+		showList.addAll(iconList);
+		
 		String sectId = user.getSectId();
-		if (StringUtils.isEmpty(sectId) || "0".equals(sectId)) {
-			return iconList;
-		}
 		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
 		logger.info("filterBottomIcon , map : " + map);
 		if (map.size()>0) {
-			return iconList;
+			return showList;
 		}
-		List<BottomIcon> showList = new ArrayList<>();
-		showList.addAll(iconList);
 		
 		int index = Integer.MAX_VALUE;
 		for (int i = 0; i < showList.size(); i++) {
