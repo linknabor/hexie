@@ -267,7 +267,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 			return;
 		}
 		Map<Object, Object> map = redisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
-		if (map.isEmpty()) {
+		if (!map.isEmpty()) {
 			int index = Integer.MAX_VALUE;
 			for (int i = 0; i < iconList.size(); i++) {
 				BottomIcon bottomIcon = iconList.get(i);
