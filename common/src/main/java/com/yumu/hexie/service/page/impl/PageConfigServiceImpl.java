@@ -278,7 +278,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 			return iconList;
 		}
 		List<BottomIcon> showList = new ArrayList<>();
-		Collections.copy(showList, iconList);
+		showList.addAll(iconList);
 		
 		int index = Integer.MAX_VALUE;
 		for (int i = 0; i < showList.size(); i++) {
