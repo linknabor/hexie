@@ -517,7 +517,7 @@ public class WuyeServiceImpl implements WuyeService {
 				if (!StringUtils.isEmpty(subTypes)) {
 					Object[]sTypes = subTypes.split(",");
 					Collection<Object> collection = Arrays.asList(sTypes);
-					
+				
 					long end = System.currentTimeMillis();
 					log.info("getQrCodePayService before : " + (end - begin));
 					

@@ -163,10 +163,7 @@ public class UserController extends BaseController{
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
 			    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
 			    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
-			    
-			    endTime = System.currentTimeMillis();
-				log.info("user:" + user.getName() + "location5，耗时：" + ((endTime-beginTime)/1000));
-			    
+			    		    
 			    endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
