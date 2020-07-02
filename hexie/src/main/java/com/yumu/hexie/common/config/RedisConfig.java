@@ -43,8 +43,8 @@ public class RedisConfig {
 		
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxIdle(25);
-		poolConfig.setMaxTotal(50);
-		poolConfig.setMinIdle(5);
+		poolConfig.setMaxTotal(100);
+		poolConfig.setMinIdle(10);
 		connectionFactory.setPoolConfig(poolConfig);
 		return connectionFactory;
 	}
