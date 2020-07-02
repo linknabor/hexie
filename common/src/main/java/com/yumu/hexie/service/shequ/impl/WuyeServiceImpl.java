@@ -499,6 +499,8 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public QrCodePayService getQrCodePayService(User user) throws Exception {
 		
+		long begin = System.currentTimeMillis();
+		
 		if (StringUtils.isEmpty(user.getTel())) {
 			user = userRepository.getOne(user.getId());
 		}
@@ -515,7 +517,15 @@ public class WuyeServiceImpl implements WuyeService {
 				if (!StringUtils.isEmpty(subTypes)) {
 					Object[]sTypes = subTypes.split(",");
 					Collection<Object> collection = Arrays.asList(sTypes);
+					
+					long end = System.currentTimeMillis();
+					log.info("getQrCodePayService before : " + (end - begin));
+					
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
+					
+					end = System.currentTimeMillis();
+					log.info("getQrCodePayService redis time : " + (end - begin));
+					
 					if (objList.size() > 0) {
 						for (int i = 0; i < sTypes.length; i++) {
 							
@@ -531,6 +541,9 @@ public class WuyeServiceImpl implements WuyeService {
 							serviceList.add(payCfg);
 						}
 					}
+					
+					end = System.currentTimeMillis();
+					log.info("getQrCodePayService loop time : " + (end - begin));
 					
 				}
 				
