@@ -2,6 +2,7 @@ package com.yumu.hexie.web.customservice;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -325,6 +326,12 @@ public class CustomServiceController extends BaseController {
 		logger.info("cfg : " + serviceCfgDTO);
 		customService.updateServiceCfg(serviceCfgDTO);
 		return "SUCCESS";
+	}
+	
+	@RequestMapping(value = "/redisOps", method = {RequestMethod.GET})
+	public Map<String, Long> testRedisOps() {
+		
+		return customService.testRedisOps();
 	}
 	
 }
