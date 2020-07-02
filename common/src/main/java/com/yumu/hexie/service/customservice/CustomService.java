@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.customservice;
 
 import java.util.List;
+import java.util.Map;
 
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
@@ -49,6 +50,8 @@ public interface CustomService {
 	void saveServiceImages(String appId, long orderId, List<String> imgUrls);
 
 	void saveCommentImages(String appId, long orderId, List<String> imgUrls);
+
+	Map<String, Long> testRedisOps();
 
 	
 
