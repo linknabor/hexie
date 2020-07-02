@@ -18,7 +18,6 @@ import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.promotion.share.ShareAccessRecord;
 import com.yumu.hexie.model.system.SystemConfig;
 
-import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
@@ -41,20 +40,15 @@ public class RedisConfig {
 		connectionFactory.setUsePool(true);
 		connectionFactory.setPassword(redisPassword);
 		connectionFactory.setDatabase(redisDatabase);
+		
+		JedisPoolConfig poolConfig = new JedisPoolConfig();
+		poolConfig.setMaxIdle(25);
+		poolConfig.setMaxTotal(50);
+		poolConfig.setMinIdle(5);
+		connectionFactory.setPoolConfig(poolConfig);
 		return connectionFactory;
 	}
 
-	@Bean
-	public JedisPool redisPoolFactory() throws Exception {
-
-		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-		jedisPoolConfig.setMaxIdle(10);
-		// 是否启用pool的jmx管理功能, 默认true
-		jedisPoolConfig.setJmxEnabled(true);
-		JedisPool jedisPool = new JedisPool(jedisPoolConfig, redisHost, Integer.valueOf(redisPort), 1000 * 10,
-				redisPassword, redisDatabase);
-		return jedisPool;
-	}
 
 	@Bean(name = "stringRedisTemplate")
 	public StringRedisTemplate getStringRedisTemplate() {
