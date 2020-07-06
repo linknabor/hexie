@@ -168,6 +168,10 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
+		User user = prepayRequestDTO.getUser();
+		User currUser = userRepository.findOne(user.getId());
+		prepayRequestDTO.setUser(currUser);
+		
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
