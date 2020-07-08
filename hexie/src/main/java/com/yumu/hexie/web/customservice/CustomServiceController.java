@@ -111,14 +111,12 @@ public class CustomServiceController extends BaseController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/confirm", method = RequestMethod.POST)
-	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId, 
-			@RequestParam(required = false) String paid) throws Exception {
+	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
 		logger.info("confirmOrder, user : " + user);
 		logger.info("confirmOrder, orderId : " + orderId);
-		logger.info("confirmOrder, paid : " + paid);
 		String operType = "0";
-		customService.confirmOrder(user, orderId, operType, paid);	//用户自己确认operType填0
+		customService.confirmOrder(user, orderId, operType);	//用户自己确认operType填0
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	
@@ -136,7 +134,7 @@ public class CustomServiceController extends BaseController {
 		logger.info("confirmByOper, user : " + user);
 		logger.info("confirmByOper orderId : " + orderId);
 		String operType = "1";
-		customService.confirmOrder(user, orderId, operType, null);	//维修工确认operType填1
+		customService.confirmOrder(user, orderId, operType);	//维修工确认operType填1
 		return BaseResult.successResult(Constants.SUCCESS);
 	}
 	

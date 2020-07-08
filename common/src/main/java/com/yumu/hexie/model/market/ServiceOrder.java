@@ -15,6 +15,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -914,6 +915,10 @@ public class ServiceOrder  extends BaseModel {
 			}
 		}else if (ModelConstant.ORDER_PINGJIA_TYPE_Y == this.pingjiaStatus) {
 			showStatus = "5";
+		}else if (ModelConstant.ORDER_STATUS_PAYED == this.status) {
+			if (ModelConstant.ORDER_PINGJIA_TYPE_N == this.pingjiaStatus) {
+				showStatus = "4";
+			}
 		}
     	return showStatus;
     	

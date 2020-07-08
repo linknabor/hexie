@@ -305,7 +305,7 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Override
 	@Transactional
-	public void confirmOrder(User user, String orderId, String operType, String paid) throws Exception {
+	public void confirmOrder(User user, String orderId, String operType) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
@@ -317,22 +317,16 @@ public class CustomServiceImpl implements CustomService {
 		}
 
 		Date date = new Date();
-		if (!"1".equals(paid)) {
-			OperOrderRequest operOrderRequest = new OperOrderRequest();
-			operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
-			operOrderRequest.setOpenid(user.getOpenid());
-			operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
-			operOrderRequest.setOperType("1");
-			customServiceUtil.operatorOrder(user, operOrderRequest);
-		}
+		OperOrderRequest operOrderRequest = new OperOrderRequest();
+		operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
+		operOrderRequest.setOpenid(user.getOpenid());
+		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
+		operOrderRequest.setOperType("1");
+		customServiceUtil.operatorOrder(user, operOrderRequest);
 		
 		serviceOrder.setConfirmDate(date);
 		serviceOrder.setConfirmer(user.getName());
-		if (!"1".equals(paid)) {
-			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
-		}else {
-			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-		}
+		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
@@ -482,7 +476,10 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
-		serviceOrder.setPayDate(new Date());
+		Date date = new Date();
+		serviceOrder.setConfirmDate(date);
+		serviceOrder.setPayDate(date);
+		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
@@ -502,8 +499,11 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			return;
 		}
-		serviceOrder.setPayDate(new Date());
-		serviceOrderRepository.save(serviceOrder);
+		if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
+			serviceOrder.setPayDate(new Date());
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			serviceOrderRepository.save(serviceOrder);
+		}
 		
 	}
 
