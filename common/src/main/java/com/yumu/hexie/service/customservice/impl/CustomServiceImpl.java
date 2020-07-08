@@ -305,29 +305,34 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Override
 	@Transactional
-	public void confirmOrder(User user, String orderId, String operType) throws Exception {
+	public void confirmOrder(User user, String orderId, String operType, String paid) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
-
-		Date date = new Date();
-		OperOrderRequest operOrderRequest = new OperOrderRequest();
-		operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
-		operOrderRequest.setOpenid(user.getOpenid());
-		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
-		operOrderRequest.setOperType("1");
-		customServiceUtil.operatorOrder(user, operOrderRequest);
-		
 		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
 			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
+		}
+
+		Date date = new Date();
+		if (!"1".equals(paid)) {
+			OperOrderRequest operOrderRequest = new OperOrderRequest();
+			operOrderRequest.setOperDate(DateUtil.dtFormat(date, "yyyyMMddHHmmss"));
+			operOrderRequest.setOpenid(user.getOpenid());
+			operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
+			operOrderRequest.setOperType("1");
+			customServiceUtil.operatorOrder(user, operOrderRequest);
 		}
 		
 		serviceOrder.setConfirmDate(date);
 		serviceOrder.setConfirmer(user.getName());
-		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
+		if (!"1".equals(paid)) {
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
+		}else {
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+		}
 		serviceOrderRepository.save(serviceOrder);
 		
 	}

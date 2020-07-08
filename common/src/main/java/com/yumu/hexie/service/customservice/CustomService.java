@@ -19,7 +19,7 @@ public interface CustomService {
 
 	CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception;
 	
-	void confirmOrder(User user, String orderId, String operType) throws Exception;
+	void confirmOrder(User user, String orderId, String operType, String paid) throws Exception;
 	
 	ServiceOrder queryOrder(User user, String orderId);
 	
