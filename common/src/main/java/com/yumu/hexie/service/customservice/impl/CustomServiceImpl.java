@@ -505,8 +505,12 @@ public class CustomServiceImpl implements CustomService {
 			return;
 		}
 		if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
+			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+				//do nothing
+			}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			}
 			serviceOrder.setPayDate(new Date());
-			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
 			serviceOrderRepository.save(serviceOrder);
 		}
 		
