@@ -476,7 +476,7 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
-		
+		logger.info("orderId : " + orderId + ", orderStatus : " + serviceOrder.getStatus());
 		Date date = new Date();
 		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
 			//do nothing
