@@ -168,6 +168,10 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
+		User user = prepayRequestDTO.getUser();
+		User currUser = userRepository.findOne(user.getId());
+		prepayRequestDTO.setUser(currUser);
+		
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
@@ -522,10 +526,7 @@ public class WuyeServiceImpl implements WuyeService {
 					log.info("getQrCodePayService before : " + (end - begin));
 					
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
-					
-					end = System.currentTimeMillis();
-					log.info("getQrCodePayService redis time : " + (end - begin));
-					
+
 					if (objList.size() > 0) {
 						for (int i = 0; i < sTypes.length; i++) {
 							

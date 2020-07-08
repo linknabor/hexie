@@ -914,6 +914,10 @@ public class ServiceOrder  extends BaseModel {
 			}
 		}else if (ModelConstant.ORDER_PINGJIA_TYPE_Y == this.pingjiaStatus) {
 			showStatus = "5";
+		}else if (ModelConstant.ORDER_STATUS_PAYED == this.status) {
+			if (ModelConstant.ORDER_PINGJIA_TYPE_N == this.pingjiaStatus) {
+				showStatus = "4";
+			}
 		}
     	return showStatus;
     	

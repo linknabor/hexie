@@ -115,6 +115,8 @@ public class WuyeUtil2 {
 		billDetailRequest.setWuyeId(user.getWuyeId());
 		billDetailRequest.setStmtId(stmtId);
 		billDetailRequest.setBillId(anotherbillIds);
+		billDetailRequest.setOpenid(user.getOpenid());
+		billDetailRequest.setAppid(user.getAppId());
 		
 		TypeReference<CommonResponse<PaymentInfo>> typeReference = new TypeReference<CommonResponse<PaymentInfo>>(){};
 		CommonResponse<PaymentInfo> hexieResponse = restUtil.exchange(requestUrl, billDetailRequest, typeReference);

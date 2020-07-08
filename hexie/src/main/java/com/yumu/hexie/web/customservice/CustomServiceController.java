@@ -114,7 +114,7 @@ public class CustomServiceController extends BaseController {
 	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
 		logger.info("confirmOrder, user : " + user);
-		logger.info("confirmOrder orderId : " + orderId);
+		logger.info("confirmOrder, orderId : " + orderId);
 		String operType = "0";
 		customService.confirmOrder(user, orderId, operType);	//用户自己确认operType填0
 		return BaseResult.successResult(Constants.SUCCESS);
@@ -333,5 +333,5 @@ public class CustomServiceController extends BaseController {
 		
 		return customService.testRedisOps();
 	}
-	
+
 }

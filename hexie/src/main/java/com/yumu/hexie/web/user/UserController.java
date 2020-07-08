@@ -115,29 +115,22 @@ public class UserController extends BaseController{
 			if(user != null){
 				
 				long endTime = System.currentTimeMillis();
-				log.info("user:" + user.getName() + "location1，耗时：" + ((endTime-beginTime)/1000));
 				
 			    session.setAttribute(Constants.USER, user);
 			    boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
 			    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
 			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
-			    
 			    endTime = System.currentTimeMillis();
-				log.info("user:" + user.getName() + "location2，耗时：" + ((endTime-beginTime)/1000));
-			    
+
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    endTime = System.currentTimeMillis();
-				log.info("user:" + user.getName() + "location3，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
 			    log.info("iconList : " + showIconList);
-			    
-			    endTime = System.currentTimeMillis();
-				log.info("user:" + user.getName() + "location4，耗时：" + ((endTime-beginTime)/1000));
-			    
+
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(showIconList);
@@ -165,6 +158,7 @@ public class UserController extends BaseController{
 			    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
 			    		    
 			    endTime = System.currentTimeMillis();
+
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
 			    return new BaseResult<UserInfo>().success(userInfo);

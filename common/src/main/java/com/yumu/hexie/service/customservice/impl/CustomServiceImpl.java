@@ -312,6 +312,9 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
+		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
+			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
+		}
 
 		Date date = new Date();
 		OperOrderRequest operOrderRequest = new OperOrderRequest();
@@ -320,10 +323,6 @@ public class CustomServiceImpl implements CustomService {
 		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
 		operOrderRequest.setOperType("1");
 		customServiceUtil.operatorOrder(user, operOrderRequest);
-		
-		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
-			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
-		}
 		
 		serviceOrder.setConfirmDate(date);
 		serviceOrder.setConfirmer(user.getName());
@@ -477,7 +476,15 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
-		serviceOrder.setPayDate(new Date());
+		logger.info("orderId : " + orderId + ", orderStatus : " + serviceOrder.getStatus());
+		Date date = new Date();
+		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+			//do nothing
+		}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			serviceOrder.setConfirmDate(date);
+		}
+		serviceOrder.setPayDate(date);
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
@@ -497,8 +504,15 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			return;
 		}
-		serviceOrder.setPayDate(new Date());
-		serviceOrderRepository.save(serviceOrder);
+		if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
+			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+				//do nothing
+			}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			}
+			serviceOrder.setPayDate(new Date());
+			serviceOrderRepository.save(serviceOrder);
+		}
 		
 	}
 
