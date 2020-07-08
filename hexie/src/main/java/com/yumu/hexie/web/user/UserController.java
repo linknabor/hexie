@@ -121,6 +121,7 @@ public class UserController extends BaseController{
 			    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
 			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
 			    endTime = System.currentTimeMillis();
+
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
@@ -129,7 +130,7 @@ public class UserController extends BaseController{
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
 			    log.info("iconList : " + showIconList);
-			    
+
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(showIconList);
@@ -157,6 +158,7 @@ public class UserController extends BaseController{
 			    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
 			    		    
 			    endTime = System.currentTimeMillis();
+
 				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
 
 			    return new BaseResult<UserInfo>().success(userInfo);

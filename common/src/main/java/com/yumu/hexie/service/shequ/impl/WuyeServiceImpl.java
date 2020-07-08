@@ -520,7 +520,7 @@ public class WuyeServiceImpl implements WuyeService {
 					Object[]sTypes = subTypes.split(",");
 					Collection<Object> collection = Arrays.asList(sTypes);
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
-					
+
 					if (objList.size() > 0) {
 						for (int i = 0; i < sTypes.length; i++) {
 							

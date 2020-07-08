@@ -76,7 +76,6 @@ public class GotongServiceImpl implements GotongService {
     
     public static String CUSTOM_SERVICE_DETAIL = ConfigUtil.get("customServiceDetail");
 
-
     
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
