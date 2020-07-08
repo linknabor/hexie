@@ -267,6 +267,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 	@Override
 	public List<BottomIcon> filterBottomIcon(User user, List<BottomIcon>iconList) {
 		
+		long begin = System.currentTimeMillis();
+		
 		List<BottomIcon> showList = new ArrayList<>();
 		showList.addAll(iconList);
 		

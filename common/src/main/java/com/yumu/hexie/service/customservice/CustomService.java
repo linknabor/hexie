@@ -52,7 +52,6 @@ public interface CustomService {
 	void saveCommentImages(String appId, long orderId, List<String> imgUrls);
 
 	Map<String, Long> testRedisOps();
-
 	
 
 }
