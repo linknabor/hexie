@@ -21,6 +21,17 @@ public class Discounts implements Serializable {
 	private String isEnableIntegral;
 	@JsonProperty("integral")
 	private String integral;
+
+	/*2020-07 添加 begin*/
+	@JsonProperty("reality_amt")
+	private String realityAmt;	//is_qrcode =1时有，实际支付金额
+	private String image;	//is_qrcode =1时有，图片的BASE64串
+	@JsonProperty("sect_name")
+	private String sectName;
+	@JsonProperty("cycle_arrs")
+	private List<String> cycleList;
+	/*2020-07 添加 end*/
+	
 	
 	public static class DiscountDetail {
 		
@@ -90,6 +101,22 @@ public class Discounts implements Serializable {
 
 	public void setIntegral(String integral) {
 		this.integral = integral;
+	}
+
+	public String getRealityAmt() {
+		return realityAmt;
+	}
+
+	public void setRealityAmt(String realityAmt) {
+		this.realityAmt = realityAmt;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 	
 

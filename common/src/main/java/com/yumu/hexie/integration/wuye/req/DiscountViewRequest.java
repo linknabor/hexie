@@ -24,6 +24,17 @@ public class DiscountViewRequest extends WuyeRequest {
 	private String payFeeType;		//01管理费，02停车费
 	private String appid;
 	
+	/*2020-07 添加 begin*/
+	@JsonProperty("is_qrcode")
+	private String isQrcode;
+	@JsonProperty("invoice_title_type")
+	private String invoiceTitleType;
+	@JsonProperty("invoice_title")
+	private String invoiceTitle;
+	@JsonProperty("credit_code")
+	private String creditCode;
+	/*2020-07 添加 end*/
+	
 	public DiscountViewRequest() {
 		super();
 	}
@@ -69,13 +80,37 @@ public class DiscountViewRequest extends WuyeRequest {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
+	public String getIsQrcode() {
+		return isQrcode;
+	}
+	public void setIsQrcode(String isQrcode) {
+		this.isQrcode = isQrcode;
+	}
+	public String getInvoiceTitleType() {
+		return invoiceTitleType;
+	}
+	public void setInvoiceTitleType(String invoiceTitleType) {
+		this.invoiceTitleType = invoiceTitleType;
+	}
+	public String getInvoiceTitle() {
+		return invoiceTitle;
+	}
+	public void setInvoiceTitle(String invoiceTitle) {
+		this.invoiceTitle = invoiceTitle;
+	}
+	public String getCreditCode() {
+		return creditCode;
+	}
+	public void setCreditCode(String creditCode) {
+		this.creditCode = creditCode;
+	}
 	@Override
 	public String toString() {
 		return "DiscountViewRequest [wuyeId=" + wuyeId + ", billId=" + billId + ", stmtId=" + stmtId + ", payType="
-				+ payType + ", payFeeType=" + payFeeType + ", appid=" + appid + "]";
-
+				+ payType + ", payFeeType=" + payFeeType + ", appid=" + appid + ", isQrcode=" + isQrcode
+				+ ", invoiceTitleType=" + invoiceTitleType + ", invoiceTitle=" + invoiceTitle + ", creditCode="
+				+ creditCode + "]";
 	}
-	
 	
 
 }

@@ -271,8 +271,10 @@ public class PageConfigServiceImpl implements PageConfigService {
 		showList.addAll(iconList);
 		
 		String sectId = user.getSectId();
+		
 		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
 		logger.info("filterBottomIcon , map : " + map);
+		
 		if (map.size()>0) {
 			return showList;
 		}

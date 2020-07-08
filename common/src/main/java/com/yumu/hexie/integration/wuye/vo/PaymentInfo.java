@@ -21,6 +21,7 @@ public class PaymentInfo implements Serializable {
 	private String invoice_title;//发票抬头（回显使用）
 	private List<PaymentData> fee_data;
 	private String support_card_pay;	//是否支持绑卡支付
+	private String is_create_qrcode;
 	
 	@Transient
 	public String getPaymethodStr(){
@@ -86,7 +87,12 @@ public class PaymentInfo implements Serializable {
 	public void setSupport_card_pay(String support_card_pay) {
 		this.support_card_pay = support_card_pay;
 	}
-
+	public String getIs_create_qrcode() {
+		return is_create_qrcode;
+	}
+	public void setIs_create_qrcode(String is_create_qrcode) {
+		this.is_create_qrcode = is_create_qrcode;
+	}
 	
 	
 }

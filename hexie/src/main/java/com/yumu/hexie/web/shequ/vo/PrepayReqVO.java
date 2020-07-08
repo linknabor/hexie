@@ -52,6 +52,9 @@ public class PrepayReqVO implements Serializable {
 	private String reductionAmt;	//减免金额
 	private String payFeeType;	//01：管理费 02：停车费
 	
+	private String isQrcode;	//是否二维码支付
+	private String alipayUserId;	//支付宝用户ID,alipay支付必传
+	
 	public String getBillId() {
 		return billId;
 	}
@@ -197,6 +200,18 @@ public class PrepayReqVO implements Serializable {
 	public void setPayFeeType(String payFeeType) {
 		this.payFeeType = payFeeType;
 	}
+	public String getIsQrcode() {
+		return isQrcode;
+	}
+	public void setIsQrcode(String isQrcode) {
+		this.isQrcode = isQrcode;
+	}
+	public String getAlipayUserId() {
+		return alipayUserId;
+	}
+	public void setAlipayUserId(String alipayUserId) {
+		this.alipayUserId = alipayUserId;
+	}
 	@Override
 	public String toString() {
 		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
@@ -205,9 +220,8 @@ public class PrepayReqVO implements Serializable {
 				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
 				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
 				+ ", veriCode=" + veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo
-				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + "]";
-
+				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType
+				+ ", isQrcode=" + isQrcode + ", alipayUserId=" + alipayUserId + "]";
 	}
-	
 	
 }

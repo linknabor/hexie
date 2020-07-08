@@ -228,7 +228,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				OperatorDTO queue = objectMapper.readValue(json, new TypeReference<OperatorDTO>(){});
 				
 				logger.info("start to consume opererator queue : " + queue);
-				
+
 				List<Operator> operList = queue.getOperatorList();
 				if (operList!=null && !operList.isEmpty()) {
 					serviceOperatorRepository.deleteByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);

@@ -2,8 +2,10 @@ package com.yumu.hexie.service.customservice.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,13 +92,14 @@ public class CustomServiceImpl implements CustomService {
 		long begin = System.currentTimeMillis();
 		
 		//1.调用API创建接口
+		User currUser = userRepository.findOne(customerServiceOrderDTO.getUser().getId());
+		customerServiceOrderDTO.setUser(currUser);
 		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
 		
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
 		
 		//2.保存本地订单
-		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
 		ServiceOrder serviceOrder = new ServiceOrder();
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
 		serviceOrder.setProductId(Long.valueOf(customerServiceOrderDTO.getServiceId()));
@@ -309,6 +312,9 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
+		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
+			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
+		}
 
 		Date date = new Date();
 		OperOrderRequest operOrderRequest = new OperOrderRequest();
@@ -317,10 +323,6 @@ public class CustomServiceImpl implements CustomService {
 		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
 		operOrderRequest.setOperType("1");
 		customServiceUtil.operatorOrder(user, operOrderRequest);
-		
-		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
-			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
-		}
 		
 		serviceOrder.setConfirmDate(date);
 		serviceOrder.setConfirmer(user.getName());
@@ -474,7 +476,15 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
-		serviceOrder.setPayDate(new Date());
+		logger.info("orderId : " + orderId + ", orderStatus : " + serviceOrder.getStatus());
+		Date date = new Date();
+		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+			//do nothing
+		}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			serviceOrder.setConfirmDate(date);
+		}
+		serviceOrder.setPayDate(date);
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
@@ -494,8 +504,15 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			return;
 		}
-		serviceOrder.setPayDate(new Date());
-		serviceOrderRepository.save(serviceOrder);
+		if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
+			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+				//do nothing
+			}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			}
+			serviceOrder.setPayDate(new Date());
+			serviceOrderRepository.save(serviceOrder);
+		}
 		
 	}
 
@@ -637,6 +654,48 @@ public class CustomServiceImpl implements CustomService {
 				}
 			}
 		}
+    	
+    }
+    
+    @Override
+    public Map<String, Long> testRedisOps() {
+
+    	Map<String, Long> returnMap = new HashMap<>();
+		String preKey = ModelConstant.KEY_CS_SERVED_SECT;
+		Map<String, String> map = new HashMap<>();
+		for (int i = 0; i < 50; i++) {
+			map.put((preKey + i),  UUID.randomUUID().toString());
+		}
+		long begin = System.currentTimeMillis();
+		redisTemplate.opsForHash().putAll("testRedisHash", map);
+		long end = System.currentTimeMillis();
+		logger.info("hash put time : " + (end - begin));
+		
+		returnMap.put("hash put time", (end - begin));
+		
+		begin = System.currentTimeMillis();
+		redisTemplate.opsForHash().entries("testRedisHash");
+		end = System.currentTimeMillis();
+		logger.info("hash get time : " + (end - begin));
+		
+		returnMap.put("hash get time", (end - begin));
+		
+		for (int i = 0; i < 50; i++) {
+			begin = System.currentTimeMillis();
+			redisTemplate.opsForValue().set("testRedisValue", String.valueOf(i));
+			end = System.currentTimeMillis();
+			logger.info("value set time : " + i + ", " + (end-begin));
+			
+			returnMap.put("value set time " + i, (end-begin));
+			
+			begin = System.currentTimeMillis();
+			redisTemplate.opsForValue().get("testRedisValue");
+			end = System.currentTimeMillis();
+			logger.info("value get time : " + i + ", " + (end-begin));
+			
+			returnMap.put("value get time " + i, (end-begin));
+		}
+		return returnMap;
     	
     }
     
