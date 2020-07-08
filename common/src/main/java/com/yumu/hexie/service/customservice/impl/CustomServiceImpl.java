@@ -476,10 +476,15 @@ public class CustomServiceImpl implements CustomService {
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
+		
 		Date date = new Date();
-		serviceOrder.setConfirmDate(date);
+		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+			//do nothing
+		}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			serviceOrder.setConfirmDate(date);
+		}
 		serviceOrder.setPayDate(date);
-		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
