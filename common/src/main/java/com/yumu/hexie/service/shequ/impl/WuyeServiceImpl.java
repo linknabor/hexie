@@ -169,8 +169,12 @@ public class WuyeServiceImpl implements WuyeService {
 	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
 		User user = prepayRequestDTO.getUser();
-		User currUser = userRepository.findOne(user.getId());
-		prepayRequestDTO.setUser(currUser);
+		if (user.getId() == 0) {
+			log.info("alipay, no user id .");
+		}else {
+			User currUser = userRepository.findOne(user.getId());
+			prepayRequestDTO.setUser(currUser);
+		}
 		
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
