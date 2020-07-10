@@ -118,6 +118,7 @@ public class PrepayRequest extends WuyeRequest {
 	private String payFeeType;	//01：管理费 02：停车费
 	
 	//是否二维码支付
+	@JsonProperty("is_qrcode")
 	private String isQrcode;
 
 	public String getCouponUnit() {
