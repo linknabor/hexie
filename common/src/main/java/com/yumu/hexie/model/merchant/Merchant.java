@@ -1,11 +1,14 @@
 package com.yumu.hexie.model.merchant;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.yumu.hexie.model.BaseModel;
 
 //商户
 @Entity
+@Table(name = "merchant", uniqueConstraints = {@UniqueConstraint(columnNames="merchantNo")})	
 public class Merchant  extends BaseModel{
 
 	private static final long serialVersionUID = 4808669460780339640L;

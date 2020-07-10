@@ -2,8 +2,11 @@ package com.yumu.hexie.model.distribution;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import com.yumu.hexie.model.ModelConstant;
@@ -63,4 +66,16 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			xiaoquId,long current,int productType, String appid, Pageable pageable);
 
 	public List<OnSaleAreaItem> findByRuleId(long ruleId);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "delete from OnSaleAreaItem where productId = ?1 ", nativeQuery = true)
+	public void deleteByProductId(String productId);
+	
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update OnSaleAreaItem set status = ?1 where id = ?2 ", nativeQuery = true)
+	public void updateStatus(int status, long id);
+	
 }
