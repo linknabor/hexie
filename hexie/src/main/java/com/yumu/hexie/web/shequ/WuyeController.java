@@ -351,12 +351,12 @@ public class WuyeController extends BaseController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/getPrePayInfoAlipay", method = RequestMethod.POST)
+	@RequestMapping(value = "/getPrePayInfo4Qrcode", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<WechatPayInfo> getPrePayInfoAlipay(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
+	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
 		WechatPayInfo result = new WechatPayInfo();
-		log.info("getPrePayInfoAlipay prepayReqVo : " + prepayReqVo);
+		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
 		
@@ -365,7 +365,7 @@ public class WuyeController extends BaseController {
 		user.setAppId(prepayReqVo.getAppid());
 		user.setOpenid(prepayReqVo.getAlipayUserId());
 		
-		log.info("getPrePayInfoAlipay prepayRequestDTO : " + dto);
+		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
 		result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}

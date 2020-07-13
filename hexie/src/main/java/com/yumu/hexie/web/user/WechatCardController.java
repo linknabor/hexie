@@ -117,7 +117,7 @@ public class WechatCardController extends BaseController {
 			return "";
 		}
 		wechatCardService.wuyeRefund(refundDTO);
-		return "success";
+		return Constants.SERVICE_SUCCESS;
 	}
 	
 }
