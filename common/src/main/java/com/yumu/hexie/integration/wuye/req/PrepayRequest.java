@@ -25,11 +25,7 @@ public class PrepayRequest extends WuyeRequest {
 		BeanUtils.copyProperties(prepayRequestDTO, this);
 		this.wuyeId = prepayRequestDTO.getUser().getWuyeId();
 		this.mobile = prepayRequestDTO.getUser().getTel();
-		if (!StringUtils.isEmpty(prepayRequestDTO.getAlipayUserId())) {
-			this.openid = prepayRequestDTO.getAlipayUserId();
-		}else {
-			this.openid = prepayRequestDTO.getUser().getOpenid();
-		}
+		this.openid = prepayRequestDTO.getUser().getOpenid();
 		if (!StringUtils.isEmpty(prepayRequestDTO.getCustomerName())) {
 			try {
 				//中文打码

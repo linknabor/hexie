@@ -170,7 +170,7 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		User user = prepayRequestDTO.getUser();
 		if (user.getId() == 0) {
-			log.info("alipay, no user id .");
+			log.info("qrcode pay, no user id .");
 		}else {
 			User currUser = userRepository.findOne(user.getId());
 			prepayRequestDTO.setUser(currUser);

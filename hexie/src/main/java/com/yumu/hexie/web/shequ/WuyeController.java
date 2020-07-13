@@ -363,7 +363,7 @@ public class WuyeController extends BaseController {
 		User user = new User();
 		dto.setUser(user);
 		user.setAppId(prepayReqVo.getAppid());
-		user.setOpenid(prepayReqVo.getAlipayUserId());
+		user.setOpenid(prepayReqVo.getOpenid());
 		
 		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
 		result = wuyeService.getPrePayInfo(dto);
