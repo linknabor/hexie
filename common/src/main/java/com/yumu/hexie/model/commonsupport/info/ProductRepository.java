@@ -14,9 +14,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	
 	
 	//不要修改顺序
-	String sqlColumn1 = " p.id, p.name, p.productType, p.oriPrice, p.miniPrice, p.singlePrice, item.status, p.startDate, p.endDate, "
+	String sqlColumn1 = " p.id, p.name, p.productType, p.oriPrice, p.miniPrice, p.singlePrice, rule.status, p.startDate, p.endDate, "
 			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, m.name as merchantName, m.merchantNo, rule.limitNumOnce, "
-			+ "item.sortNo, count(r.id) as counts ";
+			+ "item.sortNo, pp.appid, count(r.id) as counts ";
 	
 	@Query(value = "select " + sqlColumn1
 			+ "from product p "
@@ -48,7 +48,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 	@Transactional
 	@Modifying
-	@Query(value = "update status = ?1 where id = ? 2 ")
+	@Query(value = "update product set status = ?1 where id = ?2 ", nativeQuery = true)
 	void updateStatus(int status, long id);
 	
 }

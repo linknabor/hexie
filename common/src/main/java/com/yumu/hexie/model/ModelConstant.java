@@ -39,7 +39,10 @@ public class ModelConstant {
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
     public static final int SERVICE_OPER_TYPE_WAITER = 2;	//店小二
+    public static final int SERVICE_OPER_TYPE_BAOJIE = 3;	//店小二
     public static final int SERVICE_OPER_TYPE_STAFF = 5;	//物业人员
+    public static final int SERVICE_OPER_TYPE_SERVICE = 10;	//自定义服务
+    public static final int SERVICE_OPER_TYPE_EVOUCHER = 11;	//优惠券核销人员
 
 	//操作业务类型
 	public static final int OP_TYPE_SERVICE_ORDER = 1;
