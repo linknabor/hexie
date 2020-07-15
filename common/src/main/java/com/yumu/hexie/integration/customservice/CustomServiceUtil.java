@@ -40,7 +40,11 @@ public class CustomServiceUtil {
 		requestUrl += GET_SERVICE_URL;
 		
 		GetServiceRequest getServiceRequest = new GetServiceRequest();
-		getServiceRequest.setSectId(user.getSectId());
+		String sectId = user.getSectId();
+		if ("0".equals(sectId)) {
+			sectId = "";
+		}
+		getServiceRequest.setSectId(sectId);
 		getServiceRequest.setUserId(user.getWuyeId());
 		
 		TypeReference<CommonResponse<List<CustomServiceVO>>> typeReference = new TypeReference<CommonResponse<List<CustomServiceVO>>>(){};
