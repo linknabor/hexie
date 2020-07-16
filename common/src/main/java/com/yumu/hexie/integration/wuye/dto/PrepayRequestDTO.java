@@ -55,6 +55,7 @@ public class PrepayRequestDTO implements Serializable {
 	//是否二维码支付
 	private String isQrcode;
 	private String alipayUserId;
+	private String appid;
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -224,6 +225,13 @@ public class PrepayRequestDTO implements Serializable {
 	public void setAlipayUserId(String alipayUserId) {
 		this.alipayUserId = alipayUserId;
 	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+
 	@Override
 	public String toString() {
 		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
@@ -234,7 +242,8 @@ public class PrepayRequestDTO implements Serializable {
 				+ acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode
 				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
 				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
-				+ ", alipayUserId=" + alipayUserId + "]";
+				+ ", alipayUserId=" + alipayUserId + ", appid=" + appid + "]";
+
 	}
 	
 	

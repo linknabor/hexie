@@ -29,7 +29,7 @@ public class Discounts implements Serializable {
 	@JsonProperty("sect_name")
 	private String sectName;
 	@JsonProperty("cycle_arrs")
-	private List<String> cycleList;
+	private List<Cycles> cycleList;
 	/*2020-07 添加 end*/
 	
 	
@@ -62,6 +62,33 @@ public class Discounts implements Serializable {
 		}
 		
 	}
+	
+	public static class Cycles{
+		
+		@JsonProperty("fee_name")
+		private String feeName;
+		@JsonProperty("cycle_date")
+		private String cycleDate;
+		public String getFeeName() {
+			return feeName;
+		}
+		public void setFeeName(String feeName) {
+			this.feeName = feeName;
+		}
+		public String getCycleDate() {
+			return cycleDate;
+		}
+		public void setCycleDate(String cycleDate) {
+			this.cycleDate = cycleDate;
+		}
+		@Override
+		public String toString() {
+			return "Cycles [feeName=" + feeName + ", cycleDate=" + cycleDate + "]";
+		}
+		
+		
+	}
+
 
 	public String getTotalFeePrice() {
 		return totalFeePrice;

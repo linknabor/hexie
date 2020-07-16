@@ -25,11 +25,8 @@ public class PrepayRequest extends WuyeRequest {
 		BeanUtils.copyProperties(prepayRequestDTO, this);
 		this.wuyeId = prepayRequestDTO.getUser().getWuyeId();
 		this.mobile = prepayRequestDTO.getUser().getTel();
-		if (!StringUtils.isEmpty(prepayRequestDTO.getAlipayUserId())) {
-			this.openid = prepayRequestDTO.getAlipayUserId();
-		}else {
-			this.openid = prepayRequestDTO.getUser().getOpenid();
-		}
+		this.openid = prepayRequestDTO.getUser().getOpenid();
+
 		if (!StringUtils.isEmpty(prepayRequestDTO.getCustomerName())) {
 			try {
 				//中文打码
@@ -118,7 +115,8 @@ public class PrepayRequest extends WuyeRequest {
 	private String payFeeType;	//01：管理费 02：停车费
 	
 	//是否二维码支付
-	private String isQrCode;
+	@JsonProperty("is_qrcode")
+	private String isQrcode;
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -276,11 +274,11 @@ public class PrepayRequest extends WuyeRequest {
 	public void setPayFeeType(String payFeeType) {
 		this.payFeeType = payFeeType;
 	}
-	public String getIsQrCode() {
-		return isQrCode;
+	public String getIsQrcode() {
+		return isQrcode;
 	}
-	public void setIsQrCode(String isQrCode) {
-		this.isQrCode = isQrCode;
+	public void setIsQrcode(String isQrcode) {
+		this.isQrcode = isQrcode;
 	}
 	@Override
 	public String toString() {
@@ -291,7 +289,8 @@ public class PrepayRequest extends WuyeRequest {
 				+ ", stmtId=" + stmtId + ", payType=" + payType + ", customerName=" + customerName + ", certType="
 				+ certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken="
 				+ quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo + ", ruleType=" + ruleType
-				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrCode=" + isQrCode + "]";
+				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + "]";
+
 	}
 	
 	
