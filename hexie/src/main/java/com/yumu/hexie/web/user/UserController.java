@@ -128,12 +128,12 @@ public class UserController extends BaseController{
 			    endTime = System.currentTimeMillis();
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
-			    log.info("iconList : " + showIconList);
+//			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
+//			    log.info("iconList : " + showIconList);
 
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
-			    userInfo.setIconList(showIconList);
+			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
 			    
