@@ -169,8 +169,12 @@ public class WuyeServiceImpl implements WuyeService {
 	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
 		User user = prepayRequestDTO.getUser();
-		User currUser = userRepository.findOne(user.getId());
-		prepayRequestDTO.setUser(currUser);
+		if (user.getId() == 0) {
+			log.info("qrcode pay, no user id .");
+		}else {
+			User currUser = userRepository.findOne(user.getId());
+			prepayRequestDTO.setUser(currUser);
+		}
 		
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
@@ -503,6 +507,8 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public QrCodePayService getQrCodePayService(User user) throws Exception {
 		
+		long begin = System.currentTimeMillis();
+		
 		if (StringUtils.isEmpty(user.getTel())) {
 			user = userRepository.getOne(user.getId());
 		}
@@ -519,6 +525,10 @@ public class WuyeServiceImpl implements WuyeService {
 				if (!StringUtils.isEmpty(subTypes)) {
 					Object[]sTypes = subTypes.split(",");
 					Collection<Object> collection = Arrays.asList(sTypes);
+				
+					long end = System.currentTimeMillis();
+					log.info("getQrCodePayService before : " + (end - begin));
+					
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
 
 					if (objList.size() > 0) {
@@ -536,6 +546,9 @@ public class WuyeServiceImpl implements WuyeService {
 							serviceList.add(payCfg);
 						}
 					}
+					
+					end = System.currentTimeMillis();
+					log.info("getQrCodePayService loop time : " + (end - begin));
 					
 				}
 				

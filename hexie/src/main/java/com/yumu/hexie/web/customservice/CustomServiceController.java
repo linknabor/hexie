@@ -2,8 +2,6 @@ package com.yumu.hexie.web.customservice;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -117,7 +115,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("confirmOrder, orderId : " + orderId);
 		String operType = "0";
 		customService.confirmOrder(user, orderId, operType);	//用户自己确认operType填0
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -135,7 +134,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("confirmByOper orderId : " + orderId);
 		String operType = "1";
 		customService.confirmOrder(user, orderId, operType);	//维修工确认operType填1
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -203,7 +203,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("acceptOrder user : " + user);
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.acceptOrder(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -220,7 +221,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("reverseOrder, user : " + user);
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.reverseOrder(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -237,7 +239,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("notifyPay, user : " + user);
 		logger.info("notifyPay orderId : " + orderId);
 		customService.notifyPay(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -285,7 +288,8 @@ public class CustomServiceController extends BaseController {
 			customService.saveCommentImages(user.getAppId(), Long.valueOf(serviceCommentVO.getOrderId()), imgList);	//异步保存上传的图片	
 		}
 		
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -304,7 +308,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("cancelPay orderId : " + orderId);
 		
 		customService.cancelPay(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -328,10 +333,5 @@ public class CustomServiceController extends BaseController {
 		return "SUCCESS";
 	}
 	
-	@RequestMapping(value = "/redisOps", method = {RequestMethod.GET})
-	public Map<String, Long> testRedisOps() {
-		
-		return customService.testRedisOps();
-	}
 
 }
