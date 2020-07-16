@@ -89,6 +89,7 @@ public class Discounts implements Serializable {
 		
 	}
 
+
 	public String getTotalFeePrice() {
 		return totalFeePrice;
 	}

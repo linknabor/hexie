@@ -26,6 +26,7 @@ public class PrepayRequest extends WuyeRequest {
 		this.wuyeId = prepayRequestDTO.getUser().getWuyeId();
 		this.mobile = prepayRequestDTO.getUser().getTel();
 		this.openid = prepayRequestDTO.getUser().getOpenid();
+
 		if (!StringUtils.isEmpty(prepayRequestDTO.getCustomerName())) {
 			try {
 				//中文打码
@@ -289,6 +290,7 @@ public class PrepayRequest extends WuyeRequest {
 				+ certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken="
 				+ quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo + ", ruleType=" + ruleType
 				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + "]";
+
 	}
 	
 	

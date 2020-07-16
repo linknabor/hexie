@@ -86,4 +86,5 @@ public class DiscountViewRequest extends WuyeRequest {
 				+ payType + ", payFeeType=" + payFeeType + ", appid=" + appid + ", isQrcode=" + isQrcode + "]";
 	}
 	
+
 }

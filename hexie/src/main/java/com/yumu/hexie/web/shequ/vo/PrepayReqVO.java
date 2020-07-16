@@ -218,6 +218,7 @@ public class PrepayReqVO implements Serializable {
 	}
 	public void setOpenid(String openid) {
 		this.openid = openid;
+
 	}
 	@Override
 	public String toString() {
@@ -230,6 +231,7 @@ public class PrepayReqVO implements Serializable {
 				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType
 				+ ", isQrcode=" + isQrcode + ", openid=" + openid + ", appid="
 				+ appid + "]";
+
 	}
 	
 }
