@@ -2,10 +2,8 @@ package com.yumu.hexie.service.customservice.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -654,48 +652,6 @@ public class CustomServiceImpl implements CustomService {
 				}
 			}
 		}
-    	
-    }
-    
-    @Override
-    public Map<String, Long> testRedisOps() {
-
-    	Map<String, Long> returnMap = new HashMap<>();
-		String preKey = ModelConstant.KEY_CS_SERVED_SECT;
-		Map<String, String> map = new HashMap<>();
-		for (int i = 0; i < 50; i++) {
-			map.put((preKey + i),  UUID.randomUUID().toString());
-		}
-		long begin = System.currentTimeMillis();
-		redisTemplate.opsForHash().putAll("testRedisHash", map);
-		long end = System.currentTimeMillis();
-		logger.info("hash put time : " + (end - begin));
-		
-		returnMap.put("hash put time", (end - begin));
-		
-		begin = System.currentTimeMillis();
-		redisTemplate.opsForHash().entries("testRedisHash");
-		end = System.currentTimeMillis();
-		logger.info("hash get time : " + (end - begin));
-		
-		returnMap.put("hash get time", (end - begin));
-		
-		for (int i = 0; i < 50; i++) {
-			begin = System.currentTimeMillis();
-			redisTemplate.opsForValue().set("testRedisValue", String.valueOf(i));
-			end = System.currentTimeMillis();
-			logger.info("value set time : " + i + ", " + (end-begin));
-			
-			returnMap.put("value set time " + i, (end-begin));
-			
-			begin = System.currentTimeMillis();
-			redisTemplate.opsForValue().get("testRedisValue");
-			end = System.currentTimeMillis();
-			logger.info("value get time : " + i + ", " + (end-begin));
-			
-			returnMap.put("value get time " + i, (end-begin));
-		}
-		return returnMap;
     	
     }
     
