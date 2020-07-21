@@ -1,11 +1,11 @@
-package com.yumu.hexie.integration.customservice.resp;
+package com.yumu.hexie.integration.common;
 
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 
-public class CreateOrderResponseVO implements Serializable {
+public class CommonPayResponse implements Serializable {
 	
 	/**
 	 * 

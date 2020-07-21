@@ -1,9 +1,9 @@
-package com.yumu.hexie.integration.shelf.dto;
+package com.yumu.hexie.integration.eshop.dto;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.yumu.hexie.integration.shelf.mapper.SaleAreaMapper;
+import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 
 public class QueryProductDTO<T> implements Serializable {
 

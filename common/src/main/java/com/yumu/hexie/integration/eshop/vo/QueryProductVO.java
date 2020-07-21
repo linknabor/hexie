@@ -1,4 +1,4 @@
-package com.yumu.hexie.integration.shelf.vo;
+package com.yumu.hexie.integration.eshop.vo;
 
 import java.io.Serializable;
 
@@ -13,8 +13,9 @@ public class QueryProductVO implements Serializable {
 	private String productName;
 	private String productStatus;
 	private String productType;	
-	private String merchantNo;
-	private String merchantName;
+	private String agentNo;
+	private String agentName;
+	private String appid;
 	
 	private int currentPage;
 	private int pageSize;
@@ -37,17 +38,17 @@ public class QueryProductVO implements Serializable {
 	public void setProductStatus(String productStatus) {
 		this.productStatus = productStatus;
 	}
-	public String getMerchantName() {
-		return merchantName;
+	public String getAgentNo() {
+		return agentNo;
 	}
-	public void setMerchantName(String merchantName) {
-		this.merchantName = merchantName;
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
 	}
-	public String getMerchantNo() {
-		return merchantNo;
+	public String getAgentName() {
+		return agentName;
 	}
-	public void setMerchantNo(String merchantNo) {
-		this.merchantNo = merchantNo;
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
 	}
 	public int getCurrentPage() {
 		return currentPage;
@@ -66,6 +67,18 @@ public class QueryProductVO implements Serializable {
 	}
 	public void setProductType(String productType) {
 		this.productType = productType;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+	@Override
+	public String toString() {
+		return "QueryProductVO [productId=" + productId + ", productName=" + productName + ", productStatus="
+				+ productStatus + ", productType=" + productType + ", agentNo=" + agentNo + ", agentName=" + agentName
+				+ ", appid=" + appid + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
 	}
 	
 	

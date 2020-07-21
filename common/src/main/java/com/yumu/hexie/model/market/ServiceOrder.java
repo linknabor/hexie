@@ -24,6 +24,7 @@ import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
@@ -102,8 +103,11 @@ public class ServiceOrder  extends BaseModel {
 	private String productThumbPic;
 	private String groupRuleName;
 	
-	private String gongzhonghao = "上海合协社区";
+	private long agentId;
+	private String agentName;
+	private String agentNo;
 	
+	private String gongzhonghao;
 	
 	/**物流信息**/
 	private int logisticType;//0商户派送 1用户自提 2第三方配送
@@ -146,7 +150,9 @@ public class ServiceOrder  extends BaseModel {
 
 	public ServiceOrder(){}
 	public ServiceOrder(SingleItemOrder sOrder) {
-		orderNo = OrderNoUtil.generateServiceOrderNo();
+		if (!"12".equals(sOrder.getPayType())) {
+			orderNo = OrderNoUtil.generateServiceOrderNo();
+		}
 		this.memo = sOrder.getMemo();
 		this.count = sOrder.getCount();
 		this.orderType = sOrder.getOrderType();
@@ -296,6 +302,12 @@ public class ServiceOrder  extends BaseModel {
 		setLat(address.getLatitude());
 		setLng(address.getLongitude());
 
+	}
+	@Transient
+	public void fillAgentInfo(Agent agent) {
+		setAgentId(agent.getId());
+		setAgentName(agent.getName());
+		setAgentNo(agent.getAgentNo());
 	}
 
 	//FIXME
@@ -820,6 +832,24 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setImgUrls(String imgUrls) {
 		this.imgUrls = imgUrls;
+	}
+	public long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+	public String getAgentName() {
+		return agentName;
+	}
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+	public String getAgentNo() {
+		return agentNo;
+	}
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
 	}
 	@Transient
 	@JsonIgnore

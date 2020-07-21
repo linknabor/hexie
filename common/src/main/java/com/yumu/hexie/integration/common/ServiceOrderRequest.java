@@ -1,8 +1,8 @@
-package com.yumu.hexie.integration.customservice.req;
+package com.yumu.hexie.integration.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ServiceOrderRequest extends CustomServiceRequest {
+public class ServiceOrderRequest extends CommonRequest {
 
 	/**
 	 * 

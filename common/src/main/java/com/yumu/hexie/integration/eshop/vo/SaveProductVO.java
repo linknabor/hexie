@@ -1,4 +1,4 @@
-package com.yumu.hexie.integration.shelf.vo;
+package com.yumu.hexie.integration.eshop.vo;
 
 import java.io.Serializable;
 import java.util.List;
@@ -31,10 +31,11 @@ public class SaveProductVO implements Serializable {
 	private String pictures;	//轮播图，多个逗号分割
 	private String context;	//描述
 	private String updateUser;	//更新商品的用户
+	private String appid;	//公众号id
 	
 	//物业或代理商信息
-	private String merchantName;
-	private String merchantNo;
+	private String agentName;
+	private String agentNo;
 	
 	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）,6维修单，11自定义服务订单,12核销券
 	private String salePlanType;
@@ -160,20 +161,20 @@ public class SaveProductVO implements Serializable {
 		this.id = id;
 	}
 
-	public String getMerchantName() {
-		return merchantName;
+	public String getAgentName() {
+		return agentName;
 	}
 
-	public void setMerchantName(String merchantName) {
-		this.merchantName = merchantName;
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
 	}
 
-	public String getMerchantNo() {
-		return merchantNo;
+	public String getAgentNo() {
+		return agentNo;
 	}
 
-	public void setMerchantNo(String merchantNo) {
-		this.merchantNo = merchantNo;
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
 	}
 
 	public List<Region> getSaleAreas() {
@@ -224,16 +225,25 @@ public class SaveProductVO implements Serializable {
 		this.counts = counts;
 	}
 
-	@Override
-	public String toString() {
-		return "ProductDTO [operType=" + operType + ", id=" + id + ", name=" + name + ", type=" + type + ", oriPrice="
-				+ oriPrice + ", miniPrice=" + miniPrice + ", singlePrice=" + singlePrice + ", limitNumOnce="
-				+ limitNumOnce + ", sortNo=" + sortNo + ", status=" + status + ", startDate=" + startDate + ", endDate="
-				+ endDate + ", mainPicture=" + mainPicture + ", smallPicture=" + smallPicture + ", pictures=" + pictures
-				+ ", context=" + context + ", updateUser=" + updateUser + ", merchantName=" + merchantName
-				+ ", merchantNo=" + merchantNo + ", salePlanType=" + salePlanType + ", counts=" + counts
-				+ ", saleAreas=" + saleAreas + "]";
+	public String getAppid() {
+		return appid;
 	}
 
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+
+	@Override
+	public String toString() {
+		return "SaveProductVO [operType=" + operType + ", id=" + id + ", name=" + name + ", type=" + type
+				+ ", oriPrice=" + oriPrice + ", miniPrice=" + miniPrice + ", singlePrice=" + singlePrice
+				+ ", limitNumOnce=" + limitNumOnce + ", sortNo=" + sortNo + ", status=" + status + ", startDate="
+				+ startDate + ", endDate=" + endDate + ", mainPicture=" + mainPicture + ", smallPicture=" + smallPicture
+				+ ", pictures=" + pictures + ", context=" + context + ", updateUser=" + updateUser + ", appid=" + appid
+				+ ", agentName=" + agentName + ", agentNo=" + agentNo + ", salePlanType=" + salePlanType + ", counts="
+				+ counts + ", saleAreas=" + saleAreas + "]";
+	}
+
+	
 
 }

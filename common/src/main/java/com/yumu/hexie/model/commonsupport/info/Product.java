@@ -17,6 +17,7 @@ public class Product extends BaseModel {
 
 	private static final long serialVersionUID = 4808669460780339640L;
 	private long merchantId;
+	private long agentId;
 	private String productNo;
 	private String merchanProductNo;
 	private String  productType;
@@ -315,6 +316,12 @@ public class Product extends BaseModel {
 	}
 	public void setPostageFee(float postageFee) {
 		this.postageFee = postageFee;
+	}
+	public long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
 	}
 	
 }

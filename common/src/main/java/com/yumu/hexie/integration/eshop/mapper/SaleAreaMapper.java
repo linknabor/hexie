@@ -1,4 +1,4 @@
-package com.yumu.hexie.integration.shelf.mapper;
+package com.yumu.hexie.integration.eshop.mapper;
 
 import java.io.Serializable;
 

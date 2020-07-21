@@ -1,4 +1,4 @@
-package com.yumu.hexie.service.shelf.impl;
+package com.yumu.hexie.service.eshop.impl;
 
 import java.util.Date;
 import java.util.List;
@@ -14,26 +14,36 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
-import com.yumu.hexie.integration.shelf.dto.QueryProductDTO;
-import com.yumu.hexie.integration.shelf.dto.QueryProductListDTO;
-import com.yumu.hexie.integration.shelf.mapper.QueryProductMapper;
-import com.yumu.hexie.integration.shelf.mapper.SaleAreaMapper;
-import com.yumu.hexie.integration.shelf.vo.QueryProductVO;
-import com.yumu.hexie.integration.shelf.vo.SaveProductVO;
-import com.yumu.hexie.integration.wuye.resp.BaseResult;
+import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
+import com.yumu.hexie.integration.eshop.dto.QueryProductListDTO;
+import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
+import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
+import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
+import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
+import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
+import com.yumu.hexie.integration.eshop.vo.SaveOperVO.Oper;
+import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
+import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductPlat;
+import com.yumu.hexie.model.commonsupport.info.ProductPlatRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorItem;
+import com.yumu.hexie.model.localservice.ServiceOperatorItemRepository;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
-import com.yumu.hexie.model.merchant.Merchant;
-import com.yumu.hexie.model.merchant.MerchantRepository;
+import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.exception.BizValidateException;
-import com.yumu.hexie.service.shelf.ShelfSerivce;
 
 /**
  * 商品上、下架
@@ -41,68 +51,72 @@ import com.yumu.hexie.service.shelf.ShelfSerivce;
  *
  * @param <T>
  */
-public class ShelfServiceImpl<T> implements ShelfSerivce {
+public class EshopServiceImpl<T> implements EshopSerivce {
 
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
-	private MerchantRepository merchantRepository;
+	private AgentRepository agentRepository;
 	@Autowired
 	private OnSaleRuleRepository onSaleRuleRepository;
 	@Autowired
 	private OnSaleAreaItemRepository onSaleAreaItemRepository;
 	@Autowired
 	private RegionRepository regionRepository;
+	@Autowired
+	private ProductPlatRepository productPlatRepository;
+	@Autowired
+	private ServiceOperatorRepository serviceOperatorRepository;
+	@Autowired
+	private ServiceOperatorItemRepository serviceOperatorItemRepository;
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public BaseResult<T> getProduct(QueryProductVO queryProductVO) {
+	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
 
-		BaseResult baseResult = new BaseResult<>();
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			List<Integer> merchantList = null;
-			if (StringUtils.isEmpty(queryProductVO.getMerchantNo()) && StringUtils.isEmpty(queryProductVO.getMerchantName())) {
+			List<Integer> agentList = null;
+			if (StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName())) {
 				//do nothing
 			}else {
-				merchantList = merchantRepository.findByMerchantNoOrName(1, queryProductVO.getMerchantNo(), 
-						queryProductVO.getMerchantName());
+				agentList = agentRepository.findByAgentNoOrName(1, queryProductVO.getAgentNo(), 
+						queryProductVO.getAgentName());
 			}
-			if (merchantList != null ) {
-				if (merchantList.isEmpty()) {
-					merchantList.add(0);
+			if (agentList != null ) {
+				if (agentList.isEmpty()) {
+					agentList.add(0);
 				}
 			}
 			
 			Pageable pageable = new PageRequest(queryProductVO.getCurrentPage(), queryProductVO.getPageSize());
 			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
-					queryProductVO.getProductName(), queryProductVO.getProductStatus(), merchantList, pageable);
+					queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, pageable);
 			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			QueryProductListDTO<List<QueryProductMapper>> responsePage = new QueryProductListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
 			responsePage.setContent(list);
 			
-			baseResult.setData(responsePage);
-			baseResult.setResult("00");
+			commonResponse.setData(responsePage);
+			commonResponse.setResult("00");
 			
 		} catch (Exception e) {
 			
-			baseResult.setData(e.getMessage());
-			baseResult.setResult("99");		//TODO 写一个公共handler统一做异常处理
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}
-		return baseResult;
+		return commonResponse;
 	}
 	
 	/**
 	 * 根据商品ID查询
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public BaseResult<T> getProductById(QueryProductVO queryProductVO) {
+	public CommonResponse<Object> getProductById(QueryProductVO queryProductVO) {
 		
 		Assert.hasText(queryProductVO.getProductId(), "商品ID不能为空。");
 
-		BaseResult baseResult = new BaseResult<>();
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			
 			Pageable pageable = new PageRequest(0, 1);
@@ -118,15 +132,15 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 			List<SaleAreaMapper> areaList = ObjectToBeanUtils.objectToBean(regionList, SaleAreaMapper.class);
 			
 			queryProductDTO.setSaleArea(areaList);
-			baseResult.setData(queryProductDTO);
-			baseResult.setResult("00");
+			commonResponse.setData(queryProductDTO);
+			commonResponse.setResult("00");
 			
 		} catch (Exception e) {
 			
-			baseResult.setData(e.getMessage());
-			baseResult.setResult("99");		//TODO 写一个公共handler统一做异常处理
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}
-		return baseResult;
+		return commonResponse;
 	}
 	
 	
@@ -138,15 +152,15 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 	@Transactional
 	public void saveProduct(SaveProductVO saveProductVO) throws Exception {
 	
-		String merNo = saveProductVO.getMerchantNo();
-		Merchant merchant = merchantRepository.findByMerchantNo(merNo);
+		String agentNo = saveProductVO.getAgentNo();
+		Agent agent = agentRepository.findByAgentNo(agentNo);
 		if ("add".equals(saveProductVO.getOperType())) {
-			if (merchant == null) {
-				merchant = new Merchant();
-				merchant.setName(saveProductVO.getMerchantName());
-				merchant.setMerchantNo(merNo);
-				merchant.setMerchantType("C");
-				merchant = merchantRepository.save(merchant);
+			if (agent == null) {
+				agent = new Agent();
+				agent.setName(saveProductVO.getAgentName());
+				agent.setAgentNo(agentNo);
+				agent.setStatus(1);
+				agent = agentRepository.save(agent);
 			}
 		}
 		
@@ -159,12 +173,15 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 		}
 		if ("add".equals(saveProductVO.getOperType())) {
 			product.setName(saveProductVO.getName());
-			product.setMerchantId(merchant.getId());
+			product.setAgentId(agent.getId());
 		}
 		product.setProductType(saveProductVO.getType());
 		product.setMainPicture(saveProductVO.getMainPicture());
 		product.setSmallPicture(saveProductVO.getSmallPicture());
 		product.setPictures(saveProductVO.getPictures());
+		if ("1000".equals(saveProductVO.getType())) {
+			product.setTotalCount(Integer.MAX_VALUE);
+		}
 		product.setMiniPrice(Float.valueOf(saveProductVO.getMiniPrice()));
 		product.setSinglePrice(Float.valueOf(saveProductVO.getSinglePrice()));
 		product.setOriPrice(Float.valueOf(saveProductVO.getOriPrice()));
@@ -182,7 +199,7 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 		}
 		product = productRepository.save(product);
 		
-		if (ModelConstant.ORDER_TYPE_EVOUCHER != Integer.valueOf(saveProductVO.getSalePlanType())) {	//核销券规则走特卖
+		if (ModelConstant.ORDER_TYPE_ONSALE != Integer.valueOf(saveProductVO.getSalePlanType())) {	//核销券规则走特卖
 			throw new BizValidateException("unknow sale plat type : " + saveProductVO.getSalePlanType());
 		}
 		OnSaleRule onSaleRule = new OnSaleRule();
@@ -204,6 +221,7 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 		onSaleRule.setStartDate(product.getStartDate());
 		onSaleRule.setEndDate(product.getEndDate());
 		onSaleRule.setOriPrice(product.getOriPrice());
+		onSaleRule.setPrice(product.getSinglePrice());
 		onSaleRule.setDescription(product.getServiceDesc());
 		onSaleRule.setTimeoutForPay(30*60*1000);
 		if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
@@ -247,6 +265,17 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 			
 		}
 		
+		ProductPlat productPlat = new ProductPlat();
+		if ("edit".equals(saveProductVO.getOperType())) {
+			productPlat = productPlatRepository.findByProductIdAndAppId(product.getId(), saveProductVO.getAppid());
+			if (productPlat == null) {
+				productPlat = new ProductPlat();	//这里new一个，因为选线可能有商品没有配置appid
+			}
+		}
+		productPlat.setAppId(saveProductVO.getAppid());
+		productPlat.setProductId(product.getId());
+		productPlatRepository.save(productPlat);
+		
 		
 	}
 	
@@ -255,15 +284,15 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 	public void updateStatus(SaveProductVO saveProductVO) {
 		
 		Assert.hasText(saveProductVO.getId(), "商品ID不能为空。");
-		Assert.hasText(saveProductVO.getStatus(), "商品状态不能为空。");
+		Assert.hasText(saveProductVO.getOperType(), "操作类型不能为空。 ");
 		
 		String productId = saveProductVO.getId();
-		String status = saveProductVO.getStatus();
+		String operType = saveProductVO.getOperType();
 		
 		int productStatus = 0;
 		int ruleStatus = 0;
 		int itemStatus = 0;
-		if (ModelConstant.RULE_STATUS_ON == Integer.valueOf(status)) {
+		if ("on".equals(operType)) {
 			productStatus = ModelConstant.PRODUCT_ONSALE;
 			ruleStatus = ModelConstant.RULE_STATUS_ON;
 			itemStatus = ModelConstant.DISTRIBUTION_STATUS_ON;
@@ -346,6 +375,66 @@ public class ShelfServiceImpl<T> implements ShelfSerivce {
 			region = regionList.get(0);
 		}
 		return region;
+	}
+	
+	@Override
+	public CommonResponse<Object> getOper(QueryOperVO queryOperVO) {
+
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			List<Object[]> list = serviceOperatorRepository.findByTypeAndServiceId(queryOperVO.getType(), queryOperVO.getServiceId());
+			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);
+			commonResponse.setData(operList);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+	}
+	
+	/**
+	 * 保存服务人员
+	 */
+	@Override
+	@Transactional
+	public void saveOper(SaveOperVO saveOperVO) {
+		
+		Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
+		
+		serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
+		
+		List<Oper> operList = saveOperVO.getOpers();
+		for (Oper oper : operList) {
+			ServiceOperator serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, oper.getTel(), oper.getOpenId());
+			if (serviceOperator == null) {
+				serviceOperator = new ServiceOperator();
+			}
+			serviceOperator.setName(oper.getName());
+			serviceOperator.setOpenId(oper.getOpenId());
+			serviceOperator.setTel(oper.getTel());
+			serviceOperator.setType(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER);	//TODO 根据service_id动态取值
+			serviceOperator.setUserId(oper.getUserId());
+			serviceOperator.setLongitude(0d);
+			serviceOperator.setLatitude(0d);
+			serviceOperator = serviceOperatorRepository.save(serviceOperator);
+			
+			ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), saveOperVO.getServiceId());
+			if (serviceOperatorItem == null) {
+				serviceOperatorItem = new ServiceOperatorItem();
+				serviceOperatorItem.setOperatorId(serviceOperator.getId());
+				serviceOperatorItem.setServiceId(saveOperVO.getServiceId());
+				serviceOperatorItemRepository.save(serviceOperatorItem);
+			}
+			
+		}
+		//查看有哪些操作员已经没有服务项目了，没有的删除该操作员
+		List<ServiceOperator> noServiceList = serviceOperatorRepository.queryNoServiceOper(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER);
+		for (ServiceOperator serviceOperator : noServiceList) {
+			serviceOperatorRepository.delete(serviceOperator);
+		}
+		
+		
 	}
 	
 

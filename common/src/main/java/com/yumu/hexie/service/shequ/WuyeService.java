@@ -276,7 +276,7 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception 
 	 */
-	QrCodePayService getQrCodePayService(User user) throws Exception;
+	QrCodePayService getQrCodePayService(User user);
 
 	/**
 	 * 根据二维码ID获取二维码

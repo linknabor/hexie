@@ -87,9 +87,13 @@ public class UserServiceImpl implements UserService {
 	@PostConstruct
 	public void initAlipay() {
 		
-		alipayClient = new DefaultAlipayClient(ConstantAlipay.ALIPAY_GATEWAY, ConstantAlipay.APPID, 
-				ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
-				ConstantAlipay.ALIPAY_PUBLIC_KEY, ConstantAlipay.SIGNTYPE); 
+		try {
+			alipayClient = new DefaultAlipayClient(ConstantAlipay.ALIPAY_GATEWAY, ConstantAlipay.APPID, 
+					ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
+					ConstantAlipay.ALIPAY_PUBLIC_KEY, ConstantAlipay.SIGNTYPE);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} 
 		
 	}
 	

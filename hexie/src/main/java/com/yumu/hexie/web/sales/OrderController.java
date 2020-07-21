@@ -279,4 +279,20 @@ public class OrderController extends BaseController{
 		return new BaseResult<String>().success("评价成功");
 	}
 	
+	/**
+	 * 取消唤起支付
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/cancelPay", method = RequestMethod.POST)
+	public BaseResult<String> cancelPay(@ModelAttribute(Constants.USER) User user, 
+			String orderId) throws Exception {
+		
+		baseOrderService.cancelPay(user, orderId);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+	}
+	
 }

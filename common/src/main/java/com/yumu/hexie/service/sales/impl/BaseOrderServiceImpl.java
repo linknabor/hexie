@@ -1,22 +1,31 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.common.CommonPayRequest;
+import com.yumu.hexie.integration.common.CommonPayResponse;
+import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
+import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
@@ -38,6 +47,7 @@ import com.yumu.hexie.service.comment.CommentService;
 import com.yumu.hexie.service.common.ShareService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
+import com.yumu.hexie.service.evoucher.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.sales.BaseOrderService;
@@ -73,15 +83,18 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	protected ShareService shareService;
 	@Inject
 	protected RepairOrderRepository repairOrderRepository;
-	
 	@Inject
 	private SalePlanService salePlanService;
-	
 	@Inject
 	private CarService carService;
-	
 	@Inject
 	private SystemConfigService systemconfigservice;
+	@Autowired
+	private EshopUtil eshopUtil;
+	@Autowired
+	private AgentRepository agentRepository;
+	@Autowired
+	private EvoucherService evoucherService;
 
     @Value(value = "${testMode}")
     private boolean testMode;
@@ -98,8 +111,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			productService.freezeCount(product, item.getCount());
             item.fillDetail(plan, product);
             
+            Agent agent = agentRepository.findOne(product.getAgentId());
+            
 			if(StringUtil.isEmpty(order.getProductName())){
                 order.fillProductInfo(product);
+                order.fillAgentInfo(agent);
                 order.setGroupRuleId(plan.getId());
             }
 		}
@@ -169,8 +185,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			item.setUserId(o.getUserId());
 			orderItemRepository.save(item);
 		}
-		//3.1保存车辆信息 20160721 车大大的车辆服务
+		//4.保存车辆信息 20160721 车大大的车辆服务
 		carService.saveOrderCarInfo(o);
+		
+		//5.电子优惠券订单
+		evoucherService.createEvoucher(o);
 		
         log.warn("[Create]订单创建OrderNo:" + o.getOrderNo());
 		//4. 订单后处理
@@ -202,25 +221,83 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 	}
 
-
-
-
+	@Transactional
 	@Override
-	public JsSign requestPay(ServiceOrder order) {
+	public JsSign requestPay(ServiceOrder order) throws Exception {
         log.warn("[requestPay]OrderNo:" + order.getOrderNo());
 		//校验订单状态
 		if(!order.payable()){
             throw new BizValidateException(order.getId(),"订单状态不可支付，请重新查询确认订单状态！").setError();
         }
-		//获取支付单
-		PaymentOrder pay = paymentService.fetchPaymentOrder(order);
-		User user = userService.getById(order.getUserId());
-        log.warn("[requestPay]PaymentId:" + pay.getId());
-		//发起支付
-		JsSign sign = paymentService.requestPay(user, pay);
-        log.warn("[requestPay]NonceStr:" + sign.getNonceStr());
-		//操作记录
-		commonPostProcess(ModelConstant.ORDER_OP_REQPAY,order);
+		JsSign sign = null;
+		//核销券订单走平台支付接口。其余老的订单走原有支付，会慢慢改成新接口
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != order.getOrderType()) {
+			User user = userService.getById(order.getUserId());
+			CommonPayRequest request = new CommonPayRequest();
+			request.setUserId(user.getWuyeId());
+			request.setAppid(user.getAppId());
+			request.setSectId(user.getSectId());
+			request.setServiceId(String.valueOf(order.getProductId()));
+			String linkman = order.getReceiverName();
+			if (!StringUtil.isEmpty(linkman)) {
+				linkman = URLEncoder.encode(linkman,"GBK");
+			}
+			request.setLinkman(linkman);
+			request.setLinktel(order.getTel());
+			String address = order.getAddress();
+			if (!StringUtil.isEmpty(address)) {
+				address = URLEncoder.encode(address,"GBK");
+			}
+			request.setServiceAddr(address);
+			request.setOpenid(order.getOpenId());
+			request.setTranAmt(String.valueOf(order.getPrice()));
+			request.setTradeWaterId(order.getOrderNo());
+			
+			String productName = order.getProductName();
+			if (!StringUtil.isEmpty(productName)) {
+				productName = URLEncoder.encode(productName,"GBK");
+			}
+			request.setServiceName(productName);
+			request.setOrderType(String.valueOf(order.getOrderType()));
+			
+			Agent agent = agentRepository.findOne(order.getAgentId());
+			request.setAgentNo(agent.getAgentNo());
+			String agentName = agent.getName();
+			if (!StringUtil.isEmpty(agentName)) {
+				agentName = URLEncoder.encode(agentName,"GBK");
+			}
+			request.setAgentName(agentName);
+			request.setCount(String.valueOf(order.getCount()));
+			
+			CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
+			sign = new JsSign();
+			sign.setAppId(responseVo.getAppid());
+			sign.setNonceStr(responseVo.getNoncestr());
+			sign.setPkgStr(responseVo.getPack());
+			sign.setSignature(responseVo.getPaysign());
+			sign.setSignType(responseVo.getSigntype());
+			sign.setTimestamp(responseVo.getTimestamp());
+			sign.setOrderId(String.valueOf(order.getId()));
+			order = serviceOrderRepository.findOne(order.getId());
+			order.setOrderNo(responseVo.getTradeWaterId());
+
+			evoucherService.enable(order);
+			
+			//操作记录
+			commonPostProcess(ModelConstant.ORDER_OP_REQPAY,order);
+			
+		}else {	
+			//获取支付单
+			PaymentOrder pay = paymentService.fetchPaymentOrder(order);
+			User user = userService.getById(order.getUserId());
+	        log.warn("[requestPay]PaymentId:" + pay.getId());
+			//发起支付
+			sign = paymentService.requestPay(user, pay);
+	        log.warn("[requestPay]NonceStr:" + sign.getNonceStr());
+			//操作记录
+			commonPostProcess(ModelConstant.ORDER_OP_REQPAY,order);
+			
+		}
 		return sign;
 	}
 
@@ -385,4 +462,22 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	public ServiceOrder findOne(long orderId){
 	    return serviceOrderRepository.findOne(orderId);
 	}
+	
+	@Transactional
+	@Override
+	public void cancelPay(User user, String orderId) throws Exception {
+		
+		Assert.hasText(orderId, "订单ID不能为空。");
+		
+		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+		eshopUtil.cancelPay(user, serviceOrder.getOrderNo());
+		
+		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
+			serviceOrderRepository.delete(serviceOrder.getId());
+		}
+	}
+	
 }

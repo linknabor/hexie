@@ -1,4 +1,4 @@
-package com.yumu.hexie.integration.shelf.dto;
+package com.yumu.hexie.integration.eshop.dto;
 
 import java.io.Serializable;
 

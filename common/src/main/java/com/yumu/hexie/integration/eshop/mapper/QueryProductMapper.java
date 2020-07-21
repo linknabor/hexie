@@ -1,4 +1,4 @@
-package com.yumu.hexie.integration.shelf.mapper;
+package com.yumu.hexie.integration.eshop.mapper;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -40,21 +40,25 @@ public class QueryProductMapper implements Serializable {
 	private String serviceDesc;	//描述
 	
 	//物业或代理商信息
-	@JsonProperty("merchant_name")
-	private String merchantName;
-	@JsonProperty("merchant_no")
-	private String merchantNo;
+	@JsonProperty("agent_name")
+	private String agentName;
+	@JsonProperty("agent_no")
+	private String agentNo;
 	
 	@JsonProperty("limit_num_once")
 	private Integer limitNumOnce;	//限购数
 	
 	@JsonProperty("sort_no")
 	private Integer sortNo;	//商品显示位置
+	private String appid;
 	private BigInteger counts;	//关联小区数
+	@JsonProperty("oper_counts")
+	private BigInteger operCounts;	//已配置的服务人员数
+	
 	public QueryProductMapper(BigInteger id, String name, String productType, Float oriPrice, Float miniPrice,
 			Float singlePrice, Integer status, Timestamp startDate, Timestamp endDate, String mainPicture,
-			String smallPicture, String pictures, String serviceDesc, String merchantName, String merchantNo,
-			Integer limitNumOnce, Integer sortNo, BigInteger counts) {
+			String smallPicture, String pictures, String serviceDesc, String agentName, String agentNo,
+			Integer limitNumOnce, Integer sortNo, String appid, BigInteger counts, BigInteger operCounts) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -69,11 +73,13 @@ public class QueryProductMapper implements Serializable {
 		this.smallPicture = smallPicture;
 		this.pictures = pictures;
 		this.serviceDesc = serviceDesc;
-		this.merchantName = merchantName;
-		this.merchantNo = merchantNo;
+		this.agentName = agentName;
+		this.agentNo = agentNo;
 		this.limitNumOnce = limitNumOnce;
 		this.sortNo = sortNo;
+		this.appid = appid;
 		this.counts = counts;
+		this.operCounts = operCounts;
 	}
 	public BigInteger getId() {
 		return id;
@@ -154,17 +160,17 @@ public class QueryProductMapper implements Serializable {
 		byte[]bytes = Base64.getEncoder().encode(serviceDesc.getBytes("utf-8"));
 		this.serviceDesc = new String(bytes, "utf-8");
 	}
-	public String getMerchantName() {
-		return merchantName;
+	public String getAgentName() {
+		return agentName;
 	}
-	public void setMerchantName(String merchantName) {
-		this.merchantName = merchantName;
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
 	}
-	public String getMerchantNo() {
-		return merchantNo;
+	public String getAgentNo() {
+		return agentNo;
 	}
-	public void setMerchantNo(String merchantNo) {
-		this.merchantNo = merchantNo;
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
 	}
 	public Integer getLimitNumOnce() {
 		return limitNumOnce;
@@ -183,6 +189,18 @@ public class QueryProductMapper implements Serializable {
 	}
 	public void setCounts(BigInteger counts) {
 		this.counts = counts;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+	public BigInteger getOperCounts() {
+		return operCounts;
+	}
+	public void setOperCounts(BigInteger operCounts) {
+		this.operCounts = operCounts;
 	}
 	
 	
