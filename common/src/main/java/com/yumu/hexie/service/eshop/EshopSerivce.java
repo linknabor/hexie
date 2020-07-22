@@ -15,6 +15,8 @@ public interface EshopSerivce {
 	void saveProduct(SaveProductVO saveProductVO) throws Exception;
 
 	void updateStatus(SaveProductVO saveProductVO);
+	
+	void updateDemo(SaveProductVO saveProductVO);
 
 	CommonResponse<Object> getOper(QueryOperVO queryOperVO);
 

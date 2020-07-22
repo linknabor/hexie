@@ -68,6 +68,8 @@ public class Product extends BaseModel {
 	private String secondType = "00";//二级类目
 	private float postageFee = 0;//快递费
 	
+	private int demo = 0;	//0false 1true;
+	
 	public long getMerchantId() {
 		return merchantId;
 	}
@@ -322,6 +324,12 @@ public class Product extends BaseModel {
 	}
 	public void setAgentId(long agentId) {
 		this.agentId = agentId;
+	}
+	public int getDemo() {
+		return demo;
+	}
+	public void setDemo(int demo) {
+		this.demo = demo;
 	}
 	
 }

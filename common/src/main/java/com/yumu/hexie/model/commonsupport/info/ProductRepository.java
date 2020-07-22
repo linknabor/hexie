@@ -15,7 +15,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	
 	//不要修改顺序
 	String sqlColumn1 = " p.id, p.name, p.productType, p.oriPrice, p.miniPrice, p.singlePrice, rule.status, p.startDate, p.endDate, "
-			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, a.name as agentName, a.agentNo, rule.limitNumOnce, "
+			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, p.demo, a.name as agentName, a.agentNo, rule.limitNumOnce, "
 			+ "item.sortNo, pp.appid, count(r.id) as counts, count(distinct op.id) as operCounts ";
 	
 	@Query(value = "select " + sqlColumn1
@@ -31,6 +31,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 			+ "and IF (?3!='', p.name like CONCAT('%',?3,'%'), 1=1) "
 			+ "and IF (?4!='', item.status = ?4, 1=1) "
 			+ "and (COALESCE(?5) IS NULL OR (p.agentId IN (?5) )) "
+			+ "and IF (?6!='', p.demo = ?6, 1=1) "
 			+ "group by p.id "
 			+ "order by p.id desc \n#pageable\n ",
 			countQuery = "select p.id, count(r.id) from product p "
@@ -43,13 +44,20 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 					+ "and IF (?3!='', p.name like CONCAT('%',?3,'%'), 1=1) "
 					+ "and IF (?4!='', item.status = ?4, 1=1) "
 					+ "and (COALESCE(?5) IS NULL OR (p.agentId IN (?5) )) "
+					+ "and IF (?6!='', p.demo = ?6, 1=1) "
 					+ "group by p.id ", 
 			nativeQuery = true)
-	Page<Object[]> findByPageSelect(String productType, String productId, String productName, String status, List<Integer>agentId, Pageable pageable);
+	Page<Object[]> findByPageSelect(String productType, String productId, String productName, String status, 
+			List<Integer>agentId, String isDemo, Pageable pageable);
 
 	@Transactional
 	@Modifying
 	@Query(value = "update product set status = ?1 where id = ?2 ", nativeQuery = true)
 	void updateStatus(int status, long id);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update product set demo = ?1 where id = ?2 ", nativeQuery = true)
+	void updateDemo(int demo, long id);
 	
 }

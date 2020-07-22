@@ -39,4 +39,13 @@ public class SaleController extends BaseController{
 	public BaseResult<SalePlan> getRgroupRule(@PathVariable long ruleId) throws Exception {
 		return new BaseResult<SalePlan>().success(customOnSaleService.findSalePlan(ruleId));
     }
+	
+	
+	@RequestMapping(value = "/onsales/v2/{type}/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<OnSaleAreaItem>> getOnSales(@ModelAttribute(Constants.USER)User user, 
+			@PathVariable int type, @PathVariable int page) throws Exception {
+		
+		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesV2(user,type,page));
+    }
 }

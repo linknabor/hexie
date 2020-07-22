@@ -16,6 +16,7 @@ public class QueryProductVO implements Serializable {
 	private String agentNo;
 	private String agentName;
 	private String appid;
+	private String demo;
 	
 	private int currentPage;
 	private int pageSize;
@@ -74,12 +75,20 @@ public class QueryProductVO implements Serializable {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
+	public String getDemo() {
+		return demo;
+	}
+	public void setDemo(String demo) {
+		this.demo = demo;
+	}
 	@Override
 	public String toString() {
 		return "QueryProductVO [productId=" + productId + ", productName=" + productName + ", productStatus="
 				+ productStatus + ", productType=" + productType + ", agentNo=" + agentNo + ", agentName=" + agentName
-				+ ", appid=" + appid + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
+				+ ", appid=" + appid + ", demo=" + demo + ", currentPage=" + currentPage + ", pageSize=" + pageSize
+				+ "]";
 	}
+	
 	
 	
 }

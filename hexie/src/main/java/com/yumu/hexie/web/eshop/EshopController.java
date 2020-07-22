@@ -67,6 +67,16 @@ public class EshopController<T> extends BaseController {
 		return commonResponse;
 	}
 	
+	@RequestMapping(value = "/product/updateDemo", method = RequestMethod.POST)
+	public CommonResponse<String> updateDemo(@RequestBody SaveProductVO saveProductVO) throws Exception{
+		
+		logger.info("updateDemo : " + saveProductVO);
+		eshopSerivce.updateDemo(saveProductVO);
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+	}
+	
 	/**
 	 * 获取服务人员列表
 	 * @param <T>

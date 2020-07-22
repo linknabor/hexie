@@ -90,7 +90,7 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 			
 			Pageable pageable = new PageRequest(queryProductVO.getCurrentPage(), queryProductVO.getPageSize());
 			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
-					queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, pageable);
+					queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
 			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			QueryProductListDTO<List<QueryProductMapper>> responsePage = new QueryProductListDTO<>();
@@ -121,7 +121,7 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 			
 			Pageable pageable = new PageRequest(0, 1);
 			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
-					"", "", null, pageable);
+					"", "", null, "", pageable);
 			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			List<Object[]> regionList = regionRepository.findByProductId(queryProductVO.getProductId());
@@ -302,8 +302,6 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 			itemStatus = ModelConstant.DISTRIBUTION_STATUS_OFF;
 		}
 		
-		
-		
 		Product product = productRepository.findOne(Long.valueOf(productId));
 		if (product == null) {
 			throw new BizValidateException("未查询到商品, id : " + productId);
@@ -320,6 +318,26 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 			}
 		}
 		
+		
+	}
+	
+	/**
+	 * 设置成样板
+	 */
+	@Override
+	public void updateDemo(SaveProductVO saveProductVO) {
+
+		Assert.hasText(saveProductVO.getId(), "商品ID不能为空。");
+		Assert.hasText(saveProductVO.getOperType(), "操作类型不能为空。 ");
+		
+		String productId = saveProductVO.getId();
+		String operType = saveProductVO.getOperType();
+		
+		if ("1".equals(operType)) {
+			productRepository.updateDemo(1, Long.valueOf(productId));
+		}else if ("0".equals(operType)) {
+			productRepository.updateDemo(0, Long.valueOf(productId));
+		}
 		
 	}
 
