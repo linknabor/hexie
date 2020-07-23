@@ -1,8 +1,8 @@
-package com.yumu.hexie.integration.eshop.dto;
+package com.yumu.hexie.integration.common;
 
 import java.io.Serializable;
 
-public class QueryProductListDTO<T> implements Serializable {
+public class QueryListDTO<T> implements Serializable {
 
 	/**
 	 * 

@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.eshop.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,11 +16,13 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
-import com.yumu.hexie.integration.eshop.dto.QueryProductListDTO;
+import com.yumu.hexie.integration.eshop.mapper.EvoucherMapper;
 import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
+import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
@@ -40,6 +43,8 @@ import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorItem;
 import com.yumu.hexie.model.localservice.ServiceOperatorItemRepository;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
+import com.yumu.hexie.model.market.Evoucher;
+import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.service.eshop.EshopSerivce;
@@ -51,7 +56,7 @@ import com.yumu.hexie.service.exception.BizValidateException;
  *
  * @param <T>
  */
-public class EshopServiceImpl<T> implements EshopSerivce {
+public class EshopServiceImpl implements EshopSerivce {
 
 	@Autowired
 	private ProductRepository productRepository;
@@ -69,6 +74,8 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 	private ServiceOperatorRepository serviceOperatorRepository;
 	@Autowired
 	private ServiceOperatorItemRepository serviceOperatorItemRepository;
+	@Autowired
+	private EvoucherRepository evoucherRepository;
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
@@ -93,7 +100,7 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 					queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
 			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
-			QueryProductListDTO<List<QueryProductMapper>> responsePage = new QueryProductListDTO<>();
+			QueryListDTO<List<QueryProductMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
 			responsePage.setContent(list);
 			
@@ -250,6 +257,7 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 			onSaleAreaItem.setSortNo(Integer.valueOf(saveProductVO.getSortNo()));
 			onSaleAreaItem.setRuleName(onSaleRule.getName());
 			onSaleAreaItem.setOriPrice(product.getOriPrice());
+			onSaleAreaItem.setPrice(product.getSinglePrice());
 			onSaleAreaItem.setRegionId(region.getId());
 			onSaleAreaItem.setRegionType(region.getRegionType());
 			onSaleAreaItem.setProductId(product.getId());
@@ -453,6 +461,36 @@ public class EshopServiceImpl<T> implements EshopSerivce {
 		}
 		
 		
+	}
+
+	/**
+	 * 后台查询核销券信息
+	 */
+	@Override
+	public CommonResponse<Object> getEvoucher(QueryEvoucherVO queryEvoucherVO) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			Pageable pageable = new PageRequest(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize());
+			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentName(), pageable);
+			List<EvoucherMapper> mapperList = new ArrayList<>();
+			for (Evoucher evoucher : page.getContent()) {
+				EvoucherMapper evoucherMapper = new EvoucherMapper();
+				BeanUtils.copyProperties(evoucher, evoucherMapper);
+				mapperList.add(evoucherMapper);
+			}
+			
+			QueryListDTO<List<EvoucherMapper>> responsePage = new QueryListDTO<>();
+			responsePage.setTotalPages(page.getTotalPages());
+			responsePage.setContent(mapperList);
+			commonResponse.setData(responsePage);
+			commonResponse.setResult("00");
+			
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
 	}
 	
 

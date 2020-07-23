@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.eshop;
 
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
@@ -21,7 +22,8 @@ public interface EshopSerivce {
 	CommonResponse<Object> getOper(QueryOperVO queryOperVO);
 
 	void saveOper(SaveOperVO saveOperVO);
-
+	
+	CommonResponse<Object> getEvoucher(QueryEvoucherVO queryEvoucherVO);
 	
 	
 

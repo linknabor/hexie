@@ -13,12 +13,15 @@ import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.evoucher.EvoucherService;
+import com.yumu.hexie.service.exception.BizValidateException;
 
 public class EvoucherServiceImpl implements EvoucherService {
 
@@ -28,6 +31,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 	private EshopUtil eshopUtil;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
+	@Autowired
+	private ProductRepository productRepository;
 	
 	/**
 	 * 创建优惠券
@@ -40,17 +45,33 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType()) {
 			return;
 		}
-		
+		Product product = productRepository.findOne(serviceOrder.getProductId());
+		float totalPrice = 0;
 		for (int i = 0; i < serviceOrder.getCount(); i++) {
 			
 			Evoucher evoucher = new Evoucher();
 			evoucher.setCode(OrderNoUtil.generateEvoucherNo());
 			evoucher.setOrderId(serviceOrder.getId());
+			evoucher.setActualPrice(product.getSinglePrice());	//实际销售价
+			evoucher.setOriPrice(product.getOriPrice());	//原价
 			evoucher.setProductId(serviceOrder.getProductId());
 			evoucher.setProductName(serviceOrder.getProductName());
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_INIT);
 			evoucher.setUserId(serviceOrder.getUserId());
+			evoucher.setTel(serviceOrder.getTel());
+			evoucher.setOpenid(serviceOrder.getOpenId());
+			evoucher.setMerchantId(serviceOrder.getMerchantId());
+			evoucher.setMerchantName(serviceOrder.getMerchantName());
+			evoucher.setAgentId(serviceOrder.getAgentId());
+			evoucher.setAgentName(serviceOrder.getAgentName());
+			evoucher.setAgentNo(serviceOrder.getAgentNo());
 			evoucherRepository.save(evoucher);
+			
+			totalPrice += evoucher.getActualPrice();	//校验每张券的价格总和是否和订单支付金额一致
+		}
+		
+		if (totalPrice != serviceOrder.getPrice()) {
+			throw new BizValidateException("实际售卖价格有订单价格不符。");
 		}
 		
 	}

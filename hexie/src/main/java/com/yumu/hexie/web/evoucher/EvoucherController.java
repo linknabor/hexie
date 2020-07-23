@@ -51,7 +51,14 @@ public class EvoucherController extends BaseController {
 		return baseResult;
 	}
 	
-	
+	/**
+	 * 核销
+	 * @param user
+	 * @param code
+	 * @param evouchers
+	 * @return
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/consume", method = RequestMethod.POST)
 	public BaseResult<String> consume(@ModelAttribute(Constants.USER) User user, 
@@ -61,6 +68,13 @@ public class EvoucherController extends BaseController {
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
 	
+	/**
+	 * 查看核销券订单，可筛状态
+	 * @param user
+	 * @param statusType
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/orders/{statusType}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<ServiceOrder>> getEvoucherOrders(@ModelAttribute(Constants.USER)User user,@PathVariable String statusType) throws Exception {
@@ -95,5 +109,8 @@ public class EvoucherController extends BaseController {
 		List<ServiceOrder> orderList = evoucherService.getEvoucherOrders(user, status);
 		return new BaseResult<List<ServiceOrder>>().success(orderList);
     }
+	
+	
+	
 	
 }

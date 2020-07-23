@@ -98,6 +98,7 @@ public class ServiceOrder  extends BaseModel {
 
 	//产品冗余信息
 	private long merchantId;
+	private String merchantName;
 	private String productName;
 	private String productPic;
 	private String productThumbPic;
@@ -150,7 +151,7 @@ public class ServiceOrder  extends BaseModel {
 
 	public ServiceOrder(){}
 	public ServiceOrder(SingleItemOrder sOrder) {
-		if (!"12".equals(sOrder.getPayType())) {
+		if (!"2".equals(sOrder.getPayType())) {
 			orderNo = OrderNoUtil.generateServiceOrderNo();
 		}
 		this.memo = sOrder.getMemo();
@@ -850,6 +851,12 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setAgentNo(String agentNo) {
 		this.agentNo = agentNo;
+	}
+	public String getMerchantName() {
+		return merchantName;
+	}
+	public void setMerchantName(String merchantName) {
+		this.merchantName = merchantName;
 	}
 	@Transient
 	@JsonIgnore

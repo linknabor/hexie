@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
@@ -17,7 +18,7 @@ import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.web.BaseController;
 
 /**
- * 商品上、下架
+ * 商城
  * @author david
  *
  * @param <T>
@@ -104,6 +105,19 @@ public class EshopController<T> extends BaseController {
 		commonResponse.setResult("00");
 		return commonResponse;
 		
+	}
+	
+	/**
+	 * 后台查询
+	 * @param user
+	 * @param orderId
+	 * @return
+	 */
+	@RequestMapping(value = "/evoucher/get")
+	public CommonResponse<Object> platQuery(@RequestBody QueryEvoucherVO queryEvoucherVO) {
+		
+		logger.info("quEvoucherVO : " + queryEvoucherVO);
+		return eshopSerivce.getEvoucher(queryEvoucherVO);
 	}
 	
 }
