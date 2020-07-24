@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.QRCodeUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
@@ -22,6 +23,8 @@ public class EvoucherView implements Serializable {
 	 */
 	private static final long serialVersionUID = 614045847239876304L;
 	
+	private String name;
+	private String endDate;
 	private String qrcode;
 	private String code;
 	private int count;
@@ -38,6 +41,10 @@ public class EvoucherView implements Serializable {
 						&& evoucher.available()) {
 					String code = evoucher.getCode();
 					this.code = code;
+					this.name = evoucher.getProductName();
+					if (!StringUtil.isEmpty(evoucher.getEndDate())) {
+						this.endDate = DateUtil.dtFormat(evoucher.getEndDate());
+					}
 					break;
 				}
 			}
@@ -73,7 +80,18 @@ public class EvoucherView implements Serializable {
 	public void setCount(int count) {
 		this.count = count;
 	}
-	
+	public String getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	
 	
 }
