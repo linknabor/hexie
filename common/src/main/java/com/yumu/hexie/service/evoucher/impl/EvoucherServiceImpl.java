@@ -10,7 +10,6 @@ import org.springframework.util.Assert;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
-import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
@@ -119,42 +118,50 @@ public class EvoucherServiceImpl implements EvoucherService {
 		
 		Assert.hasText(code, "核销券码不能为空。");
 		
-		String[]ids = evouchers.split(",");
+//		String[]ids = evouchers.split(",");
+//		long orderId = 0;
+//		for (String id : ids) {
+//			if (StringUtil.isEmpty(id)) {
+//				continue;
+//			}
+//			Evoucher evoucher = evoucherRepository.findOne(Long.valueOf(id));
+//			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
+//			evoucher.setCosumeDate(new Date());
+//			evoucher.setOperatorName(operator.getName());
+//			evoucher.setOperatorId(operator.getId());
+//			evoucherRepository.save(evoucher);
+//			orderId = evoucher.getOrderId();
+//		}
+//		ServiceOrder serviceOrder = serviceOrderRepository.findOne(orderId);
+//		
+//		List<Evoucher> list = evoucherRepository.findByOrderIdAndStatus(serviceOrder.getId(), ModelConstant.EVOUCHER_STATUS_USED);
+//		StringBuffer bf = new StringBuffer();
+//		for (int i = 0; i < list.size(); i++) {
+//			Evoucher evoucher = list.get(i);
+//			bf.append(evoucher.getCode());
+//			if (i!=(list.size()-1)) {
+//				bf.append(",");
+//			}
+//		}
+		
 		long orderId = 0;
-		for (String id : ids) {
-			if (StringUtil.isEmpty(id)) {
-				continue;
-			}
-			Evoucher evoucher = evoucherRepository.findOne(Long.valueOf(id));
+		StringBuffer bf = new StringBuffer();
+		List<Evoucher> evoucherList = evoucherRepository.findByCode(code);
+		for (int i =0; i < evoucherList.size(); i ++) {
+			Evoucher evoucher = evoucherList.get(i);
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
 			evoucher.setCosumeDate(new Date());
 			evoucher.setOperatorName(operator.getName());
 			evoucher.setOperatorId(operator.getId());
 			evoucherRepository.save(evoucher);
+			bf.append(evoucher.getCode());
+			if (i!=(evoucherList.size()-1)) {
+				bf.append(",");
+			}
 			orderId = evoucher.getOrderId();
 		}
 		ServiceOrder serviceOrder = serviceOrderRepository.findOne(orderId);
-		
-		List<Evoucher> list = evoucherRepository.findByOrderIdAndStatus(serviceOrder.getId(), ModelConstant.EVOUCHER_STATUS_USED);
-		StringBuffer bf = new StringBuffer();
-		for (int i = 0; i < list.size(); i++) {
-			Evoucher evoucher = list.get(i);
-			bf.append(evoucher.getCode());
-			if (i!=(list.size()-1)) {
-				bf.append(",");
-			}
-		}
-		
 		eshopUtil.notifyConsume(operator, serviceOrder.getOrderNo(), bf.toString());
-		
-//		List<Evoucher> evoucherList = evoucherRepository.findByCode(code);
-//		for (Evoucher evoucher : evoucherList) {
-//			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
-//			evoucher.setEndDate(new Date());
-//			evoucher.setOperatorName(operator.getName());
-//			evoucher.setOperatorId(operator.getId());
-//			evoucherRepository.save(evoucher);
-//		}
 		
 	}
 	
