@@ -521,6 +521,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Transactional
 	public void notifyPayByServplat(String tradeWaterId) {
 		
+		log.info("notifyPayByServplat, tradeWaterId : " + tradeWaterId);
+		
 		if (StringUtils.isEmpty(tradeWaterId)) {
 			return;
 		}
@@ -528,6 +530,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			return;
 		}
+		log.info("notifyPayByServplat, orderId : " + serviceOrder.getId());
+		log.info("notifyPayByServplat, orderType : " + serviceOrder.getOrderType());
+		log.info("notifyPayByServplat, orderStatus : " + serviceOrder.getStatus());
+		
+		
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType()) {
 			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
 				Date date = new Date();
