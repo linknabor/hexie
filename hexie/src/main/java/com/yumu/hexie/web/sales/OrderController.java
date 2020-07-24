@@ -59,6 +59,7 @@ public class OrderController extends BaseController{
 	
 	private static Logger logger = LoggerFactory.getLogger(OrderController.class);
 	
+	@RequestMapping(value = "/getProduct/{productId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Product> getProduct(@PathVariable long productId) throws Exception {
 		return new BaseResult<Product>().success(productService.getProduct(productId));
