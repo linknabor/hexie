@@ -26,12 +26,12 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
-import com.yumu.hexie.model.maintenance.MaintenanceService;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 
 public class NotifyQueueTaskImpl implements NotifyQueueTask {

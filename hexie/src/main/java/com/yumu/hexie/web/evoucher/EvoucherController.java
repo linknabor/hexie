@@ -35,16 +35,16 @@ public class EvoucherController extends BaseController {
 		return baseResult;
 	}
 	
-	@RequestMapping(value = "/getByCode", method = RequestMethod.GET)
-	public BaseResult<Object> getByCode(@RequestParam String code) {
+	@RequestMapping(value = "/getByCode/{code}", method = RequestMethod.GET)
+	public BaseResult<Object> getByCode(@PathVariable String code) {
 		
 		BaseResult<Object> baseResult = new BaseResult<>();
 		baseResult.setResult(evoucherService.getEvoucher(code));
 		return baseResult;
 	}
 	
-	@RequestMapping(value = "/getByOrder", method = RequestMethod.GET)
-	public BaseResult<Object> getByOrder(@ModelAttribute(Constants.USER) User user, long orderId) {
+	@RequestMapping(value = "/getByOrder/{orderId}", method = RequestMethod.GET)
+	public BaseResult<Object> getByOrder(@ModelAttribute(Constants.USER) User user, @PathVariable long orderId) {
 		
 		BaseResult<Object> baseResult = new BaseResult<>();
 		baseResult.setResult(evoucherService.getByOrder(orderId));
@@ -60,9 +60,9 @@ public class EvoucherController extends BaseController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/consume", method = RequestMethod.POST)
+	@RequestMapping(value = "/consume/{code}", method = RequestMethod.POST)
 	public BaseResult<String> consume(@ModelAttribute(Constants.USER) User user, 
-			@RequestParam String code, @RequestParam String evouchers) throws Exception {
+			@PathVariable String code, @RequestParam String evouchers) throws Exception {
 		
 		evoucherService.consume(user, code, evouchers);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);

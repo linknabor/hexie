@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.sales.impl;
 
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -224,14 +225,15 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Transactional
 	@Override
 	public JsSign requestPay(ServiceOrder order) throws Exception {
-        log.warn("[requestPay]OrderNo:" + order.getOrderNo());
+		
+        log.info("[requestPay]OrderNo:" + order.getOrderNo() + ", orderType : " + order.getOrderType());
 		//校验订单状态
 		if(!order.payable()){
             throw new BizValidateException(order.getId(),"订单状态不可支付，请重新查询确认订单状态！").setError();
         }
 		JsSign sign = null;
 		//核销券订单走平台支付接口。其余老的订单走原有支付，会慢慢改成新接口
-		if (ModelConstant.ORDER_TYPE_EVOUCHER != order.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType()) {
 			User user = userService.getById(order.getUserId());
 			CommonPayRequest request = new CommonPayRequest();
 			request.setUserId(user.getWuyeId());
@@ -281,8 +283,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			order = serviceOrderRepository.findOne(order.getId());
 			order.setOrderNo(responseVo.getTradeWaterId());
 
-			evoucherService.enable(order);
-			
 			//操作记录
 			commonPostProcess(ModelConstant.ORDER_OP_REQPAY,order);
 			
@@ -322,7 +322,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 break;
             case PaymentConstant.PAYMENT_STATUS_SUCCESS:
                 if(order.getStatus()==ModelConstant.ORDER_STATUS_INIT){
-                    salePlanService.getService(order.getOrderType()).postPaySuccess(payment, order);
+                    salePlanService.getService(order.getOrderType()).postPaySuccess(order);
                     couponService.comsume(order);
                     createCouponSeedIfExist(order);
                     commonPostProcess(ModelConstant.ORDER_OP_UPDATE_PAYSTATUS,order);
@@ -344,16 +344,33 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 	}
 
+	@Transactional
 	@Override
 	public void notifyPayed(long orderId) {
-        log.warn("[notifyPayed]orderId:"+orderId);
+        
 		ServiceOrder so = serviceOrderRepository.findOne(orderId);
 		if(so == null || so.getStatus() == ModelConstant.ORDER_STATUS_PAYED) {
 		    return;
 		}
-        PaymentOrder payment = paymentService.fetchPaymentOrder(so);
-        payment = paymentService.refreshStatus(payment);
-        update4Payment(payment);
+		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == so.getOrderType()) {
+			if (ModelConstant.ORDER_STATUS_INIT == so.getStatus()) {
+				log.info("orderId : " + orderId + ", orderStatus : " + so.getStatus());
+				Date date = new Date();
+				so.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+				so.setConfirmDate(date);
+				so.setPayDate(date);
+				serviceOrderRepository.save(so);
+				salePlanService.getService(so.getOrderType()).postPaySuccess(so);	//修改orderItems
+				commonPostProcess(ModelConstant.ORDER_OP_UPDATE_PAYSTATUS, so);	//发送模板消息和短信
+				evoucherService.enable(so);	//激活核销券
+			}
+			
+		}else {
+			PaymentOrder payment = paymentService.fetchPaymentOrder(so);
+	        payment = paymentService.refreshStatus(payment);
+	        update4Payment(payment);
+		}
+        
 	}
 
 	@Override

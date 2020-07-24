@@ -1,4 +1,4 @@
-package com.yumu.hexie.model.maintenance;
+package com.yumu.hexie.service.maintenance;
 
 
 import java.net.InetAddress;
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.maintenance.vo.MaintenanceVO;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.maintenance.vo.MaintenanceVO;
 
 @Service
 public class MaintenanceServiceImpl implements MaintenanceService {

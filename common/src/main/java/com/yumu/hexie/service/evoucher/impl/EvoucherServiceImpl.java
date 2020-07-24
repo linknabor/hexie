@@ -22,6 +22,7 @@ import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.evoucher.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.vo.EvoucherView;
 
 public class EvoucherServiceImpl implements EvoucherService {
 
@@ -169,9 +170,10 @@ public class EvoucherServiceImpl implements EvoucherService {
 	}
 
 	@Override
-	public List<Evoucher> getByOrder(long orderId) {
+	public EvoucherView getByOrder(long orderId) {
 		
-		return evoucherRepository.findByOrderId(orderId);
+		List<Evoucher> list = evoucherRepository.findByOrderId(orderId);
+		return new EvoucherView(list);
 	}
 	
 	

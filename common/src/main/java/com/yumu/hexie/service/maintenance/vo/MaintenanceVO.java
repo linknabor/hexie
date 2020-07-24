@@ -1,4 +1,4 @@
-package com.yumu.hexie.model.maintenance.vo;
+package com.yumu.hexie.service.maintenance.vo;
 
 import java.io.Serializable;
 

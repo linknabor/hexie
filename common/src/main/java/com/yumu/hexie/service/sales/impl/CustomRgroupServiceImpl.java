@@ -13,7 +13,6 @@ import com.yumu.hexie.model.market.rgroup.RgroupUser;
 import com.yumu.hexie.model.market.rgroup.RgroupUserRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
-import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -68,7 +67,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     }
 
     @Override
-    public void postPaySuccess(PaymentOrder po, ServiceOrder so) {
+    public void postPaySuccess(ServiceOrder so) {
         //支付成功订单为配货中状态，改商品库存
         so.payed();
         serviceOrderRepository.save(so);

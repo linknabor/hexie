@@ -5,6 +5,7 @@ import java.util.List;
 import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.vo.EvoucherView;
 
 public interface EvoucherService {
 
@@ -18,7 +19,7 @@ public interface EvoucherService {
 	
 	List<Evoucher> getByUser(User user);
 	
-	List<Evoucher> getByOrder(long orderId);
+	EvoucherView getByOrder(long orderId);
 
 	List<ServiceOrder> getEvoucherOrders(User user, List<Integer> status);
 

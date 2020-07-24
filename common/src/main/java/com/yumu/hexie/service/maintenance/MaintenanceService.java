@@ -1,8 +1,8 @@
-package com.yumu.hexie.model.maintenance;
+package com.yumu.hexie.service.maintenance;
 
 import java.util.Map;
 
-import com.yumu.hexie.model.maintenance.vo.MaintenanceVO;
+import com.yumu.hexie.service.maintenance.vo.MaintenanceVO;
 
 public interface MaintenanceService {
 	

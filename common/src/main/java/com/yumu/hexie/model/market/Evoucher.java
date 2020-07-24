@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 
 import org.springframework.data.annotation.Transient;
 
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
 @Entity
 public class Evoucher extends BaseModel{
@@ -44,9 +45,13 @@ public class Evoucher extends BaseModel{
 	private String merchantName;	//商户名称
 	
 	@Transient
-	private boolean available() {
+	public boolean available() {
 		Date nowdate = new Date();
-		return beginDate.before(nowdate) && endDate.after(nowdate);
+		if (!StringUtil.isEmpty(beginDate) && !StringUtil.isEmpty(endDate)) {
+			return beginDate.before(nowdate) && endDate.after(nowdate);
+		}
+		return false;
+		
 	}
 	public String getCode() {
 		return code;

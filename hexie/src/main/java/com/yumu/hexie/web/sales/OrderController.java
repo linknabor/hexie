@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,8 +57,8 @@ public class OrderController extends BaseController{
 	@Inject
 	private AddressService addressService;
 	
-
-	@RequestMapping(value = "/getProduct/{productId}", method = RequestMethod.GET)
+	private static Logger logger = LoggerFactory.getLogger(OrderController.class);
+	
 	@ResponseBody
 	public BaseResult<Product> getProduct(@PathVariable long productId) throws Exception {
 		return new BaseResult<Product>().success(productService.getProduct(productId));
@@ -231,8 +233,11 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/createOrder", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<ServiceOrder> createOrder(@RequestBody SingleItemOrder sOrder,@ModelAttribute(Constants.USER)User user) throws Exception {
+		
 		sOrder.setUserId(user.getId());
 		sOrder.setOpenId(user.getOpenid());
+		
+		logger.info("createOrder, singleItemOrder : " + sOrder);
 		return new BaseResult<ServiceOrder>().success(baseOrderService.createOrder(sOrder));
 	}
 
@@ -287,9 +292,9 @@ public class OrderController extends BaseController{
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/order/cancelPay", method = RequestMethod.POST)
+	@RequestMapping(value = "/order/cancelPay/{orderId}", method = RequestMethod.POST)
 	public BaseResult<String> cancelPay(@ModelAttribute(Constants.USER) User user, 
-			String orderId) throws Exception {
+			@PathVariable String orderId) throws Exception {
 		
 		baseOrderService.cancelPay(user, orderId);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);

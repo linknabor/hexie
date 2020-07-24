@@ -79,5 +79,11 @@ public class SingleItemOrder implements Serializable {
 	public void setPayType(String payType) {
 		this.payType = payType;
 	}
+	@Override
+	public String toString() {
+		return "SingleItemOrder [ruleId=" + ruleId + ", count=" + count + ", orderType=" + orderType
+				+ ", serviceAddressId=" + serviceAddressId + ", receiveTimeType=" + receiveTimeType + ", memo=" + memo
+				+ ", couponId=" + couponId + ", openId=" + openId + ", userId=" + userId + ", payType=" + payType + "]";
+	}
 	
 }
