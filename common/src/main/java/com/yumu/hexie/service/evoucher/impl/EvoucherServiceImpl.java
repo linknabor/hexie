@@ -95,13 +95,13 @@ public class EvoucherServiceImpl implements EvoucherService {
 			Date beginDate = new Date();
 			String bd = DateUtil.dtFormat(beginDate, DateUtil.dSimple);
 			bd += " 00:00:00";
-			Date formatBd = DateUtil.getDateFromString(bd);
+			Date formatBd = DateUtil.parse(bd, DateUtil.dttmSimple);
 			
 			evoucher.setBeginDate(formatBd);
 			Date endDate = DateUtil.addDate(evoucher.getBeginDate(), 30);	//过期时间默认往后加一个月
 			String ed = DateUtil.dtFormat(endDate, DateUtil.dSimple);
 			ed += " 23:59:59";
-			Date formatEd = DateUtil.getDateFromString(ed);
+			Date formatEd = DateUtil.parse(ed, DateUtil.dttmSimple);
 			evoucher.setEndDate(formatEd);
 			evoucherRepository.save(evoucher);
 		}
@@ -182,6 +182,20 @@ public class EvoucherServiceImpl implements EvoucherService {
 		
 		List<Evoucher> list = evoucherRepository.findByOrderId(orderId);
 		return new EvoucherView(list);
+	}
+	
+	public static void main(String[] args) {
+		
+		Date beginDate = new Date();
+		String bd = DateUtil.dtFormat(beginDate, DateUtil.dSimple);
+		bd += " 00:00:00";
+		Date formatBd = DateUtil.parse(bd, DateUtil.dttmSimple);
+		
+		Date endDate = DateUtil.addDate(formatBd, 30);	//过期时间默认往后加一个月
+		String ed = DateUtil.dtFormat(endDate, DateUtil.dSimple);
+		ed += " 23:59:59";
+		Date formatEd = DateUtil.parse(ed, DateUtil.dttmSimple);
+		System.out.println(formatEd);
 	}
 	
 
