@@ -22,7 +22,7 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
     @Inject
     private DistributionService distributionService;
     @Inject
-    private ProductService         productService;
+    private ProductService productService;
 
 	@Override
 	public void validateRule(ServiceOrder order,SalePlan rule, OrderItem item, Address address) {
@@ -39,7 +39,7 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
 	@Override
 	public void postPaySuccess(ServiceOrder so) {
 		//支付成功订单为配货中状态，改商品库存
-		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER != so.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != so.getOrderType()) {
 			so.confirm();
 			serviceOrderRepository.save(so);
 		}

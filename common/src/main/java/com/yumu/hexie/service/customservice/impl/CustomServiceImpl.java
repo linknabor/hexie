@@ -489,33 +489,6 @@ public class CustomServiceImpl implements CustomService {
 	}
 	
 	/**
-	 * 通知入账
-	 * @throws Exception 
-	 */
-	@Override
-	@Transactional
-	public void notifyPayByServplat(String tradeWaterId) {
-		
-		if (StringUtils.isEmpty(tradeWaterId)) {
-			return;
-		}
-		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
-		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
-			return;
-		}
-		if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
-			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
-				//do nothing
-			}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
-				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-			}
-			serviceOrder.setPayDate(new Date());
-			serviceOrderRepository.save(serviceOrder);
-		}
-		
-	}
-
-	/**
 	 * 服务订单评论
 	 */
 	@Transactional
@@ -655,6 +628,7 @@ public class CustomServiceImpl implements CustomService {
 		}
     	
     }
+
     
     
 }

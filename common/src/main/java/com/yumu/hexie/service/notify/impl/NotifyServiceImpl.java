@@ -22,8 +22,8 @@ import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
-import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.notify.NotifyService;
+import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
@@ -48,7 +48,7 @@ public class NotifyServiceImpl implements NotifyService {
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
-	private CustomService customService;
+	private BaseOrderService baseOrderService;
 	
 
 	/**
@@ -57,7 +57,9 @@ public class NotifyServiceImpl implements NotifyService {
 		3.绑卡记录quickToken和卡号
 		4.绑定房屋
 		5.缴费到账通知
-		6.自定服务
+		6.自定服务接单通知
+		7.自定义服务订单状体更新
+		8.商品订单到账通知
 	 */
 	@Transactional
 	@Override
@@ -140,7 +142,8 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		
 		//7.更新自定义服务订单状态
-		customService.notifyPayByServplat(payNotification.getOrderId());
+		baseOrderService.notifyPayByServplat(payNotification.getOrderId());
+		
 		
 	}
 	

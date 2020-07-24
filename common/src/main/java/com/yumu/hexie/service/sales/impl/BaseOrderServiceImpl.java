@@ -379,23 +379,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		log.info("orderId : " + orderId + ", orderStatus : " + so.getStatus());
 		
-		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == so.getOrderType()) {
-			if (ModelConstant.ORDER_STATUS_INIT == so.getStatus()) {
-				Date date = new Date();
-				so.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-				so.setConfirmDate(date);
-				so.setPayDate(date);
-				serviceOrderRepository.save(so);
-				salePlanService.getService(so.getOrderType()).postPaySuccess(so);	//修改orderItems
-				commonPostProcess(ModelConstant.ORDER_OP_UPDATE_PAYSTATUS, so);	//发送模板消息和短信
-				evoucherService.enable(so);	//激活核销券
-			}
-			
-		}else {
-			PaymentOrder payment = paymentService.fetchPaymentOrder(so);
-	        payment = paymentService.refreshStatus(payment);
-	        update4Payment(payment);
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == so.getOrderType()) {
+			return;
 		}
+		PaymentOrder payment = paymentService.fetchPaymentOrder(so);
+        payment = paymentService.refreshStatus(payment);
+        update4Payment(payment);
         
 	}
 
@@ -521,6 +510,50 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
 			serviceOrderRepository.delete(serviceOrder.getId());
 		}
+	}
+	
+	
+	/**
+	 * 通知入账
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public void notifyPayByServplat(String tradeWaterId) {
+		
+		if (StringUtils.isEmpty(tradeWaterId)) {
+			return;
+		}
+		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			return;
+		}
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType()) {
+			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+				Date date = new Date();
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+				serviceOrder.setConfirmDate(date);
+				serviceOrder.setPayDate(date);
+				serviceOrderRepository.save(serviceOrder);
+				salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
+				commonPostProcess(ModelConstant.ORDER_OP_UPDATE_PAYSTATUS, serviceOrder);	//发送模板消息和短信
+				evoucherService.enable(serviceOrder);	//激活核销券
+			}
+		}
+		
+		if (ModelConstant.ORDER_TYPE_SERVICE == serviceOrder.getOrderType()) {
+			
+			if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
+				if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+					//do nothing
+				}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+					serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+				}
+				serviceOrder.setPayDate(new Date());
+				serviceOrderRepository.save(serviceOrder);
+			}
+		}
+		
 	}
 	
 }

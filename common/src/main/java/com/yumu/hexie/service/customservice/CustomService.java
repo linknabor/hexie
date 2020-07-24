@@ -30,8 +30,6 @@ public interface CustomService {
 
 	void notifyPay(User user, String orderId) throws Exception;
 
-	void notifyPayByServplat(String tradeWaterId);
-
 	List<ServiceOrder> queryOrderByUser(User user);
 
 	ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception;

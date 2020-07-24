@@ -41,4 +41,7 @@ public interface BaseOrderService {
 	
 	//唤起支付取消
 	void cancelPay(User user, String orderId) throws Exception;
+	
+	//平台支付，回调入账
+	void notifyPayByServplat(String tradeWaterId);
 }
