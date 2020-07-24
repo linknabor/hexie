@@ -1,6 +1,5 @@
 package com.yumu.hexie.service.evoucher.impl;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -22,7 +21,6 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.evoucher.EvoucherService;
-import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.vo.EvoucherView;
 
 public class EvoucherServiceImpl implements EvoucherService {
@@ -48,7 +46,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			return;
 		}
 		Product product = productRepository.findOne(serviceOrder.getProductId());
-		BigDecimal totalPrice = BigDecimal.ZERO;
+//		BigDecimal totalPrice = BigDecimal.ZERO;
 		for (int i = 0; i < serviceOrder.getCount(); i++) {
 			
 			Evoucher evoucher = new Evoucher();
@@ -69,12 +67,12 @@ public class EvoucherServiceImpl implements EvoucherService {
 			evoucher.setAgentNo(serviceOrder.getAgentNo());
 			evoucherRepository.save(evoucher);
 			
-			totalPrice  = totalPrice.add(new BigDecimal(evoucher.getActualPrice()));	//校验每张券的价格总和是否和订单支付金额一致
+//			totalPrice  = totalPrice.add(new BigDecimal(evoucher.getActualPrice()));	//校验每张券的价格总和是否和订单支付金额一致
 		}
 		
-		if (totalPrice.compareTo(new BigDecimal(serviceOrder.getPrice()))!=0) {
-			throw new BizValidateException("实际售卖价格有订单价格不符。");
-		}
+//		if (totalPrice.compareTo(new BigDecimal(serviceOrder.getPrice()))!=0) {
+//			throw new BizValidateException("实际售卖价格有订单价格不符。");
+//		}
 		
 	}
 	

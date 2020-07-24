@@ -217,8 +217,10 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/notifyPayed/{orderId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<String> notifyPayed(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
+		
+		logger.info("notifyPayed : " + orderId);
 		baseOrderService.notifyPayed(orderId);
-		return new BaseResult<String>().success("通知成功");
+		return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
 	}
 	
 
