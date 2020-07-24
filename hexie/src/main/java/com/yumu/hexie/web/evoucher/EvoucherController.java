@@ -62,7 +62,7 @@ public class EvoucherController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/consume/{code}", method = RequestMethod.POST)
 	public BaseResult<String> consume(@ModelAttribute(Constants.USER) User user, 
-			@PathVariable String code, @RequestParam String evouchers) throws Exception {
+			@PathVariable String code, @RequestParam(required = false) String evouchers) throws Exception {
 		
 		evoucherService.consume(user, code, evouchers);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
