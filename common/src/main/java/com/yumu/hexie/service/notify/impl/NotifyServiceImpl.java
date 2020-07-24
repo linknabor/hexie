@@ -103,12 +103,10 @@ public class NotifyServiceImpl implements NotifyService {
 		if (user != null) {
 			//2.添加芝麻积分
 			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
-				if (StringUtils.isEmpty(payNotification.getOrderId())) {
-					log.warn("orderId is null, will skip ! payNotification : " + payNotification);
-					return;
+				if (!StringUtils.isEmpty(payNotification.getOrderId())) {
+					String pointKey = "wuyePay-" + payNotification.getOrderId();
+					pointService.addPointAsync(user, payNotification.getPoints(), pointKey);
 				}
-				String pointKey = "wuyePay-" + payNotification.getOrderId();
-				pointService.addPointAsync(user, payNotification.getPoints(), pointKey);
 			}else {
 				String pointKey = "zhima-bill-" + user.getId() + "-" + payNotification.getOrderId();
 				pointService.updatePoint(user, "10", pointKey);
@@ -128,11 +126,10 @@ public class NotifyServiceImpl implements NotifyService {
 		AccountNotification accountNotify = payNotification.getAccountNotify();
 		if (accountNotify!=null) {
 			accountNotify.setOrderId(payNotification.getOrderId());
-			if (accountNotify.getFeePrice() == null) {
-				log.warn("tranAmt is null, accountNotify : " + accountNotify);
-				return;
+			if (accountNotify.getFeePrice() != null) {
+				sendPayNotificationAsync(accountNotify);
 			}
-			sendPayNotificationAsync(accountNotify);
+			
 		}
 		//6.自定义服务
 		ServiceNotification serviceNotification = payNotification.getServiceNotify();
@@ -141,7 +138,7 @@ public class NotifyServiceImpl implements NotifyService {
 			sendServiceNotificationAsync(serviceNotification);
 		}
 		
-		//7.更新自定义服务订单状态
+		//7.更新serviceOrder订单状态
 		baseOrderService.notifyPayByServplat(payNotification.getOrderId());
 		
 		

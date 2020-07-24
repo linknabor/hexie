@@ -24,15 +24,15 @@ public class EvoucherView implements Serializable {
 	
 	private String qrcode;
 	private String code;
-	private List<Evoucher> vouchers;
+	private int count;
 	
 	public EvoucherView() {
 		super();
 	}
 	public EvoucherView(List<Evoucher> vouchers) {
 		
-		this.vouchers = vouchers;
 		if (vouchers!=null) {
+			this.count = vouchers.size();
 			for (Evoucher evoucher : vouchers) {
 				if (ModelConstant.EVOUCHER_STATUS_NORMAL == evoucher.getStatus() 
 						&& evoucher.available()) {
@@ -47,7 +47,8 @@ public class EvoucherView implements Serializable {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
 				QRCodeUtil.createQRCodeToIO(code, "", os);
-				this.qrcode = new String("data:image/jpg;base64," + Base64.getEncoder().encode(os.toByteArray()));
+				String codeStr = new String (Base64.getEncoder().encode(os.toByteArray()));
+				this.qrcode = "data:image/jpg;base64," + codeStr;
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -60,21 +61,17 @@ public class EvoucherView implements Serializable {
 	public void setQrcode(String qrcode) {
 		this.qrcode = qrcode;
 	}
-	public List<Evoucher> getVouchers() {
-		return vouchers;
-	}
-	public void setVouchers(List<Evoucher> vouchers) {
-		this.vouchers = vouchers;
-	}
 	public String getCode() {
 		return code;
 	}
 	public void setCode(String code) {
 		this.code = code;
 	}
-	@Override
-	public String toString() {
-		return "EvoucherView [qrcode=" + qrcode + ", code=" + code + ", vouchers=" + vouchers + "]";
+	public int getCount() {
+		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
 	}
 	
 	
