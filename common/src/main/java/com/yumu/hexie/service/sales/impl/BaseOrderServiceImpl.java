@@ -184,7 +184,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		//5.电子优惠券订单
 		evoucherService.createEvoucher(o);
 		
-        log.warn("[Create]订单创建OrderNo:" + o.getOrderNo());
+        log.warn("[Create]订单创建OrderId:" + o.getId());
 		//4. 订单后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
 		
