@@ -43,7 +43,7 @@ public class EvoucherView implements Serializable {
 					this.code = code;
 					this.name = evoucher.getProductName();
 					if (!StringUtil.isEmpty(evoucher.getEndDate())) {
-						this.endDate = DateUtil.dtFormat(evoucher.getEndDate());
+						this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
 					}
 					break;
 				}

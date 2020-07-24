@@ -91,9 +91,18 @@ public class EvoucherServiceImpl implements EvoucherService {
 		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
 		for (Evoucher evoucher : evoucherList) {
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_NORMAL);
-			evoucher.setBeginDate(new Date());
-			Date endDate = DateUtil.addDate(evoucher.getBeginDate(), 31);	//过期时间默认往后加一个月
-			evoucher.setEndDate(endDate);
+			
+			Date beginDate = new Date();
+			String bd = DateUtil.dtFormat(beginDate, DateUtil.dSimple);
+			bd += " 00:00:00";
+			Date formatBd = DateUtil.getDateFromString(bd);
+			
+			evoucher.setBeginDate(formatBd);
+			Date endDate = DateUtil.addDate(evoucher.getBeginDate(), 30);	//过期时间默认往后加一个月
+			String ed = DateUtil.dtFormat(endDate, DateUtil.dSimple);
+			ed += " 23:59:59";
+			Date formatEd = DateUtil.getDateFromString(ed);
+			evoucher.setEndDate(formatEd);
 			evoucherRepository.save(evoucher);
 		}
 		
@@ -174,5 +183,6 @@ public class EvoucherServiceImpl implements EvoucherService {
 		List<Evoucher> list = evoucherRepository.findByOrderId(orderId);
 		return new EvoucherView(list);
 	}
+	
 
 }

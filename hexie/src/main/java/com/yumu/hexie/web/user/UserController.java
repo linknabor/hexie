@@ -30,7 +30,6 @@ import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.card.WechatCard;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
@@ -40,6 +39,7 @@ import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
@@ -117,9 +117,9 @@ public class UserController extends BaseController{
 				long endTime = System.currentTimeMillis();
 				
 			    session.setAttribute(Constants.USER, user);
-			    boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
-			    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
-			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+			    
+			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
+			    UserInfo userInfo = new UserInfo(user, odDefinition);
 			    endTime = System.currentTimeMillis();
 
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
@@ -195,9 +195,8 @@ public class UserController extends BaseController{
 		if(user != null){
 			session.setAttribute(Constants.USER, user);
 			
-			boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
-		    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
-		    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+		    OperatorDefinition odDefinition = operatorService.defineOperator(user);
+		    UserInfo userInfo = new UserInfo(user, odDefinition);
 	        return new BaseResult<UserInfo>().success(userInfo);
 		} else {
             return new BaseResult<UserInfo>().failMsg("用户不存在！");
@@ -247,9 +246,8 @@ public class UserController extends BaseController{
 		long endTime = System.currentTimeMillis();
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		
-		boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId());
-	    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,userAccount.getId());
-	    UserInfo userInfo = new UserInfo(userAccount,isRepariOper, isServiceOper);
+		OperatorDefinition odDefinition = operatorService.defineOperator(userAccount);
+	    UserInfo userInfo = new UserInfo(userAccount, odDefinition);
 		return new BaseResult<UserInfo>().success(userInfo);
 
     }
