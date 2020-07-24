@@ -55,6 +55,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			evoucher.setOriPrice(product.getOriPrice());	//原价
 			evoucher.setProductId(serviceOrder.getProductId());
 			evoucher.setProductName(serviceOrder.getProductName());
+			evoucher.setSmallPicture(product.getSmallPicture());
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_INIT);
 			evoucher.setUserId(serviceOrder.getUserId());
 			evoucher.setTel(serviceOrder.getTel());
@@ -166,10 +167,11 @@ public class EvoucherServiceImpl implements EvoucherService {
 	}
 	
 	@Override
-	public List<Evoucher> getEvoucher(String code){
+	public EvoucherView getEvoucher(String code){
 
 		Assert.hasText(code, "核销券码不能为空。");
-		return  evoucherRepository.findByCode(code);
+		List<Evoucher> list =  evoucherRepository.findByCode(code);
+		return new EvoucherView(list);
 	}
 
 	@Override

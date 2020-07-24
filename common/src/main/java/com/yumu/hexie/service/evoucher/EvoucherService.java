@@ -15,7 +15,7 @@ public interface EvoucherService {
 
 	void consume(User operator, String code, String evouchers) throws Exception;
 
-	List<Evoucher> getEvoucher(String code);
+	EvoucherView getEvoucher(String code);
 	
 	List<Evoucher> getByUser(User user);
 	

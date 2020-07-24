@@ -3,6 +3,7 @@ package com.yumu.hexie.vo;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -24,10 +25,13 @@ public class EvoucherView implements Serializable {
 	private static final long serialVersionUID = 614045847239876304L;
 	
 	private String name;
+	private String tel;
+	private String smallPicture;
 	private String endDate;
 	private String qrcode;
 	private String code;
 	private int count;
+	private Date consumeDate;
 	
 	public EvoucherView() {
 		super();
@@ -42,6 +46,9 @@ public class EvoucherView implements Serializable {
 					String code = evoucher.getCode();
 					this.code = code;
 					this.name = evoucher.getProductName();
+					this.tel = evoucher.getTel();
+					this.smallPicture = evoucher.getSmallPicture();
+					this.consumeDate = evoucher.getCosumeDate();
 					if (!StringUtil.isEmpty(evoucher.getEndDate())) {
 						this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
 					}
@@ -91,6 +98,24 @@ public class EvoucherView implements Serializable {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getTel() {
+		return tel;
+	}
+	public void setTel(String tel) {
+		this.tel = tel;
+	}
+	public String getSmallPicture() {
+		return smallPicture;
+	}
+	public void setSmallPicture(String smallPicture) {
+		this.smallPicture = smallPicture;
+	}
+	public Date getConsumeDate() {
+		return consumeDate;
+	}
+	public void setConsumeDate(Date consumeDate) {
+		this.consumeDate = consumeDate;
 	}
 	
 	

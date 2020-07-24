@@ -28,6 +28,7 @@ public class Evoucher extends BaseModel{
 	
 	private long productId;	//优惠产品ID
 	private String productName;	//优惠项目名称
+	private String smallPicture;	//商品小图
 	
 	private Date beginDate;	//生效日期
 	private Date endDate;	//过期日期
@@ -188,6 +189,12 @@ public class Evoucher extends BaseModel{
 	}
 	public void setOriPrice(float oriPrice) {
 		this.oriPrice = oriPrice;
+	}
+	public String getSmallPicture() {
+		return smallPicture;
+	}
+	public void setSmallPicture(String smallPicture) {
+		this.smallPicture = smallPicture;
 	}
 	
 	
