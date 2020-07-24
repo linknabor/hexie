@@ -2,18 +2,17 @@ package com.yumu.hexie.vo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.util.Base64;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 import com.yumu.hexie.common.util.QRCodeUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.market.Evoucher;
 
-@SuppressWarnings("restriction")
 public class EvoucherView implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(EvoucherView.class);
@@ -48,7 +47,7 @@ public class EvoucherView implements Serializable {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
 				QRCodeUtil.createQRCodeToIO(code, "", os);
-				this.qrcode = new String("data:image/jpg;base64," + Base64.encode(os.toByteArray()));
+				this.qrcode = new String("data:image/jpg;base64," + Base64.getEncoder().encode(os.toByteArray()));
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
