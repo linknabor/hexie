@@ -164,7 +164,31 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Override
 	@Transactional
 	public ServiceOrder createOrder(SingleItemOrder order){
-		return createOrder(new ServiceOrder(order));
+		
+		//1. 填充地址信息
+		ServiceOrder o = new ServiceOrder(order);
+		Address address = fillAddressInfo(o);
+		//2. 填充订单信息并校验规则,设置价格信息
+		preOrderCreate(o, address);
+		computeCoupon(o);
+		//3. 订单创建
+		o = serviceOrderRepository.save(o);
+		for(OrderItem item : o.getItems()) {
+			item.setServiceOrder(o);
+			item.setUserId(o.getUserId());
+			orderItemRepository.save(item);
+		}
+		//4.保存车辆信息 20160721 车大大的车辆服务
+		carService.saveOrderCarInfo(o);
+		
+		//5.电子优惠券订单
+		evoucherService.createEvoucher(o);
+		
+        log.warn("[Create]订单创建OrderNo:" + o.getOrderNo());
+		//4. 订单后处理
+		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
+		
+		return o;
 	}
 
 	@Override
@@ -347,14 +371,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Transactional
 	@Override
 	public void notifyPayed(long orderId) {
-        
+
+		log.info("notifyPayed : " + orderId);
 		ServiceOrder so = serviceOrderRepository.findOne(orderId);
 		if(so == null || so.getStatus() == ModelConstant.ORDER_STATUS_PAYED) {
 		    return;
 		}
+		log.info("orderId : " + orderId + ", orderStatus : " + so.getStatus());
+		
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == so.getOrderType()) {
 			if (ModelConstant.ORDER_STATUS_INIT == so.getStatus()) {
-				log.info("orderId : " + orderId + ", orderStatus : " + so.getStatus());
 				Date date = new Date();
 				so.setStatus(ModelConstant.ORDER_STATUS_PAYED);
 				so.setConfirmDate(date);

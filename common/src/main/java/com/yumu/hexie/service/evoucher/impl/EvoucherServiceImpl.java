@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.evoucher.impl;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			return;
 		}
 		Product product = productRepository.findOne(serviceOrder.getProductId());
-		float totalPrice = 0;
+		BigDecimal totalPrice = BigDecimal.ZERO;
 		for (int i = 0; i < serviceOrder.getCount(); i++) {
 			
 			Evoucher evoucher = new Evoucher();
@@ -68,10 +69,10 @@ public class EvoucherServiceImpl implements EvoucherService {
 			evoucher.setAgentNo(serviceOrder.getAgentNo());
 			evoucherRepository.save(evoucher);
 			
-			totalPrice += evoucher.getActualPrice();	//校验每张券的价格总和是否和订单支付金额一致
+			totalPrice  = totalPrice.add(new BigDecimal(evoucher.getActualPrice()));	//校验每张券的价格总和是否和订单支付金额一致
 		}
 		
-		if (totalPrice != serviceOrder.getPrice()) {
+		if (totalPrice.compareTo(new BigDecimal(serviceOrder.getPrice()))!=0) {
 			throw new BizValidateException("实际售卖价格有订单价格不符。");
 		}
 		
@@ -175,6 +176,5 @@ public class EvoucherServiceImpl implements EvoucherService {
 		List<Evoucher> list = evoucherRepository.findByOrderId(orderId);
 		return new EvoucherView(list);
 	}
-	
-	
+
 }
