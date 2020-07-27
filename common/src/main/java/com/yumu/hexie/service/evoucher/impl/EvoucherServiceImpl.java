@@ -147,7 +147,9 @@ public class EvoucherServiceImpl implements EvoucherService {
 		
 		long orderId = 0;
 		StringBuffer bf = new StringBuffer();
-		List<Evoucher> evoucherList = evoucherRepository.findByCode(code);
+		Evoucher e = evoucherRepository.findByCode(code);
+		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(e.getOrderId());
+		
 		for (int i =0; i < evoucherList.size(); i ++) {
 			Evoucher evoucher = evoucherList.get(i);
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
@@ -170,7 +172,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 	public EvoucherView getEvoucher(String code){
 
 		Assert.hasText(code, "核销券码不能为空。");
-		List<Evoucher> list =  evoucherRepository.findByCode(code);
+		Evoucher evoucher =  evoucherRepository.findByCode(code);
+		List<Evoucher> list = evoucherRepository.findByOrderIdAndStatus(evoucher.getOrderId(), ModelConstant.EVOUCHER_STATUS_NORMAL);
 		return new EvoucherView(list);
 	}
 

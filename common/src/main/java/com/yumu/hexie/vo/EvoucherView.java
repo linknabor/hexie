@@ -32,6 +32,8 @@ public class EvoucherView implements Serializable {
 	private String code;
 	private int count;
 	private Date consumeDate;
+	private float actualPrice;
+	private float oriPrice;
 	
 	public EvoucherView() {
 		super();
@@ -49,6 +51,8 @@ public class EvoucherView implements Serializable {
 					this.tel = evoucher.getTel();
 					this.smallPicture = evoucher.getSmallPicture();
 					this.consumeDate = evoucher.getCosumeDate();
+					this.actualPrice = evoucher.getActualPrice();
+					this.oriPrice = evoucher.getOriPrice();
 					if (!StringUtil.isEmpty(evoucher.getEndDate())) {
 						this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
 					}
@@ -116,6 +120,18 @@ public class EvoucherView implements Serializable {
 	}
 	public void setConsumeDate(Date consumeDate) {
 		this.consumeDate = consumeDate;
+	}
+	public float getActualPrice() {
+		return actualPrice;
+	}
+	public void setActualPrice(float actualPrice) {
+		this.actualPrice = actualPrice;
+	}
+	public float getOriPrice() {
+		return oriPrice;
+	}
+	public void setOriPrice(float oriPrice) {
+		this.oriPrice = oriPrice;
 	}
 	
 	

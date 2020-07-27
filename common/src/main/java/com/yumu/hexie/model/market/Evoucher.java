@@ -3,12 +3,16 @@ package com.yumu.hexie.model.market;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.springframework.data.annotation.Transient;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
+
 @Entity
+@Table(name = "charge", uniqueConstraints = {@UniqueConstraint(columnNames="code")})	
 public class Evoucher extends BaseModel{
 
 	/**

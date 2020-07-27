@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 
 	
-	List<Evoucher> findByCode(String code);
+	Evoucher findByCode(String code);
 	
 	List<Evoucher> findByUserId(long userId);
 	
