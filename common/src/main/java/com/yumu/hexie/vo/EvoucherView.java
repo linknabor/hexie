@@ -2,6 +2,7 @@ package com.yumu.hexie.vo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -32,8 +33,8 @@ public class EvoucherView implements Serializable {
 	private String code;
 	private int count;
 	private Date consumeDate;
-	private float actualPrice;
-	private float oriPrice;
+	private BigDecimal actualPrice;
+	private BigDecimal oriPrice;
 	
 	public EvoucherView() {
 		super();
@@ -42,21 +43,27 @@ public class EvoucherView implements Serializable {
 		
 		if (vouchers!=null) {
 			this.count = vouchers.size();
+			this.actualPrice = BigDecimal.ZERO;
+			this.oriPrice = BigDecimal.ZERO;
 			for (Evoucher evoucher : vouchers) {
 				if (ModelConstant.EVOUCHER_STATUS_NORMAL == evoucher.getStatus() 
 						&& evoucher.available()) {
-					String code = evoucher.getCode();
-					this.code = code;
-					this.name = evoucher.getProductName();
-					this.tel = evoucher.getTel();
-					this.smallPicture = evoucher.getSmallPicture();
-					this.consumeDate = evoucher.getCosumeDate();
-					this.actualPrice = evoucher.getActualPrice();
-					this.oriPrice = evoucher.getOriPrice();
-					if (!StringUtil.isEmpty(evoucher.getEndDate())) {
-						this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
+					
+					if (StringUtil.isEmpty(this.code)) {
+						this.code = evoucher.getCode();;
+						this.name = evoucher.getProductName();
+						this.tel = evoucher.getTel();
+						this.smallPicture = evoucher.getSmallPicture();
+						this.consumeDate = evoucher.getConsumeDate();
+						if (!StringUtil.isEmpty(evoucher.getEndDate())) {
+							this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
+						}
 					}
-					break;
+					
+					BigDecimal aPrice = new BigDecimal(evoucher.getActualPrice());
+					BigDecimal oPrice = new BigDecimal(evoucher.getOriPrice());
+					actualPrice = actualPrice.add(aPrice);
+					oriPrice = oriPrice.add(oPrice);
 				}
 			}
 		}
@@ -121,16 +128,16 @@ public class EvoucherView implements Serializable {
 	public void setConsumeDate(Date consumeDate) {
 		this.consumeDate = consumeDate;
 	}
-	public float getActualPrice() {
+	public BigDecimal getActualPrice() {
 		return actualPrice;
 	}
-	public void setActualPrice(float actualPrice) {
+	public void setActualPrice(BigDecimal actualPrice) {
 		this.actualPrice = actualPrice;
 	}
-	public float getOriPrice() {
+	public BigDecimal getOriPrice() {
 		return oriPrice;
 	}
-	public void setOriPrice(float oriPrice) {
+	public void setOriPrice(BigDecimal oriPrice) {
 		this.oriPrice = oriPrice;
 	}
 	

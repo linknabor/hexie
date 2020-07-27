@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
@@ -23,6 +24,7 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.evoucher.EvoucherService;
+import com.yumu.hexie.vo.EvoucherPageMapper;
 import com.yumu.hexie.vo.EvoucherView;
 
 public class EvoucherServiceImpl implements EvoucherService {
@@ -158,9 +160,9 @@ public class EvoucherServiceImpl implements EvoucherService {
 		for (int i =0; i < evoucherList.size(); i ++) {
 			Evoucher evoucher = evoucherList.get(i);
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
-			evoucher.setCosumeDate(new Date());
+			evoucher.setConsumeDate(new Date());
 			evoucher.setOperatorName(operator.getName());
-			evoucher.setOperatorId(operator.getId());
+			evoucher.setOperatorUserId(operator.getId());
 			evoucherRepository.save(evoucher);
 			bf.append(evoucher.getCode());
 			if (i!=(evoucherList.size()-1)) {
@@ -205,18 +207,12 @@ public class EvoucherServiceImpl implements EvoucherService {
 		return new EvoucherView(list);
 	}
 	
-	public static void main(String[] args) {
+	@Override
+	public List<EvoucherPageMapper> getByOperator(User operator) throws Exception {
 		
-		Date beginDate = new Date();
-		String bd = DateUtil.dtFormat(beginDate, DateUtil.dSimple);
-		bd += " 00:00:00";
-		Date formatBd = DateUtil.parse(bd, DateUtil.dttmSimple);
-		
-		Date endDate = DateUtil.addDate(formatBd, 30);	//过期时间默认往后加一个月
-		String ed = DateUtil.dtFormat(endDate, DateUtil.dSimple);
-		ed += " 23:59:59";
-		Date formatEd = DateUtil.parse(ed, DateUtil.dttmSimple);
-		System.out.println(formatEd);
+		List<Object[]> objList = evoucherRepository.findByOperator(operator.getId());
+		List<EvoucherPageMapper> list = ObjectToBeanUtils.objectToBean(objList, EvoucherPageMapper.class);
+		return list;
 	}
 	
 

@@ -36,9 +36,9 @@ public class Evoucher extends BaseModel{
 	
 	private Date beginDate;	//生效日期
 	private Date endDate;	//过期日期
-	private Date cosumeDate;	//使用日期
+	private Date consumeDate;	//使用日期
 
-	private long operatorId;	//操作人id
+	private long operatorUserId;	//操作人id
 	private String operatorName;	//操作人
 	private String operatorTel;	//操作人手机号
 	
@@ -88,11 +88,11 @@ public class Evoucher extends BaseModel{
 	public void setProductName(String productName) {
 		this.productName = productName;
 	}
-	public Date getCosumeDate() {
-		return cosumeDate;
+	public Date getConsumeDate() {
+		return consumeDate;
 	}
-	public void setCosumeDate(Date cosumeDate) {
-		this.cosumeDate = cosumeDate;
+	public void setConsumeDate(Date consumeDate) {
+		this.consumeDate = consumeDate;
 	}
 	public long getUserId() {
 		return userId;
@@ -112,12 +112,7 @@ public class Evoucher extends BaseModel{
 	public void setBeginDate(Date beginDate) {
 		this.beginDate = beginDate;
 	}
-	public long getOperatorId() {
-		return operatorId;
-	}
-	public void setOperatorId(long operatorId) {
-		this.operatorId = operatorId;
-	}
+	
 	public String getOperatorName() {
 		return operatorName;
 	}
@@ -199,6 +194,12 @@ public class Evoucher extends BaseModel{
 	}
 	public void setSmallPicture(String smallPicture) {
 		this.smallPicture = smallPicture;
+	}
+	public long getOperatorUserId() {
+		return operatorUserId;
+	}
+	public void setOperatorUserId(long operatorUserId) {
+		this.operatorUserId = operatorUserId;
 	}
 	
 	

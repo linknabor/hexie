@@ -51,6 +51,14 @@ public class EvoucherController extends BaseController {
 		return baseResult;
 	}
 	
+	@RequestMapping(value = "/getByOperator", method = RequestMethod.GET)
+	public BaseResult<Object> getByOrder(@ModelAttribute(Constants.USER) User user) throws Exception {
+		
+		BaseResult<Object> baseResult = new BaseResult<>();
+		baseResult.setResult(evoucherService.getByOperator(user));
+		return baseResult;
+	}
+	
 	/**
 	 * 核销
 	 * @param user
