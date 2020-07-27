@@ -12,7 +12,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
 
 @Entity
-@Table(name = "charge", uniqueConstraints = {@UniqueConstraint(columnNames="code")})	
+@Table(name = "evoucher", uniqueConstraints = {@UniqueConstraint(columnNames="code")})	
 public class Evoucher extends BaseModel{
 
 	/**

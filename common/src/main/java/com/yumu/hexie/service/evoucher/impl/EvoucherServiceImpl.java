@@ -1,8 +1,11 @@
 package com.yumu.hexie.service.evoucher.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,8 @@ import com.yumu.hexie.service.evoucher.EvoucherService;
 import com.yumu.hexie.vo.EvoucherView;
 
 public class EvoucherServiceImpl implements EvoucherService {
+	
+	private static Logger logger = LoggerFactory.getLogger(EvoucherServiceImpl.class);
 
 	@Autowired
 	private EvoucherRepository evoucherRepository;
@@ -172,8 +177,12 @@ public class EvoucherServiceImpl implements EvoucherService {
 	public EvoucherView getEvoucher(String code){
 
 		Assert.hasText(code, "核销券码不能为空。");
+		logger.info("code is : " + code);
 		Evoucher evoucher =  evoucherRepository.findByCode(code);
-		List<Evoucher> list = evoucherRepository.findByOrderIdAndStatus(evoucher.getOrderId(), ModelConstant.EVOUCHER_STATUS_NORMAL);
+		List<Evoucher> list = new ArrayList<>();
+		if (evoucher!=null) {
+			list = evoucherRepository.findByOrderIdAndStatus(evoucher.getOrderId(), ModelConstant.EVOUCHER_STATUS_NORMAL);
+		}
 		return new EvoucherView(list);
 	}
 
