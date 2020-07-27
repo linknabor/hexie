@@ -295,7 +295,7 @@ public class OrderController extends BaseController{
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/order/cancelPay/{orderId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/order/cancelPay/{orderId}", method = RequestMethod.GET)
 	public BaseResult<String> cancelPay(@ModelAttribute(Constants.USER) User user, 
 			@PathVariable String orderId) throws Exception {
 		

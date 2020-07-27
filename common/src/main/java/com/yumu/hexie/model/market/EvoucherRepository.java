@@ -37,4 +37,7 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 				+ "and IF (?3!='', e.agentName like CONCAT('%',?3,'%'), 1=1) " )
 	Page<Evoucher> findByMultipleConditions(String status, String tel, String agentName, Pageable pageable);
 	
+	@Query(value = "select e.* from evoucher e where endDate < ?1 and status = ?2 ")
+	List<Evoucher> findTimeoutEvouchers(long current, int status);
+	
 }

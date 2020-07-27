@@ -16,4 +16,7 @@ public interface OnSaleRuleRepository extends JpaRepository<OnSaleRule, Long> {
 	@Modifying
 	@Query(value = "update onSaleRule set status = ?1 where id = ?2 ", nativeQuery = true)
 	void updateStatus(int status, long id);
+	
+	@Query(value = "select * from onSaleRule where endDate <= ?1 and status = ?2 ", nativeQuery = true)
+	List<OnSaleRule> findTimeoutRules(long current, int status);
 }

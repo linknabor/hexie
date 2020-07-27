@@ -419,7 +419,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         log.warn("[cancelOrder]coupon:"+order.getCouponId());
 		//4.商品中取消冻结
 		salePlanService.getService(order.getOrderType()).postOrderCancel(order);
-        log.warn("[cancelOrder]unfrezee:"+order.getCouponId());
+        log.warn("[cancelOrder]unfrezee:"+order.getId());
 		//5.操作后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CANCEL,order);
 		return order;
