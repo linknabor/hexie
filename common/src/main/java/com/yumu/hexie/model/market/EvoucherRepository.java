@@ -16,7 +16,7 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 	
 	List<Evoucher> findByOrderId(long orderId);
 	
-	final String column1 = "e.orderId, e.tel, e.consumeDate, sum(e.actualPrice) as actualPrice, count(e.id) as counts";
+	final String column1 = "e.orderId, e.tel, e.consumeDate, e.productName, sum(e.actualPrice) as actualPrice, count(e.id) as counts";
 	
 	@Query(value = "select " + column1 + " from evoucher e "
 			+ "where e.operatorUserId = ?1 group by e.orderId order by e.consumeDate desc ", 

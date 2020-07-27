@@ -1,7 +1,9 @@
 package com.yumu.hexie.vo;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -18,15 +20,17 @@ public class EvoucherPageMapper implements Serializable {
 	private BigInteger orderId;
 	private String tel;
 	private Timestamp consumeDate;
+	private String productName;
 	private Double acturalPrice;
 	private BigInteger counts;
 	
-	public EvoucherPageMapper(BigInteger orderId, String tel, Timestamp consumeDate, Double acturalPrice,
+	public EvoucherPageMapper(BigInteger orderId, String tel, Timestamp consumeDate, String productName, Double acturalPrice,
 			BigInteger counts) {
 		super();
 		this.orderId = orderId;
 		this.tel = tel;
 		this.consumeDate = consumeDate;
+		this.productName = productName;
 		this.acturalPrice = acturalPrice;
 		this.counts = counts;
 	}
@@ -54,8 +58,15 @@ public class EvoucherPageMapper implements Serializable {
 	public void setConsumeDate(Timestamp consumeDate) {
 		this.consumeDate = consumeDate;
 	}
-	public Double getActuralPrice() {
-		return acturalPrice;
+	public String getActuralPrice() {
+		
+		String aPrice = "0.00";
+		if (!StringUtil.isEmpty(acturalPrice)) {
+			BigDecimal price = new BigDecimal(String.valueOf(acturalPrice));
+			price = price.setScale(2, RoundingMode.HALF_UP);
+			aPrice = price.toString();
+		}
+		return aPrice;
 	}
 	public void setActuralPrice(Double acturalPrice) {
 		this.acturalPrice = acturalPrice;
@@ -66,6 +77,13 @@ public class EvoucherPageMapper implements Serializable {
 	public void setCounts(BigInteger counts) {
 		this.counts = counts;
 	}
-	
+
+	public String getProductName() {
+		return productName;
+	}
+
+	public void setProductName(String productName) {
+		this.productName = productName;
+	}
 	
 }

@@ -3,6 +3,7 @@ package com.yumu.hexie.vo;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -60,12 +61,14 @@ public class EvoucherView implements Serializable {
 						}
 					}
 					
-					BigDecimal aPrice = new BigDecimal(evoucher.getActualPrice());
-					BigDecimal oPrice = new BigDecimal(evoucher.getOriPrice());
+					BigDecimal aPrice = new BigDecimal(String.valueOf(evoucher.getActualPrice()));
+					BigDecimal oPrice = new BigDecimal(String.valueOf(evoucher.getOriPrice()));
 					actualPrice = actualPrice.add(aPrice);
 					oriPrice = oriPrice.add(oPrice);
 				}
 			}
+			actualPrice = actualPrice.setScale(2, RoundingMode.HALF_UP);
+			oriPrice = oriPrice.setScale(2, RoundingMode.HALF_UP);
 		}
 		
 		if (!StringUtil.isEmpty(code)) {
