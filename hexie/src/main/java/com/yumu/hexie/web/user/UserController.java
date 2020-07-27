@@ -97,7 +97,7 @@ public class UserController extends BaseController{
 					if (baseduser.getId() == user.getId()) {
 						user = baseduser;
 						break;
-					}else if (StringUtils.isEmpty(baseduser.getId())&&baseduser.getOriUserId() == user.getId() ) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
+					}else if (baseduser.getOriUserId() == user.getId() && !ConstantWeChat.APPID.equals(baseduser.getAppId())) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
 						user = baseduser;
 						break;
 					}
