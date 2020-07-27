@@ -508,6 +508,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		eshopUtil.cancelPay(user, serviceOrder.getOrderNo());
 		
 		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
+			List<OrderItem> list = serviceOrder.getItems();
+			orderItemRepository.delete(list);
 			serviceOrderRepository.delete(serviceOrder.getId());
 		}
 	}
