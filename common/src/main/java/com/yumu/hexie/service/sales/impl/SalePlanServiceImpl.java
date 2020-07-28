@@ -32,7 +32,7 @@ public class SalePlanServiceImpl implements SalePlanService {
 		} else if (orderType == ModelConstant.ORDER_TYPE_REPAIR) {
 		    return customRepairService;
 		} else {
-			throw new BizValidateException("订单类型错误！");
+			throw new BizValidateException("订单类型错误!  type : " + orderType);
 		}
 	}
 

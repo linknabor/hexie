@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
@@ -33,6 +35,7 @@ import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.sales.SalePlanService;
 import com.yumu.hexie.service.user.AddressService;
+import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.RgroupOrder;
 import com.yumu.hexie.vo.SingleItemOrder;
@@ -56,6 +59,8 @@ public class OrderController extends BaseController{
     private RgroupService rgroupService;
 	@Inject
 	private AddressService addressService;
+	@Autowired
+	private UserService userService;
 	
 	private static Logger logger = LoggerFactory.getLogger(OrderController.class);
 	
@@ -190,6 +195,12 @@ public class OrderController extends BaseController{
 			address = addrList.get(0);
 		}
 		vo.setAddress(address);
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == type) {
+			User currUser = userService.getById(user.getId());
+			if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
+				vo.setAddress(new Address());
+			}
+		}
 		return new BaseResult<BuyInfoVO>().success(vo);
     }
 	
