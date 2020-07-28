@@ -13,6 +13,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.QRCodeUtil;
 import com.yumu.hexie.common.util.StringUtil;
@@ -22,6 +23,8 @@ import com.yumu.hexie.model.market.Evoucher;
 public class EvoucherView implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(EvoucherView.class);
+	
+	private static final String QRCODE_URL = ConfigUtil.get("evoucher_qrcode_url");
 	
 	/**
 	 * 
@@ -131,7 +134,7 @@ public class EvoucherView implements Serializable {
 		if (ModelConstant.EVOUCHER_STATUS_NORMAL == status) {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
-				QRCodeUtil.createQRCodeToIO(code, "", os);
+				QRCodeUtil.createQRCodeToIO(QRCODE_URL + code, "", os);
 				String codeStr = new String (Base64.getEncoder().encode(os.toByteArray()));
 				this.qrcode = "data:image/jpg;base64," + codeStr;
 			} catch (Exception e) {
