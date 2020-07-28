@@ -89,7 +89,8 @@ public class EvoucherView implements Serializable {
 				
 			}else if (!usedList.isEmpty()) {	//如果没有未使用的券，则显示已使用券的累加金额、名称、电话等，二维码不显示
 				for (Evoucher evoucher : usedList) {
-					if (StringUtil.isEmpty(this.name)) {
+					if (StringUtil.isEmpty(this.code)) {
+						this.code = evoucher.getCode();;
 						this.name = evoucher.getProductName();
 						this.tel = evoucher.getTel();
 						this.smallPicture = evoucher.getSmallPicture();
@@ -108,7 +109,8 @@ public class EvoucherView implements Serializable {
 				
 			}else if (!expiredList.isEmpty()) {	//以上两项如果都没有，则显示过期的券
 				for (Evoucher evoucher : expiredList) {
-					if (StringUtil.isEmpty(this.name)) {
+					if (StringUtil.isEmpty(this.code)) {
+						this.code = evoucher.getCode();;
 						this.name = evoucher.getProductName();
 						this.tel = evoucher.getTel();
 						this.smallPicture = evoucher.getSmallPicture();
@@ -126,7 +128,7 @@ public class EvoucherView implements Serializable {
 			}
 		}
 		
-		if (StringUtil.isEmpty(consumeDate) && !StringUtil.isEmpty(code)) {
+		if (ModelConstant.EVOUCHER_STATUS_NORMAL == status) {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
 				QRCodeUtil.createQRCodeToIO(code, "", os);
