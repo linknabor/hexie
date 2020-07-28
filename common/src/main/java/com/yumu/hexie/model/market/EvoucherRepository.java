@@ -16,8 +16,13 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 	
 	List<Evoucher> findByOrderId(long orderId);
 	
-	final String column1 = "e.orderId, e.tel, e.consumeDate, e.productName, sum(e.actualPrice) as actualPrice, count(e.id) as counts";
+	final String column1 = "e.orderId, e.tel, e.consumeDate, e.productName, e.status, sum(e.actualPrice) as actualPrice, count(e.id) as counts";
 	
+	/**
+	 * 如果同一批次购入的券要分开核销，则这个查询需要更上状态筛选的条件
+	 * @param operatorId
+	 * @return
+	 */
 	@Query(value = "select " + column1 + " from evoucher e "
 			+ "where e.operatorUserId = ?1 group by e.orderId order by e.consumeDate desc ", 
 			nativeQuery = true)

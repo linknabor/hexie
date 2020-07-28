@@ -21,16 +21,18 @@ public class EvoucherPageMapper implements Serializable {
 	private String tel;
 	private Timestamp consumeDate;
 	private String productName;
+	private Integer status;
 	private Double acturalPrice;
 	private BigInteger counts;
 	
-	public EvoucherPageMapper(BigInteger orderId, String tel, Timestamp consumeDate, String productName, Double acturalPrice,
-			BigInteger counts) {
+	public EvoucherPageMapper(BigInteger orderId, String tel, Timestamp consumeDate, String productName, Integer status, 
+			Double acturalPrice, BigInteger counts) {
 		super();
 		this.orderId = orderId;
 		this.tel = tel;
 		this.consumeDate = consumeDate;
 		this.productName = productName;
+		this.status = status;
 		this.acturalPrice = acturalPrice;
 		this.counts = counts;
 	}
@@ -77,13 +79,19 @@ public class EvoucherPageMapper implements Serializable {
 	public void setCounts(BigInteger counts) {
 		this.counts = counts;
 	}
-
 	public String getProductName() {
 		return productName;
 	}
-
 	public void setProductName(String productName) {
 		this.productName = productName;
 	}
+	public Integer getStatus() {
+		return status;
+	}
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+	
+	
 	
 }

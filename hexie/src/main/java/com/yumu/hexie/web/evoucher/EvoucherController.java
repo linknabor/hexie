@@ -52,7 +52,7 @@ public class EvoucherController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/getByOperator", method = RequestMethod.GET)
-	public BaseResult<Object> getByOrder(@ModelAttribute(Constants.USER) User user) throws Exception {
+	public BaseResult<Object> getByOperator(@ModelAttribute(Constants.USER) User user) throws Exception {
 		
 		BaseResult<Object> baseResult = new BaseResult<>();
 		baseResult.setResult(evoucherService.getByOperator(user));

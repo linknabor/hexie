@@ -49,15 +49,15 @@ public class Evoucher extends BaseModel{
 	private long merchantId;	//商户ID
 	private String merchantName;	//商户名称
 	
-	@Transient
-	public boolean available() {
-		Date nowdate = new Date();
-		if (!StringUtil.isEmpty(beginDate) && !StringUtil.isEmpty(endDate)) {
-			return beginDate.before(nowdate) && endDate.after(nowdate);
-		}
-		return false;
-		
-	}
+//	@Transient
+//	public boolean available() {
+//		Date nowdate = new Date();
+//		if (!StringUtil.isEmpty(beginDate) && !StringUtil.isEmpty(endDate)) {
+//			return beginDate.before(nowdate) && endDate.after(nowdate);
+//		}
+//		return false;
+//		
+//	}
 	public String getCode() {
 		return code;
 	}

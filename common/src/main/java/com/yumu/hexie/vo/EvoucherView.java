@@ -3,10 +3,12 @@ package com.yumu.hexie.vo;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,22 +38,58 @@ public class EvoucherView implements Serializable {
 	private Date consumeDate;
 	private BigDecimal actualPrice;
 	private BigDecimal oriPrice;
+	private int status;
 	
 	public EvoucherView() {
 		super();
 	}
+	/**
+	 * 由于一个订单可能对应多个券，但只显示一个二维码和价格以及商品信息。所以如果有部分券被核销，则显示未核销券的二维码
+	 * @param vouchers
+	 */
 	public EvoucherView(List<Evoucher> vouchers) {
 		
 		if (vouchers!=null) {
-			this.count = vouchers.size();
+			
 			this.actualPrice = BigDecimal.ZERO;
 			this.oriPrice = BigDecimal.ZERO;
+			
+			Map<Integer, List<Evoucher>> map = new HashMap<>();
+			map.put(ModelConstant.EVOUCHER_STATUS_NORMAL, new ArrayList<>());
+			map.put(ModelConstant.EVOUCHER_STATUS_USED, new ArrayList<>());
+			map.put(ModelConstant.EVOUCHER_STATUS_EXPIRED, new ArrayList<>());
+			
 			for (Evoucher evoucher : vouchers) {
-				if (ModelConstant.EVOUCHER_STATUS_NORMAL == evoucher.getStatus() 
-						&& evoucher.available()) {
-					
+				List<Evoucher> unusedList = map.get(evoucher.getStatus());
+				unusedList.add(evoucher);
+			}
+			
+			List<Evoucher> unusedList = map.get(ModelConstant.EVOUCHER_STATUS_NORMAL);
+			List<Evoucher> usedList = map.get(ModelConstant.EVOUCHER_STATUS_USED);
+			List<Evoucher> expiredList = map.get(ModelConstant.EVOUCHER_STATUS_EXPIRED);
+			if (!unusedList.isEmpty()) {	//如果有未使用的券，则以其中第一条的code作为二维码，价格是所有未使用券的累加金额
+				for (Evoucher evoucher : unusedList) {
 					if (StringUtil.isEmpty(this.code)) {
 						this.code = evoucher.getCode();;
+						this.name = evoucher.getProductName();
+						this.tel = evoucher.getTel();
+						this.smallPicture = evoucher.getSmallPicture();
+						if (!StringUtil.isEmpty(evoucher.getEndDate())) {
+							this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
+						}
+					}
+					BigDecimal aPrice = new BigDecimal(String.valueOf(evoucher.getActualPrice()));
+					BigDecimal oPrice = new BigDecimal(String.valueOf(evoucher.getOriPrice()));
+					actualPrice = actualPrice.add(aPrice);
+					oriPrice = oriPrice.add(oPrice);
+					count++;
+					
+				}
+				status = ModelConstant.EVOUCHER_STATUS_NORMAL;
+				
+			}else if (!usedList.isEmpty()) {	//如果没有未使用的券，则显示已使用券的累加金额、名称、电话等，二维码不显示
+				for (Evoucher evoucher : usedList) {
+					if (StringUtil.isEmpty(this.name)) {
 						this.name = evoucher.getProductName();
 						this.tel = evoucher.getTel();
 						this.smallPicture = evoucher.getSmallPicture();
@@ -60,18 +98,35 @@ public class EvoucherView implements Serializable {
 							this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
 						}
 					}
-					
 					BigDecimal aPrice = new BigDecimal(String.valueOf(evoucher.getActualPrice()));
 					BigDecimal oPrice = new BigDecimal(String.valueOf(evoucher.getOriPrice()));
 					actualPrice = actualPrice.add(aPrice);
 					oriPrice = oriPrice.add(oPrice);
+					count++;
 				}
+				status = ModelConstant.EVOUCHER_STATUS_USED;
+				
+			}else if (!expiredList.isEmpty()) {	//以上两项如果都没有，则显示过期的券
+				for (Evoucher evoucher : expiredList) {
+					if (StringUtil.isEmpty(this.name)) {
+						this.name = evoucher.getProductName();
+						this.tel = evoucher.getTel();
+						this.smallPicture = evoucher.getSmallPicture();
+						if (!StringUtil.isEmpty(evoucher.getEndDate())) {
+							this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
+						}
+					}
+					BigDecimal aPrice = new BigDecimal(String.valueOf(evoucher.getActualPrice()));
+					BigDecimal oPrice = new BigDecimal(String.valueOf(evoucher.getOriPrice()));
+					actualPrice = actualPrice.add(aPrice);
+					oriPrice = oriPrice.add(oPrice);
+					count++;
+				}
+				status = ModelConstant.EVOUCHER_STATUS_EXPIRED;
 			}
-			actualPrice = actualPrice.setScale(2, RoundingMode.HALF_UP);
-			oriPrice = oriPrice.setScale(2, RoundingMode.HALF_UP);
 		}
 		
-		if (!StringUtil.isEmpty(code)) {
+		if (StringUtil.isEmpty(consumeDate) && !StringUtil.isEmpty(code)) {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
 				QRCodeUtil.createQRCodeToIO(code, "", os);
@@ -142,6 +197,12 @@ public class EvoucherView implements Serializable {
 	}
 	public void setOriPrice(BigDecimal oriPrice) {
 		this.oriPrice = oriPrice;
+	}
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
 	}
 	
 	
