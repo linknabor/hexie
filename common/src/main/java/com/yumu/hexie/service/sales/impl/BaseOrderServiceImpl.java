@@ -409,8 +409,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             throw new BizValidateException(order.getId(),"该订单不能取消！").setError();
         }
 		//2. 取消支付单
-	    paymentService.cancelPayment(PaymentConstant.TYPE_MARKET_ORDER, order.getId());
-        log.warn("[cancelOrder]payment:"+order.getId());
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+			//do nothing
+		}else {
+			paymentService.cancelPayment(PaymentConstant.TYPE_MARKET_ORDER, order.getId());
+	        log.warn("[cancelOrder]payment:"+order.getId());
+		}
 		order.cancel();
 		serviceOrderRepository.save(order);
         log.warn("[cancelOrder]order:"+order.getId());

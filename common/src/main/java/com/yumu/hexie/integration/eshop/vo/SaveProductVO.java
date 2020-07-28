@@ -29,6 +29,7 @@ public class SaveProductVO implements Serializable {
 	private String mainPicture;	//封面图链接
 	private String smallPicture;	//小图
 	private String pictures;	//轮播图，多个逗号分割
+	private String totalCount;	//库存
 	private String context;	//描述
 	private String updateUser;	//更新商品的用户
 	private String appid;	//公众号id
@@ -233,17 +234,24 @@ public class SaveProductVO implements Serializable {
 		this.appid = appid;
 	}
 
+	public String getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(String totalCount) {
+		this.totalCount = totalCount;
+	}
+
 	@Override
 	public String toString() {
 		return "SaveProductVO [operType=" + operType + ", id=" + id + ", name=" + name + ", type=" + type
 				+ ", oriPrice=" + oriPrice + ", miniPrice=" + miniPrice + ", singlePrice=" + singlePrice
 				+ ", limitNumOnce=" + limitNumOnce + ", sortNo=" + sortNo + ", status=" + status + ", startDate="
 				+ startDate + ", endDate=" + endDate + ", mainPicture=" + mainPicture + ", smallPicture=" + smallPicture
-				+ ", pictures=" + pictures + ", context=" + context + ", updateUser=" + updateUser + ", appid=" + appid
-				+ ", agentName=" + agentName + ", agentNo=" + agentNo + ", salePlanType=" + salePlanType + ", counts="
-				+ counts + ", saleAreas=" + saleAreas + "]";
+				+ ", pictures=" + pictures + ", totalCount=" + totalCount + ", context=" + context + ", updateUser="
+				+ updateUser + ", appid=" + appid + ", agentName=" + agentName + ", agentNo=" + agentNo
+				+ ", salePlanType=" + salePlanType + ", counts=" + counts + ", saleAreas=" + saleAreas + "]";
 	}
 
-	
 
 }

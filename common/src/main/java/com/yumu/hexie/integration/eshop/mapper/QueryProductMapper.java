@@ -39,6 +39,8 @@ public class QueryProductMapper implements Serializable {
 	@JsonProperty("service_desc")
 	private String serviceDesc;	//描述
 	private Integer demo;	//是否样板，0否，1是
+	@JsonProperty("total_count")
+	private Integer totalCount;	//库存
 	
 	//物业或代理商信息
 	@JsonProperty("agent_name")
@@ -58,7 +60,7 @@ public class QueryProductMapper implements Serializable {
 	
 	public QueryProductMapper(BigInteger id, String name, String productType, Float oriPrice, Float miniPrice,
 			Float singlePrice, Integer status, Timestamp startDate, Timestamp endDate, String mainPicture,
-			String smallPicture, String pictures, String serviceDesc, Integer demo, String agentName, String agentNo,
+			String smallPicture, String pictures, String serviceDesc, Integer demo, Integer totalCount, String agentName, String agentNo,
 			Integer limitNumOnce, Integer sortNo, String appid, BigInteger counts, BigInteger operCounts) {
 		super();
 		this.id = id;
@@ -75,6 +77,7 @@ public class QueryProductMapper implements Serializable {
 		this.pictures = pictures;
 		this.serviceDesc = serviceDesc;
 		this.demo = demo;
+		this.totalCount = totalCount;
 		this.agentName = agentName;
 		this.agentNo = agentNo;
 		this.limitNumOnce = limitNumOnce;
@@ -210,8 +213,12 @@ public class QueryProductMapper implements Serializable {
 	public void setDemo(Integer demo) {
 		this.demo = demo;
 	}
-	
-	
+	public Integer getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(Integer totalCount) {
+		this.totalCount = totalCount;
+	}
 	
 	
 

@@ -183,12 +183,10 @@ public class EshopServiceImpl implements EshopSerivce {
 			product.setAgentId(agent.getId());
 		}
 		product.setProductType(saveProductVO.getType());
+		product.setTotalCount(Integer.parseInt(saveProductVO.getTotalCount()));
 		product.setMainPicture(saveProductVO.getMainPicture());
 		product.setSmallPicture(saveProductVO.getSmallPicture());
 		product.setPictures(saveProductVO.getPictures());
-		if ("1000".equals(saveProductVO.getType())) {
-			product.setTotalCount(Integer.MAX_VALUE);
-		}
 		product.setMiniPrice(Float.valueOf(saveProductVO.getMiniPrice()));
 		product.setSinglePrice(Float.valueOf(saveProductVO.getSinglePrice()));
 		product.setOriPrice(Float.valueOf(saveProductVO.getOriPrice()));
