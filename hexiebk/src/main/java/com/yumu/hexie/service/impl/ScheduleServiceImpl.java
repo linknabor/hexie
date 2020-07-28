@@ -266,9 +266,9 @@ public class ScheduleServiceImpl implements ScheduleService{
     
 	//1. 支付单超时(25分一次，30分钟超时)
     private void executeOrderTimeoutJob(List<ServiceOrder> serviceOrders) {
-    	SCHEDULE_LOG.debug("--------------------executeOrderTimeoutJob-------------------");
+    	SCHEDULE_LOG.info("--------------------executeOrderTimeoutJob-------------------");
     	if(serviceOrders.size() == 0) {
-    		SCHEDULE_LOG.error("**************executeOrderTimeoutJob没有记录");
+    		SCHEDULE_LOG.info("**************executeOrderTimeoutJob没有记录");
     		return;
     	}
     	String ids = "";
@@ -279,17 +279,17 @@ public class ScheduleServiceImpl implements ScheduleService{
     	sr = scheduleRecordRepository.save(sr);
     	for(ServiceOrder order : serviceOrders) {
     		try{
-    	    	SCHEDULE_LOG.debug("CancelOrder:" + order.getId());
+    	    	SCHEDULE_LOG.info("CancelOrder:" + order.getId());
     	    	baseOrderService.cancelOrder(order);
     		} catch(Exception e){
-    			SCHEDULE_LOG.error("超时支付单失败orderID"+ order.getId(),e);
+    			SCHEDULE_LOG.info("超时支付单失败orderID"+ order.getId(),e);
     			recordError(e);
     			sr.addErrorCount(""+order.getId());
     		}
     	}
     	sr.setFinishDate(new Date());
     	scheduleRecordRepository.save(sr);
-    	SCHEDULE_LOG.debug("--------------------executeOrderTimeoutJob-------------------");
+    	SCHEDULE_LOG.info("--------------------executeOrderTimeoutJob-------------------");
     }
 	//2. 退款状态查询
     private void executeRefundStatusJob(List<RefundOrder> refundOrder) {
