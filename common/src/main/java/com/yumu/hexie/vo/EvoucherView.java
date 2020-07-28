@@ -24,7 +24,7 @@ public class EvoucherView implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(EvoucherView.class);
 	
-	private static final String QRCODE_URL = ConfigUtil.get("evoucher_qrcode_url");
+	private static final String QRCODE_URL = ConfigUtil.get("evoucherQrcodeUrl");
 	
 	/**
 	 * 
