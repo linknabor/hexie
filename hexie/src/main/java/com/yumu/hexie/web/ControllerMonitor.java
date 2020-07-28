@@ -1,4 +1,4 @@
-package com.yumu.hexie.web.customservice;
+package com.yumu.hexie.web;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Aspect
-public class CustomServiceMonitor {
+public class ControllerMonitor {
 
-	private static Logger logger = LoggerFactory.getLogger(CustomServiceMonitor.class);
+	private static Logger logger = LoggerFactory.getLogger(ControllerMonitor.class);
 	
-	@Around("execution(* com.yumu.hexie.web.customservice.CustomServiceController.*(..))")
+	@Around("execution(* com.yumu.hexie.web.*.*.*(..))")
 	public Object logServiceMethodAccess(ProceedingJoinPoint joinPoint) throws Throwable {
 		long start = System.currentTimeMillis();
 		Object object = joinPoint.proceed();
