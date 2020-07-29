@@ -34,9 +34,9 @@ public class EvoucherMapper implements Serializable {
 	@JsonProperty("end_date")
 	private Date endDate;	//过期日期
 	@JsonProperty("consume_date")
-	private Date cosumeDate;	//使用日期
+	private Date consumeDate;	//使用日期
 	
-	private long operatorId;	//操作人id
+	private long operatorUserId;	//操作人id
 	@JsonProperty("operator_name")
 	private String operatorName;	//操作人
 	private String operatorTel;	//操作人手机号
@@ -111,17 +111,17 @@ public class EvoucherMapper implements Serializable {
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
-	public Date getCosumeDate() {
-		return cosumeDate;
+	public Date getConsumeDate() {
+		return consumeDate;
 	}
-	public void setCosumeDate(Date cosumeDate) {
-		this.cosumeDate = cosumeDate;
+	public void setConsumeDate(Date consumeDate) {
+		this.consumeDate = consumeDate;
 	}
-	public long getOperatorId() {
-		return operatorId;
+	public long getOperatorUserId() {
+		return operatorUserId;
 	}
-	public void setOperatorId(long operatorId) {
-		this.operatorId = operatorId;
+	public void setOperatorUserId(long operatorUserId) {
+		this.operatorUserId = operatorUserId;
 	}
 	public String getOperatorName() {
 		return operatorName;
