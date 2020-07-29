@@ -470,7 +470,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			Pageable pageable = new PageRequest(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize());
-			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentName(), pageable);
+			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentNo(), queryEvoucherVO.getAgentName(), pageable);
 			List<EvoucherMapper> mapperList = new ArrayList<>();
 			for (Evoucher evoucher : page.getContent()) {
 				EvoucherMapper evoucherMapper = new EvoucherMapper();
