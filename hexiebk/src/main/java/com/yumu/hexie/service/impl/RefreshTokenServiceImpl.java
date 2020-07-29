@@ -53,7 +53,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
      * 获取AccessToken
      * 大于等于1小时50分，更新token
      */
-//    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void refreshAccessTokenJob() {
         if(!ConstantWeChat.isMainServer()){
             return;
@@ -85,7 +85,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
      * 获取jstoken
      * 大于等于1小时50分，更新token
      */
-//    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void refreshJsTicketJob() {
         if(!ConstantWeChat.isMainServer()){
             return;
