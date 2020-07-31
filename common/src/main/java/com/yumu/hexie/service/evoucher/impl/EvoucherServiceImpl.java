@@ -20,6 +20,8 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorItem;
+import com.yumu.hexie.model.localservice.ServiceOperatorItemRepository;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.EvoucherRepository;
@@ -46,6 +48,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 	private ProductRepository productRepository;
 	@Autowired
 	private ServiceOperatorRepository serviceOperatorRepository;
+	@Autowired
+	private ServiceOperatorItemRepository serviceOperatorItemRepository;
 	
 	/**
 	 * 创建优惠券
@@ -161,13 +165,19 @@ public class EvoucherServiceImpl implements EvoucherService {
 		
 		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
 		if (opList == null || opList.isEmpty()) {
-			throw new BizValidateException("当前用户不能进行次操作。用户id: " + operator.getId());
+			throw new BizValidateException("用户不能进行当前操作。用户id: " + operator.getId());
 		}
-		ServiceOperator serviceOperator = opList.get(0);
 		
 		long orderId = 0;
 		StringBuffer bf = new StringBuffer();
 		Evoucher e = evoucherRepository.findByCode(code);
+		
+		ServiceOperator serviceOperator = opList.get(0);
+		ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), e.getProductId());
+		if (serviceOperatorItem == null) {
+			throw new BizValidateException("用户不能进行当前操作。用户id: " + operator.getId());
+		}
+		
 		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(e.getOrderId());
 		
 		for (int i =0; i < evoucherList.size(); i ++) {
