@@ -19,12 +19,15 @@ import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.evoucher.EvoucherService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.vo.EvoucherPageMapper;
 import com.yumu.hexie.vo.EvoucherView;
 
@@ -41,6 +44,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 	private ServiceOrderRepository serviceOrderRepository;
 	@Autowired
 	private ProductRepository productRepository;
+	@Autowired
+	private ServiceOperatorRepository serviceOperatorRepository;
 	
 	/**
 	 * 创建优惠券
@@ -154,6 +159,12 @@ public class EvoucherServiceImpl implements EvoucherService {
 //			}
 //		}
 		
+		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
+		if (opList == null || opList.isEmpty()) {
+			throw new BizValidateException("当前用户不能进行次操作。用户id: " + operator.getId());
+		}
+		ServiceOperator serviceOperator = opList.get(0);
+		
 		long orderId = 0;
 		StringBuffer bf = new StringBuffer();
 		Evoucher e = evoucherRepository.findByCode(code);
@@ -163,7 +174,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			Evoucher evoucher = evoucherList.get(i);
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
 			evoucher.setConsumeDate(new Date());
-			evoucher.setOperatorName(operator.getName());
+			evoucher.setOperatorName(serviceOperator.getName());
 			evoucher.setOperatorUserId(operator.getId());
 			evoucherRepository.save(evoucher);
 			bf.append(evoucher.getCode());
