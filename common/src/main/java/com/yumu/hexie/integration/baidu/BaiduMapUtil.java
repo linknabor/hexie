@@ -9,6 +9,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,12 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 public class BaiduMapUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(BaiduMapUtil.class);
+	
+	private static final String OUTPUT = "json";
 
+	@Value("${baidu.map.key}")
+	private String baiduMapKey;
+	
 	@Autowired
 	private RestTemplate restTemplate;
 	
@@ -40,7 +46,7 @@ public class BaiduMapUtil {
 		paramsMap.add("coords", coordinate);//（经度，纬度）
 		paramsMap.add("from", "1");//1：GPS设备获取的角度坐标，WGS84坐标;
 		paramsMap.add("to", "5");//5：bd09ll(百度经纬度坐标);
-		paramsMap.add("ak", ConstantBaidu.MAPKEY);
+		paramsMap.add("ak", baiduMapKey);
 
 		String requestUrl = "http://api.map.baidu.com/geoconv/v1/";
 		logger.info("baiduMap util, request url : " + requestUrl + "param : " + paramsMap);
@@ -83,8 +89,8 @@ public class BaiduMapUtil {
 		paramsMap.add("location", coordinate);//lat<纬度>,lng<经度>
 		paramsMap.add("latest_admin", "1");
 		paramsMap.add("pois", "1");
-		paramsMap.add("output", ConstantBaidu.OUTPUT);
-		paramsMap.add("ak", ConstantBaidu.MAPKEY);
+		paramsMap.add("output", OUTPUT);
+		paramsMap.add("ak", baiduMapKey);
 		
 		String requestUrl = "http://api.map.baidu.com/geocoder/v2/";
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(requestUrl);

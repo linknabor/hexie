@@ -5,7 +5,7 @@ import javax.persistence.Entity;
 import com.yumu.hexie.model.BaseModel;
 
 @Entity
-public class MsgUrl extends BaseModel{
+public class MsgTemplateUrl extends BaseModel{
 
 	/**
 	 * 

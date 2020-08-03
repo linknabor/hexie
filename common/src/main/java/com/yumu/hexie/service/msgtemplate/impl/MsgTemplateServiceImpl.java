@@ -15,8 +15,8 @@ import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.msgtemplate.MsgTempalateRepository;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
-import com.yumu.hexie.model.msgtemplate.MsgUrl;
-import com.yumu.hexie.model.msgtemplate.MsgUrlRepository;
+import com.yumu.hexie.model.msgtemplate.MsgTemplateUrl;
+import com.yumu.hexie.model.msgtemplate.MsgTemplateUrlRepository;
 import com.yumu.hexie.service.msgtemplate.MsgTemplateService;
 
 @Service
@@ -27,7 +27,7 @@ public class MsgTemplateServiceImpl implements MsgTemplateService {
 	@Autowired
 	private MsgTempalateRepository msgTempalateRepository;
 	@Autowired
-	private MsgUrlRepository msgUrlRepository;
+	private MsgTemplateUrlRepository msgUrlRepository;
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	
@@ -59,8 +59,8 @@ public class MsgTemplateServiceImpl implements MsgTemplateService {
 	
 	private void loadMsgUrlFromDatabase() {
 		
-		List<MsgUrl> msgUrlList = msgUrlRepository.findByStatus(1);	//1正常状态的页面链接配置
-		for (MsgUrl msgUrl : msgUrlList) {
+		List<MsgTemplateUrl> msgUrlList = msgUrlRepository.findByStatus(1);	//1正常状态的页面链接配置
+		for (MsgTemplateUrl msgUrl : msgUrlList) {
 			//key的形式：msgtemplate:xxxxx_appid
 			String key = ModelConstant.KEY_MSG_TEMPLATE_URL + msgUrl.getName() + "_" + msgUrl.getAppid();
 			String value = msgUrl.getValue();

@@ -52,7 +52,7 @@ public class ConstantWeChat {
 	public static String UNIFIEDURL = ConfigUtil.get("unifiedUrl");
 	/**
 	 */
-	public static String TRADETYPE = ConfigUtil.get("tradeType");
+	public static final String TRADETYPE = "JSAPI";
 	
 	/**
 	 * 返回消息类型：文本

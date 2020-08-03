@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -47,9 +48,10 @@ import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 @Component
 public class WuyeUtil2 {
 	
+	@Value("${sysName}")
+	private String sysName;
 	@Autowired
 	private RestUtil restUtil;
-	
 	@Autowired
 	private RequestUtil requestUtil;
 	
@@ -165,7 +167,7 @@ public class WuyeUtil2 {
 		
 		User user = prepayRequestDTO.getUser();
 		String appid = user.getAppId();
-		String fromSys = requestUtil.getSysName();
+		String fromSys = sysName;
 		if (!StringUtils.isEmpty(appid)) {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
