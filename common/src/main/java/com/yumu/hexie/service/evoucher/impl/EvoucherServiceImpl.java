@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,9 @@ import com.yumu.hexie.vo.EvoucherView;
 public class EvoucherServiceImpl implements EvoucherService {
 	
 	private static Logger logger = LoggerFactory.getLogger(EvoucherServiceImpl.class);
+	
+	@Value("${evoucher.qrcode.url}")
+	private String QRCODE_URL;
 
 	@Autowired
 	private EvoucherRepository evoucherRepository;
@@ -208,7 +212,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (evoucher!=null) {
 			list = evoucherRepository.findByOrderIdAndStatus(evoucher.getOrderId(), ModelConstant.EVOUCHER_STATUS_NORMAL);
 		}
-		return new EvoucherView(list);
+		return new EvoucherView(QRCODE_URL, list);
 	}
 
 	@Override
@@ -227,7 +231,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 	public EvoucherView getByOrder(long orderId) {
 		
 		List<Evoucher> list = evoucherRepository.findByOrderId(orderId);
-		return new EvoucherView(list);
+		return new EvoucherView(QRCODE_URL, list);
 	}
 	
 	@Override

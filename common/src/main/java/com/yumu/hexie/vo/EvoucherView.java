@@ -13,7 +13,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.QRCodeUtil;
 import com.yumu.hexie.common.util.StringUtil;
@@ -23,8 +22,6 @@ import com.yumu.hexie.model.market.Evoucher;
 public class EvoucherView implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(EvoucherView.class);
-	
-	private static final String QRCODE_URL = ConfigUtil.get("evoucherQrcodeUrl");
 	
 	/**
 	 * 
@@ -50,7 +47,7 @@ public class EvoucherView implements Serializable {
 	 * 由于一个订单可能对应多个券，但只显示一个二维码和价格以及商品信息。所以如果有部分券被核销，则显示未核销券的二维码
 	 * @param vouchers
 	 */
-	public EvoucherView(List<Evoucher> vouchers) {
+	public EvoucherView(String qrcodeUrl, List<Evoucher> vouchers) {
 		
 		if (vouchers!=null) {
 			
@@ -134,7 +131,7 @@ public class EvoucherView implements Serializable {
 		if (ModelConstant.EVOUCHER_STATUS_NORMAL == status) {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
-				QRCodeUtil.createQRCodeToIO(QRCODE_URL + code, "", os);
+				QRCodeUtil.createQRCodeToIO(qrcodeUrl + code, "", os);
 				String codeStr = new String (Base64.getEncoder().encode(os.toByteArray()));
 				this.qrcode = "data:image/jpg;base64," + codeStr;
 			} catch (Exception e) {
