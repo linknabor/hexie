@@ -42,7 +42,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 	}
 	@Override
 	public void orderSuccess(long userId, String tel,long orderId, String orderNo, String productName, float prices) {
-		String msg = "您好，您购买的"+productName+"已支付成功，支付总额" + prices + "元,关注微信号“合协社区”,了解更多订单信息。";
+		String msg = "您好，您购买的"+productName+"已支付成功，支付总额" + prices + "元。";
 		userNoticeRepository.save(new UserNotice(userId, ModelConstant.NOTICE_TYPE_ORDER, ModelConstant.NOTICE_SUB_TYPE_ORDERSUCCESS,
 				msg, orderId));
 		User user = userRepository.findById(userId);
