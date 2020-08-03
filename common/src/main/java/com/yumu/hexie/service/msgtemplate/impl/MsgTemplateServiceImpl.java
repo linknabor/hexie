@@ -62,7 +62,7 @@ public class MsgTemplateServiceImpl implements MsgTemplateService {
 		List<MsgTemplateUrl> msgUrlList = msgUrlRepository.findByStatus(1);	//1正常状态的页面链接配置
 		for (MsgTemplateUrl msgUrl : msgUrlList) {
 			//key的形式：msgtemplate:xxxxx_appid
-			String key = ModelConstant.KEY_MSG_TEMPLATE_URL + msgUrl.getName() + "_" + msgUrl.getAppid();
+			String key = ModelConstant.KEY_MSG_TEMPLATE_URL + msgUrl.getName();
 			String value = msgUrl.getValue();
 			redisTemplate.opsForValue().set(key, value);
 		}

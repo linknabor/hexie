@@ -54,7 +54,6 @@ public class TemplateMsgService {
 	 */
 	private boolean sendMsg(TemplateMsg<?> msg, String accessToken) {
         
-		log.error("发送模板消息------");
 		String requestUrl = MsgCfg.TEMPLATE_MSG;
 		if(StringUtil.isNotEmpty(accessToken)){
 	        requestUrl = requestUrl.replace("ACCESS_TOKEN", accessToken);
