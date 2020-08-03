@@ -307,7 +307,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			sign.setTimestamp(responseVo.getTimestamp());
 			sign.setOrderId(String.valueOf(order.getId()));
 			order = serviceOrderRepository.findOne(order.getId());
-			order.setOrderNo(responseVo.getTradeWaterId());
+			if (StringUtil.isEmpty(order.getOrderNo())) {
+				order.setOrderNo(responseVo.getTradeWaterId());
+			}
 
 			//操作记录
 			commonPostProcess(ModelConstant.ORDER_OP_REQPAY,order);

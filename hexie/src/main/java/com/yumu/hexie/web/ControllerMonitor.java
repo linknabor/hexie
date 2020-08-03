@@ -2,18 +2,16 @@ package com.yumu.hexie.web;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * 自定义服务监控
  * @author david
  *
  */
-@Component
-@Aspect
+//@Component
+//@Aspect
 public class ControllerMonitor {
 
 	private static Logger logger = LoggerFactory.getLogger(ControllerMonitor.class);
