@@ -29,6 +29,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
@@ -271,7 +272,7 @@ public class UserController extends BaseController{
 		if (StringUtils.isEmpty(token)) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp);
+		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_REG);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
@@ -298,7 +299,7 @@ public class UserController extends BaseController{
 		if (!result) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp);
+		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_INVOICE);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
