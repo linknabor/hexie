@@ -82,9 +82,7 @@ public class TemplateMsgService {
     	if (StringUtils.isEmpty(appId)) {
 			appId = ConfigUtil.get("appId");
 		}
-    	
-    	String key = templateType + "_" + appId;
-    	String templateId = msgTemplateService.getTemplateFromCache(key, appId);
+    	String templateId = msgTemplateService.getTemplateFromCache(templateType, appId);
     	return templateId;
     	
     }
