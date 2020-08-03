@@ -102,6 +102,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			QueryListDTO<List<QueryProductMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
+			responsePage.setTotalSize(page.getTotalElements());
 			responsePage.setContent(list);
 			
 			commonResponse.setData(responsePage);
@@ -480,6 +481,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			QueryListDTO<List<EvoucherMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
+			responsePage.setTotalSize(page.getTotalElements());
 			responsePage.setContent(mapperList);
 			commonResponse.setData(responsePage);
 			commonResponse.setResult("00");

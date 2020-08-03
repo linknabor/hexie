@@ -22,7 +22,7 @@ public class Evoucher extends BaseModel{
 	
 	private String code;	//which can convert to qrcode.
 	private long orderId;	//serviceOrder id 购买的订单号
-	private int status;	//0不可用，1可用，2过期
+	private int status;	//0不可用,1可用,2,已经使用,3过期
 	private float actualPrice;	//实际售价
 	private float oriPrice;	//原价
 	

@@ -10,6 +10,7 @@ public class QueryListDTO<T> implements Serializable {
 	private static final long serialVersionUID = -7009800342095816973L;
 
 	private int totalPages;
+	private long totalSize;
 	
 	private T content;
 
@@ -29,10 +30,18 @@ public class QueryListDTO<T> implements Serializable {
 		this.content = content;
 	}
 
+	public long getTotalSize() {
+		return totalSize;
+	}
+
+	public void setTotalSize(long totalSize) {
+		this.totalSize = totalSize;
+	}
+
 	@Override
 	public String toString() {
-		return "Page [totalPages=" + totalPages + ", content=" + content + "]";
+		return "QueryListDTO [totalPages=" + totalPages + ", totalSize=" + totalSize + ", content=" + content + "]";
 	}
-	
+
 	
 }
