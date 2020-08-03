@@ -169,7 +169,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 		
 		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
 		if (opList == null || opList.isEmpty()) {
-			throw new BizValidateException("用户不能进行当前操作。用户id: " + operator.getId());
+			logger.warn("用户不能进行当前操作。用户id: " + operator.getId());
+			throw new BizValidateException("您没有权限核销该券码，请确认该券码详细信息。");
 		}
 		
 		long orderId = 0;
@@ -179,7 +180,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 		ServiceOperator serviceOperator = opList.get(0);
 		ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), e.getProductId());
 		if (serviceOperatorItem == null) {
-			throw new BizValidateException("用户不能进行当前操作。用户id: " + operator.getId());
+			logger.warn("用户不能进行当前操作。用户id: " + operator.getId());
+			throw new BizValidateException("您没有权限核销该券码，请确认该券码详细信息。");
 		}
 		
 		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(e.getOrderId());
