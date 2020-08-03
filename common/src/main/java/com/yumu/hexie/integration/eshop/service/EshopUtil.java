@@ -35,7 +35,7 @@ public class EshopUtil {
 		requestUrl += REQUEST_PAY_URL;
 		
 		TypeReference<CommonResponse<CommonPayResponse>> typeReference = new TypeReference<CommonResponse<CommonPayResponse>>(){};
-		CommonResponse<CommonPayResponse> commonResponse = restUtil.exchange(requestUrl, request, typeReference);
+		CommonResponse<CommonPayResponse> commonResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
 		return commonResponse.getData();
 	}
 	
@@ -53,7 +53,7 @@ public class EshopUtil {
 		ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
 		serviceOrderRequest.setTradeWaterId(tradeWaterId);
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		restUtil.exchange(requestUrl, serviceOrderRequest, typeReference);
+		restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
 		
 	}
 	
@@ -72,7 +72,7 @@ public class EshopUtil {
 		notifyConsumeRequest.setTradeWaterId(orderNo);
 		notifyConsumeRequest.setEvouchers(evouchers);
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		restUtil.exchange(requestUrl, notifyConsumeRequest, typeReference);
+		restUtil.exchangeOnUri(requestUrl, notifyConsumeRequest, typeReference);
 		
 	}
 	

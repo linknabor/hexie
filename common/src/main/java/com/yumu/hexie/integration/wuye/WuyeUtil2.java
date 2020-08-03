@@ -88,7 +88,7 @@ public class WuyeUtil2 {
 		billStdRequest.setEndDate(endDate);
 		
 		TypeReference<CommonResponse<BillListVO>> typeReference = new TypeReference<CommonResponse<BillListVO>>(){};
-		CommonResponse<BillListVO> hexieResponse = restUtil.exchange(requestUrl, billStdRequest, typeReference);
+		CommonResponse<BillListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, billStdRequest, typeReference);
 		BaseResult<BillListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -119,7 +119,7 @@ public class WuyeUtil2 {
 		billDetailRequest.setAppid(user.getAppId());
 		
 		TypeReference<CommonResponse<PaymentInfo>> typeReference = new TypeReference<CommonResponse<PaymentInfo>>(){};
-		CommonResponse<PaymentInfo> hexieResponse = restUtil.exchange(requestUrl, billDetailRequest, typeReference);
+		CommonResponse<PaymentInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, billDetailRequest, typeReference);
 		BaseResult<PaymentInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -147,7 +147,7 @@ public class WuyeUtil2 {
 		quickPayRequest.setTotalCount(totalCount);
 		
 		TypeReference<CommonResponse<BillListVO>> typeReference = new TypeReference<CommonResponse<BillListVO>>(){};
-		CommonResponse<BillListVO> hexieResponse = restUtil.exchange(requestUrl, quickPayRequest, typeReference);
+		CommonResponse<BillListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, quickPayRequest, typeReference);
 		BaseResult<BillListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -178,7 +178,7 @@ public class WuyeUtil2 {
 		prepayRequest.setAppid(user.getAppId());
 		
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
-		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchange(requestUrl, prepayRequest, typeReference);
+		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -199,7 +199,7 @@ public class WuyeUtil2 {
 		
 		DiscountViewRequest discountViewRequest = new DiscountViewRequest(discountViewRequestDTO);
 		TypeReference<CommonResponse<Discounts>> typeReference = new TypeReference<CommonResponse<Discounts>>(){};
-		CommonResponse<Discounts> hexieResponse = restUtil.exchange(requestUrl, discountViewRequest, typeReference);
+		CommonResponse<Discounts> hexieResponse = restUtil.exchangeOnUri(requestUrl, discountViewRequest, typeReference);
 		BaseResult<Discounts> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -220,7 +220,7 @@ public class WuyeUtil2 {
 		QueryOrderRequest queryOrderRequest = new QueryOrderRequest();
 		queryOrderRequest.setOrderNo(orderNo);
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		CommonResponse<String> hexieResponse = restUtil.exchange(requestUrl, queryOrderRequest, typeReference);
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryOrderRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -242,7 +242,7 @@ public class WuyeUtil2 {
 		paySmsCodeRequest.setMobile(bankCard.getPhoneNo());
 		paySmsCodeRequest.setQuickToken(bankCard.getQuickToken());
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		CommonResponse<String> hexieResponse = restUtil.exchange(requestUrl, paySmsCodeRequest, typeReference);
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, paySmsCodeRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -262,7 +262,7 @@ public class WuyeUtil2 {
 		OtherPayRequest otherPayRequest = new OtherPayRequest(otherPayDTO);
 		
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
-		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchange(requestUrl, otherPayRequest, typeReference);
+		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, otherPayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -284,7 +284,7 @@ public class WuyeUtil2 {
 		qrCodePayServiceRequest.setTel(user.getTel());
 		
 		TypeReference<CommonResponse<QrCodePayService>> typeReference = new TypeReference<CommonResponse<QrCodePayService>>(){};
-		CommonResponse<QrCodePayService> hexieResponse = restUtil.exchange(requestUrl, qrCodePayServiceRequest, typeReference);
+		CommonResponse<QrCodePayService> hexieResponse = restUtil.exchangeOnUri(requestUrl, qrCodePayServiceRequest, typeReference);
 		BaseResult<QrCodePayService> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -306,7 +306,7 @@ public class WuyeUtil2 {
 		qrCodeRequest.setQrCodeId(qrCodeId);
 		
 		TypeReference<CommonResponse<byte[]>> typeReference = new TypeReference<CommonResponse<byte[]>>(){};
-		CommonResponse<byte[]> hexieResponse = restUtil.exchange4Resource(requestUrl, qrCodeRequest, typeReference);
+		CommonResponse<byte[]> hexieResponse = restUtil.exchange4ResourceOnUri(requestUrl, qrCodeRequest, typeReference);
 		BaseResult<byte[]> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -328,7 +328,7 @@ public class WuyeUtil2 {
 		BeanUtils.copyProperties(signInOutDTO, signInOutRequest);
 		
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		CommonResponse<String> hexieResponse = restUtil.exchange(requestUrl, signInOutRequest, typeReference);
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, signInOutRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;

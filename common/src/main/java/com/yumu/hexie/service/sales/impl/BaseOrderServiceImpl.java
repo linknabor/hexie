@@ -96,6 +96,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private AgentRepository agentRepository;
 	@Autowired
 	private EvoucherService evoucherService;
+	@Autowired
+	private TemplateMsgService templateMsgService;
 
     @Value(value = "${testMode}")
     private boolean testMode;
@@ -240,7 +242,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				userNoticeService.orderSuccess(order.getUserId(), user.getTel(),order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
 			}
 			String token = systemconfigservice.queryWXAToken(user.getAppId());
-			TemplateMsgService.sendPaySuccessMsg(order, token, user.getAppId());
+			templateMsgService.sendPaySuccessMsg(order, token, user.getAppId());
 		} else if(orderOp == ModelConstant.ORDER_OP_SEND){
 			userNoticeService.orderSend(order.getUserId(), order.getTel(),order.getId(), order.getOrderNo(), order.getLogisticName(), order.getLogisticNo());
 		}

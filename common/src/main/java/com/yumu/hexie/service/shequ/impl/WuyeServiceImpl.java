@@ -96,6 +96,9 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private ServiceOperatorRepository serviceOperatorRepository;
 	
+	@Autowired
+	private TemplateMsgService templateMsgService;
+	
 	@Override
 	public HouseListVO queryHouse(User user) {
 		return WuyeUtil.queryHouse(user).getData();
@@ -473,7 +476,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
 
-		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
+		templateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
 	}
 
 	@Override

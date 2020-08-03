@@ -376,4 +376,7 @@ public class ModelConstant {
 	public static final String KEY_NOITFY_PAY_DUPLICATION_CHECK = "lock:payNotification:";
 	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
 	public static final String KEY_CS_SERVED_SECT = "cfg:customservice:sect:";
+	
+	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template:";
+	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url:";
 }		

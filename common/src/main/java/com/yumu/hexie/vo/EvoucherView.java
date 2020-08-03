@@ -65,7 +65,6 @@ public class EvoucherView implements Serializable {
 			for (Evoucher evoucher : vouchers) {
 				List<Evoucher> evoucherList = map.get(evoucher.getStatus());
 				evoucherList.add(evoucher);
-				map.put(evoucher.getStatus(), evoucherList);
 			}
 			
 			List<Evoucher> unusedList = map.get(ModelConstant.EVOUCHER_STATUS_NORMAL);

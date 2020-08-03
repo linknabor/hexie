@@ -47,7 +47,7 @@ public class CustomServiceUtil {
 		getServiceRequest.setUserId(user.getWuyeId());
 		
 		TypeReference<CommonResponse<List<CustomServiceVO>>> typeReference = new TypeReference<CommonResponse<List<CustomServiceVO>>>(){};
-		CommonResponse<List<CustomServiceVO>> commonResponse = restUtil.exchange(requestUrl, getServiceRequest, typeReference);
+		CommonResponse<List<CustomServiceVO>> commonResponse = restUtil.exchangeOnUri(requestUrl, getServiceRequest, typeReference);
 		return commonResponse.getData();
 		
 	}
@@ -65,7 +65,7 @@ public class CustomServiceUtil {
 		
 		CommonPayRequest createOrderRequest = new CommonPayRequest(dto);
 		TypeReference<CommonResponse<CommonPayResponse>> typeReference = new TypeReference<CommonResponse<CommonPayResponse>>(){};
-		CommonResponse<CommonPayResponse> commonResponse = restUtil.exchange(requestUrl, createOrderRequest, typeReference);
+		CommonResponse<CommonPayResponse> commonResponse = restUtil.exchangeOnUri(requestUrl, createOrderRequest, typeReference);
 		return commonResponse.getData();
 		
 	}
@@ -81,7 +81,7 @@ public class CustomServiceUtil {
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += CONFIRM_ORDER_URL;
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		restUtil.exchange(requestUrl, operOrderRequest, typeReference);
+		restUtil.exchangeOnUri(requestUrl, operOrderRequest, typeReference);
 		
 	}
 	
@@ -99,7 +99,7 @@ public class CustomServiceUtil {
 		ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
 		serviceOrderRequest.setTradeWaterId(tradeWaterId);
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		restUtil.exchange(requestUrl, serviceOrderRequest, typeReference);
+		restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
 		
 	}
 	

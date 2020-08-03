@@ -4,17 +4,19 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.alipay.api.msg.Message;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CsOrderVO;
@@ -29,53 +31,85 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
-import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.common.impl.GotongServiceImpl;
+import com.yumu.hexie.service.msgtemplate.MsgTemplateService;
 
+@Component
 public class TemplateMsgService {
 	
 	private static final Logger log = LoggerFactory.getLogger(TemplateMsgService.class);
 
-	public static String SUCCESS_URL = ConfigUtil.get("successUrl");
-	public static String REG_SUCCESS_URL = ConfigUtil.get("regSuccessUrl");
-
-	public static final String TEMPLATE_TYPE_PAY_SUCCESS = "paySuccessTemplate";
-	public static final String TEMPLATE_TYPE_REG_SUCCESS = "registerSuccessTemplate";
-	public static final String TEMPLATE_TYPE_WUYEPAY_SUCCESS = "wuyePaySuccessTemplate";
-	public static final String TEMPLATE_TYPE_REPAIR_ASSIGN = "reapirAssginTemplate";
-	public static final String TEMPLATE_TYPE_YUYUE_ASSGIN = "yuyueNoticeTemplate";
-	public static final String TEMPLATE_TYPE_COMPLAIN = "complainTemplate";
-	public static final String TEMPLATE_TYPE_SERVICE = "serviceTemplate";
-	public static final String TEMPLATE_TYPE_MESSAGE = "messageTemplate";
-	public static final String TEMPLATE_TYPE_PAY_NOTIFY = "payNotifyTemplate";
-	public static final String TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN = "customServiceAssginTemplate";
-
+	@Autowired
+	private MsgTemplateService msgTemplateService;
+	@Autowired
+	private RestUtil restUtil;
 	
 	/**
 	 * 模板消息发送
 	 */
-	public static String TEMPLATE_MSG = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
-	private static boolean sendMsg(TemplateMsg< ? > msg, String accessToken) {
-        log.error("发送模板消息------");
-		WechatResponse jsonObject;
+	private boolean sendMsg(TemplateMsg<?> msg, String accessToken) {
+        
+		log.error("发送模板消息------");
+		String requestUrl = MsgCfg.TEMPLATE_MSG;
+		if(StringUtil.isNotEmpty(accessToken)){
+	        requestUrl = requestUrl.replace("ACCESS_TOKEN", accessToken);
+	    }
+		TypeReference<WechatResponse> typeReference = new TypeReference<WechatResponse>() {};
 		try {
-			jsonObject = WeixinUtil.httpsRequest(TEMPLATE_MSG, "POST", JacksonJsonUtil.beanToJson(msg), accessToken);
-			if(jsonObject.getErrcode() == 0) {
+			WechatResponse wechatResponse = restUtil.exchangeOnBody(requestUrl, msg, typeReference);
+			if (wechatResponse.getErrcode() == 0) {
 				return true;
 			}
-		} catch (JSONException e) {
+			
+		} catch (Exception e) {
 			log.error("发送模板消息失败: " +e.getMessage());
+			log.error(e.getMessage(), e);
 		}
 		return false;
 	}
 	
-	public static void sendPaySuccessMsg(ServiceOrder order, String accessToken, String appId) {
+	 /**
+     * 不同公众号用不同模板消息
+     */
+    public String getTemplateByAppId(String appId, String templateType) {
+    	
+    	Assert.hasText(templateType, "模板消息类型不能为空。");
+    	
+    	if (StringUtils.isEmpty(appId)) {
+			appId = ConfigUtil.get("appId");
+		}
+    	
+    	String key = templateType + "_" + appId;
+    	String templateId = msgTemplateService.getTemplateFromCache(key, appId);
+    	return templateId;
+    	
+    }
+    
+    /**
+     * 不同公众号用不同模板消息
+     */
+    public String getMsgUrl(String urlName) {
+    	
+    	Assert.hasText(urlName, "消息跳转链接不能为空。");
+    	
+    	String msgUrl = msgTemplateService.getMsgUrlFromCache(urlName);
+    	return msgUrl;
+    	
+    }
+	
+    /**
+     * 订单支付成功消息
+     * @param order
+     * @param accessToken
+     * @param appId
+     */
+	public void sendPaySuccessMsg(ServiceOrder order, String accessToken, String appId) {
+		
 		log.error("发送模板消息！！！！！！！！！！！！！！！" + order.getOrderNo());
 		PaySuccessVO vo = new PaySuccessVO();
 		vo.setFirst(new TemplateItem("您的订单：("+order.getOrderNo()+")已支付成功"));
@@ -92,8 +126,9 @@ public class TemplateMsgService {
 		TemplateMsg<PaySuccessVO> msg = new TemplateMsg<PaySuccessVO>();
 		msg.setData(vo);
 		
-		msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_PAY_SUCCESS));
-		String url = SUCCESS_URL.replace("ORDER_ID", ""+order.getId()).replace("ORDER_TYPE", ""+order.getOrderType());
+		msg.setTemplate_id(getTemplateByAppId(appId, MsgCfg.TEMPLATE_TYPE_PAY_SUCCESS));
+		String msgUrl = getMsgUrl(MsgCfg.URL_SUCCESS);
+		String url = msgUrl.replace("ORDER_ID", ""+order.getId()).replace("ORDER_TYPE", ""+order.getOrderType());
 		url = AppUtil.addAppOnUrl(url, appId);
 		msg.setUrl(url);
 		msg.setTouser(order.getOpenId());
@@ -104,7 +139,7 @@ public class TemplateMsgService {
 	 * 发送注册成功后的模版消息
 	 * @param user
 	 */
-	public static void sendRegisterSuccessMsg(User user, String accessToken){
+	public void sendRegisterSuccessMsg(User user, String accessToken){
 		
 		log.error("用户注册成功，发送模版消息："+user.getId()+",openid: " + user.getOpenid());
 		
@@ -118,9 +153,10 @@ public class TemplateMsgService {
 		
 		TemplateMsg<RegisterSuccessVO>msg = new TemplateMsg<RegisterSuccessVO>();
 		msg.setData(vo);
-		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_REG_SUCCESS));
+		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_REG_SUCCESS));
 		
-		String url = AppUtil.addAppOnUrl(REG_SUCCESS_URL, user.getAppId());
+		String msgUrl = getMsgUrl(MsgCfg.URL_REG_SUCCESS);
+		String url = AppUtil.addAppOnUrl(msgUrl, user.getAppId());
 		msg.setUrl(url);
 		msg.setTouser(user.getOpenid());
 		sendMsg(msg, accessToken);
@@ -131,7 +167,7 @@ public class TemplateMsgService {
 	 * 发送注册成功后的模版消息
 	 * @param user
 	 */
-	public static void sendWuYePaySuccessMsg(User user, String tradeWaterId, String feePrice, String accessToken){
+	public void sendWuYePaySuccessMsg(User user, String tradeWaterId, String feePrice, String accessToken){
 		
 		log.error("用户支付物业费成功，发送模版消息："+user.getId()+",openid: " + user.getOpenid());
 		
@@ -149,8 +185,9 @@ public class TemplateMsgService {
 		
 		TemplateMsg<WuyePaySuccessVO>msg = new TemplateMsg<WuyePaySuccessVO>();
 		msg.setData(vo);
-		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_WUYEPAY_SUCCESS));
-		String url = AppUtil.addAppOnUrl(REG_SUCCESS_URL, user.getAppId());
+		msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_WUYEPAY_SUCCESS));
+		String msgUrl = MsgCfg.URL_REG_SUCCESS;
+		String url = AppUtil.addAppOnUrl(msgUrl, user.getAppId());
 		msg.setUrl(url);
 		msg.setTouser(user.getOpenid());
 		sendMsg(msg, accessToken);
@@ -162,7 +199,7 @@ public class TemplateMsgService {
 	 * @param seed
 	 * @param ro
 	 */
-    public static void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op, String accessToken, String appId) {
+    public void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op, String accessToken, String appId) {
     	
     	log.info("发送维修单分配模版消息#########" + ", order id: " + ro.getId() + "operator id : " + op.getId());
 
@@ -177,11 +214,12 @@ public class TemplateMsgService {
   
     	TemplateMsg<RepairOrderVO>msg = new TemplateMsg<RepairOrderVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_REPAIR_ASSIGN));
-    	String url = GotongServiceImpl.WEIXIU_NOTICE + ro.getId();
+    	msg.setTemplate_id(getTemplateByAppId(appId, MsgCfg.TEMPLATE_TYPE_REPAIR_ASSIGN));
+    	String msgUrl = getMsgUrl(MsgCfg.URL_WEIXIU_NOTICE);
+    	String url = msgUrl + ro.getId();
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(op.getOpenId());
-    	TemplateMsgService.sendMsg(msg, accessToken);
+    	sendMsg(msg, accessToken);
     	
     }
     
@@ -195,7 +233,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendYuyueBillMsg(String orderId, String openId, String title,String billName, 
+    public void sendYuyueBillMsg(String orderId, String openId, String title,String billName, 
     			String requireTime, String url, String accessToken, String remark, String appId) {
 
         //更改为使用模版消息发送
@@ -210,19 +248,26 @@ public class TemplateMsgService {
 		}
         TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<YuyueOrderVO>();
         msg.setData(vo);
-        msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_YUYUE_ASSGIN));
+        msg.setTemplate_id(getTemplateByAppId(appId, MsgCfg.TEMPLATE_TYPE_YUYUE_ASSGIN));
         if (StringUtils.isEmpty(url)) {
-			url = GotongServiceImpl.SERVICE_RESV_URL + orderId;
+			url = getMsgUrl(MsgCfg.URL_SERVICE_RESV) + orderId;
 		}
         url = AppUtil.addAppOnUrl(url, appId);
         msg.setUrl(url);
         msg.setTouser(openId);
-        TemplateMsgService.sendMsg(msg, accessToken);
+        sendMsg(msg, accessToken);
         
     }
     
-   
-    public static void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken,String openId) {
+    /**
+     * 好家安预约服务派单
+     * @param hOrder
+     * @param user
+     * @param accessToken
+     * @param openId
+     */
+    public void sendHaoJiaAnAssignMsg(HaoJiaAnOrder hOrder, User user, String accessToken,String openId) {
+    	
     	HaoJiaAnOrderVO vo = new HaoJiaAnOrderVO();
     	vo.setTitle(new TemplateItem("有新的预约服务"));
     	vo.setAppointmentDate(new TemplateItem(hOrder.getExpectedTime()));
@@ -234,16 +279,24 @@ public class TemplateMsgService {
     	
     	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_YUYUE_ASSGIN));
-    	String url = GotongServiceImpl.YUYUE_NOTICE + hOrder.getyOrderId();
+    	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_YUYUE_ASSGIN));
+    	String url = getMsgUrl(MsgCfg.URL_YUYUE_NOTICE) + hOrder.getyOrderId();
     	url = AppUtil.addAppOnUrl(url, user.getAppId());
     	msg.setUrl(url);
     	msg.setTouser(openId);
-    	TemplateMsgService.sendMsg(msg, accessToken);
+    	sendMsg(msg, accessToken);
     }
     
-    //投诉模板，发送给商家
-    public static void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken,String openId) {
+    
+    /**
+     * 投诉模板，发送给商家
+     * @param comment
+     * @param user
+     * @param accessToken
+     * @param openId
+     */
+    public void sendHaoJiaAnCommentMsg(HaoJiaAnComment comment, User user, String accessToken,String openId) {
+    	
     	log.error("sendHaoJiaAnCommentMsg的用户电话="+comment.getCommentUserTel());
     	HaoJiaAnCommentVO vo = new HaoJiaAnCommentVO();
     	vo.setTitle(new TemplateItem("用户投诉"));//标题
@@ -256,31 +309,12 @@ public class TemplateMsgService {
     	log.error("投诉的user="+user+""); 
     	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_COMPLAIN));
-    	String url = GotongServiceImpl.COMPLAIN_DETAIL + comment.getId();
+    	msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_COMPLAIN));
+    	String url = getMsgUrl(MsgCfg.URL_COMPLAIN_DETAIL) + comment.getId();
     	url = AppUtil.addAppOnUrl(url, user.getAppId());
     	msg.setUrl(url);
     	msg.setTouser(openId);
-    	TemplateMsgService.sendMsg(msg, accessToken);
-    }
-    
-    /**
-     * 不同公众号用不同模板消息
-     */
-    public static String getTemplateByAppId(String appId, String templateType) {
-    	
-    	Assert.hasText(templateType, "模板消息类型不能为空。");
-    	
-    	if (StringUtils.isEmpty(appId)) {
-			appId = ConfigUtil.get("appId");
-		}
-    	
-    	String key = templateType + "_" + appId;
-    	
-    	String templateId = ConfigUtil.get(key);
-    	return templateId;
-
-    	
+    	sendMsg(msg, accessToken);
     }
     
     /**
@@ -289,7 +323,8 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendExpressDelivery(String openid, String accessToken, String appId,long userId,String type) {
+    public void sendExpressDelivery(String openid, String accessToken, String appId,long userId,String type) {
+    	
     	WuyeServiceVO vo = new WuyeServiceVO();
     	if("0".equals(type)) {
     		vo.setTitle(new TemplateItem("您的快递已送达！"));
@@ -307,11 +342,11 @@ public class TemplateMsgService {
 	  	
 	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_SERVICE));
-    	String url = GotongServiceImpl.EXPRESS_URL + userId;
+    	msg.setTemplate_id(getTemplateByAppId(appId, MsgCfg.TEMPLATE_TYPE_SERVICE));
+    	String url = getMsgUrl(MsgCfg.URL_EXPRESS) + userId;
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
-    	TemplateMsgService.sendMsg(msg, accessToken);
+    	sendMsg(msg, accessToken);
   	
 	}
     
@@ -321,23 +356,22 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
+    public void sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
+    	
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
 	  	vo.setOrderNum(new TemplateItem(content));
 	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
 	  	vo.setRecvDate(new TemplateItem(recvDate));
 	  	vo.setRemark(new TemplateItem("请点击查看"));
-    	
 	  	
 	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(appId, TEMPLATE_TYPE_MESSAGE));
-    	String url = GotongServiceImpl.MESSAGE_URL + messageId;
+    	msg.setTemplate_id(getTemplateByAppId(appId, MsgCfg.TEMPLATE_TYPE_MESSAGE));
+    	String url = getMsgUrl(MsgCfg.URL_MESSAGE) + messageId;
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
-    	TemplateMsgService.sendMsg(msg, accessToken);
-  	
+    	sendMsg(msg, accessToken);
 
 	}
    
@@ -347,7 +381,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendPayNotification(AccountNotification accountNotification, String accessToken) {
+    public void sendPayNotification(AccountNotification accountNotification, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
 		vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));
@@ -359,11 +393,11 @@ public class TemplateMsgService {
     	
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
-    	msg.setTemplate_id(getTemplateByAppId(accountNotification.getUser().getAppId(), TEMPLATE_TYPE_PAY_NOTIFY));
-    	String url = GotongServiceImpl.PAY_NOTIFY_URL;
+    	msg.setTemplate_id(getTemplateByAppId(accountNotification.getUser().getAppId(), MsgCfg.TEMPLATE_TYPE_PAY_NOTIFY));
+    	String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
     	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()));
     	msg.setTouser(accountNotification.getUser().getOpenid());
-    	TemplateMsgService.sendMsg(msg, accessToken);
+    	sendMsg(msg, accessToken);
 
 	}
 
@@ -377,7 +411,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public static void sendServiceNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
+    public void sendServiceNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
 
         //更改为使用模版消息发送
     	User user = sendUser;
@@ -393,15 +427,15 @@ public class TemplateMsgService {
     	
         TemplateMsg<CsOrderVO>msg = new TemplateMsg<CsOrderVO>();
         msg.setData(vo);
-        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN));
-        String url = GotongServiceImpl.CUSTOM_SERVICE_ASSIGN_URL;
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN));
+        String url = getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_ASSIGN);
         if (!StringUtils.isEmpty(url)) {
-			url = GotongServiceImpl.CUSTOM_SERVICE_ASSIGN_URL + serviceOrder.getId();
+			url = url + serviceOrder.getId();
 			url = AppUtil.addAppOnUrl(url, user.getAppId());
 		}
         msg.setUrl(url);
         msg.setTouser(user.getOpenid());
-        TemplateMsgService.sendMsg(msg, accessToken);
+        sendMsg(msg, accessToken);
         
     }
 
