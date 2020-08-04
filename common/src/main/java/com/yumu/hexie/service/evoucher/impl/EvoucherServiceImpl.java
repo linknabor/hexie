@@ -212,7 +212,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		Evoucher evoucher =  evoucherRepository.findByCode(code);
 		List<Evoucher> list = new ArrayList<>();
 		if (evoucher!=null) {
-			list = evoucherRepository.findByOrderIdAndStatus(evoucher.getOrderId(), ModelConstant.EVOUCHER_STATUS_NORMAL);
+			list = evoucherRepository.findByOrderId(evoucher.getOrderId());
 		}
 		return new EvoucherView(QRCODE_URL, list);
 	}

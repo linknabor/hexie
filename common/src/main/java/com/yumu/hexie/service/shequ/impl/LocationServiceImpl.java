@@ -62,13 +62,14 @@ public class LocationServiceImpl implements LocationService {
 	@Override
 	public RegionVo getRegionUrl(String coordinate) {
 		
-		if (StringUtils.isEmpty(coordinate)) {
-			return new RegionVo();
+		RegionVo vo = new RegionVo();
+		if (!StringUtils.isEmpty(coordinate)) {
+			coordinate = baiduMapUtil.findByCoordinateGetBaidu(coordinate);
+			String name = baiduMapUtil.findByBaiduGetCity(coordinate);
+			logger.info("坐标:" + coordinate + ", 对应地址："+name);
+			vo = getRegionUrlFromCache(name);
 		}
-		coordinate = baiduMapUtil.findByCoordinateGetBaidu(coordinate);
-		String name = baiduMapUtil.findByBaiduGetCity(coordinate);
-		logger.info("坐标:" + coordinate + ", 对应地址："+name);
-		RegionVo vo = getRegionUrlFromCache(name);
+		vo.setRegionurl(regionUrlList);
 		return vo;
 	}
 	
@@ -82,7 +83,7 @@ public class LocationServiceImpl implements LocationService {
 		RegionVo vo = new RegionVo();
 		if (regionSet.contains(keyName)) {
 			vo.setAddress(keyName);
-			vo.setRegionurl(regionUrlList);
+			
 		}else {
 			RegionUrl regionUrl = null;
 			List<RegionUrl> regionList = regionUrlRepository.findByRegionName(keyName);
@@ -92,14 +93,11 @@ public class LocationServiceImpl implements LocationService {
 			if (regionUrl != null) {
 				regionSet.add(regionUrl.getRegionName());
 				vo.setAddress(regionUrl.getRegionName());
-				vo.setRegionurl(regionUrlList);
 			}else {
 				vo.setAddress(DEFAULT_REGiON);
-				vo.setRegionurl(regionUrlList);
 			}
 			
 		}
-		
 		return vo;
 		
 	}
