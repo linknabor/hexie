@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.msgtemplate.MsgTemplateService;
 import com.yumu.hexie.service.page.PageConfigService;
+import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.web.BaseController;
 
@@ -40,6 +41,8 @@ public class ParamController extends BaseController {
 	private PageConfigService pageConfigService;
 	@Autowired
 	private MsgTemplateService msgTemplateService;
+	@Autowired
+	private LocationService locationService;
 	
 	@RequestMapping(value = "/wuye/{oriSys}", method = RequestMethod.GET)
 	public void initWuyeParam(HttpServletResponse response, 
@@ -80,7 +83,10 @@ public class ParamController extends BaseController {
 			pageConfigService.updatePageConfig();
 			break;
 		case "msg":
-			msgTemplateService.rerefshCache();
+			msgTemplateService.refreshCache();
+			break;
+		case "location":
+			locationService.refreshCache();
 			break;
 		default:
 			logger.info("no such type : " + type);

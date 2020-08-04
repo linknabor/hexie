@@ -6,6 +6,6 @@ public interface MsgTemplateService {
 
 	String getMsgUrlFromCache(String name);
 	
-	void rerefshCache();
+	void refreshCache();
 
 }

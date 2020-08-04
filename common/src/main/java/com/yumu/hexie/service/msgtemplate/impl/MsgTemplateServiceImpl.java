@@ -98,7 +98,7 @@ public class MsgTemplateServiceImpl implements MsgTemplateService {
 	 * 刷新模板缓存
 	 */
 	@Override
-	public void rerefshCache() {
+	public void refreshCache() {
 		
 		Set<String> keySet = redisTemplate.keys(ModelConstant.KEY_MSG_TEMPLATE);
 		redisTemplate.delete(keySet);

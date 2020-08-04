@@ -12,7 +12,12 @@ public interface LocationService {
 	 */
 	RegionVo getRegionUrl(String coordinate);
 	
-	void updateRegionUrlCache();
+	void refreshCache();
 
+	/**
+	 * 根据省级单位缩写查询  江苏 -> 江苏省
+	 * @param regionName 传简写
+	 * @return
+	 */
 	RegionUrl getRegionUrlByName(String regionName);
 }

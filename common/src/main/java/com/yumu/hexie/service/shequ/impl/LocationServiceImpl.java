@@ -2,10 +2,10 @@ package com.yumu.hexie.service.shequ.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
+import com.yumu.hexie.integration.baidu.vo.RegionVo.RegionSelection;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.region.RegionUrlRepository;
@@ -27,15 +28,14 @@ public class LocationServiceImpl implements LocationService {
 
 	private static Logger logger = LoggerFactory.getLogger(LocationServiceImpl.class);
 	
-	private static Set<String> regionSet = new HashSet<>();
+	private static List<RegionSelection> regionShowList = new ArrayList<>();	//前端显示用，里面存行政区域的缩写比如上海，江苏
 	
-	private static List<RegionUrl> regionUrlList = new ArrayList<>();
-	
-	private static Map<String, RegionUrl> regionUrlMap = new HashMap<>();
+	private static Map<String, RegionUrl> regionUrlMap = new HashMap<>();	//key为省市全程比如 上海市，广西壮族自治区,  value为对应DB的值
 
-	public static Map<String, RegionUrl> codeUrlMap = new HashMap<>();
+	public static Map<String, RegionUrl> codeUrlMap = new HashMap<>();	//key为 code, value为对应DB的值
 	
-	private static final String DEFAULT_REGiON = "上海市";
+	private static final String DEFAULT_REGiON = "上海";
+	private static final String DEFAULT_REGiON_VALUE = "上海市";
 	
 	@Autowired
 	private BaiduMapUtil baiduMapUtil;
@@ -51,11 +51,21 @@ public class LocationServiceImpl implements LocationService {
     	}
 		List<RegionUrl> list = regionUrlRepository.findAll();
 		if (list != null) {
-			regionUrlList = list;
 			for (RegionUrl regionUrl : list) {
 				regionUrlMap.put(regionUrl.getRegionName(), regionUrl);//上海的有2条，后一条会覆盖前一条，但是value是一样的
 				codeUrlMap.put(regionUrl.getRegionCode(), regionUrl);
 			}
+		}
+		Iterator<Entry<String, RegionUrl>> it = regionUrlMap.entrySet().iterator();
+		while(it.hasNext()) {
+			Entry<String, RegionUrl> entry = it.next();
+			RegionSelection selection = new RegionSelection();
+			RegionUrl regionUrl = entry.getValue();
+			if (regionUrl!=null) {
+				selection.setRegionName(regionUrl.getRegionName());
+				selection.setShowRegionName(regionUrl.getAbbr());
+			}
+			regionShowList.add(selection);
 		}
 	}
 	
@@ -69,7 +79,7 @@ public class LocationServiceImpl implements LocationService {
 			logger.info("坐标:" + coordinate + ", 对应地址："+name);
 			vo = getRegionUrlFromCache(name);
 		}
-		vo.setRegionurl(regionUrlList);
+		vo.setRegionUrl(regionShowList);
 		return vo;
 	}
 	
@@ -81,22 +91,12 @@ public class LocationServiceImpl implements LocationService {
 	private RegionVo getRegionUrlFromCache(String keyName) {
 		
 		RegionVo vo = new RegionVo();
-		if (regionSet.contains(keyName)) {
-			vo.setAddress(keyName);
-			
+		if (regionUrlMap.containsKey(keyName)) {
+			vo.setAddress(regionUrlMap.get(keyName).getRegionName());
+			vo.setShowAddress(regionUrlMap.get(keyName).getAbbr());
 		}else {
-			RegionUrl regionUrl = null;
-			List<RegionUrl> regionList = regionUrlRepository.findByRegionName(keyName);
-			if (regionList != null && !regionUrlList.isEmpty()) {
-				regionUrl = regionList.get(0);
-			}
-			if (regionUrl != null) {
-				regionSet.add(regionUrl.getRegionName());
-				vo.setAddress(regionUrl.getRegionName());
-			}else {
-				vo.setAddress(DEFAULT_REGiON);
-			}
-			
+			vo.setAddress(DEFAULT_REGiON);
+			vo.setShowAddress(DEFAULT_REGiON_VALUE);
 		}
 		return vo;
 		
@@ -110,8 +110,11 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public void updateRegionUrlCache() {
-
+	public void refreshCache() {
+		
+		regionShowList = new ArrayList<>();
+		regionUrlMap = new HashMap<>();
+		codeUrlMap = new HashMap<>();
 		initRegionUrlCache();
 		
 	}
