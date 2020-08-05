@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
@@ -41,6 +42,8 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	private AddressRepository addressRepository;
 	@Inject
     private ServiceOperatorRepository serviceOperatorRepository;
+	@Autowired
+	private TemplateMsgService templateMsgService;
 	
 	//保存评论或投诉
 	@Override
@@ -81,7 +84,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	            for (ServiceOperator op : ops) {
 	            	//循环发送短信模板
 	            	 log.error("发送短信给" + op.getName()+",userId为"+op.getUserId());
-	            	 TemplateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken,op.getOpenId());//发送模板消息
+	            	 templateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken,op.getOpenId());//发送模板消息
 				}
 	        }
 		}

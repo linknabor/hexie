@@ -7,6 +7,7 @@ import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.payment.PaymentOrder;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
@@ -18,7 +19,7 @@ public interface BaseOrderService {
 	//创建订单
 	public ServiceOrder createOrder(CreateOrderReq req,Cart cart,long userId,String openId);
 	//发起支付
-	public JsSign requestPay(ServiceOrder order);
+	public JsSign requestPay(ServiceOrder order) throws Exception;
 	//支付状态变更
 	public void update4Payment(PaymentOrder payment);
 	//通知支付成功
@@ -37,4 +38,10 @@ public interface BaseOrderService {
 	public void finishRefund(WxRefundOrder wxRefundOrder);
 	
 	public ServiceOrder findOne(long orderId);
+	
+	//唤起支付取消
+	void cancelPay(User user, String orderId) throws Exception;
+	
+	//平台支付，回调入账
+	void notifyPayByServplat(String tradeWaterId);
 }

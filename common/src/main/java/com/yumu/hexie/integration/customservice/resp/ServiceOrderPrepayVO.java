@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yumu.hexie.integration.common.CommonPayResponse;
 
 public class ServiceOrderPrepayVO implements Serializable {
 
@@ -28,7 +29,7 @@ public class ServiceOrderPrepayVO implements Serializable {
 	
 	}
 	
-	public ServiceOrderPrepayVO(CreateOrderResponseVO createOrderResponseVO) {
+	public ServiceOrderPrepayVO(CommonPayResponse createOrderResponseVO) {
 		
 		BeanUtils.copyProperties(createOrderResponseVO, this);
 	}

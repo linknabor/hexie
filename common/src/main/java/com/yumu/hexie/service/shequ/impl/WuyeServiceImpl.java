@@ -96,6 +96,9 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private ServiceOperatorRepository serviceOperatorRepository;
 	
+	@Autowired
+	private TemplateMsgService templateMsgService;
+	
 	@Override
 	public HouseListVO queryHouse(User user) {
 		return WuyeUtil.queryHouse(user).getData();
@@ -473,7 +476,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
 
-		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
+		templateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
 	}
 
 	@Override
@@ -505,14 +508,19 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public QrCodePayService getQrCodePayService(User user) throws Exception {
+	public QrCodePayService getQrCodePayService(User user) {
 		
 		long begin = System.currentTimeMillis();
 		
 		if (StringUtils.isEmpty(user.getTel())) {
 			user = userRepository.getOne(user.getId());
 		}
-		QrCodePayService service = wuyeUtil2.getQrCodePayService(user).getData();
+		QrCodePayService service = new QrCodePayService();
+		try {
+			service = wuyeUtil2.getQrCodePayService(user).getData();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(HomeServiceConstant.SERVICE_TYPE_CUSTOM, user.getId());
 		ServiceOperator serviceOperator = null;
 		List<PayCfg> serviceList = new ArrayList<>();

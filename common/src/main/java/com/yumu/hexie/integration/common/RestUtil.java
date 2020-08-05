@@ -42,6 +42,37 @@ public class RestUtil {
 	
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	/**
+	 * 物业模块的rest请求公共函数
+	 * @param <V>
+	 * @param requestUrl	请求链接
+	 * @param jsonObject	请继承wuyeRequest
+	 * @param typeReference	HexieResponse类型的子类
+	 * @return
+	 * @throws IOException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 */
+	public <T, V> V exchangeOnBody(String requestUrl, T jsonObject, TypeReference<V> typeReference)
+			throws IOException, JsonParseException, JsonMappingException {
+		
+		HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        HttpEntity<Object> httpEntity = new HttpEntity<>(jsonObject, headers);
+        logger.info("requestUrl : " + requestUrl + ", param : " + jsonObject);
+        ResponseEntity<String> respEntity = restTemplate.exchange(requestUrl, HttpMethod.POST, httpEntity, String.class);
+        
+        logger.info("response : " + respEntity);
+        
+		if (!HttpStatus.OK.equals(respEntity.getStatusCode())) {
+			throw new BizValidateException("请求失败！ code : " + respEntity.getStatusCodeValue());
+		}
+		
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		V hexieResponse = objectMapper.readValue(respEntity.getBody(), typeReference);
+		return hexieResponse;
+	}
 
 	/**
 	 * 物业模块的rest请求公共函数
@@ -54,7 +85,7 @@ public class RestUtil {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 */
-	public <T extends CommonRequest, V> CommonResponse<V> exchange(String requestUrl, T jsonObject, TypeReference<CommonResponse<V>> typeReference)
+	public <T extends CommonRequest, V> CommonResponse<V> exchangeOnUri(String requestUrl, T jsonObject, TypeReference<CommonResponse<V>> typeReference)
 			throws IOException, JsonParseException, JsonMappingException {
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -94,7 +125,7 @@ public class RestUtil {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 */
-	public <T extends CommonRequest> CommonResponse<byte[]> exchange4Resource(String requestUrl, T jsonObject, TypeReference<CommonResponse<byte[]>> typeReference)
+	public <T extends CommonRequest> CommonResponse<byte[]> exchange4ResourceOnUri(String requestUrl, T jsonObject, TypeReference<CommonResponse<byte[]>> typeReference)
 			throws IOException, JsonParseException, JsonMappingException {
 		
 		HttpHeaders headers = new HttpHeaders();

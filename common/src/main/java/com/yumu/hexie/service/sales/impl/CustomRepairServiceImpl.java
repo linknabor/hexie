@@ -16,7 +16,6 @@ import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.RepairSaleRule;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
-import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.Address;
 
 /**
@@ -38,7 +37,7 @@ public class CustomRepairServiceImpl extends CustomOrderServiceImpl {
      * @see com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl#postPaySuccess(com.yumu.hexie.model.payment.PaymentOrder, com.yumu.hexie.model.market.ServiceOrder)
      */
     @Override
-    public void postPaySuccess(PaymentOrder po, ServiceOrder so) {
+    public void postPaySuccess(ServiceOrder so) {
         so.confirm();
         serviceOrderRepository.save(so);
         List<RepairOrder> ros = repairOrderRepository.findByOrderId(so.getId());

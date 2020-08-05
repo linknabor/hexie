@@ -42,7 +42,6 @@ public class AmapUtil {
 	//around搜索
 	private static final String DATASEARCH_AROUND="/datasearch/around";
 	
-
 	public static List<AmapAddress> findByRegionAndName(String city, String region,String name) {
 	    String reqUrl = BASE_YUNTU_URL + DATASEARCH_URL
 	            + "?tableid=" + ConstantAmap.AMAPTABLEID

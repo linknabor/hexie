@@ -22,8 +22,8 @@ import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
-import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.notify.NotifyService;
+import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
@@ -48,7 +48,7 @@ public class NotifyServiceImpl implements NotifyService {
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
-	private CustomService customService;
+	private BaseOrderService baseOrderService;
 	
 
 	/**
@@ -57,7 +57,9 @@ public class NotifyServiceImpl implements NotifyService {
 		3.绑卡记录quickToken和卡号
 		4.绑定房屋
 		5.缴费到账通知
-		6.自定服务
+		6.自定服务接单通知
+		7.自定义服务订单状体更新
+		8.商品订单到账通知
 	 */
 	@Transactional
 	@Override
@@ -101,12 +103,10 @@ public class NotifyServiceImpl implements NotifyService {
 		if (user != null) {
 			//2.添加芝麻积分
 			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
-				if (StringUtils.isEmpty(payNotification.getOrderId())) {
-					log.warn("orderId is null, will skip ! payNotification : " + payNotification);
-					return;
+				if (!StringUtils.isEmpty(payNotification.getOrderId())) {
+					String pointKey = "wuyePay-" + payNotification.getOrderId();
+					pointService.addPointAsync(user, payNotification.getPoints(), pointKey);
 				}
-				String pointKey = "wuyePay-" + payNotification.getOrderId();
-				pointService.addPointAsync(user, payNotification.getPoints(), pointKey);
 			}else {
 				String pointKey = "zhima-bill-" + user.getId() + "-" + payNotification.getOrderId();
 				pointService.updatePoint(user, "10", pointKey);
@@ -126,11 +126,10 @@ public class NotifyServiceImpl implements NotifyService {
 		AccountNotification accountNotify = payNotification.getAccountNotify();
 		if (accountNotify!=null) {
 			accountNotify.setOrderId(payNotification.getOrderId());
-			if (accountNotify.getFeePrice() == null) {
-				log.warn("tranAmt is null, accountNotify : " + accountNotify);
-				return;
+			if (accountNotify.getFeePrice() != null) {
+				sendPayNotificationAsync(accountNotify);
 			}
-			sendPayNotificationAsync(accountNotify);
+			
 		}
 		//6.自定义服务
 		ServiceNotification serviceNotification = payNotification.getServiceNotify();
@@ -139,8 +138,9 @@ public class NotifyServiceImpl implements NotifyService {
 			sendServiceNotificationAsync(serviceNotification);
 		}
 		
-		//7.更新自定义服务订单状态
-		customService.notifyPayByServplat(payNotification.getOrderId());
+		//7.更新serviceOrder订单状态
+		baseOrderService.notifyPayByServplat(payNotification.getOrderId());
+		
 		
 	}
 	

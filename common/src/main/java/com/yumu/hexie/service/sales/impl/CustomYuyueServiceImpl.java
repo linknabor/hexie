@@ -20,7 +20,6 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.market.saleplan.YuyueRule;
 import com.yumu.hexie.model.market.saleplan.YuyueRuleRepository;
-import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.tohome.AixiangbanOrder;
 import com.yumu.hexie.model.tohome.AixiangbanOrderRepository;
 import com.yumu.hexie.model.user.Address;
@@ -64,7 +63,7 @@ public class CustomYuyueServiceImpl extends CustomOrderServiceImpl {
 	}
 
 	@Override
-	public void postPaySuccess(PaymentOrder po, ServiceOrder so) {
+	public void postPaySuccess(ServiceOrder so) {
 		//支付成功订单为配货中状态，改商品库存
 		so.confirm();
 		serviceOrderRepository.save(so);

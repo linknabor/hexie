@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
-import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -68,7 +68,7 @@ public class CustomServiceController extends BaseController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order", method = RequestMethod.POST)
-	public BaseResult<CreateOrderResponseVO> createOrder(@ModelAttribute(Constants.USER) User user, @RequestBody CustomServiceOrderVO customServiceOrderVO) throws Exception {
+	public BaseResult<CommonPayResponse> createOrder(@ModelAttribute(Constants.USER) User user, @RequestBody CustomServiceOrderVO customServiceOrderVO) throws Exception {
 		
 		long begin = System.currentTimeMillis();
 		logger.info("customServiceOrderVO : " + customServiceOrderVO);
@@ -80,7 +80,7 @@ public class CustomServiceController extends BaseController {
 		long end = System.currentTimeMillis();
 		logger.info("createOrderController location 1 : " + (end-begin)/1000);
 		
-		CreateOrderResponseVO cvo = customService.createOrder(dto);
+		CommonPayResponse cvo = customService.createOrder(dto);
 		customService.assginOrder(cvo);	//异步分派消息
 		
 		end = System.currentTimeMillis();
@@ -252,7 +252,7 @@ public class CustomServiceController extends BaseController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/pay", method = RequestMethod.POST)
-	public BaseResult<CreateOrderResponseVO> orderPay(@ModelAttribute(Constants.USER) User user, 
+	public BaseResult<CommonPayResponse> orderPay(@ModelAttribute(Constants.USER) User user, 
 			@RequestParam String orderId, @RequestParam String amount) throws Exception {
 		
 		logger.info("orderPay, user : " + user);

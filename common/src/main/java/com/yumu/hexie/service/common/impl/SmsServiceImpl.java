@@ -59,14 +59,14 @@ public class SmsServiceImpl implements SmsService {
      * 发送短信验证码
      */
     @Override
-    public boolean sendVerificationCode(User user, String mobilePhone, String requestIp) {
+    public boolean sendVerificationCode(User user, String mobilePhone, String requestIp, int msgType) {
       
     	String code = RandomStringUtils.randomNumeric(6);
     	String message = MessageFormat.format(VERICODE_MESSAGE, code);
 //    	checkIpFrequency(requestIp);	TODO ip暂时不限制，可能一个公司200人都一个IP
     	checkMsgFrequency(mobilePhone);
     	checkMsgTotalLimit(mobilePhone);
-    	return sendMessage(user, mobilePhone, message, code);
+    	return sendMessage(user, mobilePhone, message, code, msgType);
 
     }
 
@@ -94,7 +94,7 @@ public class SmsServiceImpl implements SmsService {
 	@Override
 	public boolean sendMsg(User user,String mobile, String msg,long id, int msgType) {
 		
-		return sendMessage(user, mobile, msg, null);
+		return sendMessage(user, mobile, msg, null, msgType);
 
 	}
 	
@@ -133,9 +133,12 @@ public class SmsServiceImpl implements SmsService {
 	 * @param message
 	 * @return
 	 */
-	private boolean sendMessage(User user, String mobilePhone, String message, String code) {
+	private boolean sendMessage(User user, String mobilePhone, String message, String code, int msgType) {
 		
-		SmsHis smsHis = getSmsFromCache(mobilePhone);
+		SmsHis smsHis = null;
+		if (ModelConstant.SMS_TYPE_REG == msgType || ModelConstant.SMS_TYPE_INVOICE == msgType) {
+			smsHis = getSmsFromCache(mobilePhone);
+		}
         if (smsHis == null) {
 			String sign = getMsgSignature(user.getAppId());
 

@@ -10,7 +10,6 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
-import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -23,7 +22,7 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
     @Inject
     private DistributionService distributionService;
     @Inject
-    private ProductService         productService;
+    private ProductService productService;
 
 	@Override
 	public void validateRule(ServiceOrder order,SalePlan rule, OrderItem item, Address address) {
@@ -38,10 +37,12 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
         
     }
 	@Override
-	public void postPaySuccess(PaymentOrder po, ServiceOrder so) {
+	public void postPaySuccess(ServiceOrder so) {
 		//支付成功订单为配货中状态，改商品库存
-		so.confirm();
-		serviceOrderRepository.save(so);
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != so.getOrderType()) {
+			so.confirm();
+			serviceOrderRepository.save(so);
+		}
 		for(OrderItem item : so.getItems()){
 			productService.saledCount(item.getProductId(), item.getCount());
 		}

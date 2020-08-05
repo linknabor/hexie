@@ -102,7 +102,7 @@ public class RepairController extends BaseController{
     //请求支付 POST
     @RequestMapping(value="repair/pay", method = RequestMethod.POST)
     @ResponseBody
-    public BaseResult<JsSign> pay(@ModelAttribute(Constants.USER)User user,@RequestBody RepairPayReq req){
+    public BaseResult<JsSign> pay(@ModelAttribute(Constants.USER)User user,@RequestBody RepairPayReq req) throws Exception{
         return new BaseResult<JsSign>().success(repairService.requestPay(req.getOrderId(), req.getAmount(), user));
     }
 

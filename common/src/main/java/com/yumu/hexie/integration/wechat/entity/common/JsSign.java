@@ -12,6 +12,8 @@ public class JsSign implements Serializable{
 	private String pkgStr;
 	private String signType = "MD5";
 	
+	private String orderId;	//serviceOrder id
+	
 	public String getAppId() {
 		return appId;
 	}
@@ -47,6 +49,12 @@ public class JsSign implements Serializable{
 	}
 	public void setSignType(String signType) {
 		this.signType = signType;
+	}
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 	
 }
