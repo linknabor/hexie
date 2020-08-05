@@ -231,6 +231,7 @@ public class PrepayRequestDTO implements Serializable {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
+
 	@Override
 	public String toString() {
 		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
@@ -242,6 +243,7 @@ public class PrepayRequestDTO implements Serializable {
 				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
 				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
 				+ ", alipayUserId=" + alipayUserId + ", appid=" + appid + "]";
+
 	}
 	
 	

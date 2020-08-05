@@ -2,7 +2,6 @@ package com.yumu.hexie.web.customservice;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -117,6 +116,7 @@ public class CustomServiceController extends BaseController {
 		String operType = "0";
 		customService.confirmOrder(user, orderId, operType);	//用户自己确认operType填0
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -135,6 +135,7 @@ public class CustomServiceController extends BaseController {
 		String operType = "1";
 		customService.confirmOrder(user, orderId, operType);	//维修工确认operType填1
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -203,6 +204,7 @@ public class CustomServiceController extends BaseController {
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.acceptOrder(user, orderId);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -220,6 +222,7 @@ public class CustomServiceController extends BaseController {
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.reverseOrder(user, orderId);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -237,6 +240,7 @@ public class CustomServiceController extends BaseController {
 		logger.info("notifyPay orderId : " + orderId);
 		customService.notifyPay(user, orderId);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -285,6 +289,7 @@ public class CustomServiceController extends BaseController {
 		}
 		
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -304,6 +309,7 @@ public class CustomServiceController extends BaseController {
 		
 		customService.cancelPay(user, orderId);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**

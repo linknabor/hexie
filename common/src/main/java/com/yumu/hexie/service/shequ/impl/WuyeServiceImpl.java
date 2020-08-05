@@ -512,6 +512,8 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		long begin = System.currentTimeMillis();
 		
+		long begin = System.currentTimeMillis();
+		
 		if (StringUtils.isEmpty(user.getTel())) {
 			user = userRepository.getOne(user.getId());
 		}

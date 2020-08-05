@@ -54,7 +54,6 @@ public class RedisConfig {
 		return poolConfig;
 	}
 
-
 	@Bean(name = "stringRedisTemplate")
 	public StringRedisTemplate getStringRedisTemplate() {
 		return new StringRedisTemplate(redisConnectionFactory());

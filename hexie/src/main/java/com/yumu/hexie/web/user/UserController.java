@@ -121,6 +121,7 @@ public class UserController extends BaseController{
 			    
 			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
 			    UserInfo userInfo = new UserInfo(user, odDefinition);
+
 			    endTime = System.currentTimeMillis();
 
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);

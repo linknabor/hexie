@@ -86,6 +86,7 @@ public class PageConfigController extends BaseController{
 		logger.info("will update pageConfig ...");
 		pageConfigService.updatePageConfig();
 		return Constants.PAGE_SUCCESS;
+
 	}
    
 }

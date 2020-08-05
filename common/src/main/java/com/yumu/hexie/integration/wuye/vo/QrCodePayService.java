@@ -107,12 +107,14 @@ public class QrCodePayService implements Serializable {
 		public void setSceneType(String sceneType) {
 			this.sceneType = sceneType;
 		}
+
 		@Override
 		public String toString() {
 			return "PayCfg [sectId=" + sectId + ", sectName=" + sectName + ", personId=" + personId + ", qrcodeId="
 					+ qrcodeId + ", operType=" + operType + ", serviceTypeCn=" + serviceTypeCn + ", signinFlag="
 					+ signinFlag + ", feeId=" + feeId + ", serviceId=" + serviceId + ", serviceType=" + serviceType
 					+ ", sceneType=" + sceneType + "]";
+
 		}
 		
 		
