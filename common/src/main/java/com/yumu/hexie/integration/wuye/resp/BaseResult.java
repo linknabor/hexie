@@ -7,15 +7,23 @@ public class BaseResult<T> implements Serializable {
 	private static final long serialVersionUID = -1148781270530596482L;
 
 	private String result;//00 成功 99 异常 01 账号不存在
-	
+	private String message;
 	private T data;
-
+	
 	public String getResult() {
 		return result;
 	}
 
 	public void setResult(String result) {
 		this.result = result;
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 	public T getData() {

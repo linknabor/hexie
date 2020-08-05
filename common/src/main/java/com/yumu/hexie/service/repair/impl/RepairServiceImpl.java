@@ -172,10 +172,11 @@ public class RepairServiceImpl implements RepairService {
      * @param amount
      * @param user
      * @return
+     * @throws Exception 
      * @see com.yumu.hexie.service.repair.RepairService#requestPay(long, int, com.yumu.hexie.model.user.User)
      */
     @Override
-    public JsSign requestPay(long orderId, float amount, User user) {
+    public JsSign requestPay(long orderId, float amount, User user) throws Exception {
         RepairOrder ro = repairOrderRepository.findOne(orderId);
         ro.setAmount(amount);
         ServiceOrder so = baseOrderService.createRepairOrder(ro, amount);

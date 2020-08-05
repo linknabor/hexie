@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -31,7 +30,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
@@ -425,7 +423,6 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult sendNotification(HttpSession session) {
 
-		User user = (User) session.getAttribute(Constants.USER);
 		String retValue = "false";
 		String[] dates = systemConfigService.queryActPeriod();
 		if (dates.length == 2) {
@@ -440,8 +437,7 @@ public class WuyeController extends BaseController {
 			}
 			/* 如果在活动日期内，则：1发送短信告知用户。2推送微信模版消息 */
 			if ("true".equals(retValue)) {
-				sendMsg(user);
-				sendRegTemplateMsg(user);
+				//TODO
 			}
 		}
 
@@ -449,16 +445,6 @@ public class WuyeController extends BaseController {
 
 	}
 
-	@Async
-	public void sendMsg(User user) {
-		String msg = "您好，欢迎加入合协社区。您已获得价值10元红包一份。感谢您对合协社区的支持。";
-		smsService.sendMsg(user, user.getTel(), msg, 11, 3);
-	}
-
-	@Async
-	public void sendRegTemplateMsg(User user) {
-		TemplateMsgService.sendRegisterSuccessMsg(user, systemConfigService.queryWXAToken(user.getAppId()));
-	}
 
 	/**
 	 * 获取支付物业费时可用的红包

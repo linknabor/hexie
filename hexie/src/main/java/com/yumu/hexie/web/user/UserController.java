@@ -29,8 +29,8 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
@@ -40,6 +40,7 @@ import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
@@ -97,7 +98,7 @@ public class UserController extends BaseController{
 					if (baseduser.getId() == user.getId()) {
 						user = baseduser;
 						break;
-					}else if (StringUtils.isEmpty(baseduser.getId())&&baseduser.getOriUserId() == user.getId() ) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
+					}else if (baseduser.getOriUserId() == user.getId() && !ConstantWeChat.APPID.equals(baseduser.getAppId())) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
 						user = baseduser;
 						break;
 					}
@@ -117,9 +118,10 @@ public class UserController extends BaseController{
 				long endTime = System.currentTimeMillis();
 				
 			    session.setAttribute(Constants.USER, user);
-			    boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
-			    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
-			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+			    
+			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
+			    UserInfo userInfo = new UserInfo(user, odDefinition);
+
 			    endTime = System.currentTimeMillis();
 
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
@@ -128,12 +130,12 @@ public class UserController extends BaseController{
 			    endTime = System.currentTimeMillis();
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
-			    log.info("iconList : " + showIconList);
+//			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
+//			    log.info("iconList : " + showIconList);
 
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
-			    userInfo.setIconList(showIconList);
+			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
 			    
@@ -195,9 +197,8 @@ public class UserController extends BaseController{
 		if(user != null){
 			session.setAttribute(Constants.USER, user);
 			
-			boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
-		    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
-		    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+		    OperatorDefinition odDefinition = operatorService.defineOperator(user);
+		    UserInfo userInfo = new UserInfo(user, odDefinition);
 	        return new BaseResult<UserInfo>().success(userInfo);
 		} else {
             return new BaseResult<UserInfo>().failMsg("用户不存在！");
@@ -247,9 +248,8 @@ public class UserController extends BaseController{
 		long endTime = System.currentTimeMillis();
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		
-		boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId());
-	    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,userAccount.getId());
-	    UserInfo userInfo = new UserInfo(userAccount,isRepariOper, isServiceOper);
+		OperatorDefinition odDefinition = operatorService.defineOperator(userAccount);
+	    UserInfo userInfo = new UserInfo(userAccount, odDefinition);
 		return new BaseResult<UserInfo>().success(userInfo);
 
     }
@@ -273,7 +273,7 @@ public class UserController extends BaseController{
 		if (StringUtils.isEmpty(token)) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp);
+		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_REG);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
@@ -300,7 +300,7 @@ public class UserController extends BaseController{
 		if (!result) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp);
+		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_INVOICE);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}

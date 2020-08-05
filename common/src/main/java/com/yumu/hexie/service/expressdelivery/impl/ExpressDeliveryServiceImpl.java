@@ -23,10 +23,13 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 	private SystemConfigService systemConfigService;
 	
 	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
 	
 	@Autowired
-	ExpressRepository expressRepository;
+	private ExpressRepository expressRepository;
+	
+	@Autowired
+	private TemplateMsgService templateMsgService;
 	
 	@Transactional
 	@Override
@@ -49,7 +52,7 @@ public class ExpressDeliveryServiceImpl implements ExpressDeliveryService{
 				expressRepository.save(express);
 
 				String accessToken = systemConfigService.queryWXAToken(user.get(0).getAppId());
-				TemplateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
+				templateMsgService.sendExpressDelivery(user.get(0).getOpenid(), accessToken, user.get(0).getAppId(),user.get(0).getId(),exr.getType());
 			
 			}
 		}

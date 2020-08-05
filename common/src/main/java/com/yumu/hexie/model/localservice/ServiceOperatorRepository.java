@@ -83,5 +83,20 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Modifying
     @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 ")
     public void deleteByType(int type);
+    
+    String column1 = "s.id, s.openId, s.name, s.tel, u.appid, s.userId ";
+    
+    @Query(value = "select "
+    		+ column1
+    		+ "from serviceoperator s "
+    		+ "join user u on u.id = s.userId "
+    		+ "join serviceOperatorItem oi on s.id = oi.operatorId "
+    		+ "where s.type = ?1 and oi.serviceId = ?2 ", nativeQuery = true)
+    public List<Object[]> findByTypeAndServiceId(int type, long serviceId);
+    
+    @Query(value = "select s.* from serviceoperator s "
+    		+ "left join serviceOperatorItem oi on s.id = oi.operatorId "
+    		+ "where s.type = ?1 and oi.id is null ", nativeQuery = true)
+    public List<ServiceOperator> queryNoServiceOper(int type);
 
 }

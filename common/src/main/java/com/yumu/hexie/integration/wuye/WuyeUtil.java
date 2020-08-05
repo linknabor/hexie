@@ -3,8 +3,6 @@ package com.yumu.hexie.integration.wuye;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.Properties;
-
 
 import org.apache.http.client.methods.HttpGet;
 import org.hibernate.bytecode.buildtime.spi.ExecutionException;
@@ -36,20 +34,6 @@ import com.yumu.hexie.service.shequ.impl.LocationServiceImpl;
 
 public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
-
-	private static String REQUEST_ADDRESS;
-	private static Properties props = new Properties();
-	
-	static {
-		try {
-			props.load(Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream("wechat.properties"));
-			
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		REQUEST_ADDRESS = props.getProperty("requestUrl");
-	}
 
 	// 接口地址
 	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s"; // 房屋详情地址
@@ -491,7 +475,7 @@ public class WuyeUtil {
 		
 		String userSysCode = SystemConfigServiceImpl.getSysMap().get(user.getAppId());
 		RegionUrl regionUrl = LocationServiceImpl.getCodeUrlMap().get(userSysCode);
-		String requestUri = REQUEST_ADDRESS;
+		String requestUri = SystemConfigServiceImpl.getREQUEST_URL();
 		if (regionUrl!=null) {
 			String urlLink = regionUrl.getRegionUrl();
 			if (!StringUtils.isEmpty(urlLink)) {

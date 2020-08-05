@@ -10,8 +10,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
+import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 
 /**
@@ -64,4 +67,24 @@ public class OperatorServiceImpl implements OperatorService {
     public List<ServiceOperator> findByType(int type) {
         return serviceOperatorRepository.findByType(type);
     }
+    
+	@Override
+	public OperatorDefinition defineOperator(User user) {
+		
+		OperatorDefinition oDefinition = new OperatorDefinition();
+		List<ServiceOperator> opList = serviceOperatorRepository.findByUserId(user.getId());
+		for (ServiceOperator serviceOperator : opList) {
+			
+			if (ModelConstant.SERVICE_OPER_TYPE_WEIXIU == serviceOperator.getType()) {
+				oDefinition.setRepairOperator(true);;
+			}
+			if (ModelConstant.SERVICE_OPER_TYPE_SERVICE == serviceOperator.getType()) {
+				oDefinition.setServiceOperator(true);
+			}
+			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == serviceOperator.getType()) {
+				oDefinition.setEvoucherOperator(true);
+			}
+		}
+		return oDefinition;
+	}
 }

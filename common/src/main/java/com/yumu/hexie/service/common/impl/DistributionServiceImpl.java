@@ -135,7 +135,7 @@ public class DistributionServiceImpl implements DistributionService {
     //1、已注册用户显示实际的城市区域和全国的特卖
     //2、未注册用户显示的上海市和全国的特卖（上海的默认id为19）
     @Override
-    public List<OnSaleAreaItem> queryOnsales(User user, int type,int page) {
+    public List<OnSaleAreaItem> queryOnsales(User user, int type, int page) {
         if(user.getProvinceId() != 0){
         if(type == ModelConstant.PRODUCT_FEATURED){
             return onSaleAreaItemRepository.findFeatured(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 100));
@@ -206,5 +206,24 @@ public class DistributionServiceImpl implements DistributionService {
     @Override
     public List<Long> queryO2OItemIds(long regionId, long typeId) {
         return homeDistributionRepository.queryItemIdsByParent(regionId, typeId);
+    }
+
+    /**
+     * 新版特卖
+     */
+    @Override
+    public List<OnSaleAreaItem> queryOnsalesV2(User user, int type, int page) {
+    	
+    	User currUser = userRepository.findOne(user.getId());
+    	long current = System.currentTimeMillis();
+    	List<OnSaleAreaItem> itemList = new ArrayList<>();
+    	
+    	if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {	//未绑定房屋的用户，展示样板商品
+    		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, new PageRequest(page, 100));
+    	}else {	//已经绑定房屋的用户查询关联小区的商品
+    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), new PageRequest(page, 100)); 
+    	}
+    	
+        return itemList;
     }
 }

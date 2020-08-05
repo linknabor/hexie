@@ -40,15 +40,19 @@ public class RedisConfig {
 		connectionFactory.setUsePool(true);
 		connectionFactory.setPassword(redisPassword);
 		connectionFactory.setDatabase(redisDatabase);
+		connectionFactory.setPoolConfig(jedisPoolConfig());
+		return connectionFactory;
+	}
+	
+	@Bean
+	public JedisPoolConfig jedisPoolConfig() {
 		
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxIdle(25);
 		poolConfig.setMaxTotal(100);
 		poolConfig.setMinIdle(10);
-		connectionFactory.setPoolConfig(poolConfig);
-		return connectionFactory;
+		return poolConfig;
 	}
-
 
 	@Bean(name = "stringRedisTemplate")
 	public StringRedisTemplate getStringRedisTemplate() {

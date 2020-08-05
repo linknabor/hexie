@@ -12,6 +12,8 @@ public class RegionUrl extends BaseModel{
 	private String regionName;
 	private String regionUrl;
 	private String regionCode;
+	private String abbr;	//缩写
+	
 	public String getRegionName() {
 		return regionName;
 	}
@@ -29,6 +31,12 @@ public class RegionUrl extends BaseModel{
 	}
 	public void setRegionCode(String regionCode) {
 		this.regionCode = regionCode;
+	}
+	public String getAbbr() {
+		return abbr;
+	}
+	public void setAbbr(String abbr) {
+		this.abbr = abbr;
 	}
 	
 	

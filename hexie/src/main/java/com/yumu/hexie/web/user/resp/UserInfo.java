@@ -16,6 +16,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.WuyePayTabs;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
 
 /**
  * <pre>
@@ -33,6 +34,7 @@ public class UserInfo implements Serializable {
     
     private boolean isRepairOperator = false;
     private boolean isServiceOperator = false;
+    private boolean isEvoucherOperator = false;
     
     private Double longitude;
     private Double latitude;
@@ -100,15 +102,18 @@ public class UserInfo implements Serializable {
 		this.officeTel = officeTel;
 	}
 	public UserInfo(){}
+	
     public UserInfo(User user){
         BeanUtils.copyProperties(user, this);
     }
-
-    public UserInfo(User user,boolean isOperator, boolean isServiceOperator){
+    
+    public UserInfo(User user, OperatorDefinition odDefinition){
         BeanUtils.copyProperties(user, this);
-        this.isRepairOperator = isOperator;
-        this.isServiceOperator = isServiceOperator;
+        this.isRepairOperator = odDefinition.isRepairOperator();
+        this.isServiceOperator = odDefinition.isServiceOperator();
+        this.isEvoucherOperator = odDefinition.isEvoucherOperator();
     }
+    
     public String getRealName() {
         return realName;
     }
@@ -276,6 +281,13 @@ public class UserInfo implements Serializable {
 	}
 	public void setServiceOperator(boolean isServiceOperator) {
 		this.isServiceOperator = isServiceOperator;
+	}
+	
+	public boolean isEvoucherOperator() {
+		return isEvoucherOperator;
+	}
+	public void setEvoucherOperator(boolean isEvoucherOperator) {
+		this.isEvoucherOperator = isEvoucherOperator;
 	}
 	public String getXiaoquName() {
         return xiaoquName;

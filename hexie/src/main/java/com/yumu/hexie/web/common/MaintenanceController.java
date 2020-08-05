@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.model.maintenance.MaintenanceService;
-import com.yumu.hexie.model.maintenance.vo.MaintenanceVO;
+import com.yumu.hexie.service.maintenance.MaintenanceService;
+import com.yumu.hexie.service.maintenance.vo.MaintenanceVO;
 import com.yumu.hexie.web.BaseController;
 
 @RestController

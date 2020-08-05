@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -48,11 +49,15 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private static final String KEY_APP_SYS = "APP_SYS_";
 	private static Map<String, String> sysMap = new HashMap<>();
 	private static Map<String, SystemConfig> sysConfigParam = new HashMap<>();
-    
+    private static String REQUEST_URL;
+	
+	
     @Inject
     private SystemConfigRepository systemConfigRepository;
     @Inject
     private RedisRepository redisRepository;
+    @Value("${requestUrl}")
+	private String requestUrl;
     
     
     /**
@@ -85,6 +90,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 			}
     		
 		}
+    	
+    	REQUEST_URL = requestUrl;
+    	
     	log.info("系统appId映射： " + sysMap);
     	
     	
@@ -325,6 +333,11 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		}
 		return isAvailable;
 	}
+
+	public static String getREQUEST_URL() {
+		return REQUEST_URL;
+	}
+
 	
     
 }

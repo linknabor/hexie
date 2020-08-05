@@ -35,4 +35,6 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
     
     public List<Region> findBySectIdIn(List<String> sectId);
     
+	@Query(value = "select r.name, r.parentName, r.sectId from region r join onsaleareaitem item on r.id = item.regionId where item.productId = ?1 ", nativeQuery = true)
+	public List<Object[]> findByProductId(String productId);
 }

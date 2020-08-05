@@ -26,7 +26,7 @@ public class ModelConstant {
 	public static final int REGION_XIAOQU = 4;
 	
 	//订单类型
-	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）,6维修单，11自定义服务订单
+	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）,6维修单，11自定义服务订单,12核销券
 	public static final int ORDER_TYPE_GROUP = 0;
 	public static final int ORDER_TYPE_GROUP_SINGLE = 1;
 	public static final int ORDER_TYPE_ONSALE = 3;
@@ -34,11 +34,23 @@ public class ModelConstant {
     public static final int ORDER_TYPE_YUYUE = 5;
     public static final int ORDER_TYPE_REPAIR = 6;
     public static final int ORDER_TYPE_SERVICE = 11;
+    public static final int ORDER_TYPE_EVOUCHER = 12;
     
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
     public static final int SERVICE_OPER_TYPE_WAITER = 2;	//店小二
+    public static final int SERVICE_OPER_TYPE_BAOJIE = 3;	//店小二
     public static final int SERVICE_OPER_TYPE_STAFF = 5;	//物业人员
+    public static final int SERVICE_OPER_TYPE_SERVICE = 10;	//自定义服务
+    public static final int SERVICE_OPER_TYPE_EVOUCHER = 11;	//优惠券核销人员
+    
+    //电子优惠券状态
+    public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
+    public static final int EVOUCHER_STATUS_NORMAL = 1;	//正常
+    public static final int EVOUCHER_STATUS_USED = 2;	//已使用
+    public static final int EVOUCHER_STATUS_EXPIRED = 3;	//过期
+    
+    
 
 	//操作业务类型
 	public static final int OP_TYPE_SERVICE_ORDER = 1;
@@ -364,4 +376,10 @@ public class ModelConstant {
 	public static final String KEY_NOITFY_PAY_DUPLICATION_CHECK = "lock:payNotification:";
 	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
 	public static final String KEY_CS_SERVED_SECT = "cfg:customservice:sect:";
+	
+	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template:";
+	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url:";
+	
+	public static final int SMS_TYPE_REG = 101;	//用户注册短信
+	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
 }		

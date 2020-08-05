@@ -16,7 +16,7 @@ public class AppTomcatConnectorCustomizer implements TomcatConnectorCustomizer {
         protocol.setMaxThreads(400);  
         protocol.setConnectionTimeout(30000);
         protocol.setAcceptCount(500);	//默认100，指定当所有可以使用的处理请求的线程数都被使用时，可以放到处理队列中的请求数，超过这个数的请求将不予处理
-		
+        protocol.setCompression("on");	//压缩传输的数据
 	}
 
 }

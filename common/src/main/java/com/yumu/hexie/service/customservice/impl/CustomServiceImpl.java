@@ -19,13 +19,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisLock;
+import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
-import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
@@ -70,7 +70,7 @@ public class CustomServiceImpl implements CustomService {
 	public List<CustomServiceVO> getService(User user) throws Exception {
 		
 		User currUser = userRepository.findOne(user.getId());
-		List<CustomServiceVO> list = customServiceUtil.getCustomService(currUser).getData();
+		List<CustomServiceVO> list = customServiceUtil.getCustomService(currUser);
 		
 		//考虑把redis操作放在循环外，频繁操作有序列化和网络交互成本 TODO
 //		list.stream().forEach(customServicevo->{
@@ -85,14 +85,15 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Transactional
 	@Override
-	public CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
+	public CommonPayResponse createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
 		
 		long begin = System.currentTimeMillis();
 		
 		//1.调用API创建接口
 		User currUser = userRepository.findOne(customerServiceOrderDTO.getUser().getId());
 		customerServiceOrderDTO.setUser(currUser);
-		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
+		customerServiceOrderDTO.setOrderType(String.valueOf(ModelConstant.ORDER_TYPE_SERVICE));
+		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
 		
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
@@ -186,7 +187,7 @@ public class CustomServiceImpl implements CustomService {
 	 * 非一口价分派订单
 	 */
 	@Override
-	public void assginOrder(CreateOrderResponseVO data) {
+	public void assginOrder(CommonPayResponse data) {
 		
 		long begin = System.currentTimeMillis();
 		
@@ -279,7 +280,7 @@ public class CustomServiceImpl implements CustomService {
 		dto.setTradeWaterId(serviceOrder.getOrderNo());
 		dto.setTranAmt(amount);
 		dto.setUser(user);
-		CreateOrderResponseVO data = customServiceUtil.createOrder(dto).getData();
+		CommonPayResponse data = customServiceUtil.createOrder(dto);
 		
 		end = System.currentTimeMillis();
 		logger.info("orderPay location 3 : " + (end - begin)/1000);
@@ -488,33 +489,6 @@ public class CustomServiceImpl implements CustomService {
 	}
 	
 	/**
-	 * 通知入账
-	 * @throws Exception 
-	 */
-	@Override
-	@Transactional
-	public void notifyPayByServplat(String tradeWaterId) {
-		
-		if (StringUtils.isEmpty(tradeWaterId)) {
-			return;
-		}
-		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
-		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
-			return;
-		}
-		if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
-			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
-				//do nothing
-			}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
-				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-			}
-			serviceOrder.setPayDate(new Date());
-			serviceOrderRepository.save(serviceOrder);
-		}
-		
-	}
-
-	/**
 	 * 服务订单评论
 	 */
 	@Transactional
@@ -654,6 +628,7 @@ public class CustomServiceImpl implements CustomService {
 		}
     	
     }
+
     
     
 }

@@ -13,7 +13,6 @@ import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
-import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.ProductService;
@@ -43,7 +42,7 @@ public abstract class CustomOrderServiceImpl implements CustomOrderService {
      * @see com.yumu.hexie.service.sales.CustomOrderService#postPaySuccess(com.yumu.hexie.model.payment.PaymentOrder, com.yumu.hexie.model.market.ServiceOrder)
      */
     @Override
-    public abstract void postPaySuccess(PaymentOrder po, ServiceOrder so);
+    public abstract void postPaySuccess(ServiceOrder so);
     /** 
      * @param order
      * @see com.yumu.hexie.service.sales.CustomOrderService#postOrderCancel(com.yumu.hexie.model.market.ServiceOrder)

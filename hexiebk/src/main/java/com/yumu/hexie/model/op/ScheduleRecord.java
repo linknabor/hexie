@@ -2,6 +2,7 @@ package com.yumu.hexie.model.op;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import com.yumu.hexie.model.BaseModel;
@@ -16,7 +17,7 @@ public class ScheduleRecord  extends BaseModel{
 	private String bizIds;//业务ID
 	
 	private int errorCount = 0;
-	
+	@Column(length=2048)
 	private String errorBizIds="";//业务ID
 	
 	public ScheduleRecord(){}
