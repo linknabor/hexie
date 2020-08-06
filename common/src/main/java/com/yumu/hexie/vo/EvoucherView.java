@@ -58,15 +58,20 @@ public class EvoucherView implements Serializable {
 			map.put(ModelConstant.EVOUCHER_STATUS_NORMAL, new ArrayList<>());
 			map.put(ModelConstant.EVOUCHER_STATUS_USED, new ArrayList<>());
 			map.put(ModelConstant.EVOUCHER_STATUS_EXPIRED, new ArrayList<>());
+			map.put(ModelConstant.EVOUCHER_STATUS_INVALID, new ArrayList<>());
 			
 			for (Evoucher evoucher : vouchers) {
 				List<Evoucher> evoucherList = map.get(evoucher.getStatus());
+				if (evoucherList == null) {
+					 continue;
+				}
 				evoucherList.add(evoucher);
 			}
 			
 			List<Evoucher> unusedList = map.get(ModelConstant.EVOUCHER_STATUS_NORMAL);
 			List<Evoucher> usedList = map.get(ModelConstant.EVOUCHER_STATUS_USED);
 			List<Evoucher> expiredList = map.get(ModelConstant.EVOUCHER_STATUS_EXPIRED);
+			List<Evoucher> invalidList = map.get(ModelConstant.EVOUCHER_STATUS_INVALID);
 			if (!unusedList.isEmpty()) {	//如果有未使用的券，则以其中第一条的code作为二维码，价格是所有未使用券的累加金额
 				for (Evoucher evoucher : unusedList) {
 					if (StringUtil.isEmpty(this.code)) {
@@ -125,6 +130,24 @@ public class EvoucherView implements Serializable {
 					count++;
 				}
 				status = ModelConstant.EVOUCHER_STATUS_EXPIRED;
+			}else if (!invalidList.isEmpty()) {	//以上两项如果都没有，则显示过期的券
+				for (Evoucher evoucher : invalidList) {
+					if (StringUtil.isEmpty(this.code)) {
+						this.code = evoucher.getCode();;
+						this.name = evoucher.getProductName();
+						this.tel = evoucher.getTel();
+						this.smallPicture = evoucher.getSmallPicture();
+						if (!StringUtil.isEmpty(evoucher.getEndDate())) {
+							this.endDate = DateUtil.dtFormat(evoucher.getEndDate(), DateUtil.dttmSimple);
+						}
+					}
+					BigDecimal aPrice = new BigDecimal(String.valueOf(evoucher.getActualPrice()));
+					BigDecimal oPrice = new BigDecimal(String.valueOf(evoucher.getOriPrice()));
+					actualPrice = actualPrice.add(aPrice);
+					oriPrice = oriPrice.add(oPrice);
+					count++;
+				}
+				status = ModelConstant.EVOUCHER_STATUS_INVALID;
 			}
 		}
 		

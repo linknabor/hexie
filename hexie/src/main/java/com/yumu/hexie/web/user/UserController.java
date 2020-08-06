@@ -118,7 +118,7 @@ public class UserController extends BaseController{
 				long endTime = System.currentTimeMillis();
 				
 			    session.setAttribute(Constants.USER, user);
-			    
+		    
 			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
 			    UserInfo userInfo = new UserInfo(user, odDefinition);
 
