@@ -187,7 +187,11 @@ public class EvoucherServiceImpl implements EvoucherService {
 		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(e.getOrderId());
 		
 		for (int i =0; i < evoucherList.size(); i ++) {
+			
 			Evoucher evoucher = evoucherList.get(i);
+			if (ModelConstant.EVOUCHER_STATUS_NORMAL != evoucher.getStatus()) {
+				throw new BizValidateException("当前核销券不可用。状态码：" + evoucher.getStatus());
+			}
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
 			evoucher.setConsumeDate(new Date());
 			evoucher.setOperatorName(serviceOperator.getName());
