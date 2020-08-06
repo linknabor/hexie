@@ -49,8 +49,7 @@ public class ModelConstant {
     public static final int EVOUCHER_STATUS_NORMAL = 1;	//正常
     public static final int EVOUCHER_STATUS_USED = 2;	//已使用
     public static final int EVOUCHER_STATUS_EXPIRED = 3;	//过期
-    
-    
+    public static final int EVOUCHER_STATUS_INVALID = 4;	//不可用,退款后的状态
 
 	//操作业务类型
 	public static final int OP_TYPE_SERVICE_ORDER = 1;

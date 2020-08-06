@@ -24,8 +24,9 @@ public interface EshopSerivce {
 	void saveOper(SaveOperVO saveOperVO);
 	
 	CommonResponse<Object> getEvoucher(QueryEvoucherVO queryEvoucherVO);
-	
-	
 
+	void refund(String orderNo, String operType);
+	
+	
 
 }

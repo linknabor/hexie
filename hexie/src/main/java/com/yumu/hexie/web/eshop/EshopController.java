@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.eshop;
 
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,5 +120,36 @@ public class EshopController<T> extends BaseController {
 		logger.info("quEvoucherVO : " + queryEvoucherVO);
 		return eshopSerivce.getEvoucher(queryEvoucherVO);
 	}
+	
+	/**
+	 * 后台调用
+	 * @param requestMap
+	 * @return
+	 */
+	@RequestMapping(value = "/order/requestRefund", method = RequestMethod.POST)
+	public CommonResponse<String> requestRefund(@RequestBody Map<String, String> requestMap){
+		
+		logger.info("requestRefund : " + requestMap);
+		eshopSerivce.refund(requestMap.get("orderNo"), "0");
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+	}
+	
+	/**
+	 * 后台调用
+	 * @param requestMap
+	 * @return
+	 */
+	@RequestMapping(value = "/order/refundReject", method = RequestMethod.POST)
+	public CommonResponse<String> refundReject(@RequestBody Map<String, String> requestMap){
+		
+		logger.info("refundReject : " + requestMap);
+		eshopSerivce.refund(requestMap.get("orderNo"), "1");
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+	}
+	
 	
 }
