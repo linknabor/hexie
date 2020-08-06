@@ -201,6 +201,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 					break;
 				}
 			}
+
 			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
 			evoucher.setConsumeDate(new Date());
 			evoucher.setOperatorName(serviceOperator.getName());

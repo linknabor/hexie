@@ -47,6 +47,7 @@ import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.service.eshop.EshopSerivce;
@@ -80,6 +81,7 @@ public class EshopServiceImpl implements EshopSerivce {
 	private EvoucherRepository evoucherRepository;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
+
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
