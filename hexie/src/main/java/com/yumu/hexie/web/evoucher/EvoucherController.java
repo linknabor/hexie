@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
@@ -84,7 +83,6 @@ public class EvoucherController extends BaseController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/orders/{statusType}", method = RequestMethod.GET)
-	@ResponseBody
 	public BaseResult<List<ServiceOrder>> getEvoucherOrders(@ModelAttribute(Constants.USER)User user,@PathVariable String statusType) throws Exception {
 		List<Integer> status = new ArrayList<Integer>();
 		if("NEEDPAY".equalsIgnoreCase(statusType)){
@@ -117,8 +115,6 @@ public class EvoucherController extends BaseController {
 		List<ServiceOrder> orderList = evoucherService.getEvoucherOrders(user, status);
 		return new BaseResult<List<ServiceOrder>>().success(orderList);
     }
-	
-	
 	
 	
 }

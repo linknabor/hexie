@@ -45,6 +45,8 @@ import com.yumu.hexie.model.localservice.ServiceOperatorItemRepository;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.EvoucherRepository;
+import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.service.eshop.EshopSerivce;
@@ -76,6 +78,8 @@ public class EshopServiceImpl implements EshopSerivce {
 	private ServiceOperatorItemRepository serviceOperatorItemRepository;
 	@Autowired
 	private EvoucherRepository evoucherRepository;
+	@Autowired
+	private ServiceOrderRepository serviceOrderRepository;
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
@@ -491,6 +495,52 @@ public class EshopServiceImpl implements EshopSerivce {
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}
 		return commonResponse;
+	}
+	
+	/**
+	 * 退款处理
+	 * @param orderNo
+	 * @param operType 0申请，1驳回
+	 */
+	@Override
+	@Transactional
+	public void refund(String orderNo, String operType) {
+
+		Assert.hasText(orderNo, "退款订单号不能为空。");
+		
+		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(orderNo);
+		if (serviceOrder == null) {
+			throw new BizValidateException("为查询到订单: " + orderNo);
+		}
+		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
+		
+		int fromStatus = 0;
+		int toStatus = 0; 
+		if ("0".equals(operType)) {
+			fromStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
+			toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+			
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+			serviceOrder.setRefundDate(new Date());
+			serviceOrderRepository.save(serviceOrder);
+			
+		}else if ("1".equals(operType)) {
+			fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+			toStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
+			
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			serviceOrder.setRefundDate(null);
+			serviceOrderRepository.save(serviceOrder);
+		}
+		
+		for (Evoucher evoucher : evoucherList) {
+			if (fromStatus == evoucher.getStatus()) {
+				evoucher.setStatus(toStatus);
+				evoucherRepository.save(evoucher);
+			}
+		}
+		
+		
 	}
 	
 
