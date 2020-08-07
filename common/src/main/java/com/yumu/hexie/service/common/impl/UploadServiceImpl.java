@@ -63,6 +63,10 @@ public class UploadServiceImpl implements UploadService {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private QiniuUtil qiniuUtil;
+	
     /** 
      * @param order
      * @see com.yumu.hexie.service.common.UploadService#updateRepairImg(com.yumu.hexie.model.localservice.repair.RepairOrder)
@@ -79,7 +83,7 @@ public class UploadServiceImpl implements UploadService {
         String imgUrls = moveImges(user.getAppId(), order.getImgUrls());
         String commentImgUrls = moveImges(user.getAppId(), order.getCommentImgUrls());
         
-        RepairOrder nOrder = repairOrderRepository.findOne(order.getId());
+        RepairOrder nOrder = repairOrderRepository.findById(order.getId()).get();
         nOrder.setImgUrls(imgUrls);
         nOrder.setCommentImgUrls(commentImgUrls);
         repairOrderRepository.save(nOrder);
@@ -147,7 +151,7 @@ public class UploadServiceImpl implements UploadService {
             return "";
         }
         PutExtra extra = new PutExtra();
-        String uptoken = QiniuUtil.getInstance().getUpToken();
+        String uptoken = qiniuUtil.getUpToken();
 
         if (file.exists() && file.getTotalSpace() > 0) {
             PutRet putRet = IoApi.putFile(uptoken, DateUtil.dtFormat(new Date(),"yyyyMMddHHmmssSSS")+(int)(Math.random()*1000), file, extra);

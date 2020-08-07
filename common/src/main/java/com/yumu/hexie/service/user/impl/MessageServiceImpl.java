@@ -48,18 +48,18 @@ public class MessageServiceImpl implements MessageService {
 			long countyId, long xiaoquId,int page, int pageSize) {
 		page = page<0?0:page;
 		pageSize = pageSize<0?10:pageSize;
-		return messageRepository.queryMessageByRegions(type, provinceId, cityId, countyId, xiaoquId, new PageRequest(page,pageSize));
+		return messageRepository.queryMessageByRegions(type, provinceId, cityId, countyId, xiaoquId, PageRequest.of(page,pageSize));
 	}
 	
 	@Override
 	public List<Message> queryMessages(int page, int pageSize){
 		
-		return messageRepository.queryMessagesByStatus(new PageRequest(page,pageSize));
+		return messageRepository.queryMessagesByStatus(PageRequest.of(page,pageSize));
 	}
 	
 	@Override
 	public Message findOne(long messageId) {
-		return messageRepository.findOne(messageId);
+		return messageRepository.findById(messageId).get();
 	}
 	@Override
 	public Feedback reply(long userId,String userName,String userHeader, long messageId, String content) {
@@ -68,7 +68,7 @@ public class MessageServiceImpl implements MessageService {
 	}
 	@Override
 	public List<Feedback> queryReplays(long messageId, int page, int pageSize) {
-		return feedbackRepository.findAllByArticleId(messageId, new PageRequest(page,pageSize));
+		return feedbackRepository.findAllByArticleId(messageId, PageRequest.of(page,pageSize));
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class MessageServiceImpl implements MessageService {
 	public Page<Message> queryMessages(BaseRequestDTO<Message> baseRequestDTO) {
 
 		List<String> sectList = baseRequestDTO.getSectList();
-		Pageable pageable = new PageRequest(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
+		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
 		Message message = baseRequestDTO.getData();
 		Page<Message> page = messageRepository.queryMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(), 
 				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), sectList, pageable);
@@ -123,7 +123,7 @@ public class MessageServiceImpl implements MessageService {
 	public List<Message> queryMessagesByUserAndType(User user, int msgType, int page, int pageSize) {
 
 		List<Message> messageList = new ArrayList<Message>();
-		Pageable pageable = new PageRequest(page, pageSize);
+		Pageable pageable = PageRequest.of(page, pageSize);
 		User currUser = userRepository.findById(user.getId());
 		switch (msgType) {
 		case 9:

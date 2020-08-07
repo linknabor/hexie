@@ -83,7 +83,7 @@ public class CarServiceImpl implements CarService {
 			//车大大的服务为特卖商品
 			
 			//获取该订单关联的商品
-			OnSaleRule onSaleRule = onSaleRuleRepository.findOne(serviceOrder.getGroupRuleId());
+			OnSaleRule onSaleRule = onSaleRuleRepository.findById(serviceOrder.getGroupRuleId()).get();
 			
 			int productType = onSaleRule.getProductType();
 			if(productType==14){

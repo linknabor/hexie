@@ -78,22 +78,22 @@ public class CustomYuyueServiceImpl extends CustomOrderServiceImpl {
 		yuyueOrderRepository.save(yuyueOrder);
 		
 		if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_FLOWERPLUS){
-			List<FlowerPlusOrder> flowerPlusOrders = flowerPlusOrderRepository.findByYOrderId(yuyueOrder.getId());
+			List<FlowerPlusOrder> flowerPlusOrders = flowerPlusOrderRepository.findByyOrderId(yuyueOrder.getId());
 			for(FlowerPlusOrder flowerPlusOrder:flowerPlusOrders){
-				flowerPlusOrder.setsOrderId(so.getId());
+				flowerPlusOrder.setSOrderId(so.getId());
 				flowerPlusOrder.setCustomerMemo(so.getMemo());
 				flowerPlusOrder.setPayStatus(ModelConstant.YUYUE_PAYSTATUS_PAYED);
 				flowerPlusOrderRepository.save(flowerPlusOrder);
 			}
 		}else if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_GAOFEI){
-			GaofeiOrder gaofeiOrder = gaofeiOrderRepository.findByYOrderId(yuyueOrder.getId());
+			GaofeiOrder gaofeiOrder = gaofeiOrderRepository.findByyOrderId(yuyueOrder.getId());
 			gaofeiOrder.setsOrderId(so.getId());
 			gaofeiOrder.setMemo(so.getMemo());
 			gaofeiOrder.setPayStatus(ModelConstant.YUYUE_PAYSTATUS_PAYED);
 			gaofeiOrderRepository.save(gaofeiOrder);
 		}else if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_JIUYE){
 			/*九曳*/
-			List<JiuyeOrder> orders = jiuyeOrderRepository.findByYOrderId(yuyueOrder.getId());
+			List<JiuyeOrder> orders = jiuyeOrderRepository.findByyOrderId(yuyueOrder.getId());
 			for(JiuyeOrder order:orders){
 				order.setsOrderId(so.getId());
 				order.setCustomerMemo(so.getMemo());
@@ -101,7 +101,7 @@ public class CustomYuyueServiceImpl extends CustomOrderServiceImpl {
 				jiuyeOrderRepository.save(order);
 			}
 		}else if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_AIXIANGBAN){
-		    AixiangbanOrder order = aixiangbanOrderRepository.findByYOrderId(yuyueOrder.getId());
+		    AixiangbanOrder order = aixiangbanOrderRepository.findByyOrderId(yuyueOrder.getId());
 		    order.setsOrderId(so.getId());
 		    order.setCustomerMemo(so.getMemo());
 		    order.setPayStatus(ModelConstant.YUYUE_PAYSTATUS_PAYED);
@@ -120,23 +120,23 @@ public class CustomYuyueServiceImpl extends CustomOrderServiceImpl {
 		yuyueOrderRepository.save(yuyueOrder);
 		
 		if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_FLOWERPLUS){
-			List<FlowerPlusOrder> flowerPlusOrders = flowerPlusOrderRepository.findByYOrderId(yuyueOrder.getId());
+			List<FlowerPlusOrder> flowerPlusOrders = flowerPlusOrderRepository.findByyOrderId(yuyueOrder.getId());
 			for(FlowerPlusOrder flowerPlusOrder:flowerPlusOrders){
 				flowerPlusOrder.setPayStatus(ModelConstant.YUYUE_PAYSTATUS_UNPAYED);
 				flowerPlusOrderRepository.save(flowerPlusOrder);
 			}
 		}else if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_GAOFEI){
-			GaofeiOrder gaofeiOrder = gaofeiOrderRepository.findByYOrderId(yuyueOrder.getId());
+			GaofeiOrder gaofeiOrder = gaofeiOrderRepository.findByyOrderId(yuyueOrder.getId());
 			gaofeiOrder.setPayStatus(ModelConstant.YUYUE_PAYSTATUS_UNPAYED);
 			gaofeiOrderRepository.save(gaofeiOrder);
 		}else if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_JIUYE){
-			List<JiuyeOrder> orders = jiuyeOrderRepository.findByYOrderId(yuyueOrder.getId());
+			List<JiuyeOrder> orders = jiuyeOrderRepository.findByyOrderId(yuyueOrder.getId());
 			for(JiuyeOrder thisorder:orders){
 				thisorder.setPayStatus(ModelConstant.YUYUE_PAYSTATUS_UNPAYED);
 				jiuyeOrderRepository.save(thisorder);
 			}
 		} else if(yuyueOrder.getProductType() == ModelConstant.YUYUE_PRODUCT_TYPE_AIXIANGBAN){
-		    AixiangbanOrder thisorder = aixiangbanOrderRepository.findByYOrderId(yuyueOrder.getId());
+		    AixiangbanOrder thisorder = aixiangbanOrderRepository.findByyOrderId(yuyueOrder.getId());
 		    thisorder.setPayStatus(ModelConstant.YUYUE_PAYSTATUS_UNPAYED);
 		    aixiangbanOrderRepository.save(thisorder);
 		}
@@ -144,7 +144,7 @@ public class CustomYuyueServiceImpl extends CustomOrderServiceImpl {
 
 	@Override
 	public SalePlan findSalePlan(long ruleId) {
-		return yuyueRuleRepository.findOne(ruleId);
+		return yuyueRuleRepository.findById(ruleId).get();
 	}
 }
 

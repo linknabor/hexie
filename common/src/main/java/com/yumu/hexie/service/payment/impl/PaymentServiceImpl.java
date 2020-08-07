@@ -277,7 +277,7 @@ public class PaymentServiceImpl implements PaymentService {
         if(ro == null) {
             return null;
         }
-        PaymentOrder po = paymentOrderRepository.findOne(ro.getPaymentId());
+        PaymentOrder po = paymentOrderRepository.findById(ro.getPaymentId()).get();
         if (ro.getRefundStatus() == PaymentConstant.REFUND_STATUS_SUCCESS) {
             po.refunded();
         } else if (ro.getRefundStatus() == PaymentConstant.REFUND_STATUS_APPLYED) {

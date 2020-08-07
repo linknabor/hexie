@@ -56,7 +56,7 @@ public class CollocationServiceImpl implements CollocationService {
 
 	@Override
 	public Collocation findOne(long collId){
-		return collocationRepository.findOne(collId);
+		return collocationRepository.findById(collId).get();
 	}
 	
 }

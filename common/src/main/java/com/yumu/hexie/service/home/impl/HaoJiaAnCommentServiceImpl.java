@@ -67,7 +67,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		if(comment.getCommentType() == ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
 			YuyueOrder yuyueOrder =yuyueOrderRepository.findByOrderNo(comment.getYuyueOrderNo());//投诉的订单
 			log.error("投诉的预约订单Id为："+yuyueOrder.getId());
-			Address address = addressRepository.findOne(yuyueOrder.getAddressId());
+			Address address = addressRepository.findById(yuyueOrder.getAddressId()).get();
 			List<ServiceOperator> ops = null;
 			List<Long> regionIds = new ArrayList<Long>();
 	        regionIds.add(1l);
@@ -120,7 +120,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		log.error("complainStatus = "+complainStatus);
 		log.error("commentId = "+commentId);
 		int count = 0;
-		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.findOne(commentId);
+		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.findById(commentId).get();
 		haoJiaAnComment.setComplainStatus(complainStatus);//投诉状态
 		haoJiaAnComment.setFeedBack(feedBack);//投诉反馈
 		haoJiaAnComment.setComplainTime(System.currentTimeMillis());//处理投诉的时间

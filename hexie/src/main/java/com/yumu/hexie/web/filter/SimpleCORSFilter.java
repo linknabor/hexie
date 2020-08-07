@@ -2,7 +2,7 @@
  * Yumu.com Inc.
  * Copyright (c) 2014-2016 All Rights Reserved.
  */
-package com.yumu.hexie.web.interceptor;
+package com.yumu.hexie.web.filter;
 
 import java.io.IOException;
 
@@ -12,10 +12,9 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.stereotype.Component;
 
 import com.yumu.hexie.common.util.MD5Util;
 import com.yumu.hexie.common.util.RandomStringUtils;
@@ -28,7 +27,7 @@ import com.yumu.hexie.common.util.RandomStringUtils;
  * @author tongqian.ni
  * @version $Id: SimpleCORSFilter.java, v 0.1 2016年5月27日 上午11:52:57  Exp $
  */
-@Component
+@WebFilter(urlPatterns = "/*", filterName = "simpleCORSFilter")
 public class SimpleCORSFilter implements Filter {
 	
 	public static void main(String[] args) {

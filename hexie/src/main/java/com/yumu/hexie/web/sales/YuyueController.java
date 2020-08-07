@@ -48,7 +48,6 @@ import com.yumu.hexie.model.tohome.AixiangbanOrderRepository;
 import com.yumu.hexie.model.tohome.BaojieOrder;
 import com.yumu.hexie.model.tohome.BaojieOrderRepository;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.home.impl.HaoJiaAnServiceImpl;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.home.HaoJiaAnController;
@@ -96,7 +95,7 @@ public class YuyueController extends BaseController{
     @RequestMapping(value = "/yuyueOrder/setServiceOrderId/{yuyueOrderId}/{serviceOrderId}", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<String> setServiceOrderIdToYuyueOrder(@PathVariable long serviceOrderId,@PathVariable long yuyueOrderId,@ModelAttribute(Constants.USER)User user) throws Exception {
-        YuyueOrder order = yuyueOrderRepository.findOne(yuyueOrderId);
+        YuyueOrder order = yuyueOrderRepository.findById(yuyueOrderId).get();
         if(user.getId() != order.getUserId()) {
             return new BaseResult<String>().failMsg("无法操作他人订单");
         }
@@ -110,7 +109,7 @@ public class YuyueController extends BaseController{
     @RequestMapping(value = "/yuyueOrder/checkYuyueOrder/{yuyueOrderId}", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<YuyueOrder> checkYuyueOrder(@PathVariable long yuyueOrderId,@ModelAttribute(Constants.USER)User user) throws Exception {
-        YuyueOrder order = yuyueOrderRepository.findOne(yuyueOrderId);
+        YuyueOrder order = yuyueOrderRepository.findById(yuyueOrderId).get();
         return new BaseResult<YuyueOrder>().success(order);
     }
 
@@ -124,7 +123,7 @@ public class YuyueController extends BaseController{
     @ResponseBody
     public BaseResult<YuyueOrder> yuyueOrdersById (@ModelAttribute(Constants.USER)User user, @PathVariable long orderId) throws Exception {
     	log.error("yuyueController的orderId="+orderId+"");
-         YuyueOrder order = yuyueOrderRepository.findOne(orderId);
+         YuyueOrder order = yuyueOrderRepository.findById(orderId).get();
          log.error("order.getUserId()="+order.getUserId()+"");
          log.error("user.getId()"+user.getId()+"");
          List<Long> userIds = haoJiaAnController.orderAccessAuthority(user, orderId);
@@ -141,44 +140,44 @@ public class YuyueController extends BaseController{
         List<BaseModel> lists = new ArrayList<BaseModel>();
 
         if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_AYILAILE){ //阿姨来了
-            AyiServiceOrder ayiServiceOrder = ayiServiceOrderRepository.findOne(orderId);
+            AyiServiceOrder ayiServiceOrder = ayiServiceOrderRepository.findById(orderId).get();
             lists.add(ayiServiceOrder);
         }else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_FASUPER){ //尚匠汽车
-            FasuperOrder fasuperOrder = fasuperOrderRepository.findByYOrderId(orderId);
+            FasuperOrder fasuperOrder = fasuperOrderRepository.findByyOrderId(orderId);
             lists.add(fasuperOrder);
         }else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_FLOWERPLUS){ //flowerPlus
-            List<FlowerPlusOrder> flowerPlusOrders = flowerPlusOrderRepository.findByYOrderId(orderId);
+            List<FlowerPlusOrder> flowerPlusOrders = flowerPlusOrderRepository.findByyOrderId(orderId);
             for(FlowerPlusOrder flowerPlusOrder:flowerPlusOrders){
                 lists.add(flowerPlusOrder);
             }
         }else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_HUYAORAL){ //上海沪雅口腔
-            HuyaOralOrder huyaOralOrder = huyaOralOrderRepository.findByYOrderId(orderId);
+            HuyaOralOrder huyaOralOrder = huyaOralOrderRepository.findByyOrderId(orderId);
             lists.add(huyaOralOrder);
         }else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_DAOJIAMEI){ //白富美
-            DaoJiaMeiOrder daoJiaMeiOrder = daoJiaMeiOrderRepository.findByYOrderId(orderId);
+            DaoJiaMeiOrder daoJiaMeiOrder = daoJiaMeiOrderRepository.findByyOrderId(orderId);
             lists.add(daoJiaMeiOrder);
         }else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_WEIZHUANGWANG){ //微装网
-            WeiZhuangWangOrder weiZhuangWangOrder = weiZhuangWangOrderRepository.findByYOrderId(orderId);
+            WeiZhuangWangOrder weiZhuangWangOrder = weiZhuangWangOrderRepository.findByyOrderId(orderId);
             lists.add(weiZhuangWangOrder);
         }else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_BOVO){ //邦天乐
-            BovoOrder bovoOrder = bovoOrderRepository.findByYOrderId(orderId);
+            BovoOrder bovoOrder = bovoOrderRepository.findByyOrderId(orderId);
             lists.add(bovoOrder);
         }else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_GAOFEI){ //高飞体育
-            GaofeiOrder gaofeiOrder = gaofeiOrderRepository.findByYOrderId(orderId);
+            GaofeiOrder gaofeiOrder = gaofeiOrderRepository.findByyOrderId(orderId);
             lists.add(gaofeiOrder);
         }
         else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_JIUYE){ //九曳
-            List<JiuyeOrder> orders = jiuyeOrderRepository.findByYOrderId(orderId);
+            List<JiuyeOrder> orders = jiuyeOrderRepository.findByyOrderId(orderId);
             for(JiuyeOrder order:orders){
                 lists.add(order);
             }
         }
         else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_BAOJIE){
-        	BaojieOrder order = baojieOrderRepository.findByYOrderId(orderId);
+        	BaojieOrder order = baojieOrderRepository.findByyOrderId(orderId);
     		lists.add(order);
         }
         else if(productType == ModelConstant.YUYUE_PRODUCT_TYPE_AIXIANGBAN){
-        	AixiangbanOrder order = aixiangbanOrderRepository.findByYOrderId(orderId);
+        	AixiangbanOrder order = aixiangbanOrderRepository.findByyOrderId(orderId);
         	lists.add(order);
         }
         else{

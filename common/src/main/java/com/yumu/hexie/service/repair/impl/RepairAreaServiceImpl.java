@@ -48,7 +48,7 @@ public class RepairAreaServiceImpl implements RepairAreaService {
 		}
 		if (existList != null) {
 			for (RepairArea existArea : existList) {	//这里用主键删除。其实可以直接delete一个list,但是可能多人操作会有锁表
-				repairAreaRepository.delete(existArea.getId());
+				repairAreaRepository.deleteById(existArea.getId());
 			}
 		}
 

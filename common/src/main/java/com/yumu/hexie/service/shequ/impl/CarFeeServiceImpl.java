@@ -2,19 +2,14 @@ package com.yumu.hexie.service.shequ.impl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.http.client.methods.HttpGet;
-import org.hibernate.bytecode.buildtime.spi.ExecutionException;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JavaType;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MyHttpClient;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
-import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.vo.CarFeeInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.service.shequ.CarFeeService;

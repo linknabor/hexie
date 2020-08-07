@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.yumu.hexie.web.interceptor;
+package com.yumu.hexie.web.filter;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
