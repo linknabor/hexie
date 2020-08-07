@@ -89,7 +89,7 @@ public class CouponServiceImpl implements CouponService {
 	
 	@Async
 	public void updateSeedForRuleUpdate(long seedId){
-		CouponSeed oriSeed = couponSeedRepository.findOne(seedId);
+		CouponSeed oriSeed = couponSeedRepository.findById(seedId).get();
 		oriSeed.getSeedStr();
 		oriSeed.updateTotal(couponRuleRepository.findBySeedId(seedId));
 		couponSeedRepository.save(oriSeed);
@@ -101,7 +101,7 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	public void updateSeedAndRuleForCouponUse(Coupon coupon){
-		CouponRule rule = couponRuleRepository.findOne(coupon.getRuleId());
+		CouponRule rule = couponRuleRepository.findById(coupon.getRuleId()).get();
 		rule.addUsed();
 		saveRule(rule);
 	}
@@ -122,7 +122,7 @@ public class CouponServiceImpl implements CouponService {
 				}
 
 				log.error("CREATE SEED: rules:" + rules.size());
-				User user = userRepository.findOne(userId);
+				User user = userRepository.findById(userId);
 				CouponSeed cs = new CouponSeed();
 				cs.update(template);
 				cs.setUserId(userId);
@@ -278,7 +278,7 @@ public class CouponServiceImpl implements CouponService {
 	public List<Coupon> findCouponsFromOrder(long orderId) {
 		CouponSeed cs = couponSeedRepository.findBySeedTypeAndBizId(ModelConstant.COUPON_SEED_ORDER_BUY, orderId);
 		if(cs != null) {
-			return couponRepository.findBySeedIdOrderByIdDesc(cs.getId(), new PageRequest(0,20));
+			return couponRepository.findBySeedIdOrderByIdDesc(cs.getId(), PageRequest.of(0,20));
 		} else {
 			return new ArrayList<Coupon>();
 		}
@@ -289,7 +289,7 @@ public class CouponServiceImpl implements CouponService {
 	public List<Coupon> findCouponsBySeedStr(String seedStr){
 		CouponSeed cs = couponSeedRepository.findBySeedStr(seedStr);
 		if(cs != null) {
-			return couponRepository.findBySeedIdOrderByIdDesc(cs.getId(), new PageRequest(0,20));
+			return couponRepository.findBySeedIdOrderByIdDesc(cs.getId(), PageRequest.of(0,20));
 		} else {
 			return new ArrayList<Coupon>();
 		}
@@ -298,7 +298,7 @@ public class CouponServiceImpl implements CouponService {
 	public List<Coupon> findAvaibleCoupon(long userId,Cart cart) {
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, new PageRequest(0,200));
+		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
 		
 		List<Coupon> result = new ArrayList<Coupon>();
 		for(Coupon coupon : coupons) {
@@ -316,7 +316,7 @@ public class CouponServiceImpl implements CouponService {
         }
         List<Integer> status = new ArrayList<Integer>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, new PageRequest(0,200));
+        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
         
         List<Coupon> result = new ArrayList<Coupon>();
         for(Coupon coupon : coupons) {
@@ -330,7 +330,7 @@ public class CouponServiceImpl implements CouponService {
     public List<Coupon> findAvaibleCoupon4ServiceType(long userId,long homeServiceType,Long parentType, Long itemId){
         List<Integer> status = new ArrayList<Integer>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, new PageRequest(0,200));
+        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
         
         List<Coupon> result = new ArrayList<Coupon>();
         for(Coupon coupon : coupons) {
@@ -349,7 +349,7 @@ public class CouponServiceImpl implements CouponService {
 		}
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, new PageRequest(0,200));
+		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
 		
 		Integer onsaleType = !(salePlan instanceof OnSaleRule) ? null : ((OnSaleRule)salePlan).getProductType();
 		if (onsaleType==null) {
@@ -535,7 +535,7 @@ public class CouponServiceImpl implements CouponService {
 		
 		log.error("mainType:"+mainType+",subType:"+subType+",itemId:"+itemId);
         if(new Long(PromotionConstant.COUPON_ITEM_TYPE_MARKET).equals(mainType) && itemId != null && !itemId.equals(0)){
-            Product product = productRepository.findOne(itemId);
+            Product product = productRepository.findById(itemId).get();
             return product == null ? 0 : product.getMerchantId();
         }
         if(new Long(PromotionConstant.COUPON_ITEM_TYPE_SERVICE).equals(mainType) && subType != null && !subType.equals(0)) {
@@ -596,7 +596,7 @@ public class CouponServiceImpl implements CouponService {
     	    for(OrderItem item : order.getItems()) {
     	        Integer onsaleType = 0;
     	        if(item.getOrderType() == ModelConstant.ORDER_TYPE_ONSALE) {
-    	            OnSaleRule plan = onSaleRuleRepository.findOne(item.getRuleId());
+    	            OnSaleRule plan = onSaleRuleRepository.findById(item.getRuleId()).get();
     	            onsaleType = plan.getProductType();
     	        }
                 if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_MARKET, new Long(item.getOrderType()),new Long(onsaleType),item.getProductId(), 
@@ -613,7 +613,7 @@ public class CouponServiceImpl implements CouponService {
 	public List<Coupon> findAvaibleCoupon(ServiceOrder order) {
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(order.getUserId(),status, new PageRequest(0,200));
+		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(order.getUserId(),status, PageRequest.of(0,200));
 		
 		List<Coupon> result = new ArrayList<Coupon>();
 		for(Coupon coupon : coupons) {
@@ -630,7 +630,7 @@ public class CouponServiceImpl implements CouponService {
 		List<Integer> invalidStatus = new ArrayList<Integer>();
 		invalidStatus.add(ModelConstant.COUPON_STATUS_USED);
 		invalidStatus.add(ModelConstant.COUPON_STATUS_TIMEOUT);
-		return couponRepository.findByUserIdAndStatusIn(userId, invalidStatus, new PageRequest(page, COUPON_PAGE_SIZE));
+		return couponRepository.findByUserIdAndStatusIn(userId, invalidStatus, PageRequest.of(page, COUPON_PAGE_SIZE));
  	}
 	
 	@Override
@@ -648,8 +648,8 @@ public class CouponServiceImpl implements CouponService {
         
         r.setInvalidCount(invalidNum);
         r.setValidCount(validNum);
-        r.setValidCoupons(couponRepository.findByUserIdAndStatusIn(userId, validStatus, new PageRequest(0, 40)));
-        r.setInvalidCoupons(couponRepository.findByUserIdAndStatusIn(userId, invalidStatus, new PageRequest(0, 2)));;
+        r.setValidCoupons(couponRepository.findByUserIdAndStatusIn(userId, validStatus, PageRequest.of(0, 40)));
+        r.setInvalidCoupons(couponRepository.findByUserIdAndStatusIn(userId, invalidStatus, PageRequest.of(0, 2)));;
         
         return r;
     }
@@ -681,7 +681,7 @@ public class CouponServiceImpl implements CouponService {
         if(order.getCouponId() == null || order.getCouponId() == 0){
             return;
         }
-        Coupon coupon = couponRepository.findOne(order.getCouponId());
+        Coupon coupon = couponRepository.findById(order.getCouponId()).get();
         if(!isAvaible(order, coupon,true)){
             throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
         }
@@ -689,7 +689,7 @@ public class CouponServiceImpl implements CouponService {
         coupon.cousume(order.getId());
         couponRepository.save(coupon);
         
-        User user = userRepository.findOne(coupon.getUserId());
+        User user = userRepository.findById(coupon.getUserId());
         if(user.getCouponCount()>0) {
             user.setCouponCount(user.getCouponCount()-1);
             userRepository.save(user);
@@ -705,7 +705,7 @@ public class CouponServiceImpl implements CouponService {
             return true;
         }
         log.warn("comsume红包Bill[BEG]["+bill.getId()+"]Coupon["+bill.getId()+"]");
-	    Coupon coupon = couponRepository.findOne(bill.getCouponId());
+	    Coupon coupon = couponRepository.findById(bill.getCouponId()).get();
 		if(!isAvaible(PromotionConstant.COUPON_ITEM_TYPE_SERVICE,
             new Long(bill.getOrderType()), bill.getItemType(), bill.getItemId(), bill.getAmount().floatValue(), coupon, true)){
 			//throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
@@ -715,7 +715,7 @@ public class CouponServiceImpl implements CouponService {
 		coupon.cousume(bill.getId());
 		couponRepository.save(coupon);
 		
-		User user = userRepository.findOne(coupon.getUserId());
+		User user = userRepository.findById(coupon.getUserId());
 		if(user.getCouponCount()>0) {
 			user.setCouponCount(user.getCouponCount()-1);
 			userRepository.save(user);
@@ -731,7 +731,7 @@ public class CouponServiceImpl implements CouponService {
 	    if(couponId ==null || couponId == 0) {
 	        return;
 	    }
-	    Coupon coupon = couponRepository.findOne(couponId);
+	    Coupon coupon = couponRepository.findById(couponId).get();
 	    if(coupon == null) {
 	        return;
 	    }
@@ -747,7 +747,7 @@ public class CouponServiceImpl implements CouponService {
 	
 	@Override
 	public Coupon findOne(long id) {
-	    return couponRepository.findOne(id);
+	    return couponRepository.findById(id).get();
 	}
 	@Override
 	public void timeout(Coupon coupon){
@@ -759,7 +759,7 @@ public class CouponServiceImpl implements CouponService {
 		coupon.timeout();
 		couponRepository.save(coupon);
 		
-		User user = userRepository.findOne(coupon.getUserId());
+		User user = userRepository.findById(coupon.getUserId());
 		if(user.getCouponCount()>0) {
 			user.setCouponCount(user.getCouponCount()-1);
 			userRepository.save(user);
@@ -767,7 +767,7 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	public List<Coupon> findTop100TimeoutCoupon(){
-		return couponRepository.findTimeoutByPage(DateUtil.getDateFromString(DateUtil.dtFormat(new Date())), new PageRequest(0, 100));
+		return couponRepository.findTimeoutByPage(DateUtil.getDateFromString(DateUtil.dtFormat(new Date())), PageRequest.of(0, 100));
 	}
 
 	@Override
@@ -776,7 +776,7 @@ public class CouponServiceImpl implements CouponService {
 		List<Coupon> result = new ArrayList<Coupon>();
         List<Integer> status = new ArrayList<Integer>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
-        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(user.getId(), status, new PageRequest(0,200));
+        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(user.getId(), status, PageRequest.of(0,200));
         for(Coupon coupon : coupons) {
             if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_WUYE, 0l, 0l, 
                 0l, null, coupon,false)){
@@ -800,7 +800,7 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public void comsume(String feePrice, long couponId) {
 
-		Coupon coupon = couponRepository.findOne(couponId);
+		Coupon coupon = couponRepository.findById(couponId).get();
 
         log.info("comsume红包Bill[BEG]feePrice["+feePrice+"]["+couponId+"]");
 		if(!isAvaible(feePrice, coupon)){
@@ -811,7 +811,7 @@ public class CouponServiceImpl implements CouponService {
 		couponRepository.save(coupon);
 
         log.info("comsume红包Bill[END]feePrice["+feePrice+"]["+couponId+"]");
-		User user = userRepository.findOne(coupon.getUserId());
+		User user = userRepository.findById(coupon.getUserId());
 		if(user.getCouponCount()>0) {
 			userRepository.updateUserCoupon(user.getCouponCount()-1, user.getId(), user.getCouponCount());
 		}
@@ -823,7 +823,7 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public List<Coupon> findTimeoutCouponByDate(Date fromDate, Date toDate) {
 
-		return couponRepository.findTimeoutCouponByDate(fromDate, toDate, new PageRequest(0, 10000));
+		return couponRepository.findTimeoutCouponByDate(fromDate, toDate, PageRequest.of(0, 10000));
 	
 	}
 	

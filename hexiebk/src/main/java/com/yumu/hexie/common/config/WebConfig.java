@@ -5,14 +5,11 @@ import java.util.List;
 
 import javax.xml.transform.Source;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.FormHttpMessageConverter;
@@ -24,7 +21,6 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -32,12 +28,12 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
-@EnableWebMvc
 @ComponentScan({"com.yumu.hexie.backend.web"})
 public class WebConfig extends WebMvcConfigurationSupport {
 
-    private static final String PROP_FILE_ENCODING = "UTF-8";
-
+    @Autowired
+    private MessageSource messageSource;
+    
     @Bean
     public RequestMappingHandlerMapping requestMappingHandlerMapping() {
         RequestMappingHandlerMapping handlerMapping = super.requestMappingHandlerMapping();
@@ -68,15 +64,6 @@ public class WebConfig extends WebMvcConfigurationSupport {
     	converters.add(new AllEncompassingFormHttpMessageConverter());
     	converters.add(new FormHttpMessageConverter());
 	}
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer loadProperties() {
-        PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
-        Resource[] resources = new ClassPathResource[]{new ClassPathResource("config.properties")};
-        configurer.setLocations(resources);
-        configurer.setFileEncoding(PROP_FILE_ENCODING);
-        configurer.setIgnoreUnresolvablePlaceholders(true);
-        return configurer;
-    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -84,22 +71,14 @@ public class WebConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/resources/img/**").addResourceLocations("/resources/img/");
         registry.addResourceHandler("/resources/js/**").addResourceLocations("/resources/js/");
     }
-
+    
     @Override
     public Validator getValidator() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.setValidationMessageSource(messageSource());
+        validator.setValidationMessageSource(messageSource);
         return validator;
     }
 
-    @Bean
-    public MessageSource messageSource() {
-        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-        messageSource.setBasename("locale/messages");
-        messageSource.setDefaultEncoding("UTF-8");
-        return messageSource;
-    }
-    
     @Bean(name = "mapper")
     public ObjectMapper mapper() {
         return new ObjectMapper();

@@ -85,7 +85,7 @@ public class GaofeiServiceImpl implements GaofeiService {
 
 	@Override
 	public YuyueOrder addGaofeiYuyueOrder(User user, GaofeiReq gaofeiReq, long addressId) {
-		Address address = addressRepository.findOne(addressId);
+		Address address = addressRepository.findById(addressId).get();
 		YuyueOrder yOrder = new YuyueOrder();
 
 		Merchant merchant = merchantRepository.findMerchantByProductType(ModelConstant.YUYUE_PRODUCT_TYPE_GAOFEI);
@@ -124,8 +124,8 @@ public class GaofeiServiceImpl implements GaofeiService {
 
 	@Override
 	public boolean checkIsExistenceByProduct(User user, long ruleId) {
-		YuyueRule yRule = yuyueRuleRepository.findOne(ruleId);
-		Product product = productRepository.findOne(yRule.getProductId());
+		YuyueRule yRule = yuyueRuleRepository.findById(ruleId).get();
+		Product product = productRepository.findById(yRule.getProductId()).get();
 		
 		log.error("checkIsExperience userId" + user.getId() + ", yRuleId=" + ruleId + "productId=" + product.getId());
 

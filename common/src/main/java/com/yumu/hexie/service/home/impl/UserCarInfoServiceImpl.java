@@ -51,7 +51,7 @@ public class UserCarInfoServiceImpl implements UserCarInfoService {
 			}
 		}
 		if(defaultUserCarInfo != null) {
-			userCarInfoRepository.save(userCarInfos);
+			userCarInfoRepository.saveAll(userCarInfos);
 		}
 		return defaultUserCarInfo != null;
 	}
@@ -65,7 +65,7 @@ public class UserCarInfoServiceImpl implements UserCarInfoService {
 	}
 	@Override
 	public UserCarInfo queryUserCarInfoById(long id) {
-		UserCarInfo userCarInfo = userCarInfoRepository.findOne(id);
+		UserCarInfo userCarInfo = userCarInfoRepository.findById(id).get();
 		return userCarInfo;
 	}
 

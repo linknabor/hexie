@@ -406,7 +406,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 			NumberFormat nf = new DecimalFormat("#");
 			String displayAmt = nf.format(couponAmt);
 			
-			User user = userRepository.findOne(userId);
+			User user = userRepository.findById(userId);
 			
 			if (user == null) {
 				SCHEDULE_LOG.debug(" user does not exist " + userId);
@@ -514,7 +514,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 			for (OnSaleAreaItem areaItem : areaList) {
 				onSaleAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_OFF, areaItem.getId());
 			}
-			Product product = productRepository.findOne(onSaleRule.getProductId());
+			Product product = productRepository.findById(onSaleRule.getProductId()).get();
 			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
 		}
 	

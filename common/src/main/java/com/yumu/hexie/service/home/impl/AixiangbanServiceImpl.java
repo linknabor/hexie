@@ -44,7 +44,7 @@ public class AixiangbanServiceImpl implements AixiangbanService {
 
 	@Override
 	public YuyueOrder addOrder(User user, AixiangbanReq req, long addressId) {
-		Address address = addressRepository.findOne(addressId);
+		Address address = addressRepository.findById(addressId).get();
 		List<Object> ruleList = yuyueRuleRepository.queryRuleAndProductInfoByRuleId(req.getRuleId());
 		Object[] ruleInfo = (Object[])ruleList.get(0);//TODO 这里需要搞清楚Object的结构
 		YuyueOrder yOrder = new YuyueOrder();

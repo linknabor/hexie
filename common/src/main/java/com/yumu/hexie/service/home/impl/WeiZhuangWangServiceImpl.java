@@ -35,7 +35,7 @@ public class WeiZhuangWangServiceImpl implements WeiZhuangWangService {
 	@Override
 	public YuyueOrder addNoNeedPayOrder(User user, WeiZhuangWangReq weiZhuangWangReq,
 			long addressId) {
-		Address address = addressRepository.findOne(addressId);
+		Address address = addressRepository.findById(addressId).get();
 		weiZhuangWangReq.setStrMobile(address.getTel());
 		weiZhuangWangReq.setStrName(address.getReceiveName());
 		weiZhuangWangReq.setStrWorkAddr(address.getRegionStr()+address.getDetailAddress());

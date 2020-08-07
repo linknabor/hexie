@@ -34,7 +34,7 @@ public class RegionServiceImpl implements RegionService{
 
 	@Override
 	public Region getRegionInfoById(long id) {
-		return regionRepository.findOne(id);
+		return regionRepository.findById(id).get();
 	}
 
 	@Override

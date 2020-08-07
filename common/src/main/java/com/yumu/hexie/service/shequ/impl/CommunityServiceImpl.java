@@ -92,7 +92,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Transactional
 	public Thread addThread(User user, Thread thread) {
 		
-		User currUser = userRepository.findOne(user.getId());
+		User currUser = userRepository.findById(user.getId());
 		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
 		Address currAdddr = new Address();
 		for (Address address : addrList) {
@@ -125,7 +125,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void deleteThread(User user, long threadId) {
 
-		Thread thread = threadRepository.findOne(threadId);
+		Thread thread = threadRepository.findById(threadId).get();
 		if (thread == null) {
 			throw new BizValidateException("帖子不存在。");
 		}
@@ -145,7 +145,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public void updateThread(Thread thread) {
 
-		Thread t = threadRepository.findOne(thread.getThreadId());
+		Thread t = threadRepository.findById(thread.getThreadId()).get();
 		if (t == null) {
 			throw new BizValidateException("帖子不存在。");
 		}
@@ -177,7 +177,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public Thread getThreadByTreadId(long threadId) {
 	
-		return threadRepository.findOne(threadId);
+		return threadRepository.findById(threadId).get();
 
 	}
 
@@ -185,7 +185,7 @@ public class CommunityServiceImpl implements CommunityService {
 	public void deleteComment(User user, long threadCommentId) {
 		
 		
-		ThreadComment comment = threadCommentRepository.findOne(threadCommentId);
+		ThreadComment comment = threadCommentRepository.findById(threadCommentId).get();
 		if (comment == null) {
 			throw new BizValidateException("评论不存在。");
 		}
@@ -194,7 +194,7 @@ public class CommunityServiceImpl implements CommunityService {
 			throw new BizValidateException("用户无权限删除帖子。");
 		}
 		
-		threadCommentRepository.delete(threadCommentId);
+		threadCommentRepository.deleteById(threadCommentId);
 		
 	}
 
@@ -232,7 +232,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public Annoucement getAnnoucementById(long annoucementId) {
 
-		return annoucementRepository.findOne(annoucementId);
+		return annoucementRepository.findById(annoucementId).get();
 	}
 
 	@Override
@@ -273,7 +273,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	@Transactional
 	public void saveThreadComment(Long threadId, String content, Long userId, String userName) {
-		Thread thread=threadRepository.findOne(threadId);
+		Thread thread=threadRepository.findById(threadId).get();
 		Long toUserId =thread.getUserId();
 		String toUserName=thread.getUserName();
 		
@@ -298,13 +298,13 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public ThreadComment getThreadCommentByTreadId(long threadCommentId) {
-		return threadCommentRepository.findOne(threadCommentId);
+		return threadCommentRepository.findById(threadCommentId).get();
 	}
 	
 	@Override
 	public void updateThreadComment(ThreadComment thread) {
 
-		ThreadComment t = threadCommentRepository.findOne(thread.getCommentId());
+		ThreadComment t = threadCommentRepository.findById(thread.getCommentId()).get();
 		if (t == null) {
 			throw new BizValidateException("帖子不存在。");
 		}

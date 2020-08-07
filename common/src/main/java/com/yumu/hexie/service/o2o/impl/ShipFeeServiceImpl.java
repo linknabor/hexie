@@ -42,7 +42,7 @@ public class ShipFeeServiceImpl implements ShipFeeService {
      */
     @Override
     public ShipFeeTemplate findTemplate(long tplId) {
-        return shipFeeTemplateRepository.findOne(tplId);
+        return shipFeeTemplateRepository.findById(tplId).get();
     }
 
     /** 
@@ -81,14 +81,14 @@ public class ShipFeeServiceImpl implements ShipFeeService {
     public ShipFeeTemplate findTemplateByItem(long itemId) {
         ServiceItem item = homeItemService.queryById(itemId);
         if(item.getShipTemplate()!=null && item.getShipTemplate() > 0) {
-            return shipFeeTemplateRepository.findOne(item.getShipTemplate());
+            return shipFeeTemplateRepository.findById(item.getShipTemplate()).get();
         }
         ServiceType type;
         long parentId = item.getType();
         do {
             type = homeItemService.queryTypeById(parentId);
             if(type.getShipTemplate()!=null && type.getShipTemplate() > 0) {
-                return shipFeeTemplateRepository.findOne(type.getShipTemplate());
+                return shipFeeTemplateRepository.findById(type.getShipTemplate()).get();
             }
             parentId = type.getParentId();
         } while (parentId > 0);

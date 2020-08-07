@@ -12,8 +12,6 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 
-import org.apache.http.annotation.Immutable;
-
 /**
  * <pre>
  * 
@@ -23,7 +21,6 @@ import org.apache.http.annotation.Immutable;
  * @version $Id: IOUtils.java, v 0.1 2016年1月7日 上午2:38:15  Exp $
  */
 
-@Immutable
 public class IOUtils {
 
     public static void copy(final InputStream in, final OutputStream out) throws IOException {
