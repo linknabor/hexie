@@ -138,15 +138,15 @@ public class DistributionServiceImpl implements DistributionService {
     public List<OnSaleAreaItem> queryOnsales(User user, int type, int page) {
         if(user.getProvinceId() != 0){
         if(type == ModelConstant.PRODUCT_FEATURED){
-            return onSaleAreaItemRepository.findFeatured(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 100));
+            return onSaleAreaItemRepository.findFeatured(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), PageRequest.of(page, 100));
         } else if(type>0){
-            return onSaleAreaItemRepository.findByCusProductType(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), new PageRequest(page, 100));
+            return onSaleAreaItemRepository.findByCusProductType(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), PageRequest.of(page, 100));
         }
         }else{
             if(type == ModelConstant.PRODUCT_FEATURED){
-                return onSaleAreaItemRepository.findFeatured(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), new PageRequest(page, 100));
+                return onSaleAreaItemRepository.findFeatured(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), PageRequest.of(page, 100));
             } else if(type>0){
-                return onSaleAreaItemRepository.findByCusProductType(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), new PageRequest(page, 100));
+                return onSaleAreaItemRepository.findByCusProductType(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), PageRequest.of(page, 100));
             }   
         }
 
@@ -166,9 +166,9 @@ public class DistributionServiceImpl implements DistributionService {
 
     	List<RgroupAreaItem> result ;
         if(currUser.getXiaoquId() == 0){
-            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), currUser.getAppId(), new PageRequest(page, 12));
+            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), currUser.getAppId(), PageRequest.of(page, 12));
         } else {
-            result = rgroupAreaItemRepository.findAllByUserInfo(currUser.getProvinceId(), currUser.getCityId(), currUser.getCountyId(), currUser.getXiaoquId(),System.currentTimeMillis(), currUser.getAppId(), new PageRequest(page, 12));
+            result = rgroupAreaItemRepository.findAllByUserInfo(currUser.getProvinceId(), currUser.getCityId(), currUser.getCountyId(), currUser.getXiaoquId(),System.currentTimeMillis(), currUser.getAppId(), PageRequest.of(page, 12));
         }
         List<RgroupAreaItem> r = filterByRuleId(result);
         return r;
@@ -214,14 +214,14 @@ public class DistributionServiceImpl implements DistributionService {
     @Override
     public List<OnSaleAreaItem> queryOnsalesV2(User user, int type, int page) {
     	
-    	User currUser = userRepository.findOne(user.getId());
+    	User currUser = userRepository.findById(user.getId());
     	long current = System.currentTimeMillis();
     	List<OnSaleAreaItem> itemList = new ArrayList<>();
     	
     	if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {	//未绑定房屋的用户，展示样板商品
-    		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, new PageRequest(page, 100));
+    		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, PageRequest.of(page, 100));
     	}else {	//已经绑定房屋的用户查询关联小区的商品
-    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), new PageRequest(page, 100)); 
+    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), PageRequest.of(page, 100)); 
     	}
     	
         return itemList;

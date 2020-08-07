@@ -123,11 +123,13 @@ public class UserController extends BaseController{
 			    UserInfo userInfo = new UserInfo(user, odDefinition);
 
 			    endTime = System.currentTimeMillis();
+			    log.info("user1，耗时：" + ((endTime-beginTime)/1000));
 
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    endTime = System.currentTimeMillis();
+			    log.info("user2，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 //			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
@@ -138,6 +140,9 @@ public class UserController extends BaseController{
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
+			    
+			    endTime = System.currentTimeMillis();
+			    log.info("user3，耗时：" + ((endTime-beginTime)/1000));
 			    
 			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
 			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {

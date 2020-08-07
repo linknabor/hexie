@@ -206,7 +206,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(preActivateReq.getCardId(), preActivateReq.getOpenid());
 		if (wechatCard != null && ModelConstant.CARD_STATUS_ACTIVATED == wechatCard.getStatus()) {
 			logger.info("当前用户卡券已激活。卡券code:" + wechatCard.getCardCode());
-			User cardUser = userRepository.findById(wechatCard.getUserId());
+			User cardUser = userRepository.findById(wechatCard.getUserId()).get();
 			if (cardUser == null) {
 				List<User> cardUserList = userRepository.findByOpenid(wechatCard.getUserOpenId());
 				if (cardUserList!=null && !cardUserList.isEmpty()) {

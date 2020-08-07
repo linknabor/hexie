@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +72,9 @@ public class CommunityController extends BaseController{
 	@Inject
 	private SystemConfigService systemConfigService;
 	
+	@Autowired
+	private QiniuUtil qiniuUtil;
+	
 	/*****************[BEGIN]帖子********************/
 	
 	/**
@@ -92,7 +96,7 @@ public class CommunityController extends BaseController{
 		
 		List<Thread>list = new ArrayList<Thread>();
 		
-		Pageable page = new PageRequest(currPage, PAGE_SIZE, sort);
+		Pageable page = PageRequest.of(currPage, PAGE_SIZE, sort);
 		//查看本小区的
 		if ("y".equals(filter)) {
 			if (ModelConstant.THREAD_CATEGORY_SUGGESTION == thread.getThreadCategory()) {
@@ -120,8 +124,8 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 					
 				}
 				
@@ -144,7 +148,7 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					thumbnailLinkList.add(QiniuUtil.getInstance().getThumbnailLink(urlKey, "3", "0"));
+					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
 					
 				}
 				
@@ -266,8 +270,8 @@ public class CommunityController extends BaseController{
 			for (int i = 0; i < urls.length; i++) {
 				
 				String urlKey = urls[i];
-				imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-				thumbnailLinkList.add(QiniuUtil.getInstance().getThumbnailLink(urlKey, "3", "0"));
+				imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+				thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
 				
 			}
 			
@@ -296,7 +300,7 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < urls.length; j++) {
 					
 					String urlKey = urls[j];
-					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 					
 				}
 				tc.setPreviewLink(previewLinkList);
@@ -333,7 +337,7 @@ public class CommunityController extends BaseController{
 			uploadIds = uploadIds.substring(0, uploadIds.length()-1);	//截掉最后一个逗号
 			String[]uploadIdArr = uploadIds.split(",");
 			
-			String uptoken = QiniuUtil.getInstance().getUpToken();	//获取qiniu上传文件的token
+			String uptoken = qiniuUtil.getUpToken();	//获取qiniu上传文件的token
 			
 			log.error("qiniu token :" + uptoken);
 			
@@ -392,7 +396,7 @@ public class CommunityController extends BaseController{
 						Map map = null;
 						while (!isUploaded && counter <3 ) {
 
-							map = QiniuUtil.getInstance().getImgs(domain+key);
+							map = qiniuUtil.getImgs(domain+key);
 							Object error = map.get("error");
 							if (error != null) {
 								log.error((String)error);
@@ -519,7 +523,7 @@ public class CommunityController extends BaseController{
 			for (int j = 0; j < urls.length; j++) {
 				
 				String urlKey = urls[j];
-				previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+				previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 				
 			}
 			retComment.setPreviewLink(previewLinkList);
@@ -693,8 +697,8 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 					
 				}
 				
@@ -751,8 +755,8 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-					thumbnailLinkList.add(QiniuUtil.getInstance().getThumbnailLink(urlKey, "3", "0"));
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
 					
 				}
 				
@@ -881,7 +885,7 @@ public class CommunityController extends BaseController{
 			uploadIds = uploadIds.substring(0, uploadIds.length()-1);	//截掉最后一个逗号
 			String[]uploadIdArr = uploadIds.split(",");
 			
-			String uptoken = QiniuUtil.getInstance().getUpToken();	//获取qiniu上传文件的token
+			String uptoken = qiniuUtil.getUpToken();	//获取qiniu上传文件的token
 			
 			log.error("qiniu token :" + uptoken);
 			
@@ -942,7 +946,7 @@ public class CommunityController extends BaseController{
 						Map map = null;
 						while (!isUploaded && counter <3 ) {
 
-							map = QiniuUtil.getInstance().getImgs(domain+key);
+							map = qiniuUtil.getImgs(domain+key);
 							Object error = map.get("error");
 							if (error != null) {
 								log.error((String)error);

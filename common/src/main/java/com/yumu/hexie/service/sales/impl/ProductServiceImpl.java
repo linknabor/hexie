@@ -18,7 +18,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public Product getProduct(long productId) {
-		return productRepository.findOne(productId);
+		return productRepository.findById(productId).get();
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void saledCount(long productId, int count) {
-		Product product = productRepository.findOne(productId);
+		Product product = productRepository.findById(productId).get();
 		product.setSaledNum(product.getSaledNum()+count);
 		product.setFreezeNum(product.getFreezeNum()-count);
 		productRepository.save(product);
@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void unfreezeCount(long productId, int count) {
-		Product product = productRepository.findOne(productId);
+		Product product = productRepository.findById(productId).get();
 		product.setFreezeNum(product.getFreezeNum()-count);
 		productRepository.save(product);
 	}

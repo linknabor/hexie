@@ -125,7 +125,7 @@ public class XiyiServiceImpl implements XiyiService {
             item.setParentType(type.getId());
             item.setBillId(bill.getId());
         }
-        homeBillItemRepository.save(ob.getBill().getItems());
+        homeBillItemRepository.saveAll(ob.getBill().getItems());
         log.warn("创建洗衣订单" + bill.getId()); 
         return bill;
     }
@@ -174,7 +174,7 @@ public class XiyiServiceImpl implements XiyiService {
             case PaymentConstant.PAYMENT_STATUS_INIT:
                 break;
             case PaymentConstant.PAYMENT_STATUS_SUCCESS:
-                YunXiyiBill bill = yunXiyiBillRepository.findOne(payment.getOrderId());
+                YunXiyiBill bill = yunXiyiBillRepository.findById(payment.getOrderId()).get();
                 if(bill.getStatus()==HomeServiceConstant.ORDER_STATUS_CREATE){
                     paySuccess(bill,payment);
                 }
@@ -198,7 +198,7 @@ public class XiyiServiceImpl implements XiyiService {
             Thread.sleep(1000);//等待微信端处理完成
         } catch (InterruptedException e) {
         }
-        YunXiyiBill bill = yunXiyiBillRepository.findOne(billId);
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
         if(bill == null || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_CREATE) {
             return;
         }
@@ -210,7 +210,7 @@ public class XiyiServiceImpl implements XiyiService {
     @Override
     public void cancel(long billId, long userId) {
         log.warn("洗衣取消[BEG]" + billId); 
-        YunXiyiBill bill = yunXiyiBillRepository.findOne(billId);
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
         checkOwner(userId, bill);
         if(bill == null || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_CREATE) {
             throw new BizValidateException("该订单无法取消！");
@@ -225,7 +225,7 @@ public class XiyiServiceImpl implements XiyiService {
     @Override
     public void signed(long billId, long userId) {
         log.warn("洗衣签收[BEG]" + billId); 
-        YunXiyiBill bill = yunXiyiBillRepository.findOne(billId);
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
         checkOwner(userId, bill);
         if(bill == null || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_SERVICED
                 || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_BACKED) {
@@ -244,7 +244,7 @@ public class XiyiServiceImpl implements XiyiService {
 
     @Override
     public List<YunXiyiBill> queryBills(long userId, int page) {
-        return yunXiyiBillRepository.findByUserId(userId,new PageRequest(page, 20,new Sort(Direction.DESC, "id"))).getContent();
+        return yunXiyiBillRepository.findByUserId(userId, PageRequest.of(page, 20,new Sort(Direction.DESC, "id"))).getContent();
     }
 
     /** 
@@ -254,7 +254,7 @@ public class XiyiServiceImpl implements XiyiService {
      */
     @Override
     public YunXiyiBill queryById(long id) {
-        return yunXiyiBillRepository.findOne(id);
+        return yunXiyiBillRepository.findById(id).get();
     }
 
 
@@ -270,7 +270,7 @@ public class XiyiServiceImpl implements XiyiService {
      */
     @Override
     public void timeout(long billId) {
-        YunXiyiBill bill = yunXiyiBillRepository.findOne(billId);
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
 
         log.warn("洗衣超时[BEG]" + billId);
         PaymentOrder payment = paymentService.queryPaymentOrder(PaymentConstant.TYPE_XIYI_ORDER,billId);

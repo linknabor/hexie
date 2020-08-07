@@ -107,7 +107,7 @@ public class BatchServiceImpl implements BatchService {
 	@Override
 	public void fixBindHouse(String userId, String tradeWaterId) {
 
-		User user = userRepository.findById(Long.valueOf(userId));
+		User user = userRepository.findById(Long.valueOf(userId)).get();
 		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
 	}
 

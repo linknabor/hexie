@@ -96,9 +96,9 @@ public class GotongServiceImpl implements GotongService {
     @Async
     @Override
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
-        ServiceOperator op = serviceOperatorRepository.findOne(opId);
-        User opUser = userRepository.findOne(op.getUserId());
-        User orderUser = userRepository.findOne(order.getUserId());
+        ServiceOperator op = serviceOperatorRepository.findById(opId).get();
+        User opUser = userRepository.findById(op.getUserId());
+        User orderUser = userRepository.findById(order.getUserId());
         if (StringUtils.isEmpty(opUser.getAppId()) ) {
 			return;
 		}
@@ -113,7 +113,7 @@ public class GotongServiceImpl implements GotongService {
     @Override
     public void sendRepairAssignedMsg(RepairOrder order){
         
-    	User user = userRepository.findOne(order.getUserId());
+    	User user = userRepository.findById(order.getUserId());
         String url = templateMsgService.getMsgUrl(MsgCfg.URL_WEIXIU_DETAIL) + order.getId();
         News news = new News(new ArrayList<Article>());
         Article article = new Article();
@@ -195,8 +195,8 @@ public class GotongServiceImpl implements GotongService {
     @Override
     public void sendXiyiAssignMsg(long opId, YunXiyiBill bill) {
     	
-    	ServiceOperator op = serviceOperatorRepository.findOne(opId);
-    	User user = userRepository.findOne(op.getUserId());
+    	ServiceOperator op = serviceOperatorRepository.findById(opId).get();
+    	User user = userRepository.findById(op.getUserId());
         String url = templateMsgService.getMsgUrl(MsgCfg.URL_XIYI_NOTICE) + bill.getId();
         
         News news = new News(new ArrayList<Article>());
@@ -227,7 +227,7 @@ public class GotongServiceImpl implements GotongService {
         List<ServiceOperator> ops = operatorService.findByType(serviceType);
         for(ServiceOperator op: ops) {
             LOG.error("发送到操作员！["+serviceType+"]" + billName + " -- " + op.getName() + "--" + op.getId());
-            User user = userRepository.findOne(op.getUserId());
+            User user = userRepository.findById(op.getUserId());
             String accessToken = systemConfigService.queryWXAToken(user.getAppId());
             templateMsgService.sendYuyueBillMsg("", op.getOpenId(), title, billName, requireTime, url, accessToken, user.getAppId(), remark);    
         }
@@ -284,7 +284,7 @@ public class GotongServiceImpl implements GotongService {
 		
 		LOG.info("发送自定服务接单通知， serviceOrder : " + serviceOrder.getId());
 		
-        User user = userRepository.findOne(serviceOrder.getUserId());
+        User user = userRepository.findById(serviceOrder.getUserId());
         String url = templateMsgService.getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_DETAIL) + serviceOrder.getId();
         
         News news = new News(new ArrayList<Article>());

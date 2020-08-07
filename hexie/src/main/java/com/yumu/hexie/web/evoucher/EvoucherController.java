@@ -83,6 +83,7 @@ public class EvoucherController extends BaseController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/orders/{statusType}", method = RequestMethod.GET)
+
 	public BaseResult<List<ServiceOrder>> getEvoucherOrders(@ModelAttribute(Constants.USER)User user,@PathVariable String statusType) throws Exception {
 		List<Integer> status = new ArrayList<Integer>();
 		if("NEEDPAY".equalsIgnoreCase(statusType)){

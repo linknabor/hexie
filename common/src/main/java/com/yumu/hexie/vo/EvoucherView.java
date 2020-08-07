@@ -72,6 +72,7 @@ public class EvoucherView implements Serializable {
 			List<Evoucher> usedList = map.get(ModelConstant.EVOUCHER_STATUS_USED);
 			List<Evoucher> expiredList = map.get(ModelConstant.EVOUCHER_STATUS_EXPIRED);
 			List<Evoucher> invalidList = map.get(ModelConstant.EVOUCHER_STATUS_INVALID);
+
 			if (!unusedList.isEmpty()) {	//如果有未使用的券，则以其中第一条的code作为二维码，价格是所有未使用券的累加金额
 				for (Evoucher evoucher : unusedList) {
 					if (StringUtil.isEmpty(this.code)) {
@@ -148,6 +149,7 @@ public class EvoucherView implements Serializable {
 					count++;
 				}
 				status = ModelConstant.EVOUCHER_STATUS_INVALID;
+
 			}
 		}
 		

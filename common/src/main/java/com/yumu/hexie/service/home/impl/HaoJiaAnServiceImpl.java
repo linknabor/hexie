@@ -59,7 +59,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	@Transactional
 	public Long addNoNeedPayOrder(User user, HaoJiaAnReq haoJiaAnReq,
 			long addressId) {
-		Address address = addressRepository.findOne(addressId);
+		Address address = addressRepository.findById(addressId).get();
 		haoJiaAnReq.setStrMobile(address.getTel());
 		haoJiaAnReq.setStrName(address.getReceiveName());
 		haoJiaAnReq.setStrWorkAddr(address.getRegionStr()+address.getDetailAddress());
@@ -128,7 +128,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	@Override
 	public YuyueQueryOrder queryYuYueOrder(User user, long orderId) {
 		
-		YuyueOrder yuyueOrder = yuyueOrderRepository.findOne(orderId);
+		YuyueOrder yuyueOrder = yuyueOrderRepository.findById(orderId).get();
 		if (yuyueOrder==null) {
 			return null;
 		}
@@ -157,8 +157,8 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	@Override
 	public List<Long> orderAccessAuthority(long orderId) {
 		log.error("进来了");
-		YuyueOrder yorder = yuyueOrderRepository.findOne(orderId);
-		Address address = addressRepository.findOne(yorder.getAddressId());
+		YuyueOrder yorder = yuyueOrderRepository.findById(orderId).get();
+		Address address = addressRepository.findById(yorder.getAddressId()).get();
 		List<Long> regionIds = new ArrayList<Long>();
         regionIds.add(1l);
         regionIds.add(address.getProvinceId());

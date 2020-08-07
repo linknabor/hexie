@@ -543,7 +543,7 @@ public class WuyeController extends BaseController {
 	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId) {
 
 		if (!StringUtil.isEmpty(userId)) {
-			User user = userRepository.findOne(Long.valueOf(userId));
+			User user = userRepository.findById(Long.valueOf(userId)).get();
 			session.setAttribute("sessionUser", user);
 		}
 		return BaseResult.successResult("succeeded");

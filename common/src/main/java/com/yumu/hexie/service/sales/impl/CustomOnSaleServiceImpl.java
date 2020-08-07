@@ -51,7 +51,7 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
 
 	@Override
 	public SalePlan findSalePlan(long ruleId) {
-		return onSaleRuleRepository.findOne(ruleId);
+		return onSaleRuleRepository.findById(ruleId).get();
 	}
 
 
