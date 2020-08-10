@@ -3,6 +3,7 @@ package com.yumu.hexie.service.shequ;
 import java.util.List;
 
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
@@ -168,6 +169,19 @@ public interface WuyeService {
 	 */
 	CellListVO querySectHeXieList(User user, String sect_id, String build_id, String unit_id, String data_type, String region_name);
 
+	/**
+	 * 根据数据类型查询指定的合协社区物业单元信息
+	 * @param user
+	 * @param sect_id
+	 * @param build_id
+	 * @param unit_id
+	 * @param data_type
+	 * @return
+	 * @throws Exception 
+	 */
+	CellListVO querySectHeXieList(GetCellDTO getCellDTO) throws Exception;
+	
+	
 	/**
 	 * 根据名称模糊查询合协社区小区列表
 	 * @param user
