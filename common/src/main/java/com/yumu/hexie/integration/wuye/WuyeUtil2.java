@@ -15,12 +15,14 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
 import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
+import com.yumu.hexie.integration.wuye.req.GetCellRequest;
 import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
@@ -31,6 +33,7 @@ import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
@@ -66,6 +69,7 @@ public class WuyeUtil2 {
 	private static final String QRCODE_PAY_SERVICE_URL = "getServiceSDO.do";	//二维码支付服务信息
 	private static final String QRCODE_URL = "getQRCodeSDO.do";	//二维码支付服务信息
 	private static final String SIGN_IN_OUT_URL = "signInSDO.do";	//二维码支付服务信息
+	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"; //合协社区物业缴费的小区级联
 	
 	/**
 	 * 标准版查询账单
@@ -316,7 +320,7 @@ public class WuyeUtil2 {
 	}
 	
 	/**
-	 * 获取二维码
+	 * 签到签退
 	 * @param user
 	 * @return
 	 * @throws Exception
@@ -332,6 +336,33 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, signInOutRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	
+	/**
+	 * 根据ID查询指定类型的合协社区物业信息
+	 * @param user
+	 * @param sect_id
+	 * @param build_id
+	 * @param unit_id
+	 * @param data_type
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<CellListVO> getMngHeXieList(GetCellDTO getCellDTO) throws Exception{
+
+		String requestUrl = requestUtil.getRequestUrl(getCellDTO.getUser(), "");
+		requestUrl += MNG_HEXIE_LIST_URL;
+		
+		GetCellRequest getCellRequest = new GetCellRequest();
+		BeanUtils.copyProperties(getCellDTO, getCellRequest);
+		
+		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
+		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, getCellRequest, typeReference);
+		BaseResult<CellListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		

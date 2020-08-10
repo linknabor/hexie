@@ -22,6 +22,7 @@ import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
@@ -580,6 +581,12 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		wuyeUtil2.signInOut(signInOutDTO);
 		
+	}
+
+	@Override
+	public CellListVO querySectHeXieList(GetCellDTO getCellDTO) throws Exception {
+		
+		return wuyeUtil2.getMngHeXieList(getCellDTO).getData();
 	}
 
 	
