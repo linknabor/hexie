@@ -26,6 +26,8 @@ public class OtherPayRequest extends WuyeRequest {
 	private String remark;
 	@JsonProperty("qrcode_id")
 	private String qrCodeId;
+	@JsonProperty("mng_cell_id")
+	private String mngCellId;
 	
 	public OtherPayRequest(OtherPayDTO otherPayDTO) {
 		BeanUtils.copyProperties(otherPayDTO, this);
@@ -76,10 +78,19 @@ public class OtherPayRequest extends WuyeRequest {
 	public void setQrCodeId(String qrCodeId) {
 		this.qrCodeId = qrCodeId;
 	}
+
+	public String getMngCellId() {
+		return mngCellId;
+	}
+
+	public void setMngCellId(String mngCellId) {
+		this.mngCellId = mngCellId;
+	}
+
 	@Override
 	public String toString() {
 		return "OtherPayRequest [openid=" + openid + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
-				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + "]";
+				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + "]";
 	}
 	
 	
