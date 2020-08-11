@@ -23,12 +23,12 @@ public class ServiceOrderQueryVO implements Serializable {
 		private String sectName;
 		@JsonProperty("acct_date")
 		private String acctDate;
-		@JsonProperty("acct_time")
-		private String acctTime;
 		@JsonProperty("tran_amt")
 		private String tranAmt;
 		@JsonProperty("fee_name")
 		private String feeName;
+		@JsonProperty("pay_method")
+		private String payMethod;
 		private String remark;
 		
 		public String getSectName() {
@@ -42,12 +42,6 @@ public class ServiceOrderQueryVO implements Serializable {
 		}
 		public void setAcctDate(String acctDate) {
 			this.acctDate = acctDate;
-		}
-		public String getAcctTime() {
-			return acctTime;
-		}
-		public void setAcctTime(String acctTime) {
-			this.acctTime = acctTime;
 		}
 		public String getTranAmt() {
 			return tranAmt;
@@ -67,10 +61,11 @@ public class ServiceOrderQueryVO implements Serializable {
 		public void setRemark(String remark) {
 			this.remark = remark;
 		}
-		@Override
-		public String toString() {
-			return "Orders [sectName=" + sectName + ", acctDate=" + acctDate + ", acctTime=" + acctTime + ", tranAmt="
-					+ tranAmt + ", feeName=" + feeName + ", remark=" + remark + "]";
+		public String getPayMethod() {
+			return payMethod;
+		}
+		public void setPayMethod(String payMethod) {
+			this.payMethod = payMethod;
 		}
 		
 		
