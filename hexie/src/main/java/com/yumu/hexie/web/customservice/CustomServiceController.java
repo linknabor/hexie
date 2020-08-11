@@ -337,7 +337,7 @@ public class CustomServiceController extends BaseController {
 	}
 	
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/order/queryByFeeType", method = RequestMethod.GET)
+	@RequestMapping(value = "/order/queryByFeeType", method = RequestMethod.POST)
 	public BaseResult<ServiceOrderQueryVO> queryOrderBySect(@ModelAttribute(Constants.USER) User user, 
 			@RequestBody OrderQueryVO orderQueryVO) throws Exception{
 		
