@@ -9,6 +9,7 @@ import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 
@@ -47,6 +48,8 @@ public interface CustomService {
 	void saveServiceImages(String appId, long orderId, List<String> imgUrls);
 
 	void saveCommentImages(String appId, long orderId, List<String> imgUrls);
+
+	ServiceOrderQueryVO queryOrderByFeeType(User user, String sectId, String feeId) throws Exception;
 
 
 }

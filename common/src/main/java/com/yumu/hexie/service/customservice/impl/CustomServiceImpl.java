@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -626,6 +627,13 @@ public class CustomServiceImpl implements CustomService {
 				}
 			}
 		}
+    	
+    }
+    
+    @Override
+    public ServiceOrderQueryVO queryOrderByFeeType(User user, String sectId, String feeId) throws Exception {
+    	
+    	return customServiceUtil.queryOrder(user, sectId, feeId);
     	
     }
     
