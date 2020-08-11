@@ -13,6 +13,7 @@ import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.common.ServiceOrderRequest;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.req.GetServiceRequest;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
@@ -111,14 +112,18 @@ public class CustomServiceUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public ServiceOrderQueryVO queryOrder(User user, String sectId, String feeId) throws Exception {
+	public ServiceOrderQueryVO queryOrder(OrderQueryDTO orderQueryDTO) throws Exception {
 		
+		User user = orderQueryDTO.getUser();
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += QUERY_ORDER_URL;
 		
 		ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
-		serviceOrderRequest.setSectId(user.getSectId());
-		serviceOrderRequest.setFeeId(feeId);
+		serviceOrderRequest.setSectId(orderQueryDTO.getSectId());
+		serviceOrderRequest.setFeeId(orderQueryDTO.getFeeId());
+		serviceOrderRequest.setTotalCount(orderQueryDTO.getTotalCount());
+		serviceOrderRequest.setCurrentPage(orderQueryDTO.getCurrentPage());
+		
 		TypeReference<CommonResponse<ServiceOrderQueryVO>> typeReference = new TypeReference<CommonResponse<ServiceOrderQueryVO>>(){};
 		CommonResponse<ServiceOrderQueryVO> commonResponse = restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
 		return commonResponse.getData();

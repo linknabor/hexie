@@ -23,6 +23,7 @@ import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
@@ -631,9 +632,9 @@ public class CustomServiceImpl implements CustomService {
     }
     
     @Override
-    public ServiceOrderQueryVO queryOrderByFeeType(User user, String sectId, String feeId) throws Exception {
+    public ServiceOrderQueryVO queryOrderByFeeType(OrderQueryDTO orderQueryDTO) throws Exception {
     	
-    	return customServiceUtil.queryOrder(user, sectId, feeId);
+    	return customServiceUtil.queryOrder(orderQueryDTO);
     	
     }
     

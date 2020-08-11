@@ -5,6 +5,7 @@ import java.util.List;
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
@@ -49,7 +50,7 @@ public interface CustomService {
 
 	void saveCommentImages(String appId, long orderId, List<String> imgUrls);
 
-	ServiceOrderQueryVO queryOrderByFeeType(User user, String sectId, String feeId) throws Exception;
+	ServiceOrderQueryVO queryOrderByFeeType(OrderQueryDTO orderQueryDTO) throws Exception;
 
 
 }
