@@ -15,6 +15,10 @@ public class ServiceOrderRequest extends CommonRequest {
 	private String feeId;
 	@JsonProperty("sect_id")
 	private String sectId;
+	@JsonProperty("curr_page")
+	private String currentPage;
+	@JsonProperty("total_count")
+	private String totalCount;
 
 	public String getTradeWaterId() {
 		return tradeWaterId;
@@ -40,10 +44,28 @@ public class ServiceOrderRequest extends CommonRequest {
 		this.sectId = sectId;
 	}
 
-	@Override
-	public String toString() {
-		return "ServiceOrderRequest [tradeWaterId=" + tradeWaterId + ", feeId=" + feeId + ", sectId=" + sectId + "]";
+	public String getCurrentPage() {
+		return currentPage;
 	}
 
+	public void setCurrentPage(String currentPage) {
+		this.currentPage = currentPage;
+	}
+
+	public String getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(String totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	@Override
+	public String toString() {
+		return "ServiceOrderRequest [tradeWaterId=" + tradeWaterId + ", feeId=" + feeId + ", sectId=" + sectId
+				+ ", currentPage=" + currentPage + ", totalCount=" + totalCount + "]";
+	}
+
+	
 
 }
