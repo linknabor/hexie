@@ -5,7 +5,6 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 import org.apache.http.client.methods.HttpGet;
-import org.hibernate.bytecode.buildtime.spi.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -30,6 +29,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.impl.LocationServiceImpl;
 
 public class WuyeUtil {
@@ -434,7 +434,7 @@ public class WuyeUtil {
 				if (!"00".equals(result)) {
 					err_msg = (String)respMap.get("err_msg");
 					err_code = result;
-					throw new ExecutionException(err_code+", " +err_msg);
+					throw new BizValidateException(err_code+", " +err_msg);
 				}
 			}
 			
@@ -445,7 +445,7 @@ public class WuyeUtil {
 				if (!"00".equals(result)) {
 					err_msg = (String)respMap.get("err_msg");
 					err_code = result;
-					throw new ExecutionException(err_code+", " +err_msg);
+					throw new BizValidateException(err_code+", " +err_msg);
 				}
 			}
 			
@@ -455,7 +455,7 @@ public class WuyeUtil {
 				if (!"00".equals(result)) {
 					err_msg = (String)respMap.get("err_msg");
 					err_code = result;
-					throw new ExecutionException(err_code+", " +err_msg);
+					throw new BizValidateException(err_code+", " +err_msg);
 				}
 			}
 			

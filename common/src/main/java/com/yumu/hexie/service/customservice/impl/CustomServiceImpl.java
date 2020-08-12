@@ -23,11 +23,13 @@ import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -69,7 +71,7 @@ public class CustomServiceImpl implements CustomService {
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
 		
-		User currUser = userRepository.findOne(user.getId());
+		User currUser = userRepository.findById(user.getId());
 		List<CustomServiceVO> list = customServiceUtil.getCustomService(currUser);
 		
 		//考虑把redis操作放在循环外，频繁操作有序列化和网络交互成本 TODO
@@ -90,7 +92,7 @@ public class CustomServiceImpl implements CustomService {
 		long begin = System.currentTimeMillis();
 		
 		//1.调用API创建接口
-		User currUser = userRepository.findOne(customerServiceOrderDTO.getUser().getId());
+		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
 		customerServiceOrderDTO.setUser(currUser);
 		customerServiceOrderDTO.setOrderType(String.valueOf(ModelConstant.ORDER_TYPE_SERVICE));
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
@@ -158,7 +160,7 @@ public class CustomServiceImpl implements CustomService {
 		ServiceOrder serviceOrder = null;
 		int count = 0;
 		while (serviceOrder == null && count < 3) {
-			serviceOrder = serviceOrderRepository.findOne(orderId);
+			serviceOrder = serviceOrderRepository.findById(orderId).get();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -255,7 +257,7 @@ public class CustomServiceImpl implements CustomService {
 		long begin = System.currentTimeMillis();
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null) {
 			throw new BizValidateException("未查询到订单，orderId: " + orderId);
 		}
@@ -267,7 +269,7 @@ public class CustomServiceImpl implements CustomService {
 		CustomerServiceOrderDTO dto = new CustomerServiceOrderDTO();
 		dto.setLinkman(serviceOrder.getReceiverName());
 		dto.setLinktel(serviceOrder.getTel());
-		Region region = regionRepository.findOne(serviceOrder.getXiaoquId());
+		Region region = regionRepository.findById(serviceOrder.getXiaoquId()).get();
 		if (region == null) {
 			throw new BizValidateException("未查询到小区, region id : " + serviceOrder.getXiaoquId());
 		}
@@ -307,7 +309,7 @@ public class CustomServiceImpl implements CustomService {
 	public void confirmOrder(User user, String orderId, String operType) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
@@ -337,7 +339,7 @@ public class CustomServiceImpl implements CustomService {
 	public ServiceOrder queryOrder(User user, String orderId) {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder!=null) {
 			boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
 			logger.info("isServiceOper : " + isServiceOper);
@@ -367,7 +369,7 @@ public class CustomServiceImpl implements CustomService {
 			throw new BizValidateException("请稍后再试。");
 		}
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
@@ -444,7 +446,7 @@ public class CustomServiceImpl implements CustomService {
 	public void reverseOrder(User user, String orderId) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
@@ -471,7 +473,7 @@ public class CustomServiceImpl implements CustomService {
 	public void notifyPay(User user, String orderId) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
@@ -498,7 +500,7 @@ public class CustomServiceImpl implements CustomService {
 		Assert.hasText(serviceCommentDTO.getOrderId(), "订单ID不能为空。");
 		Assert.hasText(serviceCommentDTO.getComment(), "平路内容不能为空。");
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(serviceCommentDTO.getOrderId()));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(serviceCommentDTO.getOrderId())).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + serviceCommentDTO.getOrderId());
 		}
@@ -523,7 +525,7 @@ public class CustomServiceImpl implements CustomService {
 		ServiceOrder serviceOrder = null;
 		int count = 0;
 		while (serviceOrder == null && count < 3) {
-			serviceOrder = serviceOrderRepository.findOne(orderId);
+			serviceOrder = serviceOrderRepository.findById(orderId).get();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -557,14 +559,14 @@ public class CustomServiceImpl implements CustomService {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
 		customServiceUtil.cancelPay(user, serviceOrder.getOrderNo());
 		
 		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
-			serviceOrderRepository.delete(serviceOrder.getId());
+			serviceOrderRepository.deleteById(serviceOrder.getId());
 		}
 		
 	}
@@ -626,6 +628,13 @@ public class CustomServiceImpl implements CustomService {
 				}
 			}
 		}
+    	
+    }
+    
+    @Override
+    public ServiceOrderQueryVO queryOrderByFeeType(OrderQueryDTO orderQueryDTO) throws Exception {
+    	
+    	return customServiceUtil.queryOrder(orderQueryDTO);
     	
     }
     

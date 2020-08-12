@@ -101,7 +101,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 			}
 			
-			Pageable pageable = new PageRequest(queryProductVO.getCurrentPage(), queryProductVO.getPageSize());
+			Pageable pageable = PageRequest.of(queryProductVO.getCurrentPage(), queryProductVO.getPageSize());
 			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 					queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
 			
@@ -133,7 +133,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			
-			Pageable pageable = new PageRequest(0, 1);
+			Pageable pageable = PageRequest.of(0, 1);
 			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 					"", "", null, "", pageable);
 			
@@ -180,7 +180,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		Product product = new Product();
 		if ("edit".equals(saveProductVO.getOperType())) {
-			product = productRepository.findOne(Long.valueOf(saveProductVO.getId()));
+			product = productRepository.findById(Long.valueOf(saveProductVO.getId())).get();
 			if (product == null) {
 				throw new BizValidateException("未查询到商品，id : " + saveProductVO.getId());
 			}
@@ -315,7 +315,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			itemStatus = ModelConstant.DISTRIBUTION_STATUS_OFF;
 		}
 		
-		Product product = productRepository.findOne(Long.valueOf(productId));
+		Product product = productRepository.findById(Long.valueOf(productId)).get();
 		if (product == null) {
 			throw new BizValidateException("未查询到商品, id : " + productId);
 		}
@@ -476,7 +476,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			Pageable pageable = new PageRequest(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize());
+			Pageable pageable = PageRequest.of(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize());
 			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentNo(), queryEvoucherVO.getAgentName(), pageable);
 			List<EvoucherMapper> mapperList = new ArrayList<>();
 			for (Evoucher evoucher : page.getContent()) {

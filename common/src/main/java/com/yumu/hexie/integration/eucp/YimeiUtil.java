@@ -1,5 +1,6 @@
 package com.yumu.hexie.integration.eucp;
 
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 
@@ -11,7 +12,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 public class YimeiUtil {
@@ -33,17 +36,23 @@ public class YimeiUtil {
 	public boolean sendMessage(String mobile, String message, long id) {
 		
 		try {
-
 			Assert.hasLength(urlStr, "未配置 yimei短信请求服务地址，请检查配置文件。key: sms.yimei.url");
-			StringBuffer bufUrl = new StringBuffer();
-			bufUrl.append(urlStr).append("?cdkey=").append(cdkey).append("&password=").append(password);
+			Assert.hasText(message, "发送内容不能为空。");
+			
 			String sendContent = URLEncoder.encode(message, Charset.forName("utf8").toString());
-			bufUrl.append("&phone=").append(mobile).append("&message=").append(sendContent).append("&addserial=").append(id);
-			String requestStr = bufUrl.toString();
-			logger.info("yimei request : " + requestStr);
-			ResponseEntity<YimeiResult> responseEntity = restTemplate.exchange(requestStr, HttpMethod.GET, null, YimeiResult.class);
-			logger.info("yimei response : " + responseEntity);
-			YimeiResult result = responseEntity.getBody();
+			LinkedMultiValueMap<String, String> paramsMap = new LinkedMultiValueMap<String, String>();
+			paramsMap.add("cdkey", cdkey);
+			paramsMap.add("password", password);
+			paramsMap.add("phone", mobile);//5：bd09ll(百度经纬度坐标);
+			paramsMap.add("message", sendContent);
+			paramsMap.add("addserial", String.valueOf(id));
+
+			logger.info("Yimei util, request url : " + urlStr + "param : " + paramsMap);
+			UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlStr);
+			URI uri = builder.queryParams(paramsMap).build().encode().toUri();
+			ResponseEntity<YimeiResult> response = restTemplate.exchange(uri, HttpMethod.GET, null, YimeiResult.class);
+			logger.info("Yimei util, response : " + response);
+			YimeiResult result = response.getBody();
 			if(result == null){
 				return false;
 			}

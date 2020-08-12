@@ -35,7 +35,7 @@ public class ResvOperServiceImpl implements ResvOperService {
 	public Page<ServiceOperator> getOperList(BaseRequestDTO<ServiceOperator> baseRequestDTO) {
 		
 		ServiceOperator serviceOperator = baseRequestDTO.getData();
-		Pageable pageable = new PageRequest(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
+		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
 		Page<ServiceOperator> page = serviceOperatorRepository.getResvOper(ModelConstant.SERVICE_OPER_TYPE_STAFF, 
 				serviceOperator.getName(), serviceOperator.getTel(), null, baseRequestDTO.getSectList(), pageable);
 		return page;
@@ -69,7 +69,7 @@ public class ResvOperServiceImpl implements ResvOperService {
 			so = serviceOperatorRepository.save(operator);
 		}else{	//编辑
 			//编辑只能改姓名以及和小区的绑定关系，手机号不能改
-			so = serviceOperatorRepository.findOne(operator.getId());
+			so = serviceOperatorRepository.findById(operator.getId()).get();
 			so.setName(operator.getName());
 			serviceOperatorRepository.save(so);
 		}
@@ -100,7 +100,7 @@ public class ResvOperServiceImpl implements ResvOperService {
 		for (String sectid : sectList) {
 			serviceOperatorSectRepository.deleteByOperatorIdAndSectId(Long.valueOf(operatorId), sectid);
 		}
-    	serviceOperatorRepository.delete(Long.valueOf(operatorId));
+    	serviceOperatorRepository.deleteById(Long.valueOf(operatorId));
 	}
 	
 

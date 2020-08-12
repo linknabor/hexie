@@ -31,6 +31,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
@@ -65,6 +66,7 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
+import com.yumu.hexie.web.shequ.vo.GetCellVO;
 import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.shequ.vo.SignInOutVO;
@@ -543,7 +545,7 @@ public class WuyeController extends BaseController {
 	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId) {
 
 		if (!StringUtil.isEmpty(userId)) {
-			User user = userRepository.findOne(Long.valueOf(userId));
+			User user = userRepository.findById(Long.valueOf(userId)).get();
 			session.setAttribute("sessionUser", user);
 		}
 		return BaseResult.successResult("succeeded");
@@ -569,6 +571,40 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false, value = "regionname") String regionName)
 			throws Exception {
 		CellListVO cellMng = wuyeService.querySectHeXieList(user, sect_id, build_id, unit_id, data_type, regionName);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
+	}
+	
+	/**
+	 * 根据ID查询指定类型的合协社区物业信息
+	 * @param user
+	 * @param sect_id
+	 * @param build_id
+	 * @param unit_id
+	 * @param data_type
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getHeXieCellById4Qrcode", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<CellVO> getHeXieCellById4Qrcode(@RequestBody GetCellVO getCellVO)
+			throws Exception {
+		
+		log.info("getHeXieCellById4Qrcode : " + getCellVO);
+		
+		User user = new User();
+		user.setAppId(getCellVO.getAppid());
+		user.setOpenid(getCellVO.getOpenid());
+		
+		GetCellDTO getCellDTO = new GetCellDTO();
+		BeanUtils.copyProperties(getCellVO, getCellDTO);
+		getCellDTO.setUser(user);
+		
+		CellListVO cellMng = wuyeService.querySectHeXieList(getCellDTO);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {

@@ -22,6 +22,7 @@ import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
@@ -175,7 +176,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if (user.getId() == 0) {
 			log.info("qrcode pay, no user id .");
 		}else {
-			User currUser = userRepository.findOne(user.getId());
+			User currUser = userRepository.findById(user.getId());
 			prepayRequestDTO.setUser(currUser);
 		}
 		
@@ -205,7 +206,7 @@ public class WuyeServiceImpl implements WuyeService {
 				bankCardRepository.save(bankCard);
 			} 
 			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
-				BankCard selBankCard = bankCardRepository.findOne(Long.valueOf(prepayRequestDTO.getCardId()));
+				BankCard selBankCard = bankCardRepository.findById(Long.valueOf(prepayRequestDTO.getCardId())).get();
 				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
 					throw new BizValidateException("未绑定的银行卡。");
 				}
@@ -496,7 +497,7 @@ public class WuyeServiceImpl implements WuyeService {
 	public String getPaySmsCode(User user, String cardId) throws Exception {
 	
 		Assert.hasText(cardId, "卡ID不能为空。");
-		BankCard bankCard = bankCardRepository.findOne(Long.valueOf(cardId));
+		BankCard bankCard = bankCardRepository.findById(Long.valueOf(cardId)).get();
 		return wuyeUtil2.getPaySmsCode(user, bankCard).getData();
 	}
 	
@@ -580,6 +581,12 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		wuyeUtil2.signInOut(signInOutDTO);
 		
+	}
+
+	@Override
+	public CellListVO querySectHeXieList(GetCellDTO getCellDTO) throws Exception {
+		
+		return wuyeUtil2.getMngHeXieList(getCellDTO).getData();
 	}
 
 	

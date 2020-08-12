@@ -77,10 +77,10 @@ public class FlowerPlusOrder extends BaseModel{
 	public void setStrWorkAddr(String strWorkAddr) {
 		this.strWorkAddr = strWorkAddr;
 	}
-	public long getsOrderId() {
+	public long getSOrderId() {
 		return sOrderId;
 	}
-	public void setsOrderId(long sOrderId) {
+	public void setSOrderId(long sOrderId) {
 		this.sOrderId = sOrderId;
 	}
 	public long getyOrderId() {

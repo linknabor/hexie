@@ -66,7 +66,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType()) {
 			return;
 		}
-		Product product = productRepository.findOne(serviceOrder.getProductId());
+		Product product = productRepository.findById(serviceOrder.getProductId()).get();
 //		BigDecimal totalPrice = BigDecimal.ZERO;
 		for (int i = 0; i < serviceOrder.getCount(); i++) {
 			
@@ -213,7 +213,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			}
 			orderId = evoucher.getOrderId();
 		}
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(orderId);
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(orderId).get();
 		eshopUtil.notifyConsume(operator, serviceOrder.getOrderNo(), bf.toString());
 		
 	}
