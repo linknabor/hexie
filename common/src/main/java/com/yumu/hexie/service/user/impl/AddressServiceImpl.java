@@ -83,12 +83,12 @@ public class AddressServiceImpl implements AddressService {
         log.info("添加地址");
         Region xiaoqu;
         Address address = addressReq.getId() == null ||  addressReq.getId()==0 
-                ? new Address() : addressRepository.findOne(addressReq.getId());
+                ? new Address() : addressRepository.findById(addressReq.getId()).get();
         if(StringUtil.isNotEmpty(addressReq.getXiaoquName())) {
             List<Region> xiaoqus = regionRepository.findAllByParentIdAndName(addressReq.getCountyId(),addressReq.getXiaoquName());
             //FIXME 以小区名为准而非小区ID
             if(xiaoqus == null||xiaoqus.size()== 0 ){
-                Region county = regionRepository.findOne(addressReq.getCountyId());
+                Region county = regionRepository.findById(addressReq.getCountyId()).get();
                 xiaoqu = new Region(county.getId(), county.getName(), addressReq.getXiaoquName());
                 xiaoqu.setLatitude(0d);
                 xiaoqu.setLongitude(0d);
@@ -98,9 +98,9 @@ public class AddressServiceImpl implements AddressService {
             }
             BeanUtils.copyProperties(addressReq, address);
             address.setXiaoquId(xiaoqu.getId());
-            Region county = regionRepository.findOne(address.getCountyId());
-            Region city = regionRepository.findOne(county.getParentId());
-            Region province = regionRepository.findOne(city.getParentId());
+            Region county = regionRepository.findById(address.getCountyId()).get();
+            Region city = regionRepository.findById(county.getParentId()).get();
+            Region province = regionRepository.findById(city.getParentId()).get();
             address.setCountyId(county.getId());
             address.setCounty(county.getName());
             address.setCity(city.getName());
@@ -166,12 +166,12 @@ public class AddressServiceImpl implements AddressService {
         }
         
         if(amapAddr!=null && amapAddr.getLocation()!=null){
-            address = addressRepository.findOne(address.getId());
+            address = addressRepository.findById(address.getId()).get();
             address.initAmapInfo(amapAddr);
 
             addressRepository.save(address);
             
-            Region xiaoqu = regionRepository.findOne(address.getXiaoquId());
+            Region xiaoqu = regionRepository.findById(address.getXiaoquId()).get();
             if(xiaoqu != null && Math.abs(xiaoqu.getLatitude()) < 0.1) {
                 xiaoqu.setLongitude(address.getLongitude());
                 xiaoqu.setLatitude(address.getLatitude());
@@ -186,7 +186,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public Address configDefaultAddress(User user, long addressId) {
         log.error("设置用户默认地址[0]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + addressId);
-        Address currentAddr = addressRepository.findOne(addressId);
+        Address currentAddr = addressRepository.findById(addressId).get();
         if(currentAddr == null) {
             return null;
         }
@@ -224,7 +224,7 @@ public class AddressServiceImpl implements AddressService {
     }
     @Override
     public void deleteAddress(long id, long userId) {
-        Address addr = addressRepository.findOne(id);
+        Address addr = addressRepository.findById(id).get();
         if(addr.isMain()) {
             throw new BizValidateException("无法删除默认地址！");
         }
@@ -254,7 +254,7 @@ public class AddressServiceImpl implements AddressService {
     }
     @Override
     public Address queryAddressById(long id) {
-        return addressRepository.findOne(id);
+        return addressRepository.findById(id).get();
     }
     
     /** 

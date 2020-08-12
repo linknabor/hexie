@@ -2,9 +2,9 @@ package com.yumu.hexie.common.config;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,8 +31,8 @@ public class AppConfig {
     }
 
     @Bean
-    public EmbeddedServletContainerFactory servletContainer(){
-        TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
+    public ServletWebServerFactory EmbeddedServletContainerFactory(){
+    	TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
         factory.setPort(8888);
         factory.addConnectorCustomizers(new AppTomcatConnectorCustomizer());
         return factory;

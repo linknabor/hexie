@@ -114,7 +114,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			productService.freezeCount(product, item.getCount());
             item.fillDetail(plan, product);
             
-            Agent agent = agentRepository.findOne(product.getAgentId());
+            Agent agent = agentRepository.findById(product.getAgentId()).get();
             
 			if(StringUtil.isEmpty(order.getProductName())){
                 order.fillProductInfo(product);
@@ -131,7 +131,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         ServiceOrder sOrder = null;
         OrderItem item = null;
         if(order.getOrderId() != null && order.getOrderId() != 0) {
-            sOrder = serviceOrderRepository.findOne(order.getOrderId());
+            sOrder = serviceOrderRepository.findById(order.getOrderId()).get();
             if(sOrder!=null){
                 if(sOrder.getStatus() == ModelConstant.ORDER_STATUS_CANCEL){
                     sOrder = null;
@@ -288,7 +288,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setServiceName(productName);
 			request.setOrderType(String.valueOf(order.getOrderType()));
 			
-			Agent agent = agentRepository.findOne(order.getAgentId());
+			Agent agent = agentRepository.findById(order.getAgentId()).get();
 			request.setAgentNo(agent.getAgentNo());
 			String agentName = agent.getName();
 			if (!StringUtil.isEmpty(agentName)) {
@@ -306,7 +306,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			sign.setSignType(responseVo.getSigntype());
 			sign.setTimestamp(responseVo.getTimestamp());
 			sign.setOrderId(String.valueOf(order.getId()));
-			order = serviceOrderRepository.findOne(order.getId());
+			order = serviceOrderRepository.findById(order.getId()).get();
 			if (StringUtil.isEmpty(order.getOrderNo())) {
 				order.setOrderNo(responseVo.getTradeWaterId());
 			}
@@ -377,7 +377,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	public void notifyPayed(long orderId) {
 
 		log.info("notifyPayed : " + orderId);
-		ServiceOrder so = serviceOrderRepository.findOne(orderId);
+		ServiceOrder so = serviceOrderRepository.findById(orderId).get();
 		if(so == null || so.getStatus() == ModelConstant.ORDER_STATUS_PAYED) {
 		    return;
 		}
@@ -490,7 +490,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	public void finishRefund(WxRefundOrder wxRefundOrder) {
         log.warn("[finishRefund]refund-begin:"+wxRefundOrder.getOut_trade_no());
 		PaymentOrder po = paymentService.updateRefundStatus(wxRefundOrder);
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(po.getOrderId());
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(po.getOrderId()).get();
 		if(po.getStatus() == PaymentConstant.PAYMENT_STATUS_REFUNDED) {
 			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
 			serviceOrderRepository.save(serviceOrder);
@@ -500,7 +500,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         log.warn("[finishRefund]refund-end:"+wxRefundOrder.getOut_trade_no());
 	}
 	public ServiceOrder findOne(long orderId){
-	    return serviceOrderRepository.findOne(orderId);
+	    return serviceOrderRepository.findById(orderId).get();
 	}
 	
 	@Transactional
@@ -509,7 +509,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
@@ -517,8 +517,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		
 		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
 			List<OrderItem> list = serviceOrder.getItems();
-			orderItemRepository.delete(list);
-			serviceOrderRepository.delete(serviceOrder.getId());
+			orderItemRepository.deleteAll(list);
+			serviceOrderRepository.deleteById(serviceOrder.getId());
 		}
 	}
 	

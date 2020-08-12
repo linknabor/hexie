@@ -150,7 +150,7 @@ public class PointServiceImpl implements PointService {
 			return;
 		}
 		
-		User currentUser = userRepository.findOne(user.getId());
+		User currentUser = userRepository.findById(user.getId());
 		if (currentUser == null) {
 			List<User> userList = userRepository.findByOpenid(user.getOpenid());
 			if (userList == null || userList.isEmpty()) {

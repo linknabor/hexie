@@ -58,7 +58,7 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 	@Override
 	public YuyueOrder addFlowerPlusOrder(User user, FlowerPlusReq flowerPlusReq, long addressId) {
 		Address address = addressService.queryAddressById(addressId);
-		YuyueRule rule = yuyueRuleRepository.findOne(flowerPlusReq.getRuleId());
+		YuyueRule rule = yuyueRuleRepository.findById(flowerPlusReq.getRuleId()).get();
 		YuyueOrder yOrder = new YuyueOrder();
 		
 		Merchant merchant = merchantRepository.findMerchantByProductType(ModelConstant.YUYUE_PRODUCT_TYPE_FLOWERPLUS);
@@ -127,7 +127,7 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 				calendar.add(Calendar.DAY_OF_MONTH, 7);
 			}
 		}else{
-			yuyueOrderRepository.delete(yOrder.getId());
+			yuyueOrderRepository.deleteById(yOrder.getId());
 			log.error("validateFlowerPlusServiceType:"+flowerPlusReq.getServiceIsSingle());
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_DAOJIA,rule.getId(),"鲜花包月类型错误").setError();
 		}
@@ -138,8 +138,8 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 	
 	@Override
 	public boolean checkIsExistenceByProduct(User user, long ruleId) {
-		YuyueRule yRule = yuyueRuleRepository.findOne(ruleId);
-		Product product = productRepository.findOne(yRule.getProductId());
+		YuyueRule yRule = yuyueRuleRepository.findById(ruleId).get();
+		Product product = productRepository.findById(yRule.getProductId()).get();
 		
 		log.error("checkIsExperience userId" + user.getId() + ", yRuleId=" + ruleId + "productId=" + product.getId());
 
@@ -161,8 +161,8 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 
 	@Override
 	public boolean checkCountByProduct(long ruleId, int count) {
-		YuyueRule yRule = yuyueRuleRepository.findOne(ruleId);
-		Product product = productRepository.findOne(yRule.getProductId());
+		YuyueRule yRule = yuyueRuleRepository.findById(ruleId).get();
+		Product product = productRepository.findById(yRule.getProductId()).get();
 		
 		log.error("checkCountByProduct yRuleId=" + ruleId + "productId=" + product.getId());
 

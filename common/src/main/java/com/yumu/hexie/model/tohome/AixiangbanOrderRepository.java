@@ -14,5 +14,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface AixiangbanOrderRepository extends JpaRepository<AixiangbanOrder, Long> {
 
-	public AixiangbanOrder findByYOrderId(long yOrderId);
+	public AixiangbanOrder findByyOrderId(long yOrderId);
 }

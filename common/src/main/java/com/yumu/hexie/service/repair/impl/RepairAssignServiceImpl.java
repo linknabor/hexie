@@ -9,14 +9,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.DistanceUtil;
-import com.yumu.hexie.model.distribution.ServiceRegionRepository;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.repair.RepairConstant;
@@ -39,7 +35,6 @@ import com.yumu.hexie.service.repair.RepairAssignService;
 @Service("repairAssignService")
 public class RepairAssignServiceImpl implements RepairAssignService {
 
-    private static final Logger log = LoggerFactory.getLogger(RepairAssignService.class);
     @Inject
     private AddressRepository addressRepository;
     @Inject
@@ -49,8 +44,6 @@ public class RepairAssignServiceImpl implements RepairAssignService {
     @Inject
     private GotongService gotongService;
     
-    @Inject
-    private ServiceRegionRepository serviceRegionRepository;
     /** 
      * @param order
      * @see com.yumu.hexie.service.repair.RepairAssignService#assignOrder(com.yumu.hexie.model.localservice.repair.RepairOrder)
@@ -58,7 +51,7 @@ public class RepairAssignServiceImpl implements RepairAssignService {
     @Async
     @Override
     public void assignOrder(RepairOrder order) {
-        Address address = addressRepository.findOne(order.getAddressId());
+        Address address = addressRepository.findById(order.getAddressId()).get();
 /*        List<ServiceOperator> ops = null;
         List<Long> regionIds = new ArrayList<Long>();
         regionIds.add(1l);

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+	
 	public List<User> findByOpenid(String openid);
 	public List<User> findByTel(String tel);
 	public List<User> findByTelAndOpenid(String tel, String openid);

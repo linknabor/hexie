@@ -6,16 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.CommonPayRequest;
 import com.yumu.hexie.integration.common.CommonPayResponse;
+import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.common.ServiceOrderRequest;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.req.GetServiceRequest;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.model.user.User;
 
 @Component
@@ -32,6 +34,7 @@ public class CustomServiceUtil {
 	private static final String CREATE_ORDER_URL = "createCustomServiceSDO.do"; //订单创建
 	private static final String CONFIRM_ORDER_URL = "setCustomReceiverSDO.do"; //确认订单
 	private static final String CANCEL_PAY_URL = "cancelCustomOrderSDO.do"; //支付取消
+	private static final String QUERY_ORDER_URL = "queryServiceOrderSDO.do";//订单查询 
 	
 	public List<CustomServiceVO> getCustomService(User user) throws Exception {
 		
@@ -102,5 +105,29 @@ public class CustomServiceUtil {
 		restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
 		
 	}
+	
+	/**
+	 * 二维码 服务订单查询
+	 * @param dto
+	 * @return
+	 * @throws Exception
+	 */
+	public ServiceOrderQueryVO queryOrder(OrderQueryDTO orderQueryDTO) throws Exception {
+		
+		User user = orderQueryDTO.getUser();
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_ORDER_URL;
+		
+		ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
+		serviceOrderRequest.setSectId(orderQueryDTO.getSectId());
+		serviceOrderRequest.setFeeId(orderQueryDTO.getFeeId());
+		serviceOrderRequest.setTotalCount(orderQueryDTO.getTotalCount());
+		serviceOrderRequest.setCurrentPage(orderQueryDTO.getCurrentPage());
+		
+		TypeReference<CommonResponse<ServiceOrderQueryVO>> typeReference = new TypeReference<CommonResponse<ServiceOrderQueryVO>>(){};
+		CommonResponse<ServiceOrderQueryVO> commonResponse = restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
+		return commonResponse.getData();
+	}
+	
 	
 }

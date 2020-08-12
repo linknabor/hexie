@@ -29,13 +29,13 @@ public class CacheableServiceImpl implements CacheableService {
 	//@Cacheable(value = "rgroupRule", key = "#ruleId.toString()")
 	public RgroupRule findRgroupRule(long ruleId) {
 		log.error("RgroupServiceImpl#findSalePlan#"+ruleId);
-		return rgroupRuleRepository.findOne(ruleId);
+		return rgroupRuleRepository.findById(ruleId).get();
 	}
 	//@CachePut(value = "rgroupRule", key = "#rgroupRule.id.toString()")
 	public RgroupRule save(RgroupRule rgroupRule){
 		log.error("RgroupServiceImpl#save#"+rgroupRule.getId());
 		if(rgroupRule.getOriPrice()<=0){
-			Product p = productRepository.findOne(rgroupRule.getProductId());
+			Product p = productRepository.findById(rgroupRule.getProductId()).get();
 			rgroupRule.fillProductInfo(p);
 		}
 		rgroupRule = rgroupRuleRepository.save(rgroupRule);

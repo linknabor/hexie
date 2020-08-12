@@ -18,16 +18,19 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.customservice.vo.CustomServiceOrderVO;
+import com.yumu.hexie.web.customservice.vo.OrderQueryVO;
 import com.yumu.hexie.web.customservice.vo.ServiceCommentVO;
 /**
  * 自定义服务
@@ -325,7 +328,7 @@ public class CustomServiceController extends BaseController {
 		return "success";
 	}
 	
-	@RequestMapping(value = "/cfg", method = {RequestMethod.POST})
+	@RequestMapping(value = "/cfg", method = RequestMethod.POST)
 	public String updateCustomServiceCfg(@RequestBody ServiceCfgDTO serviceCfgDTO) throws Exception {
 		
 		logger.info("cfg : " + serviceCfgDTO);
@@ -333,5 +336,17 @@ public class CustomServiceController extends BaseController {
 		return "SUCCESS";
 	}
 	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/queryByFeeType", method = RequestMethod.POST)
+	public BaseResult<ServiceOrderQueryVO> queryOrderBySect(@ModelAttribute(Constants.USER) User user, 
+			@RequestBody OrderQueryVO orderQueryVO) throws Exception{
+		
+		logger.info("orderQueryVO : " + orderQueryVO);
+		OrderQueryDTO orderQueryDTO = new OrderQueryDTO();
+		BeanUtils.copyProperties(orderQueryVO, orderQueryDTO);
+		orderQueryDTO.setUser(user);
+		ServiceOrderQueryVO serviceOrderQueryVO = customService.queryOrderByFeeType(orderQueryDTO);
+		return BaseResult.successResult(serviceOrderQueryVO);
+	}
 
 }

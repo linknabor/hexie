@@ -167,7 +167,7 @@ public class HealthServiceImpl implements HealthService {
 	}
 
 	private void saveThread(User user, Thread thread) {
-		User currUser = userRepository.findOne(user.getId());
+		User currUser = userRepository.findById(user.getId());
 		
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
@@ -245,7 +245,7 @@ public class HealthServiceImpl implements HealthService {
 	private Page<Thread> getThread(BaseRequestDTO<Thread> baseRequestDTO) {
 		
 		Thread thread = baseRequestDTO.getData();
-		Pageable pageable = new PageRequest(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
+		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
 		Page<Thread> page = threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, thread.getThreadCategory(),
 				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), baseRequestDTO.getSectList(), pageable);
 		return page;

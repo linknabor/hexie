@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public User getById(long uId) {
-		return userRepository.findOne(uId);
+		return userRepository.findById(uId);
 	}
 
 	public List<User> getByOpenId(String openId) {
@@ -213,7 +213,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User saveProfile(long userId, String nickName, int sex) {
 
-		User user = userRepository.findOne(userId);
+		User user = userRepository.findById(userId);
 		user.setNickname(nickName);
 		user.setSex(sex);
 		return userRepository.save(user);
