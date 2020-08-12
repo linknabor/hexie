@@ -64,8 +64,8 @@ public class WebConfig extends WebMvcConfigurationSupport {
         		}
         	}
         };
+        converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));	//stringHttpMessageConverter必须放第一个
     	converters.add(c);
-    	converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
     	converters.add(new ByteArrayHttpMessageConverter());
     	converters.add(new ResourceHttpMessageConverter());
     	converters.add(new SourceHttpMessageConverter<Source>());
