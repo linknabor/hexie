@@ -43,7 +43,7 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
 			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
 			+ " and IF (?3!='', tel like CONCAT('%',?3,'%'), 1=1)"
 			+ " and IF (?4!='', b.sectId =?4, 1=1)"
-			+ " and b.sectId in ?5 GROUP BY b.operatorId \n#pageable\n",
+			+ " and b.sectId in ?5 GROUP BY b.operatorId ",
 			countQuery="select count(1) from ( select b.operatorId from serviceoperator a "
     		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
 			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
@@ -59,7 +59,7 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
 			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
 			+ " and IF (?3!='', tel like CONCAT('%',?3,'%'), 1=1)"
 			+ " and IF (?4!='', b.sectId =?4, 1=1)"
-			+ " and b.sectId in ?5 order by id desc \n#pageable\n",
+			+ " and b.sectId in ?5 ",
 			countQuery="select count(distinct a.id) from serviceoperator a "
     		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
 			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"

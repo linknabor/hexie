@@ -47,7 +47,7 @@ public class ThreadController extends BaseController {
 		    Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
 			int currPage=baseRequestDTO.getCurr_page();
 			int pageSize=baseRequestDTO.getPage_size();
-			Pageable pageable = new PageRequest(currPage, pageSize, sort);
+			Pageable pageable = PageRequest.of(currPage, pageSize, sort);
 			String nickName=baseRequestDTO.getData().get("nickName");
 			String createDate=baseRequestDTO.getData().get("createDate");
 			String sectId=baseRequestDTO.getData().get("sectIds");

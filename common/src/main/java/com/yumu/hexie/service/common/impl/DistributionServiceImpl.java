@@ -13,6 +13,10 @@ import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
@@ -136,17 +140,26 @@ public class DistributionServiceImpl implements DistributionService {
     //2、未注册用户显示的上海市和全国的特卖（上海的默认id为19）
     @Override
     public List<OnSaleAreaItem> queryOnsales(User user, int type, int page) {
-        if(user.getProvinceId() != 0){
+        
+    	List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.ASC, "sortNo");
+    	Order order2 = new Order(Direction.DESC, "id");
+    	orderList.add(order);
+    	orderList.add(order2);
+    	Sort sort = Sort.by(orderList);
+    	
+    	Pageable pageable = PageRequest.of(page, 100, sort);
+    	if(user.getProvinceId() != 0){
         if(type == ModelConstant.PRODUCT_FEATURED){
-            return onSaleAreaItemRepository.findFeatured(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), PageRequest.of(page, 100));
+            return onSaleAreaItemRepository.findFeatured(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), pageable);
         } else if(type>0){
-            return onSaleAreaItemRepository.findByCusProductType(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), PageRequest.of(page, 100));
+            return onSaleAreaItemRepository.findByCusProductType(user.getProvinceId(), user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), pageable);
         }
         }else{
             if(type == ModelConstant.PRODUCT_FEATURED){
-                return onSaleAreaItemRepository.findFeatured(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), PageRequest.of(page, 100));
+                return onSaleAreaItemRepository.findFeatured(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(), user.getAppId(), pageable);
             } else if(type>0){
-                return onSaleAreaItemRepository.findByCusProductType(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), PageRequest.of(page, 100));
+                return onSaleAreaItemRepository.findByCusProductType(19, user.getCityId(), user.getCountyId(), user.getXiaoquId(),System.currentTimeMillis(),type, user.getAppId(), pageable);
             }   
         }
 
@@ -163,12 +176,18 @@ public class DistributionServiceImpl implements DistributionService {
     			currUser.setXiaoquId(region.getId());
 			}
     	}
-
+    	List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.ASC, "sortNo");
+    	Order order2 = new Order(Direction.DESC, "id");
+    	orderList.add(order);
+    	orderList.add(order2);
+    	Sort sort = Sort.by(orderList);
+    	Pageable pageable = PageRequest.of(page, 12, sort);
     	List<RgroupAreaItem> result ;
         if(currUser.getXiaoquId() == 0){
-            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), currUser.getAppId(), PageRequest.of(page, 12));
+            result = rgroupAreaItemRepository.findAllDefalut(System.currentTimeMillis(), currUser.getAppId(), pageable);
         } else {
-            result = rgroupAreaItemRepository.findAllByUserInfo(currUser.getProvinceId(), currUser.getCityId(), currUser.getCountyId(), currUser.getXiaoquId(),System.currentTimeMillis(), currUser.getAppId(), PageRequest.of(page, 12));
+            result = rgroupAreaItemRepository.findAllByUserInfo(currUser.getProvinceId(), currUser.getCityId(), currUser.getCountyId(), currUser.getXiaoquId(),System.currentTimeMillis(), currUser.getAppId(), pageable);
         }
         List<RgroupAreaItem> r = filterByRuleId(result);
         return r;
@@ -216,14 +235,19 @@ public class DistributionServiceImpl implements DistributionService {
     	
     	User currUser = userRepository.findById(user.getId());
     	long current = System.currentTimeMillis();
+    	List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.ASC, "sortNo");
+    	Order order2 = new Order(Direction.DESC, "id");
+    	orderList.add(order);
+    	orderList.add(order2);
+    	Sort sort = Sort.by(orderList);
+    	Pageable pageable = PageRequest.of(page, 10, sort);
     	List<OnSaleAreaItem> itemList = new ArrayList<>();
-    	
     	if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {	//未绑定房屋的用户，展示样板商品
-    		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, PageRequest.of(page, 100));
+    		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, pageable);
     	}else {	//已经绑定房屋的用户查询关联小区的商品
-    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), PageRequest.of(page, 100)); 
+    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), pageable); 
     	}
-    	
         return itemList;
     }
 }
