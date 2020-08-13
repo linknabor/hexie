@@ -47,7 +47,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " and IF (?2!='', userName like CONCAT('%',?2,'%'), 1=1)"
 			+ " and IF (?3!='', createDate = ?3, 1=1)"
 			+ " and IF (?4!='', userSectId = ?4, 1=1)"
-			+ " and userSectId in ?5 \n#pageable\n",
+			+ " and userSectId in ?5 ",
 			countQuery="select count(*) from thread  where threadStatus = 0 " 
 			+ " and threadCategory = ?1 "
 			+ " and IF (?2!='', userName like CONCAT('%',?2,'%'), 1=1)"
@@ -67,9 +67,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " and threadCategory = ?2 "
 			+ " and IF (?3!='', createDate >= ?3, 1=1)"
 			+ " and IF (?4!='', createDate <= ?4, 1=1)"
-			+ " and userSectId in ?5 "
-			+ " order by createDateTime desc "
-			+ " \n#pageable\n",
+			+ " and userSectId in ?5 ",
 			countQuery="select count(*) from thread  where threadStatus = ?1 " 
 			+ " and threadCategory = ?2 "
 			+ " and IF (?3!='', createDate >= ?3, 1=1)"

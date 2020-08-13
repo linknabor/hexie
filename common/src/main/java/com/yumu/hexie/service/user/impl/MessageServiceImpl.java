@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -78,7 +80,8 @@ public class MessageServiceImpl implements MessageService {
 	public Page<Message> queryMessages(BaseRequestDTO<Message> baseRequestDTO) {
 
 		List<String> sectList = baseRequestDTO.getSectList();
-		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
+		Sort sort = Sort.by(Direction.DESC, "top", "createDate");
+		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size(), sort);
 		Message message = baseRequestDTO.getData();
 		Page<Message> page = messageRepository.queryMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(), 
 				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), sectList, pageable);
@@ -123,7 +126,8 @@ public class MessageServiceImpl implements MessageService {
 	public List<Message> queryMessagesByUserAndType(User user, int msgType, int page, int pageSize) {
 
 		List<Message> messageList = new ArrayList<Message>();
-		Pageable pageable = PageRequest.of(page, pageSize);
+		Sort sort = Sort.by(Direction.DESC, "top", "createDate");
+		Pageable pageable = PageRequest.of(page, pageSize, sort);
 		User currUser = userRepository.findById(user.getId());
 		switch (msgType) {
 		case 9:

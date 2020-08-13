@@ -35,7 +35,6 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 			+ "and IF (?2!='', e.tel = ?2, 1=1) "
 			+ "and IF (?3!='', e.agentNo = ?3, 1=1) "
 			+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) "
-			+ "order by e.id desc \n#pageable\n "
 			, nativeQuery = true
 			, countQuery = "select count(1) as counts from evoucher e where productId >0 and status >0 "
 				+ "and IF (?1!='', e.status = ?1, 1=1) "
