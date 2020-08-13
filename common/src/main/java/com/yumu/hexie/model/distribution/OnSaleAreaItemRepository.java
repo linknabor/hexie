@@ -27,8 +27,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			+ "or (m.regionType=3 and m.regionId=?3) "
 			+ "or (m.regionType=4 and m.regionId=?4)) "
 			+ "and m.ruleCloseTime>?5 and featured is true "
-			+ "and pp.appid = ?6 "
-			+ "order by m.sortNo asc,m.id desc \n#pageable\n", 
+			+ "and pp.appid = ?6 ",
 			countQuery = "select count(m.id) from OnSaleAreaItem m left join productplat pp on pp.productId = m.productId "
 					+ "where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and ((m.regionType=0) "
 					+ "or (m.regionType=1 and m.regionId=?1) "
@@ -49,8 +48,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			+ "or (m.regionType=3 and m.regionId=?3) "
 			+ "or (m.regionType=4 and m.regionId=?4)) "
 			+ "and m.ruleCloseTime>?5 and productType=?6 "
-			+ "and pp.appid = ?7 "
-			+ "order by m.sortNo asc,m.id desc \n#pageable\n", 
+			+ "and pp.appid = ?7 ",
 			countQuery = "select count(m.id) from OnSaleAreaItem m left join productplat pp on pp.productId = m.productId "
 					+ "where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and ((m.regionType=0) "
 					+ "or (m.regionType=1 and m.regionId=?1) "
@@ -90,15 +88,13 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			+ "and m.productType = ?2 "
 			+ "and m.ruleCloseTime> ?3 "
 			+ "and p.demo = 1 "
-			+ "group by m.ruleId "
-			+ "order by m.sortNo asc, m.id desc \n#pageable\n", 
-			countQuery = "select count(m.id) from OnSaleAreaItem m "
+			+ "group by m.ruleId ", 
+			countQuery = "select count(*) from OnSaleAreaItem m "
 					+ "join product p on m.productId = p.id "
 					+ "where m.status = ?1 "
 					+ "and m.productType = ?2 "
 					+ "and m.ruleCloseTime> ?3 "
-					+ "and p.demo = 1 "
-					+ "order by m.sortNo asc, m.id desc ", 
+					+ "and p.demo = 1 ", 
 			nativeQuery = true)
 	public List<OnSaleAreaItem> findDemos(int status, int type, long current, Pageable pageable);
 	
@@ -115,15 +111,13 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			+ "where m.status= ?1 "
 			+ "and m.productType = ?2 "
 			+ "and m.ruleCloseTime> ?3 "
-			+ "and r.sectId = ?4 "
-			+ "order by m.sortNo asc,m.id desc \n#pageable\n", 
+			+ "and r.sectId = ?4 ",
 			countQuery = "select count(m.id) from OnSaleAreaItem m "
 					+ "join region r on m.regionId = r.id "
 					+ "where m.status= ?1 "
 					+ "and m.productType = ?2 "
 					+ "and m.ruleCloseTime> ?3 "
-					+ "and r.sectId = ?4 "
-					+ "order by m.sortNo asc,m.id desc ",
+					+ "and r.sectId = ?4 ",
 			nativeQuery = true)
 	public List<OnSaleAreaItem> findByBindedSect(int status, int type, long current, String sectId, Pageable pageable);
 	

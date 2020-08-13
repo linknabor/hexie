@@ -32,8 +32,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 			+ "and IF (?4!='', item.status = ?4, 1=1) "
 			+ "and (COALESCE(?5) IS NULL OR (p.agentId IN (?5) )) "
 			+ "and IF (?6!='', p.demo = ?6, 1=1) "
-			+ "group by p.id "
-			+ "order by p.id desc \n#pageable\n ",
+			+ "group by p.id ",
 			countQuery = "select p.id, count(r.id) from product p "
 					+ "left join agent a on a.id = p.agentId "
 					+ "join onsaleareaitem item on item.productId = p.id "
