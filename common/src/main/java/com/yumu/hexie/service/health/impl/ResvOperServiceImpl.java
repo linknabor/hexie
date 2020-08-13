@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -35,7 +37,8 @@ public class ResvOperServiceImpl implements ResvOperService {
 	public Page<ServiceOperator> getOperList(BaseRequestDTO<ServiceOperator> baseRequestDTO) {
 		
 		ServiceOperator serviceOperator = baseRequestDTO.getData();
-		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
+		Sort sort = new Sort(Direction.DESC, "id");
+		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size(), sort);
 		Page<ServiceOperator> page = serviceOperatorRepository.getResvOper(ModelConstant.SERVICE_OPER_TYPE_STAFF, 
 				serviceOperator.getName(), serviceOperator.getTel(), null, baseRequestDTO.getSectList(), pageable);
 		return page;
