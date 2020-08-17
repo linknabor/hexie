@@ -46,8 +46,6 @@ public class SmsServiceImpl implements SmsService {
     private SmsHisRepository smsHisRepository;
     @Value(value = "${sms.expire.minutes}")
     private Long expireMinutes;
-    @Value(value = "${testMode}")
-    private String testMode;
     @Autowired
     private StringRedisTemplate stringRedisTemplate; 
     @Autowired

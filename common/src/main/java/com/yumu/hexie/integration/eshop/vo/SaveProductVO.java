@@ -32,6 +32,9 @@ public class SaveProductVO implements Serializable {
 	private String totalCount;	//库存
 	private String context;	//描述
 	private String updateUser;	//更新商品的用户
+	private String freeShippingNum;	//免运费数
+	private String postageFee;	//运费单价
+	private String productCategoryId;	//产品分类ID
 	private String appid;	//公众号id
 	
 	//物业或代理商信息
@@ -242,6 +245,30 @@ public class SaveProductVO implements Serializable {
 		this.totalCount = totalCount;
 	}
 
+	public String getProductCategoryId() {
+		return productCategoryId;
+	}
+
+	public void setProductCategoryId(String productCategoryId) {
+		this.productCategoryId = productCategoryId;
+	}
+
+	public String getFreeShippingNum() {
+		return freeShippingNum;
+	}
+
+	public void setFreeShippingNum(String freeShippingNum) {
+		this.freeShippingNum = freeShippingNum;
+	}
+
+	public String getPostageFee() {
+		return postageFee;
+	}
+
+	public void setPostageFee(String postageFee) {
+		this.postageFee = postageFee;
+	}
+
 	@Override
 	public String toString() {
 		return "SaveProductVO [operType=" + operType + ", id=" + id + ", name=" + name + ", type=" + type
@@ -249,9 +276,12 @@ public class SaveProductVO implements Serializable {
 				+ ", limitNumOnce=" + limitNumOnce + ", sortNo=" + sortNo + ", status=" + status + ", startDate="
 				+ startDate + ", endDate=" + endDate + ", mainPicture=" + mainPicture + ", smallPicture=" + smallPicture
 				+ ", pictures=" + pictures + ", totalCount=" + totalCount + ", context=" + context + ", updateUser="
-				+ updateUser + ", appid=" + appid + ", agentName=" + agentName + ", agentNo=" + agentNo
-				+ ", salePlanType=" + salePlanType + ", counts=" + counts + ", saleAreas=" + saleAreas + "]";
+				+ updateUser + ", freeShippingNum=" + freeShippingNum + ", postageFee=" + postageFee
+				+ ", productCategoryId=" + productCategoryId + ", appid=" + appid + ", agentName=" + agentName
+				+ ", agentNo=" + agentNo + ", salePlanType=" + salePlanType + ", counts=" + counts + ", saleAreas="
+				+ saleAreas + "]";
 	}
+
 
 
 }

@@ -29,6 +29,7 @@ import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
@@ -198,9 +199,10 @@ public class ServiceOrder  extends BaseModel {
         items.add(item);
     }
 	
-	
-	public ServiceOrder(CreateOrderReq req,Cart cart,long userId,String openId) {
-		orderNo = OrderNoUtil.generateServiceOrderNo();
+	public ServiceOrder(User user, CreateOrderReq req, Cart cart) {
+		if (!"2".equals(req.getPayType())) {
+			orderNo = OrderNoUtil.generateServiceOrderNo();
+		}
 		this.memo = req.getMemo();
 		this.receiveTimeType = req.getReceiveTimeType();
 		this.serviceAddressId = req.getServiceAddressId();
@@ -208,10 +210,29 @@ public class ServiceOrder  extends BaseModel {
 
 		this.orderType = cart.getOrderType();
 		
-		this.userId = userId;
-		this.openId = openId;
+		this.userId = user.getId();
+		this.openId = user.getOpenid();
 		this.items = cart.getItems();
 	}
+	
+	
+	public ServiceOrder(User user, CreateOrderReq req) {
+		
+		if (!"2".equals(req.getPayType())) {
+			orderNo = OrderNoUtil.generateServiceOrderNo();
+		}
+		this.memo = req.getMemo();
+		this.receiveTimeType = req.getReceiveTimeType();
+		this.serviceAddressId = req.getServiceAddressId();
+		this.couponId = req.getCouponId();
+
+		this.orderType = req.getOrderType();
+		
+		this.userId = user.getId();
+		this.openId = user.getOpenid();
+		this.items = req.getItemList();
+	}
+	
 	@JsonIgnore
 	@Transient
 	public long getCollocationId(){

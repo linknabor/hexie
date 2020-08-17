@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.yumu.hexie.common.util.MD5Util;
 import com.yumu.hexie.common.util.RandomStringUtils;
@@ -35,6 +36,9 @@ public class SimpleCORSFilter implements Filter {
 	
 	private static Logger logger = LoggerFactory.getLogger(SimpleCORSFilter.class);
 	
+	@Value("${testMode}")
+	private Boolean testMode;
+	
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         
@@ -49,11 +53,7 @@ public class SimpleCORSFilter implements Filter {
 			String token = MD5Util.MD5Encode(random, "");
 			response.addHeader("Access-Control-Allow-Token", token);
 		}
-        if (requestUrl.startsWith("https://test.e-shequ.com") || 
-        		requestUrl.startsWith("https://uat.e-shequ.com")||
-        		requestUrl.startsWith("http://test.e-shequ.com") ||
-        		requestUrl.startsWith("http://uat.e-shequ.com")) {
-        	
+        if (testMode) {
         	response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
 		}
         response.setHeader("Access-Control-Allow-Credentials", "true");
