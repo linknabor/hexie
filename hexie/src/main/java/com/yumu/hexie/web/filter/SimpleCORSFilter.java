@@ -56,12 +56,10 @@ public class SimpleCORSFilter implements Filter {
         	
         	response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
 		}
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
-        response.setHeader("Access-Control-Allow-Headers", "accept, content-type");
-        response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Set-Cookie", "SameSit=None");
-        response.setHeader("Set-Cookie", "Secure");
+        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
+        response.setHeader("Access-Control-Max-Age", "3600");
         chain.doFilter(req, res);
     }
 
