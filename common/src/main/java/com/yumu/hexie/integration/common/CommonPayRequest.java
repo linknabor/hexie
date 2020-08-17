@@ -77,13 +77,17 @@ public class CommonPayRequest extends CommonRequest {
 	
 	public static class SubOrder {
 		
-		@JsonProperty("product_name")
+		@JsonProperty("sub_product_name")
 		private String productName;
-		@JsonProperty("agent_no")
+		@JsonProperty("sub_product_id")
+		private String productId;
+		@JsonProperty("sub_agent_no")
 		private String agentNo;
-		@JsonProperty("agent_name")
+		@JsonProperty("sub_agent_name")
 		private String agentName;
+		@JsonProperty("sub_count")
 		private int count;
+		@JsonProperty("sub_amount")
 		private float amount;
 		
 		public String getProductName() {
@@ -116,10 +120,16 @@ public class CommonPayRequest extends CommonRequest {
 		public void setAmount(float amount) {
 			this.amount = amount;
 		}
+		public String getProductId() {
+			return productId;
+		}
+		public void setProductId(String productId) {
+			this.productId = productId;
+		}
 		@Override
 		public String toString() {
-			return "SubOrder [productName=" + productName + ", agentNo=" + agentNo + ", agentName=" + agentName
-					+ ", count=" + count + ", amount=" + amount + "]";
+			return "SubOrder [productName=" + productName + ", productId=" + productId + ", agentNo=" + agentNo
+					+ ", agentName=" + agentName + ", count=" + count + ", amount=" + amount + "]";
 		}
 		
 		

@@ -358,11 +358,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			
 			for (OrderItem orderItem : itemList) {
 				SubOrder subOrder = new SubOrder();
-				subOrder.setAgentName(orderItem.getAgentName());
+				String subAgentName = orderItem.getAgentName();
+				if (!StringUtil.isEmpty(subAgentName)) {
+					subAgentName = URLEncoder.encode(subAgentName,"GBK");
+				}
+				subOrder.setAgentName(subAgentName);
 				subOrder.setAgentNo(orderItem.getAgentNo());
 				subOrder.setAmount(orderItem.getAmount());
 				subOrder.setCount(orderItem.getCount());
-				subOrder.setProductName(order.getProductName());
+				
+				String subProductName = orderItem.getProductName();
+				if (!StringUtil.isEmpty(subProductName)) {
+					subProductName = URLEncoder.encode(subProductName,"GBK");
+				}
+				subOrder.setProductName(subProductName);
 				subOrderList.add(subOrder);
 			}
 			request.setSubOrders(subOrderList);
