@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.sales.impl;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -9,16 +10,15 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.CommonPayRequest;
+import com.yumu.hexie.integration.common.CommonPayRequest.SubOrder;
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
@@ -30,6 +30,7 @@ import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
 import com.yumu.hexie.model.market.Cart;
@@ -41,6 +42,7 @@ import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
+import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.car.CarService;
@@ -63,7 +65,6 @@ import com.yumu.hexie.vo.SingleItemOrder;
 public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrderService {
 
     protected static final Logger log = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
-	public static String COUPON_URL = ConfigUtil.get("couponUrl");
 	@Inject
 	protected ServiceOrderRepository serviceOrderRepository;
 	@Inject
@@ -98,9 +99,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private EvoucherService evoucherService;
 	@Autowired
 	private TemplateMsgService templateMsgService;
-
-    @Value(value = "${testMode}")
-    private boolean testMode;
+	@Autowired
+	private RedisRepository redisRepository;
+	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
 		for(OrderItem item : order.getItems()){
@@ -115,6 +116,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             item.fillDetail(plan, product);
             
             Agent agent = agentRepository.findById(product.getAgentId()).get();
+            item.setAgentId(agent.getId());
+            item.setAgentName(agent.getName());
+            item.setAgentNo(agent.getAgentNo());
             
 			if(StringUtil.isEmpty(order.getProductName())){
                 order.fillProductInfo(product);
@@ -193,13 +197,63 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		return o;
 	}
 
+	/**
+	 * 根据购物车创建订单
+	 */
 	@Override
 	@Transactional
-	public ServiceOrder createOrder(CreateOrderReq req,Cart cart,long userId,String openId){
-		return createOrder(new ServiceOrder(req, cart, userId, openId));
+	public ServiceOrder createOrder(User user, CreateOrderReq req, Cart cart){
+		
+		ServiceOrder o = new ServiceOrder(user, req, cart);
+		//1. 填充地址信息
+		Address address = fillAddressInfo(o);
+		//2. 填充订单信息并校验规则,设置价格信息
+		preOrderCreate(o, address);
+		computeCoupon(o);
+		//3. 订单创建
+		o = serviceOrderRepository.save(o);
+		for(OrderItem item : o.getItems()) {
+			item.setServiceOrder(o);
+			item.setUserId(o.getUserId());
+			orderItemRepository.save(item);
+		}
+		//4.保存车辆信息 20160721 车大大的车辆服务
+		carService.saveOrderCarInfo(o);
+		
+		//5.电子优惠券订单
+		evoucherService.createEvoucher(o);
+		
+        log.warn("[Create]订单创建OrderNo:" + o.getOrderNo());
+		//4. 订单后处理
+		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
+		return o;
+		
 	}
-
-	private ServiceOrder createOrder(ServiceOrder o) {
+	
+	/**
+	 * 根据购物车创建订单
+	 */
+	@Override
+	@Transactional
+	public ServiceOrder createOrderFromCart(User user, CreateOrderReq req){
+		
+		//重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
+		List<OrderItem> itemList = req.getItemList();
+		for (OrderItem orderItem : itemList) {
+			String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
+			ProductRule productRule = redisRepository.getProdcutRule(key);
+			if (productRule == null) {
+				throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
+			}
+			
+			//只设置单价和免邮件数这些基本属性，以保证后面计算的正确性
+			orderItem.setOriPrice(productRule.getOriPrice());
+			orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
+			orderItem.setPostageFee(productRule.getPostageFee());
+			orderItem.setPrice(productRule.getPrice());
+		}
+		
+		ServiceOrder o = new ServiceOrder(user, req);
 		//1. 填充地址信息
 		Address address = fillAddressInfo(o);
 		//2. 填充订单信息并校验规则,设置价格信息
@@ -259,7 +313,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         }
 		JsSign sign = null;
 		//核销券订单走平台支付接口。其余老的订单走原有支付，会慢慢改成新接口
-		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
+				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()) {
+			
 			User user = userService.getById(order.getUserId());
 			CommonPayRequest request = new CommonPayRequest();
 			request.setUserId(user.getWuyeId());
@@ -296,6 +352,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			request.setAgentName(agentName);
 			request.setCount(String.valueOf(order.getCount()));
+			
+			List<OrderItem> itemList = order.getItems();
+			List<SubOrder> subOrderList = new ArrayList<>(itemList.size());
+			
+			for (OrderItem orderItem : itemList) {
+				SubOrder subOrder = new SubOrder();
+				subOrder.setAgentName(orderItem.getAgentName());
+				subOrder.setAgentNo(orderItem.getAgentNo());
+				subOrder.setAmount(orderItem.getAmount());
+				subOrder.setCount(orderItem.getCount());
+				subOrder.setProductName(order.getProductName());
+				subOrderList.add(subOrder);
+			}
+			request.setSubOrders(subOrderList);
 			
 			CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
 			sign = new JsSign();
@@ -572,5 +642,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		
 	}
+	
 	
 }

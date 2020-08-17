@@ -514,7 +514,7 @@ public class WuyeServiceImpl implements WuyeService {
 		long begin = System.currentTimeMillis();
 		
 		if (StringUtils.isEmpty(user.getTel())) {
-			user = userRepository.getOne(user.getId());
+			user = userRepository.findById(user.getId());
 		}
 		QrCodePayService service = new QrCodePayService();
 		try {
@@ -563,7 +563,11 @@ public class WuyeServiceImpl implements WuyeService {
 				
 			}
 		}
-		service.getServiceList().addAll(serviceList);
+		List<PayCfg> list = service.getServiceList();
+		if (list==null) {
+			list = new ArrayList<>();
+		}
+		list.addAll(serviceList);
 		return service;
 		
 	}

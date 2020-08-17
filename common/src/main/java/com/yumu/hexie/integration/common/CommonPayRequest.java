@@ -2,6 +2,7 @@ package com.yumu.hexie.integration.common;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.StringUtils;
@@ -43,6 +44,8 @@ public class CommonPayRequest extends CommonRequest {
 	@JsonProperty("agent_no")
 	private String agentNo;
 	private String count;
+	@JsonProperty("sub_orders")
+	private List<SubOrder> subOrders;
 	
 	public CommonPayRequest() {
 		super();
@@ -69,6 +72,56 @@ public class CommonPayRequest extends CommonRequest {
 		} catch (UnsupportedEncodingException e) {
 			throw new BizValidateException(e.getMessage(), e);	
 		}
+		
+	}
+	
+	public static class SubOrder {
+		
+		@JsonProperty("product_name")
+		private String productName;
+		@JsonProperty("agent_no")
+		private String agentNo;
+		@JsonProperty("agent_name")
+		private String agentName;
+		private int count;
+		private float amount;
+		
+		public String getProductName() {
+			return productName;
+		}
+		public void setProductName(String productName) {
+			this.productName = productName;
+		}
+		public String getAgentNo() {
+			return agentNo;
+		}
+		public void setAgentNo(String agentNo) {
+			this.agentNo = agentNo;
+		}
+		public String getAgentName() {
+			return agentName;
+		}
+		public void setAgentName(String agentName) {
+			this.agentName = agentName;
+		}
+		public int getCount() {
+			return count;
+		}
+		public void setCount(int count) {
+			this.count = count;
+		}
+		public float getAmount() {
+			return amount;
+		}
+		public void setAmount(float amount) {
+			this.amount = amount;
+		}
+		@Override
+		public String toString() {
+			return "SubOrder [productName=" + productName + ", agentNo=" + agentNo + ", agentName=" + agentName
+					+ ", count=" + count + ", amount=" + amount + "]";
+		}
+		
 		
 	}
 	
@@ -169,13 +222,21 @@ public class CommonPayRequest extends CommonRequest {
 		this.count = count;
 	}
 
+	public List<SubOrder> getSubOrders() {
+		return subOrders;
+	}
+
+	public void setSubOrders(List<SubOrder> subOrders) {
+		this.subOrders = subOrders;
+	}
+
 	@Override
 	public String toString() {
 		return "CommonPayRequest [userId=" + userId + ", serviceId=" + serviceId + ", sectId=" + sectId + ", linkman="
 				+ linkman + ", linktel=" + linktel + ", serviceAddr=" + serviceAddr + ", appid=" + appid + ", openid="
 				+ openid + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", orderType=" + orderType
 				+ ", serviceName=" + serviceName + ", agentName=" + agentName + ", agentNo=" + agentNo + ", count="
-				+ count + "]";
+				+ count + ", subOrders=" + subOrders + "]";
 	}
 
 	

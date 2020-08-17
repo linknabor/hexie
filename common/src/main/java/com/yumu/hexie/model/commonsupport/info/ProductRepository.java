@@ -16,7 +16,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	//不要修改顺序
 	String sqlColumn1 = " p.id, p.name, p.productType, p.oriPrice, p.miniPrice, p.singlePrice, rule.status, p.startDate, p.endDate, "
 			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, p.demo, p.totalCount, a.name as agentName, a.agentNo, rule.limitNumOnce, "
-			+ "p.productCategoryid, item.sortNo, pp.appid, count(r.id) as counts, count(distinct op.id) as operCounts ";
+			+ "rule.postageFee, rule.freeShippingNum, p.productCategoryid, item.sortNo, pp.appid, count(r.id) as counts, count(distinct op.id) as operCounts ";
 	
 	@Query(value = "select " + sqlColumn1
 			+ "from product p "
