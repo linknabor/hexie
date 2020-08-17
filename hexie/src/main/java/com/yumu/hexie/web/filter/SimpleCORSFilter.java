@@ -16,6 +16,9 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.yumu.hexie.common.util.MD5Util;
 import com.yumu.hexie.common.util.RandomStringUtils;
 
@@ -30,12 +33,8 @@ import com.yumu.hexie.common.util.RandomStringUtils;
 @WebFilter(urlPatterns = "/*", filterName = "simpleCORSFilter")
 public class SimpleCORSFilter implements Filter {
 	
-	public static void main(String[] args) {
-		String random = RandomStringUtils.random(5);
-		String token = MD5Util.MD5Encode(random, "");
-		System.out.println(token);
-	}
-
+	private static Logger logger = LoggerFactory.getLogger(SimpleCORSFilter.class);
+	
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         
@@ -43,16 +42,26 @@ public class SimpleCORSFilter implements Filter {
     	HttpServletResponse response = (HttpServletResponse) res;
         
         String requestUrl = request.getRequestURL().toString();
+        logger.info("SimpleCORSFilter, requestUrl " + requestUrl);
+        
         if (requestUrl.indexOf("/getInvoice") == -1) {	//发票的验证码添入额外的token，防止恶意刷验证码,其他的请求随意放一个token不做处理
 			String random = RandomStringUtils.random(5);
 			String token = MD5Util.MD5Encode(random, "");
 			response.addHeader("Access-Control-Allow-Token", token);
 		}
-        response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
+        if (requestUrl.startsWith("https://test.e-shequ.com") || 
+        		requestUrl.startsWith("https://uat.e-shequ.com")||
+        		requestUrl.startsWith("http://test.e-shequ.com") ||
+        		requestUrl.startsWith("http://uat.e-shequ.com")) {
+        	
+        	response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
+		}
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Allow-Headers", "accept, content-type");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Set-Cookie", "SameSit=None");
+        response.setHeader("Set-Cookie", "Secure");
         chain.doFilter(req, res);
     }
 
