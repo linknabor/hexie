@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -101,7 +104,12 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 			}
 			
-			Pageable pageable = PageRequest.of(queryProductVO.getCurrentPage(), queryProductVO.getPageSize());
+			List<Order> orderList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "id");
+	    	orderList.add(order);
+	    	Sort sort = Sort.by(orderList);
+			
+			Pageable pageable = PageRequest.of(queryProductVO.getCurrentPage(), queryProductVO.getPageSize(), sort);
 			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 					queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
 			
@@ -476,7 +484,8 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			Pageable pageable = PageRequest.of(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize());
+			Sort sort = new Sort(Direction.DESC, "id");
+			Pageable pageable = PageRequest.of(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize(), sort);
 			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentNo(), queryEvoucherVO.getAgentName(), pageable);
 			List<EvoucherMapper> mapperList = new ArrayList<>();
 			for (Evoucher evoucher : page.getContent()) {
