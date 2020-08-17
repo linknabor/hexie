@@ -29,9 +29,14 @@ public class OrderItem  extends BaseModel {
     @JoinColumn(name = "orderId")
 	private ServiceOrder serviceOrder;
 
-	private Float price;
-	private Float oriPrice;
-	private Float amount;
+	private Float price;	//售价
+	private Float oriPrice;	//原价
+	
+	private Float postageFee;	//商品邮费单价
+	private int freeShippingNum;	//商品免邮件数
+	
+	private Float amount;	//单类商品总价 = price * count
+	private Float shipFee;	//单类商品邮费 = postageFee * count，如果免邮费就是0
 	
 	//产品冗余信息
 	private Long merchantId;
@@ -40,10 +45,14 @@ public class OrderItem  extends BaseModel {
 	private String productThumbPic;
 	private String ruleName;
 	
+	private long agentId;
+	private String agentName;
+	private String agentNo;
+	
 	public OrderItem(){}
 	@Transient
 	public void fillDetail(SalePlan plan,Product product){
-		//ruleId = plan.getId();
+//		ruleId = plan.getId();
 		orderType = plan.getSalePlanType();
 		price = plan.getPrice();
 		amount = plan.getPrice() * count;
@@ -147,5 +156,42 @@ public class OrderItem  extends BaseModel {
 	public void setOriPrice(Float oriPrice) {
 		this.oriPrice = oriPrice;
 	}
+	public long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+	public String getAgentName() {
+		return agentName;
+	}
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+	public String getAgentNo() {
+		return agentNo;
+	}
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+	public Float getPostageFee() {
+		return postageFee;
+	}
+	public void setPostageFee(Float postageFee) {
+		this.postageFee = postageFee;
+	}
+	public int getFreeShippingNum() {
+		return freeShippingNum;
+	}
+	public void setFreeShippingNum(int freeShippingNum) {
+		this.freeShippingNum = freeShippingNum;
+	}
+	public Float getShipFee() {
+		return shipFee;
+	}
+	public void setShipFee(Float shipFee) {
+		this.shipFee = shipFee;
+	}
+	
 	
 }

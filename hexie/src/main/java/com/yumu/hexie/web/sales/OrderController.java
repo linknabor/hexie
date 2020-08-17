@@ -265,7 +265,7 @@ public class OrderController extends BaseController{
 		if(cart.getOrderType() < 0){
 			return new BaseResult<ServiceOrder>().failMsg("商品信息获取异常，请重新选择你需要购买的商品！");
 		}
-		ServiceOrder o = baseOrderService.createOrder(req,cart,user.getId(),user.getOpenid());
+		ServiceOrder o = baseOrderService.createOrder(user, req, cart);
 		if(o == null) {
 			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
 		} else {
@@ -314,5 +314,27 @@ public class OrderController extends BaseController{
 		baseOrderService.cancelPay(user, orderId);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
+	
+	/**
+	 * 购物车支付页面创建订单
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/createOrderFromCart", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<ServiceOrder> createOrderFromCart(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req) throws Exception {
+		
+		ServiceOrder o = baseOrderService.createOrderFromCart(user, req);
+		if(o == null) {
+			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
+		} else {
+			redisRepository.removeCart(Keys.uidCardKey(user.getId()));
+		}
+		return new BaseResult<ServiceOrder>().success(o);
+	}
+	
+	
 	
 }

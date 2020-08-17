@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO.Oper;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -35,9 +36,12 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductCategory;
+import com.yumu.hexie.model.commonsupport.info.ProductCategoryRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductPlat;
 import com.yumu.hexie.model.commonsupport.info.ProductPlatRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -50,9 +54,9 @@ import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
-
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
+import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.exception.BizValidateException;
 
@@ -84,7 +88,10 @@ public class EshopServiceImpl implements EshopSerivce {
 	private EvoucherRepository evoucherRepository;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
-
+	@Autowired
+	private ProductCategoryRepository productCategoryRepository;
+	@Autowired
+	private RedisRepository redisRepository;
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
@@ -206,6 +213,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		product.setSinglePrice(Float.valueOf(saveProductVO.getSinglePrice()));
 		product.setOriPrice(Float.valueOf(saveProductVO.getOriPrice()));
 		product.setServiceDesc(saveProductVO.getContext());
+		product.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
 		if (ModelConstant.RULE_STATUS_ON == Integer.valueOf(saveProductVO.getStatus())) {
 			product.setStatus(ModelConstant.PRODUCT_ONSALE);
 		}
@@ -217,10 +225,16 @@ public class EshopServiceImpl implements EshopSerivce {
 			product.setUpdateDate(new Date());
 			product.setUpdateUser(saveProductVO.getUpdateUser());
 		}
+		if (!StringUtils.isEmpty(saveProductVO.getProductCategoryId())) {
+			product.setProductCategoryId(Integer.valueOf(saveProductVO.getProductCategoryId()));
+		}
 		product = productRepository.save(product);
 		
-		if (ModelConstant.ORDER_TYPE_ONSALE != Integer.valueOf(saveProductVO.getSalePlanType())) {	//核销券规则走特卖
-			throw new BizValidateException("unknow sale plat type : " + saveProductVO.getSalePlanType());
+		int salePlanType = Integer.valueOf(saveProductVO.getSalePlanType());
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != salePlanType &&
+				ModelConstant.ORDER_TYPE_ONSALE != salePlanType &&
+				ModelConstant.ORDER_TYPE_RGROUP != salePlanType) {
+			throw new BizValidateException("unknow sale plan type : " + saveProductVO.getSalePlanType());
 		}
 		OnSaleRule onSaleRule = new OnSaleRule();
 		if ("edit".equals(saveProductVO.getOperType())) {
@@ -244,6 +258,8 @@ public class EshopServiceImpl implements EshopSerivce {
 		onSaleRule.setPrice(product.getSinglePrice());
 		onSaleRule.setDescription(product.getServiceDesc());
 		onSaleRule.setTimeoutForPay(30*60*1000);
+		onSaleRule.setFreeShippingNum(Integer.valueOf(saveProductVO.getFreeShippingNum()));
+		onSaleRule.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
 		if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
 			onSaleRule.setStatus(ModelConstant.RULE_STATUS_ON);
 		}else {
@@ -277,6 +293,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			onSaleAreaItem.setProductName(product.getName());
 			onSaleAreaItem.setProductPic(product.getMainPicture());
 			onSaleAreaItem.setProductType(onSaleRule.getProductType());
+			onSaleAreaItem.setPostageFee(onSaleRule.getPostageFee());
+			onSaleAreaItem.setFreeShippingNum(onSaleRule.getFreeShippingNum());
 			if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
 				onSaleAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
 			}else {
@@ -297,6 +315,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		productPlat.setProductId(product.getId());
 		productPlatRepository.save(productPlat);
 		
+
+		ProductRule productRule = new ProductRule(product, onSaleRule);
+		String key = ModelConstant.KEY_PRO_RULE_INFO + onSaleRule.getId();
+		redisRepository.setProdcutRule(key, productRule);
 		
 	}
 	
@@ -445,14 +467,14 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
-			ServiceOperator serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, oper.getTel(), oper.getOpenId());
+			ServiceOperator serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId());
 			if (serviceOperator == null) {
 				serviceOperator = new ServiceOperator();
 			}
 			serviceOperator.setName(oper.getName());
 			serviceOperator.setOpenId(oper.getOpenId());
 			serviceOperator.setTel(oper.getTel());
-			serviceOperator.setType(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER);	//TODO 根据service_id动态取值
+			serviceOperator.setType(saveOperVO.getOperatorType());
 			serviceOperator.setUserId(oper.getUserId());
 			serviceOperator.setLongitude(0d);
 			serviceOperator.setLatitude(0d);
@@ -553,6 +575,60 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		
 	}
+
+	/**
+	 * 保存产品分类
+	 */
+	@Override
+	@Transactional
+	public void saveCategory(SaveCategoryVO saveCategoryVo) {
+		
+		ProductCategory productCategory = new ProductCategory();
+		BeanUtils.copyProperties(saveCategoryVo, productCategory);
+		productCategoryRepository.save(productCategory);
+	}
+
+	/**
+	 * 删除产品分类
+	 */
+	@Override
+	@Transactional
+	public void deleteCategory(String delIds) {
+		
+		Assert.hasText(delIds, "没有可以删除的分类");
+		String[]delArr = delIds.split(",");
+		for (String delid : delArr) {
+			productCategoryRepository.deleteById(Long.valueOf(delid));
+		}
+		
+	}
 	
+	/**
+	 * 查询产品分类
+	 */
+	@Override
+	public CommonResponse<Object> getCategory(String id) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		List<ProductCategory> list = new ArrayList<>();
+		try {
+			if (StringUtils.isEmpty(id)) {
+				Sort sort = Sort.by(Direction.ASC, "sort");
+				list = productCategoryRepository.findAll(sort);
+			}else {
+				ProductCategory category = productCategoryRepository.findById(Long.valueOf(id)).get();
+				list.add(category);
+			}
+			commonResponse.setData(list);
+			commonResponse.setResult("00");
+			
+		} catch (Exception e) {
+			
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+		
+	}
 
 }

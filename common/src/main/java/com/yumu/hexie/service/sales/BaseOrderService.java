@@ -17,7 +17,7 @@ public interface BaseOrderService {
 	//创建订单
 	public ServiceOrder createOrder(SingleItemOrder order);
 	//创建订单
-	public ServiceOrder createOrder(CreateOrderReq req,Cart cart,long userId,String openId);
+	ServiceOrder createOrder(User user, CreateOrderReq req, Cart cart);
 	//发起支付
 	public JsSign requestPay(ServiceOrder order) throws Exception;
 	//支付状态变更
@@ -44,4 +44,8 @@ public interface BaseOrderService {
 	
 	//平台支付，回调入账
 	void notifyPayByServplat(String tradeWaterId);
+	//购物车页面选择商品后支付
+	ServiceOrder createOrderFromCart(User user, CreateOrderReq req);
+	
+	
 }

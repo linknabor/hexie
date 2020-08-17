@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,6 +158,7 @@ public class RestUtil {
 	 * @param fromObject
 	 * @param destMap
 	 */
+	@SuppressWarnings("unchecked")
 	private void convertObject2Map(Object fromObject, LinkedMultiValueMap<String, String> destMap) {
 		
 		if (destMap == null) {
@@ -174,7 +176,21 @@ public class RestUtil {
 				fieldName = jsonProperty.value();
 			}
 			try {
-				destMap.add(fieldName, field.get(fromObject)==null?"":String.valueOf(field.get(fromObject)));
+				Object value = field.get(fromObject);
+				if (value instanceof List || value instanceof Object[]) {
+					if (value instanceof List) {
+						List<Object> list = (List<Object>)value;
+						for (Object innerObject : list) {
+							convertObject2Map(innerObject, destMap);
+						}
+					}
+					if (value instanceof Object[]) {
+						//TODO
+					}
+					
+				}else {
+					destMap.add(fieldName, value==null?"":String.valueOf(value));
+				}
 
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				logger.error(e.getMessage(), e);

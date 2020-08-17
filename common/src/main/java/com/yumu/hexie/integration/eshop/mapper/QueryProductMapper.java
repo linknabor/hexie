@@ -51,6 +51,15 @@ public class QueryProductMapper implements Serializable {
 	@JsonProperty("limit_num_once")
 	private Integer limitNumOnce;	//限购数
 	
+	@JsonProperty("postage_fee")
+	private Float postageFee;	//运费
+	
+	@JsonProperty("free_shipping_num")
+	private Integer freeShippingNum;	//包邮件数
+	
+	@JsonProperty("product_category_id")
+	private BigInteger productCategoryId;	//商品分类ID
+	
 	@JsonProperty("sort_no")
 	private Integer sortNo;	//商品显示位置
 	private String appid;
@@ -61,7 +70,8 @@ public class QueryProductMapper implements Serializable {
 	public QueryProductMapper(BigInteger id, String name, String productType, Float oriPrice, Float miniPrice,
 			Float singlePrice, Integer status, Timestamp startDate, Timestamp endDate, String mainPicture,
 			String smallPicture, String pictures, String serviceDesc, Integer demo, Integer totalCount, String agentName, String agentNo,
-			Integer limitNumOnce, Integer sortNo, String appid, BigInteger counts, BigInteger operCounts) {
+			Integer limitNumOnce, Float postageFee, Integer freeShippingNum, BigInteger productCategoryId, Integer sortNo, String appid, 
+			BigInteger counts, BigInteger operCounts) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -81,6 +91,9 @@ public class QueryProductMapper implements Serializable {
 		this.agentName = agentName;
 		this.agentNo = agentNo;
 		this.limitNumOnce = limitNumOnce;
+		this.postageFee = postageFee;
+		this.freeShippingNum = freeShippingNum;
+		this.productCategoryId = productCategoryId;
 		this.sortNo = sortNo;
 		this.appid = appid;
 		this.counts = counts;
@@ -218,6 +231,24 @@ public class QueryProductMapper implements Serializable {
 	}
 	public void setTotalCount(Integer totalCount) {
 		this.totalCount = totalCount;
+	}
+	public BigInteger getProductCategoryId() {
+		return productCategoryId;
+	}
+	public void setProductCategoryId(BigInteger productCategoryId) {
+		this.productCategoryId = productCategoryId;
+	}
+	public Float getPostageFee() {
+		return postageFee;
+	}
+	public void setPostageFee(Float postageFee) {
+		this.postageFee = postageFee;
+	}
+	public Integer getFreeShippingNum() {
+		return freeShippingNum;
+	}
+	public void setFreeShippingNum(Integer freeShippingNum) {
+		this.freeShippingNum = freeShippingNum;
 	}
 	
 	
