@@ -9,6 +9,7 @@ public class Distribution extends BaseModel{
 	private long regionId;//区域
 	private int regionType;//0 省 1 市 2县区  3全部
 	private long productId; //商品
+	private long productCategoryId;
 
     private String productName;//商品名称
     private String productPic;//商品图片
@@ -72,5 +73,14 @@ public class Distribution extends BaseModel{
 	public void setTagUrl(String tagUrl) {
 		this.tagUrl = tagUrl;
 	}
+
+	public long getProductCategoryId() {
+		return productCategoryId;
+	}
+
+	public void setProductCategoryId(long productCategoryId) {
+		this.productCategoryId = productCategoryId;
+	}
+	
 	
 }
