@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.commonsupport.info.ProductCategory;
+import com.yumu.hexie.model.commonsupport.info.ProductCategoryRepository;
 import com.yumu.hexie.model.distribution.HomeDistributionRepository;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
@@ -63,6 +65,8 @@ public class DistributionServiceImpl implements DistributionService {
     private UserRepository userRepository;
     @Autowired
     private RegionRepository regionRepository;
+    @Autowired
+    private ProductCategoryRepository productCategoryRepository;
 
     /** 
      * @param rule
@@ -231,7 +235,7 @@ public class DistributionServiceImpl implements DistributionService {
      * 新版特卖
      */
     @Override
-    public List<OnSaleAreaItem> queryOnsalesV2(User user, int type, int page) {
+    public List<OnSaleAreaItem> queryOnsalesV2(User user, int type, int category, int page) {
     	
     	User currUser = userRepository.findById(user.getId());
     	long current = System.currentTimeMillis();
@@ -244,10 +248,25 @@ public class DistributionServiceImpl implements DistributionService {
     	Pageable pageable = PageRequest.of(page, 10, sort);
     	List<OnSaleAreaItem> itemList = new ArrayList<>();
     	if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {	//未绑定房屋的用户，展示样板商品
-    		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, pageable);
+    		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, pageable);
     	}else {	//已经绑定房屋的用户查询关联小区的商品
-    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), pageable); 
+    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), category, pageable); 
     	}
         return itemList;
     }
+
+    /**
+     * 获取分类 TODO
+     */
+	@Override
+	public List<ProductCategory> queryCategory(User user, int type) {
+
+		User currUser = userRepository.findById(user.getId());
+		long current = System.currentTimeMillis();
+		List<ProductCategory> list = productCategoryRepository.findCategoryByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId()); 
+		if (list.isEmpty()) {
+			list = productCategoryRepository.findAll();
+		}
+		return list;
+	}
 }
