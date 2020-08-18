@@ -80,7 +80,7 @@ public class CommonPayRequest extends CommonRequest {
 		@JsonProperty("sub_product_name")
 		private String productName;
 		@JsonProperty("sub_product_id")
-		private String productId;
+		private Long productId;
 		@JsonProperty("sub_agent_no")
 		private String agentNo;
 		@JsonProperty("sub_agent_name")
@@ -120,10 +120,10 @@ public class CommonPayRequest extends CommonRequest {
 		public void setAmount(float amount) {
 			this.amount = amount;
 		}
-		public String getProductId() {
+		public Long getProductId() {
 			return productId;
 		}
-		public void setProductId(String productId) {
+		public void setProductId(Long productId) {
 			this.productId = productId;
 		}
 		@Override
