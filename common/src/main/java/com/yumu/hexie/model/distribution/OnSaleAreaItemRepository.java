@@ -38,7 +38,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 					+ "and pp.appid = ?6 ",
 			nativeQuery = true)
 	public List<OnSaleAreaItem> findFeatured(long provinceId,long cityId,long countyId,
-			long xiaoquId,long current, String appid, Pageable pageable);
+			long xiaoquId,long current, String appid, Pageable spageable);
 	
 
 	@Query(value = "select m.* from OnSaleAreaItem m left join productplat pp on pp.productId = m.productId "
@@ -96,7 +96,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 					+ "and m.ruleCloseTime> ?3 "
 					+ "and p.demo = 1 ", 
 			nativeQuery = true)
-	public List<OnSaleAreaItem> findDemos(int status, int type, long current, Pageable pageable);
+	public List<OnSaleAreaItem> findDemos(int status, int type, long current, long categoryId, Pageable pageable);
 	
 	/**
 	 * 按业主绑定的房屋查询可以购买的商品
@@ -119,7 +119,8 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 					+ "and m.ruleCloseTime> ?3 "
 					+ "and r.sectId = ?4 ",
 			nativeQuery = true)
-	public List<OnSaleAreaItem> findByBindedSect(int status, int type, long current, String sectId, Pageable pageable);
+	public List<OnSaleAreaItem> findByBindedSect(int status, int type, long current, String sectId, long categoryId, Pageable pageable);
+	
 	
 	
 }

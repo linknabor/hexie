@@ -291,6 +291,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			onSaleAreaItem.setRegionType(region.getRegionType());
 			onSaleAreaItem.setProductId(product.getId());
 			onSaleAreaItem.setProductName(product.getName());
+			onSaleAreaItem.setProductCategoryId(product.getProductCategoryId());
 			onSaleAreaItem.setProductPic(product.getMainPicture());
 			onSaleAreaItem.setProductType(onSaleRule.getProductType());
 			onSaleAreaItem.setPostageFee(onSaleRule.getPostageFee());
