@@ -111,7 +111,8 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			+ "where m.status= ?1 "
 			+ "and m.productType = ?2 "
 			+ "and m.ruleCloseTime> ?3 "
-			+ "and r.sectId = ?4 ",
+			+ "and r.sectId = ?4 "
+			+ "and m.productCategoryId = ?5 ",
 			countQuery = "select count(m.id) from OnSaleAreaItem m "
 					+ "join region r on m.regionId = r.id "
 					+ "where m.status= ?1 "
