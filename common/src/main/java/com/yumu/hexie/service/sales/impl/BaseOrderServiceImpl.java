@@ -306,7 +306,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Override
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
-        log.info("[requestPay]OrderNo:" + order.getOrderNo() + ", orderType : " + order.getOrderType());
+        log.info("[requestPay]OrderNo:" + order.getId() + ", orderType : " + order.getOrderType());
 		//校验订单状态
 		if(!order.payable()){
             throw new BizValidateException(order.getId(),"订单状态不可支付，请重新查询确认订单状态！").setError();
@@ -353,7 +353,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setAgentName(agentName);
 			request.setCount(String.valueOf(order.getCount()));
 			
-			List<OrderItem> itemList = order.getItems();
+			List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
 			List<SubOrder> subOrderList = new ArrayList<>(itemList.size());
 			
 			for (OrderItem orderItem : itemList) {
@@ -372,6 +372,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					subProductName = URLEncoder.encode(subProductName,"GBK");
 				}
 				subOrder.setProductName(subProductName);
+				subOrder.setProductId(orderItem.getProductId());
 				subOrderList.add(subOrder);
 			}
 			request.setSubOrders(subOrderList);
@@ -387,7 +388,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			sign.setOrderId(String.valueOf(order.getId()));
 			order = serviceOrderRepository.findById(order.getId()).get();
 			if (StringUtil.isEmpty(order.getOrderNo())) {
-				order.setOrderNo(responseVo.getTradeWaterId());
+				order.setOrderNo(responseVo.getTradeWaterId());	//set之后,jpa会有脏检查，如果数据发生变化，会在事务提交时执行update
 			}
 
 			//操作记录
