@@ -435,5 +435,43 @@ public class TemplateMsgService {
         sendMsg(msg, accessToken);
         
     }
+    
+    /**
+     * 发货提醒
+     * @param openId
+     * @param title
+     * @param billName
+     * @param requireTime
+     * @param url
+     * @param accessToken
+     * @param appId
+     */
+    public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
+
+        //更改为使用模版消息发送
+    	User user = sendUser;
+    	CsOrderVO vo = new CsOrderVO();
+    	String title = "您有一个新的服务订单，请及时处理。";
+    	vo.setTitle(new TemplateItem(title));
+    	vo.setOrderId(new TemplateItem(String.valueOf(serviceOrder.getId())));
+    	vo.setServiceType(new TemplateItem(serviceOrder.getSubTypeName()));
+    	String customerName = serviceOrder.getReceiverName();
+    	vo.setCustomerName(new TemplateItem(customerName));
+    	vo.setCustomerTel(new TemplateItem(serviceOrder.getTel()));
+    	vo.setRemark(new TemplateItem(serviceOrder.getAddress()));
+    	
+        TemplateMsg<CsOrderVO>msg = new TemplateMsg<CsOrderVO>();
+        msg.setData(vo);
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN));
+        String url = getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_ASSIGN);	//TODO
+        if (!StringUtils.isEmpty(url)) {
+			url = url + serviceOrder.getId();
+			url = AppUtil.addAppOnUrl(url, user.getAppId());
+		}
+        msg.setUrl(url);
+        msg.setTouser(user.getOpenid());
+        sendMsg(msg, accessToken);
+        
+    }
 
 }
