@@ -43,4 +43,6 @@ public interface GotongService {
 
 	void sendCustomServiceAssignedMsg(ServiceOrder serviceOrder);
 
+	void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder);
+
 }

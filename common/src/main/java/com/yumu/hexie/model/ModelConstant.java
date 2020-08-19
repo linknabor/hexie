@@ -367,10 +367,13 @@ public class ModelConstant {
 	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
 	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
 	
-	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";
-	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";
-	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";
-	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";
+	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";	//物业支付到账通知
+	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";	//服务消息推送
+	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";	//服务人员更新
+	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新
+	public static final String KEY_UPDATE_ORDER_STATUS_QUEUE = "queue:orderstatus:update";	//订单状态（服务、特卖、团购）更新
+	public static final String KEY_NOTIFY_DELIVERY_QUEUE = "queue:noitfy:delivery";	//特卖、团购快递发货通知
+	
 	public static final String KEY_ORDER_ACCEPTED = "lock:serviceOrder:";
 	
 	public static final String KEY_CUSTOM_SERVICE = "cfg:customservice";

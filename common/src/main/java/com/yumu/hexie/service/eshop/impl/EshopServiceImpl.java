@@ -462,10 +462,10 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Transactional
 	public void saveOper(SaveOperVO saveOperVO) {
 		
-		Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
-		
-		serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
-		
+		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
+			Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
+			serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
+		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
 			ServiceOperator serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId());
@@ -481,19 +481,23 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setLatitude(0d);
 			serviceOperator = serviceOperatorRepository.save(serviceOperator);
 			
-			ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), saveOperVO.getServiceId());
-			if (serviceOperatorItem == null) {
-				serviceOperatorItem = new ServiceOperatorItem();
-				serviceOperatorItem.setOperatorId(serviceOperator.getId());
-				serviceOperatorItem.setServiceId(saveOperVO.getServiceId());
-				serviceOperatorItemRepository.save(serviceOperatorItem);
+			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
+				ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), saveOperVO.getServiceId());
+				if (serviceOperatorItem == null) {
+					serviceOperatorItem = new ServiceOperatorItem();
+					serviceOperatorItem.setOperatorId(serviceOperator.getId());
+					serviceOperatorItem.setServiceId(saveOperVO.getServiceId());
+					serviceOperatorItemRepository.save(serviceOperatorItem);
+				}
 			}
 			
 		}
-		//查看有哪些操作员已经没有服务项目了，没有的删除该操作员
-		List<ServiceOperator> noServiceList = serviceOperatorRepository.queryNoServiceOper(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER);
-		for (ServiceOperator serviceOperator : noServiceList) {
-			serviceOperatorRepository.delete(serviceOperator);
+		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
+			//查看有哪些操作员已经没有服务项目了，没有的删除该操作员
+			List<ServiceOperator> noServiceList = serviceOperatorRepository.queryNoServiceOper(saveOperVO.getOperatorType());
+			for (ServiceOperator serviceOperator : noServiceList) {
+				serviceOperatorRepository.delete(serviceOperator);
+			}
 		}
 		
 		
