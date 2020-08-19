@@ -10,4 +10,8 @@ public interface NotifyQueueTask {
 
 	void updateServiceCfgAysc();
 	
+	void updateOrderStatusAysc();
+	
+	void sendDeliveryNotificationAsyc();
+	
 }

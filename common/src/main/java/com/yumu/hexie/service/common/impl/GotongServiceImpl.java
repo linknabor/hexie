@@ -300,5 +300,16 @@ public class GotongServiceImpl implements GotongService {
         CustomService.sendCustomerMessage(msg, accessToken);
     }
 	
+	/**
+	 * 自定义服务通知
+	 */
+	@Override
+	public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder) {
+
+		LOG.info("发送自定义服务通知！ sendUser : " + sendUser);
+		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+		templateMsgService.sendDeliveryNotification(sendUser, serviceOrder, accessToken);
+	}
+	
 
 }
