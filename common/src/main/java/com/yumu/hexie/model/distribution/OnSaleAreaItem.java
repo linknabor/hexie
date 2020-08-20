@@ -38,3 +38,5 @@ public class OnSaleAreaItem extends RuleDistribution {
 	public int getCount() {
 		return count;
 	}
+
+}
