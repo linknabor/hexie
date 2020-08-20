@@ -1,6 +1,7 @@
 package com.yumu.hexie.model.commonsupport.info;
-
 import javax.persistence.Entity;
+
+import org.springframework.data.annotation.Transient;
 
 import com.yumu.hexie.model.BaseModel;
 
@@ -21,6 +22,8 @@ public class ProductCategory extends BaseModel {
 	private int level;	//分类级别
 	private int sort;	//排序位置
 	private int parentId;	//上级id
+	@Transient
+	private int count = 0;
 	
 	public String getName() {
 		return name;
@@ -46,7 +49,10 @@ public class ProductCategory extends BaseModel {
 	public void setParentId(int parentId) {
 		this.parentId = parentId;
 	}
-
+	public int getCount() {
+		return count;
+	}
+	
 	
 	
 	

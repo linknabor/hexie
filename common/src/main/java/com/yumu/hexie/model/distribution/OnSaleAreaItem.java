@@ -2,6 +2,8 @@ package com.yumu.hexie.model.distribution;
 
 import javax.persistence.Entity;
 
+import org.springframework.data.annotation.Transient;
+
 //特卖上架管理
 @Entity
 public class OnSaleAreaItem extends RuleDistribution {
@@ -11,7 +13,10 @@ public class OnSaleAreaItem extends RuleDistribution {
 	private boolean featured = false;
 	private int productType;
 	private String ruleDesDescribe;//热卖商品或新品上市
-
+	
+	@Transient
+	private int count = 0;
+	
 	public boolean isFeatured() {
 		return featured;
 	}
@@ -30,4 +35,6 @@ public class OnSaleAreaItem extends RuleDistribution {
 	public void setRuleDesDescribe(String ruleDesDescribe) {
 		this.ruleDesDescribe = ruleDesDescribe;
 	}
-}
+	public int getCount() {
+		return count;
+	}
