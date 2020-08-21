@@ -296,4 +296,19 @@ public class DistributionServiceImpl implements DistributionService {
 //        List<RgroupAreaItem> r = filterByRuleId(itemList);
         return itemList;
     }
+
+	@Override
+	public List<OnSaleAreaItem> queryOnsalesByName(User user, int type, String ruleName, int page) {
+
+		List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.ASC, "sortNo");
+    	Order order2 = new Order(Direction.DESC, "id");
+    	orderList.add(order);
+    	orderList.add(order2);
+    	Sort sort = Sort.by(orderList);
+    	Pageable pageable = PageRequest.of(page, 10, sort);
+		User currUser = userRepository.findById(user.getId());
+		long current = System.currentTimeMillis();
+		return onSaleAreaItemRepository.findByProductName(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, ruleName, currUser.getSectId(), pageable);
+	}
 }
