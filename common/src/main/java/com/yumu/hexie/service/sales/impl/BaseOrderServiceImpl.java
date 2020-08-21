@@ -314,7 +314,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		JsSign sign = null;
 		//核销券订单走平台支付接口。其余老的订单走原有支付，会慢慢改成新接口
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
-				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()) {
+				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
 			
 			User user = userService.getById(order.getUserId());
 			CommonPayRequest request = new CommonPayRequest();
@@ -547,16 +548,29 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	//FIXME 注意该方法不应该被外部用户调用
 	@Transactional
 	@Override
-	public ServiceOrder refund(ServiceOrder order) {
+	public ServiceOrder refund(ServiceOrder order) throws Exception {
         log.warn("[refund]refund-begin:"+order.getId());
 		if(!order.refundable()) {
             throw new BizValidateException(order.getId(),"该订单无法退款！").setError();
         }
-		PaymentOrder po = paymentService.fetchPaymentOrder(order);
-		if(paymentService.refundApply(po)){
-			//FIXME 支付单直接从支付成功到已退款状态  po.setStatus(ModelConstant.PAYMENT_STATUS_REFUND);
+		
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
+				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+			
+			User user = userService.getById(order.getUserId());
+			eshopUtil.requestRefund(user, order.getOrderNo());
 			order.refunding(true);
+			
+		}else {
+			PaymentOrder po = paymentService.fetchPaymentOrder(order);
+			if(paymentService.refundApply(po)){
+				//FIXME 支付单直接从支付成功到已退款状态  po.setStatus(ModelConstant.PAYMENT_STATUS_REFUND);
+				order.refunding(true);
+			}
+			
 		}
+		
 		order = serviceOrderRepository.save(order);
         log.warn("[refund]refund-finish:"+order.getId());
 		commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ,order);

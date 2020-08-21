@@ -33,7 +33,7 @@ public interface BaseOrderService {
 	//评价
 	public void comment(ServiceOrder order,Comment comment);
 	//退款
-	public ServiceOrder refund(ServiceOrder order);
+	public ServiceOrder refund(ServiceOrder order) throws Exception;
 	//退款完成
 	public void finishRefund(WxRefundOrder wxRefundOrder);
 	

@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.eshop.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +45,8 @@ import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -56,6 +59,8 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
+import com.yumu.hexie.model.market.saleplan.RgroupRule;
+import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -76,6 +81,10 @@ public class EshopServiceImpl implements EshopSerivce {
 	private OnSaleRuleRepository onSaleRuleRepository;
 	@Autowired
 	private OnSaleAreaItemRepository onSaleAreaItemRepository;
+	@Autowired
+	private RgroupRuleRepository rgroupRuleRepository;
+	@Autowired
+	private RgroupAreaItemRepository rgroupAreaItemRepository;
 	@Autowired
 	private RegionRepository regionRepository;
 	@Autowired
@@ -117,10 +126,28 @@ public class EshopServiceImpl implements EshopSerivce {
 	    	Sort sort = Sort.by(orderList);
 			
 			Pageable pageable = PageRequest.of(queryProductVO.getCurrentPage(), queryProductVO.getPageSize(), sort);
-			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
-					queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
+			Page<Object[]> page = null;
 			
+			String productType = queryProductVO.getProductType();
+			if ("1000".equals(productType) || "1001".equals(productType)) {	//TODO 核销券和特卖
+				page = productRepository.findByMultiCondOnsale(queryProductVO.getProductType(), queryProductVO.getProductId(), 
+						queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
+				
+			}else if ("1002".equals(productType)) {
+				page = productRepository.findByMultiCondRgroup(queryProductVO.getProductType(), queryProductVO.getProductId(), 
+						queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
+			}
+			
+			List<ServiceOperator> opList = new ArrayList<>();
+			if ("1001".equals(productType)) {
+				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
+			}else if ("1002".equals(productType)) {
+				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER);
+			}
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
+			if (!opList.isEmpty() && !list.isEmpty()) {
+				list.get(0).setOperCounts(BigInteger.valueOf(opList.size()));
+			}
 			QueryListDTO<List<QueryProductMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
 			responsePage.setTotalSize(page.getTotalElements());
@@ -149,8 +176,15 @@ public class EshopServiceImpl implements EshopSerivce {
 		try {
 			
 			Pageable pageable = PageRequest.of(0, 1);
-			Page<Object[]> page = productRepository.findByPageSelect(queryProductVO.getProductType(), queryProductVO.getProductId(), 
+			Page<Object[]> page = null;
+			String productType = queryProductVO.getProductType();
+			if ("1000".equals(productType) || "1001".equals(productType)) {
+				page = productRepository.findByMultiCondOnsale(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 					"", "", null, "", pageable);
+			}else if ("1001".equals(productType)) {
+				page = productRepository.findByMultiCondRgroup(queryProductVO.getProductType(), queryProductVO.getProductId(), 
+						"", "", null, "", pageable);
+			}
 			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			List<Object[]> regionList = regionRepository.findByProductId(queryProductVO.getProductId());
@@ -236,72 +270,152 @@ public class EshopServiceImpl implements EshopSerivce {
 				ModelConstant.ORDER_TYPE_RGROUP != salePlanType) {
 			throw new BizValidateException("unknow sale plan type : " + saveProductVO.getSalePlanType());
 		}
-		OnSaleRule onSaleRule = new OnSaleRule();
-		if ("edit".equals(saveProductVO.getOperType())) {
-			List<OnSaleRule> ruleList = onSaleRuleRepository.findAllByProductId(product.getId());
-			if (ruleList == null || ruleList.isEmpty()) {
-				throw new BizValidateException("未查询到商品上架规则，product id : " + saveProductVO.getId());
-			}
-			onSaleRule = ruleList.get(0);
-		}
-		onSaleRule.setProductId(Integer.valueOf(product.getProductType()));
-		onSaleRule.setProductName(product.getName());
-		onSaleRule.setProductType(Integer.valueOf(saveProductVO.getType()));
-		onSaleRule.setCreateDate(product.getCreateDate());
-		onSaleRule.setDescription(product.getServiceDesc());
-		onSaleRule.setProductId(product.getId());
-		onSaleRule.setName(product.getName());
-		onSaleRule.setLimitNumOnce(Integer.valueOf(saveProductVO.getLimitNumOnce()));
-		onSaleRule.setStartDate(product.getStartDate());
-		onSaleRule.setEndDate(product.getEndDate());
-		onSaleRule.setOriPrice(product.getOriPrice());
-		onSaleRule.setPrice(product.getSinglePrice());
-		onSaleRule.setDescription(product.getServiceDesc());
-		onSaleRule.setTimeoutForPay(30*60*1000);
-		onSaleRule.setFreeShippingNum(Integer.valueOf(saveProductVO.getFreeShippingNum()));
-		onSaleRule.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
-		if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
-			onSaleRule.setStatus(ModelConstant.RULE_STATUS_ON);
-		}else {
-			onSaleRule.setStatus(ModelConstant.RULE_STATUS_OFF);
-		}
-		onSaleRule = onSaleRuleRepository.save(onSaleRule);
 		
-		if ("edit".equals(saveProductVO.getOperType())) {
-			List<OnSaleAreaItem> areaList = onSaleAreaItemRepository.findByRuleId(onSaleRule.getId());
-			if (areaList == null || areaList.isEmpty()) {
-				throw new BizValidateException("未查询到商品上架区域，product id : " + saveProductVO.getId());
-			}
-			onSaleAreaItemRepository.deleteByProductId(saveProductVO.getId());
-		}
-		
-		for (Region saleArea : saveProductVO.getSaleAreas()) {
+		OnSaleRule onSaleRule = null;
+		RgroupRule rgroupRule = null;
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == salePlanType || ModelConstant.ORDER_TYPE_ONSALE == salePlanType) {	//走特卖规则
 			
-			Region region = getRegion(saleArea);
-			OnSaleAreaItem onSaleAreaItem = new OnSaleAreaItem();
-			onSaleAreaItem.setRegionId(region.getId());
-			onSaleAreaItem.setRuleId(onSaleRule.getId());
-			long ruleCloseTime = onSaleRule.getEndDate().getTime();
-			onSaleAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
-			onSaleAreaItem.setSortNo(Integer.valueOf(saveProductVO.getSortNo()));
-			onSaleAreaItem.setRuleName(onSaleRule.getName());
-			onSaleAreaItem.setOriPrice(product.getOriPrice());
-			onSaleAreaItem.setPrice(product.getSinglePrice());
-			onSaleAreaItem.setRegionId(region.getId());
-			onSaleAreaItem.setRegionType(region.getRegionType());
-			onSaleAreaItem.setProductId(product.getId());
-			onSaleAreaItem.setProductName(product.getName());
-			onSaleAreaItem.setProductCategoryId(product.getProductCategoryId());
-			onSaleAreaItem.setProductPic(product.getMainPicture());
-			onSaleAreaItem.setProductType(onSaleRule.getProductType());
-			onSaleAreaItem.setPostageFee(onSaleRule.getPostageFee());
-			onSaleAreaItem.setFreeShippingNum(onSaleRule.getFreeShippingNum());
-			if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
-				onSaleAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
-			}else {
-				onSaleAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+			onSaleRule = new OnSaleRule();
+			if ("edit".equals(saveProductVO.getOperType())) {
+				List<OnSaleRule> ruleList = onSaleRuleRepository.findAllByProductId(product.getId());
+				if (ruleList == null || ruleList.isEmpty()) {
+					throw new BizValidateException("未查询到商品上架规则，product id : " + saveProductVO.getId());
+				}
+				onSaleRule = ruleList.get(0);
 			}
-			onSaleAreaItemRepository.save(onSaleAreaItem);
+			onSaleRule.setProductId(Integer.valueOf(product.getProductType()));
+			onSaleRule.setProductName(product.getName());
+			onSaleRule.setProductType(Integer.valueOf(saveProductVO.getType()));
+			onSaleRule.setCreateDate(product.getCreateDate());
+			onSaleRule.setDescription(product.getServiceDesc());
+			onSaleRule.setProductId(product.getId());
+			onSaleRule.setName(product.getName());
+			onSaleRule.setLimitNumOnce(Integer.valueOf(saveProductVO.getLimitNumOnce()));
+			onSaleRule.setStartDate(product.getStartDate());
+			onSaleRule.setEndDate(product.getEndDate());
+			onSaleRule.setOriPrice(product.getOriPrice());
+			onSaleRule.setPrice(product.getSinglePrice());
+			onSaleRule.setDescription(product.getServiceDesc());
+			onSaleRule.setTimeoutForPay(30*60*1000);
+			onSaleRule.setFreeShippingNum(Integer.valueOf(saveProductVO.getFreeShippingNum()));
+			onSaleRule.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
+			if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
+				onSaleRule.setStatus(ModelConstant.RULE_STATUS_ON);
+			}else {
+				onSaleRule.setStatus(ModelConstant.RULE_STATUS_OFF);
+			}
+			onSaleRule = onSaleRuleRepository.save(onSaleRule);
+			
+			if ("edit".equals(saveProductVO.getOperType())) {
+				List<OnSaleAreaItem> areaList = onSaleAreaItemRepository.findByRuleId(onSaleRule.getId());
+				if (areaList == null || areaList.isEmpty()) {
+					throw new BizValidateException("未查询到商品上架区域，product id : " + saveProductVO.getId());
+				}
+				onSaleAreaItemRepository.deleteByProductId(saveProductVO.getId());
+			}
+			
+			for (Region saleArea : saveProductVO.getSaleAreas()) {
+				
+				Region region = getRegion(saleArea);
+				OnSaleAreaItem onSaleAreaItem = new OnSaleAreaItem();
+				onSaleAreaItem.setRegionId(region.getId());
+				onSaleAreaItem.setRuleId(onSaleRule.getId());
+				long ruleCloseTime = onSaleRule.getEndDate().getTime();
+				onSaleAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
+				onSaleAreaItem.setSortNo(Integer.valueOf(saveProductVO.getSortNo()));
+				onSaleAreaItem.setRuleName(onSaleRule.getName());
+				onSaleAreaItem.setOriPrice(product.getOriPrice());
+				onSaleAreaItem.setPrice(product.getSinglePrice());
+				onSaleAreaItem.setRegionId(region.getId());
+				onSaleAreaItem.setRegionType(region.getRegionType());
+				onSaleAreaItem.setProductId(product.getId());
+				onSaleAreaItem.setProductName(product.getName());
+				onSaleAreaItem.setProductCategoryId(product.getProductCategoryId());
+				onSaleAreaItem.setProductPic(product.getMainPicture());
+				onSaleAreaItem.setProductType(onSaleRule.getProductType());
+				onSaleAreaItem.setPostageFee(onSaleRule.getPostageFee());
+				onSaleAreaItem.setFreeShippingNum(onSaleRule.getFreeShippingNum());
+				if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
+					onSaleAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
+				}else {
+					onSaleAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+				}
+				onSaleAreaItemRepository.save(onSaleAreaItem);
+				
+			}
+			
+		} else if (ModelConstant.ORDER_TYPE_RGROUP == salePlanType) {
+			
+			rgroupRule = new RgroupRule();
+			if ("edit".equals(saveProductVO.getOperType())) {
+				List<RgroupRule> ruleList = rgroupRuleRepository.findAllByProductId(product.getId());
+				if (ruleList == null || ruleList.isEmpty()) {
+					throw new BizValidateException("未查询到商品上架规则，product id : " + saveProductVO.getId());
+				}
+				rgroupRule = ruleList.get(0);
+			}
+			rgroupRule.setProductId(Integer.valueOf(product.getProductType()));
+			rgroupRule.setProductName(product.getName());
+			rgroupRule.setProductType(Integer.valueOf(saveProductVO.getType()));
+			rgroupRule.setCreateDate(product.getCreateDate());
+			rgroupRule.setDescription(product.getServiceDesc());
+			rgroupRule.setProductId(product.getId());
+			rgroupRule.setName(product.getName());
+			rgroupRule.setLimitNumOnce(Integer.valueOf(saveProductVO.getLimitNumOnce()));
+			rgroupRule.setStartDate(product.getStartDate());
+			rgroupRule.setEndDate(product.getEndDate());
+			rgroupRule.setOriPrice(product.getOriPrice());
+			rgroupRule.setPrice(product.getSinglePrice());
+			rgroupRule.setDescription(product.getServiceDesc());
+			rgroupRule.setTimeoutForPay(30*60*1000);
+			rgroupRule.setFreeShippingNum(Integer.valueOf(saveProductVO.getFreeShippingNum()));
+			rgroupRule.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
+			rgroupRule.setGroupMinNum(Integer.valueOf(saveProductVO.getGroupMinNum()));
+			
+			if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
+				rgroupRule.setStatus(ModelConstant.RULE_STATUS_ON);
+			}else {
+				rgroupRule.setStatus(ModelConstant.RULE_STATUS_OFF);
+			}
+			rgroupRule = rgroupRuleRepository.save(rgroupRule);
+			
+			if ("edit".equals(saveProductVO.getOperType())) {
+				List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rgroupRule.getId());
+				if (areaList == null || areaList.isEmpty()) {
+					throw new BizValidateException("未查询到商品上架区域，product id : " + saveProductVO.getId());
+				}
+				rgroupAreaItemRepository.deleteByProductId(saveProductVO.getId());
+			}
+			
+			for (Region saleArea : saveProductVO.getSaleAreas()) {
+				
+				Region region = getRegion(saleArea);
+				RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
+				rgroupAreaItem.setRegionId(region.getId());
+				rgroupAreaItem.setRuleId(rgroupRule.getId());
+				long ruleCloseTime = rgroupRule.getEndDate().getTime();
+				rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
+				rgroupAreaItem.setSortNo(Integer.valueOf(saveProductVO.getSortNo()));
+				rgroupAreaItem.setRuleName(rgroupRule.getName());
+				rgroupAreaItem.setOriPrice(product.getOriPrice());
+				rgroupAreaItem.setPrice(product.getSinglePrice());
+				rgroupAreaItem.setRegionId(region.getId());
+				rgroupAreaItem.setRegionType(region.getRegionType());
+				rgroupAreaItem.setProductId(product.getId());
+				rgroupAreaItem.setProductName(product.getName());
+				rgroupAreaItem.setProductCategoryId(product.getProductCategoryId());
+				rgroupAreaItem.setProductPic(product.getMainPicture());
+				rgroupAreaItem.setProductType(rgroupRule.getProductType());
+				rgroupAreaItem.setPostageFee(rgroupRule.getPostageFee());
+				rgroupAreaItem.setFreeShippingNum(rgroupRule.getFreeShippingNum());
+				if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
+					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
+				}else {
+					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+				}
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+				
+			}
 			
 		}
 		
@@ -316,9 +430,13 @@ public class EshopServiceImpl implements EshopSerivce {
 		productPlat.setProductId(product.getId());
 		productPlatRepository.save(productPlat);
 		
-
-		ProductRule productRule = new ProductRule(product, onSaleRule);
-		String key = ModelConstant.KEY_PRO_RULE_INFO + onSaleRule.getId();
+		ProductRule productRule = null;
+		if (onSaleRule != null) {
+			productRule = new ProductRule(product, onSaleRule);
+		}else {
+			productRule = new ProductRule(product, rgroupRule);
+		}
+		String key = ModelConstant.KEY_PRO_RULE_INFO + productRule.getId();
 		redisRepository.setProdcutRule(key, productRule);
 		
 	}
@@ -351,16 +469,30 @@ public class EshopServiceImpl implements EshopSerivce {
 			throw new BizValidateException("未查询到商品, id : " + productId);
 		}
 		productRepository.updateStatus(productStatus, product.getId());
-		
+		//特卖
 		List<OnSaleRule> ruleList = onSaleRuleRepository.findAllByProductId(product.getId());
-		for (OnSaleRule onSaleRule : ruleList) {
-			onSaleRuleRepository.updateStatus(ruleStatus, onSaleRule.getId());
+		if (!ruleList.isEmpty()) {
+			for (OnSaleRule onSaleRule : ruleList) {
+				onSaleRuleRepository.updateStatus(ruleStatus, onSaleRule.getId());
 
-			List<OnSaleAreaItem> itemList = onSaleAreaItemRepository.findByRuleId(onSaleRule.getId());
-			for (OnSaleAreaItem item : itemList) {
-				onSaleAreaItemRepository.updateStatus(itemStatus, item.getId());
+				List<OnSaleAreaItem> itemList = onSaleAreaItemRepository.findByRuleId(onSaleRule.getId());
+				for (OnSaleAreaItem item : itemList) {
+					onSaleAreaItemRepository.updateStatus(itemStatus, item.getId());
+				}
+			}
+		//团购
+		}else {
+			List<RgroupRule> rgroupRuleList = rgroupRuleRepository.findAllByProductId(product.getId());
+			for (RgroupRule rgroupRule : rgroupRuleList) {
+				rgroupRuleRepository.updateStatus(ruleStatus, rgroupRule.getId());
+
+				List<RgroupAreaItem> itemList = rgroupAreaItemRepository.findByRuleId(rgroupRule.getId());
+				for (RgroupAreaItem item : itemList) {
+					rgroupAreaItemRepository.updateStatus(itemStatus, item.getId());
+				}
 			}
 		}
+		
 		
 		
 	}
@@ -444,7 +576,15 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			List<Object[]> list = serviceOperatorRepository.findByTypeAndServiceId(queryOperVO.getType(), queryOperVO.getServiceId());
+			
+			List<Object[]> list = null;
+			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == queryOperVO.getType()) {
+				list = serviceOperatorRepository.findByTypeAndServiceId(queryOperVO.getType(), queryOperVO.getServiceId());
+			}else if (ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == queryOperVO.getType() ||
+					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType()) {
+				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+			}
+			
 			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);
 			commonResponse.setData(operList);
 			commonResponse.setResult("00");

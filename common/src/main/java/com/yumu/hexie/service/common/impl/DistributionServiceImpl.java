@@ -250,7 +250,7 @@ public class DistributionServiceImpl implements DistributionService {
     	if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {	//未绑定房屋的用户，展示样板商品
     		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, pageable);
     	}else {	//已经绑定房屋的用户查询关联小区的商品
-    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), category, pageable); 
+    		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, currUser.getSectId(), pageable); 
     	}
         return itemList;
     }
@@ -269,4 +269,31 @@ public class DistributionServiceImpl implements DistributionService {
 		}
 		return list;
 	}
+	
+	/**
+	 * 新版团购
+	 */
+	@Override
+	public List<RgroupAreaItem> queryRgroupsV2(User user, int page){
+        
+		User currUser = userRepository.findById(user.getId());
+    	long current = System.currentTimeMillis();
+    	int type = 1002;
+    	List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.ASC, "sortNo");
+    	Order order2 = new Order(Direction.DESC, "id");
+    	orderList.add(order);
+    	orderList.add(order2);
+    	Sort sort = Sort.by(orderList);
+    	Pageable pageable = PageRequest.of(page, 10, sort);
+    	
+    	List<RgroupAreaItem> itemList = new ArrayList<>();
+    	if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {	//未绑定房屋的用户，展示样板商品
+    		itemList = rgroupAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, pageable);
+    	}else {
+    		itemList = rgroupAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId(), pageable);
+    	}
+//        List<RgroupAreaItem> r = filterByRuleId(itemList);
+        return itemList;
+    }
 }
