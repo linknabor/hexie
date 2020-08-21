@@ -37,4 +37,6 @@ public interface DistributionService {
 	List<OnSaleAreaItem> queryOnsalesV2(User user, int type, int category, int page);
 	
 	List<ProductCategory> queryCategory(User user, int type);
+	
+	List<RgroupAreaItem> queryRgroupsV2(User user, int page);
 }

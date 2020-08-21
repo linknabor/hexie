@@ -94,6 +94,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 					+ "where m.status = ?1 "
 					+ "and m.productType = ?2 "
 					+ "and m.ruleCloseTime> ?3 "
+					+ "and m.productCategoryId = ?4 "
 					+ "and p.demo = 1 ", 
 			nativeQuery = true)
 	public List<OnSaleAreaItem> findDemos(int status, int type, long current, long categoryId, Pageable pageable);
@@ -118,9 +119,10 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 					+ "where m.status= ?1 "
 					+ "and m.productType = ?2 "
 					+ "and m.ruleCloseTime> ?3 "
-					+ "and r.sectId = ?4 ",
+					+ "and m.productCategoryId = ?4 "
+					+ "and r.sectId = ?5 ",
 			nativeQuery = true)
-	public List<OnSaleAreaItem> findByBindedSect(int status, int type, long current, String sectId, long categoryId, Pageable pageable);
+	public List<OnSaleAreaItem> findByBindedSect(int status, int type, long current, long categoryId, String sectId, Pageable pageable);
 	
 	
 	

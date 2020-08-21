@@ -35,6 +35,7 @@ public class SaveProductVO implements Serializable {
 	private String freeShippingNum;	//免运费数
 	private String postageFee;	//运费单价
 	private String productCategoryId;	//产品分类ID
+	private String groupMinNum;	//最小成团人数
 	private String appid;	//公众号id
 	
 	//物业或代理商信息
@@ -269,6 +270,14 @@ public class SaveProductVO implements Serializable {
 		this.postageFee = postageFee;
 	}
 
+	public String getGroupMinNum() {
+		return groupMinNum;
+	}
+
+	public void setGroupMinNum(String groupMinNum) {
+		this.groupMinNum = groupMinNum;
+	}
+
 	@Override
 	public String toString() {
 		return "SaveProductVO [operType=" + operType + ", id=" + id + ", name=" + name + ", type=" + type
@@ -277,11 +286,12 @@ public class SaveProductVO implements Serializable {
 				+ startDate + ", endDate=" + endDate + ", mainPicture=" + mainPicture + ", smallPicture=" + smallPicture
 				+ ", pictures=" + pictures + ", totalCount=" + totalCount + ", context=" + context + ", updateUser="
 				+ updateUser + ", freeShippingNum=" + freeShippingNum + ", postageFee=" + postageFee
-				+ ", productCategoryId=" + productCategoryId + ", appid=" + appid + ", agentName=" + agentName
-				+ ", agentNo=" + agentNo + ", salePlanType=" + salePlanType + ", counts=" + counts + ", saleAreas="
-				+ saleAreas + "]";
+				+ ", productCategoryId=" + productCategoryId + ", groupMinNum=" + groupMinNum + ", appid=" + appid
+				+ ", agentName=" + agentName + ", agentNo=" + agentNo + ", salePlanType=" + salePlanType + ", counts="
+				+ counts + ", saleAreas=" + saleAreas + "]";
 	}
 
+	
 
 
 }
