@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
@@ -41,7 +42,6 @@ public class SaleController extends BaseController{
 		return new BaseResult<SalePlan>().success(customOnSaleService.findSalePlan(ruleId));
     }
 	
-	
 	@RequestMapping(value = "/onsales/v2/{type}/{category}/{page}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<OnSaleAreaItem>> getOnSales(@ModelAttribute(Constants.USER)User user, 
@@ -56,6 +56,14 @@ public class SaleController extends BaseController{
 			@PathVariable int type) throws Exception {
 		
 		return new BaseResult<List<ProductCategory>>().success(distributionService.queryCategory(user, type));
+    }
+	
+	@RequestMapping(value = "/onsales/get/{type}/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<OnSaleAreaItem>> getOnSalesByName(@ModelAttribute(Constants.USER)User user, 
+			@RequestParam String name, @PathVariable int type, @PathVariable int page) throws Exception {
+		
+		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesByName(user,type,name,page));
     }
 	
 }
