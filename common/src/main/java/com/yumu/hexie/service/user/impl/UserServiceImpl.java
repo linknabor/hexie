@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -141,7 +142,8 @@ public class UserServiceImpl implements UserService {
 			userAccount.setCity(weixinUser.getCity());
 			userAccount.setLanguage(weixinUser.getLanguage());
 			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
-			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + userAccount.getId() + "]"));
+			//这时候新用户还没有生成user，ID是空值,uid取uuid打MD5。
+			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 
 		} else {
 

@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.batch.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
@@ -73,7 +74,7 @@ public class BatchServiceImpl implements BatchService {
 		List<User> list = userRepository.getShareCodeIsNull();
 		for (User user : list) {
 			try {
-				String shareCode = DigestUtils.md5Hex("UID[" + user.getId() + "]");
+				String shareCode = DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]");
 				user.setShareCode(shareCode);
 				userRepository.save(user);
 			} catch (Exception e) {
@@ -90,7 +91,7 @@ public class BatchServiceImpl implements BatchService {
 			List<User> uList = userRepository.getUserByShareCode(string);
 			for (User user2 : uList) {
 				try {
-					String shareCode = DigestUtils.md5Hex("UID[" + user2.getId() + "]");
+					String shareCode = DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]");
 					user2.setShareCode(shareCode);
 					userRepository.save(user2);
 				} catch (Exception e) {
