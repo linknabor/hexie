@@ -22,6 +22,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.yumu.hexie.model.system.SystemConfig;
+
 @Configuration
 public class RedisConfig {
 
@@ -102,6 +104,15 @@ public class RedisConfig {
 		return authRedisTemplate;
 		
 	}
+    
+    @Bean(name = "systemConfigRedisTemplate")
+    public  RedisTemplate<String, SystemConfig> mainRedisTemplate(@Qualifier(value="lettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory){
+        RedisTemplate<String, SystemConfig> redisTemplate = new RedisTemplate<String, SystemConfig>();
+        redisTemplate.setConnectionFactory(lettuceConnectionFactory);
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<SystemConfig>(SystemConfig.class));
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
     
     @Bean
     public CacheManager getCacheManager(@Qualifier(value="lettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory) {
