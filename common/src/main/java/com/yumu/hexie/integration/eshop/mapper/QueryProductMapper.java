@@ -57,6 +57,9 @@ public class QueryProductMapper implements Serializable {
 	@JsonProperty("free_shipping_num")
 	private Integer freeShippingNum;	//包邮件数
 	
+	@JsonProperty("group_min_num")
+	private BigInteger groupMinNum;	//最小成团数量
+	
 	@JsonProperty("product_category_id")
 	private BigInteger productCategoryId;	//商品分类ID
 	
@@ -70,7 +73,7 @@ public class QueryProductMapper implements Serializable {
 	public QueryProductMapper(BigInteger id, String name, String productType, Float oriPrice, Float miniPrice,
 			Float singlePrice, Integer status, Timestamp startDate, Timestamp endDate, String mainPicture,
 			String smallPicture, String pictures, String serviceDesc, Integer demo, Integer totalCount, String agentName, String agentNo,
-			Integer limitNumOnce, Float postageFee, Integer freeShippingNum, BigInteger productCategoryId, Integer sortNo, String appid, 
+			Integer limitNumOnce, Float postageFee, Integer freeShippingNum, BigInteger groupMinNum, BigInteger productCategoryId, Integer sortNo, String appid, 
 			BigInteger counts, BigInteger operCounts) {
 		super();
 		this.id = id;
@@ -93,6 +96,7 @@ public class QueryProductMapper implements Serializable {
 		this.limitNumOnce = limitNumOnce;
 		this.postageFee = postageFee;
 		this.freeShippingNum = freeShippingNum;
+		this.groupMinNum = groupMinNum;
 		this.productCategoryId = productCategoryId;
 		this.sortNo = sortNo;
 		this.appid = appid;
@@ -249,6 +253,12 @@ public class QueryProductMapper implements Serializable {
 	}
 	public void setFreeShippingNum(Integer freeShippingNum) {
 		this.freeShippingNum = freeShippingNum;
+	}
+	public BigInteger getGroupMinNum() {
+		return groupMinNum;
+	}
+	public void setGroupMinNum(BigInteger groupMinNum) {
+		this.groupMinNum = groupMinNum;
 	}
 	
 	

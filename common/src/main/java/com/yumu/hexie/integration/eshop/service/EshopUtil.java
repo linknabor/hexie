@@ -23,6 +23,7 @@ public class EshopUtil {
 	private static final String REQUEST_PAY_URL = "/eshop/requestPaySDO.do";
 	private static final String CANCEL_PAY_URL = "/eshop/cancelPaySDO.do";
 	private static final String NOTIFY_CONSUME_URL = "/eshop/notifyConsumeSDO.do";
+	private static final String REQUEST_REFUND_URL = "/eshop/doRefundSDO.do";
 	
 	@Autowired
 	private RequestUtil requestUtil;
@@ -74,6 +75,25 @@ public class EshopUtil {
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		restUtil.exchangeOnUri(requestUrl, notifyConsumeRequest, typeReference);
 		
+	}
+	
+	/**
+	 * 申请退款
+	 * @param user
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public void requestRefund(User user, String orderId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += REQUEST_REFUND_URL;
+		
+		ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
+		serviceOrderRequest.setTradeWaterId(orderId);
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
 	}
 	
 }
