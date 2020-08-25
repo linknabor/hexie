@@ -36,6 +36,7 @@ import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -126,7 +127,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			productService.freezeCount(product, item.getCount());
             item.fillDetail(plan, product);
             
-            Agent agent = agentRepository.findById(product.getAgentId()).get();
+            Long agentId = product.getAgentId();
+            if (ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
+				agentId = order.getAgentId();
+			}
+            Agent agent = new Agent();
+            if (0 != agentId) {
+            	agent = agentRepository.findById(agentId).get();
+			}
             item.setAgentId(agent.getId());
             item.setAgentName(agent.getName());
             item.setAgentNo(agent.getAgentNo());
@@ -712,9 +720,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		/*
 		 * 2.创建订单
 		 * 1).根据页面填写的内容，先建一个新的地址
-		 * 2).用新地址创建订单
+		 * 2).新建一个机构(后面分享用)
+		 * 3).用新地址创建订单
 		 */
 		Address address = createAddress(promotionOrder, user);
+		createAgent(promotionOrder.getName(), promotionOrder.getMobile());	//新建机构，以保证当前用户成为合伙人后可以分享订单
+		Agent agent = getSharedAgent(promotionOrder.getShareCode());	//获取分享本次订单的机构，有可能是空的
+		
 		SingleItemOrder singleItemOrder = new SingleItemOrder();
 		singleItemOrder.setCount(1);
 		singleItemOrder.setMemo("推广订单");
@@ -724,6 +736,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		singleItemOrder.setRuleId(templateRuleId);
 		singleItemOrder.setServiceAddressId(address.getId());
 		singleItemOrder.setUserId(user.getId());
+		singleItemOrder.setAgentId(agent.getId());
 		ServiceOrder serviceOrder = createOrder(singleItemOrder);
 		return requestPay(serviceOrder);
 		
@@ -782,6 +795,29 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		User savedUser = userService.simpleRegister(user);
 		return savedUser;
+	}
+	
+	private void createAgent(String name, String mobile) {
+		
+		Agent agent = agentRepository.findByAgentNo(mobile);
+		if (agent == null) {
+			agent = new Agent();
+			agent.setAgentNo(mobile);
+			agent.setName(name);
+			agent.setStatus(1);
+			agent = agentRepository.save(agent);
+		}
+	}
+	
+	private Agent getSharedAgent(String shareCode) {
+		
+		Agent agent = new Agent();
+		if (StringUtils.isEmpty(shareCode)) {
+			return agent;
+		}
+		Evoucher evoucher = evoucherService.getEvoucherByCode(shareCode);
+		agent = agentRepository.findByAgentNo(evoucher.getAgentNo());
+		return agent;
 	}
 	
 	
