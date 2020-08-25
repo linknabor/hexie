@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.sales.SalePlanService;
+import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
@@ -333,6 +335,23 @@ public class OrderController extends BaseController{
 			redisRepository.removeCart(Keys.uidCardKey(user.getId()));
 		}
 		return new BaseResult<ServiceOrder>().success(o);
+	}
+	
+	/**
+	 * 购物车支付页面创建订单
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/promotionPay", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<JsSign> promotionPay(HttpSession session, @ModelAttribute(Constants.USER)User user, 
+			@RequestBody PromotionOrder promotionOrder) throws Exception {
+		
+		JsSign jsSign = baseOrderService.promotionPay(user, promotionOrder);
+		session.setAttribute(Constants.USER, user);
+		return new BaseResult<JsSign>().success(jsSign);
 	}
 	
 	
