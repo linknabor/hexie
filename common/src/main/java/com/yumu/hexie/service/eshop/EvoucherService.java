@@ -1,4 +1,4 @@
-package com.yumu.hexie.service.evoucher;
+package com.yumu.hexie.service.eshop;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public interface EvoucherService {
 
 	EvoucherView getEvoucher(String code);
 	
-	List<Evoucher> getByUser(User user);
+	List<Evoucher> getByUserAndType(User user, int type);
 	
 	EvoucherView getByOrder(long orderId);
 	

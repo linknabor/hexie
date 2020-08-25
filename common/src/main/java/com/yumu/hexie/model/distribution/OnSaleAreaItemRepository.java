@@ -125,6 +125,28 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			nativeQuery = true)
 	public List<OnSaleAreaItem> findByBindedSect(int status, int type, long current, long categoryId, String sectId, Pageable pageable);
 	
+	/**
+	 * 查询全国商品，不做sect_id限制
+	 * @param status
+	 * @param type
+	 * @param current
+	 * @param pageable
+	 * @return
+	 */
+	@Query(value = "select m.* from OnSaleAreaItem m "
+			+ "join product p on m.productId = p.id "
+			+ "where m.status = ?1 "
+			+ "and m.productType = ?2 "
+			+ "and m.ruleCloseTime> ?3 "
+			+ "and m.productCategoryId = ?4 ",
+			countQuery = "select count(*) from OnSaleAreaItem m "
+					+ "join product p on m.productId = p.id "
+					+ "where m.status = ?1 "
+					+ "and m.productType = ?2 "
+					+ "and m.ruleCloseTime> ?3 "
+					+ "and m.productCategoryId = ?4 ",
+			nativeQuery = true)
+	public List<OnSaleAreaItem> findAllCountry(int status, int type, long current, long categoryId, Pageable pageable);
 	
 	/**
 	 * 按业主绑定的房屋查询可以购买的商品
