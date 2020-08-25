@@ -342,12 +342,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setLinkman(linkman);
 			request.setLinktel(order.getTel());
 			
-			String sectName = order.getXiaoquName();
-			if (!StringUtil.isEmpty(sectName)) {
-				sectName = URLEncoder.encode(sectName,"GBK");
-			}
-			request.setSectName(sectName);
-			
 			String address = order.getAddress();
 			if (!StringUtil.isEmpty(address)) {
 				address = URLEncoder.encode(address,"GBK");
