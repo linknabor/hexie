@@ -164,7 +164,9 @@ public class ServiceOrder  extends BaseModel {
 		this.userId = sOrder.getUserId();
 		this.openId = sOrder.getOpenId();
 		this.couponId = sOrder.getCouponId();
-		
+		if (ModelConstant.ORDER_TYPE_PROMOTION == this.orderType) {
+			this.agentId = sOrder.getAgentId();
+		}
 		OrderItem item = new OrderItem();
 		item.setRuleId(sOrder.getRuleId());
 		item.setCount(sOrder.getCount());

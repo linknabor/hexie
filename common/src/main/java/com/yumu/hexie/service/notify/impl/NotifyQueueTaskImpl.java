@@ -424,7 +424,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					//核销券
 					if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || 
 							ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
-							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType() ||
+							ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
 						
 						if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
 							Date date = new Date();
@@ -437,7 +438,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
 									serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
 							
-							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType()) {
+							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
 								evoucherService.enable(serviceOrder);	//激活核销券
 							}
 							

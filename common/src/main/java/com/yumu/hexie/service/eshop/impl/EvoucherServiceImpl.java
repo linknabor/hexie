@@ -110,7 +110,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void enable(ServiceOrder serviceOrder) {
 		
-		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
 			return;
 		}
 		
@@ -266,5 +266,12 @@ public class EvoucherServiceImpl implements EvoucherService {
 		return list;
 	}
 	
+	@Override
+	public Evoucher getEvoucherByCode(String code){
+
+		Assert.hasText(code, "核销券码不能为空。");
+		logger.info("code is : " + code);
+		return evoucherRepository.findByCode(code);
+	}
 
 }
