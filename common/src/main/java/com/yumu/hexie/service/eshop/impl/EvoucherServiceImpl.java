@@ -1,4 +1,4 @@
-package com.yumu.hexie.service.evoucher.impl;
+package com.yumu.hexie.service.eshop.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +29,7 @@ import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.evoucher.EvoucherService;
+import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.vo.EvoucherPageMapper;
 import com.yumu.hexie.vo.EvoucherView;
@@ -63,7 +63,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void createEvoucher(ServiceOrder serviceOrder) {
 		
-		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType()) {
 			return;
 		}
 		Product product = productRepository.findById(serviceOrder.getProductId()).get();
@@ -71,6 +71,10 @@ public class EvoucherServiceImpl implements EvoucherService {
 		for (int i = 0; i < serviceOrder.getCount(); i++) {
 			
 			Evoucher evoucher = new Evoucher();
+			evoucher.setType(ModelConstant.EVOUCHER_TYPE_VERIFICATION);	//核销券
+			if (ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+				evoucher.setType(ModelConstant.EVOUCHER_TYPE_PROMOTION);	//推广券码
+			}
 			evoucher.setCode(OrderNoUtil.generateEvoucherNo());
 			evoucher.setOrderId(serviceOrder.getId());
 			evoucher.setActualPrice(product.getSinglePrice());	//实际销售价
@@ -120,7 +124,11 @@ public class EvoucherServiceImpl implements EvoucherService {
 			Date formatBd = DateUtil.parse(bd, DateUtil.dttmSimple);
 			
 			evoucher.setBeginDate(formatBd);
+			
 			Date endDate = DateUtil.addDate(evoucher.getBeginDate(), 30);	//过期时间默认往后加一个月
+			if (ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+				endDate = DateUtil.addDate(evoucher.getBeginDate(), 365*1);	//过期时间默认往后加一年
+			}
 			String ed = DateUtil.dtFormat(endDate, DateUtil.dSimple);
 			ed += " 23:59:59";
 			Date formatEd = DateUtil.parse(ed, DateUtil.dttmSimple);
@@ -232,9 +240,9 @@ public class EvoucherServiceImpl implements EvoucherService {
 	}
 
 	@Override
-	public List<Evoucher> getByUser(User user) {
+	public List<Evoucher> getByUserAndType(User user, int type) {
 		
-		return evoucherRepository.findByUserId(user.getId());
+		return evoucherRepository.findByUserIdAndType(user.getId(), type);
 	}
 	
 	@Override
@@ -253,7 +261,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 	@Override
 	public List<EvoucherPageMapper> getByOperator(User operator) throws Exception {
 		
-		List<Object[]> objList = evoucherRepository.findByOperator(operator.getId());
+		List<Object[]> objList = evoucherRepository.findByOperatorAndType(operator.getId(), ModelConstant.EVOUCHER_TYPE_VERIFICATION);
 		List<EvoucherPageMapper> list = ObjectToBeanUtils.objectToBean(objList, EvoucherPageMapper.class);
 		return list;
 	}

@@ -247,9 +247,11 @@ public class DistributionServiceImpl implements DistributionService {
     	Sort sort = Sort.by(orderList);
     	Pageable pageable = PageRequest.of(page, 10, sort);
     	List<OnSaleAreaItem> itemList = new ArrayList<>();
-    	if ((StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) && type!=1003) {	//未绑定房屋的用户，展示样板商品
+    	if ((StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) ) {	//未绑定房屋的用户，展示样板商品
     		itemList = onSaleAreaItemRepository.findDemos(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, pageable);
-    	}else {	//已经绑定房屋的用户查询关联小区的商品
+    	} else if (1003 == type) {
+    		itemList = onSaleAreaItemRepository.findAllCountry(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, pageable);
+		} else {	//已经绑定房屋的用户查询关联小区的商品
     		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, currUser.getSectId(), pageable); 
     	}
         return itemList;
