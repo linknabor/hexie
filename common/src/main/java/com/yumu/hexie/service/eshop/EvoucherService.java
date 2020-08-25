@@ -26,5 +26,6 @@ public interface EvoucherService {
 
 	List<ServiceOrder> getEvoucherOrders(User user, List<Integer> status);
 
+	Evoucher getEvoucherByCode(String code);
 
 }
