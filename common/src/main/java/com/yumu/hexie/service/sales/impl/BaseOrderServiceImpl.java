@@ -31,6 +31,8 @@ import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
 import com.yumu.hexie.model.market.Cart;
@@ -44,10 +46,12 @@ import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.car.CarService;
 import com.yumu.hexie.service.comment.CommentService;
 import com.yumu.hexie.service.common.ShareService;
+import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.evoucher.EvoucherService;
@@ -56,6 +60,7 @@ import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.sales.SalePlanService;
+import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
@@ -101,6 +106,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private TemplateMsgService templateMsgService;
 	@Autowired
 	private RedisRepository redisRepository;
+	@Autowired
+	private RegionRepository regionRepository;
+	@Autowired
+	private AddressRepository addressRepository;
+	@Autowired
+	private SmsService smsService;
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -315,7 +326,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		//核销券订单走平台支付接口。其余老的订单走原有支付，会慢慢改成新接口
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
 				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
-				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
 			
 			User user = userService.getById(order.getUserId());
 			CommonPayRequest request = new CommonPayRequest();
@@ -329,6 +341,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			request.setLinkman(linkman);
 			request.setLinktel(order.getTel());
+			
+			String sectName = order.getXiaoquName();
+			if (!StringUtil.isEmpty(sectName)) {
+				sectName = URLEncoder.encode(sectName,"GBK");
+			}
+			request.setSectName(sectName);
+			
 			String address = order.getAddress();
 			if (!StringUtil.isEmpty(address)) {
 				address = URLEncoder.encode(address,"GBK");
@@ -665,6 +684,106 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 		}
 		
+	}
+	
+	/**
+	 * 1.验证短信验证码 
+	 * 2.创建订单 
+	 * 3.支付 
+	 * 4.回填tradeWaterId和代理商、合伙人信息
+	 * @param promotionOrder
+	 * @return
+	 * @throws Exception 
+	 */
+	@Transactional
+	@Override
+	public JsSign promotionPay(User user, PromotionOrder promotionOrder) throws Exception {
+		
+		Long templateRuleId = promotionOrder.getRuleId();
+		Assert.notNull(promotionOrder.getRuleId(), "规则ID不能为空。");
+
+		//1.验证手机
+		boolean result = validateMobile(promotionOrder.getMobile(), promotionOrder.getCode());
+		if (!result) {
+			throw new BizValidateException("验证码不正确。");
+		}
+		
+		//2.创建用户
+		createUser(user, promotionOrder.getName(), promotionOrder.getMobile());
+		
+		/*
+		 * 2.创建订单
+		 * 1).根据页面填写的内容，先建一个新的地址
+		 * 2).用新地址创建订单
+		 */
+		Address address = createAddress(promotionOrder, user);
+		SingleItemOrder singleItemOrder = new SingleItemOrder();
+		singleItemOrder.setCount(1);
+		singleItemOrder.setMemo("推广订单");
+		singleItemOrder.setOpenId(user.getOpenid());
+		singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_PROMOTION);
+		singleItemOrder.setPayType("2");
+		singleItemOrder.setRuleId(templateRuleId);
+		singleItemOrder.setServiceAddressId(address.getId());
+		singleItemOrder.setUserId(user.getId());
+		ServiceOrder serviceOrder = createOrder(singleItemOrder);
+		return requestPay(serviceOrder);
+		
+	}
+
+	private Address createAddress(PromotionOrder promotionOrder, User user) {
+		
+		Address address = new Address();
+		address.setBind(false);
+
+		Region province = regionRepository.findById(promotionOrder.getProvince()).get();
+		address.setProvince(province.getName());
+		address.setProvinceId(province.getId());
+		
+		Region city = regionRepository.findById(promotionOrder.getCity()).get();
+		address.setCity(city.getName());
+		address.setCityId(city.getId());
+		
+		Region county = regionRepository.findById(promotionOrder.getCounty()).get();
+		address.setCounty(county.getName());
+		address.setCountyId(county.getId());
+		
+		address.setMain(false);
+		address.setReceiveName(promotionOrder.getName());
+		address.setTel(promotionOrder.getMobile());
+		address.setUserId(user.getId());
+		address.setUserName(promotionOrder.getName());
+		address.setXiaoquName(promotionOrder.getSectName());
+		address = addressRepository.save(address);
+		return address;
+	}
+	
+	/**
+	 * 验证手机号
+	 * @param mobile
+	 * @param code
+	 * @param name
+	 * @return
+	 */
+	private boolean validateMobile(String mobile, String code) {
+
+		if (StringUtil.isEmpty(mobile) || StringUtil.isEmpty(code)) {
+			throw new BizValidateException("未填写手机或者验证码信息。");
+		}
+		boolean result = smsService.checkVerificationCode(mobile, code);
+		return result;
+	}
+	
+	private User createUser(User user, String name, String mobile) {
+		
+		if (StringUtil.isNotEmpty(name)) {
+			user.setName(name);
+		}
+		if (!StringUtils.isEmpty(mobile)) {
+			user.setTel(mobile);
+		}
+		User savedUser = userService.simpleRegister(user);
+		return savedUser;
 	}
 	
 	

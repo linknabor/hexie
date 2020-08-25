@@ -119,7 +119,7 @@ public class EshopController<T> extends BaseController {
 	@RequestMapping(value = "/evoucher/get")
 	public CommonResponse<Object> platQuery(@RequestBody QueryEvoucherVO queryEvoucherVO) {
 		
-		logger.info("quEvoucherVO : " + queryEvoucherVO);
+		logger.info("platQuery : " + queryEvoucherVO);
 		return eshopSerivce.getEvoucher(queryEvoucherVO);
 	}
 	
