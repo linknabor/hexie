@@ -317,12 +317,20 @@ public class ServiceOrder  extends BaseModel {
 	}
 	@Transient
 	public void fillAddressInfo(Address address) {
-		setAddress(address.getRegionStr() + address.getDetailAddress());
+		
+		String regionStr = StringUtils.isEmpty(address.getRegionStr())?"":address.getRegionStr();
+		String detailAddress = StringUtils.isEmpty(address.getDetailAddress())?"":address.getDetailAddress();
+		setAddress(regionStr + detailAddress);
+		if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+			String addr = address.getProvince() + "," + address.getCity() + "," + address.getCounty() + "," + address.getXiaoquName();
+			setAddress(addr);
+		}
 		setTel(address.getTel());
 		setXiaoquId(address.getXiaoquId());
 		setReceiverName(address.getReceiveName());
 		setLat(address.getLatitude());
 		setLng(address.getLongitude());
+		setXiaoquName(address.getXiaoquName());
 
 	}
 	@Transient

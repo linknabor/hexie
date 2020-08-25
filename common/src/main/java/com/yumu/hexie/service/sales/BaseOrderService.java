@@ -8,6 +8,7 @@ import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
@@ -46,6 +47,8 @@ public interface BaseOrderService {
 	void notifyPayByServplat(String tradeWaterId);
 	//购物车页面选择商品后支付
 	ServiceOrder createOrderFromCart(User user, CreateOrderReq req);
+	//推广支付
+	JsSign promotionPay(User user, PromotionOrder promotionOrder) throws Exception;
 	
 	
 }

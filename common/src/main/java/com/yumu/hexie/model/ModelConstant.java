@@ -35,6 +35,7 @@ public class ModelConstant {
     public static final int ORDER_TYPE_REPAIR = 6;
     public static final int ORDER_TYPE_SERVICE = 11;
     public static final int ORDER_TYPE_EVOUCHER = 12;
+    public static final int ORDER_TYPE_PROMOTION = 13;
     
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
