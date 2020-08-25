@@ -696,6 +696,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		Long templateRuleId = promotionOrder.getRuleId();
 		Assert.notNull(promotionOrder.getRuleId(), "规则ID不能为空。");
 
+		if (1003 != promotionOrder.getProductType()) {
+			throw new BizValidateException("错误的商品类型 : " + promotionOrder.getProductType());
+		}
+		
 		//1.验证手机
 		boolean result = validateMobile(promotionOrder.getMobile(), promotionOrder.getCode());
 		if (!result) {
