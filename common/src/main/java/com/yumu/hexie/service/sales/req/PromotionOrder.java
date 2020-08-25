@@ -17,6 +17,7 @@ public class PromotionOrder implements Serializable {
 	private String mobile;	//手机号
 	private String code;	//验证码
 	private Long ruleId;	//规则ID
+	private Long productType;	//1003推广，售卖产品类型
 	private String shareCode;	//分享链接的userId
 	
 	public Long getProvince() {
@@ -73,11 +74,17 @@ public class PromotionOrder implements Serializable {
 	public void setShareCode(String shareCode) {
 		this.shareCode = shareCode;
 	}
+	public Long getProductType() {
+		return productType;
+	}
+	public void setProductType(Long productType) {
+		this.productType = productType;
+	}
 	@Override
 	public String toString() {
 		return "PromotionOrder [province=" + province + ", city=" + city + ", county=" + county + ", sectName="
 				+ sectName + ", name=" + name + ", mobile=" + mobile + ", code=" + code + ", ruleId=" + ruleId
-				+ ", shareCode=" + shareCode + "]";
+				+ ", productType=" + productType + ", shareCode=" + shareCode + "]";
 	}
 	
 	
