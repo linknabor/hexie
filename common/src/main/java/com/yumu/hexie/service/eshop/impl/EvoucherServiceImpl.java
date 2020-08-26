@@ -18,6 +18,8 @@ import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
+import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -54,6 +56,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 	private ServiceOperatorRepository serviceOperatorRepository;
 	@Autowired
 	private ServiceOperatorItemRepository serviceOperatorItemRepository;
+	@Autowired
+	private AgentRepository agentRepository;
 	
 	/**
 	 * 创建优惠券
@@ -91,6 +95,12 @@ public class EvoucherServiceImpl implements EvoucherService {
 			evoucher.setAgentId(serviceOrder.getAgentId());
 			evoucher.setAgentName(serviceOrder.getAgentName());
 			evoucher.setAgentNo(serviceOrder.getAgentNo());
+			if (ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+				Agent agent = agentRepository.findByAgentNo(serviceOrder.getTel());	//新下单用户的手机号就是他的机构号
+				evoucher.setAgentId(agent.getId());
+				evoucher.setAgentName(agent.getName());
+				evoucher.setAgentNo(agent.getAgentNo());
+			}
 			evoucherRepository.save(evoucher);
 			
 //			totalPrice  = totalPrice.add(new BigDecimal(evoucher.getActualPrice()));	//校验每张券的价格总和是否和订单支付金额一致

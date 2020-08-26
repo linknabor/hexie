@@ -13,5 +13,5 @@ public interface NotifyQueueTask {
 	void updateOrderStatusAysc();
 	
 	void sendDeliveryNotificationAsyc();
-	
+
 }
