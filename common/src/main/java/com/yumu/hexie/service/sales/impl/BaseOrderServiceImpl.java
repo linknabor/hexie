@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -132,12 +133,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				agentId = order.getAgentId();
 			}
             Agent agent = new Agent();
-            if (0 != agentId) {
-            	agent = agentRepository.findById(agentId).get();
+            Optional<Agent> optional = agentRepository.findById(agentId);
+            if (optional.isPresent()) {
+            	agent = optional.get();
+            	item.setAgentId(agent.getId());
+                item.setAgentName(agent.getName());
+                item.setAgentNo(agent.getAgentNo());
 			}
-            item.setAgentId(agent.getId());
-            item.setAgentName(agent.getName());
-            item.setAgentNo(agent.getAgentNo());
             
 			if(StringUtil.isEmpty(order.getProductName())){
                 order.fillProductInfo(product);
@@ -366,13 +368,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setServiceName(productName);
 			request.setOrderType(String.valueOf(order.getOrderType()));
 			
-			Agent agent = agentRepository.findById(order.getAgentId()).get();
-			request.setAgentNo(agent.getAgentNo());
-			String agentName = agent.getName();
-			if (!StringUtil.isEmpty(agentName)) {
-				agentName = URLEncoder.encode(agentName,"GBK");
+			Optional<Agent> optional = agentRepository.findById(order.getAgentId());
+			if (optional.isPresent()) {
+				Agent agent = optional.get();
+				request.setAgentNo(agent.getAgentNo());
+				String agentName = agent.getName();
+				if (!StringUtil.isEmpty(agentName)) {
+					agentName = URLEncoder.encode(agentName,"GBK");
+				}
+				request.setAgentName(agentName);
 			}
-			request.setAgentName(agentName);
 			request.setCount(String.valueOf(order.getCount()));
 			
 			List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
