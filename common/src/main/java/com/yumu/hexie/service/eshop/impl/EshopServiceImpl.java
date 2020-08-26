@@ -143,6 +143,8 @@ public class EshopServiceImpl implements EshopSerivce {
 				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
 			}else if ("1002".equals(productType)) {
 				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER);
+			}else if ("1003".equals(productType)) {
+				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
 			}
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			if (!opList.isEmpty() && !list.isEmpty()) {

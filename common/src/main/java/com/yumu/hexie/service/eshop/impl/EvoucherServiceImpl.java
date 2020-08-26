@@ -120,7 +120,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void enable(ServiceOrder serviceOrder) {
 		
-		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType()) {
 			return;
 		}
 		
