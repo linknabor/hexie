@@ -816,6 +816,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			return agent;
 		}
 		Evoucher evoucher = evoucherService.getEvoucherByCode(shareCode);
+		if (evoucher == null) {
+			return agent;
+		}
 		agent = agentRepository.findByAgentNo(evoucher.getAgentNo());
 		return agent;
 	}
