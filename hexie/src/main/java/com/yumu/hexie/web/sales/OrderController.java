@@ -349,6 +349,7 @@ public class OrderController extends BaseController{
 	public BaseResult<JsSign> promotionPay(HttpSession session, @ModelAttribute(Constants.USER)User user, 
 			@RequestBody PromotionOrder promotionOrder) throws Exception {
 		
+		logger.info("promotionPay : " + promotionOrder);
 		JsSign jsSign = baseOrderService.promotionPay(user, promotionOrder);
 		session.setAttribute(Constants.USER, user);
 		return new BaseResult<JsSign>().success(jsSign);
