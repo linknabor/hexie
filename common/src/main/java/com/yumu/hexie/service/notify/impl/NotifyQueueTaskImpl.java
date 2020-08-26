@@ -3,6 +3,7 @@ package com.yumu.hexie.service.notify.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -87,6 +88,25 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.info("start to consume wuyeNotificatione queue : " + queue);
 				
 				boolean isSuccess = false;
+				
+				/*推广订单 特殊处理 start*/
+				String tradeWaterId = queue.getOrderId();
+				ServiceOrder order = serviceOrderRepository.findByOrderNo(tradeWaterId);
+				if (order != null) {
+					int orderType = order.getOrderType();
+					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+						List<Map<String, String>> openidList = new ArrayList<>();
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
+						for (ServiceOperator serviceOperator : opList) {
+							Map<String, String> openids = new HashMap<>();
+							openids.put("openid", serviceOperator.getOpenId());
+							openidList.add(openids);
+						}
+						queue.setOpenids(openidList);
+					}
+				}
+				/*推广订单 特殊处理 end*/
+				
 				List<Map<String, String>> openidList = queue.getOpenids();
 				if (openidList == null || openidList.isEmpty()) {
 					continue;
@@ -381,7 +401,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				isSuccess = true;
 				if (!isSuccess) {
 					String value = objectMapper.writeValueAsString(json);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_SERVICE_CFG_QUEUE, value);
 				}
 			
 			} catch (Exception e) {
@@ -466,7 +486,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				
 				isSuccess = true;
 				if (!isSuccess) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, tradeWaterId);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, tradeWaterId);
 				}
 			
 			} catch (Exception e) {
@@ -527,7 +547,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				
 				isSuccess = true;
 				if (!isSuccess) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, tradeWaterId);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, tradeWaterId);
 				}
 			
 			} catch (Exception e) {

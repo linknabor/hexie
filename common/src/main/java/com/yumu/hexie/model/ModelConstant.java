@@ -46,6 +46,7 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_EVOUCHER = 11;	//优惠券核销人员
     public static final int SERVICE_OPER_TYPE_ONSALE_TAKER = 12;	//特卖接单人员
     public static final int SERVICE_OPER_TYPE_RGROUP_TAKER = 13;	//团购接单人员
+    public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
@@ -374,6 +375,7 @@ public class ModelConstant {
 	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新
 	public static final String KEY_UPDATE_ORDER_STATUS_QUEUE = "queue:orderstatus:update";	//订单状态（服务、特卖、团购）更新
 	public static final String KEY_NOTIFY_DELIVERY_QUEUE = "queue:noitfy:delivery";	//特卖、团购快递发货通知
+	public static final String KEY_NOTIFY_PROMOTION_QUEUE = "queue:noitfy:promotion";	//推广下单通知
 	
 	public static final String KEY_ORDER_ACCEPTED = "lock:serviceOrder:";
 	
