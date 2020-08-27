@@ -313,4 +313,19 @@ public class DistributionServiceImpl implements DistributionService {
 		long current = System.currentTimeMillis();
 		return onSaleAreaItemRepository.findByProductName(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, ruleName, currUser.getSectId(), pageable);
 	}
+
+	@Override
+	public List<OnSaleAreaItem> getPromotion() {
+		
+		long current = System.currentTimeMillis();
+		List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.ASC, "sortNo");
+    	Order order2 = new Order(Direction.DESC, "id");
+    	orderList.add(order);
+    	orderList.add(order2);
+    	Sort sort = Sort.by(orderList);
+    	Pageable pageable = PageRequest.of(0, 10, sort);
+    	List<OnSaleAreaItem> itemList = onSaleAreaItemRepository.findAllCountry(ModelConstant.DISTRIBUTION_STATUS_ON, 1003, current, 0, pageable);
+    	return itemList;
+	}
 }
