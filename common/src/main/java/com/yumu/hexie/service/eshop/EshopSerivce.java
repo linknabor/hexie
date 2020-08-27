@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.eshop;
 
+import java.util.Map;
+
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
@@ -33,5 +35,7 @@ public interface EshopSerivce {
 	void deleteCategory(String delIds);
 
 	CommonResponse<Object> getCategory(String id);
+
+	CommonResponse<Object> genPromotionQrCode(Map<String, String> requestMap);
 
 }

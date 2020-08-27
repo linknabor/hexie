@@ -49,4 +49,6 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 	@Query(value = "select e.* from evoucher e where UNIX_TIMESTAMP(endDate) < ?1 and status = ?2 ", nativeQuery = true)
 	List<Evoucher> findTimeoutEvouchers(long current, int status);
 	
+	List<Evoucher> findByStatusAndTypeAndAgentNo(int status, int type, String agentNo);
+	
 }

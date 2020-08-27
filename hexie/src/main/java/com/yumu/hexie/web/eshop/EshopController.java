@@ -195,4 +195,17 @@ public class EshopController<T> extends BaseController {
 		return commonResponse;
 	}
 	
+	/**
+	 * 查询商品分类
+	 * @return
+	 */
+	@RequestMapping(value = "/promotion/genQrCode", method = RequestMethod.POST)
+	public CommonResponse<Object> genQrCode(@RequestBody Map<String, String> map ){
+		
+		logger.info("genQrCode, id : " + map);
+		return eshopSerivce.genPromotionQrCode(map);
+	}
+	
+	
+	
 }

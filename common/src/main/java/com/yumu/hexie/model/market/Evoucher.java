@@ -6,9 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.springframework.data.annotation.Transient;
-
-import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
 
 @Entity
@@ -32,6 +29,8 @@ public class Evoucher extends BaseModel{
 	private String openid;	//下单用户openid
 	
 	private long productId;	//优惠产品ID
+	private int productType;	//产品类型
+	private long ruleId;
 	private String productName;	//优惠项目名称
 	private String smallPicture;	//商品小图
 	
@@ -207,6 +206,18 @@ public class Evoucher extends BaseModel{
 	}
 	public void setType(int type) {
 		this.type = type;
+	}
+	public long getRuleId() {
+		return ruleId;
+	}
+	public void setRuleId(long ruleId) {
+		this.ruleId = ruleId;
+	}
+	public int getProductType() {
+		return productType;
+	}
+	public void setProductType(int productType) {
+		this.productType = productType;
 	}
 	
 	
