@@ -1,14 +1,18 @@
 package com.yumu.hexie.service.eshop.impl;
 
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +67,7 @@ import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.service.eshop.EshopSerivce;
+import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
@@ -101,6 +106,11 @@ public class EshopServiceImpl implements EshopSerivce {
 	private ProductCategoryRepository productCategoryRepository;
 	@Autowired
 	private RedisRepository redisRepository;
+	@Autowired
+	private EvoucherService evoucherService;
+	
+	@Value("${promotion.qrcode.url}")
+	private String PROMOTION_QRCODE_URL;
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
@@ -143,6 +153,8 @@ public class EshopServiceImpl implements EshopSerivce {
 				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
 			}else if ("1002".equals(productType)) {
 				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER);
+			}else if ("1003".equals(productType)) {
+				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
 			}
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			if (!opList.isEmpty() && !list.isEmpty()) {
@@ -794,6 +806,65 @@ public class EshopServiceImpl implements EshopSerivce {
 				list.add(category);
 			}
 			commonResponse.setData(list);
+			commonResponse.setResult("00");
+			
+		} catch (Exception e) {
+			
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+		
+	}
+	
+	/**
+	 * 生成推广海报
+	 */
+	@Transactional
+	@Override
+	public CommonResponse<Object> genPromotionQrCode(Map<String, String> requestMap) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		Map<String, String> map = new HashMap<>();
+		try {
+			String agentNo = requestMap.get("agentNo");
+			String agentName = requestMap.get("agentName");
+			
+			Assert.hasText(agentNo, "agentNo不能为空。");
+			
+			Evoucher evoucher = null;
+			List<Evoucher> evoucherList = evoucherRepository.findByStatusAndTypeAndAgentNo(ModelConstant.EVOUCHER_STATUS_NORMAL, ModelConstant.EVOUCHER_TYPE_PROMOTION, agentNo);
+			if (evoucherList.isEmpty()) {
+				if (agentNo.length()==11 && org.apache.commons.lang3.StringUtils.isNumeric(agentNo)) {	//合伙人是11位手机号
+					//do nothing
+				}else {
+					Agent agent = agentRepository.findByAgentNo(agentNo);
+					if (agent == null) {	//机构。如果没有需要新建，以保证二位码被分享后下单能找到该机构打标记
+						agent = new Agent();
+						agent.setAgentNo(agentNo);
+						agent.setName(agentName);
+						agent.setStatus(1);
+						agent = agentRepository.save(agent);
+					}
+					evoucher = evoucherService.createSingle4Promotion(agent);
+				}
+				
+			}else {
+				evoucher = evoucherList.get(0);
+			}
+			
+			if (evoucher == null) {
+				throw new BizValidateException("没有可以生成的海报。 ");
+			}
+//			ruleId=RULE_ID&productType=PRODUCT_TYPE&shareCode=SHARE_CODE
+			String url = PROMOTION_QRCODE_URL;
+			url = url.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
+					replaceAll("SHARE_CODE", evoucher.getCode());
+			
+			url = URLEncoder.encode(url, "utf-8");
+			
+			map.put("codeUrl", url);
+			commonResponse.setData(map);
 			commonResponse.setResult("00");
 			
 		} catch (Exception e) {
