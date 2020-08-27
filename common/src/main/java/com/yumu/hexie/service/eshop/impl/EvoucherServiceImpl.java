@@ -113,6 +113,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 				
 				evoucher.setType(ModelConstant.EVOUCHER_TYPE_PROMOTION);	//推广券码
 				evoucher.setCode(OrderNoUtil.generateEvoucherNo());
+				evoucher.setOrderId(serviceOrder.getId());
 				evoucher.setProductId(serviceOrder.getProductId());
 				evoucher.setProductType(Integer.valueOf(product.getProductType()));
 				evoucher.setProductName(serviceOrder.getProductName());

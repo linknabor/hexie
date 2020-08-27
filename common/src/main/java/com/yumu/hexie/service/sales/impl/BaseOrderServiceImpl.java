@@ -131,6 +131,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             Long agentId = product.getAgentId();
             if (ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
 				agentId = order.getAgentId();
+				if (agentId == 0) {
+					agentId = product.getAgentId();
+				}
 			}
             Agent agent = new Agent();
             Optional<Agent> optional = agentRepository.findById(agentId);
