@@ -49,6 +49,8 @@ public interface BaseOrderService {
 	ServiceOrder createOrderFromCart(User user, CreateOrderReq req);
 	//推广支付
 	JsSign promotionPay(User user, PromotionOrder promotionOrder) throws Exception;
+	//查询是否购买过推广商品
+	Long queryPromotionOrder(User user);
 	
 	
 }
