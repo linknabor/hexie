@@ -355,6 +355,19 @@ public class OrderController extends BaseController{
 		return new BaseResult<JsSign>().success(jsSign);
 	}
 	
-	
+	/**
+	 * 查询是否购买过推广商品
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/queryPromotionOrder", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user) throws Exception {
+		
+		Long orderId = baseOrderService.queryPromotionOrder(user);
+		return new BaseResult<Long>().success(orderId);
+	}
 	
 }

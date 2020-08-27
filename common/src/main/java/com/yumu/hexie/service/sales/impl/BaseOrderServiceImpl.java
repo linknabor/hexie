@@ -346,7 +346,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			CommonPayRequest request = new CommonPayRequest();
 			request.setUserId(user.getWuyeId());
 			request.setAppid(user.getAppId());
-			request.setSectId(user.getSectId());
+			if (ModelConstant.ORDER_TYPE_PROMOTION != order.getOrderType()) {
+				request.setSectId(user.getSectId());
+			}
 			request.setServiceId(String.valueOf(order.getProductId()));
 			String linkman = order.getReceiverName();
 			if (!StringUtil.isEmpty(linkman)) {
@@ -829,6 +831,24 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		agent = agentRepository.findByAgentNo(evoucher.getAgentNo());
 		return agent;
+	}
+
+	/**
+	 * 查询用户购买过的推广订单
+	 */
+	@Override
+	public Long queryPromotionOrder(User user) {
+		
+		List<Integer> statusList = new ArrayList<>();
+		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+		List<Integer> typeList = new ArrayList<>();
+		typeList.add(ModelConstant.ORDER_TYPE_PROMOTION);
+		List<ServiceOrder> orderList = serviceOrderRepository.findByUserAndStatusAndTypes(user.getId(), statusList, typeList);
+		Long orderId = 0l;
+		if (!orderList.isEmpty()) {
+			orderId = orderList.get(orderList.size()-1).getId();
+		}
+		return orderId;
 	}
 	
 	
