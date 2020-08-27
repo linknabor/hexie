@@ -277,7 +277,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
 			qrCodeUrl = PROMOTION_QRCODE_URL;
 			qrCodeUrl = qrCodeUrl.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
-					replaceAll("SHARE_CODE", evoucher.getCode());
+					replaceAll("SHARE_CODE", "");
 		}
 		return new EvoucherView(qrCodeUrl, list);
 	}
@@ -306,7 +306,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
 			qrCodeUrl = PROMOTION_QRCODE_URL;
 			qrCodeUrl = qrCodeUrl.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
-					replaceAll("SHARE_CODE", evoucher.getCode());
+					replaceAll("SHARE_CODE", "");
 		}
 		return new EvoucherView(qrCodeUrl, list);
 	}
