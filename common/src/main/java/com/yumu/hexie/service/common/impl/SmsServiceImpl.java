@@ -151,7 +151,9 @@ public class SmsServiceImpl implements SmsService {
 	        if (!StringUtils.isEmpty(user.getName())) {
 	        	smsHis.setUserName(user.getName());
 			}
-	        saveSms2Cache(smsHis);
+	        if (ModelConstant.SMS_TYPE_REG == msgType || ModelConstant.SMS_TYPE_INVOICE == msgType) {
+	        	saveSms2Cache(smsHis);
+	        }
 	        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
 		}
         
