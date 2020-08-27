@@ -66,4 +66,11 @@ public class SaleController extends BaseController{
 		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesByName(user,type,name,page));
     }
 	
+	@RequestMapping(value = "/onsales/getPromotion", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<OnSaleAreaItem>> getPromotion() throws Exception {
+		
+		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.getPromotion());
+    }
+	
 }
