@@ -21,6 +21,9 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
+import com.yumu.hexie.model.distribution.region.City;
+import com.yumu.hexie.model.distribution.region.County;
+import com.yumu.hexie.model.distribution.region.Province;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
@@ -183,4 +186,35 @@ public class AddressController extends BaseController{
 		vo.setBuyer(user);
 		return new BaseResult<SharedVo>().successResult(vo);
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/province", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<Province>> queryProvince(){
+		
+		return BaseResult.successResult(addressService.queryProvince());
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/city/{provinceId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<City>> queryCity(@PathVariable long provinceId){
+		
+		return BaseResult.successResult(addressService.queryCity(provinceId));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/county/{cityId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<County>> queryCounty(@PathVariable long cityId){
+		
+		return BaseResult.successResult(addressService.queryCounty(cityId));
+	}
+	
+	public static void main(String[] args) {
+		
+		System.out.println(System.currentTimeMillis());
+	}
+	
 }
