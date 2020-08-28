@@ -32,6 +32,12 @@ import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.distribution.region.City;
+import com.yumu.hexie.model.distribution.region.CityRepository;
+import com.yumu.hexie.model.distribution.region.County;
+import com.yumu.hexie.model.distribution.region.CountyRepository;
+import com.yumu.hexie.model.distribution.region.Province;
+import com.yumu.hexie.model.distribution.region.ProvinceRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
@@ -114,6 +120,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private AddressRepository addressRepository;
 	@Autowired
 	private SmsService smsService;
+	@Autowired
+	private ProvinceRepository provinceRepository;
+	@Autowired
+	private CityRepository cityRepository;
+	@Autowired
+	private CountyRepository countyRepository;
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -757,17 +769,66 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		Address address = new Address();
 		address.setBind(false);
 
-		Region province = regionRepository.findById(promotionOrder.getProvince()).get();
-		address.setProvince(province.getName());
-		address.setProvinceId(province.getId());
+		Province province = provinceRepository.findByProvinceId(promotionOrder.getProvince());
+		Region rProvince = regionRepository.findByName(province.getName());
+		if (rProvince == null) {
+			rProvince = new Region();
+			rProvince.setName(province.getName());
+			rProvince.setParentId(1l);	//省，写死中国
+			rProvince.setParentName("中国");
+			rProvince.setRegionType(ModelConstant.REGION_PROVINCE);
+			rProvince.setMappingId(province.getProvinceId());
+			rProvince.setLatitude(0d);
+			rProvince.setLongitude(0d);
+			rProvince = regionRepository.save(rProvince);
+		}
+		address.setProvince(rProvince.getName());
+		address.setProvinceId(rProvince.getId());
 		
-		Region city = regionRepository.findById(promotionOrder.getCity()).get();
-		address.setCity(city.getName());
-		address.setCityId(city.getId());
+		City city = cityRepository.findByCityId(promotionOrder.getCity());
+		Region rCity = regionRepository.findByName(city.getName());
+		if (rCity == null) {
+			rCity = new Region();
+			rCity.setName(city.getName());
+			rCity.setParentId(rProvince.getId());
+			rCity.setParentName(rProvince.getName());
+			rCity.setRegionType(ModelConstant.REGION_CITY);
+			rCity.setMappingId(city.getCityId());
+			rCity.setLatitude(0d);
+			rCity.setLongitude(0d);
+			rCity = regionRepository.save(rCity);
+		}
+		address.setCity(rCity.getName());
+		address.setCityId(rCity.getId());
 		
-		Region county = regionRepository.findById(promotionOrder.getCounty()).get();
-		address.setCounty(county.getName());
-		address.setCountyId(county.getId());
+		County county = countyRepository.findByCountyId(promotionOrder.getCounty());
+		Region rCounty = regionRepository.findByName(county.getName());
+		if (rCounty == null) {
+			rCounty = new Region();
+			rCounty.setName(county.getName());
+			rCounty.setParentId(rCity.getId());
+			rCounty.setParentName(rCity.getName());
+			rCounty.setRegionType(ModelConstant.REGION_COUNTY);
+			rCounty.setMappingId(county.getCountyId());
+			rCounty.setLatitude(0d);
+			rCounty.setLongitude(0d);
+			rCounty = regionRepository.save(rCounty);
+		}
+		address.setCounty(rCounty.getName());
+		address.setCountyId(rCounty.getId());
+		
+		
+//		Region province = regionRepository.findById(promotionOrder.getProvince()).get();
+//		address.setProvince(province.getName());
+//		address.setProvinceId(province.getId());
+//		
+//		Region city = regionRepository.findById(promotionOrder.getCity()).get();
+//		address.setCity(city.getName());
+//		address.setCityId(city.getId());
+//		
+//		Region county = regionRepository.findById(promotionOrder.getCounty()).get();
+//		address.setCounty(county.getName());
+//		address.setCountyId(county.getId());
 		
 		address.setMain(false);
 		address.setReceiveName(promotionOrder.getName());

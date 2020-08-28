@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CityRepository extends JpaRepository<City, Long> {
 
-	public List<City> findByProvinceIdAndStatus(long provinceId, int status);
+	List<City> findByProvinceIdAndStatus(long provinceId, int status);
 	
+	City findByCityId(long cityId);
 }

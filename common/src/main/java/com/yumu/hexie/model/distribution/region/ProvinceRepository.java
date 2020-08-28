@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProvinceRepository extends JpaRepository<Province, Long> {
 
-	public List<Province> findByStatus(int status);
+	List<Province> findByStatus(int status);
+	
+	Province findByProvinceId(long provinceId);
 	
 }
