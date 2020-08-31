@@ -770,9 +770,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		address.setBind(false);
 
 		Province province = provinceRepository.findByProvinceId(promotionOrder.getProvince());
-		Region rProvince = regionRepository.findByName(province.getName());
-		if (rProvince == null) {
-			rProvince = new Region();
+		Region rProvince = new Region();
+		List<Region> regionList = regionRepository.findByNameAndRegionType(province.getName(), ModelConstant.REGION_PROVINCE);
+		if (regionList.isEmpty()) {
 			rProvince.setName(province.getName());
 			rProvince.setParentId(1l);	//省，写死中国
 			rProvince.setParentName("中国");
@@ -781,14 +781,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			rProvince.setLatitude(0d);
 			rProvince.setLongitude(0d);
 			rProvince = regionRepository.save(rProvince);
+		}else {
+			rProvince = regionList.get(0);
 		}
 		address.setProvince(rProvince.getName());
 		address.setProvinceId(rProvince.getId());
 		
 		City city = cityRepository.findByCityId(promotionOrder.getCity());
-		Region rCity = regionRepository.findByName(city.getName());
-		if (rCity == null) {
-			rCity = new Region();
+		Region rCity = new Region();
+		List<Region> cityList = regionRepository.findByNameAndRegionType(province.getName(), ModelConstant.REGION_CITY);
+		if (cityList.isEmpty()) {
 			rCity.setName(city.getName());
 			rCity.setParentId(rProvince.getId());
 			rCity.setParentName(rProvince.getName());
@@ -797,14 +799,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			rCity.setLatitude(0d);
 			rCity.setLongitude(0d);
 			rCity = regionRepository.save(rCity);
+		}else {
+			rCity = cityList.get(0);
 		}
 		address.setCity(rCity.getName());
 		address.setCityId(rCity.getId());
 		
 		County county = countyRepository.findByCountyId(promotionOrder.getCounty());
-		Region rCounty = regionRepository.findByName(county.getName());
-		if (rCounty == null) {
-			rCounty = new Region();
+		Region rCounty = new Region();
+		List<Region> countyList = regionRepository.findByNameAndRegionType(province.getName(), ModelConstant.REGION_COUNTY);
+		if (countyList.isEmpty()) {
 			rCounty.setName(county.getName());
 			rCounty.setParentId(rCity.getId());
 			rCounty.setParentName(rCity.getName());
@@ -813,6 +817,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			rCounty.setLatitude(0d);
 			rCounty.setLongitude(0d);
 			rCounty = regionRepository.save(rCounty);
+		}else {
+			rCounty = countyList.get(0);
 		}
 		address.setCounty(rCounty.getName());
 		address.setCountyId(rCounty.getId());
