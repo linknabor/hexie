@@ -38,7 +38,8 @@ public class SaleController extends BaseController{
 	
 	@RequestMapping(value = "/getOnSaleRule/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<SalePlan> getRgroupRule(@PathVariable long ruleId) throws Exception {
+	public BaseResult<SalePlan> getRgroupRule(@ModelAttribute(Constants.USER)User user, @PathVariable long ruleId) throws Exception {
+		//user 用于强制授权，不要删除
 		return new BaseResult<SalePlan>().success(customOnSaleService.findSalePlan(ruleId));
     }
 	
