@@ -348,7 +348,7 @@ public class ModelConstant {
 	//队列
 	public static final String KEY_ADD_POINT_QUEUE = "addPointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
-	public static final String KEY_USER_LOGIN = "userLoginSession_";
+	public static final String KEY_USER_LOGIN = "lock:userLoginSession:";
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
 	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
