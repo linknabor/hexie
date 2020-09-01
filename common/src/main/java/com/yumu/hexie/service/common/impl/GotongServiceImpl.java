@@ -278,6 +278,14 @@ public class GotongServiceImpl implements GotongService {
 		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
 		templateMsgService.sendDeliveryNotification(sendUser, serviceOrder, accessToken);
 	}
+
+	@Override
+	public void sendResetPasswordMsg(User user, String password) {
+
+		LOG.info("发送重置密码模板消息！ sendUser : " + user);
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		templateMsgService.sendResetPasswordMsg(user, password, accessToken);
+	}
 	
 
 }
