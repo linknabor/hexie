@@ -23,7 +23,7 @@ public class PromotionServiceImpl implements PromotionService {
 	public void resetPassword(User user) throws Exception {
 
 		User currUser = userService.getById(user.getId());
-		if (StringUtils.isEmpty(user.getTel())) {
+		if (StringUtils.isEmpty(currUser.getTel())) {
 			throw new BizValidateException("当前用户尚未注册。"); 
 		}
 		String password = eshopUtil.resetPassword(currUser);
