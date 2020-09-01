@@ -392,8 +392,8 @@ public class TemplateMsgService {
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(accountNotification.getUser().getAppId(), MsgCfg.TEMPLATE_TYPE_PAY_NOTIFY));
-    	String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
-    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()));
+//    	String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
+//    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()));
     	msg.setTouser(accountNotification.getUser().getOpenid());
     	sendMsg(msg, accessToken);
 
@@ -491,7 +491,7 @@ public class TemplateMsgService {
     	Date date = new Date();
     	String resetTime = DateUtil.dtFormat(date, DateUtil.dttmSimple);
     	vo.setResetTime(new TemplateItem(resetTime));
-    	vo.setRemark(new TemplateItem("感谢您的使用"));
+//    	vo.setRemark(new TemplateItem("感谢您的使用"));
     	
     	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<ResetPasswordVO>();
         msg.setData(vo);
