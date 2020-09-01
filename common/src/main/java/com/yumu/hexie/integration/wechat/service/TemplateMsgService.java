@@ -26,6 +26,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.PayNotifyMsgVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.ResetPasswordVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateItem;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
@@ -472,6 +473,34 @@ public class TemplateMsgService {
         msg.setTouser(user.getOpenid());
         sendMsg(msg, accessToken);
         
+    }
+    
+    /**
+     * 重置密码
+     * @param user
+     * @param password
+     * @param accessToken
+     */
+    public void sendResetPasswordMsg(User user, String password, String accessToken) {
+    	
+    	ResetPasswordVO vo = new ResetPasswordVO();
+    	String title = "您好，您的密码已经被重置。";
+    	vo.setTitle(new TemplateItem(title));
+    	vo.setUserName(new TemplateItem(user.getName()));
+    	vo.setPassword(new TemplateItem(password));
+    	Date date = new Date();
+    	String resetTime = DateUtil.dtFormat(date, DateUtil.dttmSimple);
+    	vo.setResetTime(new TemplateItem(resetTime));
+    	vo.setRemark(new TemplateItem("感谢您的使用"));
+    	
+    	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<ResetPasswordVO>();
+        msg.setData(vo);
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_RESET_PASSWORD));
+//        String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
+//        msg.setUrl(url);
+        msg.setTouser(user.getOpenid());
+        sendMsg(msg, accessToken);
+    	
     }
 
 }
