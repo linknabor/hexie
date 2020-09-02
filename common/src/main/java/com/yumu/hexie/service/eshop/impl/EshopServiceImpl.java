@@ -244,8 +244,10 @@ public class EshopServiceImpl implements EshopSerivce {
 				throw new BizValidateException("未查询到商品，id : " + saveProductVO.getId());
 			}
 		}
+		
+		product.setName(saveProductVO.getName());
+		
 		if ("add".equals(saveProductVO.getOperType())) {
-			product.setName(saveProductVO.getName());
 			product.setAgentId(agent.getId());
 		}
 		product.setProductType(saveProductVO.getType());
