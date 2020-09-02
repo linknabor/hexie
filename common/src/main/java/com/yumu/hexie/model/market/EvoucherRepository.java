@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.yumu.hexie.model.ModelConstant;
+
 public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 
 	
@@ -49,6 +51,12 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 	@Query(value = "select e.* from evoucher e where UNIX_TIMESTAMP(endDate) < ?1 and status = ?2 ", nativeQuery = true)
 	List<Evoucher> findTimeoutEvouchers(long current, int status);
 	
+	@Query(value = "select e.* from evoucher e join onsalerule r on e.ruleId = r.id "
+			+ "where e.status = ?1 "
+			+ "and e.type = ?2 "
+			+ "and e.agentNo = ?3 "
+			+ "and r.status = " + ModelConstant.RULE_STATUS_ON, 
+			nativeQuery = true)
 	List<Evoucher> findByStatusAndTypeAndAgentNo(int status, int type, String agentNo);
 	
 }

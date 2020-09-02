@@ -342,6 +342,9 @@ public class EvoucherServiceImpl implements EvoucherService {
     	Pageable pageable = PageRequest.of(0, 10, sort);
 		
 		List<OnSaleAreaItem> itemList = onSaleAreaItemRepository.findAllCountry(ModelConstant.DISTRIBUTION_STATUS_ON, 1003, current, 0, pageable);
+		if (itemList.isEmpty()) {
+			throw new BizValidateException("没有可以生成海报的推广配置，请先前往推广配置功能新建规则。");
+		}
 		OnSaleAreaItem onSaleAreaItem = itemList.get(0);
 		
 		evoucher.setProductId(onSaleAreaItem.getProductId());
