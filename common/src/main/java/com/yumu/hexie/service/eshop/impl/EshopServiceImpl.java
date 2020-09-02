@@ -700,6 +700,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			Sort sort = new Sort(Direction.DESC, "id");
 			Pageable pageable = PageRequest.of(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize(), sort);
 			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentNo(), queryEvoucherVO.getAgentName(), queryEvoucherVO.getType(), pageable);
+
 			List<EvoucherMapper> mapperList = new ArrayList<>();
 			for (Evoucher evoucher : page.getContent()) {
 				EvoucherMapper evoucherMapper = new EvoucherMapper();
