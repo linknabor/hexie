@@ -30,6 +30,8 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 	@Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.orderType in ?2 order by id desc", nativeQuery = true)
 	public List<ServiceOrder> findByUserIdAndOrderType(long userId, List<Integer> types);
 	
+	public List<ServiceOrder> findByTelAndStatusAndOrderType(String tel, int status, int orderType);
+	
 	public ServiceOrder findByOrderNo(String orderNo);
 
 	public List<ServiceOrder> findAllByTel(String tel);

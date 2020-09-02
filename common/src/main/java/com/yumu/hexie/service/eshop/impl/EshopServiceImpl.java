@@ -838,7 +838,14 @@ public class EshopServiceImpl implements EshopSerivce {
 			List<Evoucher> evoucherList = evoucherRepository.findByStatusAndTypeAndAgentNo(ModelConstant.EVOUCHER_STATUS_NORMAL, ModelConstant.EVOUCHER_TYPE_PROMOTION, agentNo);
 			if (evoucherList.isEmpty()) {
 				if (agentNo.length()==11 && org.apache.commons.lang3.StringUtils.isNumeric(agentNo)) {	//合伙人是11位手机号
-					//do nothing
+					//查看合伙人是否购买过推广订单。如果有，说明是合伙人
+					List<ServiceOrder> orderList = serviceOrderRepository.findByTelAndStatusAndOrderType(agentNo, ModelConstant.ORDER_STATUS_PAYED, ModelConstant.ORDER_TYPE_PROMOTION);
+					if (orderList.isEmpty()) {
+						//do nothing
+					}else {
+						Agent agent = agentRepository.findByAgentNo(agentNo);
+						evoucher = evoucherService.createSingle4Promotion(agent);
+					}
 				}else {
 					Agent agent = agentRepository.findByAgentNo(agentNo);
 					if (agent == null) {	//机构。如果没有需要新建，以保证二位码被分享后下单能找到该机构打标记
