@@ -454,9 +454,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							serviceOrder.setPayDate(date);
 							serviceOrderRepository.save(serviceOrder);
 							salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
-							//发送模板消息和短信
-							userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
-									serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+							
+							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType()) {
+								//发送模板消息和短信
+								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
+										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+							}
 							
 							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
 								evoucherService.enable(serviceOrder);	//激活核销券
