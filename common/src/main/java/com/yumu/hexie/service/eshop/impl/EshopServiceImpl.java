@@ -66,6 +66,7 @@ import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -108,6 +109,8 @@ public class EshopServiceImpl implements EshopSerivce {
 	private RedisRepository redisRepository;
 	@Autowired
 	private EvoucherService evoucherService;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
@@ -866,9 +869,13 @@ public class EshopServiceImpl implements EshopSerivce {
 				throw new BizValidateException("没有可以生成的海报。 ");
 			}
 //			ruleId=RULE_ID&productType=PRODUCT_TYPE&shareCode=SHARE_CODE
+			String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
+			if (StringUtils.isEmpty(appid)) {
+				appid = "";
+			}
 			String url = PROMOTION_QRCODE_URL;
 			url = url.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
-					replaceAll("SHARE_CODE", evoucher.getCode());
+					replaceAll("SHARE_CODE", evoucher.getCode()).replaceAll("APP_ID", appid);
 			
 			url = URLEncoder.encode(url, "utf-8");
 			

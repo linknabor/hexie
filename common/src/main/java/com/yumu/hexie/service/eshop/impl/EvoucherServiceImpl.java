@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
@@ -38,6 +39,7 @@ import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.vo.EvoucherPageMapper;
@@ -70,7 +72,8 @@ public class EvoucherServiceImpl implements EvoucherService {
 	private AgentRepository agentRepository;
 	@Autowired
 	private OnSaleAreaItemRepository onSaleAreaItemRepository;
-	
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	/**
 	 * 创建优惠券
@@ -275,9 +278,14 @@ public class EvoucherServiceImpl implements EvoucherService {
 		}
 		String qrCodeUrl = EVOUCHER_QRCODE_URL;
 		if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
+			
+			String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
+			if (StringUtils.isEmpty(appid)) {
+				appid = "";
+			}
 			qrCodeUrl = PROMOTION_QRCODE_URL;
 			qrCodeUrl = qrCodeUrl.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
-					replaceAll("SHARE_CODE", "");
+					replaceAll("SHARE_CODE", "").replace("APP_ID", appid);
 		}
 		return new EvoucherView(qrCodeUrl, list);
 	}
@@ -304,9 +312,14 @@ public class EvoucherServiceImpl implements EvoucherService {
 		}
 		String qrCodeUrl = EVOUCHER_QRCODE_URL;
 		if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
+			
+			String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
+			if (StringUtils.isEmpty(appid)) {
+				appid = "";
+			}
 			qrCodeUrl = PROMOTION_QRCODE_URL;
 			qrCodeUrl = qrCodeUrl.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
-					replaceAll("SHARE_CODE", "");
+					replaceAll("SHARE_CODE", "").replace("APP_ID", appid);
 		}
 		return new EvoucherView(qrCodeUrl, list);
 	}
