@@ -25,22 +25,20 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Configuration
-@ComponentScan({"com.yumu.hexie.backend.web"})
+@ComponentScan({"com.yumu.hexie.web"})
 public class WebConfig extends WebMvcConfigurationSupport {
-
+	
     @Autowired
     private MessageSource messageSource;
-    
+
     @Bean
     public RequestMappingHandlerMapping requestMappingHandlerMapping() {
         RequestMappingHandlerMapping handlerMapping = super.requestMappingHandlerMapping();
         handlerMapping.setRemoveSemicolonContent(false);
         return handlerMapping;
     }
-
+    
     protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
     	converters.clear();
     	MappingJackson2HttpMessageConverter c = new MappingJackson2HttpMessageConverter(){
@@ -56,8 +54,11 @@ public class WebConfig extends WebMvcConfigurationSupport {
         		}
         	}
         };
+        
+        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName("UTF-8"));
+        stringHttpMessageConverter.setWriteAcceptCharset(false);
+        converters.add(stringHttpMessageConverter);	//stringHttpMessageConverter必须放第一个
     	converters.add(c);
-    	converters.add(new StringHttpMessageConverter(Charset.forName("UTF-8")));
     	converters.add(new ByteArrayHttpMessageConverter());
     	converters.add(new ResourceHttpMessageConverter());
     	converters.add(new SourceHttpMessageConverter<Source>());
@@ -71,16 +72,16 @@ public class WebConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/resources/img/**").addResourceLocations("/resources/img/");
         registry.addResourceHandler("/resources/js/**").addResourceLocations("/resources/js/");
     }
-    
+   
+
     @Override
     public Validator getValidator() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
         validator.setValidationMessageSource(messageSource);
         return validator;
     }
-
-    @Bean(name = "mapper")
-    public ObjectMapper mapper() {
-        return new ObjectMapper();
-    }
+    
+    
+    
+    
 }

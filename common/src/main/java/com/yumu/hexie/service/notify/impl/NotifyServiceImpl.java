@@ -23,7 +23,6 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.notify.NotifyService;
-import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
@@ -47,8 +46,6 @@ public class NotifyServiceImpl implements NotifyService {
 	private WuyeService wuyeService;
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
-	@Autowired
-	private BaseOrderService baseOrderService;
 	
 
 	/**
@@ -139,9 +136,10 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		
 		//7.更新serviceOrder订单状态
-		baseOrderService.notifyPayByServplat(payNotification.getOrderId());
+		updateServiceOrderStatusAsync(payNotification.getOrderId());
 		
-		
+		//8.通知相关人员发货
+		notifyDeliveryAsync(payNotification.getOrderId());
 	}
 	
 	/**
@@ -203,6 +201,68 @@ public class NotifyServiceImpl implements NotifyService {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String value = objectMapper.writeValueAsString(serviceNotification);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * 订单状态更新
+	 */
+	@Override
+	public void updateServiceOrderStatusAsync(String orderId) {
+		
+		if (StringUtils.isEmpty(orderId)) {
+			log.info("updateServiceOrderStatusAsync: orderId is null, will return ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, orderId);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * 通知发货人员发货
+	 */
+	@Override
+	public void notifyDeliveryAsync(String orderId) {
+		
+		if (StringUtils.isEmpty(orderId)) {
+			log.info("notifyDeliveryAsync: orderId is null, will return ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, orderId);
 				isSuccess = true;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

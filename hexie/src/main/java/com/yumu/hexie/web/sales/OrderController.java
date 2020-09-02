@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.sales.SalePlanService;
+import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
@@ -265,7 +267,7 @@ public class OrderController extends BaseController{
 		if(cart.getOrderType() < 0){
 			return new BaseResult<ServiceOrder>().failMsg("商品信息获取异常，请重新选择你需要购买的商品！");
 		}
-		ServiceOrder o = baseOrderService.createOrder(req,cart,user.getId(),user.getOpenid());
+		ServiceOrder o = baseOrderService.createOrder(user, req, cart);
 		if(o == null) {
 			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
 		} else {
@@ -313,6 +315,59 @@ public class OrderController extends BaseController{
 		
 		baseOrderService.cancelPay(user, orderId);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+	}
+	
+	/**
+	 * 购物车支付页面创建订单
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/createOrderFromCart", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<ServiceOrder> createOrderFromCart(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req) throws Exception {
+		
+		ServiceOrder o = baseOrderService.createOrderFromCart(user, req);
+		if(o == null) {
+			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
+		} else {
+			redisRepository.removeCart(Keys.uidCardKey(user.getId()));
+		}
+		return new BaseResult<ServiceOrder>().success(o);
+	}
+	
+	/**
+	 * 购物车支付页面创建订单
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/promotionPay", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<JsSign> promotionPay(HttpSession session, @ModelAttribute(Constants.USER)User user, 
+			@RequestBody PromotionOrder promotionOrder) throws Exception {
+		
+		logger.info("promotionPay : " + promotionOrder);
+		JsSign jsSign = baseOrderService.promotionPay(user, promotionOrder);
+		session.setAttribute(Constants.USER, user);
+		return new BaseResult<JsSign>().success(jsSign);
+	}
+	
+	/**
+	 * 查询是否购买过推广商品
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/queryPromotionOrder", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user) throws Exception {
+		
+		Long orderId = baseOrderService.queryPromotionOrder(user);
+		return new BaseResult<Long>().success(orderId);
 	}
 	
 }

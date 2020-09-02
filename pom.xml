@@ -18,7 +18,6 @@
 	<properties>
 		<java.version>1.8</java.version>
 		<spring-boot.version>2.1.13.RELEASE</spring-boot.version>
-		<mysql-connector-java.version>5.1.33</mysql-connector-java.version>
 		<qiniu-sdk.version>[6.1.9, 6.999]</qiniu-sdk.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
@@ -31,14 +30,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
 				<version>${spring-boot.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
-			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>${mysql-connector-java.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

@@ -2,6 +2,8 @@ package com.yumu.hexie.service.notify.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +34,11 @@ import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
+import com.yumu.hexie.service.sales.SalePlanService;
+import com.yumu.hexie.service.user.UserNoticeService;
 
 @Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
@@ -52,6 +57,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private ServiceOperatorRepository serviceOperatorRepository;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
+	@Autowired
+	private SalePlanService salePlanService;
+	@Autowired
+	private UserNoticeService userNoticeService;
+	@Autowired
+	private EvoucherService evoucherService;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -77,6 +88,25 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.info("start to consume wuyeNotificatione queue : " + queue);
 				
 				boolean isSuccess = false;
+				
+				/*推广订单 特殊处理 start*/
+				String tradeWaterId = queue.getOrderId();
+				ServiceOrder order = serviceOrderRepository.findByOrderNo(tradeWaterId);
+				if (order != null) {
+					int orderType = order.getOrderType();
+					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+						List<Map<String, String>> openidList = new ArrayList<>();
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
+						for (ServiceOperator serviceOperator : opList) {
+							Map<String, String> openids = new HashMap<>();
+							openids.put("openid", serviceOperator.getOpenId());
+							openidList.add(openids);
+						}
+						queue.setOpenids(openidList);
+					}
+				}
+				/*推广订单 特殊处理 end*/
+				
 				List<Map<String, String>> openidList = queue.getOpenids();
 				if (openidList == null || openidList.isEmpty()) {
 					continue;
@@ -371,7 +401,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				isSuccess = true;
 				if (!isSuccess) {
 					String value = objectMapper.writeValueAsString(json);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_SERVICE_CFG_QUEUE, value);
 				}
 			
 			} catch (Exception e) {
@@ -379,6 +409,154 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 			}
 		}
 	
+		
+	}
+
+	@Override
+	@Async("taskExecutor")
+	public void updateOrderStatusAysc() {
+		
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String tradeWaterId = redisTemplate.opsForList().leftPop(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(tradeWaterId)) {
+					continue;
+				}
+				logger.info("start to consume orderStatus update queue : " + tradeWaterId);
+				
+				boolean isSuccess = false;
+				try {
+					logger.info("update orderStatus, tradeWaterId : " + tradeWaterId);
+					
+					ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
+					if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+						continue;
+					}
+					logger.info("update orderStatus, orderId : " + serviceOrder.getId());
+					logger.info("update orderStatus, orderType : " + serviceOrder.getOrderType());
+					logger.info("update orderStatus, orderStatus : " + serviceOrder.getStatus());
+					
+					//核销券
+					if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || 
+							ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
+							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType() ||
+							ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+						
+						if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+							Date date = new Date();
+							serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+							serviceOrder.setConfirmDate(date);
+							serviceOrder.setPayDate(date);
+							serviceOrderRepository.save(serviceOrder);
+							salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
+							
+							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType()) {
+								//发送模板消息和短信
+								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
+										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+							}
+							
+							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+								evoucherService.enable(serviceOrder);	//激活核销券
+							}
+							
+						}
+						
+					}
+					
+					//服务
+					if (ModelConstant.ORDER_TYPE_SERVICE == serviceOrder.getOrderType()) {
+						
+						if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
+							if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+								//do nothing
+							}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+								serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+							}
+							serviceOrder.setPayDate(new Date());
+							serviceOrderRepository.save(serviceOrder);
+						}
+					}
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				
+				isSuccess = true;
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, tradeWaterId);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+		}
+	
+		
+	}
+
+	/**
+	 * 给操作员发送发货提醒
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void sendDeliveryNotificationAsyc() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String tradeWaterId = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(tradeWaterId)) {
+					continue;
+				}
+				logger.info("start to consume notify delivery queue : " + tradeWaterId);
+				
+				boolean isSuccess = false;
+				try {
+					logger.info("notify delivery, tradeWaterId : " + tradeWaterId);
+					
+					ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
+					if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+						continue;
+					}
+					logger.info("notify delivery, orderId : " + serviceOrder.getId());
+					logger.info("notify delivery, orderType : " + serviceOrder.getOrderType());
+					
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
+							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+						
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
+						for (ServiceOperator serviceOperator : opList) {
+							User sendUser = userRepository.findById(serviceOperator.getUserId());
+							gotongService.sendDeliveryNotification(sendUser, serviceOrder);
+						}
+						
+					}
+					
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				
+				isSuccess = true;
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, tradeWaterId);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
 		
 	}
 	

@@ -8,6 +8,7 @@ import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
@@ -17,7 +18,7 @@ public interface BaseOrderService {
 	//创建订单
 	public ServiceOrder createOrder(SingleItemOrder order);
 	//创建订单
-	public ServiceOrder createOrder(CreateOrderReq req,Cart cart,long userId,String openId);
+	ServiceOrder createOrder(User user, CreateOrderReq req, Cart cart);
 	//发起支付
 	public JsSign requestPay(ServiceOrder order) throws Exception;
 	//支付状态变更
@@ -33,7 +34,7 @@ public interface BaseOrderService {
 	//评价
 	public void comment(ServiceOrder order,Comment comment);
 	//退款
-	public ServiceOrder refund(ServiceOrder order);
+	public ServiceOrder refund(ServiceOrder order) throws Exception;
 	//退款完成
 	public void finishRefund(WxRefundOrder wxRefundOrder);
 	
@@ -44,4 +45,12 @@ public interface BaseOrderService {
 	
 	//平台支付，回调入账
 	void notifyPayByServplat(String tradeWaterId);
+	//购物车页面选择商品后支付
+	ServiceOrder createOrderFromCart(User user, CreateOrderReq req);
+	//推广支付
+	JsSign promotionPay(User user, PromotionOrder promotionOrder) throws Exception;
+	//查询是否购买过推广商品
+	Long queryPromotionOrder(User user);
+	
+	
 }

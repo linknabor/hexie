@@ -19,6 +19,7 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_MESSAGE = "messageTemplate";
 	public static final String TEMPLATE_TYPE_PAY_NOTIFY = "payNotifyTemplate";
 	public static final String TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN = "customServiceAssginTemplate";
+	public static final String TEMPLATE_TYPE_RESET_PASSWORD = "resetPasswordTemplate";
 	
 	public static final String URL_SUCCESS = "successUrl";
 	public static final String URL_REG_SUCCESS = "regSuccessUrl";

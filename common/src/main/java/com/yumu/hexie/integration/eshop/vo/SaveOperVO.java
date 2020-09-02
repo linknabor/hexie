@@ -12,7 +12,7 @@ public class SaveOperVO implements Serializable {
 	 */
 	private static final long serialVersionUID = -121766136771005460L;
 	
-	private String operType;
+	private int operatorType;
 	private Long serviceId;
 	private List<Oper> opers;
 
@@ -72,11 +72,11 @@ public class SaveOperVO implements Serializable {
 		
 	}
 	
-	public String getOperType() {
-		return operType;
+	public int getOperatorType() {
+		return operatorType;
 	}
-	public void setOperType(String operType) {
-		this.operType = operType;
+	public void setOperatorType(int operatorType) {
+		this.operatorType = operatorType;
 	}
 	public List<Oper> getOpers() {
 		return opers;
@@ -92,7 +92,7 @@ public class SaveOperVO implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "SaveOperVO [operType=" + operType + ", serviceId=" + serviceId + ", opers=" + opers + "]";
+		return "SaveOperVO [operatorType=" + operatorType + ", serviceId=" + serviceId + ", opers=" + opers + "]";
 	}
 	
 	

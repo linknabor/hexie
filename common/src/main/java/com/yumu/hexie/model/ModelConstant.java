@@ -35,6 +35,7 @@ public class ModelConstant {
     public static final int ORDER_TYPE_REPAIR = 6;
     public static final int ORDER_TYPE_SERVICE = 11;
     public static final int ORDER_TYPE_EVOUCHER = 12;
+    public static final int ORDER_TYPE_PROMOTION = 13;
     
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
@@ -43,6 +44,9 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_STAFF = 5;	//物业人员
     public static final int SERVICE_OPER_TYPE_SERVICE = 10;	//自定义服务
     public static final int SERVICE_OPER_TYPE_EVOUCHER = 11;	//优惠券核销人员
+    public static final int SERVICE_OPER_TYPE_ONSALE_TAKER = 12;	//特卖接单人员
+    public static final int SERVICE_OPER_TYPE_RGROUP_TAKER = 13;	//团购接单人员
+    public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
@@ -344,7 +348,7 @@ public class ModelConstant {
 	//队列
 	public static final String KEY_ADD_POINT_QUEUE = "addPointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
-	public static final String KEY_USER_LOGIN = "userLoginSession_";
+	public static final String KEY_USER_LOGIN = "lock:userLoginSession:";
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
 	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
@@ -365,10 +369,14 @@ public class ModelConstant {
 	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
 	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
 	
-	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";
-	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";
-	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";
-	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";
+	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";	//物业支付到账通知
+	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";	//服务消息推送
+	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";	//服务人员更新
+	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新
+	public static final String KEY_UPDATE_ORDER_STATUS_QUEUE = "queue:orderstatus:update";	//订单状态（服务、特卖、团购）更新
+	public static final String KEY_NOTIFY_DELIVERY_QUEUE = "queue:noitfy:delivery";	//特卖、团购快递发货通知
+	public static final String KEY_NOTIFY_PROMOTION_QUEUE = "queue:noitfy:promotion";	//推广下单通知
+	
 	public static final String KEY_ORDER_ACCEPTED = "lock:serviceOrder:";
 	
 	public static final String KEY_CUSTOM_SERVICE = "cfg:customservice";
@@ -381,4 +389,10 @@ public class ModelConstant {
 	
 	public static final int SMS_TYPE_REG = 101;	//用户注册短信
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
+	
+	public static final String KEY_PRO_RULE_INFO = "product:rule:";
+	
+	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
+	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
+	
 }		

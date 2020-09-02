@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.model.commonsupport.info.ProductCategory;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.user.User;
@@ -36,16 +38,40 @@ public class SaleController extends BaseController{
 	
 	@RequestMapping(value = "/getOnSaleRule/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<SalePlan> getRgroupRule(@PathVariable long ruleId) throws Exception {
+	public BaseResult<SalePlan> getRgroupRule(@ModelAttribute(Constants.USER)User user, @PathVariable long ruleId) throws Exception {
+		//user 用于强制授权，不要删除
 		return new BaseResult<SalePlan>().success(customOnSaleService.findSalePlan(ruleId));
     }
 	
-	
-	@RequestMapping(value = "/onsales/v2/{type}/{page}", method = RequestMethod.GET)
+	@RequestMapping(value = "/onsales/v2/{type}/{category}/{page}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<OnSaleAreaItem>> getOnSales(@ModelAttribute(Constants.USER)User user, 
-			@PathVariable int type, @PathVariable int page) throws Exception {
+			@PathVariable int type, @PathVariable int page, @PathVariable int category) throws Exception {
 		
-		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesV2(user,type,page));
+		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesV2(user,type,category,page));
     }
+	
+	@RequestMapping(value = "/getOnsaleCategory/{type}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<ProductCategory>> getOnSales(@ModelAttribute(Constants.USER)User user, 
+			@PathVariable int type) throws Exception {
+		
+		return new BaseResult<List<ProductCategory>>().success(distributionService.queryCategory(user, type));
+    }
+	
+	@RequestMapping(value = "/onsales/get/{type}/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<OnSaleAreaItem>> getOnSalesByName(@ModelAttribute(Constants.USER)User user, 
+			@RequestParam String name, @PathVariable int type, @PathVariable int page) throws Exception {
+		
+		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesByName(user,type,name,page));
+    }
+	
+	@RequestMapping(value = "/onsales/getPromotion", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<OnSaleAreaItem>> getPromotion() throws Exception {
+		
+		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.getPromotion());
+    }
+	
 }

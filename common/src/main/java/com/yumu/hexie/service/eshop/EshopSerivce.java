@@ -1,9 +1,12 @@
 package com.yumu.hexie.service.eshop;
 
+import java.util.Map;
+
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 
@@ -27,6 +30,12 @@ public interface EshopSerivce {
 
 	void refund(String orderNo, String operType);
 	
+	void saveCategory(SaveCategoryVO saveCategoryVo);
 	
+	void deleteCategory(String delIds);
+
+	CommonResponse<Object> getCategory(String id);
+
+	CommonResponse<Object> genPromotionQrCode(Map<String, String> requestMap);
 
 }

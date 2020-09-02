@@ -333,7 +333,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		}
 		return isAvailable;
 	}
-
+	
 	public static String getREQUEST_URL() {
 		return REQUEST_URL;
 	}

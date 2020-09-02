@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.redis;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.car.OrderCarInfo;
@@ -31,6 +33,8 @@ public class RedisRepository {
     @Autowired
 	@Qualifier(value = "authRedisTemplate")
 	private RedisTemplate<String, Object> authRedisTemplate;
+    @Autowired
+    private RedisTemplate<String, ProductRule> proRedisTemplate;
     
     /**
      * 获取订单车辆信息 
@@ -94,6 +98,17 @@ public class RedisRepository {
     
     public String getAuthorizerJsTicket(String key) {
     	return (String) authRedisTemplate.opsForValue().get(key);
+    }
+    
+    public void setProdcutRule(String key, ProductRule value) {
+    	
+    	Date start = value.getStartDate();
+    	Date end = value.getEndDate();
+    	long expire = end.getTime() - start.getTime();
+    	proRedisTemplate.opsForValue().set(key,value, expire, TimeUnit.SECONDS);
+    }
+    public ProductRule getProdcutRule(String key) {
+        return proRedisTemplate.opsForValue().get(key);
     }
 
 //    

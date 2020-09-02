@@ -6,9 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.springframework.data.annotation.Transient;
-
-import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
 
 @Entity
@@ -21,6 +18,7 @@ public class Evoucher extends BaseModel{
 	private static final long serialVersionUID = 142709793093193198L;
 	
 	private String code;	//which can convert to qrcode.
+	private int type;	//票券类型, 0核销券，1推广码
 	private long orderId;	//serviceOrder id 购买的订单号
 	private int status;	//0不可用,1可用,2,已经使用,3过期
 	private float actualPrice;	//实际售价
@@ -31,6 +29,8 @@ public class Evoucher extends BaseModel{
 	private String openid;	//下单用户openid
 	
 	private long productId;	//优惠产品ID
+	private int productType;	//产品类型
+	private long ruleId;
 	private String productName;	//优惠项目名称
 	private String smallPicture;	//商品小图
 	
@@ -200,6 +200,24 @@ public class Evoucher extends BaseModel{
 	}
 	public void setOperatorUserId(long operatorUserId) {
 		this.operatorUserId = operatorUserId;
+	}
+	public int getType() {
+		return type;
+	}
+	public void setType(int type) {
+		this.type = type;
+	}
+	public long getRuleId() {
+		return ruleId;
+	}
+	public void setRuleId(long ruleId) {
+		this.ruleId = ruleId;
+	}
+	public int getProductType() {
+		return productType;
+	}
+	public void setProductType(int productType) {
+		this.productType = productType;
 	}
 	
 	

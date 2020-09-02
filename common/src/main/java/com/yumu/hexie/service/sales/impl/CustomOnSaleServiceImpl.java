@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -39,11 +41,12 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
 	@Override
 	public void postPaySuccess(ServiceOrder so) {
 		//支付成功订单为配货中状态，改商品库存
-		if (ModelConstant.ORDER_TYPE_EVOUCHER != so.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER != so.getOrderType() && ModelConstant.ORDER_TYPE_PROMOTION != so.getOrderType()) {
 			so.confirm();
 			serviceOrderRepository.save(so);
 		}
-		for(OrderItem item : so.getItems()){
+		List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(so);
+		for(OrderItem item : orderItems){
 			productService.saledCount(item.getProductId(), item.getCount());
 		}
 	}

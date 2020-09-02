@@ -6,6 +6,7 @@ package com.yumu.hexie.service.common;
 
 import java.util.List;
 
+import com.yumu.hexie.model.commonsupport.info.ProductCategory;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
@@ -33,5 +34,13 @@ public interface DistributionService {
     public List<Long> queryO2OServiceIds(long regionId, long type);
     public List<Long> queryO2OItemIds(long regionId, long type);
     
-	List<OnSaleAreaItem> queryOnsalesV2(User user, int type, int page);
+	List<OnSaleAreaItem> queryOnsalesV2(User user, int type, int category, int page);
+	
+	List<OnSaleAreaItem> queryOnsalesByName(User user, int type, String ruleName, int page);
+	
+	List<ProductCategory> queryCategory(User user, int type);
+	
+	List<RgroupAreaItem> queryRgroupsV2(User user, int page);
+	
+	List<OnSaleAreaItem> getPromotion();
 }

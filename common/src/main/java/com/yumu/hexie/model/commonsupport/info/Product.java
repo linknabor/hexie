@@ -70,6 +70,9 @@ public class Product extends BaseModel {
 	
 	private int demo = 0;	//0false 1true;
 	
+	private long productCategoryId;	//分类ID
+	
+	
 	public long getMerchantId() {
 		return merchantId;
 	}
@@ -330,6 +333,12 @@ public class Product extends BaseModel {
 	}
 	public void setDemo(int demo) {
 		this.demo = demo;
+	}
+	public long getProductCategoryId() {
+		return productCategoryId;
+	}
+	public void setProductCategoryId(long productCategoryId) {
+		this.productCategoryId = productCategoryId;
 	}
 	
 }

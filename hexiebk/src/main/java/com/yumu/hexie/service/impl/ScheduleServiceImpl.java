@@ -136,7 +136,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
     
    //4. 团购团超时
-//    @Scheduled(cron = "11 2/5 * * * ?")
+    @Scheduled(cron = "11 2/5 * * * ?")
     @Override
     public void executeRGroupTimeoutJob() {
     	SCHEDULE_LOG.error("--------------------executeGroupTimeoutJob[B][R]-------------------");

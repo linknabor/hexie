@@ -1,5 +1,8 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import javax.inject.Inject;
 
 import com.yumu.hexie.model.market.Collocation;
@@ -31,58 +34,82 @@ public abstract class BaseOrderProcessor {
 
 	// 计算总价 运费 折扣 支付价格 最后支付时间 （不包含）
 	protected void computePrice(ServiceOrder order) {
-		Float totalAmount = 0f;
-		Float discount = 0f;
-		Float shipfee = 0f;
-		Float price = 0f;
+		
+		BigDecimal totalAmount = BigDecimal.ZERO;
+		BigDecimal discount = BigDecimal.ZERO;
+		BigDecimal shipfee = BigDecimal.ZERO;
+		BigDecimal price = BigDecimal.ZERO;
 		int count = 0;
 		long closeTime = System.currentTimeMillis() + 900000;// 默认15分
 		// 设定价格运费等
 		if (order.getCollocationId() > 0) {
 			// 1.优惠组合
 			// 算总价
-
 			for (OrderItem item : order.getItems()) {
-				totalAmount += item.getAmount();
+				totalAmount = totalAmount.add(new BigDecimal(String.valueOf(item.getAmount())));
 				count += item.getCount();
 			}
-			price += totalAmount;
-
-			Collocation c = collocationService.findOne(order
-					.getCollocationId());
-			int discountTimes = (int)Math.floor(price/c.getSatisfyAmount());
-			// 算优惠
-			discount = c.getDiscountAmount()*discountTimes;
+			price = price.add(totalAmount);
+			Collocation c = collocationService.findOne(order.getCollocationId());
+			BigDecimal discountTimes = price.divide(new BigDecimal(String.valueOf(c.getSatisfyAmount())));
+			discountTimes = discount.setScale(0, RoundingMode.DOWN);
 			
-			price -= discount;
+			// 算优惠
+			discount = new BigDecimal(String.valueOf(c.getDiscountAmount())).multiply(discountTimes);
+			price = price.subtract(discount);
 			// 算邮费
-			if (c.getFreeShipAmount() < 0.01 ||
-					c.getFreeShipAmount()-price>=0.01) {//浮点精度存在问题
-				shipfee = c.getShipAmount();
+			BigDecimal freeShipAmount = new BigDecimal(String.valueOf(c.getFreeShipAmount()));
+			if (freeShipAmount.compareTo(BigDecimal.ZERO) == 0 || 
+					freeShipAmount.subtract(price).compareTo(BigDecimal.ZERO) > 0) {
+				shipfee = new BigDecimal(String.valueOf(c.getShipAmount()));
 			}
-			price += shipfee;
-
+			price = price.add(shipfee);
 			closeTime = c.getTimeoutForPay() + System.currentTimeMillis();
+			
 		} else if (order.getItems().size() == 1) {
 			// 2.单个商品
 			OrderItem item = order.getItems().get(0);
 			SalePlan plan = findSalePlan(order.getOrderType(), item.getRuleId());
 
-			totalAmount = item.getAmount();
+			totalAmount = new BigDecimal(String.valueOf(item.getAmount()));
 			price = totalAmount;
 			if (item.getCount() < plan.getFreeShippingNum()) {
-				shipfee = plan.getPostageFee();
+				shipfee = new BigDecimal(String.valueOf(plan.getPostageFee()));
 			}
 			count += item.getCount();
-			price += shipfee;
+			price = price.add(shipfee);
 			closeTime = plan.getTimeoutForPay() + System.currentTimeMillis();
+			
 		} else {
-			throw new BizValidateException("下单失败，请重试！");
+			//3.没有优惠组合的情况下，多件商品一起购买
+			// 算总价
+			long minTimeout = 0l;
+			BigDecimal itemShipFee = BigDecimal.ZERO;
+			for (OrderItem item : order.getItems()) {
+				totalAmount = totalAmount.add(new BigDecimal(String.valueOf(item.getAmount())));
+				count += item.getCount();
+				SalePlan plan = findSalePlan(order.getOrderType(), item.getRuleId());
+				if (minTimeout == 0l) {
+					minTimeout = plan.getTimeoutForPay();
+				}else if (minTimeout > plan.getTimeoutForPay()) {
+					minTimeout = plan.getTimeoutForPay();
+				}
+				if (item.getCount() < plan.getFreeShippingNum()) {
+					BigDecimal unitShipFee = new BigDecimal(String.valueOf(plan.getPostageFee()));
+					itemShipFee = unitShipFee.multiply(new BigDecimal(item.getCount()));
+				}else {
+					itemShipFee = BigDecimal.ZERO;
+				}
+				shipfee = shipfee.add(itemShipFee);
+			}
+			price = price.add(totalAmount);
+			price = price.add(shipfee);
+			
 		}
-		order.setTotalAmount(totalAmount);
-		order.setShipFee(shipfee);
-		order.setDiscountAmount(discount);
-		order.setPrice(price);
+		order.setTotalAmount(totalAmount.floatValue());
+		order.setShipFee(shipfee.floatValue());
+		order.setDiscountAmount(discount.floatValue());
+		order.setPrice(price.floatValue());
 		order.setCloseTime(closeTime);
 		order.setCount(count);
 	}
@@ -110,4 +137,5 @@ public abstract class BaseOrderProcessor {
 		o.fillAddressInfo(address);
 		return address;
 	}
+
 }
