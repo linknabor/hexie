@@ -6,9 +6,9 @@
         </encoder>
     </appender>
     <appender name="COMMONERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/hexie/common-error.log</file>
+        <file>logs/hexiebk/common-error.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-        	<FileNamePattern>logs/hexie/common-error.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+        	<FileNamePattern>logs/hexiebk/common-error.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
 			<maxFileSize>100MB</maxFileSize>
    		</rollingPolicy>
         <encoder>

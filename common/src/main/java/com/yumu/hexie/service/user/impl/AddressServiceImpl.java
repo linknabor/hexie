@@ -27,6 +27,12 @@ import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddressRepository;
+import com.yumu.hexie.model.distribution.region.City;
+import com.yumu.hexie.model.distribution.region.CityRepository;
+import com.yumu.hexie.model.distribution.region.County;
+import com.yumu.hexie.model.distribution.region.CountyRepository;
+import com.yumu.hexie.model.distribution.region.Province;
+import com.yumu.hexie.model.distribution.region.ProvinceRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.user.Address;
@@ -55,6 +61,12 @@ public class AddressServiceImpl implements AddressService {
     private RegionRepository regionRepository;
     @Autowired
     private RegionService regionService;
+    @Autowired
+    private ProvinceRepository provinceRepository;
+    @Autowired
+    private CityRepository cityRepository;
+    @Autowired
+    private CountyRepository countyRepository;
     
     @PostConstruct
 	public void init() {
@@ -412,5 +424,24 @@ public class AddressServiceImpl implements AddressService {
 		return addressRepository.findByUserIdAndBind(userId, true);
 	}
 
+	@Override
+	public List<Province> queryProvince() {
+		
+		return provinceRepository.findByStatus(0);
+		
+	}
+	
+	@Override
+	public List<City> queryCity(long provinceId){
+		
+		return cityRepository.findByProvinceIdAndStatus(provinceId, 0);
+	}
+	
+	@Override
+	public List<County> queryCounty(long cityId) {
+		
+		return countyRepository.findByCityIdAndStatus(cityId, 0);
+	}
+	
 	
 }

@@ -49,38 +49,6 @@ public class GotongServiceImpl implements GotongService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GotongServiceImpl.class);
     
-//    public static String SUCCESS_URL = ConfigUtil.get("successUrl");
-//    
-//	public static String REG_SUCCESS_URL = ConfigUtil.get("regSuccessUrl");
-//    
-//    public static String YUYUE_NOTICE = ConfigUtil.get("yuyueNotice");
-//    
-//    public static String COMPLAIN_DETAIL = ConfigUtil.get("complainDetail");
-//    
-//    public static String WEIXIU_NOTICE = ConfigUtil.get("weixiuNotice");
-//
-//    public static String XIYI_NOTICE = ConfigUtil.get("weixiuNotice");
-//    
-//    public static String WEIXIU_DETAIL = ConfigUtil.get("weixiuDetail");
-//    
-//    public static String SUBSCRIBE_IMG = ConfigUtil.get("subscribeImage");
-//    
-//    public static String SUBSCRIBE_DETAIL = ConfigUtil.get("subscribeDetail");
-//    
-//    public static String SERVICE_URL = ConfigUtil.get("serviceUrl");
-//
-//    public static String EXPRESS_URL = ConfigUtil.get("expressUrl");
-//    
-//    public static String MESSAGE_URL = ConfigUtil.get("messageUrl");
-//
-//    public static String SERVICE_RESV_URL = ConfigUtil.get("serviceResvUrl");
-//
-//    public static String PAY_NOTIFY_URL = ConfigUtil.get("payNotifyUrl");
-//    
-//    public static String CUSTOM_SERVICE_ASSIGN_URL = ConfigUtil.get("customServiceUrl");	//自定义服务抢单
-//    
-//    public static String CUSTOM_SERVICE_DETAIL = ConfigUtil.get("customServiceDetail");
-    
     @Inject
     private ServiceOperatorRepository  serviceOperatorRepository;
     @Inject
@@ -299,6 +267,25 @@ public class GotongServiceImpl implements GotongService {
         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
         CustomService.sendCustomerMessage(msg, accessToken);
     }
+	
+	/**
+	 * 自定义服务通知
+	 */
+	@Override
+	public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder) {
+
+		LOG.info("发送自定义服务通知！ sendUser : " + sendUser);
+		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+		templateMsgService.sendDeliveryNotification(sendUser, serviceOrder, accessToken);
+	}
+
+	@Override
+	public void sendResetPasswordMsg(User user, String password) {
+
+		LOG.info("发送重置密码模板消息！ sendUser : " + user);
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		templateMsgService.sendResetPasswordMsg(user, password, accessToken);
+	}
 	
 
 }

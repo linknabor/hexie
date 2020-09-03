@@ -103,6 +103,15 @@ public class RedisConfig {
 		
 	}
     
+    @Bean(name = "systemConfigRedisTemplate")
+    public  RedisTemplate<String, SystemConfig> mainRedisTemplate(@Qualifier(value="lettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory){
+        RedisTemplate<String, SystemConfig> redisTemplate = new RedisTemplate<String, SystemConfig>();
+        redisTemplate.setConnectionFactory(lettuceConnectionFactory);
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<SystemConfig>(SystemConfig.class));
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
+    
     @Bean
     public CacheManager getCacheManager(@Qualifier(value="lettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory) {
     	

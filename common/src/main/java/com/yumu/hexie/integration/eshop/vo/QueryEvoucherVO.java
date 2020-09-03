@@ -13,6 +13,7 @@ public class QueryEvoucherVO implements Serializable {
 	private String status;
 	private String agentNo;
 	private String agentName;
+	private String type;
 	
 	private int currentPage;
 	private int pageSize;
@@ -53,10 +54,16 @@ public class QueryEvoucherVO implements Serializable {
 	public void setPageSize(int pageSize) {
 		this.pageSize = pageSize;
 	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
 	@Override
 	public String toString() {
 		return "QueryEvoucherVO [tel=" + tel + ", status=" + status + ", agentNo=" + agentNo + ", agentName="
-				+ agentName + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
+				+ agentName + ", type=" + type + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
 	}
 	
 	

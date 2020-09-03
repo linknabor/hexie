@@ -26,6 +26,7 @@ public class Region extends BaseModel{
 	private String xiaoquAddress; 
 	
 	private String sectId;
+	private long mappingId;	//与servplat对应的id，可能是省或者市或者区
 	
     public Region(long parentId,String parentName,String name){
     	this.regionType = ModelConstant.REGION_XIAOQU;
@@ -104,5 +105,11 @@ public class Region extends BaseModel{
     public void setAmapId(Long amapId) {
         this.amapId = amapId;
     }
+	public long getMappingId() {
+		return mappingId;
+	}
+	public void setMappingId(long mappingId) {
+		this.mappingId = mappingId;
+	}
 	
 }

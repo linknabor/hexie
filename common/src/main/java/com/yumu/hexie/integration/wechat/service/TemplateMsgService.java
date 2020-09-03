@@ -26,6 +26,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.PayNotifyMsgVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.ResetPasswordVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateItem;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
@@ -391,8 +392,8 @@ public class TemplateMsgService {
 	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
     	msg.setData(vo);
     	msg.setTemplate_id(getTemplateByAppId(accountNotification.getUser().getAppId(), MsgCfg.TEMPLATE_TYPE_PAY_NOTIFY));
-    	String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
-    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()));
+//    	String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
+//    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()));
     	msg.setTouser(accountNotification.getUser().getOpenid());
     	sendMsg(msg, accessToken);
 
@@ -434,6 +435,72 @@ public class TemplateMsgService {
         msg.setTouser(user.getOpenid());
         sendMsg(msg, accessToken);
         
+    }
+    
+    /**
+     * 发货提醒
+     * @param openId
+     * @param title
+     * @param billName
+     * @param requireTime
+     * @param url
+     * @param accessToken
+     * @param appId
+     */
+    public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
+
+        //更改为使用模版消息发送
+    	User user = sendUser;
+    	CsOrderVO vo = new CsOrderVO();
+    	String title = "您有一个新的服务订单，请及时处理。";
+    	vo.setTitle(new TemplateItem(title));
+    	vo.setOrderId(new TemplateItem(String.valueOf(serviceOrder.getId())));
+    	vo.setServiceType(new TemplateItem(serviceOrder.getSubTypeName()));
+    	String customerName = serviceOrder.getReceiverName();
+    	vo.setCustomerName(new TemplateItem(customerName));
+    	vo.setCustomerTel(new TemplateItem(serviceOrder.getTel()));
+    	vo.setRemark(new TemplateItem(serviceOrder.getAddress()));
+    	
+        TemplateMsg<CsOrderVO>msg = new TemplateMsg<CsOrderVO>();
+        msg.setData(vo);
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN));
+        String url = getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_ASSIGN);	//TODO
+        if (!StringUtils.isEmpty(url)) {
+			url = url + serviceOrder.getId();
+			url = AppUtil.addAppOnUrl(url, user.getAppId());
+		}
+        msg.setUrl(url);
+        msg.setTouser(user.getOpenid());
+        sendMsg(msg, accessToken);
+        
+    }
+    
+    /**
+     * 重置密码
+     * @param user
+     * @param password
+     * @param accessToken
+     */
+    public void sendResetPasswordMsg(User user, String password, String accessToken) {
+    	
+    	ResetPasswordVO vo = new ResetPasswordVO();
+    	String title = "您好，您的密码已经被重置。";
+    	vo.setTitle(new TemplateItem(title));
+    	vo.setUserName(new TemplateItem(user.getName()));
+    	vo.setPassword(new TemplateItem(password));
+    	Date date = new Date();
+    	String resetTime = DateUtil.dtFormat(date, DateUtil.dttmSimple);
+    	vo.setResetTime(new TemplateItem(resetTime));
+//    	vo.setRemark(new TemplateItem("感谢您的使用"));
+    	
+    	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<ResetPasswordVO>();
+        msg.setData(vo);
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_RESET_PASSWORD));
+//        String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
+//        msg.setUrl(url);
+        msg.setTouser(user.getOpenid());
+        sendMsg(msg, accessToken);
+    	
     }
 
 }

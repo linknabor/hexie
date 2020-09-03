@@ -1,24 +1,25 @@
 package com.yumu.hexie.service.sales.impl;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.CommonPayRequest;
+import com.yumu.hexie.integration.common.CommonPayRequest.SubOrder;
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
@@ -30,9 +31,19 @@ import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.distribution.region.City;
+import com.yumu.hexie.model.distribution.region.CityRepository;
+import com.yumu.hexie.model.distribution.region.County;
+import com.yumu.hexie.model.distribution.region.CountyRepository;
+import com.yumu.hexie.model.distribution.region.Province;
+import com.yumu.hexie.model.distribution.region.ProvinceRepository;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -41,19 +52,23 @@ import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
+import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.car.CarService;
 import com.yumu.hexie.service.comment.CommentService;
 import com.yumu.hexie.service.common.ShareService;
+import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
-import com.yumu.hexie.service.evoucher.EvoucherService;
+import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.sales.SalePlanService;
+import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
@@ -63,7 +78,6 @@ import com.yumu.hexie.vo.SingleItemOrder;
 public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrderService {
 
     protected static final Logger log = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
-	public static String COUPON_URL = ConfigUtil.get("couponUrl");
 	@Inject
 	protected ServiceOrderRepository serviceOrderRepository;
 	@Inject
@@ -98,9 +112,21 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private EvoucherService evoucherService;
 	@Autowired
 	private TemplateMsgService templateMsgService;
-
-    @Value(value = "${testMode}")
-    private boolean testMode;
+	@Autowired
+	private RedisRepository redisRepository;
+	@Autowired
+	private RegionRepository regionRepository;
+	@Autowired
+	private AddressRepository addressRepository;
+	@Autowired
+	private SmsService smsService;
+	@Autowired
+	private ProvinceRepository provinceRepository;
+	@Autowired
+	private CityRepository cityRepository;
+	@Autowired
+	private CountyRepository countyRepository;
+	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
 		for(OrderItem item : order.getItems()){
@@ -114,7 +140,21 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			productService.freezeCount(product, item.getCount());
             item.fillDetail(plan, product);
             
-            Agent agent = agentRepository.findById(product.getAgentId()).get();
+            Long agentId = product.getAgentId();
+            if (ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
+				agentId = order.getAgentId();
+				if (agentId == 0) {
+					agentId = product.getAgentId();
+				}
+			}
+            Agent agent = new Agent();
+            Optional<Agent> optional = agentRepository.findById(agentId);
+            if (optional.isPresent()) {
+            	agent = optional.get();
+            	item.setAgentId(agent.getId());
+                item.setAgentName(agent.getName());
+                item.setAgentNo(agent.getAgentNo());
+			}
             
 			if(StringUtil.isEmpty(order.getProductName())){
                 order.fillProductInfo(product);
@@ -193,13 +233,63 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		return o;
 	}
 
+	/**
+	 * 根据购物车创建订单
+	 */
 	@Override
 	@Transactional
-	public ServiceOrder createOrder(CreateOrderReq req,Cart cart,long userId,String openId){
-		return createOrder(new ServiceOrder(req, cart, userId, openId));
+	public ServiceOrder createOrder(User user, CreateOrderReq req, Cart cart){
+		
+		ServiceOrder o = new ServiceOrder(user, req, cart);
+		//1. 填充地址信息
+		Address address = fillAddressInfo(o);
+		//2. 填充订单信息并校验规则,设置价格信息
+		preOrderCreate(o, address);
+		computeCoupon(o);
+		//3. 订单创建
+		o = serviceOrderRepository.save(o);
+		for(OrderItem item : o.getItems()) {
+			item.setServiceOrder(o);
+			item.setUserId(o.getUserId());
+			orderItemRepository.save(item);
+		}
+		//4.保存车辆信息 20160721 车大大的车辆服务
+		carService.saveOrderCarInfo(o);
+		
+		//5.电子优惠券订单
+		evoucherService.createEvoucher(o);
+		
+        log.warn("[Create]订单创建OrderNo:" + o.getOrderNo());
+		//4. 订单后处理
+		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
+		return o;
+		
 	}
-
-	private ServiceOrder createOrder(ServiceOrder o) {
+	
+	/**
+	 * 根据购物车创建订单
+	 */
+	@Override
+	@Transactional
+	public ServiceOrder createOrderFromCart(User user, CreateOrderReq req){
+		
+		//重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
+		List<OrderItem> itemList = req.getItemList();
+		for (OrderItem orderItem : itemList) {
+			String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
+			ProductRule productRule = redisRepository.getProdcutRule(key);
+			if (productRule == null) {
+				throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
+			}
+			
+			//只设置单价和免邮件数这些基本属性，以保证后面计算的正确性
+			orderItem.setOriPrice(productRule.getOriPrice());
+			orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
+			orderItem.setPostageFee(productRule.getPostageFee());
+			orderItem.setPrice(productRule.getPrice());
+		}
+		
+		ServiceOrder o = new ServiceOrder(user, req);
 		//1. 填充地址信息
 		Address address = fillAddressInfo(o);
 		//2. 填充订单信息并校验规则,设置价格信息
@@ -252,19 +342,25 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Override
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
-        log.info("[requestPay]OrderNo:" + order.getOrderNo() + ", orderType : " + order.getOrderType());
+        log.info("[requestPay]OrderNo:" + order.getId() + ", orderType : " + order.getOrderType());
 		//校验订单状态
 		if(!order.payable()){
             throw new BizValidateException(order.getId(),"订单状态不可支付，请重新查询确认订单状态！").setError();
         }
 		JsSign sign = null;
 		//核销券订单走平台支付接口。其余老的订单走原有支付，会慢慢改成新接口
-		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType()) {
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
+				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
+			
 			User user = userService.getById(order.getUserId());
 			CommonPayRequest request = new CommonPayRequest();
 			request.setUserId(user.getWuyeId());
 			request.setAppid(user.getAppId());
-			request.setSectId(user.getSectId());
+			if (ModelConstant.ORDER_TYPE_PROMOTION != order.getOrderType()) {
+				request.setSectId(user.getSectId());
+			}
 			request.setServiceId(String.valueOf(order.getProductId()));
 			String linkman = order.getReceiverName();
 			if (!StringUtil.isEmpty(linkman)) {
@@ -272,6 +368,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			request.setLinkman(linkman);
 			request.setLinktel(order.getTel());
+			
 			String address = order.getAddress();
 			if (!StringUtil.isEmpty(address)) {
 				address = URLEncoder.encode(address,"GBK");
@@ -288,14 +385,41 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setServiceName(productName);
 			request.setOrderType(String.valueOf(order.getOrderType()));
 			
-			Agent agent = agentRepository.findById(order.getAgentId()).get();
-			request.setAgentNo(agent.getAgentNo());
-			String agentName = agent.getName();
-			if (!StringUtil.isEmpty(agentName)) {
-				agentName = URLEncoder.encode(agentName,"GBK");
+			Optional<Agent> optional = agentRepository.findById(order.getAgentId());
+			if (optional.isPresent()) {
+				Agent agent = optional.get();
+				request.setAgentNo(agent.getAgentNo());
+				String agentName = agent.getName();
+				if (!StringUtil.isEmpty(agentName)) {
+					agentName = URLEncoder.encode(agentName,"GBK");
+				}
+				request.setAgentName(agentName);
 			}
-			request.setAgentName(agentName);
 			request.setCount(String.valueOf(order.getCount()));
+			
+			List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
+			List<SubOrder> subOrderList = new ArrayList<>(itemList.size());
+			
+			for (OrderItem orderItem : itemList) {
+				SubOrder subOrder = new SubOrder();
+				String subAgentName = orderItem.getAgentName();
+				if (!StringUtil.isEmpty(subAgentName)) {
+					subAgentName = URLEncoder.encode(subAgentName,"GBK");
+				}
+				subOrder.setAgentName(subAgentName);
+				subOrder.setAgentNo(orderItem.getAgentNo());
+				subOrder.setAmount(orderItem.getAmount());
+				subOrder.setCount(orderItem.getCount());
+				
+				String subProductName = orderItem.getProductName();
+				if (!StringUtil.isEmpty(subProductName)) {
+					subProductName = URLEncoder.encode(subProductName,"GBK");
+				}
+				subOrder.setProductName(subProductName);
+				subOrder.setProductId(orderItem.getProductId());
+				subOrderList.add(subOrder);
+			}
+			request.setSubOrders(subOrderList);
 			
 			CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
 			sign = new JsSign();
@@ -308,7 +432,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			sign.setOrderId(String.valueOf(order.getId()));
 			order = serviceOrderRepository.findById(order.getId()).get();
 			if (StringUtil.isEmpty(order.getOrderNo())) {
-				order.setOrderNo(responseVo.getTradeWaterId());
+				order.setOrderNo(responseVo.getTradeWaterId());	//set之后,jpa会有脏检查，如果数据发生变化，会在事务提交时执行update
 			}
 
 			//操作记录
@@ -467,16 +591,29 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	//FIXME 注意该方法不应该被外部用户调用
 	@Transactional
 	@Override
-	public ServiceOrder refund(ServiceOrder order) {
+	public ServiceOrder refund(ServiceOrder order) throws Exception {
         log.warn("[refund]refund-begin:"+order.getId());
 		if(!order.refundable()) {
             throw new BizValidateException(order.getId(),"该订单无法退款！").setError();
         }
-		PaymentOrder po = paymentService.fetchPaymentOrder(order);
-		if(paymentService.refundApply(po)){
-			//FIXME 支付单直接从支付成功到已退款状态  po.setStatus(ModelConstant.PAYMENT_STATUS_REFUND);
+		
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
+				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+			
+			User user = userService.getById(order.getUserId());
+			eshopUtil.requestRefund(user, order.getOrderNo());
 			order.refunding(true);
+			
+		}else {
+			PaymentOrder po = paymentService.fetchPaymentOrder(order);
+			if(paymentService.refundApply(po)){
+				//FIXME 支付单直接从支付成功到已退款状态  po.setStatus(ModelConstant.PAYMENT_STATUS_REFUND);
+				order.refunding(true);
+			}
+			
 		}
+		
 		order = serviceOrderRepository.save(order);
         log.warn("[refund]refund-finish:"+order.getId());
 		commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ,order);
@@ -572,5 +709,214 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		
 	}
+	
+	/**
+	 * 1.验证短信验证码 
+	 * 2.创建订单 
+	 * 3.支付 
+	 * 4.回填tradeWaterId和代理商、合伙人信息
+	 * @param promotionOrder
+	 * @return
+	 * @throws Exception 
+	 */
+	@Transactional
+	@Override
+	public JsSign promotionPay(User user, PromotionOrder promotionOrder) throws Exception {
+		
+		Long templateRuleId = promotionOrder.getRuleId();
+		Assert.notNull(promotionOrder.getRuleId(), "规则ID不能为空。");
+
+		if (1003 != promotionOrder.getProductType()) {
+			throw new BizValidateException("错误的商品类型 : " + promotionOrder.getProductType());
+		}
+		
+		//1.验证手机
+		boolean result = validateMobile(promotionOrder.getMobile(), promotionOrder.getCode());
+		if (!result) {
+			throw new BizValidateException("验证码不正确。");
+		}
+		
+		//2.创建用户
+		createUser(user, promotionOrder.getName(), promotionOrder.getMobile());
+		
+		/*
+		 * 2.创建订单
+		 * 1).根据页面填写的内容，先建一个新的地址
+		 * 2).新建一个机构(后面分享用)
+		 * 3).用新地址创建订单
+		 */
+		Address address = createAddress(promotionOrder, user);
+		createAgent(promotionOrder.getName(), promotionOrder.getMobile());	//新建机构，以保证当前用户成为合伙人后可以分享订单
+		Agent agent = getSharedAgent(promotionOrder.getShareCode());	//获取分享本次订单的机构，有可能是空的
+		
+		SingleItemOrder singleItemOrder = new SingleItemOrder();
+		singleItemOrder.setCount(1);
+		singleItemOrder.setMemo("推广订单");
+		singleItemOrder.setOpenId(user.getOpenid());
+		singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_PROMOTION);
+		singleItemOrder.setPayType("2");
+		singleItemOrder.setRuleId(templateRuleId);
+		singleItemOrder.setServiceAddressId(address.getId());
+		singleItemOrder.setUserId(user.getId());
+		singleItemOrder.setAgentId(agent.getId());
+		ServiceOrder serviceOrder = createOrder(singleItemOrder);
+		return requestPay(serviceOrder);
+		
+	}
+
+	private Address createAddress(PromotionOrder promotionOrder, User user) {
+		
+		Address address = new Address();
+		address.setBind(false);
+
+		Province province = provinceRepository.findByProvinceId(promotionOrder.getProvince());
+		Region rProvince = new Region();
+		List<Region> regionList = regionRepository.findByNameAndRegionType(province.getName(), ModelConstant.REGION_PROVINCE);
+		if (regionList.isEmpty()) {
+			rProvince.setName(province.getName());
+			rProvince.setParentId(1l);	//省，写死中国
+			rProvince.setParentName("中国");
+			rProvince.setRegionType(ModelConstant.REGION_PROVINCE);
+			rProvince.setMappingId(province.getProvinceId());
+			rProvince.setLatitude(0d);
+			rProvince.setLongitude(0d);
+			rProvince = regionRepository.save(rProvince);
+		}else {
+			rProvince = regionList.get(0);
+		}
+		address.setProvince(rProvince.getName());
+		address.setProvinceId(rProvince.getId());
+		
+		City city = cityRepository.findByCityId(promotionOrder.getCity());
+		Region rCity = new Region();
+		List<Region> cityList = regionRepository.findByNameAndRegionType(province.getName(), ModelConstant.REGION_CITY);
+		if (cityList.isEmpty()) {
+			rCity.setName(city.getName());
+			rCity.setParentId(rProvince.getId());
+			rCity.setParentName(rProvince.getName());
+			rCity.setRegionType(ModelConstant.REGION_CITY);
+			rCity.setMappingId(city.getCityId());
+			rCity.setLatitude(0d);
+			rCity.setLongitude(0d);
+			rCity = regionRepository.save(rCity);
+		}else {
+			rCity = cityList.get(0);
+		}
+		address.setCity(rCity.getName());
+		address.setCityId(rCity.getId());
+		
+		County county = countyRepository.findByCountyId(promotionOrder.getCounty());
+		Region rCounty = new Region();
+		List<Region> countyList = regionRepository.findByNameAndRegionType(province.getName(), ModelConstant.REGION_COUNTY);
+		if (countyList.isEmpty()) {
+			rCounty.setName(county.getName());
+			rCounty.setParentId(rCity.getId());
+			rCounty.setParentName(rCity.getName());
+			rCounty.setRegionType(ModelConstant.REGION_COUNTY);
+			rCounty.setMappingId(county.getCountyId());
+			rCounty.setLatitude(0d);
+			rCounty.setLongitude(0d);
+			rCounty = regionRepository.save(rCounty);
+		}else {
+			rCounty = countyList.get(0);
+		}
+		address.setCounty(rCounty.getName());
+		address.setCountyId(rCounty.getId());
+		
+		
+//		Region province = regionRepository.findById(promotionOrder.getProvince()).get();
+//		address.setProvince(province.getName());
+//		address.setProvinceId(province.getId());
+//		
+//		Region city = regionRepository.findById(promotionOrder.getCity()).get();
+//		address.setCity(city.getName());
+//		address.setCityId(city.getId());
+//		
+//		Region county = regionRepository.findById(promotionOrder.getCounty()).get();
+//		address.setCounty(county.getName());
+//		address.setCountyId(county.getId());
+		
+		address.setMain(false);
+		address.setReceiveName(promotionOrder.getName());
+		address.setTel(promotionOrder.getMobile());
+		address.setUserId(user.getId());
+		address.setUserName(promotionOrder.getName());
+		address.setXiaoquName(promotionOrder.getSectName());
+		address = addressRepository.save(address);
+		return address;
+	}
+	
+	/**
+	 * 验证手机号
+	 * @param mobile
+	 * @param code
+	 * @param name
+	 * @return
+	 */
+	private boolean validateMobile(String mobile, String code) {
+
+		if (StringUtil.isEmpty(mobile) || StringUtil.isEmpty(code)) {
+			throw new BizValidateException("未填写手机或者验证码信息。");
+		}
+		boolean result = smsService.checkVerificationCode(mobile, code);
+		return result;
+	}
+	
+	private User createUser(User user, String name, String mobile) {
+		
+		if (StringUtil.isNotEmpty(name)) {
+			user.setName(name);
+		}
+		if (!StringUtils.isEmpty(mobile)) {
+			user.setTel(mobile);
+		}
+		User savedUser = userService.simpleRegister(user);
+		return savedUser;
+	}
+	
+	private void createAgent(String name, String mobile) {
+		
+		Agent agent = agentRepository.findByAgentNo(mobile);
+		if (agent == null) {
+			agent = new Agent();
+			agent.setAgentNo(mobile);
+			agent.setName(name);
+			agent.setStatus(1);
+			agent = agentRepository.save(agent);
+		}
+	}
+	
+	private Agent getSharedAgent(String shareCode) {
+		
+		Agent agent = new Agent();
+		if (StringUtils.isEmpty(shareCode)) {
+			return agent;
+		}
+		Evoucher evoucher = evoucherService.getEvoucherByCode(shareCode);
+		if (evoucher == null) {
+			return agent;
+		}
+		agent = agentRepository.findByAgentNo(evoucher.getAgentNo());
+		return agent;
+	}
+
+	/**
+	 * 查询用户购买过的推广订单
+	 */
+	@Override
+	public Long queryPromotionOrder(User user) {
+		
+		List<Integer> statusList = new ArrayList<>();
+		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+		List<Integer> typeList = new ArrayList<>();
+		typeList.add(ModelConstant.ORDER_TYPE_PROMOTION);
+		List<ServiceOrder> orderList = serviceOrderRepository.findByUserAndStatusAndTypes(user.getId(), statusList, typeList);
+		Long orderId = 0l;
+		if (!orderList.isEmpty()) {
+			orderId = orderList.get(orderList.size()-1).getId();
+		}
+		return orderId;
+	}
+	
 	
 }

@@ -123,13 +123,13 @@ public class UserController extends BaseController{
 			    UserInfo userInfo = new UserInfo(user, odDefinition);
 
 			    endTime = System.currentTimeMillis();
-			    log.info("user1，耗时：" + ((endTime-beginTime)/1000));
+			    log.info("user1，耗时：" + ((endTime-beginTime)));
 
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    endTime = System.currentTimeMillis();
-			    log.info("user2，耗时：" + ((endTime-beginTime)/1000));
+			    log.info("user2，耗时：" + ((endTime-beginTime)));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 //			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
@@ -142,7 +142,7 @@ public class UserController extends BaseController{
 			    userInfo.setWuyeTabsList(tabsList);
 			    
 			    endTime = System.currentTimeMillis();
-			    log.info("user3，耗时：" + ((endTime-beginTime)/1000));
+			    log.info("user3，耗时：" + ((endTime-beginTime)));
 			    
 			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
 			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
@@ -166,7 +166,7 @@ public class UserController extends BaseController{
 			    		    
 			    endTime = System.currentTimeMillis();
 
-				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
+				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)));
 
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
@@ -232,7 +232,7 @@ public class UserController extends BaseController{
 		    if(userAccount == null) {
 		    	
 		    	if (userService.checkDuplicateLogin(session)) {
-					throw new BizValidateException("正在登陆中，请耐心等待。");
+					throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
 				}
 		    	
 		    	UserWeiXin weixinUser = null;

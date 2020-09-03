@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 import com.yumu.hexie.service.eshop.EshopSerivce;
@@ -117,7 +119,7 @@ public class EshopController<T> extends BaseController {
 	@RequestMapping(value = "/evoucher/get")
 	public CommonResponse<Object> platQuery(@RequestBody QueryEvoucherVO queryEvoucherVO) {
 		
-		logger.info("quEvoucherVO : " + queryEvoucherVO);
+		logger.info("platQuery : " + queryEvoucherVO);
 		return eshopSerivce.getEvoucher(queryEvoucherVO);
 	}
 	
@@ -150,6 +152,60 @@ public class EshopController<T> extends BaseController {
 		commonResponse.setResult("00");
 		return commonResponse;
 	}
+	
+	/**
+	 * 保存商品分类
+	 * @param saveCategoryVo
+	 * @return
+	 */
+	@RequestMapping(value = "/product/category/save", method = RequestMethod.POST)
+	public CommonResponse<String> saveCategory(@RequestBody SaveCategoryVO saveCategoryVo){
+		
+		logger.info("saveCategoryVo : " + saveCategoryVo);
+		eshopSerivce.saveCategory(saveCategoryVo);
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+		
+	}
+	
+	/**
+	 * 查询商品分类
+	 * @return
+	 */
+	@RequestMapping(value = "/product/category/get", method = RequestMethod.POST)
+	public CommonResponse<Object> getCategory(@RequestParam(required = false) String id){
+		
+		logger.info("getCategory, id : " + id);
+		CommonResponse<Object> commonResponse = eshopSerivce.getCategory(id);
+		return commonResponse;
+	}
+	
+	/**
+	 * 查询商品分类
+	 * @return
+	 */
+	@RequestMapping(value = "/product/category/del", method = RequestMethod.POST)
+	public CommonResponse<String> delCategory(@RequestBody Map<String, String> map ){
+		
+		logger.info("delCategory, id : " + map);
+		eshopSerivce.deleteCategory(map.get("delIds"));
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+	}
+	
+	/**
+	 * 查询商品分类
+	 * @return
+	 */
+	@RequestMapping(value = "/promotion/genQrCode", method = RequestMethod.POST)
+	public CommonResponse<Object> genQrCode(@RequestBody Map<String, String> map ){
+		
+		logger.info("genQrCode, id : " + map);
+		return eshopSerivce.genPromotionQrCode(map);
+	}
+	
 	
 	
 }

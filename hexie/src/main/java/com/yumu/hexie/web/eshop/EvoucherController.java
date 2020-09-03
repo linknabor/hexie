@@ -1,9 +1,10 @@
-package com.yumu.hexie.web.evoucher;
+package com.yumu.hexie.web.eshop;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.evoucher.EvoucherService;
+import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
@@ -26,11 +27,14 @@ public class EvoucherController extends BaseController {
 	@Autowired
 	private EvoucherService evoucherService;
 	
-	@RequestMapping(value = "/get", method = RequestMethod.GET)
-	public BaseResult<Object> getEvoucher(@ModelAttribute(Constants.USER) User user) {
+	@RequestMapping(value = "/get/{type}", method = RequestMethod.GET)
+	public BaseResult<Object> getEvoucher(@ModelAttribute(Constants.USER) User user, @PathVariable(required = false) int type) {
 		
+		if (StringUtils.isEmpty(type)) {
+			type = ModelConstant.EVOUCHER_TYPE_VERIFICATION;
+		}
 		BaseResult<Object> baseResult = new BaseResult<>();
-		baseResult.setResult(evoucherService.getByUser(user));
+		baseResult.setResult(evoucherService.getByUserAndType(user, type));
 		return baseResult;
 	}
 	
@@ -116,6 +120,18 @@ public class EvoucherController extends BaseController {
 		List<ServiceOrder> orderList = evoucherService.getEvoucherOrders(user, status);
 		return new BaseResult<List<ServiceOrder>>().success(orderList);
     }
+	
+	/**
+	 * 获取默认的推广海报
+	 * @return
+	 */
+	@RequestMapping(value = "/getDefaultPromotion", method = RequestMethod.GET)
+	public BaseResult<Object> getDefaultPromotion() {
+		
+		BaseResult<Object> baseResult = new BaseResult<>();
+		baseResult.setResult(evoucherService.getDefaultEvoucher4Promotion());
+		return baseResult;
+	}
 	
 	
 }

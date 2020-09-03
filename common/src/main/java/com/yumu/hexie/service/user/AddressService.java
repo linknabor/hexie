@@ -6,6 +6,9 @@ import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
+import com.yumu.hexie.model.distribution.region.City;
+import com.yumu.hexie.model.distribution.region.County;
+import com.yumu.hexie.model.distribution.region.Province;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
@@ -48,6 +51,12 @@ public interface AddressService {
 	void updateDefaultAddress(User user, HexieAddress addr);
 	
 	List<Address> queryBindedAddressByUser(long userId);
+
+	List<Province> queryProvince();
+
+	List<City> queryCity(long provinceId);
+
+	List<County> queryCounty(long cityId);
 	
 	
 }

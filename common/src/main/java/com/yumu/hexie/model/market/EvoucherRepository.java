@@ -7,12 +7,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.yumu.hexie.model.ModelConstant;
+
 public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 
 	
 	Evoucher findByCode(String code);
 	
-	List<Evoucher> findByUserId(long userId);
+	List<Evoucher> findByUserIdAndType(long userId, int type);
 	
 	List<Evoucher> findByOrderId(long orderId);
 	
@@ -24,9 +26,9 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 	 * @return
 	 */
 	@Query(value = "select " + column1 + " from evoucher e "
-			+ "where e.operatorUserId = ?1 group by e.orderId order by e.consumeDate desc ", 
+			+ "where e.operatorUserId = ?1 and e.type = ?2 group by e.orderId order by e.consumeDate desc ", 
 			nativeQuery = true)
-	List<Object[]> findByOperator(long operatorId);
+	List<Object[]> findByOperatorAndType(long operatorId, int type);
 	
 	List<Evoucher> findByOrderIdAndStatus(long orderId, int status);
 	
@@ -35,15 +37,26 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 			+ "and IF (?2!='', e.tel = ?2, 1=1) "
 			+ "and IF (?3!='', e.agentNo = ?3, 1=1) "
 			+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) "
+			+ "and IF (?5!='', e.type = ?5, 1=1) "
 			, nativeQuery = true
 			, countQuery = "select count(1) as counts from evoucher e where productId >0 and status >0 "
 				+ "and IF (?1!='', e.status = ?1, 1=1) "
 				+ "and IF (?2!='', e.tel = ?2, 1=1) "
 				+ "and IF (?3!='', e.agentNo = ?3, 1=1) "
-				+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) " )
-	Page<Evoucher> findByMultipleConditions(String status, String tel, String agentNo, String agentName, Pageable pageable);
+				+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) " 
+				+ "and IF (?5!='', e.type = ?5, 1=1) "
+			)
+	Page<Evoucher> findByMultipleConditions(String status, String tel, String agentNo, String agentName, String type, Pageable pageable);
 	
 	@Query(value = "select e.* from evoucher e where UNIX_TIMESTAMP(endDate) < ?1 and status = ?2 ", nativeQuery = true)
 	List<Evoucher> findTimeoutEvouchers(long current, int status);
+	
+	@Query(value = "select e.* from evoucher e join onsalerule r on e.ruleId = r.id "
+			+ "where e.status = ?1 "
+			+ "and e.type = ?2 "
+			+ "and e.agentNo = ?3 "
+			+ "and r.status = " + ModelConstant.RULE_STATUS_ON, 
+			nativeQuery = true)
+	List<Evoucher> findByStatusAndTypeAndAgentNo(int status, int type, String agentNo);
 	
 }
