@@ -384,10 +384,9 @@ public class EvoucherServiceImpl implements EvoucherService {
 		String agentNo = "000000000000";	//写死机构ID，奈博
 		Evoucher evoucher = new Evoucher();
 		List<Evoucher> evoucherList = evoucherRepository.findByStatusAndTypeAndAgentNo(ModelConstant.EVOUCHER_STATUS_NORMAL, ModelConstant.EVOUCHER_TYPE_PROMOTION, agentNo);
-		if (evoucherList.isEmpty()) {
+		if (!evoucherList.isEmpty()) {
 			evoucher = evoucherList.get(0);
 		}
-		
 		logger.info("evoucher : " + evoucher);
 		
 		String qrCodeUrl = EVOUCHER_QRCODE_URL;
