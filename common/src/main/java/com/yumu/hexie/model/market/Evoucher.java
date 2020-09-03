@@ -219,6 +219,17 @@ public class Evoucher extends BaseModel{
 	public void setProductType(int productType) {
 		this.productType = productType;
 	}
+	@Override
+	public String toString() {
+		return "Evoucher [code=" + code + ", type=" + type + ", orderId=" + orderId + ", status=" + status
+				+ ", actualPrice=" + actualPrice + ", oriPrice=" + oriPrice + ", userId=" + userId + ", tel=" + tel
+				+ ", openid=" + openid + ", productId=" + productId + ", productType=" + productType + ", ruleId="
+				+ ruleId + ", productName=" + productName + ", smallPicture=" + smallPicture + ", beginDate="
+				+ beginDate + ", endDate=" + endDate + ", consumeDate=" + consumeDate + ", operatorUserId="
+				+ operatorUserId + ", operatorName=" + operatorName + ", operatorTel=" + operatorTel + ", agentId="
+				+ agentId + ", agentName=" + agentName + ", agentNo=" + agentNo + ", merchantId=" + merchantId
+				+ ", merchantName=" + merchantName + "]";
+	}
 	
 	
 }

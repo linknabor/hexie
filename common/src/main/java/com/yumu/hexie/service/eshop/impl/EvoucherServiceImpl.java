@@ -340,7 +340,6 @@ public class EvoucherServiceImpl implements EvoucherService {
 		return evoucherRepository.findByCode(code);
 	}
 
-	@Transactional
 	@Override
 	public Evoucher createSingle4Promotion(Agent agent) {
 		
@@ -388,6 +387,9 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (evoucherList.isEmpty()) {
 			evoucher = evoucherList.get(0);
 		}
+		
+		logger.info("evoucher : " + evoucher);
+		
 		String qrCodeUrl = EVOUCHER_QRCODE_URL;
 		String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
 		if (StringUtils.isEmpty(appid)) {
