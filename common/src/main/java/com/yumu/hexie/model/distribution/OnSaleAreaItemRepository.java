@@ -145,6 +145,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 					+ "and m.productType = ?2 "
 					+ "and m.ruleCloseTime> ?3 "
 					+ "and m.productCategoryId = ?4 ",
+
 			nativeQuery = true)
 	public List<OnSaleAreaItem> findAllCountry(int status, int type, long current, long categoryId, Pageable pageable);
 	
@@ -163,6 +164,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 			+ "and m.ruleCloseTime> ?3 "
 			+ "and IF (?4!='', m.productName like CONCAT('%',?4,'%'), 1=1) "
 			+ "and r.sectId = ?5 ",
+
 			countQuery = "select count(m.id) from OnSaleAreaItem m "
 					+ "join region r on m.regionId = r.id "
 					+ "where m.status= ?1 "
@@ -170,6 +172,7 @@ public interface OnSaleAreaItemRepository extends JpaRepository<OnSaleAreaItem, 
 					+ "and m.ruleCloseTime> ?3 "
 					+ "and IF (?4!='', m.productName like CONCAT('%',?4,'%'), 1=1) "
 					+ "and r.sectId = ?5 ",
+
 			nativeQuery = true)
 	public List<OnSaleAreaItem> findByProductName(int status, int type, long current, String ruleName, String sectId, Pageable pageable);
 	

@@ -374,6 +374,32 @@ public class EvoucherServiceImpl implements EvoucherService {
 		return evoucherRepository.save(evoucher);
 		
 	}
+	
+	/**
+	 * 获取默认的海报
+	 * @return
+	 */
+	@Override
+	public EvoucherView getDefaultEvoucher4Promotion() {
+		
+		String agentNo = "000000000000";	//写死机构ID，奈博
+		Evoucher evoucher = new Evoucher();
+		List<Evoucher> evoucherList = evoucherRepository.findByStatusAndTypeAndAgentNo(ModelConstant.EVOUCHER_STATUS_NORMAL, ModelConstant.EVOUCHER_TYPE_PROMOTION, agentNo);
+		if (evoucherList.isEmpty()) {
+			evoucher = evoucherList.get(0);
+		}
+		String qrCodeUrl = EVOUCHER_QRCODE_URL;
+		String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
+		if (StringUtils.isEmpty(appid)) {
+			appid = "";
+		}
+		qrCodeUrl = PROMOTION_QRCODE_URL;
+		qrCodeUrl = qrCodeUrl.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
+				replaceAll("SHARE_CODE", "").replace("APP_ID", appid);
+		
+		return new EvoucherView(qrCodeUrl, evoucherList);
+		
+	}
 
 
 }
