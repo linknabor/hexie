@@ -103,6 +103,33 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							openidList.add(openids);
 						}
 						queue.setOpenids(openidList);
+						
+						
+						String address = order.getAddress();	//逗号分隔，需要split
+						String[]addrArr = address.split(",");
+						
+						String remark = "";
+						if (addrArr.length!=4) {
+							logger.error("当前地址: " + address + "，不能分成 省市区");
+						}else {
+							String province = addrArr[0];
+							String city = addrArr[1];
+							String county = addrArr[2];
+							String sect = addrArr[3];
+							
+							if(province.indexOf("上海")>=0
+									||province.indexOf("北京")>=0
+									||province.indexOf("重庆")>=0
+									||province.indexOf("天津")>=0){
+								province = "";
+							}
+							
+							remark = province + city + county + sect;
+							remark = order.getReceiverName() + "-" + remark;
+							logger.info("remark : " + remark);
+						}
+						queue.setRemark(remark);
+						
 					}
 				}
 				/*推广订单 特殊处理 end*/
