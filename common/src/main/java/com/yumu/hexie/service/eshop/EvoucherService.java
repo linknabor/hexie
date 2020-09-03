@@ -31,4 +31,6 @@ public interface EvoucherService {
 
 	Evoucher createSingle4Promotion(Agent agent);
 
+	EvoucherView getDefaultEvoucher4Promotion();
+
 }
