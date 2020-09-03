@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.ProductCategory;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.DistributionService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -40,6 +42,10 @@ public class SaleController extends BaseController{
 	@ResponseBody
 	public BaseResult<SalePlan> getRgroupRule(@ModelAttribute(Constants.USER)User user, @PathVariable long ruleId) throws Exception {
 		//user 用于强制授权，不要删除
+		SalePlan salePlan = customOnSaleService.findSalePlan(ruleId);
+		if (ModelConstant.RULE_STATUS_OFF == salePlan.getStatus()) {
+			throw new BizValidateException("当前商品规则已失效。");
+		}
 		return new BaseResult<SalePlan>().success(customOnSaleService.findSalePlan(ruleId));
     }
 	

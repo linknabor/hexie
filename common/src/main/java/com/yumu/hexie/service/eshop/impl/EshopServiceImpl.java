@@ -634,6 +634,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			}else if (ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == queryOperVO.getType() ||
 					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType()) {
+				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
 			}
 			
 			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);
