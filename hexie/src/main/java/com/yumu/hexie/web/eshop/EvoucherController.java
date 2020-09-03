@@ -121,5 +121,17 @@ public class EvoucherController extends BaseController {
 		return new BaseResult<List<ServiceOrder>>().success(orderList);
     }
 	
+	/**
+	 * 获取默认的推广海报
+	 * @return
+	 */
+	@RequestMapping(value = "/getDefaultPromotion", method = RequestMethod.GET)
+	public BaseResult<Object> getDefaultPromotion() {
+		
+		BaseResult<Object> baseResult = new BaseResult<>();
+		baseResult.setResult(evoucherService.getDefaultEvoucher4Promotion());
+		return baseResult;
+	}
+	
 	
 }

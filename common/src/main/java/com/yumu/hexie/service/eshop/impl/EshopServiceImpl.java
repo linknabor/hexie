@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,6 +80,8 @@ import com.yumu.hexie.service.exception.BizValidateException;
  * @param <T>
  */
 public class EshopServiceImpl implements EshopSerivce {
+	
+	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
 
 	@Autowired
 	private ProductRepository productRepository;
@@ -215,6 +219,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 		} catch (Exception e) {
 			
+			logger.info(e.getMessage(), e);
 			commonResponse.setErrMsg(e.getMessage());
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}
@@ -629,6 +634,9 @@ public class EshopServiceImpl implements EshopSerivce {
 			}else if (ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == queryOperVO.getType() ||
 					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType()) {
+				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+
 			}
 			
 			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);
