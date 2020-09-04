@@ -486,12 +486,12 @@ public class TemplateMsgService {
     	ResetPasswordVO vo = new ResetPasswordVO();
     	String title = "您好，您的密码已经被重置。";
     	vo.setTitle(new TemplateItem(title));
-    	vo.setUserName(new TemplateItem(user.getName()));
+    	vo.setUserName(new TemplateItem(user.getTel()));
     	vo.setPassword(new TemplateItem(password));
     	Date date = new Date();
     	String resetTime = DateUtil.dtFormat(date, DateUtil.dttmSimple);
     	vo.setResetTime(new TemplateItem(resetTime));
-//    	vo.setRemark(new TemplateItem("感谢您的使用"));
+    	vo.setRemark(new TemplateItem("请用PC浏览器访问b.e-shequ.com，进入您的运营系统"));
     	
     	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<ResetPasswordVO>();
         msg.setData(vo);

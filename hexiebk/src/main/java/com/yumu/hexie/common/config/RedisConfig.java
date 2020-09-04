@@ -22,6 +22,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.yumu.hexie.model.system.SystemConfig;
+
 @Configuration
 public class RedisConfig {
 
