@@ -913,7 +913,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		List<ServiceOrder> orderList = serviceOrderRepository.findByUserAndStatusAndTypes(user.getId(), statusList, typeList);
 		Long orderId = 0l;
 		if (!orderList.isEmpty()) {
-			orderId = orderList.get(orderList.size()-1).getId();
+			orderId = orderList.get(0).getId();
 		}
 		return orderId;
 	}
