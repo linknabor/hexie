@@ -103,8 +103,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							openidList.add(openids);
 						}
 						queue.setOpenids(openidList);
-						
-						
+										
 						String address = order.getAddress();	//逗号分隔，需要split
 						String[]addrArr = address.split(",");
 						
