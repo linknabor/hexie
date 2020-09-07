@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -126,7 +127,11 @@ public class RepairServiceImpl implements RepairService {
         Address address = addressRepository.findById(req.getAddressId()).get();
         
         //查询region 
-        Region region=regionRepository.findById(address.getXiaoquId()).get();
+        Region region = null;
+        Optional<Region> optional = regionRepository.findById(address.getXiaoquId());
+        if (optional.isPresent()) {
+			region = optional.get();
+		}
         if(region != null && StringUtil.isNotEmpty(region.getSectId())){
         	user.setSectId(region.getSectId());
         }
