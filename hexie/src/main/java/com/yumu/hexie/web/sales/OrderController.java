@@ -356,6 +356,23 @@ public class OrderController extends BaseController{
 	}
 	
 	/**
+	 * 购物车支付页面创建订单
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/promotionPayV2", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<JsSign> promotionPayV2(@ModelAttribute(Constants.USER)User user, @RequestBody PromotionOrder promotionOrder) throws Exception {
+		
+		logger.info("promotionPayV2 : " + promotionOrder);
+		JsSign jsSign = baseOrderService.promotionPayV2(user, promotionOrder);
+		return new BaseResult<JsSign>().success(jsSign);
+	}
+	
+	
+	/**
 	 * 查询是否购买过推广商品
 	 * @param user
 	 * @param req
@@ -366,7 +383,13 @@ public class OrderController extends BaseController{
 	@ResponseBody
 	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user) throws Exception {
 		
-		Long orderId = baseOrderService.queryPromotionOrder(user);
+		List<Integer> statusList = new ArrayList<>();
+		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+		List<ServiceOrder> orderList = baseOrderService.queryPromotionOrder(user, statusList);
+		Long orderId = 0l;
+		if (!orderList.isEmpty()) {
+			orderId = orderList.get(0).getId();
+		}
 		return new BaseResult<Long>().success(orderId);
 	}
 	
