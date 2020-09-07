@@ -491,7 +491,7 @@ public class TemplateMsgService {
     	Date date = new Date();
     	String resetTime = DateUtil.dtFormat(date, DateUtil.dttmSimple);
     	vo.setResetTime(new TemplateItem(resetTime));
-    	vo.setRemark(new TemplateItem("请用PC浏览器访问b.e-shequ.com，进入您的运营系统"));
+    	vo.setRemark(new TemplateItem("请用PC浏览器访问b.e-shequ.cn，进入您的运营系统"));
     	
     	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<ResetPasswordVO>();
         msg.setData(vo);
