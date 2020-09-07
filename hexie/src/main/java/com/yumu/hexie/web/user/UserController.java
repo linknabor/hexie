@@ -278,7 +278,10 @@ public class UserController extends BaseController{
 		if (StringUtils.isEmpty(token)) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_REG);
+		if (yzm.getType() == 0) {
+			yzm.setType(ModelConstant.SMS_TYPE_REG);
+		}
+		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp, yzm.getType());
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}

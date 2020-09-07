@@ -3,9 +3,11 @@ package com.yumu.hexie.web.user.req;
 import java.io.Serializable;
 
 public class MobileYzm implements Serializable{
+	
 	private static final long serialVersionUID = -2090643413772467559L;
 	private String mobile;
 	private String yzm;
+	private int type;		//101 用户注册短信，  102 发票验证码获取， 103推广支付， 104重置密码
 	
 	public String getMobile() {
 		return mobile;
@@ -19,5 +21,12 @@ public class MobileYzm implements Serializable{
 	public void setYzm(String yzm) {
 		this.yzm = yzm;
 	}
+	public int getType() {
+		return type;
+	}
+	public void setType(int type) {
+		this.type = type;
+	}
+	
 	
 }
