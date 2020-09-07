@@ -80,7 +80,7 @@ import com.yumu.hexie.service.exception.BizValidateException;
  * @param <T>
  */
 public class EshopServiceImpl implements EshopSerivce {
-	
+
 	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
 
 	@Autowired
