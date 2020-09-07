@@ -904,18 +904,61 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	 * 查询用户购买过的推广订单
 	 */
 	@Override
-	public Long queryPromotionOrder(User user) {
+	public List<ServiceOrder> queryPromotionOrder(User user, List<Integer> statusList) {
 		
-		List<Integer> statusList = new ArrayList<>();
-		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
 		List<Integer> typeList = new ArrayList<>();
 		typeList.add(ModelConstant.ORDER_TYPE_PROMOTION);
 		List<ServiceOrder> orderList = serviceOrderRepository.findByUserAndStatusAndTypes(user.getId(), statusList, typeList);
-		Long orderId = 0l;
-		if (!orderList.isEmpty()) {
-			orderId = orderList.get(0).getId();
+		return orderList;
+	}
+
+	@Override
+	public JsSign promotionPayV2(User user, PromotionOrder promotionOrder) throws Exception {
+		
+		Long templateRuleId = promotionOrder.getRuleId();
+		Assert.notNull(promotionOrder.getRuleId(), "规则ID不能为空。");
+
+		if (1003 != promotionOrder.getProductType()) {
+			throw new BizValidateException("错误的商品类型 : " + promotionOrder.getProductType());
 		}
-		return orderId;
+		//2.创建用户
+		List<Integer> statusList = new ArrayList<>();
+		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+		statusList.add(ModelConstant.ORDER_STATUS_REFUNDED);
+		User currUser = userService.getById(user.getId());
+		List<ServiceOrder> orderList = queryPromotionOrder(currUser, statusList);
+		Long addressId = null;
+		if (!orderList.isEmpty()) {
+			ServiceOrder paidOrder = orderList.get(0);
+			addressId = paidOrder.getServiceAddressId();
+		}else {
+			List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+			if (!addrList.isEmpty()) {
+				addressId = addrList.get(0).getId();
+			}
+		}
+		
+		
+		/*
+		 * 2.创建订单
+		 * 1).根据页面填写的内容，先建一个新的地址
+		 * 2).新建一个机构(后面分享用)
+		 * 3).用新地址创建订单
+		 */
+		Agent agent = getSharedAgent(promotionOrder.getShareCode());	//获取分享本次订单的机构，有可能是空的
+		
+		SingleItemOrder singleItemOrder = new SingleItemOrder();
+		singleItemOrder.setCount(1);
+		singleItemOrder.setMemo("推广订单");
+		singleItemOrder.setOpenId(user.getOpenid());
+		singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_PROMOTION);
+		singleItemOrder.setPayType("2");
+		singleItemOrder.setRuleId(templateRuleId);
+		singleItemOrder.setServiceAddressId(addressId);
+		singleItemOrder.setUserId(user.getId());
+		singleItemOrder.setAgentId(agent.getId());
+		ServiceOrder serviceOrder = createOrder(singleItemOrder);
+		return requestPay(serviceOrder);
 	}
 	
 	
