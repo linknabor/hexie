@@ -386,6 +386,7 @@ public class OrderController extends BaseController{
 		List<Integer> statusList = new ArrayList<>();
 		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
 		statusList.add(ModelConstant.ORDER_STATUS_REFUNDED);
+
 		List<ServiceOrder> orderList = baseOrderService.queryPromotionOrder(user, statusList);
 		Long orderId = 0l;
 		if (!orderList.isEmpty()) {
