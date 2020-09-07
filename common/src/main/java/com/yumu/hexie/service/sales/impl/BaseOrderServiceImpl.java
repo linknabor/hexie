@@ -912,6 +912,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		return orderList;
 	}
 
+	@Transactional
 	@Override
 	public JsSign promotionPayV2(User user, PromotionOrder promotionOrder) throws Exception {
 		
@@ -938,13 +939,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 		}
 		
-		
-		/*
-		 * 2.创建订单
-		 * 1).根据页面填写的内容，先建一个新的地址
-		 * 2).新建一个机构(后面分享用)
-		 * 3).用新地址创建订单
-		 */
+		createAgent(currUser.getName(), currUser.getTel());	//新建机构，以保证当前用户成为合伙人后可以分享订单
 		Agent agent = getSharedAgent(promotionOrder.getShareCode());	//获取分享本次订单的机构，有可能是空的
 		
 		SingleItemOrder singleItemOrder = new SingleItemOrder();
