@@ -389,6 +389,8 @@ public class ModelConstant {
 	
 	public static final int SMS_TYPE_REG = 101;	//用户注册短信
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
+	public static final int SMS_TYPE_PROMOTION_PAY = 103;	//发票验证码获取
+	public static final int SMS_TYPE_RESET_PASSWORD = 104;	//发票验证码获取
 	
 	public static final String KEY_PRO_RULE_INFO = "product:rule:";
 	

@@ -151,7 +151,8 @@ public class SmsServiceImpl implements SmsService {
 	        if (!StringUtils.isEmpty(user.getName())) {
 	        	smsHis.setUserName(user.getName());
 			}
-	        if (ModelConstant.SMS_TYPE_REG == msgType || ModelConstant.SMS_TYPE_INVOICE == msgType) {
+	        if (ModelConstant.SMS_TYPE_REG == msgType || ModelConstant.SMS_TYPE_INVOICE == msgType || 
+	        		ModelConstant.SMS_TYPE_PROMOTION_PAY == msgType || ModelConstant.SMS_TYPE_RESET_PASSWORD == msgType) {
 	        	saveSms2Cache(smsHis);
 	        }
 	        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
@@ -238,7 +239,7 @@ public class SmsServiceImpl implements SmsService {
 		Object totalSent = stringRedisTemplate.opsForValue().get(key);
 		if (totalSent != null) {
 			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
-			if (sent > 10) {
+			if (sent > 20) {
 				throw new BizValidateException("当日短信验证码发送次数超限，请联系社区客服。");
 			}
 		}else {
