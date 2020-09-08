@@ -338,7 +338,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 	}
 
-	@Transactional
 	@Override
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
@@ -433,6 +432,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			order = serviceOrderRepository.findById(order.getId()).get();
 			if (StringUtil.isEmpty(order.getOrderNo())) {
 				order.setOrderNo(responseVo.getTradeWaterId());	//set之后,jpa会有脏检查，如果数据发生变化，会在事务提交时执行update
+				serviceOrderRepository.save(order);
 			}
 
 			//操作记录
