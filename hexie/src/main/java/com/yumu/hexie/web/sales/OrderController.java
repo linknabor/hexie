@@ -371,9 +371,8 @@ public class OrderController extends BaseController{
 		return new BaseResult<JsSign>().success(jsSign);
 	}
 	
-	
 	/**
-	 * 查询是否购买过推广商品
+	 * 查询是否购买过推广商品(有退款的也算)
 	 * @param user
 	 * @param req
 	 * @return
@@ -390,8 +389,17 @@ public class OrderController extends BaseController{
 		List<ServiceOrder> orderList = baseOrderService.queryPromotionOrder(user, statusList);
 		Long orderId = 0l;
 		if (!orderList.isEmpty()) {
-			orderId = orderList.get(0).getId();
+			for (ServiceOrder serviceOrder : orderList) {
+				if (serviceOrder.getStatus() == ModelConstant.EVOUCHER_STATUS_NORMAL) {
+					orderId = serviceOrder.getId();
+					break;
+				}
+			}
+			if (orderId == 0l) {
+				orderId = orderList.get(0).getId();
+			}
 		}
+		
 		return new BaseResult<Long>().success(orderId);
 	}
 	

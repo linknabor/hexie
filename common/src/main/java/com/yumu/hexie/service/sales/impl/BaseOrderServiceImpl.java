@@ -338,7 +338,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 	}
 
-	@Transactional
 	@Override
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
