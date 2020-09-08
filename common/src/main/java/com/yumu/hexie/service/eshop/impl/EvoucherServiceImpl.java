@@ -322,7 +322,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			evoucherView = new EvoucherView(qrCodeUrl, list);
 		}else {
 			evoucherView = new EvoucherView();
-			if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
+			if (ModelConstant.EVOUCHER_TYPE_PROMOTION == type) {
 				evoucherView = getDefaultEvoucher4Promotion();
 			}
 		}
