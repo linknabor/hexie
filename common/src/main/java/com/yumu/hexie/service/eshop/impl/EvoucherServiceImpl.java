@@ -296,6 +296,39 @@ public class EvoucherServiceImpl implements EvoucherService {
 		return evoucherRepository.findByUserIdAndType(user.getId(), type);
 	}
 	
+	/**
+	 * 获取可用的二维码
+	 * 1.用户已购买合伙人，显示带有用户自己分享码的二维码
+	 * 2.用户购买合伙人后退款，则显示带有奈博科技分享码的二维码
+	 */
+	@Override
+	public EvoucherView getAvailableEvoucher(User user, int type) {
+		
+		EvoucherView evoucherView = null;
+		List<Evoucher> list = evoucherRepository.findByUserIdAndTypeAndStatus(user.getId(), type, ModelConstant.EVOUCHER_STATUS_NORMAL);
+		Evoucher evoucher = new Evoucher();
+		if (!list.isEmpty()) {
+			evoucher = list.get(0);
+			String qrCodeUrl = EVOUCHER_QRCODE_URL;
+			if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
+				qrCodeUrl = PROMOTION_QRCODE_URL;
+				String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
+				if (StringUtils.isEmpty(appid)) {
+					appid = "";
+				}
+				qrCodeUrl = qrCodeUrl.replaceAll("RULE_ID", String.valueOf(evoucher.getRuleId())).replaceAll("PRODUCT_TYPE", String.valueOf(evoucher.getProductType())).
+						replaceAll("SHARE_CODE", "").replace("APP_ID", appid);
+			}
+			evoucherView = new EvoucherView(qrCodeUrl, list);
+		}else {
+			evoucherView = new EvoucherView();
+			if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
+				evoucherView = getDefaultEvoucher4Promotion();
+			}
+		}
+		return evoucherView;
+	}
+	
 	@Override
 	public List<ServiceOrder> getEvoucherOrders(User user, List<Integer>status) {
 		

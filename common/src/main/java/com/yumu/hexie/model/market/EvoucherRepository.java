@@ -16,6 +16,8 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 	
 	List<Evoucher> findByUserIdAndType(long userId, int type);
 	
+	List<Evoucher> findByUserIdAndTypeAndStatus(long userId, int type, int status);
+	
 	List<Evoucher> findByOrderId(long orderId);
 	
 	final String column1 = "e.orderId, e.tel, e.consumeDate, e.productName, e.status, sum(e.actualPrice) as actualPrice, count(e.id) as counts";
