@@ -33,4 +33,6 @@ public interface EvoucherService {
 
 	EvoucherView getDefaultEvoucher4Promotion();
 
+	EvoucherView getAvailableEvoucher(User user, int type);
+
 }

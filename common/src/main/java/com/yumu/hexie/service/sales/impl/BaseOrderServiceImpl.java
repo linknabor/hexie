@@ -937,6 +937,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			if (!addrList.isEmpty()) {
 				addressId = addrList.get(0).getId();
 			}
+
 		}
 		
 		createAgent(currUser.getName(), currUser.getTel());	//新建机构，以保证当前用户成为合伙人后可以分享订单

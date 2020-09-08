@@ -38,6 +38,17 @@ public class EvoucherController extends BaseController {
 		return baseResult;
 	}
 	
+	@RequestMapping(value = "/getAvailable/{type}", method = RequestMethod.GET)
+	public BaseResult<Object> getEvoucherAvailable(@ModelAttribute(Constants.USER) User user, @PathVariable(required = false) int type) {
+		
+		if (StringUtils.isEmpty(type)) {
+			type = ModelConstant.EVOUCHER_TYPE_VERIFICATION;
+		}
+		BaseResult<Object> baseResult = new BaseResult<>();
+		baseResult.setResult(evoucherService.getAvailableEvoucher(user, type));
+		return baseResult;
+	}
+	
 	@RequestMapping(value = "/getByCode/{code}", method = RequestMethod.GET)
 	public BaseResult<Object> getByCode(@PathVariable String code) {
 		
