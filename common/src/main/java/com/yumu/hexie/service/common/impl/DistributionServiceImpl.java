@@ -11,6 +11,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +54,8 @@ import com.yumu.hexie.service.exception.BizValidateException;
  */
 @Service("distributionService")
 public class DistributionServiceImpl implements DistributionService {
+	
+	private static Logger logger = LoggerFactory.getLogger(DistributionServiceImpl.class);
 
     @Inject
     private YuyueAreaItemRepository yuyueAreaItemRepository;
@@ -315,7 +319,13 @@ public class DistributionServiceImpl implements DistributionService {
 	}
 
 	@Override
-	public List<OnSaleAreaItem> getPromotion() {
+	public List<OnSaleAreaItem> getPromotion(String productType) {
+		
+		int type = 1003;
+		logger.info("productType : " + productType);
+		if (!org.springframework.util.StringUtils.isEmpty(productType)) {
+			type = Integer.valueOf(productType);
+		}
 		
 		long current = System.currentTimeMillis();
 		List<Order> orderList = new ArrayList<>();
@@ -325,7 +335,7 @@ public class DistributionServiceImpl implements DistributionService {
     	orderList.add(order2);
     	Sort sort = Sort.by(orderList);
     	Pageable pageable = PageRequest.of(0, 10, sort);
-    	List<OnSaleAreaItem> itemList = onSaleAreaItemRepository.findAllCountry(ModelConstant.DISTRIBUTION_STATUS_ON, 1003, current, 0, pageable);
+    	List<OnSaleAreaItem> itemList = onSaleAreaItemRepository.findAllCountry(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, 0, pageable);
     	return itemList;
 	}
 }

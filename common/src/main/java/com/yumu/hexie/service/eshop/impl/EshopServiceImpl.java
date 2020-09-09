@@ -146,7 +146,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			Page<Object[]> page = null;
 			
 			String productType = queryProductVO.getProductType();
-			if ("1000".equals(productType) || "1001".equals(productType) || "1003".contentEquals(productType)) {	//TODO 核销券和特卖
+			if ("1000".equals(productType) || "1001".equals(productType) || "1003".contentEquals(productType) || "1004".equals(productType)) {	//TODO 核销券和特卖
 				page = productRepository.findByMultiCondOnsale(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 						queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
 				
@@ -162,6 +162,8 @@ public class EshopServiceImpl implements EshopSerivce {
 				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER);
 			}else if ("1003".equals(productType)) {
 				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
+			}else if ("1004".equals(productType)) {
+				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_SAASSALE);
 			}
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
 			if (!opList.isEmpty() && !list.isEmpty()) {
@@ -197,10 +199,10 @@ public class EshopServiceImpl implements EshopSerivce {
 			Pageable pageable = PageRequest.of(0, 1);
 			Page<Object[]> page = null;
 			String productType = queryProductVO.getProductType();
-			if ("1000".equals(productType) || "1001".equals(productType) || "1003".equals(productType)) {
+			if ("1000".equals(productType) || "1001".equals(productType) || "1003".equals(productType) || "1004".equals(productType)) {
 				page = productRepository.findByMultiCondOnsale(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 					"", "", null, "", pageable);
-			}else if ("1001".equals(productType)) {
+			}else if ("1002".equals(productType)) {
 				page = productRepository.findByMultiCondRgroup(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 						"", "", null, "", pageable);
 			}
@@ -288,14 +290,15 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (ModelConstant.ORDER_TYPE_EVOUCHER != salePlanType &&
 				ModelConstant.ORDER_TYPE_ONSALE != salePlanType &&
 				ModelConstant.ORDER_TYPE_RGROUP != salePlanType &&
-				ModelConstant.ORDER_TYPE_PROMOTION != salePlanType) {
+				ModelConstant.ORDER_TYPE_PROMOTION != salePlanType &&
+				ModelConstant.ORDER_TYPE_SAASSALE != salePlanType) {
 			throw new BizValidateException("unknow sale plan type : " + saveProductVO.getSalePlanType());
 		}
 		
 		OnSaleRule onSaleRule = null;
 		RgroupRule rgroupRule = null;
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == salePlanType || ModelConstant.ORDER_TYPE_ONSALE == salePlanType
-				|| ModelConstant.ORDER_TYPE_PROMOTION == salePlanType) {	//走特卖规则
+				|| ModelConstant.ORDER_TYPE_PROMOTION == salePlanType || ModelConstant.ORDER_TYPE_SAASSALE == salePlanType) {	//走特卖规则
 			
 			onSaleRule = new OnSaleRule();
 			if ("edit".equals(saveProductVO.getOperType())) {
@@ -336,7 +339,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				onSaleAreaItemRepository.deleteByProductId(saveProductVO.getId());
 			}
 			
-			if (ModelConstant.ORDER_TYPE_PROMOTION == salePlanType) {
+			if (ModelConstant.ORDER_TYPE_PROMOTION == salePlanType || ModelConstant.ORDER_TYPE_SAASSALE == salePlanType) {
 				
 				OnSaleAreaItem onSaleAreaItem = new OnSaleAreaItem();
 				onSaleAreaItem.setRegionId(1l);	//全国
@@ -632,11 +635,10 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeAndServiceId(queryOperVO.getType(), queryOperVO.getServiceId());
 			}else if (ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == queryOperVO.getType() ||
-					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType()) {
+					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType() ||
+					ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType() ||
+					ModelConstant.SERVICE_OPER_TYPE_SAASSALE == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
-			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType()) {
-				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
-
 			}
 			
 			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);

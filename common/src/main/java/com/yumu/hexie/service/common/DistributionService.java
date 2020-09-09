@@ -42,5 +42,5 @@ public interface DistributionService {
 	
 	List<RgroupAreaItem> queryRgroupsV2(User user, int page);
 	
-	List<OnSaleAreaItem> getPromotion();
+	List<OnSaleAreaItem> getPromotion(String prodcutType);
 }
