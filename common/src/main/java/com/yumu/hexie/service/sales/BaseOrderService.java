@@ -54,7 +54,7 @@ public interface BaseOrderService {
 	//推广支付
 	JsSign promotionPayV2(User user, PromotionOrder promotionOrder) throws Exception;
 	//查询是否购买过推广商品
-	List<ServiceOrder> queryPromotionOrder(User user, List<Integer> statusList);
+	List<ServiceOrder> queryPromotionOrder(User user, List<Integer> statusList, List<Integer> typeList);
 	
 	
 }
