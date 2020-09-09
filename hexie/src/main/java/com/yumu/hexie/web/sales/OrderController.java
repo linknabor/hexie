@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
@@ -378,9 +379,9 @@ public class OrderController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/queryPromotionOrder/{orderType}", method = RequestMethod.GET)
+	@RequestMapping(value = "/queryPromotionOrder", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user, @PathVariable(required = false) String orderType) throws Exception {
+	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String orderType) throws Exception {
 		
 		List<Integer> statusList = new ArrayList<>();
 		statusList.add(ModelConstant.ORDER_STATUS_PAYED);

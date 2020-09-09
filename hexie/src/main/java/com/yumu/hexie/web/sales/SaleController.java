@@ -73,9 +73,9 @@ public class SaleController extends BaseController{
 		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesByName(user,type,name,page));
     }
 	
-	@RequestMapping(value = "/onsales/getPromotion/{prodcutType}", method = RequestMethod.GET)
+	@RequestMapping(value = "/onsales/getPromotion", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<OnSaleAreaItem>> getPromotion(@PathVariable(required = false) String prodcutType) throws Exception {
+	public BaseResult<List<OnSaleAreaItem>> getPromotion(@RequestParam(required = false) String prodcutType) throws Exception {
 		
 		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.getPromotion(prodcutType));
     }
