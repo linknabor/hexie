@@ -5,6 +5,9 @@
 package com.yumu.hexie.web.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -54,7 +57,13 @@ public class SimpleCORSFilter implements Filter {
 			response.addHeader("Access-Control-Allow-Token", token);
 		}
         if (testMode) {
-        	response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
+        	String []  allowDomain= {"http://127.0.0.1","http://192.168.1.150"};
+            Set<String> allowedOrigins= new HashSet<String>(Arrays.asList(allowDomain));
+            String originHeader=((HttpServletRequest) req).getHeader("Origin");
+            if (allowedOrigins.contains(originHeader)) {
+                response.setHeader("Access-Control-Allow-Origin", originHeader);
+            }
+//        	response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
 		}
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
