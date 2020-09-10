@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
@@ -380,13 +381,23 @@ public class OrderController extends BaseController{
 	 */
 	@RequestMapping(value = "/queryPromotionOrder", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user) throws Exception {
+	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String orderType) throws Exception {
 		
 		List<Integer> statusList = new ArrayList<>();
 		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
 		statusList.add(ModelConstant.ORDER_STATUS_REFUNDED);
-
-		List<ServiceOrder> orderList = baseOrderService.queryPromotionOrder(user, statusList);
+		
+		List<Integer> typeList = new ArrayList<>();
+		if (StringUtil.isEmpty(orderType)) {
+			typeList.add(ModelConstant.ORDER_TYPE_PROMOTION);
+		}else if ("99".equals(orderType)) {
+			typeList.add(ModelConstant.ORDER_TYPE_PROMOTION);
+			typeList.add(ModelConstant.ORDER_TYPE_SAASSALE);
+		}else {
+			Integer type = Integer.valueOf(orderType);
+			typeList.add(type);
+		}
+		List<ServiceOrder> orderList = baseOrderService.queryPromotionOrder(user, statusList, typeList);
 		Long orderId = 0l;
 		if (!orderList.isEmpty()) {
 			for (ServiceOrder serviceOrder : orderList) {

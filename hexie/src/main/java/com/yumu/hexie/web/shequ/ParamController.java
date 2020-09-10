@@ -72,10 +72,10 @@ public class ParamController extends BaseController {
 		response.getWriter().print("ok");
 	}
 	
-	@RequestMapping(value = "/recache/{type}", method = RequestMethod.POST)
-	public String updateSysParam(@RequestParam(value = "code") String code, @PathVariable String type) {
+	@RequestMapping(value = "/recache/{type}", method = RequestMethod.GET)
+	public String updateSysParam(@RequestParam(value = "syscode") String syscode, @PathVariable String type) {
 		
-		if (!"hexie".equals(code)) {
+		if (!"hexie".equals(syscode)) {
 			return "";
 		}
 		switch (type) {

@@ -24,7 +24,7 @@ public class SalePlanServiceImpl implements SalePlanService {
 		if (orderType == 0 || orderType == 1) {
 			return customOnSaleService;//FIXME 删除拼单相关代码
 		} else if (orderType == ModelConstant.ORDER_TYPE_ONSALE || orderType == ModelConstant.ORDER_TYPE_EVOUCHER
-				|| orderType == ModelConstant.ORDER_TYPE_PROMOTION) {
+				|| orderType == ModelConstant.ORDER_TYPE_PROMOTION || orderType == ModelConstant.ORDER_TYPE_SAASSALE) {
 			return customOnSaleService;
 		} else if (orderType == ModelConstant.ORDER_TYPE_RGROUP) {
 			return customRgroupService;
