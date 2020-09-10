@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.sales;
 
+import java.util.List;
+
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
@@ -49,8 +51,10 @@ public interface BaseOrderService {
 	ServiceOrder createOrderFromCart(User user, CreateOrderReq req);
 	//推广支付
 	JsSign promotionPay(User user, PromotionOrder promotionOrder) throws Exception;
+	//推广支付
+	JsSign promotionPayV2(User user, PromotionOrder promotionOrder) throws Exception;
 	//查询是否购买过推广商品
-	Long queryPromotionOrder(User user);
+	List<ServiceOrder> queryPromotionOrder(User user, List<Integer> statusList, List<Integer> typeList);
 	
 	
 }

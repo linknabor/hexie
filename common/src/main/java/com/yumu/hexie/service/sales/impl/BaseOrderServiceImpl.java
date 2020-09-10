@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.CommonPayRequest;
 import com.yumu.hexie.integration.common.CommonPayRequest.SubOrder;
 import com.yumu.hexie.integration.common.CommonPayResponse;
@@ -156,7 +155,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 item.setAgentNo(agent.getAgentNo());
 			}
             
-			if(StringUtil.isEmpty(order.getProductName())){
+			if(StringUtils.isEmpty(order.getProductName())){
                 order.fillProductInfo(product);
                 order.fillAgentInfo(agent);
                 order.setGroupRuleId(plan.getId());
@@ -338,7 +337,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 	}
 
-	@Transactional
 	@Override
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
@@ -352,25 +350,26 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
 				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
 				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType() ||
-				ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
+				ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_SAASSALE == order.getOrderType()) {
 			
 			User user = userService.getById(order.getUserId());
 			CommonPayRequest request = new CommonPayRequest();
 			request.setUserId(user.getWuyeId());
 			request.setAppid(user.getAppId());
-			if (ModelConstant.ORDER_TYPE_PROMOTION != order.getOrderType()) {
+			if (ModelConstant.ORDER_TYPE_PROMOTION != order.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != order.getOrderType()) {
 				request.setSectId(user.getSectId());
 			}
 			request.setServiceId(String.valueOf(order.getProductId()));
 			String linkman = order.getReceiverName();
-			if (!StringUtil.isEmpty(linkman)) {
+			if (!StringUtils.isEmpty(linkman)) {
 				linkman = URLEncoder.encode(linkman,"GBK");
 			}
 			request.setLinkman(linkman);
 			request.setLinktel(order.getTel());
 			
 			String address = order.getAddress();
-			if (!StringUtil.isEmpty(address)) {
+			if (!StringUtils.isEmpty(address)) {
 				address = URLEncoder.encode(address,"GBK");
 			}
 			request.setServiceAddr(address);
@@ -379,7 +378,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setTradeWaterId(order.getOrderNo());
 			
 			String productName = order.getProductName();
-			if (!StringUtil.isEmpty(productName)) {
+			if (!StringUtils.isEmpty(productName)) {
 				productName = URLEncoder.encode(productName,"GBK");
 			}
 			request.setServiceName(productName);
@@ -390,7 +389,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				Agent agent = optional.get();
 				request.setAgentNo(agent.getAgentNo());
 				String agentName = agent.getName();
-				if (!StringUtil.isEmpty(agentName)) {
+				if (!StringUtils.isEmpty(agentName)) {
 					agentName = URLEncoder.encode(agentName,"GBK");
 				}
 				request.setAgentName(agentName);
@@ -403,7 +402,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			for (OrderItem orderItem : itemList) {
 				SubOrder subOrder = new SubOrder();
 				String subAgentName = orderItem.getAgentName();
-				if (!StringUtil.isEmpty(subAgentName)) {
+				if (!StringUtils.isEmpty(subAgentName)) {
 					subAgentName = URLEncoder.encode(subAgentName,"GBK");
 				}
 				subOrder.setAgentName(subAgentName);
@@ -412,7 +411,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				subOrder.setCount(orderItem.getCount());
 				
 				String subProductName = orderItem.getProductName();
-				if (!StringUtil.isEmpty(subProductName)) {
+				if (!StringUtils.isEmpty(subProductName)) {
 					subProductName = URLEncoder.encode(subProductName,"GBK");
 				}
 				subOrder.setProductName(subProductName);
@@ -431,7 +430,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			sign.setTimestamp(responseVo.getTimestamp());
 			sign.setOrderId(String.valueOf(order.getId()));
 			order = serviceOrderRepository.findById(order.getId()).get();
-			if (StringUtil.isEmpty(order.getOrderNo())) {
+			if (StringUtils.isEmpty(order.getOrderNo())) {
 				order.setOrderNo(responseVo.getTradeWaterId());	//set之后,jpa会有脏检查，如果数据发生变化，会在事务提交时执行update
 			}
 
@@ -726,7 +725,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		Long templateRuleId = promotionOrder.getRuleId();
 		Assert.notNull(promotionOrder.getRuleId(), "规则ID不能为空。");
 
-		if (1003 != promotionOrder.getProductType()) {
+		if (1003 != promotionOrder.getProductType() && 1004 != promotionOrder.getProductType()) {
 			throw new BizValidateException("错误的商品类型 : " + promotionOrder.getProductType());
 		}
 		
@@ -745,22 +744,57 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		 * 2).新建一个机构(后面分享用)
 		 * 3).用新地址创建订单
 		 */
-		Address address = createAddress(promotionOrder, user);
-		createAgent(promotionOrder.getName(), promotionOrder.getMobile());	//新建机构，以保证当前用户成为合伙人后可以分享订单
-		Agent agent = getSharedAgent(promotionOrder.getShareCode());	//获取分享本次订单的机构，有可能是空的
-		
-		SingleItemOrder singleItemOrder = new SingleItemOrder();
-		singleItemOrder.setCount(1);
-		singleItemOrder.setMemo("推广订单");
-		singleItemOrder.setOpenId(user.getOpenid());
-		singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_PROMOTION);
-		singleItemOrder.setPayType("2");
-		singleItemOrder.setRuleId(templateRuleId);
-		singleItemOrder.setServiceAddressId(address.getId());
-		singleItemOrder.setUserId(user.getId());
-		singleItemOrder.setAgentId(agent.getId());
-		ServiceOrder serviceOrder = createOrder(singleItemOrder);
+		ServiceOrder serviceOrder = null;
+		if (1003 == promotionOrder.getProductType()) {
+			Address address = createAddress(promotionOrder, user);
+			createAgent(promotionOrder.getName(), promotionOrder.getMobile());	//新建机构，以保证当前用户成为合伙人后可以分享订单
+			Agent agent = getSharedAgent(promotionOrder.getShareCode());	//获取分享本次订单的机构，有可能是空的
+			SingleItemOrder singleItemOrder = new SingleItemOrder();
+			singleItemOrder.setCount(1);
+			singleItemOrder.setMemo("推广订单");
+			singleItemOrder.setOpenId(user.getOpenid());
+			singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_PROMOTION);
+			singleItemOrder.setPayType("2");
+			singleItemOrder.setRuleId(templateRuleId);
+			singleItemOrder.setServiceAddressId(address.getId());
+			singleItemOrder.setUserId(user.getId());
+			singleItemOrder.setAgentId(agent.getId());
+			serviceOrder = createOrder(singleItemOrder);
+			
+		}else if (1004 == promotionOrder.getProductType()) {
+			Address address = createAddress(user);
+			SingleItemOrder singleItemOrder = new SingleItemOrder();
+			singleItemOrder.setCount(1);
+			singleItemOrder.setMemo("saas售卖订单");
+			singleItemOrder.setOpenId(user.getOpenid());
+			singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_SAASSALE);
+			singleItemOrder.setPayType("2");
+			singleItemOrder.setRuleId(templateRuleId);
+			singleItemOrder.setServiceAddressId(address.getId());
+			singleItemOrder.setUserId(user.getId());
+			serviceOrder = createOrder(singleItemOrder);
+		}
 		return requestPay(serviceOrder);
+		
+	}
+	
+	private Address createAddress(User user) {
+
+		Address address = new Address();
+		address.setBind(false);
+		address.setProvince("上海");
+		address.setProvinceId(19l);
+		address.setCity("上海市");
+		address.setCityId(20l);
+		address.setCounty("浦东新区");
+		address.setCountyId(34l);
+		
+		address.setMain(false);
+		address.setReceiveName(user.getTel());
+		address.setTel(user.getTel());
+		address.setUserId(user.getId());
+		address.setUserName(user.getTel());
+		return addressRepository.save(address);
 		
 	}
 
@@ -855,7 +889,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	 */
 	private boolean validateMobile(String mobile, String code) {
 
-		if (StringUtil.isEmpty(mobile) || StringUtil.isEmpty(code)) {
+		if (StringUtils.isEmpty(mobile) || StringUtils.isEmpty(code)) {
 			throw new BizValidateException("未填写手机或者验证码信息。");
 		}
 		boolean result = smsService.checkVerificationCode(mobile, code);
@@ -864,14 +898,18 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	
 	private User createUser(User user, String name, String mobile) {
 		
-		if (StringUtil.isNotEmpty(name)) {
+		if (!StringUtils.isEmpty(name)) {
 			user.setName(name);
+		}else {
+			if (!StringUtils.isEmpty(mobile)) {
+				user.setName(mobile);
+			}
 		}
 		if (!StringUtils.isEmpty(mobile)) {
 			user.setTel(mobile);
 		}
-		User savedUser = userService.simpleRegister(user);
-		return savedUser;
+		
+		return userService.simpleRegister(user);
 	}
 	
 	private void createAgent(String name, String mobile) {
@@ -904,18 +942,68 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	 * 查询用户购买过的推广订单
 	 */
 	@Override
-	public Long queryPromotionOrder(User user) {
+	public List<ServiceOrder> queryPromotionOrder(User user, List<Integer> statusList, List<Integer> typeList) {
+		
+		List<ServiceOrder> orderList = serviceOrderRepository.findByUserAndStatusAndTypes(user.getId(), statusList, typeList);
+		return orderList;
+	}
+
+	@Transactional
+	@Override
+	public JsSign promotionPayV2(User user, PromotionOrder promotionOrder) throws Exception {
+		
+		Long templateRuleId = promotionOrder.getRuleId();
+		Assert.notNull(promotionOrder.getRuleId(), "规则ID不能为空。");
+
+		if (1003 != promotionOrder.getProductType() && 1004 != promotionOrder.getProductType()) {
+			throw new BizValidateException("错误的商品类型 : " + promotionOrder.getProductType());
+		}
 		
 		List<Integer> statusList = new ArrayList<>();
 		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+		statusList.add(ModelConstant.ORDER_STATUS_REFUNDED);
+		
 		List<Integer> typeList = new ArrayList<>();
-		typeList.add(ModelConstant.ORDER_TYPE_PROMOTION);
-		List<ServiceOrder> orderList = serviceOrderRepository.findByUserAndStatusAndTypes(user.getId(), statusList, typeList);
-		Long orderId = 0l;
-		if (!orderList.isEmpty()) {
-			orderId = orderList.get(0).getId();
+		if (1003 == promotionOrder.getProductType()) {
+			typeList.add(ModelConstant.ORDER_TYPE_PROMOTION);
+		}else if (1004 == promotionOrder.getProductType()) {
+			typeList.add(ModelConstant.ORDER_TYPE_SAASSALE);
 		}
-		return orderId;
+		
+		User currUser = userService.getById(user.getId());
+		List<ServiceOrder> orderList = queryPromotionOrder(currUser, statusList, typeList);
+		Long addressId = null;
+		if (!orderList.isEmpty()) {
+			ServiceOrder paidOrder = orderList.get(0);
+			addressId = paidOrder.getServiceAddressId();
+		}else {
+			List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+			if (!addrList.isEmpty()) {
+				addressId = addrList.get(0).getId();
+			}
+
+		}
+		createAgent(currUser.getName(), currUser.getTel());	//新建机构，以保证当前用户成为合伙人后可以分享订单
+		Agent agent = getSharedAgent(promotionOrder.getShareCode());	//获取分享本次订单的机构，有可能是空的
+		
+		SingleItemOrder singleItemOrder = new SingleItemOrder();
+		singleItemOrder.setCount(1);
+		singleItemOrder.setMemo("推广订单");
+		if (1004 == promotionOrder.getProductType()) {
+			singleItemOrder.setMemo("saas售卖订单");
+		}
+		singleItemOrder.setOpenId(user.getOpenid());
+		singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_PROMOTION);
+		if (1004 == promotionOrder.getProductType()) {
+			singleItemOrder.setOrderType(ModelConstant.ORDER_TYPE_SAASSALE);
+		}
+		singleItemOrder.setPayType("2");
+		singleItemOrder.setRuleId(templateRuleId);
+		singleItemOrder.setServiceAddressId(addressId);
+		singleItemOrder.setUserId(user.getId());
+		singleItemOrder.setAgentId(agent.getId());
+		ServiceOrder serviceOrder = createOrder(singleItemOrder);
+		return requestPay(serviceOrder);
 	}
 	
 	

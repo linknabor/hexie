@@ -17,7 +17,7 @@ public class PromotionOrder implements Serializable {
 	private String mobile;	//手机号
 	private String code;	//验证码
 	private Long ruleId;	//规则ID
-	private Long productType;	//1003推广，售卖产品类型
+	private Long productType;	//1003推广，1004saas软件
 	private String shareCode;	//分享链接的userId
 	
 	public Long getProvince() {

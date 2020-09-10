@@ -36,6 +36,7 @@ public class ModelConstant {
     public static final int ORDER_TYPE_SERVICE = 11;
     public static final int ORDER_TYPE_EVOUCHER = 12;
     public static final int ORDER_TYPE_PROMOTION = 13;
+    public static final int ORDER_TYPE_SAASSALE = 14;
     
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
@@ -47,6 +48,7 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_ONSALE_TAKER = 12;	//特卖接单人员
     public static final int SERVICE_OPER_TYPE_RGROUP_TAKER = 13;	//团购接单人员
     public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
+    public static final int SERVICE_OPER_TYPE_SAASSALE = 15;	//saas售卖接单提醒
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
@@ -389,6 +391,8 @@ public class ModelConstant {
 	
 	public static final int SMS_TYPE_REG = 101;	//用户注册短信
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
+	public static final int SMS_TYPE_PROMOTION_PAY = 103;	//发票验证码获取
+	public static final int SMS_TYPE_RESET_PASSWORD = 104;	//发票验证码获取
 	
 	public static final String KEY_PRO_RULE_INFO = "product:rule:";
 	
