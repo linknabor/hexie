@@ -96,7 +96,13 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					int orderType = order.getOrderType();
 					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType || ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
 						List<Map<String, String>> openidList = new ArrayList<>();
-						List<ServiceOperator> opList = serviceOperatorRepository.findByType(orderType);
+						int operType = 0;
+						if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+							operType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
+						}else if (ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
+							operType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
+						}
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(operType);
 						for (ServiceOperator serviceOperator : opList) {
 							Map<String, String> openids = new HashMap<>();
 							openids.put("openid", serviceOperator.getOpenId());
