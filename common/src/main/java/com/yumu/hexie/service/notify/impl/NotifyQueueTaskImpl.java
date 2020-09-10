@@ -94,40 +94,43 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				ServiceOrder order = serviceOrderRepository.findByOrderNo(tradeWaterId);
 				if (order != null) {
 					int orderType = order.getOrderType();
-					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType || ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
 						List<Map<String, String>> openidList = new ArrayList<>();
-						List<ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(orderType);
 						for (ServiceOperator serviceOperator : opList) {
 							Map<String, String> openids = new HashMap<>();
 							openids.put("openid", serviceOperator.getOpenId());
 							openidList.add(openids);
 						}
 						queue.setOpenids(openidList);
-										
-						String address = order.getAddress();	//逗号分隔，需要split
-						String[]addrArr = address.split(",");
 						
-						String remark = "";
-						if (addrArr.length!=4) {
-							logger.error("当前地址: " + address + "，不能分成 省市区");
-						}else {
-							String province = addrArr[0];
-							String city = addrArr[1];
-							String county = addrArr[2];
-							String sect = addrArr[3];
+						if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+										
+							String address = order.getAddress();	//逗号分隔，需要split
+							String[]addrArr = address.split(",");
 							
-							if(province.indexOf("上海")>=0
-									||province.indexOf("北京")>=0
-									||province.indexOf("重庆")>=0
-									||province.indexOf("天津")>=0){
-								province = "";
+							String remark = "";
+							if (addrArr.length!=4) {
+								logger.error("当前地址: " + address + "，不能分成 省市区");
+							}else {
+								String province = addrArr[0];
+								String city = addrArr[1];
+								String county = addrArr[2];
+								String sect = addrArr[3];
+								
+								if(province.indexOf("上海")>=0
+										||province.indexOf("北京")>=0
+										||province.indexOf("重庆")>=0
+										||province.indexOf("天津")>=0){
+									province = "";
+								}
+								
+								remark = province + city + county + sect;
+								remark = order.getReceiverName() + "-" + remark;
+								logger.info("remark : " + remark);
 							}
-							
-							remark = province + city + county + sect;
-							remark = order.getReceiverName() + "-" + remark;
-							logger.info("remark : " + remark);
+							queue.setRemark(remark);
 						}
-						queue.setRemark(remark);
 						
 					}
 				}
@@ -471,7 +474,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || 
 							ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType() ||
-							ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+							ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType() ||
+							ModelConstant.ORDER_TYPE_SAASSALE == serviceOrder.getOrderType()) {
 						
 						if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
 							Date date = new Date();
@@ -481,7 +485,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							serviceOrderRepository.save(serviceOrder);
 							salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
 							
-							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType()) {
+							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
 								//发送模板消息和短信
 								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
 										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
