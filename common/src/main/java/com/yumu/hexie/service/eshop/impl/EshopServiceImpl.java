@@ -83,6 +83,8 @@ public class EshopServiceImpl implements EshopSerivce {
 	
 	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
 
+	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
+
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
