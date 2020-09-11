@@ -63,7 +63,8 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.updateOpereratorAysc();
 		notifyQueueTask.updateServiceCfgAysc();
 		notifyQueueTask.updateOrderStatusAysc();
-		notifyQueueTask.sendDeliveryNotificationAsyc();
+//		notifyQueueTask.sendDeliveryNotificationAsyc();
+		notifyQueueTask.updatePartnerAsync();
 		
 		logger.info("异步队列任务启动完成。");
 		

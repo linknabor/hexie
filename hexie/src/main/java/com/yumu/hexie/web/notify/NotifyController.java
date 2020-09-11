@@ -1,6 +1,7 @@
 package com.yumu.hexie.web.notify;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.yumu.hexie.integration.notify.CommonNotificationResponse;
+import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
-import com.yumu.hexie.integration.notify.PayNotificationResponse;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.web.BaseController;
 
@@ -44,13 +46,26 @@ public class NotifyController extends BaseController {
 	 */
 	@RequestMapping(value = "/servplat/noticeCardPay", method = {RequestMethod.GET, RequestMethod.POST})
 	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId,
-			@RequestBody PayNotificationResponse<PayNotification> payNotificationResponse) throws Exception {
+			@RequestBody CommonNotificationResponse<PayNotification> commonNotificationResponse) throws Exception {
 		
-		log.info("payNotificationResponse :" + payNotificationResponse);
-		if ("00".equals(payNotificationResponse.getResult())) {
-			notifyService.notify(payNotificationResponse.getData());
+		log.info("payNotificationResponse :" + commonNotificationResponse);
+		if ("00".equals(commonNotificationResponse.getResult())) {
+			notifyService.notify(commonNotificationResponse.getData());
 		}else {
-			log.error("result : " + payNotificationResponse.getResult() + ", data : " + payNotificationResponse.getData());
+			log.error("result : " + commonNotificationResponse.getResult() + ", data : " + commonNotificationResponse.getData());
+		}
+		return "SUCCESS";
+	}
+	
+	@RequestMapping(value = "/promotion/partner/update", method = RequestMethod.POST )
+	public <T> String updatePartner(@RequestBody CommonNotificationResponse<List<PartnerNotification>> commonNotificationResponse) throws Exception {
+		
+		log.info("updatePartner :" + commonNotificationResponse);
+		
+		if ("00".equals(commonNotificationResponse.getResult())) {
+			notifyService.updatePartner(commonNotificationResponse.getData());
+		}else {
+			log.error("result : " + commonNotificationResponse.getResult() + ", data : " + commonNotificationResponse.getData());
 		}
 		return "SUCCESS";
 	}
