@@ -91,11 +91,12 @@ public class PartnerServiceImpl implements PartnerService {
 				if (StringUtils.isEmpty(validDateStr)) {
 					throw new BizValidateException("当前用户无法进行此操作。");
 				}
-				stringRedisTemplate.opsForValue().set(key, validDateStr);
+				Date expiredDate = DateUtil.parse(validDateStr, DateUtil.dttmSimple);
+				stringRedisTemplate.opsForValue().set(key, expiredDate.toString());
+				validDateStr = expiredDate.toString();
 			}
 		}
-		Date validDate = null;
-		validDate = DateUtil.parse(validDateStr, DateUtil.dttmSimple);
+		Date validDate = DateUtil.parse(validDateStr, DateUtil.dateSimple);
 		Date now = new Date();
 		if (validDate.before(now)) {
 			throw new BizValidateException("当前用户无法进行此操作。");
