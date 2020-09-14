@@ -95,13 +95,12 @@ public class PartnerServiceImpl implements PartnerService {
 			}
 		}
 		Date validDate = null;
-		validDate = DateUtil.parse(validDateStr, DateUtil.dateSimple);
+		validDate = DateUtil.parse(validDateStr, DateUtil.dttmSimple);
 		Date now = new Date();
 		if (validDate.before(now)) {
 			throw new BizValidateException("当前用户无法进行此操作。");
 		}
 
-		
 	}
 	
 	@Override
