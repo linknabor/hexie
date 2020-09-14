@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.notify.CommonNotificationResponse;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.web.BaseController;
 
@@ -58,16 +60,14 @@ public class NotifyController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/promotion/partner/update", method = RequestMethod.POST )
-	public <T> String updatePartner(@RequestBody CommonNotificationResponse<List<PartnerNotification>> commonNotificationResponse) throws Exception {
+	public <T> BaseResult<String> updatePartner(@RequestBody CommonNotificationResponse<List<PartnerNotification>> commonNotificationResponse) throws Exception {
 		
 		log.info("updatePartner :" + commonNotificationResponse);
-		
-		if ("00".equals(commonNotificationResponse.getResult())) {
-			notifyService.updatePartner(commonNotificationResponse.getData());
-		}else {
-			log.error("result : " + commonNotificationResponse.getResult() + ", data : " + commonNotificationResponse.getData());
-		}
-		return "SUCCESS";
+		notifyService.updatePartner(commonNotificationResponse.getData());
+		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setResult("00");
+		baseResult.setData(Constants.SERVICE_SUCCESS);
+		return baseResult;
 	}
 	
 	
