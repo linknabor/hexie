@@ -80,9 +80,8 @@ import com.yumu.hexie.service.exception.BizValidateException;
  * @param <T>
  */
 public class EshopServiceImpl implements EshopSerivce {
-
+	
 	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
-
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
@@ -639,6 +638,9 @@ public class EshopServiceImpl implements EshopSerivce {
 					ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType() ||
 					ModelConstant.SERVICE_OPER_TYPE_SAASSALE == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType()) {
+				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+
 			}
 			
 			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);
@@ -902,5 +904,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		return commonResponse;
 		
 	}
+	
+	
 
 }

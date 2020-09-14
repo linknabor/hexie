@@ -23,6 +23,7 @@ import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
+import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
@@ -31,10 +32,12 @@ import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.user.Partner;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.eshop.EvoucherService;
+import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.SalePlanService;
@@ -63,6 +66,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private UserNoticeService userNoticeService;
 	@Autowired
 	private EvoucherService evoucherService;
+	@Autowired
+	private PartnerService partnerService;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -96,7 +101,13 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					int orderType = order.getOrderType();
 					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType || ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
 						List<Map<String, String>> openidList = new ArrayList<>();
-						List<ServiceOperator> opList = serviceOperatorRepository.findByType(orderType);
+						int operType = 0;
+						if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+							operType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
+						}else if (ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
+							operType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
+						}
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(operType);
 						for (ServiceOperator serviceOperator : opList) {
 							Map<String, String> openids = new HashMap<>();
 							openids.put("openid", serviceOperator.getOpenId());
@@ -497,6 +508,15 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							
 						}
 						
+						if (ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+							Partner partner = new Partner();
+							partner.setTel(serviceOrder.getTel());
+							partner.setName(serviceOrder.getReceiverName());
+							partner.setUserId(serviceOrder.getUserId());
+							partnerService.save(partner);
+						}
+						
+						
 					}
 					
 					//服务
@@ -581,6 +601,55 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				isSuccess = true;
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, tradeWaterId);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+	}
+	
+	/**
+	 * 合伙人退款更新有效期
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void updatePartnerAsync() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String queue = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_PARTNER_REFUND_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(queue)) {
+					continue;
+				}
+				boolean isSuccess = false;
+				try {
+					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+					List<PartnerNotification> list = objectMapper.readValue(queue, new TypeReference<List<PartnerNotification>>(){});
+					
+					logger.info("start to consume notify update partner refund queue : " + queue);
+				
+					if (list == null || list.isEmpty()) {
+						continue;
+					}
+					for (PartnerNotification partnerNotification : list) {
+						logger.info("partnerNotification : " + partnerNotification);
+						partnerService.invalidate(partnerNotification);
+					}
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				
+				isSuccess = true;
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
 				}
 			
 			} catch (Exception e) {
