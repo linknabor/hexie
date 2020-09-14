@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.eshop.impl;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -101,6 +102,17 @@ public class PartnerServiceImpl implements PartnerService {
 		}
 
 		
+	}
+	
+	@Override
+	public void refreshPartnerCache() {
+		
+		List<Partner> partnerList = partnerRepository.findAll();
+		for (Partner partner : partnerList) {
+			String key = ModelConstant.KEY_HEXIE_PARTNER + partner.getTel();
+			String validateDate = partner.getExpiredDate().toString();
+			stringRedisTemplate.opsForValue().set(key, validateDate);
+		}
 	}
 	
 	

@@ -11,6 +11,8 @@ public interface PartnerService {
 	void invalidate(PartnerNotification partnerNotification);
 
 	void checkValidation(User user);
+
+	void refreshPartnerCache();
 	
 	
 
