@@ -110,8 +110,11 @@ public class PartnerServiceImpl implements PartnerService {
 		List<Partner> partnerList = partnerRepository.findAll();
 		for (Partner partner : partnerList) {
 			String key = ModelConstant.KEY_HEXIE_PARTNER + partner.getTel();
-			String validateDate = partner.getExpiredDate().toString();
-			stringRedisTemplate.opsForValue().set(key, validateDate);
+			if (partner.getExpiredDate() != null) {
+				Date expiredDate = DateUtil.parse(partner.getExpiredDate().toString(), DateUtil.dttmSimple);
+				stringRedisTemplate.opsForValue().set(key, expiredDate.toString());
+			}
+			
 		}
 	}
 	
