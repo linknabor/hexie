@@ -76,6 +76,12 @@ public class Cart extends BaseModel {
 		orderItem.setPostageFee(productRule.getPostageFee());
 		orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
 		orderItem.setOrderType(productRule.getSalePlanType());
+		
+		//展示用
+		orderItem.setProductName(productRule.getName());
+		orderItem.setProductId(productRule.getProductId());
+		orderItem.setProductPic(productRule.getMainPicture());
+		orderItem.setProductThumbPic(productRule.getSmallPicture());
 	}
 
 	/**
