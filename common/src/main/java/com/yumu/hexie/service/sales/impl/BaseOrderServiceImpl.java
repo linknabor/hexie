@@ -1074,7 +1074,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderItem.setProductId(productRule.getProductId());
 			orderItem.setProductName(productRule.getName());
 			orderItem.setRuleName(productRule.getName());
-			orderItem.setProductPic(productRule.getPictures());
+			orderItem.setProductPic(productRule.getMainPicture());
 			orderItem.setProductThumbPic(productRule.getSmallPicture());
 			
 		}
