@@ -1063,13 +1063,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			
 			//只设置单价和免邮件数这些基本属性，以保证后面计算的正确性
-			orderItem.setProductId(productRule.getProductId());
 			orderItem.setOriPrice(productRule.getOriPrice());
 			orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
 			orderItem.setPostageFee(productRule.getPostageFee());
 			orderItem.setPrice(productRule.getPrice());
 			BigDecimal amt = new BigDecimal(String.valueOf(productRule.getPrice())).multiply(new BigDecimal(String.valueOf(orderItem.getCount())));
 			orderItem.setAmount(amt.floatValue());
+			
+			//页面展示用的属性
+			orderItem.setProductId(productRule.getProductId());
+			orderItem.setProductName(productRule.getName());
+			orderItem.setRuleName(productRule.getName());
+			orderItem.setProductPic(productRule.getPictures());
+			orderItem.setProductThumbPic(productRule.getSmallPicture());
+			
 		}
 		
 		ServiceOrder o = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用
