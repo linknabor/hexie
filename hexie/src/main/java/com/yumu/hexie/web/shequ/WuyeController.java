@@ -763,6 +763,9 @@ public class WuyeController extends BaseController {
 		User user = new User();
 		dto.setUser(user);
 		user.setAppId(otherPayVo.getAppid());
+		if (StringUtils.isEmpty(otherPayVo.getAppid())) {
+			user.setAppId(otherPayVo.getRealAppid());
+		}
 		user.setOpenid(otherPayVo.getOpenid());
 		WechatPayInfo wechatPayInfo = wuyeService.requestOtherPay(dto);
 		return BaseResult.successResult(wechatPayInfo);
