@@ -218,7 +218,7 @@ public class OrderController extends BaseController{
 		return new BaseResult<ServiceOrder>().success(order);
     }
 
-	@RequestMapping(value = "/requestPay/{orderId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/requestPay/{orderId}", method = {RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
 	public BaseResult<JsSign> requestPay(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
 		ServiceOrder order = baseOrderService.findOne(orderId);

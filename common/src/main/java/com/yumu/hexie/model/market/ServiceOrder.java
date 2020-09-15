@@ -939,7 +939,10 @@ public class ServiceOrder  extends BaseModel {
 		this.logisticCode = logisticCode;
 	}
 	public List<OrderItem> getOrderItems() {
-		return items;
+		if (items == null) {
+			return items;
+		}
+		return new ArrayList<>();
 	}
 	public boolean payable() {
         return ModelConstant.ORDER_STATUS_INIT==getStatus();
