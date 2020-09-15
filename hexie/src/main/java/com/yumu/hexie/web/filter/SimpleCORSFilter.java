@@ -49,7 +49,14 @@ public class SimpleCORSFilter implements Filter {
     	HttpServletResponse response = (HttpServletResponse) res;
         
         String requestUrl = request.getRequestURL().toString();
-        logger.info("SimpleCORSFilter, requestUrl " + requestUrl);
+        String remoteAddr = request.getRemoteAddr();
+        String host = request.getRemoteHost();
+        int port = request.getRemotePort();
+        
+        logger.info("SimpleCORSFilter, requestUrl : " + requestUrl);
+        logger.info("SimpleCORSFilter, remoteAddr : " + remoteAddr);
+        logger.info("SimpleCORSFilter, host : " + host);
+        logger.info("SimpleCORSFilter, port : " + port);
         
         if (requestUrl.indexOf("/getInvoice") == -1) {	//发票的验证码添入额外的token，防止恶意刷验证码,其他的请求随意放一个token不做处理
 			String random = RandomStringUtils.random(5);
