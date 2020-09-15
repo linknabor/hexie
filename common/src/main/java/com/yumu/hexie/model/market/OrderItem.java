@@ -7,6 +7,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
@@ -25,6 +26,7 @@ public class OrderItem  extends BaseModel {
 	private Long productId;
 	private int orderType;
 
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.REFRESH }, optional = true)
     @JoinColumn(name = "orderId")
 	private ServiceOrder serviceOrder;

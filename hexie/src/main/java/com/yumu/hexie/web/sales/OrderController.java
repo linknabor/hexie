@@ -25,6 +25,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
@@ -413,5 +414,28 @@ public class OrderController extends BaseController{
 		
 		return new BaseResult<Long>().success(orderId);
 	}
+	
+	/**
+	 * 订单结算也页面
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/order/check", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<ServiceOrder> orderCheck(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req)throws Exception {
+		
+		ServiceOrder serviceOrder = baseOrderService.orderCheck(user, req);
+		return new BaseResult<ServiceOrder>().success(serviceOrder);
+	}
+	
+	@RequestMapping(value = "/getOrderDetail/{orderId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<OrderItem>> getOrderDetail(@ModelAttribute(Constants.USER)User user, @PathVariable long orderId) throws Exception {
+		
+		List<OrderItem> itemList = baseOrderService.getOrderDetail(user, orderId);
+		return new BaseResult<List<OrderItem>>().success(itemList);
+    }
 	
 }

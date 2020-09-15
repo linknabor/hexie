@@ -30,6 +30,8 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
+import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.Partner;
@@ -40,6 +42,7 @@ import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
+import com.yumu.hexie.service.sales.CartService;
 import com.yumu.hexie.service.sales.SalePlanService;
 import com.yumu.hexie.service.user.UserNoticeService;
 
@@ -68,6 +71,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private EvoucherService evoucherService;
 	@Autowired
 	private PartnerService partnerService;
+	@Autowired
+	private CartService cartService;
+	@Autowired
+	private OrderItemRepository orderItemRepository;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -500,6 +507,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								//发送模板消息和短信
 								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
 										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+								//清空购物车中已购买的商品
+								List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
+								cartService.delFromCart(serviceOrder.getUserId(), itemList);
+								
 							}
 							
 							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
