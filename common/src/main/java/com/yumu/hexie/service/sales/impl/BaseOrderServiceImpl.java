@@ -341,6 +341,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	}
 
 	@Override
+	@Transactional
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
         log.info("[requestPay]OrderNo:" + order.getId() + ", orderType : " + order.getOrderType());
