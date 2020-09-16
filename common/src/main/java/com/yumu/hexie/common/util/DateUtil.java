@@ -6,11 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 public class DateUtil {
     public static final String dSimple    = "yyyy-MM-dd";
     public static final String dttmSimple = "yyyy-MM-dd HH:mm:ss";
-
+    public static final String dateSimple = "EEE MMM dd HH:mm:ss z yyyy";
 
     public static Date addDate(Date current, int addedDays) {
     	 Calendar   calendar   =   new   GregorianCalendar(); 
@@ -48,8 +49,11 @@ public class DateUtil {
         if (timeText == null) {
             return null;
         }
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         try {
+	        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+	        if (dateSimple.equals(pattern)) {
+	        	sdf = new SimpleDateFormat(pattern, Locale.US);
+	        }
             return sdf.parse(timeText);
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
@@ -251,10 +255,11 @@ public class DateUtil {
     
     public static void main(String[] args) {
 
-    	long date = System.currentTimeMillis();
-    	String format = "yyyy-MM-dd HH:mm:ss";
-    	String s = dtFormat(date, format);
-    	System.out.println(s);
-		
+    	String sdate = "2020-09-11 23:59:59";
+    	Date date = parse(sdate, dttmSimple);
+    	System.out.println(date);
+    	Date now = new Date();
+    	System.out.println(now);
+    	System.out.println(now.before(date));
 	}
 }

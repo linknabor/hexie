@@ -48,7 +48,7 @@ public class RedisRepository {
      * @param carInfo
      */
     public void setOrderCarInfo(OrderCarInfo carInfo) {
-    	orderCarInfoRedisTemplate.opsForValue().set(Keys.orderCarInfoKey(carInfo.getUserId()), carInfo);
+    	orderCarInfoRedisTemplate.opsForValue().set(Keys.orderCarInfoKey(carInfo.getUserId()), carInfo, 30, TimeUnit.DAYS);
     }
     
     public SystemConfig getSystemConfig(String key) {
@@ -59,14 +59,14 @@ public class RedisRepository {
     }
 
     public void setHomeCart(String key,HomeCart value){
-        homeCartRedisTemplate.opsForValue().set(key, value);
+        homeCartRedisTemplate.opsForValue().set(key, value, 60, TimeUnit.DAYS);
     }
     public HomeCart getHomeCart(String key) {
         return homeCartRedisTemplate.opsForValue().get(key);
     }
     
     public void setCart(String key, Cart value) {
-        cartRedisTemplate.opsForValue().set(key, value);
+        cartRedisTemplate.opsForValue().set(key, value, 60, TimeUnit.DAYS);
     }
     public Cart getCart(String key) {
         return cartRedisTemplate.opsForValue().get(key);

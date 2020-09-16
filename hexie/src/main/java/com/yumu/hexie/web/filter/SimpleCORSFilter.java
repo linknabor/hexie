@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import com.yumu.hexie.common.util.MD5Util;
 import com.yumu.hexie.common.util.RandomStringUtils;
+import com.yumu.hexie.common.util.RequestUtil;
 
 /**
  * <pre>
@@ -49,7 +50,10 @@ public class SimpleCORSFilter implements Filter {
     	HttpServletResponse response = (HttpServletResponse) res;
         
         String requestUrl = request.getRequestURL().toString();
-        logger.info("SimpleCORSFilter, requestUrl " + requestUrl);
+        String remoteAddr = RequestUtil.getRealIp(request);
+        
+        logger.info("SimpleCORSFilter, requestUrl : " + requestUrl);
+        logger.info("SimpleCORSFilter, remoteAddr : " + remoteAddr);
         
         if (requestUrl.indexOf("/getInvoice") == -1) {	//发票的验证码添入额外的token，防止恶意刷验证码,其他的请求随意放一个token不做处理
 			String random = RandomStringUtils.random(5);
@@ -57,13 +61,8 @@ public class SimpleCORSFilter implements Filter {
 			response.addHeader("Access-Control-Allow-Token", token);
 		}
         if (testMode) {
-        	String []  allowDomain= {"http://127.0.0.1","http://192.168.1.150"};
-            Set<String> allowedOrigins= new HashSet<String>(Arrays.asList(allowDomain));
-            String originHeader=((HttpServletRequest) req).getHeader("Origin");
-            if (allowedOrigins.contains(originHeader)) {
-                response.setHeader("Access-Control-Allow-Origin", originHeader);
-            }
-//        	response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
+            String originHeader = request.getHeader("Origin");
+            response.setHeader("Access-Control-Allow-Origin", originHeader);
 		}
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
