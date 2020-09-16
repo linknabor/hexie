@@ -508,8 +508,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
 										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
 								//清空购物车中已购买的商品
-								List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
-								cartService.delFromCart(serviceOrder.getUserId(), itemList);
+								if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+									List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
+									cartService.delFromCart(serviceOrder.getUserId(), itemList);
+								}
 								
 							}
 							
