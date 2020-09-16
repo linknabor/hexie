@@ -1082,6 +1082,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		
 		ServiceOrder o = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用
 		computePrice(o);
+		o.setOrderItems(req.getItemList());	//serviceOrder中的items是懒加载，因此一旦hibernate的session关闭，将加载不到items的值。拿到页面序列化的时候会报错
 		return o;
 		
 	}
