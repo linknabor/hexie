@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisLock;
+import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
@@ -263,6 +264,36 @@ public class NotifyServiceImpl implements NotifyService {
 		while(!isSuccess && retryTimes < 3) {
 			try {
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, orderId);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+
+	@Override
+	public void updatePartner(List<PartnerNotification> list) {
+		
+		if (list==null || list.isEmpty()) {
+			log.info("updatePartner: partnerNotification is null, will return ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(list);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_PARTNER_REFUND_QUEUE, value);
 				isSuccess = true;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

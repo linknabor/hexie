@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.sales;
 
+import java.util.List;
+
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.user.User;
@@ -16,5 +18,7 @@ public interface CartService {
 	int clearCart(User user);
 
 	Cart getCart(User user);
+
+	void delFromCart(Long userId, List<OrderItem> itemList);
 
 }

@@ -14,4 +14,6 @@ public interface NotifyQueueTask {
 	
 	void sendDeliveryNotificationAsyc();
 
+	void updatePartnerAsync();
+
 }

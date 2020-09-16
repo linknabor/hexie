@@ -2,7 +2,7 @@ package com.yumu.hexie.integration.notify;
 
 import java.io.Serializable;
 
-public class PayNotificationResponse<T> implements Serializable {
+public class CommonNotificationResponse<T> implements Serializable {
 
 	/**
 	 * 
@@ -25,7 +25,7 @@ public class PayNotificationResponse<T> implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "PayNotificationResponse [result=" + result + ", data=" + data + "]";
+		return "CommonNotificationResponse [result=" + result + ", data=" + data + "]";
 	}
 	
 	

@@ -47,5 +47,5 @@ public class PromotionServiceImpl implements PromotionService {
 		// 发送模板消息
 		gotongService.sendResetPasswordMsg(currUser, password);
 	}
-
+	
 }

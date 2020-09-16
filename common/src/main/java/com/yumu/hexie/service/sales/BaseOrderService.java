@@ -7,6 +7,7 @@ import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.User;
@@ -55,6 +56,10 @@ public interface BaseOrderService {
 	JsSign promotionPayV2(User user, PromotionOrder promotionOrder) throws Exception;
 	//查询是否购买过推广商品
 	List<ServiceOrder> queryPromotionOrder(User user, List<Integer> statusList, List<Integer> typeList);
-	
-	
+	//购物车结算页面
+	ServiceOrder orderCheck(User user, CreateOrderReq req);
+	//查询订单明细
+	List<OrderItem> getOrderDetail(User user, long orderId);
+
+		
 }
