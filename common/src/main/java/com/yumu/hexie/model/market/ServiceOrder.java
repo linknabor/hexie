@@ -149,7 +149,7 @@ public class ServiceOrder  extends BaseModel {
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
     @Fetch(FetchMode.SUBSELECT)
 	private List<OrderItem> items = new ArrayList<OrderItem>();
-
+	
 	public ServiceOrder(){}
 	public ServiceOrder(SingleItemOrder sOrder) {
 		if (!"2".equals(sOrder.getPayType())) {
@@ -938,7 +938,12 @@ public class ServiceOrder  extends BaseModel {
 	public void setLogisticCode(String logisticCode) {
 		this.logisticCode = logisticCode;
 	}
-	
+	public List<OrderItem> getOrderItems() {
+		if (items == null) {
+			return items;
+		}
+		return new ArrayList<>();
+	}
 	public boolean payable() {
         return ModelConstant.ORDER_STATUS_INIT==getStatus();
     }

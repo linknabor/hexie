@@ -23,7 +23,7 @@ public class Cart extends BaseModel {
 	private static final long serialVersionUID = 8850980148126766715L;
 	
 	private List<OrderItem> items;
-	private Map<Long, OrderItem> itemsMap;
+	private Map<Long, OrderItem> itemsMap;	//key:ruleId, value:orderItem
 	private BigDecimal totalAmount = BigDecimal.ZERO;	//不含运费
 	private BigDecimal totalShipFee = BigDecimal.ZERO;	//运费，需要计算几件包邮
 	private BigDecimal totalPrice = BigDecimal.ZERO;	//商品费用 + 运费
@@ -76,6 +76,12 @@ public class Cart extends BaseModel {
 		orderItem.setPostageFee(productRule.getPostageFee());
 		orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
 		orderItem.setOrderType(productRule.getSalePlanType());
+		
+		//展示用
+		orderItem.setProductName(productRule.getName());
+		orderItem.setProductId(productRule.getProductId());
+		orderItem.setProductPic(productRule.getMainPicture());
+		orderItem.setProductThumbPic(productRule.getSmallPicture());
 	}
 
 	/**
@@ -137,6 +143,9 @@ public class Cart extends BaseModel {
 		
 	}
 	
+	/**
+	 * 重新计算运费
+	 */
 	@JsonIgnore
 	private void resizeItemList() {
 

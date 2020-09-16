@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -282,6 +283,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			
 			//只设置单价和免邮件数这些基本属性，以保证后面计算的正确性
+			BigDecimal amt = new BigDecimal(String.valueOf(productRule.getPrice())).multiply(new BigDecimal(String.valueOf(orderItem.getCount())));
+			orderItem.setAmount(amt.floatValue());
 			orderItem.setOriPrice(productRule.getOriPrice());
 			orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
 			orderItem.setPostageFee(productRule.getPostageFee());
@@ -338,6 +341,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	}
 
 	@Override
+	@Transactional
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
         log.info("[requestPay]OrderNo:" + order.getId() + ", orderType : " + order.getOrderType());
@@ -635,8 +639,40 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
         log.warn("[finishRefund]refund-end:"+wxRefundOrder.getOut_trade_no());
 	}
+	
+	/**
+	 * 根据ID查询订单
+	 */
 	public ServiceOrder findOne(long orderId){
-	    return serviceOrderRepository.findById(orderId).get();
+		
+		ServiceOrder order = new ServiceOrder();
+		Optional<ServiceOrder> optional = serviceOrderRepository.findById(orderId);
+		if (optional.isPresent()) {
+			order = optional.get();
+		}
+		return order;
+	}
+	
+	/**
+	 * 根据ID查询订单明细
+	 */
+	@Override
+	public List<OrderItem> getOrderDetail(User user, long orderId){
+	    
+		List<OrderItem> itemList = new ArrayList<>();
+		ServiceOrder order = null;
+		Optional<ServiceOrder> optional = serviceOrderRepository.findById(orderId);
+		if (optional.isPresent()) {
+			order = optional.get();
+		}
+		if(order.getUserId() != user.getId()){
+			throw new BizValidateException("你没有权限查看该订单！");
+		}
+		if (order != null) {
+			itemList = orderItemRepository.findByServiceOrder(order);
+		}
+		return itemList;
+		
 	}
 	
 	@Transactional
@@ -1004,6 +1040,50 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		singleItemOrder.setAgentId(agent.getId());
 		ServiceOrder serviceOrder = createOrder(singleItemOrder);
 		return requestPay(serviceOrder);
+	}
+	
+	/**
+	 * 购物车支付结算页面
+	 * @param user
+	 * @param req
+	 * @return
+	 */
+	@Override
+	public ServiceOrder orderCheck(User user, CreateOrderReq req) {
+		
+		//重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
+		List<OrderItem> itemList = req.getItemList();
+		if (itemList == null || itemList.isEmpty()) {
+			throw new BizValidateException("没有选择任何商品。");
+		}
+		for (OrderItem orderItem : itemList) {
+			String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
+			ProductRule productRule = redisRepository.getProdcutRule(key);
+			if (productRule == null) {
+				throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
+			}
+			
+			//只设置单价和免邮件数这些基本属性，以保证后面计算的正确性
+			orderItem.setOriPrice(productRule.getOriPrice());
+			orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
+			orderItem.setPostageFee(productRule.getPostageFee());
+			orderItem.setPrice(productRule.getPrice());
+			BigDecimal amt = new BigDecimal(String.valueOf(productRule.getPrice())).multiply(new BigDecimal(String.valueOf(orderItem.getCount())));
+			orderItem.setAmount(amt.floatValue());
+			
+			//页面展示用的属性
+			orderItem.setProductId(productRule.getProductId());
+			orderItem.setProductName(productRule.getName());
+			orderItem.setRuleName(productRule.getName());
+			orderItem.setProductPic(productRule.getMainPicture());
+			orderItem.setProductThumbPic(productRule.getSmallPicture());
+			
+		}
+		
+		ServiceOrder o = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用
+		computePrice(o);
+		return o;
+		
 	}
 	
 	

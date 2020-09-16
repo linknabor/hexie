@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.eshop.PromotionService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -26,12 +27,23 @@ public class PromotionController extends BaseController {
 	
 	@Autowired
 	private PromotionService promotionService;
+	@Autowired
+	private PartnerService partnerService;
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/password/reset", method = RequestMethod.GET)
 	public BaseResult<String> resetPassword(@ModelAttribute(Constants.USER)User user, @RequestParam String vericode) throws Exception{
 		
 		promotionService.resetPassword(user, vericode);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/partner/checkValidation", method = RequestMethod.GET)
+	public BaseResult<String> checkValidation(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String link) throws Exception{
+		
+		partnerService.checkValidation(user);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 		
 	}

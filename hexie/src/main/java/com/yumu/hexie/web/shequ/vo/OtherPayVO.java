@@ -23,6 +23,8 @@ public class OtherPayVO implements Serializable {
 	private String qrCodeId;
 	@JsonProperty("mng_cell_id")
 	private String mngCellId;
+	@JsonProperty("real_appid")
+	private String realAppid;
 	
 	public String getMoney() {
 		return money;
@@ -72,11 +74,17 @@ public class OtherPayVO implements Serializable {
 	public void setMngCellId(String mngCellId) {
 		this.mngCellId = mngCellId;
 	}
+	public String getRealAppid() {
+		return realAppid;
+	}
+	public void setRealAppid(String realAppid) {
+		this.realAppid = realAppid;
+	}
 	@Override
 	public String toString() {
 		return "OtherPayVO [money=" + money + ", sectId=" + sectId + ", feeId=" + feeId + ", openid=" + openid
 				+ ", remark=" + remark + ", appid=" + appid + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId
-				+ "]";
+				+ ", realAppid=" + realAppid + "]";
 	}
 	
 	
