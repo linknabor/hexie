@@ -82,6 +82,7 @@ public class Cart extends BaseModel {
 		orderItem.setProductId(productRule.getProductId());
 		orderItem.setProductPic(productRule.getMainPicture());
 		orderItem.setProductThumbPic(productRule.getSmallPicture());
+		orderItem.setProductCategoryId(productRule.getProductCategoryId());
 	}
 
 	/**

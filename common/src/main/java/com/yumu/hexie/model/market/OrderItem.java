@@ -46,6 +46,7 @@ public class OrderItem  extends BaseModel {
 	private String productPic;
 	private String productThumbPic;
 	private String ruleName;
+	private Long productCategoryId;
 	
 	private long agentId;
 	private String agentName;
@@ -66,6 +67,7 @@ public class OrderItem  extends BaseModel {
 		productName = product.getName();
 		productPic = product.getMainPicture();
 		productThumbPic = product.getSmallPicture();
+		productCategoryId = product.getProductCategoryId();
 	}
 	public Long getProductId() {
 		return productId;
@@ -193,6 +195,12 @@ public class OrderItem  extends BaseModel {
 	}
 	public void setShipFee(Float shipFee) {
 		this.shipFee = shipFee;
+	}
+	public Long getProductCategoryId() {
+		return productCategoryId;
+	}
+	public void setProductCategoryId(Long productCategoryId) {
+		this.productCategoryId = productCategoryId;
 	}
 	
 	

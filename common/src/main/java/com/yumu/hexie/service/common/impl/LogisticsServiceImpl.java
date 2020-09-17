@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.common.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +128,8 @@ public class LogisticsServiceImpl implements LogisticsService {
 		serviceOrder.setLogisticNo(logisticsInfoReq.getLogisticNo());
 		serviceOrder.setLogisticType(logisticsInfoReq.getLogisticType());
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_SENDED);
+		serviceOrder.setSendDate(new Date());
+		
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
