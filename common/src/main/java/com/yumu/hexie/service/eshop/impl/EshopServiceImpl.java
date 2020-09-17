@@ -758,6 +758,9 @@ public class EshopServiceImpl implements EshopSerivce {
 			toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
 			
 			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+			if (!StringUtils.isEmpty(serviceOrder.getSendDate())) {
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_RETURNED);
+			}
 			serviceOrder.setRefundDate(new Date());
 			serviceOrderRepository.save(serviceOrder);
 			
@@ -766,6 +769,11 @@ public class EshopServiceImpl implements EshopSerivce {
 			toStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
 			
 			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			if (!StringUtils.isEmpty(serviceOrder.getSendDate())) {
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_SENDED);
+			}else if (!StringUtils.isEmpty(serviceOrder.getConfirmDate())) {
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
+			}
 			serviceOrder.setRefundDate(null);
 			serviceOrderRepository.save(serviceOrder);
 		}
