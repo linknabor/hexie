@@ -144,6 +144,8 @@ public class ServiceOrder  extends BaseModel {
     
     private long subType;	//子类，对于自定义服务列说，有子类
     private String subTypeName;	//子类中文名称
+    
+    private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
 
 	@JsonIgnore
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
@@ -891,6 +893,12 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setMerchantName(String merchantName) {
 		this.merchantName = merchantName;
+	}
+	public Long getGroupOrderId() {
+		return groupOrderId;
+	}
+	public void setGroupOrderId(Long groupOrderId) {
+		this.groupOrderId = groupOrderId;
 	}
 	@Transient
 	@JsonIgnore

@@ -155,17 +155,28 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			
 			List<ServiceOperator> opList = new ArrayList<>();
+			int operatorType = 0;
 			if ("1001".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
 			}else if ("1002".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
 			}else if ("1003".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
 			}else if ("1004".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_SAASSALE);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
 			}
+			
+			if (StringUtils.isEmpty(queryProductVO.getAgentNo())) {
+				opList = serviceOperatorRepository.findByType(operatorType);
+			}else {
+				Agent agent = agentRepository.findByAgentNo(queryProductVO.getAgentNo());
+				if (agent != null) {
+					opList = serviceOperatorRepository.findByTypeAndAgentId(operatorType, agent.getId());
+				}
+			}
+			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
-			if (!opList.isEmpty() && !list.isEmpty()) {
+			if (!opList.isEmpty() && (list!=null && !list.isEmpty())) {
 				list.get(0).setOperCounts(BigInteger.valueOf(opList.size()));
 			}
 			QueryListDTO<List<QueryProductMapper>> responsePage = new QueryListDTO<>();
@@ -634,11 +645,16 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeAndServiceId(queryOperVO.getType(), queryOperVO.getServiceId());
 			}else if (ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == queryOperVO.getType() ||
-					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType() ||
-					ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType() ||
-					ModelConstant.SERVICE_OPER_TYPE_SAASSALE == queryOperVO.getType()) {
-				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
-			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType()) {
+					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType()) {
+			
+				if (StringUtils.isEmpty(queryOperVO.getAgentNo())) {
+					list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+				}else {
+					Agent agent = agentRepository.findByAgentNo(queryOperVO.getAgentNo());
+					list = serviceOperatorRepository.findByTypeAndAgentIdWithAppid(queryOperVO.getType(), agent.getId());
+				}
+
+			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType() || ModelConstant.SERVICE_OPER_TYPE_SAASSALE == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
 
 			}
@@ -663,6 +679,11 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
 			Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
 			serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
+		}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_SAASSALE == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()) {
+			serviceOperatorRepository.deleteByType(saveOperVO.getOperatorType());
 		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
@@ -677,6 +698,10 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setUserId(oper.getUserId());
 			serviceOperator.setLongitude(0d);
 			serviceOperator.setLatitude(0d);
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				Agent agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
+				serviceOperator.setAgentId(agent.getId());
+			}
 			serviceOperator = serviceOperatorRepository.save(serviceOperator);
 			
 			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {

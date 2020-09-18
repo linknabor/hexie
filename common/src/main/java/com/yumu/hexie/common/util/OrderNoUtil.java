@@ -40,4 +40,7 @@ public class OrderNoUtil {
     public static String generateEvoucherNo() {
         return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") + (int)(1000+(Math.random()*9000)) + System.currentTimeMillis() % 10;
     }
-}
+    
+    public static String generateServiceNo() {
+        return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") + (int)(1000+(Math.random()*9000)) + System.currentTimeMillis() % 100;
+    }
