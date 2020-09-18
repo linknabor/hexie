@@ -34,7 +34,7 @@ public class OrderNoUtil {
     
 
     public static String generateSettleOrderNo() {
-        return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") +"T" + (int)(1000+(Math.random()*9000)) + System.currentTimeMillis() % 10;
+        return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") +"T" + (int)(1000+(Math.random()*9000)) + System.currentTimeMillis() % 1;
     }
     
     public static String generateEvoucherNo() {
@@ -42,6 +42,16 @@ public class OrderNoUtil {
     }
     
     public static String generateServiceNo() {
-        return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") + (int)(1000+(Math.random()*9000)) + System.currentTimeMillis() % 10000;
+        return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") + (int)(1000+(Math.random()*9000));
     }
+    
+    
+    public static void main(String[] args) {
+		
+    	String no = generateServiceNo();
+    	System.out.println(no);
+    	System.out.println(no.length());
+    	Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
+    	System.out.println(groupId);
+	}
 }
