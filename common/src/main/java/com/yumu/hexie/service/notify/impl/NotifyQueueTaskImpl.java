@@ -602,10 +602,15 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
 						
+						int operType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
+						if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+							operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
+						}
+						
 						long groupOrderId = serviceOrder.getGroupOrderId();
 						logger.info("notify delivery, groupOrderId : " + groupOrderId);
 						
-						List<ServiceOperator> opList = serviceOperatorRepository.findByType(serviceOrder.getOrderType());
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(operType);
 						for (ServiceOperator serviceOperator : opList) {
 							User sendUser = userRepository.findById(serviceOperator.getUserId());
 							if (groupOrderId > 0) {
