@@ -40,7 +40,6 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.eshop.PartnerService;
-import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.CartService;
@@ -612,15 +611,17 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
 							}
 							long agentId = o.getAgentId();
+							logger.info("agentId is : " + agentId);
 							List<ServiceOperator> opList = new ArrayList<>();
 							if (agentId > 0) {
 								opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
 							}else {
 								opList = serviceOperatorRepository.findByType(operType);
 							}
-							
+							logger.info("oper list size : " + opList.size());
 							for (ServiceOperator serviceOperator : opList) {
 								User sendUser = userRepository.findById(serviceOperator.getUserId());
+								logger.info("send user : " + sendUser.getId());
 								gotongService.sendDeliveryNotification(sendUser, o);
 							}
 						}
