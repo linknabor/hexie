@@ -40,6 +40,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.eshop.PartnerService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.CartService;
@@ -441,11 +442,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						});
 					}
 					
+					isSuccess = true;
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
 				if (!isSuccess) {
 					String value = objectMapper.writeValueAsString(json);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_SERVICE_CFG_QUEUE, value);
@@ -546,11 +548,13 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						}
 					}
 					
+					isSuccess = true;
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
+				
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, tradeWaterId);
 				}
@@ -592,26 +596,34 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 						continue;
 					}
-					logger.info("notify delivery, orderId : " + serviceOrder.getId());
+					logger.info("notify delivery, orderNo : " + serviceOrder.getOrderNo());
 					logger.info("notify delivery, orderType : " + serviceOrder.getOrderType());
 					
 					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
 						
-						List<ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
+						long groupOrderId = serviceOrder.getGroupOrderId();
+						logger.info("notify delivery, groupOrderId : " + groupOrderId);
+						
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(serviceOrder.getOrderType());
 						for (ServiceOperator serviceOperator : opList) {
 							User sendUser = userRepository.findById(serviceOperator.getUserId());
-							gotongService.sendDeliveryNotification(sendUser, serviceOrder);
+							if (groupOrderId > 0) {
+								ServiceOrder o = serviceOrderRepository.findByGroupOrderIdAndAgentId(groupOrderId, serviceOperator.getAgentId());
+								gotongService.sendDeliveryNotification(sendUser, o);
+							}else {
+								throw new BizValidateException("cant not find serviceOrder, orderNo : " + tradeWaterId + ", groupOrderId is 0 ! ");
+							}
+							
 						}
 						
 					}
-					
+					isSuccess = true;
 					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, tradeWaterId);
 				}
@@ -655,12 +667,13 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						logger.info("partnerNotification : " + partnerNotification);
 						partnerService.invalidate(partnerNotification);
 					}
+					isSuccess = true;
 					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
+				
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
 				}

@@ -60,6 +60,12 @@ public interface BaseOrderService {
 	ServiceOrder orderCheck(User user, CreateOrderReq req);
 	//查询订单明细
 	List<OrderItem> getOrderDetail(User user, long orderId);
+	//拆单支付
+	JsSign requestGroupPay(long orderId) throws Exception;
+	//订单支付
+	JsSign requestOrderPay(User user, long orderId) throws Exception;
+	//查询订单（兼容拆分的交易）
+	ServiceOrder getOrder(User user, long orderId);
 
 		
 }

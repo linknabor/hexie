@@ -4,13 +4,18 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.integration.common.CommonPayRequest;
 import com.yumu.hexie.integration.common.CommonPayRequest.SubOrder;
 import com.yumu.hexie.integration.common.CommonPayResponse;
@@ -273,6 +279,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Transactional
 	public ServiceOrder createOrderFromCart(User user, CreateOrderReq req){
 		
+		Map<Long, List<OrderItem>> itemsMap = new HashMap<>();
 		//重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
 		List<OrderItem> itemList = req.getItemList();
 		for (OrderItem orderItem : itemList) {
@@ -289,31 +296,50 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
 			orderItem.setPostageFee(productRule.getPostageFee());
 			orderItem.setPrice(productRule.getPrice());
+			
+			Long agentId = productRule.getAgentId();
+			orderItem.setAgentId(productRule.getAgentId());
+			
+			if (!itemsMap.containsKey(agentId)) {
+				List<OrderItem> oList = new ArrayList<>();
+				oList.add(orderItem);
+				itemsMap.put(agentId, oList);
+			} else {
+				List<OrderItem> oList = itemsMap.get(agentId);
+				oList.add(orderItem);
+			}
+			
 		}
+		Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
+		Iterator<Entry<Long, List<OrderItem>>> it = itemsMap.entrySet().iterator();
+		while(it.hasNext()) {
+			Entry<Long, List<OrderItem>> entry = it.next();
+			CreateOrderReq orderRequest = new CreateOrderReq();
+			BeanUtils.copyProperties(req, orderRequest);
+			orderRequest.setItemList(entry.getValue());
+			
+			ServiceOrder o = new ServiceOrder(user, orderRequest);
+			//1. 填充地址信息
+			Address address = fillAddressInfo(o);
+			//2. 填充订单信息并校验规则,设置价格信息
+			preOrderCreate(o, address);
+			computeCoupon(o);
+			
+			//3. 订单创建
+			o.setGroupOrderId(groupId);
+			o = serviceOrderRepository.save(o);
+			for(OrderItem item : o.getItems()) {
+				item.setServiceOrder(o);
+				item.setUserId(o.getUserId());
+				orderItemRepository.save(item);
+			}
+			//4. 订单后处理
+			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
 		
-		ServiceOrder o = new ServiceOrder(user, req);
-		//1. 填充地址信息
-		Address address = fillAddressInfo(o);
-		//2. 填充订单信息并校验规则,设置价格信息
-		preOrderCreate(o, address);
-		computeCoupon(o);
-		//3. 订单创建
-		o = serviceOrderRepository.save(o);
-		for(OrderItem item : o.getItems()) {
-			item.setServiceOrder(o);
-			item.setUserId(o.getUserId());
-			orderItemRepository.save(item);
 		}
-		//4.保存车辆信息 20160721 车大大的车辆服务
-		carService.saveOrderCarInfo(o);
-		
-		//5.电子优惠券订单
-		evoucherService.createEvoucher(o);
-		
-        log.warn("[Create]订单创建OrderNo:" + o.getOrderNo());
-		//4. 订单后处理
-		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
-		return o;
+		ServiceOrder newOrder = new ServiceOrder();
+		newOrder.setId(groupId);
+		return newOrder;
 		
 	}
 
@@ -339,12 +365,30 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			userNoticeService.orderSend(order.getUserId(), order.getTel(),order.getId(), order.getOrderNo(), order.getLogisticName(), order.getLogisticNo());
 		}
 	}
+	
+	@Override
+	@Transactional
+	public JsSign requestOrderPay(User user, long orderId) throws Exception {
+		
+		JsSign jsSign = null;
+		ServiceOrder order = findOne(orderId);
+		if (order != null && order.getId() > 0) {
+			if(user.getId() != order.getUserId()) {
+				throw new BizValidateException("无法支付他人订单");
+			}
+			jsSign = requestPay(order);
+		}else {
+			jsSign = requestGroupPay(orderId);
+		}
+		return jsSign;
+		
+	}
 
 	@Override
 	@Transactional
 	public JsSign requestPay(ServiceOrder order) throws Exception {
 		
-        log.info("[requestPay]OrderNo:" + order.getId() + ", orderType : " + order.getOrderType());
+        log.info("[requestPay]OrderId:" + order.getId() + ", orderType : " + order.getOrderType());
 		//校验订单状态
 		if(!order.payable()){
             throw new BizValidateException(order.getId(),"订单状态不可支付，请重新查询确认订单状态！").setError();
@@ -456,8 +500,119 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		return sign;
 	}
 
-
-
+	@Override
+	@Transactional
+	public JsSign requestGroupPay(long orderId) throws Exception {
+		
+		List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(orderId);
+		if (orderList.isEmpty()) {
+			throw new BizValidateException("未查询倒订单：" + orderId);
+		}
+		log.info("[requestPay]OrderId:" + orderId);
+		
+		ServiceOrder o = orderList.get(0);
+		//校验订单状态
+		if(!o.payable()){
+            throw new BizValidateException(orderId,"订单状态不可支付，请重新查询确认订单状态！").setError();
+        }
+			
+		CommonPayRequest request = new CommonPayRequest();
+		List<SubOrder> subOrderList = new ArrayList<>(orderList.size());
+		
+		BigDecimal totalPrice = BigDecimal.ZERO;
+		int totalCount = 0;
+		for (ServiceOrder order : orderList) {
+			SubOrder subOrder = new SubOrder();
+			String subAgentName = order.getAgentName();
+			if (!StringUtils.isEmpty(subAgentName)) {
+				subAgentName = URLEncoder.encode(subAgentName,"GBK");
+			}
+			subOrder.setAgentName(subAgentName);
+			subOrder.setAgentNo(order.getAgentNo());
+			subOrder.setAmount(order.getPrice());
+			subOrder.setCount(order.getCount());
+			
+			String subProductName = order.getProductName();
+			if (!StringUtils.isEmpty(subProductName)) {
+				subProductName = URLEncoder.encode(subProductName,"GBK");
+			}
+			subOrder.setProductName(subProductName);
+			subOrder.setProductId(order.getProductId());
+			subOrderList.add(subOrder);
+			
+			totalPrice = totalPrice.add(new BigDecimal(String.valueOf(order.getPrice())));
+			totalCount += order.getCount();
+		}
+		request.setSubOrders(subOrderList);
+		
+		User user = userService.getById(o.getUserId());
+		
+		request.setUserId(user.getWuyeId());
+		request.setAppid(user.getAppId());
+		Optional<Region> optional = regionRepository.findById(o.getXiaoquId());
+		Region region = null;
+		if (optional.isPresent()) {
+			region = optional.get();
+			request.setSectId(region.getSectId());
+		}
+		if (StringUtils.isEmpty(request.getSectId())) {
+			throw new BizValidateException("未查询地址所对应的小区ID， addressId : " + o.getServiceAddressId());
+		}
+		
+		request.setServiceId(String.valueOf(o.getProductId()));
+		String linkman = o.getReceiverName();
+		if (!StringUtils.isEmpty(linkman)) {
+			linkman = URLEncoder.encode(linkman,"GBK");
+		}
+		request.setLinkman(linkman);
+		request.setLinktel(o.getTel());
+		
+		String address = o.getAddress();
+		if (!StringUtils.isEmpty(address)) {
+			address = URLEncoder.encode(address,"GBK");
+		}
+		request.setServiceAddr(address);
+		request.setOpenid(o.getOpenId());
+		request.setTranAmt(totalPrice.toString());
+		
+		String productName = o.getProductName();
+		if(orderList.size() > 1){
+			productName = productName+"等"+orderList.size()+"种商品";
+		}
+		if (!StringUtils.isEmpty(productName)) {
+			productName = URLEncoder.encode(productName,"GBK");
+		}
+		request.setServiceName(productName);
+		request.setOrderType(String.valueOf(o.getOrderType()));
+		
+		Optional<Agent> opAgent = agentRepository.findById(o.getAgentId());
+		if (optional.isPresent()) {
+			Agent agent = opAgent.get();
+			request.setAgentNo(agent.getAgentNo());
+			String agentName = agent.getName();
+			if (!StringUtils.isEmpty(agentName)) {
+				agentName = URLEncoder.encode(agentName,"GBK");
+			}
+			request.setAgentName(agentName);
+		}
+		request.setCount(String.valueOf(totalCount));
+		
+		CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
+		
+		JsSign sign = new JsSign();
+		sign.setAppId(responseVo.getAppid());
+		sign.setNonceStr(responseVo.getNoncestr());
+		sign.setPkgStr(responseVo.getPack());
+		sign.setSignature(responseVo.getPaysign());
+		sign.setSignType(responseVo.getSigntype());
+		sign.setTimestamp(responseVo.getTimestamp());
+		sign.setOrderId(String.valueOf(orderId));
+		
+		o.setOrderNo(responseVo.getTradeWaterId());	//如果是拼单，只记其中一条的orderNo
+		commonPostProcess(ModelConstant.ORDER_OP_REQPAY, o);	//记录分享记录，也不循环，拼多视为一单。
+		return sign;
+	}
+	
 
 	@Transactional
     @Override
@@ -654,6 +809,37 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	}
 	
 	/**
+	 * 获取订单
+	 * @param orderId
+	 * @return
+	 */
+	@Override
+	public ServiceOrder getOrder(User user, long orderId) {
+		
+		ServiceOrder order = findOne(orderId);
+		if (order.getId() == 0) {
+			List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(orderId);
+			if (!orderList.isEmpty()) {
+				order = orderList.get(0);
+				BigDecimal totalPrice = BigDecimal.ZERO;
+				int totalCount = 0;
+				for (ServiceOrder serviceOrder : orderList) {
+					totalCount += serviceOrder.getCount();
+					totalPrice = totalPrice.add(new BigDecimal(String.valueOf(serviceOrder.getPrice())));
+				}
+				order.setPrice(totalPrice.floatValue());
+				order.setCount(totalCount);
+				order.setId(order.getGroupOrderId());
+			}
+		}
+		if (user.getId() != order.getUserId()) {
+			throw new BizValidateException("当前用户没有权限查看此订单。");
+		}
+		return order;
+		
+	}
+	
+	/**
 	 * 根据ID查询订单明细
 	 */
 	@Override
@@ -665,11 +851,21 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (optional.isPresent()) {
 			order = optional.get();
 		}
-		if(order.getUserId() != user.getId()){
-			throw new BizValidateException("你没有权限查看该订单！");
-		}
+		
 		if (order != null) {
 			itemList = orderItemRepository.findByServiceOrder(order);
+		}else {
+			List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(orderId);
+			order = orderList.get(0);
+			if (!orderList.isEmpty()) {
+				for (ServiceOrder serviceOrder : orderList) {
+					List<OrderItem> oList = orderItemRepository.findByServiceOrder(serviceOrder);
+					itemList.addAll(oList);
+				}
+			}
+		}
+		if(order.getUserId() != user.getId()){
+			throw new BizValidateException("你没有权限查看该订单！");
 		}
 		return itemList;
 		
