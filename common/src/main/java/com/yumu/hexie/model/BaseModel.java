@@ -8,9 +8,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 @MappedSuperclass
 public class BaseModel  implements Serializable {
 	private static final long serialVersionUID = 3468345175276564755L;
+	@JsonSerialize(using = ToStringSerializer.class)
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
