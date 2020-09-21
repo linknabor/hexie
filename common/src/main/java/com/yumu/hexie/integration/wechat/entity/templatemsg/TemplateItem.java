@@ -22,4 +22,10 @@ public class TemplateItem implements Serializable {
 	public void setColor(String color) {
 		this.color = color;
 	}
+	@Override
+	public String toString() {
+		return "TemplateItem [value=" + value + ", color=" + color + "]";
+	}
+	
+	
 }

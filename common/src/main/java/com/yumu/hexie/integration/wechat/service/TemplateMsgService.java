@@ -19,6 +19,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CsOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
@@ -449,22 +450,24 @@ public class TemplateMsgService {
      */
     public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
 
-        //更改为使用模版消息发送
     	User user = sendUser;
-    	CsOrderVO vo = new CsOrderVO();
-    	String title = "您有一个新的服务订单，请及时处理。";
-    	vo.setTitle(new TemplateItem(title));
-    	vo.setOrderId(new TemplateItem(String.valueOf(serviceOrder.getId())));
-    	vo.setServiceType(new TemplateItem(serviceOrder.getSubTypeName()));
+    	String title = "您有一个新的订单，请及时处理。";
+    	String orderDate = serviceOrder.getCreateDateStr();
     	String customerName = serviceOrder.getReceiverName();
-    	vo.setCustomerName(new TemplateItem(customerName));
-    	vo.setCustomerTel(new TemplateItem(serviceOrder.getTel()));
-    	vo.setRemark(new TemplateItem(serviceOrder.getAddress()));
+
+    	CommonVO vo = new CommonVO();
+    	vo.setFirst(new TemplateItem(title));
+    	vo.setKeyword1(new TemplateItem(String.valueOf(serviceOrder.getId())));
+    	vo.setKeyword2(new TemplateItem(orderDate));	//下单时间
+    	vo.setKeyword3(new TemplateItem(customerName));
+    	vo.setKeyword4(new TemplateItem(serviceOrder.getAddress()));
+    	String remark = "请及时发货哦～";
+    	vo.setRemark(new TemplateItem(remark));
     	
-        TemplateMsg<CsOrderVO>msg = new TemplateMsg<CsOrderVO>();
+        TemplateMsg<CommonVO>msg = new TemplateMsg<>();
         msg.setData(vo);
-        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN));
-        String url = getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_ASSIGN);	//TODO
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_DELIVERY_MESSAGE));	
+        String url = getMsgUrl(MsgCfg.URL_DELIVERY_DETAIL);
         if (!StringUtils.isEmpty(url)) {
 			url = url + serviceOrder.getId();
 			url = AppUtil.addAppOnUrl(url, user.getAppId());
@@ -496,11 +499,46 @@ public class TemplateMsgService {
     	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<ResetPasswordVO>();
         msg.setData(vo);
         msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_RESET_PASSWORD));
-//        String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
-//        msg.setUrl(url);
         msg.setTouser(user.getOpenid());
         sendMsg(msg, accessToken);
     	
+    }
+    
+    /**
+     * 用户订单发货提醒
+     * @param openId
+     * @param title
+     * @param billName
+     * @param requireTime
+     * @param url
+     * @param accessToken
+     * @param appId
+     */
+    public void sendCustomerDeliveryMessage(User sendUser, ServiceOrder serviceOrder, String accessToken) {
+
+    	User user = sendUser;
+    	String title = "您购买的订单已经发货啦，正快马加鞭向您飞奔而去。";
+
+    	CommonVO vo = new CommonVO();
+    	vo.setFirst(new TemplateItem(title));
+    	vo.setKeyword1(new TemplateItem(String.valueOf(serviceOrder.getId())));	//订单号
+    	vo.setKeyword2(new TemplateItem(serviceOrder.getLogisticName()));	//物流公司名称
+    	vo.setKeyword4(new TemplateItem(serviceOrder.getLogisticNo()));	//快递单好
+    	String remark = "请及时发货哦～";
+    	vo.setRemark(new TemplateItem(remark));
+    	
+        TemplateMsg<CommonVO>msg = new TemplateMsg<>();
+        msg.setData(vo);
+        msg.setTemplate_id(getTemplateByAppId(user.getAppId(), MsgCfg.TEMPLATE_TYPE_CUSTOMER_DELIVERY));	
+        String url = getMsgUrl(MsgCfg.URL_CUSTOMER_DELIVERY);
+        if (!StringUtils.isEmpty(url)) {
+			url = url + serviceOrder.getId();
+			url = AppUtil.addAppOnUrl(url, user.getAppId());
+		}
+        msg.setUrl(url);
+        msg.setTouser(user.getOpenid());
+        sendMsg(msg, accessToken);
+        
     }
 
 }

@@ -47,4 +47,6 @@ public interface GotongService {
 	
 	void sendResetPasswordMsg(User user, String password);
 
+	void sendCustomerDelivery(User user, ServiceOrder serviceOrder);
+
 }

@@ -25,9 +25,12 @@ import com.yumu.hexie.model.commonsupport.logistics.Logistics;
 import com.yumu.hexie.model.commonsupport.logistics.LogisticsRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.LogisticsService;
 import com.yumu.hexie.service.common.req.LogisticsInfoReq;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.user.UserService;
 
 
 
@@ -47,6 +50,10 @@ public class LogisticsServiceImpl implements LogisticsService {
 	private ServiceOrderRepository serviceOrderRepository;
 	@Autowired
 	private Kuaidi100Util kuaidi100Util;
+	@Autowired
+	private GotongService gotongService;
+	@Autowired
+	private UserService userService;
 	
 	private static Map<String,String> map = null;
 	
@@ -129,8 +136,12 @@ public class LogisticsServiceImpl implements LogisticsService {
 		serviceOrder.setLogisticType(logisticsInfoReq.getLogisticType());
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_SENDED);
 		serviceOrder.setSendDate(new Date());
-		
 		serviceOrderRepository.save(serviceOrder);
+		
+		//提醒用户已发货
+		User user = userService.getById(serviceOrder.getUserId());
+		gotongService.sendCustomerDelivery(user, serviceOrder);
+		
 		
 	}
 }

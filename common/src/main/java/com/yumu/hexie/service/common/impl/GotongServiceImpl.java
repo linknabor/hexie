@@ -287,5 +287,16 @@ public class GotongServiceImpl implements GotongService {
 		templateMsgService.sendResetPasswordMsg(user, password, accessToken);
 	}
 	
+	/**
+	 * 用户发货提醒
+	 */
+	@Override
+	public void sendCustomerDelivery(User user, ServiceOrder serviceOrder) {
+
+		LOG.info("用户发货提醒！ sendUser : " + user);
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+		templateMsgService.sendCustomerDeliveryMessage(user, serviceOrder, accessToken);
+	}
+	
 
 }
