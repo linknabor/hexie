@@ -452,7 +452,7 @@ public class TemplateMsgService {
 
     	User user = sendUser;
     	String title = "您有一个新的订单，请及时处理。";
-    	String orderDate = serviceOrder.getCreateDateStr();
+    	String orderDate = DateUtil.dtFormat(new Date(serviceOrder.getCreateDate()));
     	String customerName = serviceOrder.getReceiverName();
 
     	CommonVO vo = new CommonVO();
