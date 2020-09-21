@@ -335,7 +335,7 @@ public class OrderController extends BaseController{
 		if(o == null) {
 			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
 		} else {
-			redisRepository.removeCart(Keys.uidCardKey(user.getId()));
+//			redisRepository.removeCart(Keys.uidCardKey(user.getId()));
 		}
 		return new BaseResult<ServiceOrder>().success(o);
 	}
