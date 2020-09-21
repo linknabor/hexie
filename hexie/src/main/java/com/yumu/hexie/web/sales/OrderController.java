@@ -96,6 +96,7 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
 		}else if("PAYED".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
 		}else if("PREPARE".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
 		}else{//if("ALL".equalsIgnoreCase(statusType)){
