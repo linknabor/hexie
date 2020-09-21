@@ -72,6 +72,7 @@ import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.sales.BaseOrderService;
+import com.yumu.hexie.service.sales.CartService;
 import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.sales.SalePlanService;
 import com.yumu.hexie.service.sales.req.PromotionOrder;
@@ -132,6 +133,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private CityRepository cityRepository;
 	@Autowired
 	private CountyRepository countyRepository;
+	@Autowired
+	private CartService cartService;
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -332,6 +335,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				item.setServiceOrder(o);
 				item.setUserId(o.getUserId());
 				orderItemRepository.save(item);
+				
+				//清空购物车中已购买的商品
+				cartService.delFromCart(user.getId(), itemList);
+				
 			}
 			//4. 订单后处理
 			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);

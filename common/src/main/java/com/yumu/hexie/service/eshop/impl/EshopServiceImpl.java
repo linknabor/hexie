@@ -218,7 +218,12 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
-			List<Object[]> regionList = regionRepository.findByProductId(queryProductVO.getProductId());
+			List<Object[]> regionList = new ArrayList<>();
+			if ("1000".equals(productType) || "1001".equals(productType) || "1003".equals(productType) || "1004".equals(productType)) {
+				regionList = regionRepository.findByProductId(queryProductVO.getProductId());}
+			else if ("1002".equals(productType)) {
+				regionList = regionRepository.findByProductId4Rroup(queryProductVO.getProductId());
+			}
 			
 			QueryProductDTO<QueryProductMapper> queryProductDTO = new QueryProductDTO<>();
 			queryProductDTO.setContent(list.get(0));
@@ -676,6 +681,11 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Transactional
 	public void saveOper(SaveOperVO saveOperVO) {
 		
+		Agent agent = new Agent();
+		if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+			agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
+		}
+		
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
 			Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
 			serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
@@ -683,7 +693,8 @@ public class EshopServiceImpl implements EshopSerivce {
 				ModelConstant.SERVICE_OPER_TYPE_SAASSALE == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()) {
-			serviceOperatorRepository.deleteByType(saveOperVO.getOperatorType());
+			
+			serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
 		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
@@ -699,7 +710,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setLongitude(0d);
 			serviceOperator.setLatitude(0d);
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
-				Agent agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
+				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
 				serviceOperator.setAgentId(agent.getId());
 			}
 			serviceOperator = serviceOperatorRepository.save(serviceOperator);

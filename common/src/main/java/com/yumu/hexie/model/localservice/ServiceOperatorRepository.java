@@ -86,6 +86,11 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 ")
     public void deleteByType(int type);
     
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 and agentId =?2 ")
+    public void deleteByTypeAndAgentId(int type, long agentId);
+    
     String column1 = "s.id, s.openId, s.name, s.tel, u.appid, s.userId ";
     
     @Query(value = "select "
