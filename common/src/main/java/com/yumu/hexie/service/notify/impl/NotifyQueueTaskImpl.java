@@ -489,9 +489,35 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.info("update orderStatus, orderType : " + serviceOrder.getOrderType());
 					logger.info("update orderStatus, orderStatus : " + serviceOrder.getStatus());
 					
-					//核销券
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+						
+						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
+						for (ServiceOrder order : orderList) {
+							
+							if (ModelConstant.ORDER_STATUS_INIT == order.getStatus()) {
+								Date date = new Date();
+								order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+								order.setConfirmDate(date);
+								order.setPayDate(date);
+								serviceOrderRepository.save(order);
+								salePlanService.getService(order.getOrderType()).postPaySuccess(order);	//修改orderItems
+								
+								//发送模板消息和短信
+								userNoticeService.orderSuccess(order.getUserId(), order.getTel(),
+										order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
+								//清空购物车中已购买的商品
+								List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
+								cartService.delFromCart(order.getUserId(), itemList);
+								
+								
+							}
+							
+						}
+					
+					}
+					
+					//核销券、团购、合伙人、saas售卖
 					if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || 
-							ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_SAASSALE == serviceOrder.getOrderType()) {
