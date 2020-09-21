@@ -523,9 +523,9 @@ public class TemplateMsgService {
     	vo.setFirst(new TemplateItem(title));
     	vo.setKeyword1(new TemplateItem(String.valueOf(serviceOrder.getId())));	//订单号
     	vo.setKeyword2(new TemplateItem(serviceOrder.getLogisticName()));	//物流公司名称
-    	vo.setKeyword4(new TemplateItem(serviceOrder.getLogisticNo()));	//快递单好
-    	String remark = "请及时发货哦～";
-    	vo.setRemark(new TemplateItem(remark));
+    	vo.setKeyword3(new TemplateItem(serviceOrder.getLogisticNo()));	//快递单好
+//    	String remark = "";
+//    	vo.setRemark(new TemplateItem(remark));
     	
         TemplateMsg<CommonVO>msg = new TemplateMsg<>();
         msg.setData(vo);
