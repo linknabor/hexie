@@ -34,7 +34,7 @@ public class Cart extends BaseModel {
 	 * 添加商品
 	 * @param goods
 	 */
-	public void add(OrderItem orderItem, ProductRule productRule) {
+	public void add(OrderItem orderItem, ProductRule productRule, int stock) {
 		
 		BigDecimal unitPrice = new BigDecimal(String.valueOf(productRule.getPrice()));	//前端传上来的价格不可信，全部采用后端计算
 		BigDecimal count = new BigDecimal(orderItem.getCount());	//数量采用前端传的
@@ -51,8 +51,7 @@ public class Cart extends BaseModel {
 			if (orderItem.getCount() > perLimit) {
 				throw new BizValidateException("每人限购" + perLimit + "件。");
 			}
-			int totalCount = productRule.getTotalCount();
-			if (orderItem.getCount() > totalCount) {
+			if (orderItem.getCount() > stock) {
 				throw new BizValidateException("数量超出范围，库存不足。");
 			}
 			orderItem.setAmount(amount.floatValue());
@@ -64,11 +63,9 @@ public class Cart extends BaseModel {
 			if (existItem.getCount() + orderItem.getCount() > perLimit) {
 				throw new BizValidateException("每人限购" + perLimit + "件。");
 			}
-			int totalCount = productRule.getTotalCount();
-			if (existItem.getCount() + orderItem.getCount() > totalCount) {
+			if (existItem.getCount() + orderItem.getCount() > stock) {
 				throw new BizValidateException("数量超出范围，库存不足。");
 			}
-			
 			existItem.setCount(existItem.getCount() + orderItem.getCount());
 			BigDecimal existAmount = new BigDecimal(String.valueOf(existItem.getAmount()));
 			existItem.setAmount(existAmount.add(amount).floatValue());

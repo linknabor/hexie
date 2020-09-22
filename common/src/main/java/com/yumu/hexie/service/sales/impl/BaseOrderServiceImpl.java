@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +71,8 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
+import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.CartService;
@@ -135,6 +138,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private CountyRepository countyRepository;
 	@Autowired
 	private CartService cartService;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
+	private OperatorService operatorService;
+		
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -841,7 +849,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				order.setId(order.getGroupOrderId());
 			}
 		}
-		if (user.getId() != order.getUserId()) {
+		
+		OperatorDefinition operatorDefinition = operatorService.defineOperator(user);
+		if (user.getId() != order.getUserId() && (operatorDefinition.isOnsaleTaker() && !operatorDefinition.isRgroupTaker())) {
 			throw new BizValidateException("当前用户没有权限查看此订单。");
 		}
 		return order;
@@ -1282,6 +1292,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderItem.setRuleName(productRule.getName());
 			orderItem.setProductPic(productRule.getMainPicture());
 			orderItem.setProductThumbPic(productRule.getSmallPicture());
+			
+			String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + productRule.getProductId());
+			Integer proStock = 0;
+			try {
+				proStock = Integer.valueOf(stock);
+			} catch (Exception e) {
+			}
+			orderItem.setTotalCount(proStock);
 			
 		}
 		

@@ -8,15 +8,14 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
-import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.BaseOrderService;
@@ -41,7 +40,7 @@ public class RgroupServiceImpl implements RgroupService {
     @Inject
     private BaseOrderService baseOrderService;
     @Autowired
-    private RedisRepository redisRepository;
+    private RedisTemplate<String, String> redisTemplate;
 
     private void cancelValidate(RgroupRule rule) {
         if(rule.getGroupStatus() == ModelConstant.RGROUP_STAUS_FINISH){
@@ -127,9 +126,10 @@ public class RgroupServiceImpl implements RgroupService {
             } else {
                 item.setProcess(0);
             }
-            String key = ModelConstant.KEY_PRO_RULE_INFO + item.getRuleId();
-            ProductRule productRule = redisRepository.getProdcutRule(key);
-            item.setTotalCount(productRule.getTotalCount());
+            String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
+    		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
+    		int canSale = Integer.valueOf(stock) - Integer.valueOf(freeze);
+			item.setTotalCount(canSale);
         }
         return result;
     }

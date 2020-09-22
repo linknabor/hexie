@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -110,6 +111,8 @@ public class EshopServiceImpl implements EshopSerivce {
 	private ProductCategoryRepository productCategoryRepository;
 	@Autowired
 	private RedisRepository redisRepository;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private EvoucherService evoucherService;
 	@Autowired
@@ -507,6 +510,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		}
 		String key = ModelConstant.KEY_PRO_RULE_INFO + productRule.getId();
 		redisRepository.setProdcutRule(key, productRule);
+		
+		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");	//初始化冻结数量
 		
 	}
 	

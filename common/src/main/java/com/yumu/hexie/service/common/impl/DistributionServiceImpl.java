@@ -19,13 +19,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.ProductCategory;
 import com.yumu.hexie.model.commonsupport.info.ProductCategoryRepository;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.distribution.HomeDistributionRepository;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
@@ -39,7 +39,6 @@ import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.YuyueRule;
-import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -74,7 +73,7 @@ public class DistributionServiceImpl implements DistributionService {
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
     @Autowired
-	private RedisRepository redisRepository;
+    private RedisTemplate<String, String> redisTemplate;
 
     /** 
      * @param rule
@@ -264,8 +263,10 @@ public class DistributionServiceImpl implements DistributionService {
     	}
     	
     	for (OnSaleAreaItem item : itemList) {
-    		ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + item.getRuleId());
-			item.setTotalCount(productRule.getTotalCount());
+    		String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
+    		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
+			int totalCount = Integer.valueOf(stock) - Integer.valueOf(freeze);
+    		item.setTotalCount(totalCount);
 		}
         return itemList;
     }

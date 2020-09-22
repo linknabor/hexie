@@ -21,7 +21,6 @@ public class OrderItem  extends BaseModel {
 	private Long ruleId;
 	private Long userId;
 	private Integer count = 1;
-	
 
 	private Long productId;
 	private int orderType;
@@ -51,6 +50,9 @@ public class OrderItem  extends BaseModel {
 	private long agentId;
 	private String agentName;
 	private String agentNo;
+	
+	@Transient
+	private long totalCount;	//总库存 
 	
 	public OrderItem(){}
 	@Transient
@@ -201,6 +203,12 @@ public class OrderItem  extends BaseModel {
 	}
 	public void setProductCategoryId(Long productCategoryId) {
 		this.productCategoryId = productCategoryId;
+	}
+	public long getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(long totalCount) {
+		this.totalCount = totalCount;
 	}
 	
 	

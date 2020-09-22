@@ -28,7 +28,8 @@ import com.yumu.hexie.service.user.UserNoticeService;
 
 @Service("customRgroupService")
 public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
-    private static final Logger    log = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
+	
+    private static final Logger logger = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
 
     @Inject
     private UserRepository         userRepository;
@@ -85,7 +86,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         User u = userRepository.findById(so.getUserId());
         RgroupRule rule = findSalePlan(so.getGroupRuleId());
 
-        log.error("rgroup postPaySuccess:" + rule.getId());
+        logger.error("rgroup postPaySuccess:" + rule.getId());
         if (rule.getOwnerId() == 0) {
             rule.setOwnerId(so.getUserId());
             rule.setOwnerAddr(so.getAddress());
@@ -120,6 +121,16 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
      */
     @Override
     public void postOrderCancel(ServiceOrder order) {
+    	
+    	if (order == null) {
+    		logger.warn("order is null, will return ");
+			return;
+		}
+    	List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
+    	for (OrderItem orderItem : itemList) {
+    		logger.info("unfreeze product : " + orderItem.getProductId());
+    		productService.unfreezeCount(orderItem.getProductId(), orderItem.getCount());
+		}
     }
 
 }
