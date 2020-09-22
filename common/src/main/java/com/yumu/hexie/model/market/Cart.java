@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
  *类似购物车，用来暂存商品项，以后可扩展成购物车 
@@ -45,6 +46,16 @@ public class Cart extends BaseModel {
 			itemsMap = new HashMap<>();
 		}
 		if (!itemsMap.containsKey(orderItem.getRuleId())) {	//用map存放，避免每次迭代itemsList
+			
+			int perLimit = productRule.getLimitNumOnce();
+			if (orderItem.getCount() > perLimit) {
+				throw new BizValidateException("每人限购" + perLimit + "件。");
+			}
+			int totalCount = productRule.getTotalCount();
+			if (orderItem.getCount() > totalCount) {
+				throw new BizValidateException("数量超出范围，库存不足。");
+			}
+			
 			orderItem.setAmount(amount.floatValue());
 			itemsMap.put(orderItem.getRuleId(), orderItem);
 		}else {
