@@ -47,6 +47,8 @@ import com.yumu.hexie.model.distribution.region.Province;
 import com.yumu.hexie.model.distribution.region.ProvinceRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
 import com.yumu.hexie.model.market.Cart;
@@ -71,6 +73,8 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
+import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.CartService;
@@ -138,6 +142,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private CartService cartService;
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
+	private OperatorService operatorService;
+		
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -844,7 +851,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				order.setId(order.getGroupOrderId());
 			}
 		}
-		if (user.getId() != order.getUserId()) {
+		
+		OperatorDefinition operatorDefinition = operatorService.defineOperator(user);
+		if (user.getId() != order.getUserId() && (operatorDefinition.isOnsaleTaker() && !operatorDefinition.isRgroupTaker())) {
 			throw new BizValidateException("当前用户没有权限查看此订单。");
 		}
 		return order;
