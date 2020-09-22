@@ -55,11 +55,20 @@ public class Cart extends BaseModel {
 			if (orderItem.getCount() > totalCount) {
 				throw new BizValidateException("数量超出范围，库存不足。");
 			}
-			
 			orderItem.setAmount(amount.floatValue());
 			itemsMap.put(orderItem.getRuleId(), orderItem);
 		}else {
 			OrderItem existItem = itemsMap.get(orderItem.getRuleId());
+			
+			int perLimit = productRule.getLimitNumOnce();
+			if (existItem.getCount() + orderItem.getCount() > perLimit) {
+				throw new BizValidateException("每人限购" + perLimit + "件。");
+			}
+			int totalCount = productRule.getTotalCount();
+			if (existItem.getCount() + orderItem.getCount() > totalCount) {
+				throw new BizValidateException("数量超出范围，库存不足。");
+			}
+			
 			existItem.setCount(existItem.getCount() + orderItem.getCount());
 			BigDecimal existAmount = new BigDecimal(String.valueOf(existItem.getAmount()));
 			existItem.setAmount(existAmount.add(amount).floatValue());
