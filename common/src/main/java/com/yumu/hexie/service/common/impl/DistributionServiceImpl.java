@@ -25,6 +25,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.ProductCategory;
 import com.yumu.hexie.model.commonsupport.info.ProductCategoryRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.distribution.HomeDistributionRepository;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
@@ -38,6 +39,7 @@ import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.YuyueRule;
+import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -71,6 +73,8 @@ public class DistributionServiceImpl implements DistributionService {
     private RegionRepository regionRepository;
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
+    @Autowired
+	private RedisRepository redisRepository;
 
     /** 
      * @param rule
@@ -258,6 +262,11 @@ public class DistributionServiceImpl implements DistributionService {
 		} else {	//已经绑定房屋的用户查询关联小区的商品
     		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, currUser.getSectId(), pageable); 
     	}
+    	
+    	for (OnSaleAreaItem item : itemList) {
+    		ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + item.getRuleId());
+			item.setCount(productRule.getTotalCount());
+		}
         return itemList;
     }
 

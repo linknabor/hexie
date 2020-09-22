@@ -1,13 +1,17 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.rgroup.RgroupUser;
 import com.yumu.hexie.model.market.rgroup.RgroupUserRepository;
@@ -38,6 +42,8 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private ProductService         productService;
     @Inject
     private UserNoticeService      userNoticeService;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Override
     public void validateRule(ServiceOrder order, SalePlan plan, OrderItem item, Address address) {
@@ -71,14 +77,15 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         //支付成功订单为配货中状态，改商品库存
         so.payed();
         serviceOrderRepository.save(so);
-        for (OrderItem item : so.getItems()) {
+        List<OrderItem> itemList = orderItemRepository.findByServiceOrder(so);
+        for (OrderItem item : itemList) {
             productService.saledCount(item.getProductId(), item.getCount());
         }
 
         User u = userRepository.findById(so.getUserId());
         RgroupRule rule = findSalePlan(so.getGroupRuleId());
 
-        log.error("postPaySuccess:" + rule.getId());
+        log.error("rgroup postPaySuccess:" + rule.getId());
         if (rule.getOwnerId() == 0) {
             rule.setOwnerId(so.getUserId());
             rule.setOwnerAddr(so.getAddress());

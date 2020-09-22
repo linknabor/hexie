@@ -27,6 +27,7 @@ import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -54,6 +55,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
+    private RedisTemplate<String, ProductRule> proRedisTemplate;
+	@Autowired
 	private MaintenanceService maintenanceService;
 	@Autowired
 	private UserRepository userRepository;
@@ -75,6 +78,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private CartService cartService;
 	@Autowired
 	private OrderItemRepository orderItemRepository;
+	
 	
 	/**
 	 * 异步发送到账模板消息
@@ -490,7 +494,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.info("update orderStatus, orderStatus : " + serviceOrder.getStatus());
 					
 					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
-						
 						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
 						for (ServiceOrder order : orderList) {
 							
@@ -499,7 +502,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
 								order.setConfirmDate(date);
 								order.setPayDate(date);
-								serviceOrderRepository.save(order);
+//								serviceOrderRepository.save(order);
 								salePlanService.getService(order.getOrderType()).postPaySuccess(order);	//修改orderItems
 								
 								//发送模板消息和短信
@@ -508,7 +511,16 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								//清空购物车中已购买的商品
 								List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
 								cartService.delFromCart(order.getUserId(), itemList);
-								
+								//减库存
+								for (OrderItem item : itemList) {
+									String key = ModelConstant.KEY_PRO_RULE_INFO + item.getRuleId();
+									ProductRule productRule = proRedisTemplate.opsForValue().get(key);
+									int totalCount = productRule.getTotalCount();
+									totalCount -= item.getCount();
+									productRule.setTotalCount(totalCount);
+									long time = productRule.getEndDate().getTime() - productRule.getStartDate().getTime();
+									proRedisTemplate.opsForValue().set(key, productRule, time, TimeUnit.SECONDS);
+								}
 								
 							}
 							
@@ -530,11 +542,24 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							serviceOrderRepository.save(serviceOrder);
 							salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
 							
+							if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+								//减库存
+								String key = ModelConstant.KEY_PRO_RULE_INFO + serviceOrder.getGroupRuleId();
+								ProductRule productRule = proRedisTemplate.opsForValue().get(key);
+								int totalCount = productRule.getTotalCount();
+								totalCount -= serviceOrder.getCount();
+								productRule.setTotalCount(totalCount);
+								long time = productRule.getEndDate().getTime() - productRule.getStartDate().getTime();
+								proRedisTemplate.opsForValue().set(key, productRule, time, TimeUnit.SECONDS);
+							
+							}
+								
+							
+							
 							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
 								//发送模板消息和短信
 								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
 										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
-								
 							}
 							
 							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
@@ -619,8 +644,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.info("notify delivery, orderNo : " + serviceOrder.getOrderNo());
 					logger.info("notify delivery, orderType : " + serviceOrder.getOrderType());
 					
-					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
-							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
 						
 						long groupOrderId = serviceOrder.getGroupOrderId();
 						logger.info("notify delivery, groupOrderId : " + groupOrderId);
@@ -628,9 +652,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupOrderId);
 						for (ServiceOrder o : orderList) {
 							int operType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
-							if (ModelConstant.ORDER_TYPE_RGROUP == o.getOrderType()) {
-								operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
-							}
 							long agentId = o.getAgentId();
 							logger.info("agentId is : " + agentId);
 							List<ServiceOperator> opList = new ArrayList<>();
@@ -647,6 +668,23 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							}
 						}
 						
+					} else if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+						
+						int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
+						long agentId = serviceOrder.getAgentId();
+						logger.info("agentId is : " + agentId);
+						List<ServiceOperator> opList = new ArrayList<>();
+						if (agentId > 1) {	//1是默认奈博的，所以跳过
+							opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
+						}else {
+							opList = serviceOperatorRepository.findByType(operType);
+						}
+						logger.info("oper list size : " + opList.size());
+						for (ServiceOperator serviceOperator : opList) {
+							User sendUser = userRepository.findById(serviceOperator.getUserId());
+							logger.info("send user : " + sendUser.getId());
+							gotongService.sendDeliveryNotification(sendUser, serviceOrder);
+						}
 					}
 					isSuccess = true;
 					

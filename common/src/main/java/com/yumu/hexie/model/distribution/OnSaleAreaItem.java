@@ -13,7 +13,6 @@ public class OnSaleAreaItem extends RuleDistribution {
 	private boolean featured = false;
 	private int productType;
 	private String ruleDesDescribe;//热卖商品或新品上市
-	
 	@Transient
 	private int count = 0;
 	
@@ -38,5 +37,9 @@ public class OnSaleAreaItem extends RuleDistribution {
 	public int getCount() {
 		return count;
 	}
+	public void setCount(int count) {
+		this.count = count;
+	}
+		
 
 }
