@@ -115,4 +115,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	@Query(value = "update product set demo = ?1 where id = ?2 ", nativeQuery = true)
 	void updateDemo(int demo, long id);
 	
+	@Query(value = "select * from product where status = ?1 and productType >= 1000 ", nativeQuery = true)
+	List<Product> findByStatusMultiType(int status);
+	
 }

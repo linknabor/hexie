@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -120,6 +121,20 @@ public class EshopServiceImpl implements EshopSerivce {
 	
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
+	
+	@PostConstruct
+	public void initStockAndFreeze() {
+		
+		List<Product> proList = productRepository.findByStatusMultiType(ModelConstant.PRODUCT_ONSALE);
+		for (Product product : proList) {
+			String total = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + product.getId());
+			if (StringUtils.isEmpty(total)) {
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");
+			}
+		}
+		logger.info("init stock and freeze finished .");
+	}
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
