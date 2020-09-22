@@ -785,35 +785,44 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (serviceOrder == null) {
 			throw new BizValidateException("为查询到订单: " + orderNo);
 		}
-		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
+		List<ServiceOrder> orderList = new ArrayList<>();
+		if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+			orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
+		} else {
+			orderList.add(serviceOrder);
+		}
 		
 		int fromStatus = 0;
 		int toStatus = 0; 
-		if ("0".equals(operType)) {
-			fromStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
-			toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+		for (ServiceOrder order : orderList) {
 			
-			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
-			if (!StringUtils.isEmpty(serviceOrder.getSendDate())) {
-				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_RETURNED);
+			if ("0".equals(operType)) {
+				fromStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
+				toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+				
+				order.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+				if (!StringUtils.isEmpty(order.getSendDate())) {
+					order.setStatus(ModelConstant.ORDER_STATUS_RETURNED);
+				}
+				order.setRefundDate(new Date());
+				serviceOrderRepository.save(order);
+				
+			}else if ("1".equals(operType)) {
+				fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+				toStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
+				
+				order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+				if (!StringUtils.isEmpty(order.getSendDate())) {
+					order.setStatus(ModelConstant.ORDER_STATUS_SENDED);
+				}else if (!StringUtils.isEmpty(order.getConfirmDate())) {
+					order.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
+				}
+				order.setRefundDate(null);
+				serviceOrderRepository.save(order);
 			}
-			serviceOrder.setRefundDate(new Date());
-			serviceOrderRepository.save(serviceOrder);
-			
-		}else if ("1".equals(operType)) {
-			fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
-			toStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
-			
-			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-			if (!StringUtils.isEmpty(serviceOrder.getSendDate())) {
-				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_SENDED);
-			}else if (!StringUtils.isEmpty(serviceOrder.getConfirmDate())) {
-				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
-			}
-			serviceOrder.setRefundDate(null);
-			serviceOrderRepository.save(serviceOrder);
 		}
 		
+		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
 		for (Evoucher evoucher : evoucherList) {
 			if (fromStatus == evoucher.getStatus()) {
 				evoucher.setStatus(toStatus);
