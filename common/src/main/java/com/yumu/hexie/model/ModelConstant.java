@@ -396,6 +396,8 @@ public class ModelConstant {
 	public static final int SMS_TYPE_RESET_PASSWORD = 104;	//发票验证码获取
 	
 	public static final String KEY_PRO_RULE_INFO = "product:rule:";
+	public static final String KEY_PRO_STOCK = "product:stock:";
+	public static final String KEY_PRO_FREEZE = "product:freeze:";
 	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码

@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
@@ -24,6 +25,8 @@ public class CartServiceImpl implements CartService {
 	
 	@Autowired
 	private RedisRepository redisRepository;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 
 	/**
 	 * 添加商品至购物车
@@ -35,12 +38,13 @@ public class CartServiceImpl implements CartService {
 		if (productRule == null) {
 			throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
 		}
+		String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + productRule.getProductId());
 		String cartKey = Keys.uidCardKey(user.getId());
 		Cart cart = redisRepository.getCart(cartKey);
 		if (cart == null) {
 			cart = new Cart();
 		}
-		cart.add(orderItem, productRule);
+		cart.add(orderItem, productRule, Integer.valueOf(stock));
 		redisRepository.setCart(cartKey, cart);
 		return cart.getTotalCount();
 	
@@ -91,7 +95,6 @@ public class CartServiceImpl implements CartService {
 		String cartKey = Keys.uidCardKey(user.getId());
 		Cart cart = redisRepository.getCart(cartKey);
 		return cart;
-		
 	}
 	
 	/**

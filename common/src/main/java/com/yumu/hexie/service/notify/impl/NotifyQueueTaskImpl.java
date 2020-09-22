@@ -27,7 +27,6 @@ import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -54,8 +53,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
-	@Autowired
-    private RedisTemplate<String, ProductRule> proRedisTemplate;
 	@Autowired
 	private MaintenanceService maintenanceService;
 	@Autowired
@@ -513,13 +510,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								cartService.delFromCart(order.getUserId(), itemList);
 								//减库存
 								for (OrderItem item : itemList) {
-									String key = ModelConstant.KEY_PRO_RULE_INFO + item.getRuleId();
-									ProductRule productRule = proRedisTemplate.opsForValue().get(key);
-									int totalCount = productRule.getTotalCount();
-									totalCount -= item.getCount();
-									productRule.setTotalCount(totalCount);
-									long time = productRule.getEndDate().getTime() - productRule.getStartDate().getTime();
-									proRedisTemplate.opsForValue().set(key, productRule, time, TimeUnit.SECONDS);
+									redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + item.getProductId(), item.getCount());
 								}
 								
 							}
@@ -544,17 +535,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							
 							if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
 								//减库存
-								String key = ModelConstant.KEY_PRO_RULE_INFO + serviceOrder.getGroupRuleId();
-								ProductRule productRule = proRedisTemplate.opsForValue().get(key);
-								int totalCount = productRule.getTotalCount();
-								totalCount -= serviceOrder.getCount();
-								productRule.setTotalCount(totalCount);
-								long time = productRule.getEndDate().getTime() - productRule.getStartDate().getTime();
-								proRedisTemplate.opsForValue().set(key, productRule, time, TimeUnit.SECONDS);
-							
+								redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
 							}
-								
-							
 							
 							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
 								//发送模板消息和短信
