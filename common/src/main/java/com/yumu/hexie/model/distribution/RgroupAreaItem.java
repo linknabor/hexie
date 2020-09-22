@@ -12,7 +12,9 @@ public class RgroupAreaItem  extends RuleDistribution {
 	@Transient
 	private int process;//进度
 	@Transient
-	private int count;	//库存
+	private int count;	//页面用
+	@Transient
+	private int totalCount;	//库存
 	
 	private boolean featured = false;
 	private int productType;
@@ -40,6 +42,12 @@ public class RgroupAreaItem  extends RuleDistribution {
 	}
 	public void setCount(int count) {
 		this.count = count;
+	}
+	public int getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(int totalCount) {
+		this.totalCount = totalCount;
 	}
 	
 }

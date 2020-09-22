@@ -265,7 +265,7 @@ public class DistributionServiceImpl implements DistributionService {
     	
     	for (OnSaleAreaItem item : itemList) {
     		ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + item.getRuleId());
-			item.setCount(productRule.getTotalCount());
+			item.setTotalCount(productRule.getTotalCount());
 		}
         return itemList;
     }

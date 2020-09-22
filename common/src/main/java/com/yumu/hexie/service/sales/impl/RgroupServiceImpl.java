@@ -129,7 +129,7 @@ public class RgroupServiceImpl implements RgroupService {
             }
             String key = ModelConstant.KEY_PRO_RULE_INFO + item.getRuleId();
             ProductRule productRule = redisRepository.getProdcutRule(key);
-            item.setCount(productRule.getTotalCount());
+            item.setTotalCount(productRule.getTotalCount());
         }
         return result;
     }
