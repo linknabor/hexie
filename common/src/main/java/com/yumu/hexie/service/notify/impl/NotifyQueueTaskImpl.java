@@ -662,9 +662,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							}
 							logger.info("oper list size : " + opList.size());
 							for (ServiceOperator serviceOperator : opList) {
+								logger.info("delivery user id : " + serviceOperator.getUserId());
 								User sendUser = userRepository.findById(serviceOperator.getUserId());
-								logger.info("send user : " + sendUser.getId());
-								gotongService.sendDeliveryNotification(sendUser, o);
+								if (sendUser != null) {
+									logger.info("send user : " + sendUser.getId());
+									gotongService.sendDeliveryNotification(sendUser, o);
+								}
 							}
 						}
 						
@@ -681,9 +684,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						}
 						logger.info("oper list size : " + opList.size());
 						for (ServiceOperator serviceOperator : opList) {
+							logger.info("delivery user id : " + serviceOperator.getUserId());
 							User sendUser = userRepository.findById(serviceOperator.getUserId());
-							logger.info("send user : " + sendUser.getId());
-							gotongService.sendDeliveryNotification(sendUser, serviceOrder);
+							if (sendUser != null) {
+								logger.info("send user : " + sendUser.getId());
+								gotongService.sendDeliveryNotification(sendUser, serviceOrder);
+							}
 						}
 					}
 					isSuccess = true;
