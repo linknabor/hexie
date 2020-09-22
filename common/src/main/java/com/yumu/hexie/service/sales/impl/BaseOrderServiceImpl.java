@@ -47,8 +47,6 @@ import com.yumu.hexie.model.distribution.region.Province;
 import com.yumu.hexie.model.distribution.region.ProvinceRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
-import com.yumu.hexie.model.localservice.ServiceOperator;
-import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrderRepository;
 import com.yumu.hexie.model.market.Cart;
