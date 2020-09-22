@@ -1,13 +1,13 @@
 package com.yumu.hexie.web.eshop;
 
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.common.CommonResponse;
@@ -174,10 +174,10 @@ public class EshopController<T> extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "/product/category/get", method = RequestMethod.POST)
-	public CommonResponse<Object> getCategory(@RequestParam(required = false) String id){
+	public CommonResponse<Object> getCategory(@RequestBody(required = false) Map<String, String> map){
 		
-		logger.info("getCategory, id : " + id);
-		CommonResponse<Object> commonResponse = eshopSerivce.getCategory(id);
+		logger.info("getCategory, id : " + map);
+		CommonResponse<Object> commonResponse = eshopSerivce.getCategory(map.get("id"));
 		return commonResponse;
 	}
 	
