@@ -79,7 +79,9 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     		+ "where a.type = ?1 and b.sectId = ?2 ")
     public List<ServiceOperator> findByTypeAndSectId(int type, String sectId);
     
-    public ServiceOperator findByTypeAndTelAndOpenId(int type, String tel, String openId);
+    public ServiceOperator findByTypeAndTelAndOpenIdAndAgentIdIsNull(int type, String tel, String openId);
+    
+    public ServiceOperator findByTypeAndTelAndOpenIdAndAgentId(int type, String tel, String openId, long agentId);
     
     @Transactional
     @Modifying
