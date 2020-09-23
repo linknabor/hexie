@@ -72,7 +72,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 
 	@Override
 	public void groupFail(User user, String tel,long groupId,  String productName, int ruleMinNum, String ruleName) {
-		String msg = "非常遗憾，您参与的"+ruleName+"因未达到的目标份数，团购，系统将自动为您退款退款。您可以通过微信支付通知进行核实。";
+		String msg = "非常遗憾，您参与的"+ruleName+"因未达到的目标份数，系统将自动为您退款退款。您可以通过微信支付通知进行核实。";
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPFAIL,
 				msg, groupId));
 		smsService.sendMsg(user, tel, msg,  getKey(user.getId(),groupId,5));
