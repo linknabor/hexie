@@ -75,6 +75,7 @@ public class RgroupServiceImpl implements RgroupService {
 	public void refreshGroupStatus(RgroupRule rule) {
 		if(System.currentTimeMillis()>rule.getEndDate().getTime()) {
 			if(rule.getCurrentNum() < rule.getGroupMinNum()) {
+				log.info("");
 				cancelGroup(rule);
 			} else {
 				finishGroup(rule);

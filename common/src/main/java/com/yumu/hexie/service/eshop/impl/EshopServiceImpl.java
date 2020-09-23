@@ -726,10 +726,18 @@ public class EshopServiceImpl implements EshopSerivce {
 		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
-			ServiceOperator serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId());
+			
+			ServiceOperator serviceOperator = null;
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenIdAndAgentId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId(), agent.getId());
+			}else {
+				serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenIdAndAgentIdIsNull(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId());
+			}
+			
 			if (serviceOperator == null) {
 				serviceOperator = new ServiceOperator();
 			}
+			
 			serviceOperator.setName(oper.getName());
 			serviceOperator.setOpenId(oper.getOpenId());
 			serviceOperator.setTel(oper.getTel());
