@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.kuaidi100.Kuaidi100Util;
 import com.yumu.hexie.integration.kuaidi100.resp.LogisticCompanyQueryResp;
@@ -108,6 +109,9 @@ public class LogisticsServiceImpl implements LogisticsService {
 			LogisticCompany com = new LogisticCompany();
 			com.setCode(logisticCompanyQueryResp.getComCode());
 			com.setName(map.get(logisticCompanyQueryResp.getComCode()));
+			if (StringUtils.isEmpty(com.getName())) {
+				continue;
+			}
 			returnList.add(com);
 		}
 		return returnList;
