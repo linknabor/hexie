@@ -853,7 +853,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		
 		OperatorDefinition operatorDefinition = operatorService.defineOperator(user);
+		log.info("orderId : " + order.getId());
+		log.info("orderUserId: " + order.getUserId());
 		log.info("op : " + operatorDefinition);
+		log.info("userId : " + user.getId());
 		if (user.getId() != order.getUserId()) {
 			if (ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()) {
 				if (!operatorDefinition.isOnsaleTaker()) {
