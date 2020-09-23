@@ -136,6 +136,11 @@ public class LogisticsServiceImpl implements LogisticsService {
 		}
 		serviceOrder.setLogisticCode(logisticsInfoReq.getLogisticCode());
 		serviceOrder.setLogisticName(logisticsInfoReq.getLogisticName());
+		if (logisticsInfoReq.getLogisticType() == 0) {
+			serviceOrder.setLogisticName("商家配送");
+		}else if (logisticsInfoReq.getLogisticType() == 1) {
+			serviceOrder.setLogisticName("用户自提");
+		}
 		serviceOrder.setLogisticNo(logisticsInfoReq.getLogisticNo());
 		serviceOrder.setLogisticType(logisticsInfoReq.getLogisticType());
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_SENDED);

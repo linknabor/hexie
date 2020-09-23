@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
@@ -834,6 +835,15 @@ public class EshopServiceImpl implements EshopSerivce {
 				order.setRefundDate(new Date());
 				serviceOrderRepository.save(order);
 				
+				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
+					if (optional.isPresent()) {
+						RgroupRule rule = optional.get();
+						rule.setCurrentNum(rule.getCurrentNum()-order.getCount());
+						rgroupRuleRepository.save(rule);
+					}
+				}
+				
 			}else if ("1".equals(operType)) {
 				fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
 				toStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
@@ -846,6 +856,15 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 				order.setRefundDate(null);
 				serviceOrderRepository.save(order);
+				
+				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
+					if (optional.isPresent()) {
+						RgroupRule rule = optional.get();
+						rule.setCurrentNum(rule.getCurrentNum()+order.getCount());
+						rgroupRuleRepository.save(rule);
+					}
+				}
 			}
 		}
 		
