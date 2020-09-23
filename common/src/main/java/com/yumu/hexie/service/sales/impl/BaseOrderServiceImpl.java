@@ -853,6 +853,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		
 		OperatorDefinition operatorDefinition = operatorService.defineOperator(user);
+		log.info("op : " + operatorDefinition);
+		log.info("auth : " + (user.getId() != order.getUserId() && (operatorDefinition.isOnsaleTaker() && !operatorDefinition.isRgroupTaker())));
 		if (user.getId() != order.getUserId() && (operatorDefinition.isOnsaleTaker() && !operatorDefinition.isRgroupTaker())) {
 			throw new BizValidateException("当前用户没有权限查看此订单。");
 		}
