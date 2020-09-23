@@ -898,8 +898,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				}
 			}
 		}
-		if(order.getUserId() != user.getId()){
-			throw new BizValidateException("你没有权限查看该订单！");
+		
+		OperatorDefinition operatorDefinition = operatorService.defineOperator(user);
+		log.info("getOrderDetail op : " + operatorDefinition);
+		if (user.getId() != order.getUserId()) {
+			if (ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()) {
+				if (!operatorDefinition.isOnsaleTaker()) {
+					throw new BizValidateException("当前用户没有权限查看此订单。");
+				}
+			}else if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+				if (!operatorDefinition.isOnsaleTaker()) {
+					throw new BizValidateException("当前用户没有权限查看此订单。");
+				}
+			}
+			
 		}
 		return itemList;
 		
