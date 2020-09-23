@@ -38,6 +38,12 @@ public class OperatorDefinition {
 	public void setRgroupTaker(boolean isRgroupTaker) {
 		this.isRgroupTaker = isRgroupTaker;
 	}
+	@Override
+	public String toString() {
+		return "OperatorDefinition [isServiceOperator=" + isServiceOperator + ", isRepairOperator=" + isRepairOperator
+				+ ", isEvoucherOperator=" + isEvoucherOperator + ", isOnsaleTaker=" + isOnsaleTaker + ", isRgroupTaker="
+				+ isRgroupTaker + "]";
+	}
 	
 	
 	
