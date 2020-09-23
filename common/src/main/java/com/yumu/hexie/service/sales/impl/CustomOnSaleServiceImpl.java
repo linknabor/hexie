@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,8 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
     public void postOrderConfirm(ServiceOrder order) {
         
     }
+    
+    @Transactional
 	@Override
 	public void postPaySuccess(ServiceOrder so) {
 		//支付成功订单为配货中状态，改商品库存

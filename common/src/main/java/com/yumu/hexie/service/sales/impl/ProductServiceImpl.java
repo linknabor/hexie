@@ -40,9 +40,9 @@ public class ProductServiceImpl implements ProductService {
 		String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + product.getId());
 		int canSale = Integer.valueOf(stock) - Integer.valueOf(freeze);
 		if (canSale <= 0) {
-			throw new BizValidateException("您晚到了一步，商品已卖完！");
+			throw new BizValidateException("您晚到了一步，商品["+product.getName()+"]已卖完！");
 		}else if (canSale < count) {
-			throw new BizValidateException("库存不足，请减少购买数量！");
+			throw new BizValidateException("商品["+product.getName()+"]库存不足，请减少购买数量！");
 		}
 	}
 

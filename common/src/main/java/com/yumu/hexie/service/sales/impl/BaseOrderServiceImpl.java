@@ -1294,12 +1294,15 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderItem.setProductThumbPic(productRule.getSmallPicture());
 			
 			String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + productRule.getProductId());
-			Integer proStock = 0;
-			try {
-				proStock = Integer.valueOf(stock);
-			} catch (Exception e) {
+			String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + productRule.getProductId());
+			
+			int canSale = Integer.valueOf(stock) - Integer.valueOf(freeze);
+			if (canSale <= 0) {
+				throw new BizValidateException("抱歉，商品["+productRule.getName()+"]没有库存啦。");
 			}
-			orderItem.setTotalCount(proStock);
+			if (canSale <= orderItem.getCount()) {
+				throw new BizValidateException("抱歉，商品["+productRule.getName()+"]仅剩"+canSale+"件，请减少购买件数。");
+			}
 			
 		}
 		

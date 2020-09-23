@@ -26,6 +26,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
@@ -294,7 +295,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			product.setAgentId(agent.getId());
 		}
 		product.setProductType(saveProductVO.getType());
-		product.setTotalCount(Integer.parseInt(saveProductVO.getTotalCount()));
+		product.setTotalCount(Integer.parseInt(saveProductVO.getTotalCount()) + product.getSaledNum());
 		product.setMainPicture(saveProductVO.getMainPicture());
 		product.setSmallPicture(saveProductVO.getSmallPicture());
 		product.setPictures(saveProductVO.getPictures());
@@ -306,8 +307,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (ModelConstant.RULE_STATUS_ON == Integer.valueOf(saveProductVO.getStatus())) {
 			product.setStatus(ModelConstant.PRODUCT_ONSALE);
 		}
-		product.setStartDate(saveProductVO.getStartDate() + " 00:00:00");
-		product.setEndDate(saveProductVO.getEndDate() + " 00:00:00");
+		Date startDate = DateUtil.parse(saveProductVO.getStartDate(), DateUtil.dttmSimple);
+		product.setStartDate(startDate);
+		Date endDate = DateUtil.parse(saveProductVO.getEndDate(), DateUtil.dttmSimple);
+		product.setEndDate(endDate);
 		product.setShortName(saveProductVO.getName());
 		product.setTitleName(saveProductVO.getName());
 		if ("edit".equals(saveProductVO.getOperType())) {
@@ -679,12 +682,9 @@ public class EshopServiceImpl implements EshopSerivce {
 					Agent agent = agentRepository.findByAgentNo(queryOperVO.getAgentNo());
 					list = serviceOperatorRepository.findByTypeAndAgentIdWithAppid(queryOperVO.getType(), agent.getId());
 				}
-
 			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType() || ModelConstant.SERVICE_OPER_TYPE_SAASSALE == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
-
 			}
-			
 			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);
 			commonResponse.setData(operList);
 			commonResponse.setResult("00");
@@ -715,7 +715,13 @@ public class EshopServiceImpl implements EshopSerivce {
 				ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()) {
 			
-			serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+			}else {
+				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
+			}
+			
+			
 		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
