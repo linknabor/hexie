@@ -772,14 +772,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             throw new BizValidateException(order.getId(),"该订单无法退款！").setError();
         }
 		
-		if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
-				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
-				ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-			
+		if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
 			User user = userService.getById(order.getUserId());
 			eshopUtil.requestRefund(user, order.getOrderNo());
 			order.refunding(true);
-			
+		}else if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || 
+				ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_SAASSALE == order.getOrderType() ||
+				ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+			//do nothing
 		}else {
 			PaymentOrder po = paymentService.fetchPaymentOrder(order);
 			if(paymentService.refundApply(po)){
