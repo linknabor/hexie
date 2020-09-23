@@ -279,9 +279,11 @@ public class DistributionServiceImpl implements DistributionService {
 
 		User currUser = userRepository.findById(user.getId());
 		long current = System.currentTimeMillis();
-		List<ProductCategory> list = productCategoryRepository.findCategoryByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId()); 
-		if (list.isEmpty()) {
-			list = productCategoryRepository.findAll();
+		List<ProductCategory> list = null;
+		if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
+			list = productCategoryRepository.findCategoryDemo(ModelConstant.DISTRIBUTION_STATUS_ON, type, current);
+		}else {
+			list = productCategoryRepository.findCategoryByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId());
 		}
 		return list;
 	}
