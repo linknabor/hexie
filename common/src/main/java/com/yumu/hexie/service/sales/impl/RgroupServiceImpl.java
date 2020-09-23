@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +73,10 @@ public class RgroupServiceImpl implements RgroupService {
 	}
 
 	@Override
+	@Transactional
 	public void refreshGroupStatus(RgroupRule rule) {
 		if(System.currentTimeMillis()>rule.getEndDate().getTime()) {
 			if(rule.getCurrentNum() < rule.getGroupMinNum()) {
-				log.info("");
 				cancelGroup(rule);
 			} else {
 				finishGroup(rule);
