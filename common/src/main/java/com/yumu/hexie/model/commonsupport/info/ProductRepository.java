@@ -15,12 +15,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	
 	//不要修改顺序--核销券
 	String sqlColumn1 = " p.id, p.name, p.productType, p.oriPrice, p.miniPrice, p.singlePrice, rule.status, p.startDate, p.endDate, "
-			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, p.demo, p.totalCount, a.name as agentName, a.agentNo, rule.limitNumOnce, "
+			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, p.demo, p.totalCount-p.saledNum as totalCount, a.name as agentName, a.agentNo, rule.limitNumOnce, "
 			+ "rule.postageFee, rule.freeShippingNum, 0 as groupMinNum, p.productCategoryId, item.sortNo, pp.appid, count(r.id) as counts, count(distinct op.id) as operCounts ";
 	
 	//不要修改顺序--团购
 	String sqlColumn2 = " p.id, p.name, p.productType, p.oriPrice, p.miniPrice, p.singlePrice, rule.status, p.startDate, p.endDate, "
-			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, p.demo, p.totalCount, a.name as agentName, a.agentNo, rule.limitNumOnce, "
+			+ "p.mainPicture, p.smallPicture, p.pictures, p.serviceDesc, p.demo, p.totalCount-p.saledNum as totalCount, a.name as agentName, a.agentNo, rule.limitNumOnce, "
 			+ "rule.postageFee, rule.freeShippingNum, CONVERT(rule.groupMinNum, SIGNED INTEGER) as groupMinNum, p.productCategoryId, item.sortNo, pp.appid, count(r.id) as counts, 0 as operCounts ";
 			
 	/**
@@ -114,5 +114,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	@Modifying
 	@Query(value = "update product set demo = ?1 where id = ?2 ", nativeQuery = true)
 	void updateDemo(int demo, long id);
+	
+	@Query(value = "select * from product where status = ?1 and productType >= 1000 ", nativeQuery = true)
+	List<Product> findByStatusMultiType(int status);
+	
+//	@Transactional
+//	@Modifying
+//	@Query(value = "update product set totalCount = totalCount - ?1 where id = ?2 ", nativeQuery = true)
+//	void updateStock(int count, long id);
 	
 }

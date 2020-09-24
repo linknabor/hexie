@@ -441,11 +441,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						});
 					}
 					
+					isSuccess = true;
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
 				if (!isSuccess) {
 					String value = objectMapper.writeValueAsString(json);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_SERVICE_CFG_QUEUE, value);
@@ -488,9 +489,37 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.info("update orderStatus, orderType : " + serviceOrder.getOrderType());
 					logger.info("update orderStatus, orderStatus : " + serviceOrder.getStatus());
 					
-					//核销券
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
+						for (ServiceOrder order : orderList) {
+							
+							if (ModelConstant.ORDER_STATUS_INIT == order.getStatus()) {
+								Date date = new Date();
+								order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+								order.setConfirmDate(date);
+								order.setPayDate(date);
+//								serviceOrderRepository.save(order);
+								salePlanService.getService(order.getOrderType()).postPaySuccess(order);	//修改orderItems
+								
+								//发送模板消息和短信
+								userNoticeService.orderSuccess(order.getUserId(), order.getTel(),
+										order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
+								//清空购物车中已购买的商品
+								List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
+								cartService.delFromCart(order.getUserId(), itemList);
+								//减库存
+								for (OrderItem item : itemList) {
+									redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + item.getProductId(), item.getCount());
+								}
+								
+							}
+							
+						}
+					
+					}
+					
+					//核销券、团购、合伙人、saas售卖
 					if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || 
-							ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType() ||
 							ModelConstant.ORDER_TYPE_SAASSALE == serviceOrder.getOrderType()) {
@@ -503,16 +532,15 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							serviceOrderRepository.save(serviceOrder);
 							salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
 							
+							if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+								//减库存
+								redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
+							}
+							
 							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
 								//发送模板消息和短信
 								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
 										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
-								//清空购物车中已购买的商品
-								if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
-									List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
-									cartService.delFromCart(serviceOrder.getUserId(), itemList);
-								}
-								
 							}
 							
 							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
@@ -546,11 +574,13 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						}
 					}
 					
+					isSuccess = true;
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
+				
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, tradeWaterId);
 				}
@@ -592,26 +622,63 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 						continue;
 					}
-					logger.info("notify delivery, orderId : " + serviceOrder.getId());
+					logger.info("notify delivery, orderNo : " + serviceOrder.getOrderNo());
 					logger.info("notify delivery, orderType : " + serviceOrder.getOrderType());
 					
-					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType() ||
-							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
 						
-						List<ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
-						for (ServiceOperator serviceOperator : opList) {
-							User sendUser = userRepository.findById(serviceOperator.getUserId());
-							gotongService.sendDeliveryNotification(sendUser, serviceOrder);
+						long groupOrderId = serviceOrder.getGroupOrderId();
+						logger.info("notify delivery, groupOrderId : " + groupOrderId);
+						
+						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupOrderId);
+						for (ServiceOrder o : orderList) {
+							int operType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
+							long agentId = o.getAgentId();
+							logger.info("agentId is : " + agentId);
+							List<ServiceOperator> opList = new ArrayList<>();
+							if (agentId > 1) {	//1是默认奈博的，所以跳过
+								opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
+							}else {
+								opList = serviceOperatorRepository.findByType(operType);
+							}
+							logger.info("oper list size : " + opList.size());
+							for (ServiceOperator serviceOperator : opList) {
+								logger.info("delivery user id : " + serviceOperator.getUserId());
+								User sendUser = userRepository.findById(serviceOperator.getUserId());
+								if (sendUser != null) {
+									logger.info("send user : " + sendUser.getId());
+									gotongService.sendDeliveryNotification(sendUser, o);
+								}
+							}
 						}
 						
+					} else if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+						
+						int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
+						long agentId = serviceOrder.getAgentId();
+						logger.info("agentId is : " + agentId);
+						List<ServiceOperator> opList = new ArrayList<>();
+						if (agentId > 1) {	//1是默认奈博的，所以跳过
+							opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
+						}else {
+							opList = serviceOperatorRepository.findByType(operType);
+						}
+						logger.info("oper list size : " + opList.size());
+						for (ServiceOperator serviceOperator : opList) {
+							logger.info("delivery user id : " + serviceOperator.getUserId());
+							User sendUser = userRepository.findById(serviceOperator.getUserId());
+							if (sendUser != null) {
+								logger.info("send user : " + sendUser.getId());
+								gotongService.sendDeliveryNotification(sendUser, serviceOrder);
+							}
+						}
 					}
-					
+					isSuccess = true;
 					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, tradeWaterId);
 				}
@@ -655,12 +722,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						logger.info("partnerNotification : " + partnerNotification);
 						partnerService.invalidate(partnerNotification);
 					}
+					isSuccess = true;
 					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
-				
-				isSuccess = true;
+						
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
 				}

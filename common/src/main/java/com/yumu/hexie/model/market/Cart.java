@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
  *类似购物车，用来暂存商品项，以后可扩展成购物车 
@@ -33,7 +34,7 @@ public class Cart extends BaseModel {
 	 * 添加商品
 	 * @param goods
 	 */
-	public void add(OrderItem orderItem, ProductRule productRule) {
+	public void add(OrderItem orderItem, ProductRule productRule, int stock) {
 		
 		BigDecimal unitPrice = new BigDecimal(String.valueOf(productRule.getPrice()));	//前端传上来的价格不可信，全部采用后端计算
 		BigDecimal count = new BigDecimal(orderItem.getCount());	//数量采用前端传的
@@ -45,10 +46,26 @@ public class Cart extends BaseModel {
 			itemsMap = new HashMap<>();
 		}
 		if (!itemsMap.containsKey(orderItem.getRuleId())) {	//用map存放，避免每次迭代itemsList
+			
+			int perLimit = productRule.getLimitNumOnce();
+			if (orderItem.getCount() > perLimit) {
+				throw new BizValidateException("每人限购" + perLimit + "件。");
+			}
+			if (orderItem.getCount() > stock) {
+				throw new BizValidateException("数量超出范围，库存不足。");
+			}
 			orderItem.setAmount(amount.floatValue());
 			itemsMap.put(orderItem.getRuleId(), orderItem);
 		}else {
 			OrderItem existItem = itemsMap.get(orderItem.getRuleId());
+			
+			int perLimit = productRule.getLimitNumOnce();
+			if (existItem.getCount() + orderItem.getCount() > perLimit) {
+				throw new BizValidateException("每人限购" + perLimit + "件。");
+			}
+			if (existItem.getCount() + orderItem.getCount() > stock) {
+				throw new BizValidateException("数量超出范围，库存不足。");
+			}
 			existItem.setCount(existItem.getCount() + orderItem.getCount());
 			BigDecimal existAmount = new BigDecimal(String.valueOf(existItem.getAmount()));
 			existItem.setAmount(existAmount.add(amount).floatValue());
@@ -82,6 +99,8 @@ public class Cart extends BaseModel {
 		orderItem.setProductId(productRule.getProductId());
 		orderItem.setProductPic(productRule.getMainPicture());
 		orderItem.setProductThumbPic(productRule.getSmallPicture());
+		orderItem.setProductCategoryId(productRule.getProductCategoryId());
+
 	}
 
 	/**

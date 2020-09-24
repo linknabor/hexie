@@ -144,12 +144,17 @@ public class ServiceOrder  extends BaseModel {
     
     private long subType;	//子类，对于自定义服务列说，有子类
     private String subTypeName;	//子类中文名称
+    
+    private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
 
 	@JsonIgnore
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
     @Fetch(FetchMode.SUBSELECT)
 	private List<OrderItem> items = new ArrayList<OrderItem>();
 	
+	@Transient
+	private List<OrderItem> orderItems = new ArrayList<OrderItem>();
+
 	public ServiceOrder(){}
 	public ServiceOrder(SingleItemOrder sOrder) {
 		if (!"2".equals(sOrder.getPayType())) {
@@ -889,6 +894,12 @@ public class ServiceOrder  extends BaseModel {
 	public void setMerchantName(String merchantName) {
 		this.merchantName = merchantName;
 	}
+	public Long getGroupOrderId() {
+		return groupOrderId;
+	}
+	public void setGroupOrderId(Long groupOrderId) {
+		this.groupOrderId = groupOrderId;
+	}
 	@Transient
 	@JsonIgnore
 	public List<Long> getProductIds(){
@@ -939,10 +950,10 @@ public class ServiceOrder  extends BaseModel {
 		this.logisticCode = logisticCode;
 	}
 	public List<OrderItem> getOrderItems() {
-		if (items == null) {
-			return items;
-		}
-		return new ArrayList<>();
+		return orderItems;
+	}
+	public void setOrderItems(List<OrderItem> orderItems) {
+		this.orderItems = orderItems;
 	}
 	public boolean payable() {
         return ModelConstant.ORDER_STATUS_INIT==getStatus();

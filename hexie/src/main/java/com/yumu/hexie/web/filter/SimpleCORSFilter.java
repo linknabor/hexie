@@ -61,13 +61,8 @@ public class SimpleCORSFilter implements Filter {
 			response.addHeader("Access-Control-Allow-Token", token);
 		}
         if (testMode) {
-        	String []  allowDomain= {"http://127.0.0.1","http://192.168.1.150"};
-            Set<String> allowedOrigins= new HashSet<String>(Arrays.asList(allowDomain));
-            String originHeader=((HttpServletRequest) req).getHeader("Origin");
-            if (allowedOrigins.contains(originHeader)) {
-                response.setHeader("Access-Control-Allow-Origin", originHeader);
-            }
-//        	response.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1");
+            String originHeader = request.getHeader("Origin");
+            response.setHeader("Access-Control-Allow-Origin", originHeader);
 		}
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
