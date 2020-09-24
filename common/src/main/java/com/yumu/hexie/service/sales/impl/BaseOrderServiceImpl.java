@@ -863,7 +863,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}else if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-				if (!operatorDefinition.isOnsaleTaker()) {
+				if (!operatorDefinition.isRgroupTaker()) {
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}
@@ -907,7 +907,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}else if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-				if (!operatorDefinition.isOnsaleTaker()) {
+				if (!operatorDefinition.isRgroupTaker()) {
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}
