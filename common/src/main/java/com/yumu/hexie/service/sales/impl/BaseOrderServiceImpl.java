@@ -1327,7 +1327,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			if (canSale <= 0) {
 				throw new BizValidateException("抱歉，商品["+productRule.getName()+"]没有库存啦。");
 			}
-			if (canSale <= orderItem.getCount()) {
+			if (canSale < orderItem.getCount()) {
 				throw new BizValidateException("抱歉，商品["+productRule.getName()+"]仅剩"+canSale+"件，请减少购买件数。");
 			}
 			
