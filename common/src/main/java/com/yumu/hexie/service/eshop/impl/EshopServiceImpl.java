@@ -7,7 +7,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -21,9 +23,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
@@ -111,12 +115,28 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Autowired
 	private RedisRepository redisRepository;
 	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
 	private EvoucherService evoucherService;
 	@Autowired
 	private SystemConfigService systemConfigService;
 	
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
+	
+	@PostConstruct
+	public void initStockAndFreeze() {
+		
+		List<Product> proList = productRepository.findByStatusMultiType(ModelConstant.PRODUCT_ONSALE);
+		for (Product product : proList) {
+			String total = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + product.getId());
+			if (StringUtils.isEmpty(total)) {
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");
+			}
+		}
+		logger.info("init stock and freeze finished .");
+	}
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
@@ -155,17 +175,28 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			
 			List<ServiceOperator> opList = new ArrayList<>();
+			int operatorType = 0;
 			if ("1001".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
 			}else if ("1002".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
 			}else if ("1003".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_PROMOTION);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
 			}else if ("1004".equals(productType)) {
-				opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_SAASSALE);
+				operatorType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
 			}
+			
+			if (StringUtils.isEmpty(queryProductVO.getAgentNo())) {
+				opList = serviceOperatorRepository.findByType(operatorType);
+			}else {
+				Agent agent = agentRepository.findByAgentNo(queryProductVO.getAgentNo());
+				if (agent != null) {
+					opList = serviceOperatorRepository.findByTypeAndAgentId(operatorType, agent.getId());
+				}
+			}
+			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
-			if (!opList.isEmpty() && !list.isEmpty()) {
+			if (!opList.isEmpty() && (list!=null && !list.isEmpty())) {
 				list.get(0).setOperCounts(BigInteger.valueOf(opList.size()));
 			}
 			QueryListDTO<List<QueryProductMapper>> responsePage = new QueryListDTO<>();
@@ -207,7 +238,12 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
-			List<Object[]> regionList = regionRepository.findByProductId(queryProductVO.getProductId());
+			List<Object[]> regionList = new ArrayList<>();
+			if ("1000".equals(productType) || "1001".equals(productType) || "1003".equals(productType) || "1004".equals(productType)) {
+				regionList = regionRepository.findByProductId(queryProductVO.getProductId());}
+			else if ("1002".equals(productType)) {
+				regionList = regionRepository.findByProductId4Rroup(queryProductVO.getProductId());
+			}
 			
 			QueryProductDTO<QueryProductMapper> queryProductDTO = new QueryProductDTO<>();
 			queryProductDTO.setContent(list.get(0));
@@ -260,7 +296,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			product.setAgentId(agent.getId());
 		}
 		product.setProductType(saveProductVO.getType());
-		product.setTotalCount(Integer.parseInt(saveProductVO.getTotalCount()));
+		product.setTotalCount(Integer.parseInt(saveProductVO.getTotalCount()) + product.getSaledNum());
 		product.setMainPicture(saveProductVO.getMainPicture());
 		product.setSmallPicture(saveProductVO.getSmallPicture());
 		product.setPictures(saveProductVO.getPictures());
@@ -272,8 +308,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (ModelConstant.RULE_STATUS_ON == Integer.valueOf(saveProductVO.getStatus())) {
 			product.setStatus(ModelConstant.PRODUCT_ONSALE);
 		}
-		product.setStartDate(saveProductVO.getStartDate() + " 00:00:00");
-		product.setEndDate(saveProductVO.getEndDate() + " 00:00:00");
+		Date startDate = DateUtil.parse(saveProductVO.getStartDate(), DateUtil.dttmSimple);
+		product.setStartDate(startDate);
+		Date endDate = DateUtil.parse(saveProductVO.getEndDate(), DateUtil.dttmSimple);
+		product.setEndDate(endDate);
 		product.setShortName(saveProductVO.getName());
 		product.setTitleName(saveProductVO.getName());
 		if ("edit".equals(saveProductVO.getOperType())) {
@@ -492,6 +530,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		String key = ModelConstant.KEY_PRO_RULE_INFO + productRule.getId();
 		redisRepository.setProdcutRule(key, productRule);
 		
+		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");	//初始化冻结数量
+		
 	}
 	
 	@Override
@@ -634,15 +675,17 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == queryOperVO.getType()) {
 				list = serviceOperatorRepository.findByTypeAndServiceId(queryOperVO.getType(), queryOperVO.getServiceId());
 			}else if (ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == queryOperVO.getType() ||
-					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType() ||
-					ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType() ||
-					ModelConstant.SERVICE_OPER_TYPE_SAASSALE == queryOperVO.getType()) {
-				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
-			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType()) {
-				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
-
-			}
+					ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == queryOperVO.getType()) {
 			
+				if (StringUtils.isEmpty(queryOperVO.getAgentNo())) {
+					list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+				}else {
+					Agent agent = agentRepository.findByAgentNo(queryOperVO.getAgentNo());
+					list = serviceOperatorRepository.findByTypeAndAgentIdWithAppid(queryOperVO.getType(), agent.getId());
+				}
+			}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == queryOperVO.getType() || ModelConstant.SERVICE_OPER_TYPE_SAASSALE == queryOperVO.getType()) {
+				list = serviceOperatorRepository.findByTypeWithAppid(queryOperVO.getType());
+			}
 			List<OperatorMapper> operList = ObjectToBeanUtils.objectToBean(list, OperatorMapper.class);
 			commonResponse.setData(operList);
 			commonResponse.setResult("00");
@@ -660,16 +703,41 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Transactional
 	public void saveOper(SaveOperVO saveOperVO) {
 		
+		Agent agent = new Agent();
+		if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+			agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
+		}
+		
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
 			Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
 			serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
+		}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_SAASSALE == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()) {
+			
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+			}else {
+				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
+			}
+			
+			
 		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
-			ServiceOperator serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId());
+			
+			ServiceOperator serviceOperator = null;
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenIdAndAgentId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId(), agent.getId());
+			}else {
+				serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenIdAndAgentIdIsNull(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId());
+			}
+			
 			if (serviceOperator == null) {
 				serviceOperator = new ServiceOperator();
 			}
+			
 			serviceOperator.setName(oper.getName());
 			serviceOperator.setOpenId(oper.getOpenId());
 			serviceOperator.setTel(oper.getTel());
@@ -677,6 +745,10 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setUserId(oper.getUserId());
 			serviceOperator.setLongitude(0d);
 			serviceOperator.setLatitude(0d);
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
+				serviceOperator.setAgentId(agent.getId());
+			}
 			serviceOperator = serviceOperatorRepository.save(serviceOperator);
 			
 			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
@@ -749,27 +821,62 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (serviceOrder == null) {
 			throw new BizValidateException("为查询到订单: " + orderNo);
 		}
-		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
+		List<ServiceOrder> orderList = new ArrayList<>();
+		if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+			orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
+		} else {
+			orderList.add(serviceOrder);
+		}
 		
 		int fromStatus = 0;
 		int toStatus = 0; 
-		if ("0".equals(operType)) {
-			fromStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
-			toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+		for (ServiceOrder order : orderList) {
 			
-			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
-			serviceOrder.setRefundDate(new Date());
-			serviceOrderRepository.save(serviceOrder);
-			
-		}else if ("1".equals(operType)) {
-			fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
-			toStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
-			
-			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-			serviceOrder.setRefundDate(null);
-			serviceOrderRepository.save(serviceOrder);
+			if ("0".equals(operType)) {
+				fromStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
+				toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+				
+				order.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+				if (!StringUtils.isEmpty(order.getSendDate())) {
+					order.setStatus(ModelConstant.ORDER_STATUS_RETURNED);
+				}
+				order.setRefundDate(new Date());
+				serviceOrderRepository.save(order);
+				
+				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
+					if (optional.isPresent()) {
+						RgroupRule rule = optional.get();
+						rule.setCurrentNum(rule.getCurrentNum()-order.getCount());
+						rgroupRuleRepository.save(rule);
+					}
+				}
+				
+			}else if ("1".equals(operType)) {
+				fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
+				toStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
+				
+				order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+				if (!StringUtils.isEmpty(order.getSendDate())) {
+					order.setStatus(ModelConstant.ORDER_STATUS_SENDED);
+				}else if (!StringUtils.isEmpty(order.getConfirmDate())) {
+					order.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
+				}
+				order.setRefundDate(null);
+				serviceOrderRepository.save(order);
+				
+				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
+					if (optional.isPresent()) {
+						RgroupRule rule = optional.get();
+						rule.setCurrentNum(rule.getCurrentNum()+order.getCount());
+						rgroupRuleRepository.save(rule);
+					}
+				}
+			}
 		}
 		
+		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
 		for (Evoucher evoucher : evoucherList) {
 			if (fromStatus == evoucher.getStatus()) {
 				evoucher.setStatus(toStatus);

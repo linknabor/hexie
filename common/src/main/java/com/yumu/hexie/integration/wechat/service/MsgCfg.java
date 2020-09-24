@@ -20,6 +20,8 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_PAY_NOTIFY = "payNotifyTemplate";
 	public static final String TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN = "customServiceAssginTemplate";
 	public static final String TEMPLATE_TYPE_RESET_PASSWORD = "resetPasswordTemplate";
+	public static final String TEMPLATE_TYPE_DELIVERY_MESSAGE = "deliveryMessageTemplate";	//商家订单发货提醒
+	public static final String TEMPLATE_TYPE_CUSTOMER_DELIVERY = "customerDeliveryTemplate";	//买家发货提醒
 	
 	public static final String URL_SUCCESS = "successUrl";
 	public static final String URL_REG_SUCCESS = "regSuccessUrl";
@@ -36,7 +38,9 @@ public class MsgCfg {
 	public static final String URL_PAY_NOTIFY = "payNotifyUrl";
 	public static final String URL_CUSTOM_SERVICE_ASSIGN = "customServiceUrl";
 	public static final String URL_CUSTOM_SERVICE_DETAIL = "customServiceDetail";
-    
+	public static final String URL_DELIVERY_DETAIL = "deliveryDetailUrl";
+	public static final String URL_CUSTOMER_DELIVERY = "customerDeliveryUrl";
 	
+    
 	
 }

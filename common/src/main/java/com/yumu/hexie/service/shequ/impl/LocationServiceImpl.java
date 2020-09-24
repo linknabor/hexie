@@ -46,9 +46,6 @@ public class LocationServiceImpl implements LocationService {
 	@PostConstruct
 	public void initRegionUrlCache() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
-    		return;
-    	}
 		List<RegionUrl> list = regionUrlRepository.findAll();
 		if (list != null) {
 			for (RegionUrl regionUrl : list) {

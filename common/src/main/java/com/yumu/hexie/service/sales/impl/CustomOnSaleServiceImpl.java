@@ -4,11 +4,16 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
@@ -20,12 +25,17 @@ import com.yumu.hexie.service.sales.ProductService;
 
 @Service("customOnSaleService")
 public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
+	
+	private static Logger logger = LoggerFactory.getLogger(CustomOnSaleServiceImpl.class);
+	
 	@Inject
 	private OnSaleRuleRepository onSaleRuleRepository;
     @Inject
     private DistributionService distributionService;
     @Inject
     private ProductService productService;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
 	@Override
 	public void validateRule(ServiceOrder order,SalePlan rule, OrderItem item, Address address) {
@@ -39,6 +49,8 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
     public void postOrderConfirm(ServiceOrder order) {
         
     }
+    
+    @Transactional
 	@Override
 	public void postPaySuccess(ServiceOrder so) {
 		//支付成功订单为配货中状态，改商品库存
@@ -68,6 +80,17 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
      */
     @Override
     public void postOrderCancel(ServiceOrder order) {
+    	
+    	if (order == null) {
+    		logger.warn("order is null, will return ");
+			return;
+		}
+    	List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
+    	for (OrderItem orderItem : itemList) {
+    		logger.info("unfreeze product : " + orderItem.getProductId());
+    		productService.unfreezeCount(orderItem.getProductId(), orderItem.getCount());
+		}
+    
     }
 	
 }

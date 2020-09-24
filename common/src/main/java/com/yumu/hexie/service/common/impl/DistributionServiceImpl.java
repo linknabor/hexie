@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
@@ -71,6 +72,8 @@ public class DistributionServiceImpl implements DistributionService {
     private RegionRepository regionRepository;
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     /** 
      * @param rule
@@ -258,6 +261,13 @@ public class DistributionServiceImpl implements DistributionService {
 		} else {	//已经绑定房屋的用户查询关联小区的商品
     		itemList = onSaleAreaItemRepository.findByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, category, currUser.getSectId(), pageable); 
     	}
+    	
+    	for (OnSaleAreaItem item : itemList) {
+    		String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
+    		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
+			int totalCount = Integer.valueOf(stock) - Integer.valueOf(freeze);
+    		item.setTotalCount(totalCount);
+		}
         return itemList;
     }
 
@@ -269,9 +279,11 @@ public class DistributionServiceImpl implements DistributionService {
 
 		User currUser = userRepository.findById(user.getId());
 		long current = System.currentTimeMillis();
-		List<ProductCategory> list = productCategoryRepository.findCategoryByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId()); 
-		if (list.isEmpty()) {
-			list = productCategoryRepository.findAll();
+		List<ProductCategory> list = null;
+		if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
+			list = productCategoryRepository.findCategoryDemo(ModelConstant.DISTRIBUTION_STATUS_ON, type, current);
+		}else {
+			list = productCategoryRepository.findCategoryByBindedSect(ModelConstant.DISTRIBUTION_STATUS_ON, type, current, currUser.getSectId());
 		}
 		return list;
 	}

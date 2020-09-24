@@ -32,6 +32,8 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     
     public List<ServiceOperator> findByType(int type);
     
+    public List<ServiceOperator> findByTypeAndAgentId(int type, long agentId);
+    
     @Query("From ServiceOperator r order by POWER(MOD(ABS(r.longitude - ?1),360),2) + POWER(ABS(r.latitude - ?2),2)")
     public List<ServiceOperator> findByLongitudeAndLatitude(Double longitude, Double latitude, Pageable pageable);
     
@@ -77,12 +79,24 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     		+ "where a.type = ?1 and b.sectId = ?2 ")
     public List<ServiceOperator> findByTypeAndSectId(int type, String sectId);
     
-    public ServiceOperator findByTypeAndTelAndOpenId(int type, String tel, String openId);
+    public ServiceOperator findByTypeAndTelAndOpenIdAndAgentIdIsNull(int type, String tel, String openId);
+    
+    public ServiceOperator findByTypeAndTelAndOpenIdAndAgentId(int type, String tel, String openId, long agentId);
     
     @Transactional
     @Modifying
     @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 ")
     public void deleteByType(int type);
+    
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 and agentId =?2 ")
+    public void deleteByTypeAndAgentId(int type, long agentId);
+    
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 and agentId is null ")
+    public void deleteByTypeAndNullAgent(int type);
     
     String column1 = "s.id, s.openId, s.name, s.tel, u.appid, s.userId ";
     
@@ -98,8 +112,15 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     		+ column1
     		+ "from serviceoperator s "
     		+ "join user u on u.id = s.userId "
-    		+ "where s.type = ?1 ", nativeQuery = true)
+    		+ "where s.type = ?1 and s.agentId is null ", nativeQuery = true)
     public List<Object[]> findByTypeWithAppid(int type);
+    
+    @Query(value = "select "
+    		+ column1
+    		+ "from serviceoperator s "
+    		+ "join user u on u.id = s.userId "
+    		+ "where s.type = ?1 and s.agentId = ?2 ", nativeQuery = true)
+    public List<Object[]> findByTypeAndAgentIdWithAppid(int type, Long agentId);
     
     @Query(value = "select s.* from serviceoperator s "
     		+ "left join serviceOperatorItem oi on s.id = oi.operatorId "

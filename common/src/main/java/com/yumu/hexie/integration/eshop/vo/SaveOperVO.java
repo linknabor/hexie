@@ -15,6 +15,7 @@ public class SaveOperVO implements Serializable {
 	private int operatorType;
 	private Long serviceId;
 	private List<Oper> opers;
+	private String agentNo;
 
 	public static class Oper {
 		
@@ -66,7 +67,7 @@ public class SaveOperVO implements Serializable {
 		@Override
 		public String toString() {
 			return "Oper [id=" + id + ", name=" + name + ", openId=" + openId + ", tel=" + tel + ", type=" + type
-					+ ", userId=" + userId + "]";
+					+ ", userId=" + userId;
 		}
 		
 		
@@ -90,9 +91,16 @@ public class SaveOperVO implements Serializable {
 	public void setServiceId(Long serviceId) {
 		this.serviceId = serviceId;
 	}
+	public String getAgentNo() {
+		return agentNo;
+	}
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
 	@Override
 	public String toString() {
-		return "SaveOperVO [operatorType=" + operatorType + ", serviceId=" + serviceId + ", opers=" + opers + "]";
+		return "SaveOperVO [operatorType=" + operatorType + ", serviceId=" + serviceId + ", opers=" + opers
+				+ ", agentNo=" + agentNo + "]";
 	}
 	
 	

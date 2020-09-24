@@ -84,6 +84,12 @@ public class OperatorServiceImpl implements OperatorService {
 			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == serviceOperator.getType()) {
 				oDefinition.setEvoucherOperator(true);
 			}
+			if (ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == serviceOperator.getType()) {
+				oDefinition.setOnsaleTaker(true);
+			}
+			if (ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == serviceOperator.getType()) {
+				oDefinition.setRgroupTaker(true);
+			}
 		}
 		return oDefinition;
 	}
