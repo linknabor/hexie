@@ -890,8 +890,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			itemList = orderItemRepository.findByServiceOrder(order);
 		}else {
 			List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(orderId);
-			order = orderList.get(0);
 			if (!orderList.isEmpty()) {
+				order = orderList.get(0);
 				for (ServiceOrder serviceOrder : orderList) {
 					List<OrderItem> oList = orderItemRepository.findByServiceOrder(serviceOrder);
 					itemList.addAll(oList);
