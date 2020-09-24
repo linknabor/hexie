@@ -1330,7 +1330,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			if (canSale <= orderItem.getCount()) {
 				throw new BizValidateException("抱歉，商品["+productRule.getName()+"]仅剩"+canSale+"件，请减少购买件数。");
 			}
-			
+
 		}
 		
 		ServiceOrder o = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用

@@ -154,7 +154,7 @@ public class ServiceOrder  extends BaseModel {
 	
 	@Transient
 	private List<OrderItem> orderItems = new ArrayList<OrderItem>();
-	
+
 	public ServiceOrder(){}
 	public ServiceOrder(SingleItemOrder sOrder) {
 		if (!"2".equals(sOrder.getPayType())) {
