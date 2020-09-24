@@ -123,29 +123,5 @@ public class CartServiceImpl implements CartService {
 	}
 
 	
-	/**
-	 * 从购物车删除商品
-	 */
-	@Override
-	public void delFromCart(Long userId, List<OrderItem> itemList){
-		
-		String cartKey = Keys.uidCardKey(userId);
-		Cart cart = redisRepository.getCart(cartKey);
-		if (cart == null) {
-			logger.info("cart is empty, userId : " + userId);
-			return;
-		}
-		
-		for (OrderItem orderItem : itemList) {
-			ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
-			if (productRule == null) {
-				throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
-			}
-			cart.del(orderItem, productRule);
-				
-		}
-		redisRepository.setCart(cartKey, cart);
-	}
-	
 	
 }
