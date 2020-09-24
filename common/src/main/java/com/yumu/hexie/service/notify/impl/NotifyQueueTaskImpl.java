@@ -76,7 +76,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	@Autowired
 	private OrderItemRepository orderItemRepository;
 	
-	
 	/**
 	 * 异步发送到账模板消息
 	 */
@@ -542,6 +541,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								//发送模板消息和短信
 								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
 										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+								//清空购物车中已购买的商品
+								if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+									List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
+									cartService.delFromCart(serviceOrder.getUserId(), itemList);
+								}
+								
 							}
 							
 							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
@@ -728,8 +733,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
-				
-				
+						
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
 				}
