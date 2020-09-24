@@ -96,6 +96,8 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
 		}else if("PAYED".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
 		}else if("PREPARE".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
 		}else{//if("ALL".equalsIgnoreCase(statusType)){
@@ -122,15 +124,17 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 		}else if("NEEDRECEIVE".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
-			status.add(ModelConstant.ORDER_STATUS_SENDED);
+//			status.add(ModelConstant.ORDER_STATUS_SENDED);
 		}else if("CANCELD".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_CANCEL);
 			status.add(ModelConstant.ORDER_STATUS_CANCEL_BACKEND);
 			status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
 		}else if("PAYED".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
-		}else if("PREPARE".equalsIgnoreCase(statusType)){
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+		}else if("PREPARE".equalsIgnoreCase(statusType)){
+//			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
 		}else{//if("ALL".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
@@ -211,24 +215,21 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/getOrder/{orderId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<ServiceOrder> getOrder(@ModelAttribute(Constants.USER)User user,@PathVariable long orderId) throws Exception {
-		ServiceOrder order = baseOrderService.findOne(orderId);
-		if(order.getUserId() != user.getId()){
-			return new BaseResult<ServiceOrder>().failMsg("你没有权限查看该订单！");
-		}
+//		ServiceOrder order = baseOrderService.findOne(orderId);
+//		if(order.getUserId() != user.getId()){
+//			return new BaseResult<ServiceOrder>().failMsg("你没有权限查看该订单！");
+//		}
+		ServiceOrder order = baseOrderService.getOrder(user, orderId);
 		return new BaseResult<ServiceOrder>().success(order);
     }
 
 	@RequestMapping(value = "/requestPay/{orderId}", method = {RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
 	public BaseResult<JsSign> requestPay(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
-		ServiceOrder order = baseOrderService.findOne(orderId);
-		if(user.getId() != order.getUserId()) {
-			return new BaseResult<JsSign>().failMsg("无法支付他人订单");
-		}
-		return new BaseResult<JsSign>().success(baseOrderService.requestPay(order));
+		
+		return new BaseResult<JsSign>().success(baseOrderService.requestOrderPay(user, orderId));
 	}
-
-
+	
 	@RequestMapping(value = "/notifyPayed/{orderId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<String> notifyPayed(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
@@ -333,8 +334,6 @@ public class OrderController extends BaseController{
 		ServiceOrder o = baseOrderService.createOrderFromCart(user, req);
 		if(o == null) {
 			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
-		} else {
-			redisRepository.removeCart(Keys.uidCardKey(user.getId()));
 		}
 		return new BaseResult<ServiceOrder>().success(o);
 	}

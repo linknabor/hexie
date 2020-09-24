@@ -115,12 +115,11 @@ public class SmsServiceImpl implements SmsService {
 		}
 		sign = systemConfigService.getSysConfigByKey(key);	//形如：DEFAULT_SIGN_wxa48ca61b68163483
 		
-		sign = "【"+sign+"】";
-		
 		if (StringUtil.isEmpty(sign)) {
 			LOGGER.warn("未配置系统参数DEFAULT_SIGN，默认值：合协社区");
-			sign = "【合协社区】";
+			sign = "合协社区";
 		}
+		sign = "【"+sign+"】";
 		return sign;
 	}
 	

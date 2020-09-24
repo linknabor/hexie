@@ -6,10 +6,16 @@ import javax.persistence.Transient;
 //团购上架管理
 @Entity
 public class RgroupAreaItem  extends RuleDistribution {
+	
 	private static final long serialVersionUID = 4808669460780339640L;
 
 	@Transient
 	private int process;//进度
+	@Transient
+	private int count;	//页面用
+	@Transient
+	private int totalCount;	//库存
+	
 	private boolean featured = false;
 	private int productType;
 
@@ -31,4 +37,17 @@ public class RgroupAreaItem  extends RuleDistribution {
 	public void setProcess(int process) {
 		this.process = process;
 	}
+	public int getCount() {
+		return count;
+	}
+	public void setCount(int count) {
+		this.count = count;
+	}
+	public int getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(int totalCount) {
+		this.totalCount = totalCount;
+	}
+	
 }

@@ -29,13 +29,15 @@ public class ServiceOperator  extends BaseModel {
     private String openId;//设置用户ID的时候将其匹配
     private long userId;
     
-
     private Long regionId;//合协社区区域ID
     private boolean fromWuye = false;
     private double longitude;
     private double latitude;
     
     private String subTypes;
+    
+    private Long agentId;	//操作员来自哪个代理商
+    private Long merchantId;	//操作员来自哪个商户
     
     public String getCompanyName() {
         return companyName;
@@ -103,11 +105,25 @@ public class ServiceOperator  extends BaseModel {
 	public void setSubTypes(String subTypes) {
 		this.subTypes = subTypes;
 	}
+	public Long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(Long agentId) {
+		this.agentId = agentId;
+	}
+	public Long getMerchantId() {
+		return merchantId;
+	}
+	public void setMerchantId(Long merchantId) {
+		this.merchantId = merchantId;
+	}
 	@Override
 	public String toString() {
 		return "ServiceOperator [type=" + type + ", companyName=" + companyName + ", name=" + name + ", tel=" + tel
 				+ ", openId=" + openId + ", userId=" + userId + ", regionId=" + regionId + ", fromWuye=" + fromWuye
-				+ ", longitude=" + longitude + ", latitude=" + latitude + ", subTypes=" + subTypes + "]";
+				+ ", longitude=" + longitude + ", latitude=" + latitude + ", subTypes=" + subTypes + ", agentId="
+				+ agentId + ", merchantId=" + merchantId + "]";
 	}
-    
+	
+	
 }
