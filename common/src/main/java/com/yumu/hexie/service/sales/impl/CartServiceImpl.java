@@ -113,13 +113,15 @@ public class CartServiceImpl implements CartService {
 		for (OrderItem orderItem : itemList) {
 			ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
 			if (productRule == null) {
-				throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
+				logger.info("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
+			}else {
+				cart.del(orderItem, productRule);
 			}
-			cart.del(orderItem, productRule);
 				
 		}
 		redisRepository.setCart(cartKey, cart);
 	}
+
 	
 	
 }

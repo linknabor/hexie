@@ -76,7 +76,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	@Autowired
 	private OrderItemRepository orderItemRepository;
 	
-	
 	/**
 	 * 异步发送到账模板消息
 	 */
@@ -728,8 +727,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
-				
-				
+						
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
 				}
