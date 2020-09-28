@@ -1,5 +1,7 @@
 package com.yumu.hexie.common.config;
 
+import java.io.UnsupportedEncodingException;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,8 +24,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class Swagger2Config {
 
 	@Bean("swagger4sales")
-	public Docket api4Sales() {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("电商板块").apiInfo(apiInfo()).select()
+	public Docket api4Sales() throws UnsupportedEncodingException {
+		return new Docket(DocumentationType.SWAGGER_2).groupName("Sales").apiInfo(apiInfo()).select()
 				// 自行修改为自己的包路径
 				.apis(RequestHandlerSelectors.basePackage("com.yumu.hexie.web.sales"))
 				.paths(PathSelectors.any()).build();
