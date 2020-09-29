@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -49,7 +49,7 @@ public class BatchServiceImpl implements BatchService {
 	@PostConstruct
 	public void runBatch() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+		if (Constants.MAIN_SERVER) {	//BK程序不跑下面的队列轮询
 			return;
 		}
 		wuyeQueueTask.bindHouseByTrade();
@@ -65,6 +65,7 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.updateOrderStatusAysc();
 		notifyQueueTask.sendDeliveryNotificationAsyc();
 		notifyQueueTask.updatePartnerAsync();
+		notifyQueueTask.eshopRefundAsync();
 		
 		logger.info("异步队列任务启动完成。");
 		

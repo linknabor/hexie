@@ -57,8 +57,8 @@ public class FundService {
 		String spbill_create_ip = addr.getHostAddress().toString();	//订单生成的机器IP
 		String nonce_str = WeixinUtil.buildRandom();	//随机字符串
 		Map<String,String> map = new HashMap<String, String>();
-		map.put("appid", ConstantWeChat.APPID_PAY);
-		map.put("mch_id", ConstantWeChat.MERCHANTID);
+		map.put("appid", ConstantWeChat.APPID);
+		map.put("mch_id", ConstantWeChat.MERCHANT_ID);
 		map.put("notify_url", ConstantWeChat.NOTIFYURL);
 		map.put("trade_type", ConstantWeChat.TRADETYPE);
 		
@@ -73,7 +73,7 @@ public class FundService {
 		map.put("body", payOrder.getProductName());
 		map.put("openid", payOrder.getOpenId());
 		
-		String sign = WeixinUtil.createSign(map, ConstantWeChat.KEY);	//生成签名
+		String sign = WeixinUtil.createSign(map, ConstantWeChat.MERCHANT_KEY);	//生成签名
 		map.put("sign", sign);
 		map.remove("key");	//只有生成签名的时候需要将key加入，组建XML时无须使用KEY，不然会报错。
 		String requestXml = MessageUtil.createPayRequestXML(map);
@@ -123,12 +123,12 @@ public class FundService {
 	public static PaymentOrderResult queryOrder(String out_trade_no){
 		Map<String, String>map = new TreeMap<String, String>();
 		String nonceStr = WeixinUtil.buildRandom();	//随机字符串
-		map.put("appid", ConstantWeChat.APPID_PAY);
-		map.put("mch_id", ConstantWeChat.MERCHANTID);
-		map.put("key", ConstantWeChat.KEY);
+		map.put("appid", ConstantWeChat.APPID);
+		map.put("mch_id", ConstantWeChat.MERCHANT_ID);
+		map.put("key", ConstantWeChat.MERCHANT_KEY);
 		map.put("nonce_str", String.valueOf(nonceStr));
 		map.put("out_trade_no", out_trade_no);
-		String sign = WeixinUtil.createSign(map, ConstantWeChat.KEY);
+		String sign = WeixinUtil.createSign(map, ConstantWeChat.MERCHANT_KEY);
 		//组装发送的XML
 		map.put("sign", sign);
 		map.remove("key");
@@ -155,12 +155,12 @@ public class FundService {
 	public static CloseOrderResp closeOrder(String out_trade_no){
 		Map<String, String>map = new TreeMap<String, String>();
 		String nonceStr = WeixinUtil.buildRandom();	//随机字符串
-		map.put("appid", ConstantWeChat.APPID_PAY);
-		map.put("mch_id", ConstantWeChat.MERCHANTID);
-		map.put("key", ConstantWeChat.KEY);
+		map.put("appid", ConstantWeChat.APPID);
+		map.put("mch_id", ConstantWeChat.MERCHANT_ID);
+		map.put("key", ConstantWeChat.MERCHANT_KEY);
 		map.put("nonce_str", String.valueOf(nonceStr));
 		map.put("out_trade_no", out_trade_no);
-		String sign = WeixinUtil.createSign(map, ConstantWeChat.KEY);
+		String sign = WeixinUtil.createSign(map, ConstantWeChat.MERCHANT_KEY);
 		//组装发送的XML
 		map.put("sign", sign);
 		map.remove("key");
@@ -204,7 +204,7 @@ public class FundService {
 	public static JsSign getPrepareSign(String prepay_id) {
 		Map<String,String> map = new HashMap<String, String>();
 		JsSign r = new JsSign();
-		r.setAppId(ConstantWeChat.APPID_PAY);
+		r.setAppId(ConstantWeChat.APPID);
 		r.setTimestamp(""+(int)(System.currentTimeMillis()/1000));
 		r.setNonceStr(WeixinUtil.buildRandom());
 		r.setPkgStr("prepay_id=" + prepay_id);
@@ -214,7 +214,7 @@ public class FundService {
 		map.put("nonceStr", r.getNonceStr());
 		map.put("package", "prepay_id=" + prepay_id);
 		map.put("signType", "MD5");
-		r.setSignature(WeixinUtil.createSign(map, ConstantWeChat.KEY));
+		r.setSignature(WeixinUtil.createSign(map, ConstantWeChat.MERCHANT_KEY));
 		return r;
 	}
 	/**

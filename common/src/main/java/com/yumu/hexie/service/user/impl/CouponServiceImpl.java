@@ -534,11 +534,11 @@ public class CouponServiceImpl implements CouponService {
 	public Long getMerchatId(Long mainType, Long subType, Long itemId) {
 		
 		log.error("mainType:"+mainType+",subType:"+subType+",itemId:"+itemId);
-        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_MARKET).equals(mainType) && itemId != null && !itemId.equals(0)){
+        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_MARKET).equals(mainType) && itemId != null && itemId != 0){
             Product product = productRepository.findById(itemId).get();
             return product == null ? 0 : product.getMerchantId();
         }
-        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_SERVICE).equals(mainType) && subType != null && !subType.equals(0)) {
+        if(new Long(PromotionConstant.COUPON_ITEM_TYPE_SERVICE).equals(mainType) && subType != null && subType!=0) {
             ServiceType type = homeItemService.queryTypeById(subType);
             return type == null ? 0 : type.getMerchantId();
         }

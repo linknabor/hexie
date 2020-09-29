@@ -42,6 +42,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.MD5Util;
 import com.yumu.hexie.common.util.MyX509TrustManager;
@@ -74,7 +75,7 @@ public class WeixinUtil {
 	public static String jsTicket="";
 	
 	public static String getRefreshJsTicket(String accessToken) {
-		if(!ConstantWeChat.isMainServer())return jsTicket;
+		if(!Constants.MAIN_SERVER)return jsTicket;
 		WechatResponse jsonObject = httpsRequest(JS_TICKET, "GET", null, accessToken);
 		// 如果请求成功
 		if (null != jsonObject && StringUtil.isNotEmpty(jsonObject.getTicket())) {
@@ -92,7 +93,7 @@ public class WeixinUtil {
 	 * @return AccessToken对象
 	 */
 	public static AccessToken getAccessToken() {
-		if(!ConstantWeChat.isMainServer())return at;
+		if(!Constants.MAIN_SERVER)return at;
 		AccessToken accessToken = null;
 
 		String requestUrl = ACCESS_TOKEN.replace("APPID", ConstantWeChat.APPID).replace(
@@ -282,9 +283,9 @@ public class WeixinUtil {
 			keyStore  = KeyStore.getInstance("PKCS12");
 			log.error("cert path is : " + ConstantWeChat.KEYSTORE);
 			instream = new FileInputStream(new File(ConstantWeChat.KEYSTORE));
-			keyStore.load(instream, ConstantWeChat.MERCHANTID.toCharArray());
+			keyStore.load(instream, ConstantWeChat.MERCHANT_ID.toCharArray());
 			
-			SSLContext sslcontext = SSLContexts.custom().loadKeyMaterial(keyStore, ConstantWeChat.MERCHANTID.toCharArray()).build();
+			SSLContext sslcontext = SSLContexts.custom().loadKeyMaterial(keyStore, ConstantWeChat.MERCHANT_ID.toCharArray()).build();
 			// Allow TLSv1 protocol only
 			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
 	                sslcontext,

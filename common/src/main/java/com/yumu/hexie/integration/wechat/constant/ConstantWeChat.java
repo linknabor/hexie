@@ -1,56 +1,28 @@
 package com.yumu.hexie.integration.wechat.constant;
 
-import com.yumu.hexie.common.util.ConfigUtil;
-
 /**
  * 微信常量
  */
 public class ConstantWeChat {
 	
+	public static String APPID;
+	
+	public static String APPSECRET;
+	
+	public static String MERCHANT_ID;
+	
+	public static String MERCHANT_KEY;
+	
+	public static String COMPONENT_APPID;
+	
+	public static String KEYSTORE;
+	
+	public static String UNIFIEDURL;
+	
+	public static String NOTIFYURL;
 	
 	/**
-	 * 与接口配置信息中的Token要一致
-	 */
-	public static String TOKEN = ConfigUtil.get("token");
-	
-	/**
-	 * 第三方用户唯一凭证
-	 */
-	public static String APPID = ConfigUtil.get("appId");
-
-	/**
-	 * 第三方用户唯一凭证密钥
-	 */
-	public static String APPSECRET = ConfigUtil.get("appSecret");
-	
-	public static String COMPONENT_APPID = ConfigUtil.get("componentAppId");
-	
-	public static String MAIN_SERVER = ConfigUtil.get("mainServer");
-	
-	public static boolean isMainServer(){
-		return "true".equalsIgnoreCase(MAIN_SERVER);
-	}
-	
-
-	/**
-	 * 第三方用户唯一凭证
-	 */
-	public static String APPID_PAY = ConfigUtil.get("appId");
-			
-	/**
-	 */
-	public static String MERCHANTID = ConfigUtil.get("mchId");
-	/**
-	 */
-	public static String KEY = ConfigUtil.get("key");
-	public static String KEYSTORE = ConfigUtil.get("wechatCertPath");
-	/**
-	 */
-	public static String NOTIFYURL = ConfigUtil.get("notifyUrl");
-	/**
-	 */
-	public static String UNIFIEDURL = ConfigUtil.get("unifiedUrl");
-	/**
+	 * 
 	 */
 	public static final String TRADETYPE = "JSAPI";
 	

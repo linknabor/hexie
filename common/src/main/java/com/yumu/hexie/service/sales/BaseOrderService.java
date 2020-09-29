@@ -66,5 +66,7 @@ public interface BaseOrderService {
 	JsSign requestOrderPay(User user, long orderId) throws Exception;
 	//查询订单（兼容拆分的交易）
 	ServiceOrder getOrder(User user, long orderId);
+	//退款处理
+	void finishRefund(ServiceOrder serviceOrder);
 		
 }
