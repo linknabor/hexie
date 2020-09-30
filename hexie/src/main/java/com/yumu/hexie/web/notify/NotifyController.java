@@ -2,6 +2,7 @@ package com.yumu.hexie.web.notify;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,5 +71,12 @@ public class NotifyController extends BaseController {
 		return baseResult;
 	}
 	
+	@RequestMapping(value = "/eshop/notifyRefund", method = RequestMethod.POST )
+	public String notifyRefund(@RequestBody Map<String, String> map) throws Exception {
+		
+		log.info("notifyRefund :" + map);
+		notifyService.notifyEshopRefund(map.get("trade_water_id"));
+		return "SUCCESS";
+	}
 	
 }

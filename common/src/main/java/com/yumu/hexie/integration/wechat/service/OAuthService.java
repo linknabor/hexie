@@ -17,7 +17,7 @@ import com.yumu.hexie.service.exception.BizValidateException;
  * oAuth服务
  */
 public class OAuthService {
-
+	
 	/**
 	 * wechat oauth url
 	 */

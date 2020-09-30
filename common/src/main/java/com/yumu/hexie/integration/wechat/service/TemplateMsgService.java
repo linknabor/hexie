@@ -13,11 +13,11 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.yumu.hexie.common.util.AppUtil;
-import com.yumu.hexie.common.util.ConfigUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CsOrderVO;
@@ -82,7 +82,7 @@ public class TemplateMsgService {
     	Assert.hasText(templateType, "模板消息类型不能为空。");
     	
     	if (StringUtils.isEmpty(appId)) {
-			appId = ConfigUtil.get("appId");
+			appId = ConstantWeChat.APPID;
 		}
     	String templateId = msgTemplateService.getTemplateFromCache(templateType, appId);
     	return templateId;

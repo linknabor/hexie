@@ -58,28 +58,20 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private UserRepository userRepository;
-
 	@Inject
 	private WechatCoreService wechatCoreService;
-
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
-	
 	@Autowired
 	private WechatCardRepository wechatCardRepository;
-	
 	@Autowired
 	private CardService cardService;
-	
 	@Autowired
 	private SystemConfigService systemConfigService;
-	
 	@Autowired
 	private PointService pointService;
-	
 	@Autowired
 	private CouponStrategyFactory couponStrategyFactory;
-	
 	@Autowired
 	private RedisRepository redisRepository;
 	
@@ -89,9 +81,9 @@ public class UserServiceImpl implements UserService {
 	public void initAlipay() {
 		
 		try {
-			alipayClient = new DefaultAlipayClient(ConstantAlipay.ALIPAY_GATEWAY, ConstantAlipay.APPID, 
+			alipayClient = new DefaultAlipayClient(ConstantAlipay.GATEWAY, ConstantAlipay.APPID, 
 					ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
-					ConstantAlipay.ALIPAY_PUBLIC_KEY, ConstantAlipay.SIGNTYPE);
+					ConstantAlipay.PUBLIC_KEY, ConstantAlipay.SIGNTYPE);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} 

@@ -27,8 +27,8 @@ public class RefundService {
 	 */
 	public static WxRefundResp requestRefund(RefundOrder refund){
 		Map<String,String> map = new HashMap<String, String>();
-		map.put("appid", ConstantWeChat.APPID_PAY);
-		map.put("mch_id", ConstantWeChat.MERCHANTID);
+		map.put("appid", ConstantWeChat.APPID);
+		map.put("mch_id", ConstantWeChat.MERCHANT_ID);
 		String nonce_str = WeixinUtil.buildRandom();
 		map.put("nonce_str", nonce_str);
 
@@ -39,9 +39,9 @@ public class RefundService {
 		String refundFee = (int)(refund.getRefundFee()*100)+"";
 		map.put("total_fee", totalFee);
 		map.put("refund_fee", refundFee);
-		map.put("op_user_id", ConstantWeChat.MERCHANTID);
+		map.put("op_user_id", ConstantWeChat.MERCHANT_ID);
 		
-		String sign = WeixinUtil.createSign(map, ConstantWeChat.KEY);
+		String sign = WeixinUtil.createSign(map, ConstantWeChat.MERCHANT_KEY);
 		map.put("sign", sign);	
 		String requestXml = MessageUtil.createPayRequestXML(map);
 		WxRefundResp r = (WxRefundResp)WeixinUtil.httpsRequestXmlWithStore(
@@ -58,11 +58,11 @@ public class RefundService {
 	public static WxRefundOrder refundQuery(String outTradeNo){
 		String nonce_str = WeixinUtil.buildRandom();	
 		Map<String,String> map = new HashMap<String, String>();
-		map.put("appid", ConstantWeChat.APPID_PAY);
-		map.put("mch_id", ConstantWeChat.MERCHANTID);
+		map.put("appid", ConstantWeChat.APPID);
+		map.put("mch_id", ConstantWeChat.MERCHANT_ID);
 		map.put("out_trade_no", outTradeNo);
 		map.put("nonce_str", nonce_str);
-		String sign = WeixinUtil.createSign(map, ConstantWeChat.KEY);	//生成签名
+		String sign = WeixinUtil.createSign(map, ConstantWeChat.MERCHANT_KEY);	//生成签名
 		map.put("sign", sign);
 		String requestXml = MessageUtil.createPayRequestXML(map);
 	

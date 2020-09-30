@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
@@ -835,22 +834,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			if ("0".equals(operType)) {
 				fromStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
 				toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
-				
-				order.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
-				if (!StringUtils.isEmpty(order.getSendDate())) {
-					order.setStatus(ModelConstant.ORDER_STATUS_RETURNED);
-				}
-				order.setRefundDate(new Date());
+				order.setStatus(ModelConstant.ORDER_STATUS_REFUNDING);
 				serviceOrderRepository.save(order);
-				
-				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
-					if (optional.isPresent()) {
-						RgroupRule rule = optional.get();
-						rule.setCurrentNum(rule.getCurrentNum()-order.getCount());
-						rgroupRuleRepository.save(rule);
-					}
-				}
 				
 			}else if ("1".equals(operType)) {
 				fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
@@ -862,20 +847,11 @@ public class EshopServiceImpl implements EshopSerivce {
 				}else if (!StringUtils.isEmpty(order.getConfirmDate())) {
 					order.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
 				}
-				order.setRefundDate(null);
 				serviceOrderRepository.save(order);
 				
-				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
-					if (optional.isPresent()) {
-						RgroupRule rule = optional.get();
-						rule.setCurrentNum(rule.getCurrentNum()+order.getCount());
-						rgroupRuleRepository.save(rule);
-					}
-				}
 			}
 		}
-		
+		//TODO 考虑放到异步通知里去，但是时效性较差
 		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
 		for (Evoucher evoucher : evoucherList) {
 			if (fromStatus == evoucher.getStatus()) {

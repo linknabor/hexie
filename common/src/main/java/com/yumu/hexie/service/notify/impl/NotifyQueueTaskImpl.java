@@ -42,6 +42,7 @@ import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
+import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.CartService;
 import com.yumu.hexie.service.sales.SalePlanService;
 import com.yumu.hexie.service.user.UserNoticeService;
@@ -75,6 +76,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private CartService cartService;
 	@Autowired
 	private OrderItemRepository orderItemRepository;
+	@Autowired
+	private BaseOrderService baseOrderService;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -658,27 +661,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							}
 						}
 						
-					} else if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
-						
-						int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
-						long agentId = serviceOrder.getAgentId();
-						logger.info("agentId is : " + agentId);
-						List<ServiceOperator> opList = new ArrayList<>();
-						if (agentId > 1) {	//1是默认奈博的，所以跳过
-							opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
-						}else {
-							opList = serviceOperatorRepository.findByType(operType);
-						}
-						logger.info("oper list size : " + opList.size());
-						for (ServiceOperator serviceOperator : opList) {
-							logger.info("delivery user id : " + serviceOperator.getUserId());
-							User sendUser = userRepository.findById(serviceOperator.getUserId());
-							if (sendUser != null) {
-								logger.info("send user : " + sendUser.getId());
-								gotongService.sendDeliveryNotification(sendUser, serviceOrder);
-							}
-						}
-					}
+					} 
+
 					isSuccess = true;
 					
 				} catch (Exception e) {
@@ -736,6 +720,61 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+	}
+	
+	/**
+	 * 商品订单退款，包括：特卖、团购、核销券、合伙人、saas套件的售卖、自定义服务订单
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void eshopRefundAsync() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String orderNo = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(orderNo)) {
+					continue;
+				}
+				boolean isSuccess = false;
+				try {
+					logger.info("start to consume eshop refund queue, orderNo : " + orderNo);
+					if (StringUtils.isEmpty(orderNo)) {
+						continue;
+					}
+					
+					ServiceOrder order = serviceOrderRepository.findByOrderNo(orderNo);
+					if (order != null) {
+						List<ServiceOrder> orderList = new ArrayList<>();
+						if (ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()) {
+							orderList = serviceOrderRepository.findByGroupOrderId(order.getGroupOrderId());
+						}else {
+							orderList.add(order);
+						}
+						for (ServiceOrder o : orderList) {
+							baseOrderService.finishRefund(o);
+						}
+						
+					}
+					isSuccess = true;
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+						
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, orderNo);
 				}
 			
 			} catch (Exception e) {

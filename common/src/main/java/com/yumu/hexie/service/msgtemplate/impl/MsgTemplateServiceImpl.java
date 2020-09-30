@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.msgtemplate.MsgTempalateRepository;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
@@ -35,7 +35,7 @@ public class MsgTemplateServiceImpl implements MsgTemplateService {
 	@PostConstruct
 	public void loadCache() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+		if (Constants.MAIN_SERVER) {	//BK程序不跑下面的队列轮询
 			return;
 		}
 		try {
