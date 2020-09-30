@@ -2,6 +2,8 @@ package com.yumu.hexie.common.config;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,6 +13,8 @@ import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 
 @Configuration
 public class ConstantConfig {
+	
+	private static Logger logger = LoggerFactory.getLogger(ConstantConfig.class);
 
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -61,6 +65,7 @@ public class ConstantConfig {
 	@PostConstruct
 	public void init()	{
 		
+		logger.info("start to init constant ...is mainServer : " + mainServer);
 		Constants.MAIN_SERVER = mainServer;
 		
 		ConstantWeChat.APPID = wechatAppId;
