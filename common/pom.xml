@@ -36,7 +36,7 @@
 		    <groupId>org.springframework.session</groupId>
 		    <artifactId>spring-session-data-redis</artifactId>
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -140,6 +140,12 @@
 	       <artifactId>springfox-swagger2</artifactId>
 	       <version>2.9.2</version>
 	    </dependency>
+	    
+	    <dependency>
+	        <groupId>com.github.ulisesbocchio</groupId>
+			<artifactId>jasypt-spring-boot-starter</artifactId>
+			<version>2.1.1</version>
+		</dependency>
 		
 	</dependencies>
 

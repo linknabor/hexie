@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,6 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.amap.AmapUtil;
 import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
@@ -68,10 +68,13 @@ public class AddressServiceImpl implements AddressService {
     @Autowired
     private CountyRepository countyRepository;
     
+    @Value("${mainServer}")
+    private Boolean mainServer;
+    
     @PostConstruct
 	public void init() {
 
-    	if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+    	if (mainServer) {	//BK程序不跑下面的队列轮询
     		return;
     	}
 		if(map == null){

@@ -16,9 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.kuaidi100.Kuaidi100Util;
 import com.yumu.hexie.integration.kuaidi100.resp.LogisticCompanyQueryResp;
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.logistics.LogisticCompany;
 import com.yumu.hexie.model.commonsupport.logistics.LogisticCompanyRepository;
@@ -61,7 +61,7 @@ public class LogisticsServiceImpl implements LogisticsService {
 	@PostConstruct
 	public void init() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+		if (Constants.MAIN_SERVER) {	//BK程序不跑下面的队列轮询
     		return;
     	}
 		if(map == null){

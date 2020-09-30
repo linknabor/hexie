@@ -34,6 +34,8 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     
     public List<ServiceOperator> findByTypeAndAgentId(int type, long agentId);
     
+    public List<ServiceOperator> findByTypeAndAgentIdIsNull(int type);
+    
     @Query("From ServiceOperator r order by POWER(MOD(ABS(r.longitude - ?1),360),2) + POWER(ABS(r.latitude - ?2),2)")
     public List<ServiceOperator> findByLongitudeAndLatitude(Double longitude, Double latitude, Pageable pageable);
     
