@@ -1,8 +1,17 @@
 package hexie;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
+import org.jasypt.util.text.BasicTextEncryptor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +87,42 @@ public class AppTest extends TestCase {
 		System.out.println("str6:" + str6);
 		
 		
-		
 	}
 
+	@Test
+	public void readPropFile () throws IOException{
+		
+		Properties sysProp = System.getProperties();
+		String password = sysProp.getProperty("jasypt.encryptor.password");
+		System.out.println("password : " + password);
+		
+		List<String> fileList = new ArrayList<>();
+		fileList.add("d:/tmp/props/application.properties");
+		fileList.add("d:/tmp/props/wechat.properties");
+		fileList.add("d:/tmp/props/alipay.properties");
+		
+		for (String filePath : fileList) {
+			Properties props = new Properties();
+			InputStream in = new FileInputStream(filePath);
+			props.load(in);
+			
+			Iterator<Entry<Object, Object>> it = props.entrySet().iterator();
+			while(it.hasNext()) {
+				Entry<Object, Object> entry = it.next();
+//				System.out.println("key:" + entry.getKey() + ", value : " + entry.getValue());
+				
+				BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+		        textEncryptor.setPassword(password);
+		        
+		        String value = (String) entry.getValue();
+		        String encryptValue = textEncryptor.encrypt(value);
+		        System.out.println("key:" + entry.getKey() + ", value : " + encryptValue);
+		        
+			}
+
+		}
+		
+	}
 
 
 
