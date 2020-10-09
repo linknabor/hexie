@@ -28,7 +28,12 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     public List<ServiceOperator> findOperators(List<Long> operatorIds);
 
     public List<ServiceOperator> findByUserId(long userId);
+    
     public List<ServiceOperator> findByTypeAndUserId(int type,long userId);
+    
+    public List<ServiceOperator> findByTypeAndUserIdAndAgentId(int type,long userId, long agentId);
+    
+    public List<ServiceOperator> findByTypeAndUserIdAndAgentIdIsNull(int type,long userId);
     
     public List<ServiceOperator> findByType(int type);
     
