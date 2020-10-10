@@ -27,7 +27,9 @@ import com.yumu.hexie.service.o2o.OperatorDefinition;
  * @version $Id: UserInfo.java, v 0.1 2016年2月2日 上午11:30:23  Exp $
  */
 public class UserInfo implements Serializable {
+	
     private static final long serialVersionUID = 4808669460780339640L;
+    
     private String realName;
     private String name;
     private String tel;
@@ -35,6 +37,7 @@ public class UserInfo implements Serializable {
     private boolean isRepairOperator = false;
     private boolean isServiceOperator = false;
     private boolean isEvoucherOperator = false;
+    private boolean isMerchant = false;
     
     private Double longitude;
     private Double latitude;
@@ -112,6 +115,7 @@ public class UserInfo implements Serializable {
         this.isRepairOperator = odDefinition.isRepairOperator();
         this.isServiceOperator = odDefinition.isServiceOperator();
         this.isEvoucherOperator = odDefinition.isEvoucherOperator();
+        this.isMerchant = odDefinition.isOnsaleTaker() || odDefinition.isRgroupTaker();
     }
     
     public String getRealName() {
@@ -366,6 +370,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setCardPayService(boolean cardPayService) {
 		this.cardPayService = cardPayService;
+	}
+	public boolean isMerchant() {
+		return isMerchant;
+	}
+	public void setMerchant(boolean isMerchant) {
+		this.isMerchant = isMerchant;
 	}
 	
 	
