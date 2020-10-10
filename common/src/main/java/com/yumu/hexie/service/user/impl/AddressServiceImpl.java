@@ -67,7 +67,6 @@ public class AddressServiceImpl implements AddressService {
     private CityRepository cityRepository;
     @Autowired
     private CountyRepository countyRepository;
-    
     @Value("${mainServer}")
     private Boolean mainServer;
     

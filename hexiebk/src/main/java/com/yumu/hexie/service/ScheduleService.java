@@ -26,5 +26,7 @@ public interface ScheduleService {
 	void executeOnsaleRuleTimeoutJob();
 	//12.核销券超时自动修改状态
 	void executeEvoucherTimeoutJob();
+	//13.刷新缓存中的库存
+	void initStockAndFreeze();
 	
 }
