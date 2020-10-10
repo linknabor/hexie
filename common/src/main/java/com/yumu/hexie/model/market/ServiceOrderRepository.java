@@ -3,6 +3,7 @@ package com.yumu.hexie.model.market;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -89,5 +90,39 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 	public List<ServiceOrder> findByGroupOrderId(long groupOrderId);
 	
 	public ServiceOrder findByGroupOrderIdAndAgentId(long groupOrderId, long agentId);
+	
+	String queryString = "o.id, o.address, o.count, o.logisticName, o.logisticNo, o.logisticType, o.orderNo, o.orderType, o.productName, "
+			+ "o.refundDate, o.sendDate, o.status, o.tel, o.receiverName, o.totalAmount, o.agentNo, o.agentName";
+	
+	@Query(value = "select " + queryString + " from serviceorder o "
+			+ "where o.orderType in ( ?1 ) "
+			+ "and o.status in ( ?2 ) "
+			+ "and if(?3!='', o.id = ?3, 1=1) "
+			+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+			+ "and if(?5!='', o.orderNo = ?5, 1=1) "
+			+ "and if(?6!='', o.receiverName like CONCAT('%',?6,'%'), 1=1) "
+			+ "and if(?7!='', o.tel like CONCAT('%',?7,'%'), 1=1) "
+			+ "and if(?8!='', o.logisticNo = ?8, 1=1) "
+			+ "and if(?9!='', o.sendDate >= ?9, 1=1) "
+			+ "and if(?10!='', o.sendDate <= ?10, 1=1) "
+			+ "and if(?11!='', o.agentNo = ?11, 1=1) "
+			+ "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
+			, countQuery = "select count(1) from serviceorder o "
+					+ "where o.orderType in ( ?1 ) "
+							+ "and o.status in ( ?2 ) "
+							+ "and if(?3!='', o.id = ?3, 1=1) "
+							+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+							+ "and if(?5!='', o.orderNo = ?5, 1=1) "
+							+ "and if(?6!='', o.receiverName like CONCAT('%',?6,'%'), 1=1) "
+							+ "and if(?7!='', o.tel like CONCAT('%',?7,'%'), 1=1) "
+							+ "and if(?8!='', o.logisticNo = ?8, 1=1) "
+							+ "and if(?9!='', o.sendDate >= ?9, 1=1) "
+							+ "and if(?10!='', o.sendDate <= ?10, 1=1) "
+							+ "and if(?11!='', o.agentNo = ?11, 1=1) "
+							+ "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
+							, nativeQuery = true)
+	public Page<Object[]> findByMultiCondition(List<Integer> types, List<Integer> status, String orderId, String productName, 
+			String orderNo, String receiverName, String tel, String logisticNo, String sendDateBegin, String sendDateEnd, 
+			String agentNo, String agentName, Pageable pageable);
 
 }
