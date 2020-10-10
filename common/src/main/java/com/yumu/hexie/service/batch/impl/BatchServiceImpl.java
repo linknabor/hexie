@@ -9,11 +9,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -46,10 +46,13 @@ public class BatchServiceImpl implements BatchService {
 	@Autowired
 	private NotifyQueueTask notifyQueueTask;
 	
+	@Value("${mainServer}")
+	private Boolean mainServer;
+	
 	@PostConstruct
 	public void runBatch() {
 		
-		if (Constants.MAIN_SERVER) {	//BK程序不跑下面的队列轮询
+		if (mainServer) {	//BK程序不跑下面的队列轮询
 			return;
 		}
 		wuyeQueueTask.bindHouseByTrade();
