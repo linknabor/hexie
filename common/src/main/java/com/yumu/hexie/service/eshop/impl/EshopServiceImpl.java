@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
@@ -33,12 +34,16 @@ import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
 import com.yumu.hexie.integration.eshop.mapper.EvoucherMapper;
 import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
+import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
+import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO.LogisticInfo;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO.Oper;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -987,7 +992,121 @@ public class EshopServiceImpl implements EshopSerivce {
 		return commonResponse;
 		
 	}
+
+	/**
+	 * 订单查询
+	 */
+	@Override
+	public CommonResponse<Object> getOrder(QueryOrderVO queryOrderVO) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			
+			List<Integer> typeList = new ArrayList<>();
+			String orderType = queryOrderVO.getOrderType();
+			if (StringUtils.isEmpty(orderType)) {
+				typeList.add(ModelConstant.ORDER_TYPE_ONSALE);
+				typeList.add(ModelConstant.ORDER_TYPE_RGROUP);
+			} else {
+				typeList.add(Integer.valueOf(orderType));
+			}
+			List<Integer> statusList = new ArrayList<>();
+			String status = queryOrderVO.getStatus();
+			if (StringUtils.isEmpty(status)) {
+				statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+				statusList.add(ModelConstant.ORDER_STATUS_REFUNDED);
+				statusList.add(ModelConstant.ORDER_STATUS_REFUNDING);
+				statusList.add(ModelConstant.ORDER_STATUS_RETURNED);
+				statusList.add(ModelConstant.ORDER_STATUS_SENDED);
+				statusList.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			} else {
+				statusList.add(Integer.valueOf(status));
+			} 
 	
+			List<Order> sortList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "id");
+	    	sortList.add(order);
+	    	Sort sort = Sort.by(sortList);
+			
+			Pageable pageable = PageRequest.of(queryOrderVO.getCurrentPage(), queryOrderVO.getPageSize(), sort);
+			
+			Date startDate = null;
+			Date endDate = null;
+			String sDate = "";
+			String eDate = "";
+			if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
+				startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
+				sDate = startDate.toString();
+			}
+			if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
+				endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
+				eDate = endDate.toString();
+			}
+			
+			Page<Object[]> page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(), 
+					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(), 
+					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(), 
+					queryOrderVO.getAgentName(), pageable);
+			
+			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
+			QueryListDTO<List<QueryOrderMapper>> responsePage = new QueryListDTO<>();
+			responsePage.setTotalPages(page.getTotalPages());
+			responsePage.setTotalSize(page.getTotalElements());
+			responsePage.setContent(list);
+			
+			commonResponse.setData(responsePage);
+			commonResponse.setResult("00");
+		
+		} catch (Exception e) {
+
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+
+		return commonResponse;
+	}
 	
+	/**
+	 * 保存物流信息
+	 * @param saveLogisticsVO
+	 */
+	@Transactional
+	@Override
+	public void saveLogistics(SaveLogisticsVO saveLogisticsVO) {
+		
+		Assert.hasLength(saveLogisticsVO.getOrderId(), "订单id不能为空。");
+		
+		Long orderId = Long.valueOf(saveLogisticsVO.getOrderId());
+		Optional<ServiceOrder> optional = serviceOrderRepository.findById(orderId);
+		if (optional.isPresent()) {
+			
+			List<LogisticInfo> logisticList = saveLogisticsVO.getLogistics();
+			StringBuffer codeBf  = new StringBuffer();
+			StringBuffer comBf = new StringBuffer();
+			StringBuffer noBf = new StringBuffer();
+			
+			for (int i=0; i<logisticList.size(); i++) {
+				
+				codeBf.append(logisticList.get(i).getLogisticCode());
+				comBf.append(logisticList.get(i).getLogisticName());
+				noBf.append(logisticList.get(i).getLogisticNo());
+				
+				if (i!= logisticList.size()-1) {
+					codeBf.append(",");
+					comBf.append(",");
+					noBf.append(",");
+				}
+			}
+			
+			ServiceOrder order = optional.get();
+			order.setLogisticCode(codeBf.toString());
+			order.setLogisticName(comBf.toString());
+			order.setLogisticNo(noBf.toString());
+			order.setLogisticType(3);	//第三方配送
+			order.setStatus(ModelConstant.ORDER_STATUS_SENDED);//改状态为已发货
+			order.setSendDate(new Date());
+			
+		}
+	} 
 
 }
