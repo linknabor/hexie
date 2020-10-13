@@ -12,6 +12,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -74,6 +75,8 @@ public class UserServiceImpl implements UserService {
 	private CouponStrategyFactory couponStrategyFactory;
 	@Autowired
 	private RedisRepository redisRepository;
+	@Value("${mainServer}")
+	private Boolean mainServer;
 	
 	private AlipayClient alipayClient;
 	
@@ -81,9 +84,17 @@ public class UserServiceImpl implements UserService {
 	public void initAlipay() {
 		
 		try {
+			
+			if (mainServer) {
+				return;
+			}
+			logger.info("start to init alipay client ...");
 			alipayClient = new DefaultAlipayClient(ConstantAlipay.GATEWAY, ConstantAlipay.APPID, 
 					ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
 					ConstantAlipay.PUBLIC_KEY, ConstantAlipay.SIGNTYPE);
+			
+			logger.info("init alipay client finished .");
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} 
