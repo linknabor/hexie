@@ -75,6 +75,9 @@ import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
+import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.eshop.EvoucherService;
@@ -123,6 +126,10 @@ public class EshopServiceImpl implements EshopSerivce {
 	private EvoucherService evoucherService;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private GotongService gotongService;
 	
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
@@ -1091,7 +1098,17 @@ public class EshopServiceImpl implements EshopSerivce {
 			order.setStatus(ModelConstant.ORDER_STATUS_SENDED);//改状态为已发货
 			order.setSendDate(new Date());
 			
+			//提醒用户已发货
+			User user = userRepository.findById(order.getUserId());
+			gotongService.sendCustomerDelivery(user, order);
+			
 		}
-	} 
+	}
+	
+//	public void getCouponCfg(Query) {
+//		
+//		
+//		
+//	}
 
 }
