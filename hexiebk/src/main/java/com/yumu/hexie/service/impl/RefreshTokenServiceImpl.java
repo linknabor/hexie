@@ -13,8 +13,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.redis.Keys;
@@ -55,7 +55,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
      */
     @Scheduled(cron = "0 0/10 * * * ?")
     public void refreshAccessTokenJob() {
-        if(!ConstantWeChat.isMainServer()){
+        if(!Constants.MAIN_SERVER){
             return;
         }
         logger.error("--------------------refresh token[B]-------------------");
@@ -87,7 +87,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
      */
     @Scheduled(cron = "0 0/10 * * * ?")
     public void refreshJsTicketJob() {
-        if(!ConstantWeChat.isMainServer()){
+        if(!Constants.MAIN_SERVER){
             return;
         }
         logger.error("--------------------refresh ticket[B]-------------------");

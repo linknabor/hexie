@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
+import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 import com.yumu.hexie.service.eshop.EshopSerivce;
@@ -206,6 +208,32 @@ public class EshopController<T> extends BaseController {
 		return eshopSerivce.genPromotionQrCode(map);
 	}
 	
+	/**
+	 * 查询订单
+	 * @return
+	 */
+	@RequestMapping(value = "/order/get", method = RequestMethod.POST)
+	public CommonResponse<Object> getOrderList(@RequestBody QueryOrderVO queryOrderVO){
+		
+		logger.info("queryOrderVO : " + queryOrderVO);
+		return eshopSerivce.getOrder(queryOrderVO);
+	}
+	
+	/**
+	 * 查询订单
+	 * @return
+	 */
+	@RequestMapping(value = "/logistics/save", method = RequestMethod.POST)
+	public CommonResponse<String> saveLogistics(@RequestBody SaveLogisticsVO saveLogisticsVO){
+		
+		logger.info("saveLogisticsVO : " + saveLogisticsVO);
+		eshopSerivce.saveLogistics(saveLogisticsVO);
+		
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+	
+	}
 	
 	
 }

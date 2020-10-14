@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -21,6 +24,7 @@ import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.DistributionService;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CacheableService;
 import com.yumu.hexie.service.sales.ProductService;
@@ -45,6 +49,10 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private UserNoticeService      userNoticeService;
     @Autowired
     private OrderItemRepository orderItemRepository;
+    @Autowired
+    private ServiceOperatorRepository serviceOperatorRepository;
+    @Autowired
+    private GotongService gotongService;
 
     @Override
     public void validateRule(ServiceOrder order, SalePlan plan, OrderItem item, Address address) {
@@ -114,9 +122,32 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         User u = userRepository.findById(o.getUserId());
         RgroupRule rule = cacheableService.findRgroupRule(o.getGroupRuleId());
         
+        //给用户发送成团短信
         logger.info("groupSuccess, ruleId : " + rule.getId());
         userNoticeService.groupSuccess(u, u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
             rule.getProductName(), rule.getName());
+        
+        //给操作员发送发货模板消息
+		int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
+		long agentId = o.getAgentId();
+		logger.info("agentId is : " + agentId);
+		List<ServiceOperator> opList = new ArrayList<>();
+		if (agentId > 1) {	//1是默认奈博的，奈博的操作员都是null
+			opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
+		}else {
+			opList = serviceOperatorRepository.findByTypeAndAgentIdIsNull(operType);
+		}
+		logger.info("oper list size : " + opList.size());
+		for (ServiceOperator serviceOperator : opList) {
+			logger.info("delivery user id : " + serviceOperator.getUserId());
+			User sendUser = userRepository.findById(serviceOperator.getUserId());
+			if (sendUser != null) {
+				logger.info("send user : " + sendUser.getId());
+				gotongService.sendDeliveryNotification(sendUser, o);
+			}
+		}
+        
+        
     }
 
     /** 

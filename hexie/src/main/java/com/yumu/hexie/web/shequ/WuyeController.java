@@ -763,7 +763,7 @@ public class WuyeController extends BaseController {
 		User user = new User();
 		dto.setUser(user);
 		user.setAppId(otherPayVo.getAppid());
-		if (StringUtils.isEmpty(otherPayVo.getAppid())) {
+		if (!StringUtils.isEmpty(otherPayVo.getRealAppid())) {
 			user.setAppId(otherPayVo.getRealAppid());
 		}
 		user.setOpenid(otherPayVo.getOpenid());

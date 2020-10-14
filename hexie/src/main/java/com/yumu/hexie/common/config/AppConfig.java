@@ -18,6 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -25,7 +26,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 @Configuration
-@ComponentScan(basePackages = {"com.yumu.hexie"}, includeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = {"com.yumu.hexie.web.*", "com.yumu.hexie.service.*"}))
+@PropertySource(value = {"classpath:wechat.properties", "classpath:alipay.properties"})
+@ComponentScan(basePackages = {"com.yumu.hexie"}, includeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = {"com.yumu.hexie.web.*", "com.yumu.hexie.service.*"} ))
 @EnableJpaRepositories({"com.yumu.hexie.model.*"})
 @EntityScan(basePackages = {"com.yumu.hexie.model"})
 @EnableScheduling
@@ -53,7 +55,7 @@ public class AppConfig {
 		}
 		return factory;
 	}
-
+	
 	@Bean
 	public MessageSource messageSource() {
 		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();

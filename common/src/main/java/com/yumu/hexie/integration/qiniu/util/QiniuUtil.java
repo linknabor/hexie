@@ -18,7 +18,6 @@ import com.qiniu.api.auth.digest.Mac;
 import com.qiniu.api.rs.PutPolicy;
 import com.qiniu.api.rs.RSClient;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 
 /**
  * @author HuYM
@@ -43,6 +42,8 @@ public class QiniuUtil {
 	private String accessKey = null;
 	@Value(value= "${qiniu.secret.key}")
 	private String secretKey = null;
+	@Value("${mainServer}")
+	private Boolean mainServer;
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -54,7 +55,7 @@ public class QiniuUtil {
 	@PostConstruct
 	private void initToken(){
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+		if (mainServer) {	//BK程序不跑下面的队列轮询
 			return;
 		}
 		

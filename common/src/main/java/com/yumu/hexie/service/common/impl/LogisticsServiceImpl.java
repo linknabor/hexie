@@ -13,12 +13,12 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.kuaidi100.Kuaidi100Util;
 import com.yumu.hexie.integration.kuaidi100.resp.LogisticCompanyQueryResp;
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.logistics.LogisticCompany;
 import com.yumu.hexie.model.commonsupport.logistics.LogisticCompanyRepository;
@@ -56,12 +56,15 @@ public class LogisticsServiceImpl implements LogisticsService {
 	@Autowired
 	private UserService userService;
 	
+	@Value("${mainServer}")
+	private Boolean mainServer;
+	
 	private static Map<String,String> map = null;
 	
 	@PostConstruct
 	public void init() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+		if (mainServer) {	//BK程序不跑下面的队列轮询
     		return;
     	}
 		if(map == null){

@@ -16,4 +16,6 @@ public interface NotifyQueueTask {
 
 	void updatePartnerAsync();
 
+	void eshopRefundAsync();
+
 }

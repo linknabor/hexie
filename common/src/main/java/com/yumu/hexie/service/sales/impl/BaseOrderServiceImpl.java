@@ -55,6 +55,7 @@ import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
@@ -75,6 +76,7 @@ import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.payment.PaymentService;
 import com.yumu.hexie.service.sales.BaseOrderService;
+import com.yumu.hexie.service.sales.CacheableService;
 import com.yumu.hexie.service.sales.CartService;
 import com.yumu.hexie.service.sales.ProductService;
 import com.yumu.hexie.service.sales.SalePlanService;
@@ -142,6 +144,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private OperatorService operatorService;
+	@Autowired
+	private CacheableService cacheableService;
 		
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
@@ -815,6 +819,48 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	}
 	
 	/**
+	 * 退款处理
+	 * 1.修改订单状态 -->已退款
+	 * 2.库存重新加回去
+	 * 3.已售分数减回去
+	 * 4.团购订单，如果还未成团，减成团份数
+	 */
+	@Transactional
+	@Override
+	public void finishRefund(ServiceOrder serviceOrder) {
+		
+        log.warn("[finishRefund]refund-begin:"+serviceOrder.getId());
+		if(ModelConstant.ORDER_STATUS_REFUNDING == serviceOrder.getStatus() || ModelConstant.ORDER_STATUS_CONFIRM == serviceOrder.getStatus()|| 
+				ModelConstant.ORDER_STATUS_PAYED == serviceOrder.getStatus() || ModelConstant.ORDER_STATUS_SENDED == serviceOrder.getStatus()) {
+			
+			/*1.团购订单处理*/
+			if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+				RgroupRule rule = (RgroupRule) salePlanService.getService(serviceOrder.getOrderType()).findSalePlan(serviceOrder.getGroupRuleId());
+				if (ModelConstant.RGROUP_STAUS_GROUPING == rule.getGroupStatus()) {
+					rule.setCurrentNum(rule.getCurrentNum()-serviceOrder.getCount());
+					cacheableService.save(rule);
+				}
+			}
+			/*2.修改i当你孤单状态为已退款*/
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+			serviceOrderRepository.save(serviceOrder);
+			
+			/*3.修改已售份数*/
+			productService.saledCount(serviceOrder.getProductId(), serviceOrder.getCount()*-1);
+			
+			/*4.修改库存*/
+			redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
+			
+			
+	        log.warn("[finishRefund]refund-saved:"+serviceOrder.getId());
+		}else {
+			log.warn("could not finishe refund, order status : " + serviceOrder.getStatus());
+		}
+		log.warn("[finishRefund]refund-begin:"+serviceOrder.getId());
+	}
+	
+	
+	/**
 	 * 根据ID查询订单
 	 */
 	public ServiceOrder findOne(long orderId){
@@ -863,7 +909,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}else if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-				if (!operatorDefinition.isOnsaleTaker()) {
+				if (!operatorDefinition.isRgroupTaker()) {
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}
@@ -907,7 +953,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}else if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-				if (!operatorDefinition.isOnsaleTaker()) {
+				if (!operatorDefinition.isRgroupTaker()) {
 					throw new BizValidateException("当前用户没有权限查看此订单。");
 				}
 			}

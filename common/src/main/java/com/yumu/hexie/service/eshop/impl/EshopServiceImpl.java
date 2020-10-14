@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -34,12 +33,16 @@ import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
 import com.yumu.hexie.integration.eshop.mapper.EvoucherMapper;
 import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
+import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
+import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO.LogisticInfo;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO.Oper;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -72,6 +75,9 @@ import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
+import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.eshop.EvoucherService;
@@ -120,23 +126,13 @@ public class EshopServiceImpl implements EshopSerivce {
 	private EvoucherService evoucherService;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private GotongService gotongService;
 	
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
-	
-	@PostConstruct
-	public void initStockAndFreeze() {
-		
-		List<Product> proList = productRepository.findByStatusMultiType(ModelConstant.PRODUCT_ONSALE);
-		for (Product product : proList) {
-			String total = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + product.getId());
-			if (StringUtils.isEmpty(total)) {
-				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
-				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");
-			}
-		}
-		logger.info("init stock and freeze finished .");
-	}
 	
 	@Override
 	public CommonResponse<Object> getProduct(QueryProductVO queryProductVO) {
@@ -835,22 +831,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			if ("0".equals(operType)) {
 				fromStatus = ModelConstant.EVOUCHER_STATUS_NORMAL;
 				toStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
-				
-				order.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
-				if (!StringUtils.isEmpty(order.getSendDate())) {
-					order.setStatus(ModelConstant.ORDER_STATUS_RETURNED);
-				}
-				order.setRefundDate(new Date());
+				order.setStatus(ModelConstant.ORDER_STATUS_REFUNDING);
 				serviceOrderRepository.save(order);
-				
-				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
-					if (optional.isPresent()) {
-						RgroupRule rule = optional.get();
-						rule.setCurrentNum(rule.getCurrentNum()-order.getCount());
-						rgroupRuleRepository.save(rule);
-					}
-				}
 				
 			}else if ("1".equals(operType)) {
 				fromStatus = ModelConstant.EVOUCHER_STATUS_INVALID;
@@ -862,20 +844,11 @@ public class EshopServiceImpl implements EshopSerivce {
 				}else if (!StringUtils.isEmpty(order.getConfirmDate())) {
 					order.setStatus(ModelConstant.ORDER_STATUS_CONFIRM);
 				}
-				order.setRefundDate(null);
 				serviceOrderRepository.save(order);
 				
-				if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-					Optional<RgroupRule> optional = rgroupRuleRepository.findById(order.getGroupRuleId());
-					if (optional.isPresent()) {
-						RgroupRule rule = optional.get();
-						rule.setCurrentNum(rule.getCurrentNum()+order.getCount());
-						rgroupRuleRepository.save(rule);
-					}
-				}
 			}
 		}
-		
+		//TODO 考虑放到异步通知里去，但是时效性较差
 		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(serviceOrder.getId());
 		for (Evoucher evoucher : evoucherList) {
 			if (fromStatus == evoucher.getStatus()) {
@@ -1011,7 +984,131 @@ public class EshopServiceImpl implements EshopSerivce {
 		return commonResponse;
 		
 	}
+
+	/**
+	 * 订单查询
+	 */
+	@Override
+	public CommonResponse<Object> getOrder(QueryOrderVO queryOrderVO) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			
+			List<Integer> typeList = new ArrayList<>();
+			String orderType = queryOrderVO.getOrderType();
+			if (StringUtils.isEmpty(orderType)) {
+				typeList.add(ModelConstant.ORDER_TYPE_ONSALE);
+				typeList.add(ModelConstant.ORDER_TYPE_RGROUP);
+			} else {
+				typeList.add(Integer.valueOf(orderType));
+			}
+			List<Integer> statusList = new ArrayList<>();
+			String status = queryOrderVO.getStatus();
+			if (StringUtils.isEmpty(status)) {
+				statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+				statusList.add(ModelConstant.ORDER_STATUS_REFUNDED);
+				statusList.add(ModelConstant.ORDER_STATUS_REFUNDING);
+				statusList.add(ModelConstant.ORDER_STATUS_RETURNED);
+				statusList.add(ModelConstant.ORDER_STATUS_SENDED);
+				statusList.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			} else {
+				statusList.add(Integer.valueOf(status));
+			} 
 	
+			List<Order> sortList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "id");
+	    	sortList.add(order);
+	    	Sort sort = Sort.by(sortList);
+			
+			Pageable pageable = PageRequest.of(queryOrderVO.getCurrentPage(), queryOrderVO.getPageSize(), sort);
+			
+			Date startDate = null;
+			Date endDate = null;
+			String sDate = "";
+			String eDate = "";
+			if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
+				startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
+				sDate = startDate.toString();
+			}
+			if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
+				endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
+				eDate = endDate.toString();
+			}
+			
+			Page<Object[]> page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(), 
+					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(), 
+					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(), 
+					queryOrderVO.getAgentName(), pageable);
+			
+			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
+			QueryListDTO<List<QueryOrderMapper>> responsePage = new QueryListDTO<>();
+			responsePage.setTotalPages(page.getTotalPages());
+			responsePage.setTotalSize(page.getTotalElements());
+			responsePage.setContent(list);
+			
+			commonResponse.setData(responsePage);
+			commonResponse.setResult("00");
+		
+		} catch (Exception e) {
+
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+
+		return commonResponse;
+	}
 	
+	/**
+	 * 保存物流信息
+	 * @param saveLogisticsVO
+	 */
+	@Transactional
+	@Override
+	public void saveLogistics(SaveLogisticsVO saveLogisticsVO) {
+		
+		Assert.hasLength(saveLogisticsVO.getOrderId(), "订单id不能为空。");
+		
+		Long orderId = Long.valueOf(saveLogisticsVO.getOrderId());
+		Optional<ServiceOrder> optional = serviceOrderRepository.findById(orderId);
+		if (optional.isPresent()) {
+			
+			List<LogisticInfo> logisticList = saveLogisticsVO.getLogistics();
+			StringBuffer codeBf  = new StringBuffer();
+			StringBuffer comBf = new StringBuffer();
+			StringBuffer noBf = new StringBuffer();
+			
+			for (int i=0; i<logisticList.size(); i++) {
+				
+				codeBf.append(logisticList.get(i).getLogisticCode());
+				comBf.append(logisticList.get(i).getLogisticName());
+				noBf.append(logisticList.get(i).getLogisticNo());
+				
+				if (i!= logisticList.size()-1) {
+					codeBf.append(",");
+					comBf.append(",");
+					noBf.append(",");
+				}
+			}
+			
+			ServiceOrder order = optional.get();
+			order.setLogisticCode(codeBf.toString());
+			order.setLogisticName(comBf.toString());
+			order.setLogisticNo(noBf.toString());
+			order.setLogisticType(3);	//第三方配送
+			order.setStatus(ModelConstant.ORDER_STATUS_SENDED);//改状态为已发货
+			order.setSendDate(new Date());
+			
+			//提醒用户已发货
+			User user = userRepository.findById(order.getUserId());
+			gotongService.sendCustomerDelivery(user, order);
+			
+		}
+	}
+	
+//	public void getCouponCfg(Query) {
+//		
+//		
+//		
+//	}
 
 }

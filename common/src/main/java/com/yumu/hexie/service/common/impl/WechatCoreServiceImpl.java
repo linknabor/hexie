@@ -21,7 +21,6 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.integration.wechat.service.FundService;
 import com.yumu.hexie.integration.wechat.service.OAuthService;
 import com.yumu.hexie.integration.wechat.service.RefundService;
-import com.yumu.hexie.integration.wechat.service.SignService;
 import com.yumu.hexie.integration.wechat.service.UserService;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.payment.PaymentOrder;
@@ -70,16 +69,6 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 		return null;
 	}
 
-	@Override
-	public boolean checkSignature(String signature, String timestamp,
-			String nonce) {
-		try {
-			return SignService.checkSignature(signature, timestamp, nonce);
-		} catch (Exception e) {
-			processError(e);
-		}
-		return false;
-	}
 	@Override
 	public UserWeiXin getUserInfo(String appId, String openid) {
 		try {
