@@ -13,9 +13,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -114,6 +116,8 @@ public class ScheduleServiceImpl implements ScheduleService{
 	private ProductRepository productRepository;
 	@Autowired
 	private EvoucherRepository evoucherRepository;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 	
 	
 //	1. 订单超时
@@ -535,6 +539,21 @@ public class ScheduleServiceImpl implements ScheduleService{
 			evoucherRepository.save(evoucher);
 		}
 	
+	}
+	
+//	@Scheduled(cron = "0 */5 * * * ?")
+	@Override
+	public void initStockAndFreeze() {
+		
+		List<Product> proList = productRepository.findByStatusMultiType(ModelConstant.PRODUCT_ONSALE);
+		for (Product product : proList) {
+			String total = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + product.getId());
+			if (StringUtils.isEmpty(total)) {
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");
+			}
+		}
+		SCHEDULE_LOG.info("refresh stock and freeze finished .");
 	}
 	
 }

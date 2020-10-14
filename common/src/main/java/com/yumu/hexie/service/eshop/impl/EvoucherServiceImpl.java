@@ -215,15 +215,22 @@ public class EvoucherServiceImpl implements EvoucherService {
 //			}
 //		}
 		
-		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
+		long orderId = 0;
+		StringBuffer bf = new StringBuffer();
+		Evoucher e = evoucherRepository.findByCode(code);
+		long agentId = e.getAgentId();
+		
+		List<ServiceOperator> opList = new ArrayList<>();
+		if (agentId == 1) {	//奈博自己发的核销券
+			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
+		}else {	//代理商、合伙人发的和小小去按
+			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId(), agentId);
+		}
+		
 		if (opList == null || opList.isEmpty()) {
 			logger.warn("用户不能进行当前操作。用户id: " + operator.getId());
 			throw new BizValidateException("您没有权限核销该券码，请确认该券码详细信息。");
 		}
-		
-		long orderId = 0;
-		StringBuffer bf = new StringBuffer();
-		Evoucher e = evoucherRepository.findByCode(code);
 		
 		ServiceOperator serviceOperator = opList.get(0);
 		ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), e.getProductId());

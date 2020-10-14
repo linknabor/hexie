@@ -33,6 +33,8 @@ public class RequestUtil {
 	 */
 	public String getRequestUrl(User user, String regionName) {
 	
+		logger.info("requestUrl : " + requestUrl);
+		
 		//1.先从用户的自动定位取
 		String targetUrl = "";
 		if (!StringUtils.isEmpty(regionName)) {
@@ -57,6 +59,9 @@ public class RequestUtil {
 				}
 			}
 		}
+		
+		logger.info("targetUrl : " + targetUrl);
+		
 		return targetUrl;
 		
 	}

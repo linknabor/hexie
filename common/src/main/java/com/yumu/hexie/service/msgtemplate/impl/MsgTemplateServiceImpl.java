@@ -8,10 +8,10 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.msgtemplate.MsgTempalateRepository;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
@@ -30,12 +30,13 @@ public class MsgTemplateServiceImpl implements MsgTemplateService {
 	private MsgTemplateUrlRepository msgUrlRepository;
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
-	
+	@Value("${mainServer}")
+	private Boolean mainServer;
 	
 	@PostConstruct
 	public void loadCache() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+		if (mainServer) {	//BK程序不跑下面的队列轮询
 			return;
 		}
 		try {

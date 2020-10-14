@@ -59,7 +59,10 @@ public class ProductServiceImpl implements ProductService {
 		product.setSaledNum(product.getSaledNum()+count);
 //		product.setFreezeNum(product.getFreezeNum()-count);
 		productRepository.save(product);
-		redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_FREEZE + productId, count);
+		if (count >= 0) {	//退款不需要解冻库存
+			redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_FREEZE + productId, count);
+		}
+		
 	}
 
 	@Override

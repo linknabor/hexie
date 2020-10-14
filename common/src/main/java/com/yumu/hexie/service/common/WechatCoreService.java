@@ -13,8 +13,6 @@ import com.yumu.hexie.model.payment.RefundOrder;
 public interface WechatCoreService {
 
 	public JsSign getJsSign(String url, String appId);
-	public boolean checkSignature(String signature, String timestamp,
-			String nonce);
 
 	public UserWeiXin getUserInfo(String appId, String openid);
 	public UserWeiXin getByOAuthAccessToken(String code, String oriApp);

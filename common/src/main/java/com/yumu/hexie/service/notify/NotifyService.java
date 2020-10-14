@@ -21,4 +21,6 @@ public interface NotifyService {
 	
 	void updatePartner(List<PartnerNotification> list);
 
+	void notifyEshopRefund(String orderId);
+
 }

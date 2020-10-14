@@ -5,7 +5,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,22 +47,6 @@ public class WechatController extends BaseController{
     private BaojieService baojieService;
 	@Inject
 	private PaymentService paymentService;
-    
-    @ResponseBody
-    @RequestMapping(value = "/checkSignature", method = RequestMethod.GET)
-    public String checkSignature(@RequestParam(value = "signature", required = false) String signature,
-    		@RequestParam(value = "timestamp", required = false) String timestamp,
-    		@RequestParam(value = "nonce", required = false) String nonce,
-    		@RequestParam(value = "echostr", required = false) String echostr) throws Exception {
-    	LOGGER.info(String.format("checkSignature(signature:%s,timestamp:%s,nonce:%s,echostr:%s)",signature,timestamp,nonce,echostr));
-    	if(checkParams(signature, timestamp, nonce)){
-    		LOGGER.info("checkSignature success");
-    		return echostr;
-    	} else {
-    		LOGGER.error("checkSignature fail");
-    		return "";
-    	}
-    }
     
     @ResponseBody
     @RequestMapping(value = "/orderNotify", method = RequestMethod.POST )
@@ -126,13 +109,6 @@ public class WechatController extends BaseController{
     		return new BaseResult<JsSign>().failMsg("支付初始化失败，请稍后重试！");
     	}
     	
-    }
-
-    private boolean checkParams(String signature, String timestamp, String nonce){
-    	if(StringUtils.isEmpty(signature)||StringUtils.isEmpty(timestamp)||StringUtils.isEmpty(nonce)){
-    		return false;
-    	}
-    	return wechatCoreService.checkSignature(signature, timestamp, nonce);
     }
 
 }
