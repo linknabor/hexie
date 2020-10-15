@@ -1,7 +1,11 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,8 @@ import com.yumu.hexie.service.sales.ProductService;
 
 @Service("productService")
 public class ProductServiceImpl implements ProductService {
+	
+	private static Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
 	@Inject
 	private ProductRepository productRepository;
@@ -55,7 +61,13 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void saledCount(long productId, int count) {
-		Product product = productRepository.findById(productId).get();
+		
+		Optional<Product> optional = productRepository.findById(productId);
+		if (!optional.isPresent()) {
+			logger.warn("cant not find product, id : " + productId);
+			return;
+		}
+		Product product = optional.get();
 		product.setSaledNum(product.getSaledNum()+count);
 //		product.setFreezeNum(product.getFreezeNum()-count);
 		productRepository.save(product);
