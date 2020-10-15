@@ -846,11 +846,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			serviceOrderRepository.save(serviceOrder);
 			
 			/*3.修改已售份数*/
-			productService.saledCount(serviceOrder.getProductId(), serviceOrder.getCount()*-1);
-			
-			/*4.修改库存*/
-			redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
-			
+			if (ModelConstant.ORDER_TYPE_SERVICE != serviceOrder.getOrderType()) {
+				productService.saledCount(serviceOrder.getProductId(), serviceOrder.getCount()*-1);
+				/*4.修改库存*/
+				redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
+			}
 			
 	        log.warn("[finishRefund]refund-saved:"+serviceOrder.getId());
 		}else {
