@@ -70,16 +70,14 @@ public class CouponRule extends BaseModel {
 
     /**************使用时间**************/
 
-    
-
-
     /** 发放 **/
 	private int totalCount = 0;
 	private Date startDate;//发放时间
 	private Date endDate;//发放时间
     /** 发放 **/
 	
-
+	/**代理商、合伙人信息**/
+	private long agentId;
 
 	public CouponRule copy(long seedId){
 		CouponRule cr = new CouponRule();
@@ -299,5 +297,11 @@ public class CouponRule extends BaseModel {
     public void setuMerchantId(Long uMerchantId) {
         this.uMerchantId = uMerchantId;
     }
+	public long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
 	
 }
