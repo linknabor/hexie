@@ -49,4 +49,6 @@ public interface EshopSerivce {
 
 	CommonResponse<Object> getCouponCfgByRuleId(QueryCouponCfgVO queryCouponCfgVO);
 
+	CommonResponse<Object> getSupportProduct(QueryProductVO queryProductVO);
+
 }

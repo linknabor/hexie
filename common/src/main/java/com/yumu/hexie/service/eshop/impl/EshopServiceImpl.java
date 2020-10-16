@@ -37,6 +37,7 @@ import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryCouponCfgMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
+import com.yumu.hexie.integration.eshop.mapper.QuerySupportProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
@@ -1186,6 +1187,63 @@ public class EshopServiceImpl implements EshopSerivce {
 		} catch (Exception e) {
 			
 			logger.info(e.getMessage(), e);
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+	}
+	
+	/**
+	 * 选择支持优惠券的商品
+	 * @param queryProductVO
+	 */
+	@Override
+	public CommonResponse<Object> getSupportProduct(QueryProductVO queryProductVO) {
+
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			List<Integer> agentList = null;
+			if (StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName())) {
+				//do nothing
+			}else {
+				agentList = agentRepository.findByAgentNoOrName(1, queryProductVO.getAgentNo(), 
+						queryProductVO.getAgentName());
+			}
+			if (agentList != null ) {
+				if (agentList.isEmpty()) {
+					agentList.add(0);
+				}
+			}
+			
+			List<Order> orderList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "id");
+	    	orderList.add(order);
+	    	Sort sort = Sort.by(orderList);
+			
+			Pageable pageable = PageRequest.of(queryProductVO.getCurrentPage(), queryProductVO.getPageSize(), sort);
+			String productType = queryProductVO.getProductType();
+			List<String> typeList = new ArrayList<>();
+			if ("9999".equals(productType)) {
+				typeList.add("1001");
+				typeList.add("1002");
+			}else {
+				typeList.add(productType);
+			}
+			
+			Page<Object[]>	page = productRepository.getSupportProduct(typeList, queryProductVO.getProductName(), 
+					queryProductVO.getProductStatus(), agentList, pageable);
+			
+			List<QuerySupportProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QuerySupportProductMapper.class);
+			QueryListDTO<List<QuerySupportProductMapper>> responsePage = new QueryListDTO<>();
+			responsePage.setTotalPages(page.getTotalPages());
+			responsePage.setTotalSize(page.getTotalElements());
+			responsePage.setContent(list);
+			
+			commonResponse.setData(responsePage);
+			commonResponse.setResult("00");
+			
+		} catch (Exception e) {
+			
 			commonResponse.setErrMsg(e.getMessage());
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}

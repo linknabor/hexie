@@ -252,7 +252,18 @@ public class EshopController<T> extends BaseController {
 	
 	}
 	
-
+	/**
+	 * 选择支持优惠券的商品
+	 * @return
+	 */
+	@RequestMapping(value = "/product/getSupport", method = RequestMethod.POST)
+	public CommonResponse<Object> getSupportProduct(@RequestBody QueryProductVO queryProductVO){
+		
+		logger.info("getSupportProduct : " + queryProductVO);
+		CommonResponse<Object> commonResponse = eshopSerivce.getSupportProduct(queryProductVO);
+		return commonResponse;
+	
+	}
 	
 	
 }
