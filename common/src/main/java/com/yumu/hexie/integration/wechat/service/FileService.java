@@ -1,130 +1,104 @@
 package com.yumu.hexie.integration.wechat.service;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClients;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.integration.wechat.util.WechatConfig;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
- * 文件上传下载
+ * 微信文件上传下载
  */
+@Component
 public class FileService {
-	
-	private static final Logger log = LoggerFactory.getLogger(FileService.class);
 	
 	private static final String INVALID_PATH_STR1 = "../";
 	private static final String INVALID_PATH_STR2 = "..\\";
 
+	@Autowired
+	private RestUtil restUtil;
+	
 	/**
 	 * 下载文件URL
 	 */
-	private static String dwonloadFileURL = "https://api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID";
+	private static String DOWNLOAD_FILE_URL = "https://api.weixin.qq.com/cgi-bin/media/get";
 
 	/**
 	 * 下载文件
 	 * @param mediaId
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
 	 */
-	public static InputStream downloadFile(String mediaId,String accessToken){
+	public byte[] downloadFile(String mediaId,String accessToken) throws Exception {
 		
-		String requestUrl = dwonloadFileURL.replace("ACCESS_TOKEN", accessToken).replace("MEDIA_ID", mediaId);
-		try {
-			HttpGet httpGet = new HttpGet(requestUrl);
-			HttpClient httpclient = HttpClients.createDefault();
-			
-			log.debug("start to call httpclient ... ");
-			HttpResponse response = httpclient.execute(httpGet);
-
-			HttpEntity entity = response.getEntity();
-			log.info("start to get response ...");
-			log.info(response.getStatusLine().toString());
-			
-			String responseStr = null;
-			if (entity != null) {
-
-				log.info("response content length: " + entity.getContentLength());
-				Header header = entity.getContentType();
-				
-				log.info("header :" + header.getName()+":"+header.getValue());
-				
-				InputStream input = entity.getContent();
-				if (header.getValue().contains("image")) {	//返回图片
-					
-					return input;
-				
-				}else {	//返回错误信息
-					
-					byte[]bytes = new byte[1024];	//错误信息
-					input.read(bytes);
-				    responseStr = new String(bytes, WechatConfig.INPUT_CHARSET);	//转UTF-8
-				    responseStr = responseStr.trim();
-				    log.error("response : \n" + responseStr);
-				    throw new BizValidateException(responseStr);
-				    
-				}
-				
-			}
-			
-		} catch (Exception e) {
-			 throw new BizValidateException(e.getMessage());
-		}
-		
-		return null;
-	}
-
-	/**
-	 * inputStream转文件
-	 * @param is
-	 * @param filePath
-	 * @return
-	 */
-	public static void inputStream2File(InputStream is, String filePath){
-		
-		try {
-			FileService.checkFilePath(filePath);	//校验文件路径
-			OutputStream os = new FileOutputStream(new File(filePath));
-			int bytesRead = 0;
-			byte[] buffer = new byte[1024*1024];
-			while ((bytesRead = is.read(buffer, 0, 1024*1024)) != -1) {
-				os.write(buffer, 0, bytesRead);
-			}
-			os.flush();
-			os.close();
-			is.close();
-		
-		} catch (Exception e) {
-			
-			log.error("convert stream to file failed ...");
-		}
-		
+		Map<String, String> map = new HashMap<>();
+		map.put("access_token", accessToken);
+		map.put("media_id", mediaId);
+		TypeReference<CommonResponse<byte[]>> typeReference = new TypeReference<CommonResponse<byte[]>>(){};
+		CommonResponse<byte[]> response = restUtil.exchange4ResourceOnUri(DOWNLOAD_FILE_URL, map, typeReference);
+		return response.getData();
 	}
 	
 	/**
+	 * 下载文件
+	 * @param mediaId
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public void downloadFile(String mediaId, String accessToken, File file) throws Exception {
+		
+		Map<String, String> map = new HashMap<>();
+		map.put("access_token", accessToken);
+		map.put("media_id", mediaId);
+		TypeReference<CommonResponse<byte[]>> typeReference = new TypeReference<CommonResponse<byte[]>>(){};
+		CommonResponse<byte[]> response = restUtil.exchange4ResourceOnUri(DOWNLOAD_FILE_URL, map, typeReference);
+		byte2File(response.getData(), file);
+	}
+	
+	/**
+	 * byte转文件
+	 * @param fileByte
+	 * @param filePath
+	 * @throws Exception
+	 */
+	public void byte2File(byte[]fileByte, File file) throws Exception {
+		
+		checkFilePath(file.getPath());
+		OutputStream output = new FileOutputStream(file);
+		BufferedOutputStream bufferedOutput = new BufferedOutputStream(output);
+		bufferedOutput.write(fileByte);
+		bufferedOutput.close();
+	}
+
+	/**
 	 * 去除文件中的非法字符
-	 * @param fileName
+	 * @param filePath
 	 * @return
 	 */
-	public static void checkFilePath(String fileName) {
+	private void checkFilePath(String filePath) {
 		
 		boolean isValid = true;
-		if (StringUtils.isEmpty(fileName)) {
+		if (StringUtils.isEmpty(filePath)) {
 			return;
 		}
-		if (fileName.indexOf(INVALID_PATH_STR1) > -1) {
+		if (filePath.indexOf(INVALID_PATH_STR1) > -1) {
 			isValid = false;
-		}else if (fileName.indexOf(INVALID_PATH_STR2) > -1) {
+		}else if (filePath.indexOf(INVALID_PATH_STR2) > -1) {
 			isValid = false;
 		}
 		if (!isValid) {
