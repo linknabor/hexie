@@ -17,9 +17,9 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 	public List<CouponRule> findBySeedIdAndStatus(long seedId,int status);
 	
 	
-	String queryColumn = "r.id as ruleId, s.id as seedId, r.title, s.seedType, r.itemType, "
-			+ "r.amount, r.usageCondition, r.totalCount, r.receivedCount, r.usedCount, "
-			+ "r.startDate, r.endDate, r.useStartDate, r.useEndDate, r.suggestUrl, a.name as agentName, a.agentNo, r.couponDesc";
+	String queryColumn = "r.id as ruleId, s.id as seedId, r.title, s.seedType, r.itemType, r.status, "
+			+ "r.totalCount, r.receivedCount, r.usedCount, r.amount, r.usageCondition, r.productId, r.uProductId, "
+			+ "r.startDate, r.endDate, r.useStartDate, r.useEndDate, r.expiredDays, r.suggestUrl, s.seedImg, a.name as agentName, a.agentNo, r.couponDesc";
 	
 	@Query(value = "select " + queryColumn + " from couponRule r "
 			+ "join couponSeed s on r.seedId = s.id "
@@ -38,7 +38,7 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 					+ "and IF (?2!='', s.id = ?2, 1=1) "
 					+ "and IF (?3!='', s.seedType = ?3, 1=1) "
 					+ "and IF (?4!='', r.status = ?4, 1=1) "
-					+ "and (COALESCE(?5) IS NULL OR (p.agentId IN (?5) )) "
+					+ "and (COALESCE(?5) IS NULL OR (r.agentId IN (?5) )) "
 					+ "and IF (?6!='', r.title like CONCAT('%',?6,'%'), 1=1) "
 			, nativeQuery = true)
 	public Page<Object[]> findByMultiCondition(String ruleId, String seedId, String seedType, String ruleStatus, 

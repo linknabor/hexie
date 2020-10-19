@@ -45,6 +45,7 @@ import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO.LogisticInfo;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
@@ -78,7 +79,10 @@ import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
+import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponRuleRepository;
+import com.yumu.hexie.model.promotion.coupon.CouponSeed;
+import com.yumu.hexie.model.promotion.coupon.CouponSeedRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -137,6 +141,9 @@ public class EshopServiceImpl implements EshopSerivce {
 	private GotongService gotongService;
 	@Autowired
 	private CouponRuleRepository couponRuleRepository;
+	@Autowired
+	private CouponSeedRepository couponSeedRepository;
+	
 	
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
@@ -1248,6 +1255,114 @@ public class EshopServiceImpl implements EshopSerivce {
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}
 		return commonResponse;
+	}
+	
+	
+	/**
+	 * 保存商品上架内容
+	 */
+	@Override
+	@Transactional
+	public void saveCouponCfg(SaveCouponCfgVO saveCouponCfgVO) throws Exception {
+	
+		String agentNo = saveCouponCfgVO.getAgentNo();
+		Agent agent = agentRepository.findByAgentNo(agentNo);
+		if ("add".equals(saveCouponCfgVO.getOperType())) {
+			if (agent == null) {
+				agent = new Agent();
+				agent.setName(saveCouponCfgVO.getAgentName());
+				agent.setAgentNo(agentNo);
+				agent.setStatus(1);
+				agent = agentRepository.save(agent);
+			}
+		}
+		
+		/*保存红包种子 start */
+		CouponSeed couponSeed = new CouponSeed();
+		if ("edit".equals(saveCouponCfgVO.getOperType())) {
+			couponSeed = couponSeedRepository.findById(Long.valueOf(saveCouponCfgVO.getSeedId())).get();
+			if (couponSeed == null) {
+				throw new BizValidateException("未查询到商品，id : " + saveCouponCfgVO.getSeedId());
+			}
+		}
+		couponSeed.setTitle(saveCouponCfgVO.getTitle());
+		couponSeed.setSeedType(Integer.valueOf(saveCouponCfgVO.getSeedType()));
+		
+		int seedStatus = ModelConstant.COUPON_SEED_STATUS_AVAILABLE;
+		if ("1".equals(saveCouponCfgVO.getStatus())) {
+			//do nothing
+		}else {
+			seedStatus = ModelConstant.COUPON_SEED_STATUS_INVALID;
+		}
+		couponSeed.setStatus(seedStatus);
+		couponSeed.setRate(1d);	//固定1.0
+		
+		//生效时间
+		Date startDate = DateUtil.parse(saveCouponCfgVO.getStartDate(), DateUtil.dttmSimple);
+		couponSeed.setStartDate(startDate);
+		Date endDate = DateUtil.parse(saveCouponCfgVO.getEndDate(), DateUtil.dttmSimple);
+		couponSeed.setEndDate(endDate);
+		
+		couponSeed.setSeedImg(saveCouponCfgVO.getSeedImg());
+		couponSeed.setRuleDescription(saveCouponCfgVO.getCouponDesc());
+		couponSeed.setDescription(saveCouponCfgVO.getCouponDesc());
+		couponSeed = couponSeedRepository.save(couponSeed);
+		/*保存红包种子 end */
+		
+		/*保存红包规则 start */
+		CouponRule couponRule = new CouponRule();
+		if ("edit".equals(saveCouponCfgVO.getOperType())) {
+			couponRule = couponRuleRepository.findById(Long.valueOf(saveCouponCfgVO.getRuleId())).get();
+			if (couponRule == null) {
+				throw new BizValidateException("未查询到商品，id : " + saveCouponCfgVO.getRuleId());
+			}
+		}
+		couponRule.setTitle(saveCouponCfgVO.getTitle());	//名称
+		
+		if ("add".equals(saveCouponCfgVO.getOperType())) {
+			couponRule.setAgentId(agent.getId());
+		}
+		
+		couponRule.setSeedId(couponSeed.getId());
+		couponRule.setTitle(saveCouponCfgVO.getTitle());
+		couponRule.setAmount(Float.valueOf(saveCouponCfgVO.getAmount()));
+		couponRule.setTotalCount(Integer.valueOf(saveCouponCfgVO.getTotalCount()));
+		couponRule.setUsageCondition(Float.valueOf(saveCouponCfgVO.getUsageCondition()));
+		couponRule.setItemType(Integer.valueOf(saveCouponCfgVO.getItemType()));	//适用模块
+		
+		String supportType = saveCouponCfgVO.getSupportType();	//0全部支持，1支持部分商品，2不支持部分商品
+		if ("1".equals(supportType)) {
+			couponRule.setProductId(saveCouponCfgVO.getSupported());
+		}else if ("2".equals(supportType)) {
+			couponRule.setuProductId(saveCouponCfgVO.getUnsupported());
+		}
+		couponRule.setStartDate(couponSeed.getStartDate());
+		couponRule.setEndDate(couponSeed.getEndDate());
+		if (!StringUtils.isEmpty(saveCouponCfgVO.getExpiredDays())) {
+			couponRule.setExpiredDays(Integer.valueOf(saveCouponCfgVO.getExpiredDays()));
+		}else if (!StringUtils.isEmpty(saveCouponCfgVO.getUseStartDate()) && !StringUtils.isEmpty(saveCouponCfgVO.getUseEndDate())) {
+			//可用日期
+			Date useStartDate = DateUtil.parse(saveCouponCfgVO.getUseStartDate(), DateUtil.dttmSimple);
+			couponRule.setUseStartDate(useStartDate);
+			Date useEndDate = DateUtil.parse(saveCouponCfgVO.getUseEndDate(), DateUtil.dttmSimple);
+			couponRule.setUseEndDate(useEndDate);
+		}
+		
+		int ruleStatus = ModelConstant.COUPON_RULE_STATUS_AVAILABLE;
+		if ("1".equals(saveCouponCfgVO.getStatus())) {
+			//do nothing
+		}else {
+			ruleStatus = ModelConstant.COUPON_RULE_STATUS_INVALID;
+		}
+		couponRule.setSuggestUrl(saveCouponCfgVO.getSuggestUrl());
+		couponRule.setStatus(ruleStatus);
+		couponRule.setCouponDesc(saveCouponCfgVO.getCouponDesc());
+		couponRule = couponRuleRepository.save(couponRule);
+		
+		String key = ModelConstant.KEY_COUPON_RULE_INFO + couponRule.getId();
+		redisRepository.setCouponRule(key, couponRule);
+		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + couponRule.getId(), String.valueOf(couponRule.getTotalCount()));
+		
 	}
 
 }

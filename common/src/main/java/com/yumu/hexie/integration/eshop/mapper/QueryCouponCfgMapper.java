@@ -22,16 +22,20 @@ public class QueryCouponCfgMapper implements Serializable {
 	private Integer seedType;
 	@JsonProperty("item_type")
 	private Integer itemType;
+	private Integer status;
 	@JsonProperty("total_count")
 	private Integer totalCount;
 	@JsonProperty("received_count")
 	private Integer receivedCount;	//已领
 	@JsonProperty("used_count")
 	private Integer usedCount;	//已使用
-	
 	private Float amount;
 	@JsonProperty("usage_condition")
 	private Float usageCondition;
+	@JsonProperty("product_id")
+	private String productId;
+	@JsonProperty("uproduct_id")
+	private String uProductId;
 	@JsonProperty("start_date")
 	private Timestamp startDate;
 	@JsonProperty("end_date")
@@ -40,8 +44,12 @@ public class QueryCouponCfgMapper implements Serializable {
 	private Timestamp useStartDate;
 	@JsonProperty("use_end_date")
 	private Timestamp useEndDate;
+	@JsonProperty("expired_days")
+	private Integer expiredDays;
 	@JsonProperty("suggest_url")
 	private String suggestUrl;
+	@JsonProperty("seed_img")
+	private String seedImg;
 	@JsonProperty("agent_name")
 	private String agentName;
 	@JsonProperty("agent_no")
@@ -49,25 +57,31 @@ public class QueryCouponCfgMapper implements Serializable {
 	@JsonProperty("coupon_desc")
 	private String couponDesc;
 	
-	public QueryCouponCfgMapper(BigInteger ruleId, BigInteger seedId, String title, Integer seedType, Integer itemType,
-			Integer totalCount, Integer receivedCount, Integer usedCount, Float amount, Float usageCondition, Timestamp startDate, Timestamp endDate, Timestamp useStartDate,
-			Timestamp useEndDate, String suggestUrl, String agentName, String agentNo, String couponDesc) {
+	public QueryCouponCfgMapper(BigInteger ruleId, BigInteger seedId, String title, Integer seedType, Integer itemType, Integer status,
+			Integer totalCount, Integer receivedCount, Integer usedCount, Float amount, Float usageCondition, String productId, String uProductId,
+			Timestamp startDate, Timestamp endDate, Timestamp useStartDate, Timestamp useEndDate, Integer expiredDays,
+			String suggestUrl, String seedImg, String agentName, String agentNo, String couponDesc) {
 		super();
 		this.ruleId = ruleId;
 		this.seedId = seedId;
 		this.title = title;
 		this.seedType = seedType;
 		this.itemType = itemType;
+		this.status = status;
 		this.totalCount = totalCount;
 		this.receivedCount = receivedCount;
 		this.usedCount = usedCount;
 		this.amount = amount;
 		this.usageCondition = usageCondition;
+		this.productId = productId;
+		this.uProductId = uProductId;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.useStartDate = useStartDate;
 		this.useEndDate = useEndDate;
+		this.expiredDays = expiredDays;
 		this.suggestUrl = suggestUrl;
+		this.seedImg = seedImg;
 		this.agentName = agentName;
 		this.agentNo = agentNo;
 		this.couponDesc = couponDesc;
@@ -217,5 +231,45 @@ public class QueryCouponCfgMapper implements Serializable {
 		this.usedCount = usedCount;
 	}
 
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
+	public Integer getExpiredDays() {
+		return expiredDays;
+	}
+
+	public void setExpiredDays(Integer expiredDays) {
+		this.expiredDays = expiredDays;
+	}
+
+	public String getProductId() {
+		return productId;
+	}
+
+	public void setProductId(String productId) {
+		this.productId = productId;
+	}
+
+	public String getuProductId() {
+		return uProductId;
+	}
+
+	public void setuProductId(String uProductId) {
+		this.uProductId = uProductId;
+	}
+
+	public String getSeedImg() {
+		return seedImg;
+	}
+
+	public void setSeedImg(String seedImg) {
+		this.seedImg = seedImg;
+	}
+	
 	
 }

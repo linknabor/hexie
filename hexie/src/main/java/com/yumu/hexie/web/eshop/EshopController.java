@@ -17,6 +17,7 @@ import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -237,19 +238,28 @@ public class EshopController<T> extends BaseController {
 	}
 	
 	/**
-	 * 查询订单
+	 * 查询优惠券配置
 	 * @return
 	 */
 	@RequestMapping(value = "/coupon/cfg/get", method = RequestMethod.POST)
-	public CommonResponse<String> getCouponCfg(@RequestBody QueryCouponCfgVO queryCouponCfgVO){
+	public CommonResponse<Object> getCouponCfg(@RequestBody QueryCouponCfgVO queryCouponCfgVO){
 		
 		logger.info("queryCouponCfgVO : " + queryCouponCfgVO);
-		eshopSerivce.getCouponCfg(queryCouponCfgVO);
+		return eshopSerivce.getCouponCfg(queryCouponCfgVO);
 		
-		CommonResponse<String> commonResponse = new CommonResponse<>();
-		commonResponse.setResult("00");
-		return commonResponse;
+	}
 	
+	/**
+	 * 根据规则ID查询优惠券配置
+	 * @param queryProductVO
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/cfg/getById", method = RequestMethod.POST)
+	public CommonResponse<Object> getCouponCfgById(@RequestBody QueryCouponCfgVO queryCouponCfgVO) {
+		
+		logger.info("getById queryCouponCfgVO : " + queryCouponCfgVO);
+		return eshopSerivce.getCouponCfgByRuleId(queryCouponCfgVO);
+		
 	}
 	
 	/**
@@ -261,6 +271,22 @@ public class EshopController<T> extends BaseController {
 		
 		logger.info("getSupportProduct : " + queryProductVO);
 		CommonResponse<Object> commonResponse = eshopSerivce.getSupportProduct(queryProductVO);
+		return commonResponse;
+	
+	}
+	
+	/**
+	 * 保存优惠券配置
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/cfg/save", method = RequestMethod.POST)
+	public CommonResponse<String> saveCouponCfg(@RequestBody SaveCouponCfgVO saveCouponCfgVO) throws Exception {
+		
+		logger.info("saveCouponCfgVO : " + saveCouponCfgVO);
+		eshopSerivce.saveCouponCfg(saveCouponCfgVO);
+		
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
 		return commonResponse;
 	
 	}

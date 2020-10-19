@@ -400,6 +400,9 @@ public class ModelConstant {
 	public static final String KEY_PRO_STOCK = "product:stock:";
 	public static final String KEY_PRO_FREEZE = "product:freeze:";
 	
+	public static final String KEY_COUPON_RULE_INFO = "coupon:rule:";
+	public static final String KEY_COUPON_STOCK = "coupon:stock:";
+	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	
