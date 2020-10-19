@@ -31,7 +31,7 @@ public class FileService {
 	/**
 	 * 下载文件URL
 	 */
-	private static String dwonloadFileURL = "http://file.api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID";
+	private static String dwonloadFileURL = "https://api.weixin.qq.com/cgi-bin/media/get?access_token=ACCESS_TOKEN&media_id=MEDIA_ID";
 
 	/**
 	 * 下载文件

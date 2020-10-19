@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
@@ -231,6 +232,35 @@ public class EshopController<T> extends BaseController {
 		
 		CommonResponse<String> commonResponse = new CommonResponse<>();
 		commonResponse.setResult("00");
+		return commonResponse;
+	
+	}
+	
+	/**
+	 * 查询订单
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/cfg/get", method = RequestMethod.POST)
+	public CommonResponse<String> getCouponCfg(@RequestBody QueryCouponCfgVO queryCouponCfgVO){
+		
+		logger.info("queryCouponCfgVO : " + queryCouponCfgVO);
+		eshopSerivce.getCouponCfg(queryCouponCfgVO);
+		
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+	
+	}
+	
+	/**
+	 * 选择支持优惠券的商品
+	 * @return
+	 */
+	@RequestMapping(value = "/product/getSupport", method = RequestMethod.POST)
+	public CommonResponse<Object> getSupportProduct(@RequestBody QueryProductVO queryProductVO){
+		
+		logger.info("getSupportProduct : " + queryProductVO);
+		CommonResponse<Object> commonResponse = eshopSerivce.getSupportProduct(queryProductVO);
 		return commonResponse;
 	
 	}
