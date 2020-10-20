@@ -1331,11 +1331,17 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponRule.setItemType(Integer.valueOf(saveCouponCfgVO.getItemType()));	//适用模块
 		
 		String supportType = saveCouponCfgVO.getSupportType();	//0全部支持，1支持部分商品，2不支持部分商品
-		if ("1".equals(supportType)) {
+		if ("0".equals(supportType)) {
+			couponRule.setProductId("");
+			couponRule.setuProductId("");
+		}else if ("1".equals(supportType)) {
 			couponRule.setProductId(saveCouponCfgVO.getSupported());
+			couponRule.setuProductId("");
 		}else if ("2".equals(supportType)) {
 			couponRule.setuProductId(saveCouponCfgVO.getUnsupported());
+			couponRule.setProductId("");
 		}
+		couponRule.setSupportType(Integer.valueOf(supportType));
 		couponRule.setStartDate(couponSeed.getStartDate());
 		couponRule.setEndDate(couponSeed.getEndDate());
 		if (!StringUtils.isEmpty(saveCouponCfgVO.getExpiredDays())) {
@@ -1361,8 +1367,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		String key = ModelConstant.KEY_COUPON_RULE_INFO + couponRule.getId();
 		redisRepository.setCouponRule(key, couponRule);
-		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + couponRule.getId(), String.valueOf(couponRule.getTotalCount()));
-		
+		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_STOCK + couponRule.getId(), String.valueOf(couponRule.getTotalCount()));	//初始化改规则下的库存
+		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_FREEZE + couponRule.getId(), "0");	//初始化冻结数量
 	}
+	
 
 }

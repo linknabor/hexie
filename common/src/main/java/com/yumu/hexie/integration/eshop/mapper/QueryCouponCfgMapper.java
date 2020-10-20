@@ -23,6 +23,8 @@ public class QueryCouponCfgMapper implements Serializable {
 	@JsonProperty("item_type")
 	private Integer itemType;
 	private Integer status;
+	@JsonProperty("support_type")
+	private Integer supportType;
 	@JsonProperty("total_count")
 	private Integer totalCount;
 	@JsonProperty("received_count")
@@ -57,9 +59,10 @@ public class QueryCouponCfgMapper implements Serializable {
 	@JsonProperty("coupon_desc")
 	private String couponDesc;
 	
-	public QueryCouponCfgMapper(BigInteger ruleId, BigInteger seedId, String title, Integer seedType, Integer itemType, Integer status,
-			Integer totalCount, Integer receivedCount, Integer usedCount, Float amount, Float usageCondition, String productId, String uProductId,
-			Timestamp startDate, Timestamp endDate, Timestamp useStartDate, Timestamp useEndDate, Integer expiredDays,
+	public QueryCouponCfgMapper(BigInteger ruleId, BigInteger seedId, String title, Integer seedType, Integer itemType, 
+			Integer status, Integer supportType, Integer totalCount, Integer receivedCount, Integer usedCount, 
+			Float amount, Float usageCondition, String productId, String uProductId, Timestamp startDate, 
+			Timestamp endDate, Timestamp useStartDate, Timestamp useEndDate, Integer expiredDays,
 			String suggestUrl, String seedImg, String agentName, String agentNo, String couponDesc) {
 		super();
 		this.ruleId = ruleId;
@@ -68,6 +71,7 @@ public class QueryCouponCfgMapper implements Serializable {
 		this.seedType = seedType;
 		this.itemType = itemType;
 		this.status = status;
+		this.supportType = supportType;
 		this.totalCount = totalCount;
 		this.receivedCount = receivedCount;
 		this.usedCount = usedCount;
@@ -269,6 +273,14 @@ public class QueryCouponCfgMapper implements Serializable {
 
 	public void setSeedImg(String seedImg) {
 		this.seedImg = seedImg;
+	}
+
+	public Integer getSupportType() {
+		return supportType;
+	}
+
+	public void setSupportType(Integer supportType) {
+		this.supportType = supportType;
 	}
 	
 	

@@ -46,6 +46,7 @@ public class CouponRule extends BaseModel {
     /**************现金券适用范围**************/
     private float usageCondition;//最小金额
     private boolean availableForAll = true;//与以下三条互斥
+    private int supportType;	//适用类型，0全部，1部分支持，2部分不支持
     
     //支持项目，不支持的优先过滤
     private int itemType = PromotionConstant.COUPON_ITEM_TYPE_ALL;//全部，商品项，服务项，服务类型
@@ -302,6 +303,12 @@ public class CouponRule extends BaseModel {
 	}
 	public void setAgentId(long agentId) {
 		this.agentId = agentId;
+	}
+	public int getSupportType() {
+		return supportType;
+	}
+	public void setSupportType(int supportType) {
+		this.supportType = supportType;
 	}
 	
 }

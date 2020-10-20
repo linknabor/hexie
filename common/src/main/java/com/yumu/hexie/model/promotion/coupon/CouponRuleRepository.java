@@ -17,7 +17,7 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 	public List<CouponRule> findBySeedIdAndStatus(long seedId,int status);
 	
 	
-	String queryColumn = "r.id as ruleId, s.id as seedId, r.title, s.seedType, r.itemType, r.status, "
+	String queryColumn = "r.id as ruleId, s.id as seedId, r.title, s.seedType, r.itemType, r.status, r.supportType, "
 			+ "r.totalCount, r.receivedCount, r.usedCount, r.amount, r.usageCondition, r.productId, r.uProductId, "
 			+ "r.startDate, r.endDate, r.useStartDate, r.useEndDate, r.expiredDays, r.suggestUrl, s.seedImg, a.name as agentName, a.agentNo, r.couponDesc";
 	
