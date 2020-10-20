@@ -125,6 +125,21 @@ public class CouponController extends BaseController{
 			return "";
 		}
     	couponService.consume(Long.valueOf(tradeWaterId));
+        return Constants.SERVICE_SUCCESS;	//TODO 应该用PAGE_SUCCESS，前端需要修改
+    }
+    
+    /**
+     * 红包领取页面列表
+     * @param tradeWaterId
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/coupon/seedList", method = RequestMethod.GET)
+    @ResponseBody
+    public String getSeedList(@ModelAttribute(Constants.USER)User user) throws Exception {
+
+//    	couponService.consume(Long.valueOf(tradeWaterId));
         return "SUCCESS";
     }
+    
 }

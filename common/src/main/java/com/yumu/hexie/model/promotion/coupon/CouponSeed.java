@@ -60,6 +60,7 @@ public class CouponSeed extends BaseModel  {
 	/*****汇总信息******/
 	
 	private String appid;	//公众号类别
+	private String sectIds;	//支持的小区
 
 	@Transient
 	public String getState(){
@@ -262,6 +263,12 @@ public class CouponSeed extends BaseModel  {
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+	}
+	public String getSectIds() {
+		return sectIds;
+	}
+	public void setSectIds(String sectIds) {
+		this.sectIds = sectIds;
 	}
 	
 }

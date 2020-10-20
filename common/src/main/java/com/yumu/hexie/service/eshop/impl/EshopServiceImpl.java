@@ -1,8 +1,10 @@
 package com.yumu.hexie.service.eshop.impl;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +81,7 @@ import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
+import com.yumu.hexie.model.promotion.PromotionConstant;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponRuleRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
@@ -252,7 +255,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			if ("1000".equals(productType) || "1001".equals(productType) || "1003".equals(productType) || "1004".equals(productType)) {
 				regionList = regionRepository.findByProductId(queryProductVO.getProductId());}
 			else if ("1002".equals(productType)) {
-				regionList = regionRepository.findByProductId4Rroup(queryProductVO.getProductId());
+				regionList = regionRepository.findByProductId4Rgroup(queryProductVO.getProductId());
 			}
 			
 			QueryProductDTO<QueryProductMapper> queryProductDTO = new QueryProductDTO<>();
@@ -1294,6 +1297,11 @@ public class EshopServiceImpl implements EshopSerivce {
 		}else {
 			seedStatus = ModelConstant.COUPON_SEED_STATUS_INVALID;
 		}
+		couponSeed.setTotalCount(Integer.valueOf(saveCouponCfgVO.getTotalCount()));	//总数，以种子的总数为统计单位，规则里的总数分享时用。
+		BigDecimal unitAmt = new BigDecimal(saveCouponCfgVO.getAmount());
+		BigDecimal count = new BigDecimal(saveCouponCfgVO.getTotalCount());
+		BigDecimal totalAmt = unitAmt.multiply(count);
+		couponSeed.setTotalAmount(totalAmt.floatValue());
 		couponSeed.setStatus(seedStatus);
 		couponSeed.setRate(1d);	//固定1.0
 		
@@ -1306,10 +1314,13 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponSeed.setSeedImg(saveCouponCfgVO.getSeedImg());
 		couponSeed.setRuleDescription(saveCouponCfgVO.getCouponDesc());
 		couponSeed.setDescription(saveCouponCfgVO.getCouponDesc());
-		couponSeed = couponSeedRepository.save(couponSeed);
-		/*保存红包种子 end */
 		
-		/*保存红包规则 start */
+		/*添加支持的小区，领券时判断 start*/
+		String supportType = saveCouponCfgVO.getSupportType();	//0全部支持，1支持部分商品，2不支持部分商品
+		if (StringUtils.isEmpty(supportType)) {
+			supportType = "0";
+		}
+		
 		CouponRule couponRule = new CouponRule();
 		if ("edit".equals(saveCouponCfgVO.getOperType())) {
 			couponRule = couponRuleRepository.findById(Long.valueOf(saveCouponCfgVO.getRuleId())).get();
@@ -1317,6 +1328,43 @@ public class EshopServiceImpl implements EshopSerivce {
 				throw new BizValidateException("未查询到商品，id : " + saveCouponCfgVO.getRuleId());
 			}
 		}
+		if (agent == null) {	//编辑的时候为空
+			agent = agentRepository.findById(couponRule.getAgentId()).get();
+		}
+		
+		List<String> marketRegions = null;
+		List<String> serviceRegions = null;
+		if (PromotionConstant.COUPON_ITEM_TYPE_ALL == Integer.valueOf(saveCouponCfgVO.getItemType())) {
+			marketRegions = getMarketRegions(saveCouponCfgVO.getSupported(), saveCouponCfgVO.getUnsupported(), agent, supportType);
+			serviceRegions = getServiceRegions(saveCouponCfgVO.getServiceSupportedSect());
+		} else if (PromotionConstant.COUPON_ITEM_TYPE_EVOUCHER == Integer.valueOf(saveCouponCfgVO.getItemType()) ||
+				PromotionConstant.COUPON_ITEM_TYPE_MARKET == Integer.valueOf(saveCouponCfgVO.getItemType())) {
+			marketRegions = getMarketRegions(saveCouponCfgVO.getSupported(), saveCouponCfgVO.getUnsupported(), agent, supportType);
+		} else if (PromotionConstant.COUPON_ITEM_TYPE_SERVICE == Integer.valueOf(saveCouponCfgVO.getItemType())) {
+			serviceRegions = getServiceRegions(saveCouponCfgVO.getServiceSupportedSect());
+		}
+		if (marketRegions == null) {
+			marketRegions = new ArrayList<>();
+		}
+		if (serviceRegions == null) {
+			serviceRegions = new ArrayList<>();
+		}
+		marketRegions.removeAll(serviceRegions);
+		marketRegions.addAll(serviceRegions);
+		
+		StringBuffer bf = new StringBuffer();
+		for (String sectId : marketRegions) {
+			bf.append(sectId).append(",");
+		}
+		String serviceSupported = bf.substring(0, bf.length()-1);
+		couponSeed.setSectIds(serviceSupported);
+		
+		/*添加支持的小区，领券时判断 end*/
+		
+		couponSeed = couponSeedRepository.save(couponSeed);
+		/*保存红包种子 end */
+		
+		/*保存红包规则 start */
 		couponRule.setTitle(saveCouponCfgVO.getTitle());	//名称
 		
 		if ("add".equals(saveCouponCfgVO.getOperType())) {
@@ -1330,7 +1378,6 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponRule.setUsageCondition(Float.valueOf(saveCouponCfgVO.getUsageCondition()));
 		couponRule.setItemType(Integer.valueOf(saveCouponCfgVO.getItemType()));	//适用模块
 		
-		String supportType = saveCouponCfgVO.getSupportType();	//0全部支持，1支持部分商品，2不支持部分商品
 		if ("0".equals(supportType)) {
 			couponRule.setProductId("");
 			couponRule.setuProductId("");
@@ -1365,10 +1412,61 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponRule.setCouponDesc(saveCouponCfgVO.getCouponDesc());
 		couponRule = couponRuleRepository.save(couponRule);
 		
-		String key = ModelConstant.KEY_COUPON_RULE_INFO + couponRule.getId();
+		String key = ModelConstant.KEY_COUPON_RULE + couponRule.getId();
 		redisRepository.setCouponRule(key, couponRule);
 		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_STOCK + couponRule.getId(), String.valueOf(couponRule.getTotalCount()));	//初始化改规则下的库存
 		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_FREEZE + couponRule.getId(), "0");	//初始化冻结数量
+	}
+
+	/**
+	 * 获取自定义服务支持的区域列表
+	 * @param serviceSupportSect
+	 * @return
+	 */
+	private List<String> getServiceRegions(String serviceSupportSect) {
+		
+		List<String> serviceRegions = new ArrayList<>();
+		if (!StringUtils.isEmpty(serviceSupportSect)) {
+			String[]sects = serviceSupportSect.split(",");
+			serviceRegions = Arrays.asList(sects);
+		}
+		return serviceRegions;
+	}
+
+	/**
+	 * 获取核销券、特卖和团购商品所支持的区域列表
+	 * @param saveCouponCfgVO
+	 * @param agent
+	 * @param supportType
+	 * @param onsaleList
+	 * @param rgroupList
+	 */
+	private List<String> getMarketRegions(String supported, String unsupported, Agent agent, String supportType) {
+		
+		List<Region> onsaleList = null;
+		List<Region> rgroupList = null;
+		if ("0".equals(supportType) || StringUtils.isEmpty(supportType)) {
+			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, null, null, String.valueOf(agent.getId()));
+			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, null, null, String.valueOf(agent.getId()));
+		}else if ("1".equals(supportType)) {
+			String[]products = supported.split(",");
+			List<String> productList = Arrays.asList(products);
+			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, productList, null, String.valueOf(agent.getId()));
+			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, productList, null, String.valueOf(agent.getId()));
+		}else if ("2".equals(supportType)) {
+			String[]uproducts = unsupported.split(",");
+			List<String> uproductList = Arrays.asList(uproducts);
+			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, String.valueOf(agent.getId()));
+			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, String.valueOf(agent.getId()));
+		}
+		
+		onsaleList.removeAll(rgroupList);	//去重
+		onsaleList.addAll(rgroupList);	//取并集
+		List<String> sectIds = new ArrayList<>(onsaleList.size());
+		for (Region region : onsaleList) {
+			sectIds.add(region.getSectId());
+		}
+		return sectIds;
 	}
 	
 

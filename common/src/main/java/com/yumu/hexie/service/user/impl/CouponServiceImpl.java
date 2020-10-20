@@ -869,4 +869,16 @@ public class CouponServiceImpl implements CouponService {
 		return couponRepository.findByOrderId(orderId);
 	}
 	
+	/**
+	 * 获取红包种子列表
+	 * @param user
+	 * @return
+	 */
+	public List<CouponSeed> getSeedList(User user){
+		
+		
+		return null;
+		
+	}
+	
 }
