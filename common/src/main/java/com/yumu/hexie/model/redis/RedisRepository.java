@@ -14,6 +14,7 @@ import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.car.OrderCarInfo;
+import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.share.ShareAccessRecord;
 import com.yumu.hexie.model.system.SystemConfig;
 
@@ -35,6 +36,8 @@ public class RedisRepository {
 	private RedisTemplate<String, Object> authRedisTemplate;
     @Autowired
     private RedisTemplate<String, ProductRule> proRedisTemplate;
+    @Autowired
+    private RedisTemplate<String, CouponRule> couponRuleRedisTemplate;
     
     /**
      * 获取订单车辆信息 
@@ -105,10 +108,22 @@ public class RedisRepository {
     	Date start = value.getStartDate();
     	Date end = value.getEndDate();
     	long expire = end.getTime() - start.getTime();
-    	proRedisTemplate.opsForValue().set(key,value, expire, TimeUnit.SECONDS);
+    	proRedisTemplate.opsForValue().set(key, value, expire, TimeUnit.SECONDS);
     }
     public ProductRule getProdcutRule(String key) {
         return proRedisTemplate.opsForValue().get(key);
+    }
+    
+    public CouponRule getCouponRule(String key) {
+        return couponRuleRedisTemplate.opsForValue().get(key);
+    }
+    
+    public void setCouponRule(String key, CouponRule value) {
+    	
+    	Date start = value.getStartDate();
+    	Date end = value.getEndDate();
+    	long expire = end.getTime() - start.getTime();
+    	couponRuleRedisTemplate.opsForValue().set(key, value, expire, TimeUnit.SECONDS);
     }
 
 //    
