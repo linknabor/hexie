@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -82,6 +85,7 @@ import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.promotion.PromotionConstant;
+import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponRuleRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
@@ -544,7 +548,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		redisRepository.setProdcutRule(key, productRule);
 		
 		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
-		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");	//初始化冻结数量
+		if ("add".equals(saveProductVO.getOperType())) {
+			redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");	//初始化冻结数量
+		}
 		
 	}
 	
@@ -1297,9 +1303,11 @@ public class EshopServiceImpl implements EshopSerivce {
 		}else {
 			seedStatus = ModelConstant.COUPON_SEED_STATUS_INVALID;
 		}
+		int oriCount = couponSeed.getTotalCount();	//原来的库存，新增情况下，这个值是0
+		int addedCount = Integer.valueOf(saveCouponCfgVO.getTotalCount()) - oriCount; //编辑后增加的数量，跟当前有多少库存无关
 		couponSeed.setTotalCount(Integer.valueOf(saveCouponCfgVO.getTotalCount()));	//总数，以种子的总数为统计单位，规则里的总数分享时用。
 		BigDecimal unitAmt = new BigDecimal(saveCouponCfgVO.getAmount());
-		BigDecimal count = new BigDecimal(saveCouponCfgVO.getTotalCount());
+		BigDecimal count = new BigDecimal(couponSeed.getTotalCount());
 		BigDecimal totalAmt = unitAmt.multiply(count);
 		couponSeed.setTotalAmount(totalAmt.floatValue());
 		couponSeed.setStatus(seedStatus);
@@ -1315,13 +1323,22 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponSeed.setRuleDescription(saveCouponCfgVO.getCouponDesc());
 		couponSeed.setDescription(saveCouponCfgVO.getCouponDesc());
 		
+		String seedStr = DigestUtils.md5Hex((UUID.randomUUID().toString()));//唯一标识
+		couponSeed.setSeedStr(seedStr);	//种子
+		
+		couponSeed = couponSeedRepository.save(couponSeed);
+		/*保存红包种子 end */
+		
+		/*保存红包规则 start */
 		/*添加支持的小区，领券时判断 start*/
 		String supportType = saveCouponCfgVO.getSupportType();	//0全部支持，1支持部分商品，2不支持部分商品
 		if (StringUtils.isEmpty(supportType)) {
 			supportType = "0";
 		}
-		
 		CouponRule couponRule = new CouponRule();
+		if ("add".equals(saveCouponCfgVO.getOperType())) {
+			couponRule.setAgentId(agent.getId());
+		}
 		if ("edit".equals(saveCouponCfgVO.getOperType())) {
 			couponRule = couponRuleRepository.findById(Long.valueOf(saveCouponCfgVO.getRuleId())).get();
 			if (couponRule == null) {
@@ -1354,27 +1371,20 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		StringBuffer bf = new StringBuffer();
 		for (String sectId : marketRegions) {
+			if (StringUtils.isEmpty(sectId)) {
+				continue;
+			}
 			bf.append(sectId).append(",");
 		}
 		String serviceSupported = bf.substring(0, bf.length()-1);
-		couponSeed.setSectIds(serviceSupported);
-		
+		couponRule.setSectIds(serviceSupported);
 		/*添加支持的小区，领券时判断 end*/
 		
-		couponSeed = couponSeedRepository.save(couponSeed);
-		/*保存红包种子 end */
-		
-		/*保存红包规则 start */
-		couponRule.setTitle(saveCouponCfgVO.getTitle());	//名称
-		
-		if ("add".equals(saveCouponCfgVO.getOperType())) {
-			couponRule.setAgentId(agent.getId());
-		}
-		
+		couponRule.setTitle(couponSeed.getTitle());	//名称
 		couponRule.setSeedId(couponSeed.getId());
-		couponRule.setTitle(saveCouponCfgVO.getTitle());
+		couponRule.setTitle(couponSeed.getTitle());
+		couponRule.setTotalCount(couponSeed.getTotalCount());
 		couponRule.setAmount(Float.valueOf(saveCouponCfgVO.getAmount()));
-		couponRule.setTotalCount(Integer.valueOf(saveCouponCfgVO.getTotalCount()));
 		couponRule.setUsageCondition(Float.valueOf(saveCouponCfgVO.getUsageCondition()));
 		couponRule.setItemType(Integer.valueOf(saveCouponCfgVO.getItemType()));	//适用模块
 		
@@ -1412,10 +1422,23 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponRule.setCouponDesc(saveCouponCfgVO.getCouponDesc());
 		couponRule = couponRuleRepository.save(couponRule);
 		
+		CouponCfg couponCfg = new CouponCfg(couponRule, couponSeed);
 		String key = ModelConstant.KEY_COUPON_RULE + couponRule.getId();
-		redisRepository.setCouponRule(key, couponRule);
-		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_STOCK + couponRule.getId(), String.valueOf(couponRule.getTotalCount()));	//初始化改规则下的库存
-		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_FREEZE + couponRule.getId(), "0");	//初始化冻结数量
+		redisRepository.setCouponCfg(key, couponCfg);
+		
+		Integer currValue = 0;
+		String currCount = redisTemplate.opsForValue().get(ModelConstant.KEY_COUPON_TOTAL + couponRule.getId());
+		if (!StringUtils.isEmpty(currCount)) {
+			currValue = Integer.valueOf(currCount);
+			if (currValue < 0) {
+				addedCount = addedCount - currValue;	//先要平成0，因为redis里面是一直减的，会有负值
+			}
+		}
+		
+		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_TOTAL + couponRule.getId(), String.valueOf(addedCount));
+		
+		long expire = couponRule.getEndDate().getTime() - couponRule.getStartDate().getTime();
+		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_SEED + couponSeed.getSeedStr(), String.valueOf(couponRule.getId()), expire, TimeUnit.SECONDS);
 	}
 
 	/**

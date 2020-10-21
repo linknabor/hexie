@@ -16,7 +16,7 @@ import com.yumu.hexie.common.Constants;
  */
 @SessionAttributes(Constants.USER)
 public class BaseController {
-    
+
 	@InitBinder
     protected void initBinder(WebDataBinder binder) {
         binder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true));

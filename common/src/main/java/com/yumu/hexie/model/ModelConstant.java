@@ -401,10 +401,10 @@ public class ModelConstant {
 	public static final String KEY_PRO_FREEZE = "product:freeze:";
 	
 	public static final String KEY_COUPON_RULE = "coupon:rule:";
-	public static final String KEY_COUPON_STOCK = "coupon:stock:";
-	public static final String KEY_COUPON_FREEZE = "coupon:freeze:";
-	public static final String KEY_COUPON_SEED_AVAILABLE = "coupon:seed:available:";
-	public static final String KEY_COUPON_SEED_INVALID = "coupon:seed:invalid:";
+	public static final String KEY_COUPON_TOTAL = "coupon:total:";	//总数
+	public static final String KEY_COUPON_USED = "coupon:used:";	//已使用的
+	public static final String KEY_COUPON_SEED = "coupon:seed:";
+	public static final String KEY_COUPON_GAIN_QUEUE = "queue:coupon:gain";
 	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码

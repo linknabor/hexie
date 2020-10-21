@@ -9,6 +9,7 @@ import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
+import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
@@ -78,4 +79,10 @@ public interface CouponService {
 	Coupon findByOrderId(long orderId);
 
 	boolean isAvaible(String appId, String payType);
+	
+	/********v2 新版 start ************/
+	List<CouponCfg> getSeedList(User user);
+
+	Coupon gainCouponFromSeed(User user, String seedStr);
+	
 }
