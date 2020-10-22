@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisUtil;
-import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
@@ -74,11 +73,10 @@ public class CouponServiceImpl implements CouponService {
 
     @Inject
     private CouponRepository couponRepository;
-    @Inject
-    private SystemConfigService systemConfigService;
 	@Inject
 	private CollocationService collocationService;
-	
+	@Inject
+	private SystemConfigService systemConfigService;
 	@Inject
 	private CouponRuleRepository couponRuleRepository;
 	@Inject
@@ -176,12 +174,6 @@ public class CouponServiceImpl implements CouponService {
         List<Coupon> coupons = couponRepository.findByUserIdAndSeedId(userId, seedId);
         return (coupons!=null &&coupons.size()>0) ?  coupons.get(0) : null;
 	}
-    
-    public static void main(String[] args) {
-		double a = Math.random();
-		int count = 2;
-		System.out.println(a*count);
-    }
     
 	@Override
 	public Coupon addCouponFromSeed(CouponSeed seed,User user){
@@ -363,6 +355,10 @@ public class CouponServiceImpl implements CouponService {
         }
         return result;
     }
+    
+    /**
+     * 获取可用的红包
+     */
 	@Override
 	public List<Coupon> findAvaibleCoupon(long userId,SalePlan salePlan){
 		List<Coupon> result = new ArrayList<Coupon>();
@@ -378,21 +374,14 @@ public class CouponServiceImpl implements CouponService {
 			onsaleType = 0;
 		}
 		
-		Long orderType = 3l;
-		if (ModelConstant.ORDER_TYPE_RGROUP==salePlan.getSalePlanType()) {
-			orderType = Long.valueOf(ModelConstant.ORDER_TYPE_RGROUP);
-		}
-		
 		for(Coupon coupon : coupons) {
-			
-			if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_MARKET, 
-					orderType, new Long(onsaleType), salePlan.getProductId(), null, coupon,false)){
+			if (checkAvaible4v2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, salePlan.getProductId(), null, coupon, false)) {
 				result.add(coupon);
 			}
 		}
 		return result;
 	}
-
+	
 	//服务-洗衣-服务项父类型-服务项 商户ID
 	public boolean isAvaible(int itemType, Long subItemType, Long serviceType, Long productId, 
 	                          Float amount, Coupon coupon, boolean locked) {
@@ -430,93 +419,6 @@ public class CouponServiceImpl implements CouponService {
             }
         }
 
-//	    String typeStr = itemType + "-" + subItemType + "-" + serviceType + "-" + productId;
-        if(StringUtil.isNotEmpty(coupon.getPassTypePrefix())) {
-            
-        	int cItemType = coupon.getItemType();
-        	long cSubItemType = coupon.getSubItemType();
-        	long cServiceType = coupon.getServiceType();
-        	long cProductId = coupon.getProductId();
-        	
-        	if (cItemType!=itemType) {
-        		log.warn("itemType 不可用");
-        		return false;
-			}
-        	
-        	if (cSubItemType!=0 && cSubItemType!=subItemType) {
-        		log.warn("subItemType 不可用");
-        		return false;
-			}
-        	
-        	if (cServiceType!=0 && cServiceType!=serviceType) {
-        		log.warn("serviceType 不可用");
-        		return false;
-			}
-        	
-        	if (cProductId!=0 && cProductId!=productId) {
-        		log.warn("productId 不可用");
-        		return false;
-			}
-        	
-        }
-	    
-        if(StringUtil.isNotEmpty(coupon.getUnPassTypePrefix())) {
-        	
-            //反向验证
-        	int uItemType = coupon.getuItemType();
-        	long uSubItemType = coupon.getuSubItemType();
-        	long uServiceType = coupon.getuServiceType();
-        	long uProductId = coupon.getuProductId();
-        	
-        	if (uItemType == itemType) {
-        		
-        		if (uSubItemType == 0) {
-        			
-        			if (uProductId==productId) {
-        				log.warn("productId:"+uProductId+"不可用");
-                		return false;
-					}else if(uProductId==0) {
-						log.warn("subItemType:"+uSubItemType+"不可用");
-	            		return false;
-					}
-        			
-				}
-        		
-        		if (uSubItemType == subItemType) {
-        			
-        			if (uServiceType == 0) {
-        				
-        				if (uProductId==productId) {
-            				log.warn("productId:"+uProductId+"不可用");
-                    		return false;
-    					}else if(uProductId==0) {
-    						log.warn("serviceType:"+uServiceType+"不可用");
-    	            		return false;
-    					}
-        				
-    				}
-        			
-        			if (uServiceType == serviceType) {
-						
-        				if (uProductId==productId) {
-            				log.warn("productId:"+uProductId+"不可用");
-                    		return false;
-    					}else if(uProductId==0) {
-    						log.warn("serviceType:"+uServiceType+"不可用");
-    	            		return false;
-    					}
-        				
-					}
-        			
-        			
-				}
-        		
-        		
-			}
-        	
-        	
-        }
-
         /*可用商户校验*/
 		if(coupon.getMerchantId() != null && coupon.getMerchantId() != 0 ){
 		    Long merchantId = getMerchatId(new Long(itemType), serviceType, productId);
@@ -540,6 +442,8 @@ public class CouponServiceImpl implements CouponService {
         log.warn("可以用（全部通过）");
 		return true;
 	}
+	
+	
 	
 	/**
 	 * 根据卡库指定策略 TODO
@@ -916,7 +820,7 @@ public class CouponServiceImpl implements CouponService {
 					if (!StringUtils.isEmpty(stock) && Integer.valueOf(stock) <= 0) {
 						couponView.setUsedup(true);	//已领完
 					}
-					if (!StringUtils.isEmpty(gainedSeedStr) && gainedSeedStr.indexOf(String.valueOf(couponCfg.getSeedId()))>-1) {
+					if (!StringUtils.isEmpty(gainedSeedStr) && gainedSeedStr.indexOf(couponCfg.getSeedStr())>-1) {
 						couponView.setGained(true);
 					}
 					availableList.add(couponView);
@@ -958,7 +862,7 @@ public class CouponServiceImpl implements CouponService {
 		Long stock = redisTemplate.opsForValue().decrement(stockKey);	//直接减，不要用get获取一遍值，非原子性操作，有脏读
 		if (stock < 0) {
 			log.info("红包已领完, ruleId : " + ruleId);
-			return null;//现金券已领完
+			throw new BizValidateException("现金券已领完。");
 		}
 		CouponSeed seed = new CouponSeed();
 		seed.setId(couponCfg.getSeedId());
@@ -1016,9 +920,88 @@ public class CouponServiceImpl implements CouponService {
 		int validNum = couponRepository.countByUserIdAndStatusIn(user.getId(),status);
 		log.info("当前用户:" + user.getId() + ", 实际拥有红包：" + validNum);
 		userRepository.updateUserCoupon(validNum, user.getId(), user.getCouponCount());
-		
 		return coupon;
+		
+	}
+	
+	/**
+	 * 验证红包是否可用
+	 * @param itemType	0全部，1特卖团购商品，2电子核销券,3服务，4物业缴费
+	 * @param productId	需要验证的产品ID，如果是服务传serviceId
+	 * @param amount	此次购买金额
+	 * @param coupon	此次使用的红包
+	 * @param locked	是否锁
+	 * @return
+	 */
+	@Override
+	public boolean checkAvaible4v2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked) {
+	    
+		if(coupon == null) {
+	        return false;
+	    }
+	    log.warn("Check Coupon, couponId : " + coupon.getId() + ", ["+itemType+"]["+productId+"]["+amount+"]["+coupon.getId()+"]["+locked+"]");
+	    //1.状态验证
+        if(!locked && coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
+            log.warn("coupon " + coupon.getId() + ", 不可用（状态验证）");
+            return false;
+        }
+        //2.是否锁定验证
+        if(locked && coupon.getStatus() != ModelConstant.COUPON_STATUS_LOCKED && coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
+        	log.warn("coupon " + coupon.getId() + ", 不可用（锁定状态）");
+            return false;
+        }
+        
+        //3.金额验证
+        BigDecimal amt = new BigDecimal(String.valueOf(amount));
+        BigDecimal minAmt = new BigDecimal("0.01");
+        BigDecimal usageCondition = new BigDecimal(String.valueOf(coupon.getUsageCondition()));
+        
+        if(amount != null && amt.subtract(usageCondition).compareTo(minAmt) <= 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+        	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
+            return false;
+        }
+
+	    //4.支持产品类型验证
+	    if(itemType != PromotionConstant.COUPON_ITEM_TYPE_ALL && productId > 0) {
+	    	boolean inSupport = false;	//是否在支持的商品列表中
+            if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId))>-1) {
+            	inSupport = true;
+			} else {
+				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 不在支持的列表中。");
+			}
+            
+            boolean inUnsupport = false;	//是否在不支持的商品列表中
+            if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId)) >-1) {
+				inUnsupport = true;
+				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 在不支持的列表中。");
+			}
+            if (!inSupport || inUnsupport) {
+				return false;
+			}
+        }
+	    
+	    //5.验证代理商
+	    if (coupon.getAgentId() > 0) {
+	    	Optional<Product> optional = productRepository.findById(productId);
+	    	if (optional.isPresent()) {
+				Product product = optional.get();
+				if (product == null) {
+					log.warn("未找到当前商品, productId: " + productId);
+					return false;
+				}
+				if (product.getAgentId() != coupon.getAgentId()) {
+					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 非指定代理商, agentId : " + product.getAgentId() + ", 不能使用。");
+					return false;
+				}
+			}
+	    }
+
+	    //TODO 商户校验
+        log.warn("可以用（全部通过）");
+		return true;
 	}
 
+	
+	
 	
 }
