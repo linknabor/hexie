@@ -406,6 +406,8 @@ public class ModelConstant {
 	public static final String KEY_COUPON_SEED = "coupon:seed:";
 	public static final String KEY_COUPON_GAIN_QUEUE = "queue:coupon:gain";
 	
+	public static final String KEY_USER_COUPON_SEED = "user:gaiedCouponSeed:";	//用户已领过的红包种子
+	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	

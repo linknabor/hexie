@@ -66,7 +66,7 @@ public class Coupon extends BaseModel {
     private Long uProductId;
     private Long uMerchantId;
 	/**************现金券适用范围**************/
-
+    
 	private String suggestUrl;
 	private String appid;	//所属平台
 	

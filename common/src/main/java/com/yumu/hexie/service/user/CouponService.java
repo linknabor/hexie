@@ -13,6 +13,7 @@ import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
+import com.yumu.hexie.model.promotion.coupon.CouponView;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.CouponsSummary;
 
@@ -81,8 +82,10 @@ public interface CouponService {
 	boolean isAvaible(String appId, String payType);
 	
 	/********v2 新版 start ************/
-	List<CouponCfg> getSeedList(User user);
+	List<CouponView> getSeedList(User user);
 
-	Coupon gainCouponFromSeed(User user, String seedStr);
+	Coupon gainCouponFromSeed(User user, String seedStr) throws Exception;
+
+	Coupon updateCouponReceived(Coupon coupon);
 	
 }

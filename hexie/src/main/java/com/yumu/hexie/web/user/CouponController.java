@@ -19,8 +19,8 @@ import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
-import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
+import com.yumu.hexie.model.promotion.coupon.CouponView;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
@@ -57,11 +57,14 @@ public class CouponController extends BaseController{
 	public BaseResult<CouponsSummary> coupons(@ModelAttribute(Constants.USER)User user) throws Exception {
 		return new BaseResult<CouponsSummary>().success(couponService.findCouponSummary(user.getId()));
 	}
+    
+    @ApiOperation(value = "获取个人已失效的红包")
     @RequestMapping(value = "/invalidCoupons/{page}", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<Coupon>> coupons(@ModelAttribute(Constants.USER)User user,@PathVariable int page) throws Exception {
         return new BaseResult<List<Coupon>>().success(couponService.findInvalidCoupons(user.getId(), page));
     }
+    
     @RequestMapping(value = "/order/coupon/{orderId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Coupon> orderCoupon(@PathVariable Long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
@@ -135,10 +138,10 @@ public class CouponController extends BaseController{
     @ApiOperation(value = "获取红包种子列表")
     @RequestMapping(value = "/coupon/v2/seedList", method = RequestMethod.GET)
     @ResponseBody
-    public BaseResult<List<CouponCfg>> getSeedList(@ModelAttribute(Constants.USER)User user) throws Exception {
+    public BaseResult<List<CouponView>> getSeedList(@ModelAttribute(Constants.USER)User user) throws Exception {
 
-    	List<CouponCfg> cfgList = couponService.getSeedList(user);
-        return new BaseResult<List<CouponCfg>>().success(cfgList);
+    	List<CouponView> viewList = couponService.getSeedList(user);
+        return new BaseResult<List<CouponView>>().success(viewList);
     }
     
     @ApiOperation(value = "根据种子领取红包")

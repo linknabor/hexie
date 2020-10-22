@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisUtil;
@@ -46,6 +49,7 @@ import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponRuleRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.promotion.coupon.CouponSeedRepository;
+import com.yumu.hexie.model.promotion.coupon.CouponView;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -893,23 +897,29 @@ public class CouponServiceImpl implements CouponService {
 	 * @return
 	 */
 	@Override
-	public List<CouponCfg> getSeedList(User user){
+	public List<CouponView> getSeedList(User user){
+		
+		String gainedSeedKey = ModelConstant.KEY_USER_COUPON_SEED + user.getId();
+		String gainedSeedStr = redisTemplate.opsForValue().get(gainedSeedKey);
 		
 		String seedKeyPattern = ModelConstant.KEY_COUPON_RULE + "*";	//这里如果操作的数据量较大，需要改成 scan操作。keys操作会阻塞其他redis操作，导致redis宕机。
 		List<String> ruleList = RedisUtil.scanKeys(redisTemplate, seedKeyPattern);
-//		Set<String> keysSet = redisTemplate.keys(seedKeyPattern);	//注意pattern必须有值
-//		List<String> ruleList = new ArrayList<>(keysSet);
-		List<CouponCfg> availableList = new ArrayList<>();
+		List<CouponView> availableList = new ArrayList<>();
 		for (String ruleKey : ruleList) {
-			CouponCfg couponCfg = redisRepository.getCouponRule(ruleKey);
-			if (ModelConstant.COUPON_RULE_STATUS_AVAILABLE == couponCfg.getStatus()) {
-				if (couponCfg.getTotalCount() - couponCfg.getReceivedCount() > 0) {
-					String supportSects = couponCfg.getSectIds();	//支持的小区
-					if (!StringUtils.isEmpty(supportSects)) {
-						if (supportSects.indexOf(user.getSectId()) > -1) {
-							availableList.add(couponCfg);
-						}
+			CouponCfg couponCfg = redisRepository.getCouponCfg(ruleKey);
+			String supportSects = couponCfg.getSectIds();	//支持的小区
+			if (!StringUtils.isEmpty(supportSects)) {
+				if (supportSects.indexOf(user.getSectId()) > -1) {
+					CouponView couponView = new CouponView(couponCfg);
+					String stockKey = ModelConstant.KEY_COUPON_TOTAL + couponView.getId();
+					String stock = redisTemplate.opsForValue().get(stockKey);	//这里只是粗略判断一下，可能存在多个用户同时显示可领，但真正领的时候其实只有一个红包，在领取的方法里会校验
+					if (!StringUtils.isEmpty(stock) && Integer.valueOf(stock) <= 0) {
+						couponView.setUsedup(true);	//已领完
 					}
+					if (!StringUtils.isEmpty(gainedSeedStr) && gainedSeedStr.indexOf(String.valueOf(couponCfg.getSeedId()))>-1) {
+						couponView.setGained(true);
+					}
+					availableList.add(couponView);
 				}
 			}
 		}
@@ -920,14 +930,21 @@ public class CouponServiceImpl implements CouponService {
 	/**
 	 * 根据种子领取红包
 	 * @param seedStr
+	 * @throws JsonProcessingException 
 	 */
 	@Override
-	@Transactional
-	public Coupon gainCouponFromSeed(User user, String seedStr) {
+	public Coupon gainCouponFromSeed(User user, String seedStr) throws Exception {
 		
 		Assert.hasText(seedStr, "种子不能为空。");
 		
 		log.info("当前用户:" + user.getId() + ", session中拥有红包：" + user.getCouponCount());
+		String couponKey = ModelConstant.KEY_USER_COUPON_SEED + user.getId();
+		String gainedSeeds = redisTemplate.opsForValue().get(couponKey);
+		if (!StringUtils.isEmpty(gainedSeeds)) {
+			if (gainedSeeds.indexOf(seedStr) > -1) {
+				throw new BizValidateException("已经领过红包啦。");
+			}
+		}
 		
 		String seedStrKey = ModelConstant.KEY_COUPON_SEED + seedStr;
 		String ruleId = redisTemplate.opsForValue().get(seedStrKey);
@@ -935,7 +952,7 @@ public class CouponServiceImpl implements CouponService {
 			throw new BizValidateException("未找到当前种子对应的规则ID， 种子：" + seedStr);
 		}
 		String ruleKey = ModelConstant.KEY_COUPON_RULE + ruleId;
-		CouponCfg couponCfg = redisRepository.getCouponRule(ruleKey);
+		CouponCfg couponCfg = redisRepository.getCouponCfg(ruleKey);
 		
 		String stockKey = ModelConstant.KEY_COUPON_TOTAL + ruleId;
 		Long stock = redisTemplate.opsForValue().decrement(stockKey);	//直接减，不要用get获取一遍值，非原子性操作，有脏读
@@ -947,53 +964,61 @@ public class CouponServiceImpl implements CouponService {
 		seed.setId(couponCfg.getSeedId());
 		seed.setSeedType(couponCfg.getSeedType());
 		
-		Coupon coupon = null;
-		if(couponCfg.getRate() < Math.random()){	//rate为1时不会发生
-			//没有抽中现金券
-			coupon = Coupon.emptyCoupon(seed, user);
-			coupon = couponRepository.save(coupon);
-			return coupon;
-		}
-		
 		CouponRule rule = new CouponRule();
 		BeanUtils.copyProperties(couponCfg, rule);
 		
-		coupon = new Coupon(seed, rule, user);
-		coupon = couponRepository.save(coupon);
-        log.info("红包发放："+ coupon.getId() + ", title: " + coupon.getTitle());
-
+		Coupon coupon = new Coupon(seed, rule, user);
+		
 		//更新数据库。放到队列，以免多人同时领取时脏读
-        int retryTimes = 0;
-		boolean isSuccess = false;
-		while(!isSuccess && retryTimes < 3) {
-			try {
-				redisTemplate.opsForList().rightPush(ModelConstant.KEY_COUPON_GAIN_QUEUE, String.valueOf(couponCfg.getId()));
-				isSuccess = true;
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				retryTimes++;
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e1) {
-					log.error(e.getMessage(), e);
-				}
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		String value = objectMapper.writeValueAsString(coupon);
+		redisTemplate.opsForList().rightPush(ModelConstant.KEY_COUPON_GAIN_QUEUE, value);
+		
+		//塞红包到缓存
+		user.setCouponCount(user.getCouponCount()+1);
+		redisTemplate.opsForValue().append(couponKey, seedStr + ",");	//后面加逗号分割
+		return coupon;
+	}
+	
+	@Transactional
+	@Override
+	public Coupon updateCouponReceived(Coupon coupon) {
+		
+		//1.更新couponRule
+		Optional<CouponRule> optional = couponRuleRepository.findById(Long.valueOf(coupon.getRuleId()));
+		CouponRule couponRule  = null;
+		if (optional.isPresent()) {
+			couponRule = optional.get();
+			couponRule.addReceived();
+			couponRuleRepository.save(couponRule);
+			
+			//2.更新couponSeed
+			Optional<CouponSeed> seedOptional = couponSeedRepository.findById(couponRule.getSeedId());
+			if (seedOptional.isPresent()) {
+				CouponSeed couponSeed = seedOptional.get();
+				couponSeed.setReceivedCount(couponRule.getReceivedCount());
+				couponSeed.getSeedStr();
+				couponSeedRepository.save(couponSeed);
+				
 			}
 		}
-
+		//3.保存红包到数据库
+		coupon = couponRepository.save(coupon);
+		log.info("红包发放："+ coupon.getId() + ", title: " + coupon.getTitle());
+		
+		//4.更新用户红包数量
+		User user = userRepository.findById(coupon.getUserId());
+		log.info("当前用户:" + user.getId() + ", db中拥有红包：" + user.getCouponCount());
+		
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		status.add(ModelConstant.COUPON_STATUS_LOCKED);
-		//status.add(ModelConstant.COUPON_STATUS_USED);
-		//status.add(ModelConstant.COUPON_STATUS_TIMEOUT);
-		
-		user = userRepository.findById(user.getId());
-		log.info("当前用户:" + user.getId() + ", db中拥有红包：" + user.getCouponCount());
-		
 		int validNum = couponRepository.countByUserIdAndStatusIn(user.getId(),status);
 		log.info("当前用户:" + user.getId() + ", 实际拥有红包：" + validNum);
-		
 		userRepository.updateUserCoupon(validNum, user.getId(), user.getCouponCount());
+		
 		return coupon;
 	}
+
 	
 }
