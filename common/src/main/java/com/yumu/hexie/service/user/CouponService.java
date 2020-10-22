@@ -9,7 +9,6 @@ import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
-import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
@@ -87,5 +86,7 @@ public interface CouponService {
 	Coupon gainCouponFromSeed(User user, String seedStr) throws Exception;
 
 	Coupon updateCouponReceived(Coupon coupon);
+
+	boolean checkAvaible4v2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked);
 	
 }
