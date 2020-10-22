@@ -1,7 +1,5 @@
 package com.yumu.hexie.service.user.impl;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -15,15 +13,11 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.promotion.coupon.CouponRepository;
-import com.yumu.hexie.model.promotion.coupon.CouponRule;
-import com.yumu.hexie.model.promotion.coupon.CouponRuleRepository;
-import com.yumu.hexie.model.promotion.coupon.CouponSeed;
-import com.yumu.hexie.model.promotion.coupon.CouponSeedRepository;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.user.CouponQueueTask;
+import com.yumu.hexie.service.user.CouponService;
 
 @Service
 public class CouponQueueTaskImpl implements CouponQueueTask {
@@ -33,9 +27,7 @@ public class CouponQueueTaskImpl implements CouponQueueTask {
 	@Autowired
 	private MaintenanceService maintenanceService;
 	@Autowired
-	private CouponRuleRepository couponRuleRepository;
-	@Autowired
-	private CouponSeedRepository couponSeedRepository;
+	private CouponService couponService;
 	
 	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
@@ -55,32 +47,18 @@ public class CouponQueueTaskImpl implements CouponQueueTask {
 					Thread.sleep(60000);
 					continue;
 				}
-				String ruleId = redisTemplate.opsForList().leftPop(ModelConstant.KEY_COUPON_GAIN_QUEUE, 30, TimeUnit.SECONDS);
-				if (StringUtils.isEmpty(ruleId)) {
+				String couponStr = redisTemplate.opsForList().leftPop(ModelConstant.KEY_COUPON_GAIN_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(couponStr)) {
 					continue;
 				}
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				Coupon coupon = objectMapper.readValue(couponStr, new TypeReference<Coupon>(){});
+				
 				boolean isSuccess = false;
 				try {
-					logger.info("start to consume gain coupon queue, ruleId : " + ruleId);
-				
-					//1.更新couponRule
-					Optional<CouponRule> optional = couponRuleRepository.findById(Long.valueOf(ruleId));
-					CouponRule couponRule  = null;
-					if (optional.isPresent()) {
-						couponRule = optional.get();
-						couponRule.addReceived();
-						couponRuleRepository.save(couponRule);
-						
-						//2.更新couponSeed
-						Optional<CouponSeed> seedOptional = couponSeedRepository.findById(couponRule.getSeedId());
-						if (seedOptional.isPresent()) {
-							CouponSeed couponSeed = seedOptional.get();
-							couponSeed.setReceivedCount(couponRule.getReceivedCount());
-							couponSeed.getSeedStr();
-							couponSeedRepository.save(couponSeed);
-							
-						}
-					}
+					logger.info("start to consume gain coupon queue, coupon : " + coupon.getRuleId() + ", userId : " + coupon.getUserId());
+					coupon = couponService.updateCouponReceived(coupon);
 					isSuccess = true;
 					
 				} catch (Exception e) {
@@ -88,7 +66,7 @@ public class CouponQueueTaskImpl implements CouponQueueTask {
 				}
 						
 				if (!isSuccess) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_COUPON_GAIN_QUEUE, ruleId);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_COUPON_GAIN_QUEUE, couponStr);
 				}
 			
 			} catch (Exception e) {
@@ -98,4 +76,5 @@ public class CouponQueueTaskImpl implements CouponQueueTask {
 
 	}
 
+	
 }

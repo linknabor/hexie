@@ -1323,9 +1323,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponSeed.setRuleDescription(saveCouponCfgVO.getCouponDesc());
 		couponSeed.setDescription(saveCouponCfgVO.getCouponDesc());
 		
-		String seedStr = DigestUtils.md5Hex((UUID.randomUUID().toString()));//唯一标识
-		couponSeed.setSeedStr(seedStr);	//种子
-		
+		if ("add".equals(saveCouponCfgVO.getOperType())) {	//不可修改项，生成后唯一
+			String seedStr = DigestUtils.md5Hex((UUID.randomUUID().toString()));//唯一标识
+			couponSeed.setSeedStr(seedStr);	//种子
+		}
 		couponSeed = couponSeedRepository.save(couponSeed);
 		/*保存红包种子 end */
 		
@@ -1401,14 +1402,21 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponRule.setSupportType(Integer.valueOf(supportType));
 		couponRule.setStartDate(couponSeed.getStartDate());
 		couponRule.setEndDate(couponSeed.getEndDate());
+		Integer expiredDays = 0;
 		if (!StringUtils.isEmpty(saveCouponCfgVO.getExpiredDays())) {
+			expiredDays = Integer.valueOf(saveCouponCfgVO.getExpiredDays());
+		}
+		if (expiredDays > 0) {
 			couponRule.setExpiredDays(Integer.valueOf(saveCouponCfgVO.getExpiredDays()));
-		}else if (!StringUtils.isEmpty(saveCouponCfgVO.getUseStartDate()) && !StringUtils.isEmpty(saveCouponCfgVO.getUseEndDate())) {
+			couponRule.setUseStartDate(null);
+			couponRule.setUseEndDate(null);
+		}else {
 			//可用日期
 			Date useStartDate = DateUtil.parse(saveCouponCfgVO.getUseStartDate(), DateUtil.dttmSimple);
 			couponRule.setUseStartDate(useStartDate);
 			Date useEndDate = DateUtil.parse(saveCouponCfgVO.getUseEndDate(), DateUtil.dttmSimple);
 			couponRule.setUseEndDate(useEndDate);
+			couponRule.setExpiredDays(0);
 		}
 		
 		int ruleStatus = ModelConstant.COUPON_RULE_STATUS_AVAILABLE;
@@ -1435,8 +1443,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 		}
 		
-		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_TOTAL + couponRule.getId(), String.valueOf(addedCount));
-		
+		redisTemplate.opsForValue().increment(ModelConstant.KEY_COUPON_TOTAL + couponRule.getId(), addedCount);
 		long expire = couponRule.getEndDate().getTime() - couponRule.getStartDate().getTime();
 		redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_SEED + couponSeed.getSeedStr(), String.valueOf(couponRule.getId()), expire, TimeUnit.SECONDS);
 	}
