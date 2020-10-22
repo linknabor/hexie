@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.swagger.annotations.ApiOperation;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -28,6 +29,14 @@ public class Swagger2Config {
 		return new Docket(DocumentationType.SWAGGER_2).groupName("Sales").apiInfo(apiInfo()).select()
 				// 自行修改为自己的包路径
 				.apis(RequestHandlerSelectors.basePackage("com.yumu.hexie.web.sales"))
+				.paths(PathSelectors.any()).build();
+	}
+	
+	@Bean("swagger4coupon")
+	public Docket api4Coupon() throws UnsupportedEncodingException {
+		return new Docket(DocumentationType.SWAGGER_2).groupName("Coupon").apiInfo(apiInfo()).select()
+				// 自行修改为自己的包路径
+				.apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
 				.paths(PathSelectors.any()).build();
 	}
 

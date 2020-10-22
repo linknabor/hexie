@@ -841,8 +841,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					cacheableService.save(rule);
 				}
 			}
-			/*2.修改i当你孤单状态为已退款*/
+			/*2.修改订单状态为已退款*/
 			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+			serviceOrder.setRefundDate(new Date());
 			serviceOrderRepository.save(serviceOrder);
 			
 			/*3.修改已售份数*/

@@ -79,6 +79,8 @@ public class CouponRule extends BaseModel {
 	
 	/**代理商、合伙人信息**/
 	private long agentId;
+	
+	private String sectIds;	//支持的小区
 
 	public CouponRule copy(long seedId){
 		CouponRule cr = new CouponRule();
@@ -309,6 +311,12 @@ public class CouponRule extends BaseModel {
 	}
 	public void setSupportType(int supportType) {
 		this.supportType = supportType;
+	}
+	public String getSectIds() {
+		return sectIds;
+	}
+	public void setSectIds(String sectIds) {
+		this.sectIds = sectIds;
 	}
 	
 }

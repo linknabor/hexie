@@ -12,8 +12,8 @@ public class SaveCouponCfgVO implements Serializable {
 	private String operType;	//add,edit;
 	
 	private String ruleId;	//规则id
-	private String title;	//名称
 	private String seedId;	//种子ID
+	private String title;	//名称
 	private String seedType;	//种子类型
 	private String amount;	//优惠券金额
 	private String usageCondition;	//最小使用金额
@@ -34,6 +34,8 @@ public class SaveCouponCfgVO implements Serializable {
 	
 	private String agentName;
 	private String agentNo;
+	
+	private String serviceSupportedSect;	//自定义服务支持的小区
 	
 	public String getRuleId() {
 		return ruleId;
@@ -173,6 +175,12 @@ public class SaveCouponCfgVO implements Serializable {
 	public void setSeedId(String seedId) {
 		this.seedId = seedId;
 	}
+	public String getServiceSupportedSect() {
+		return serviceSupportedSect;
+	}
+	public void setServiceSupportedSect(String serviceSupportedSect) {
+		this.serviceSupportedSect = serviceSupportedSect;
+	}
 	@Override
 	public String toString() {
 		return "SaveCouponCfgVO [operType=" + operType + ", ruleId=" + ruleId + ", title=" + title + ", seedId="
@@ -181,7 +189,8 @@ public class SaveCouponCfgVO implements Serializable {
 				+ ", supported=" + supported + ", unsupported=" + unsupported + ", expiredDays=" + expiredDays
 				+ ", startDate=" + startDate + ", endDate=" + endDate + ", useStartDate=" + useStartDate
 				+ ", useEndDate=" + useEndDate + ", status=" + status + ", suggestUrl=" + suggestUrl + ", seedImg="
-				+ seedImg + ", couponDesc=" + couponDesc + ", agentName=" + agentName + ", agentNo=" + agentNo + "]";
+				+ seedImg + ", couponDesc=" + couponDesc + ", agentName=" + agentName + ", agentNo=" + agentNo
+				+ ", serviceSupportedSect=" + serviceSupportedSect + "]";
 	}
 	
 

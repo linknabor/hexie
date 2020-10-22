@@ -14,7 +14,7 @@ import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.car.OrderCarInfo;
-import com.yumu.hexie.model.promotion.coupon.CouponRule;
+import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.share.ShareAccessRecord;
 import com.yumu.hexie.model.system.SystemConfig;
 
@@ -37,7 +37,7 @@ public class RedisRepository {
     @Autowired
     private RedisTemplate<String, ProductRule> proRedisTemplate;
     @Autowired
-    private RedisTemplate<String, CouponRule> couponRuleRedisTemplate;
+    private RedisTemplate<String, CouponCfg> couponRuleRedisTemplate;
     
     /**
      * 获取订单车辆信息 
@@ -114,11 +114,11 @@ public class RedisRepository {
         return proRedisTemplate.opsForValue().get(key);
     }
     
-    public CouponRule getCouponRule(String key) {
+    public CouponCfg getCouponRule(String key) {
         return couponRuleRedisTemplate.opsForValue().get(key);
     }
     
-    public void setCouponRule(String key, CouponRule value) {
+    public void setCouponCfg(String key, CouponCfg value) {
     	
     	Date start = value.getStartDate();
     	Date end = value.getEndDate();

@@ -3,6 +3,7 @@ package com.yumu.hexie.web.user;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -18,6 +19,7 @@ import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
+import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
@@ -30,6 +32,8 @@ import com.yumu.hexie.vo.CouponsSummary;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.CouponSeedVO;
+
+import io.swagger.annotations.ApiOperation;
 
 @Controller(value = "couponController")
 public class CouponController extends BaseController{
@@ -125,6 +129,26 @@ public class CouponController extends BaseController{
 			return "";
 		}
     	couponService.consume(Long.valueOf(tradeWaterId));
-        return "SUCCESS";
+        return Constants.SERVICE_SUCCESS;	//TODO 应该用PAGE_SUCCESS，前端需要修改
     }
+    
+    @ApiOperation(value = "获取红包种子列表")
+    @RequestMapping(value = "/coupon/v2/seedList", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<List<CouponCfg>> getSeedList(@ModelAttribute(Constants.USER)User user) throws Exception {
+
+    	List<CouponCfg> cfgList = couponService.getSeedList(user);
+        return new BaseResult<List<CouponCfg>>().success(cfgList);
+    }
+    
+    @ApiOperation(value = "根据种子领取红包")
+    @RequestMapping(value = "/coupon/v2/gain/{seedStr}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Coupon> gainCoupon(HttpSession session, @ModelAttribute(Constants.USER)User user, @PathVariable String seedStr) throws Exception {
+    	
+    	Coupon coupon = couponService.gainCouponFromSeed(user, seedStr);
+    	session.setAttribute(Constants.USER, user);
+		return new BaseResult<Coupon>().success(coupon);
+	}
+    
 }

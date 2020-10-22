@@ -25,6 +25,7 @@ import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.user.CouponQueueTask;
 
 @Service
 public class BatchServiceImpl implements BatchService {
@@ -45,6 +46,9 @@ public class BatchServiceImpl implements BatchService {
 	
 	@Autowired
 	private NotifyQueueTask notifyQueueTask;
+	
+	@Autowired
+	private CouponQueueTask couponQueueTask;
 	
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -69,6 +73,8 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.sendDeliveryNotificationAsyc();
 		notifyQueueTask.updatePartnerAsync();
 		notifyQueueTask.eshopRefundAsync();
+		
+		couponQueueTask.gainCouponAsync();
 		
 		logger.info("异步队列任务启动完成。");
 		
