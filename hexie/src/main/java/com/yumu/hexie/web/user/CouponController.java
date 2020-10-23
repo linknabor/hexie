@@ -102,6 +102,8 @@ public class CouponController extends BaseController{
 		}
 		return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(order));
 	}
+    
+    @ApiOperation(value = "特卖、团购获取可以用的红包", notes = "salePlanType --> 特卖3, 团购4, 服务11, 核销券12")
     @RequestMapping(value = "/coupon/valid/{salePlanType}/{salePlanId}", method = RequestMethod.GET)
    	@ResponseBody
    	public BaseResult<List<Coupon>> findValidCoupons(@PathVariable int salePlanType,

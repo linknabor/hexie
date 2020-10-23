@@ -1246,8 +1246,8 @@ public class EshopServiceImpl implements EshopSerivce {
 				typeList.add(productType);
 			}
 			
-			Page<Object[]>	page = productRepository.getSupportProduct(typeList, queryProductVO.getProductName(), 
-					queryProductVO.getProductStatus(), agentList, pageable);
+			Page<Object[]>	page = productRepository.getSupportProduct(typeList, queryProductVO.getProductStatus(), 
+					queryProductVO.getProductName(), agentList, pageable);
 			
 			List<QuerySupportProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QuerySupportProductMapper.class);
 			QueryListDTO<List<QuerySupportProductMapper>> responsePage = new QueryListDTO<>();

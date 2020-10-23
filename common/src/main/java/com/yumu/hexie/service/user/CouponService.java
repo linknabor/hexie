@@ -87,6 +87,10 @@ public interface CouponService {
 
 	Coupon updateCouponReceived(Coupon coupon);
 
-	boolean checkAvaible4v2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked);
+	boolean checkAvaibleV2(ServiceOrder order, Coupon coupon, boolean withLocked);
+	
+	boolean checkAvaibleV2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked);
+
+	
 	
 }
