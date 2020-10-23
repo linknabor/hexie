@@ -32,11 +32,15 @@ import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
+import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.promotion.PromotionConstant;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -44,6 +48,7 @@ import com.yumu.hexie.service.common.UploadService;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
+import com.yumu.hexie.service.user.CouponService;
 
 @Service
 public class CustomServiceImpl implements CustomService {
@@ -66,7 +71,10 @@ public class CustomServiceImpl implements CustomService {
 	private OperatorService operatorService;
 	@Autowired
 	private UploadService uploadService;
-	
+	@Autowired
+	private AgentRepository agentRepository;
+	@Autowired
+	private CouponService couponService;
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -95,6 +103,22 @@ public class CustomServiceImpl implements CustomService {
 		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
 		customerServiceOrderDTO.setUser(currUser);
 		customerServiceOrderDTO.setOrderType(String.valueOf(ModelConstant.ORDER_TYPE_SERVICE));
+		
+		Coupon coupon = null;
+		if (!StringUtils.isEmpty(customerServiceOrderDTO.getCouponId())) {
+			coupon = couponService.findById(Long.valueOf(customerServiceOrderDTO.getCouponId()));
+			
+			Float amount = Float.valueOf(customerServiceOrderDTO.getTranAmt());
+			Long serviceId = Long.valueOf(customerServiceOrderDTO.getServiceId());
+			boolean isAvailable = couponService.checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, serviceId, amount, coupon, false);
+			if (isAvailable) {
+				throw new BizValidateException("当前优惠券不可用。coupon id : " + coupon.getId());
+			}
+			customerServiceOrderDTO.setCouponId(String.valueOf(coupon.getId()));
+			customerServiceOrderDTO.setCouponAmt(String.valueOf(coupon.getAmount()));
+		}
+		 
+		
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
 		
 		long end = System.currentTimeMillis();
@@ -120,6 +144,19 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setSubType(Long.valueOf(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
+		
+		Agent agent = null;
+		if (!StringUtils.isEmpty(customerServiceOrderDTO.getAgentNo())) {
+			agent = agentRepository.findByAgentNo(customerServiceOrderDTO.getAgentNo());
+		}
+		if (agent!=null) {
+			serviceOrder.setAgentId(agent.getId());
+			serviceOrder.setAgentName(agent.getName());
+			serviceOrder.setAgentNo(agent.getAgentNo());
+		}
+		if (!StringUtils.isEmpty(customerServiceOrderDTO.getCouponId())) {
+			serviceOrder.setCouponId(Long.valueOf(customerServiceOrderDTO.getCouponId()));
+		}
 		
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
