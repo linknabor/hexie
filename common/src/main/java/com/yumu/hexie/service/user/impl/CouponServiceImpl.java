@@ -360,7 +360,7 @@ public class CouponServiceImpl implements CouponService {
      * 获取可用的红包
      */
 	@Override
-	public List<Coupon> findAvaibleCoupon(long userId,SalePlan salePlan){
+	public List<Coupon> findAvaibleCoupon(long userId, SalePlan salePlan){
 		List<Coupon> result = new ArrayList<Coupon>();
 		if(salePlan == null) {
 			return result;
@@ -368,11 +368,6 @@ public class CouponServiceImpl implements CouponService {
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
-		
-		Integer onsaleType = !(salePlan instanceof OnSaleRule) ? null : ((OnSaleRule)salePlan).getProductType();
-		if (onsaleType==null) {
-			onsaleType = 0;
-		}
 		
 		for(Coupon coupon : coupons) {
 			if (checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, salePlan.getProductId(), null, coupon, false)) {
@@ -973,14 +968,16 @@ public class CouponServiceImpl implements CouponService {
         }
         
         //3.金额验证
-        BigDecimal amt = new BigDecimal(String.valueOf(amount));
-        BigDecimal minAmt = new BigDecimal("0.01");
-        BigDecimal usageCondition = new BigDecimal(String.valueOf(coupon.getUsageCondition()));
-        
-        if(amount != null && amt.subtract(usageCondition).compareTo(minAmt) <= 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
-        	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
-            return false;
-        }
+        if (amount != null) {
+        	BigDecimal amt = new BigDecimal(String.valueOf(amount));
+            BigDecimal minAmt = new BigDecimal("0.01");
+            BigDecimal usageCondition = new BigDecimal(String.valueOf(coupon.getUsageCondition()));
+            
+            if(amount != null && amt.subtract(usageCondition).compareTo(minAmt) <= 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+            	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
+                return false;
+            }
+		}
 
 	    //4.支持产品类型验证
         if (PromotionConstant.COUPON_ITEM_TYPE_ALL != coupon.getItemType() && itemType != coupon.getItemType()) {
