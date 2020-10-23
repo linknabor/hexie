@@ -46,6 +46,10 @@ public class CommonPayRequest extends CommonRequest {
 	private String count;
 	@JsonProperty("sub_orders")
 	private List<SubOrder> subOrders;
+	@JsonProperty("coupon_id")
+	private String couponId;
+	@JsonProperty("coupon_amt")
+	private String couponAmt;
 	
 	public CommonPayRequest() {
 		super();
@@ -89,6 +93,10 @@ public class CommonPayRequest extends CommonRequest {
 		private int count;
 		@JsonProperty("sub_amount")
 		private float amount;
+		@JsonProperty("sub_coupon_id")
+		private Long subCouponId;
+		@JsonProperty("sub_coupon_amt")
+		private float subCouponAmt;
 		
 		public String getProductName() {
 			return productName;
@@ -126,12 +134,24 @@ public class CommonPayRequest extends CommonRequest {
 		public void setProductId(Long productId) {
 			this.productId = productId;
 		}
+		public Long getSubCouponId() {
+			return subCouponId;
+		}
+		public void setSubCouponId(Long subCouponId) {
+			this.subCouponId = subCouponId;
+		}
+		public float getSubCouponAmt() {
+			return subCouponAmt;
+		}
+		public void setSubCouponAmt(float subCouponAmt) {
+			this.subCouponAmt = subCouponAmt;
+		}
 		@Override
 		public String toString() {
 			return "SubOrder [productName=" + productName + ", productId=" + productId + ", agentNo=" + agentNo
-					+ ", agentName=" + agentName + ", count=" + count + ", amount=" + amount + "]";
+					+ ", agentName=" + agentName + ", count=" + count + ", amount=" + amount + ", subCouponId="
+					+ subCouponId + ", subCouponAmt=" + subCouponAmt + "]";
 		}
-		
 		
 	}
 	
@@ -240,13 +260,29 @@ public class CommonPayRequest extends CommonRequest {
 		this.subOrders = subOrders;
 	}
 
+	public String getCouponId() {
+		return couponId;
+	}
+
+	public void setCouponId(String couponId) {
+		this.couponId = couponId;
+	}
+
+	public String getCouponAmt() {
+		return couponAmt;
+	}
+
+	public void setCouponAmt(String couponAmt) {
+		this.couponAmt = couponAmt;
+	}
+
 	@Override
 	public String toString() {
 		return "CommonPayRequest [userId=" + userId + ", serviceId=" + serviceId + ", sectId=" + sectId + ", linkman="
 				+ linkman + ", linktel=" + linktel + ", serviceAddr=" + serviceAddr + ", appid=" + appid + ", openid="
 				+ openid + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", orderType=" + orderType
 				+ ", serviceName=" + serviceName + ", agentName=" + agentName + ", agentNo=" + agentNo + ", count="
-				+ count + ", subOrders=" + subOrders + "]";
+				+ count + ", subOrders=" + subOrders + ", couponId=" + couponId + ", couponAmt=" + couponAmt + "]";
 	}
 
 	

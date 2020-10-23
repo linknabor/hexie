@@ -146,7 +146,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private OperatorService operatorService;
 	@Autowired
 	private CacheableService cacheableService;
-		
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -158,7 +157,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			Product product = productService.getProduct(plan.getProductId());
 			productService.checkSalable(product, item.getCount());
 			//填充信息
-			productService.freezeCount(product, item.getCount());
+//			productService.freezeCount(product, item.getCount());	放到外面
             item.fillDetail(plan, product);
             
             Long agentId = product.getAgentId();
@@ -223,7 +222,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         return sOrder;
     }
 	
-	//创建订单
+	/**
+	 * 创建订单，单个种类物品
+	 */
 	@Override
 	@Transactional
 	public ServiceOrder createOrder(SingleItemOrder order){
@@ -248,14 +249,21 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		evoucherService.createEvoucher(o);
 		
         log.warn("[Create]订单创建OrderId:" + o.getId());
-		//4. 订单后处理
+		//6. 订单后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
 		
+		
+		//7.冻结库存，这步必须最后
+		for(OrderItem item : o.getItems()) {
+			Product pro = new Product();
+			pro.setId(item.getProductId());
+			productService.freezeCount(pro, item.getCount());
+		}
 		return o;
 	}
 
 	/**
-	 * 根据购物车创建订单
+	 * 根据购物车创建订单(老版本)
 	 */
 	@Override
 	@Transactional
@@ -327,6 +335,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
 		Iterator<Entry<Long, List<OrderItem>>> it = itemsMap.entrySet().iterator();
+		
 		while(it.hasNext()) {
 			Entry<Long, List<OrderItem>> entry = it.next();
 			CreateOrderReq orderRequest = new CreateOrderReq();
@@ -334,23 +343,24 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderRequest.setItemList(entry.getValue());
 			
 			ServiceOrder o = new ServiceOrder(user, orderRequest);
+			o.setGroupOrderId(groupId);
+			
 			//1. 填充地址信息
 			Address address = fillAddressInfo(o);
 			//2. 填充订单信息并校验规则,设置价格信息
 			preOrderCreate(o, address);
-			computeCoupon(o);
-			
+			//如果是拆分的订单，则红包需要放在相应的订单上面，红包和商品的代理商需要一致。
+			try {
+				computeCoupon(o);
+			} catch (Exception e) {
+				log.info("当前拆分的订单不适用于此红包，红包id: " + o.getCouponId() + "， 订单代理商: " + o.getAgentId());
+			}
 			//3. 订单创建
-			o.setGroupOrderId(groupId);
 			o = serviceOrderRepository.save(o);
 			for(OrderItem item : o.getItems()) {
 				item.setServiceOrder(o);
 				item.setUserId(o.getUserId());
 				orderItemRepository.save(item);
-				
-				//清空购物车中已购买的商品
-				cartService.delFromCart(user.getId(), itemList);
-				
 			}
 			//4. 订单后处理
 			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
@@ -358,6 +368,15 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		ServiceOrder newOrder = new ServiceOrder();
 		newOrder.setId(groupId);
+		
+		//5.冻结库存。这步必须放最后，因为redis没法跟随数据库一起回滚
+		for (OrderItem orderItem : itemList) {
+			Product pro = new Product();
+			pro.setId(orderItem.getProductId());
+			productService.freezeCount(pro, orderItem.getCount());
+			//6.清空购物车中已购买的商品
+			cartService.delFromCart(user.getId(), itemList);
+		}
 		return newOrder;
 		
 	}
@@ -451,6 +470,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setServiceName(productName);
 			request.setOrderType(String.valueOf(order.getOrderType()));
 			
+			if (order.getCouponId() !=null && order.getCouponId() > 0) {
+				request.setCouponId(String.valueOf(order.getCouponId()));
+				request.setCouponAmt(String.valueOf(order.getCouponAmount()));
+			}
+			
 			Optional<Agent> optional = agentRepository.findById(order.getAgentId());
 			if (optional.isPresent()) {
 				Agent agent = optional.get();
@@ -485,6 +509,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				subOrder.setProductId(orderItem.getProductId());
 				subOrderList.add(subOrder);
 			}
+			if (order.getCouponId() !=null && order.getCouponId() > 0) {
+				SubOrder subOrder = subOrderList.get(0);
+				if (subOrder!=null) {
+					subOrder.setSubCouponId(order.getCouponId());
+					subOrder.setSubCouponAmt(order.getCouponAmount());
+				}
+			}
+			
 			request.setSubOrders(subOrderList);
 			
 			CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
@@ -518,7 +550,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		return sign;
 	}
-
+	
 	@Override
 	@Transactional
 	public JsSign requestGroupPay(long orderId) throws Exception {
@@ -538,6 +570,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		CommonPayRequest request = new CommonPayRequest();
 		List<SubOrder> subOrderList = new ArrayList<>(orderList.size());
 		
+		Long couponId = 0l;
+		float couponAmt = 0f;
 		BigDecimal totalPrice = BigDecimal.ZERO;
 		int totalCount = 0;
 		for (ServiceOrder order : orderList) {
@@ -557,15 +591,25 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			subOrder.setProductName(subProductName);
 			subOrder.setProductId(order.getProductId());
+			
+			if (order.getCouponId() != null && order.getCouponId() > 0) {
+				subOrder.setSubCouponId(order.getCouponId());
+				subOrder.setSubCouponAmt(order.getCouponAmount());
+				couponId = order.getCouponId();
+				couponAmt = order.getCouponAmount();
+			}
 			subOrderList.add(subOrder);
 			
 			totalPrice = totalPrice.add(new BigDecimal(String.valueOf(order.getPrice())));
 			totalCount += order.getCount();
 		}
 		request.setSubOrders(subOrderList);
-		
+		if (couponId > 0 ) {
+			request.setCouponId(String.valueOf(couponId));
+			request.setCouponAmt(String.valueOf(couponAmt));
+		}
+
 		User user = userService.getById(o.getUserId());
-		
 		request.setUserId(user.getWuyeId());
 		request.setAppid(user.getAppId());
 		Optional<Region> optional = regionRepository.findById(o.getXiaoquId());
@@ -728,11 +772,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		//3.解锁红包
 		couponService.unlock(order.getCouponId());
         log.warn("[cancelOrder]coupon:"+order.getCouponId());
-		//4.商品中取消冻结
+		//4.操作后处理
+		commonPostProcess(ModelConstant.ORDER_OP_CANCEL,order);
+		//5.商品中取消冻结
 		salePlanService.getService(order.getOrderType()).postOrderCancel(order);
         log.warn("[cancelOrder]unfrezee:"+order.getId());
-		//5.操作后处理
-		commonPostProcess(ModelConstant.ORDER_OP_CANCEL,order);
 		return order;
 	}
 

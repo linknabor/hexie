@@ -114,6 +114,10 @@ public abstract class BaseOrderProcessor {
 		order.setCount(count);
 	}
 
+	/**
+	 * 计算红包减免后的订单金额，并且锁定红包
+	 * @param order
+	 */
 	protected void computeCoupon(ServiceOrder order) {
 		if(order.getCouponId() == null || order.getCouponId() ==0) {
 			return;
@@ -122,7 +126,7 @@ public abstract class BaseOrderProcessor {
 		if(coupon == null) {
 		    return;
 		}
-		if(!couponService.isAvaible(order, coupon, false)){
+		if(!couponService.checkAvaibleV2(order, coupon, false)){
 			throw new BizValidateException("该现金券已被其它订单锁定或不可使用，请选择其它可用现金券"+coupon.getId());
 		}
 		order.configCoupon(coupon);

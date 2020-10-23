@@ -375,7 +375,7 @@ public class CouponServiceImpl implements CouponService {
 		}
 		
 		for(Coupon coupon : coupons) {
-			if (checkAvaible4v2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, salePlan.getProductId(), null, coupon, false)) {
+			if (checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, salePlan.getProductId(), null, coupon, false)) {
 				result.add(coupon);
 			}
 		}
@@ -584,7 +584,7 @@ public class CouponServiceImpl implements CouponService {
 	public void lock(ServiceOrder order, Coupon coupon){
 
         log.warn("lock红包["+order.getId()+"]Coupon["+coupon.getId()+"]");
-		if(!isAvaible(order, coupon, false)){
+		if(!checkAvaibleV2(order, coupon, false)){
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
 		}
 		coupon.lock(order.getId());
@@ -925,6 +925,27 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	/**
+	 * 根据订单验证红包是否可用
+	 */
+	@Override
+    public boolean checkAvaibleV2(ServiceOrder order, Coupon coupon, boolean withLocked) {
+    	if(withLocked) {
+    		if(coupon.getOrderId() != 0&& coupon.getOrderId() != order.getId()) {
+    			return false;
+    		}
+    	}
+    	if(order.getItems() != null) {
+    	    for(OrderItem item : order.getItems()) {
+                if (checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, item.getProductId(), order.getTotalAmount(), coupon, withLocked)) {
+                	return true;
+				}
+            }
+    	}
+        
+    	return false;
+    }
+	
+	/**
 	 * 验证红包是否可用
 	 * @param itemType	0全部，1特卖团购商品，2电子核销券,3服务，4物业缴费
 	 * @param productId	需要验证的产品ID，如果是服务传serviceId
@@ -934,7 +955,7 @@ public class CouponServiceImpl implements CouponService {
 	 * @return
 	 */
 	@Override
-	public boolean checkAvaible4v2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked) {
+	public boolean checkAvaibleV2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked) {
 	    
 		if(coupon == null) {
 	        return false;
@@ -962,22 +983,26 @@ public class CouponServiceImpl implements CouponService {
         }
 
 	    //4.支持产品类型验证
-	    if(itemType != PromotionConstant.COUPON_ITEM_TYPE_ALL && productId > 0) {
-	    	boolean inSupport = false;	//是否在支持的商品列表中
-            if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId))>-1) {
-            	inSupport = true;
-			} else {
-				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 不在支持的列表中。");
+        if (PromotionConstant.COUPON_ITEM_TYPE_ALL != coupon.getItemType() && itemType != coupon.getItemType()) {
+        	return false;
+        }
+        
+        //5.支持(或不支持)的商品验证
+	    if(PromotionConstant.COUPON_ITEM_TYPE_ALL != coupon.getItemType()&& productId > 0) {
+	    	if (coupon.getSupportType() == 1) {	//0全部支持，1部分支持，2部分不支持
+    			if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId))>-1) {
+    				//do nothing
+    			} else {
+					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 不在支持的列表中。");
+					return false;
+    			}
 			}
-            
-            boolean inUnsupport = false;	//是否在不支持的商品列表中
-            if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId)) >-1) {
-				inUnsupport = true;
-				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 在不支持的列表中。");
-			}
-            if (!inSupport || inUnsupport) {
-				return false;
-			}
+    		if (coupon.getSupportType() == 2) {
+    			if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId)) >-1) {
+					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 在不支持的列表中。");
+					return false;
+				}
+    		}
         }
 	    
 	    //5.验证代理商

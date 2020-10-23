@@ -51,6 +51,7 @@ public class Coupon extends BaseModel {
 	/**************现金券适用范围**************/
 	private float usageCondition;//最小金额
     private boolean availableForAll = true;//与以下互斥
+    private int supportType;	//适用类型，0全部，1部分支持，2部分不支持
     
     //支持项目，不支持的优先过滤
     private int itemType = PromotionConstant.COUPON_ITEM_TYPE_ALL;//全部，商品项，服务项，服务类型
@@ -370,6 +371,14 @@ public class Coupon extends BaseModel {
 		this.agentId = agentId;
 	}
 
+	public int getSupportType() {
+		return supportType;
+	}
+
+	public void setSupportType(int supportType) {
+		this.supportType = supportType;
+	}
+
 	@Override
 	public String toString() {
 		return "Coupon [seedId=" + seedId + ", userId=" + userId + ", ruleId=" + ruleId + ", empty=" + empty
@@ -377,13 +386,13 @@ public class Coupon extends BaseModel {
 				+ ", status=" + status + ", usedDate=" + usedDate + ", selected=" + selected + ", title=" + title
 				+ ", amount=" + amount + ", userHeadImg=" + userHeadImg + ", userName=" + userName + ", seedType="
 				+ seedType + ", seedStr=" + seedStr + ", couponDesc=" + couponDesc + ", usageCondition="
-				+ usageCondition + ", availableForAll=" + availableForAll + ", itemType=" + itemType + ", subItemType="
-				+ subItemType + ", serviceType=" + serviceType + ", productId=" + productId + ", merchantId="
-				+ merchantId + ", uItemType=" + uItemType + ", uSubItemType=" + uSubItemType + ", uServiceType="
-				+ uServiceType + ", uProductId=" + uProductId + ", uMerchantId=" + uMerchantId + ", suggestUrl="
-				+ suggestUrl + ", appid=" + appid + ", agentId=" + agentId + "]";
+				+ usageCondition + ", availableForAll=" + availableForAll + ", supportType=" + supportType
+				+ ", itemType=" + itemType + ", subItemType=" + subItemType + ", serviceType=" + serviceType
+				+ ", productId=" + productId + ", merchantId=" + merchantId + ", uItemType=" + uItemType
+				+ ", uSubItemType=" + uSubItemType + ", uServiceType=" + uServiceType + ", uProductId=" + uProductId
+				+ ", uMerchantId=" + uMerchantId + ", suggestUrl=" + suggestUrl + ", appid=" + appid + ", agentId="
+				+ agentId + "]";
 	}
 
-	
 	
 }
