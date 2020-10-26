@@ -3,6 +3,7 @@ package com.yumu.hexie.model.promotion.coupon;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -60,4 +61,20 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
 	public void consumeWuyeCoupon(int toStatus, long couponId, long orderId, int fromStatus);
 	
 	public Coupon findByOrderId(long orderId);
+	
+	String queryCoumn = "id, title, ruleId, createDate, userId, tel, seedType, status, amount, useStartDate, expiredDate, usedDate, couponDesc, agentNo, agentName ";
+	
+	@Query(value = "select " + queryCoumn + "from coupon where status in ( ?1 ) "
+			+ "and IF (?2!='', title like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3!='', seedType = ?3, 1=1) "
+			+ "and IF (?4!='', tel = ?4, 1=1) "
+			+ "and (COALESCE(?5) IS NULL OR (agentId IN (?5) )) "
+			, countQuery = "select count(1) from coupon where status in ( ?1 ) "
+					+ "and IF (?2!='', title like CONCAT('%',?2,'%'), 1=1) "
+					+ "and IF (?3!='', seedType = ?3, 1=1) "
+					+ "and IF (?4!='', tel = ?4, 1=1) "
+					+ "and (COALESCE(?5) IS NULL OR (agentId IN (?5) )) "
+			, nativeQuery = true)
+	public Page<Object[]> findByMultiCondition(List<Integer> status, String title, String seedType, 
+			String tel, List<Long> agentId, Pageable pageable);
 }

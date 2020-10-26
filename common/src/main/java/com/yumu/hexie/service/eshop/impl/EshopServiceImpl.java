@@ -40,11 +40,13 @@ import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
 import com.yumu.hexie.integration.eshop.mapper.EvoucherMapper;
 import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryCouponCfgMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryCouponMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.QuerySupportProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
@@ -86,6 +88,7 @@ import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.promotion.PromotionConstant;
 import com.yumu.hexie.model.promotion.coupon.CouponCfg;
+import com.yumu.hexie.model.promotion.coupon.CouponRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponRuleRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
@@ -150,6 +153,8 @@ public class EshopServiceImpl implements EshopSerivce {
 	private CouponRuleRepository couponRuleRepository;
 	@Autowired
 	private CouponSeedRepository couponSeedRepository;
+	@Autowired
+	private CouponRepository couponRepository;
 	
 	
 	@Value("${promotion.qrcode.url}")
@@ -160,7 +165,7 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			List<Integer> agentList = null;
+			List<Long> agentList = null;
 			if (StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName())) {
 				//do nothing
 			}else {
@@ -169,7 +174,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			if (agentList != null ) {
 				if (agentList.isEmpty()) {
-					agentList.add(0);
+					agentList.add(0l);
 				}
 			}
 			
@@ -1137,7 +1142,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			List<Integer> agentList = null;
+			List<Long> agentList = null;
 			if (StringUtils.isEmpty(queryCouponCfgVO.getAgentNo()) && StringUtils.isEmpty(queryCouponCfgVO.getAgentName())) {
 				//do nothing
 			}else {
@@ -1146,7 +1151,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			if (agentList != null ) {
 				if (agentList.isEmpty()) {
-					agentList.add(0);
+					agentList.add(0l);
 				}
 			}
 			
@@ -1218,7 +1223,7 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			List<Integer> agentList = null;
+			List<Long> agentList = null;
 			if (StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName())) {
 				//do nothing
 			}else {
@@ -1227,7 +1232,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			if (agentList != null ) {
 				if (agentList.isEmpty()) {
-					agentList.add(0);
+					agentList.add(0l);
 				}
 			}
 			
@@ -1497,6 +1502,62 @@ public class EshopServiceImpl implements EshopSerivce {
 			sectIds.add(region.getSectId());
 		}
 		return sectIds;
+	}
+	
+	/**
+	 * 查询红包列表
+	 */
+	@Override
+	public CommonResponse<Object> getCouponList(QueryCouponVO queryCouponVO){
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		
+		try {
+			List<Long> agentList = null;
+			if (StringUtils.isEmpty(queryCouponVO.getAgentNo()) && StringUtils.isEmpty(queryCouponVO.getAgentName())) {
+				//do nothing
+			}else {
+				agentList = agentRepository.findByAgentNoOrName(1, queryCouponVO.getAgentNo(), 
+						queryCouponVO.getAgentName());
+			}
+			if (agentList != null ) {
+				if (agentList.isEmpty()) {
+//					agentList.add(0l);
+				}
+			}
+			List<Order> orderList = new ArrayList<>();
+			Order order = new Order(Direction.DESC, "id");
+			orderList.add(order);
+			Sort sort = Sort.by(orderList);
+			
+			Pageable pageable = PageRequest.of(queryCouponVO.getCurrentPage(), queryCouponVO.getPageSize(), sort);
+			
+			List<Integer> statusList = new ArrayList<>();
+			if (StringUtils.isEmpty(queryCouponVO.getStatus())) {
+				statusList.add(ModelConstant.COUPON_STATUS_AVAILABLE);
+				statusList.add(ModelConstant.COUPON_STATUS_LOCKED);
+				statusList.add(ModelConstant.COUPON_STATUS_TIMEOUT);
+				statusList.add(ModelConstant.COUPON_STATUS_USED);
+			}else {
+				statusList.add(Integer.valueOf(queryCouponVO.getStatus()));
+			}
+			
+			Page<Object[]> page = couponRepository.findByMultiCondition(statusList, queryCouponVO.getTitle(), queryCouponVO.getSeedType(), 
+					queryCouponVO.getTel(), agentList, pageable);
+			
+			List<QueryCouponMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryCouponMapper.class);
+			QueryListDTO<List<QueryCouponMapper>> responsePage = new QueryListDTO<>();
+			responsePage.setTotalPages(page.getTotalPages());
+			responsePage.setTotalSize(page.getTotalElements());
+			responsePage.setContent(list);
+			
+			commonResponse.setData(responsePage);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
 	}
 	
 

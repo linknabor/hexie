@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
@@ -53,5 +54,7 @@ public interface EshopSerivce {
 	CommonResponse<Object> getSupportProduct(QueryProductVO queryProductVO);
 
 	void saveCouponCfg(SaveCouponCfgVO saveCouponCfgVO) throws Exception;
+	
+	CommonResponse<Object> getCouponList(QueryCouponVO queryCouponVO);
 
 }

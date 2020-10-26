@@ -26,6 +26,8 @@ import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisUtil;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
+import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.localservice.HomeCart;
@@ -95,6 +97,8 @@ public class CouponServiceImpl implements CouponService {
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private RedisRepository redisRepository;
+	@Autowired
+	private AgentRepository agentRepository;
 	
 	@Override
 	public Coupon findById(Long couponId) {
@@ -614,7 +618,7 @@ public class CouponServiceImpl implements CouponService {
             return;
         }
         Coupon coupon = couponRepository.findById(order.getCouponId()).get();
-        if(!isAvaible(order, coupon,true)){
+        if (checkAvaibleV2(order, coupon, true)) {
             throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
         }
         log.warn("comsume红包before["+order.getId()+"]Coupon["+coupon.getId()+"]");
@@ -626,9 +630,8 @@ public class CouponServiceImpl implements CouponService {
             user.setCouponCount(user.getCouponCount()-1);
             userRepository.save(user);
         }
-
-        log.warn("comsume红包END["+order.getId()+"]Coupon["+coupon.getId()+"]");
         updateSeedAndRuleForCouponUse(coupon);
+        log.warn("comsume红包END["+order.getId()+"]Coupon["+coupon.getId()+"]");
     }
 	
 	@Override
@@ -878,6 +881,14 @@ public class CouponServiceImpl implements CouponService {
 		BeanUtils.copyProperties(couponCfg, rule);
 		
 		Coupon coupon = new Coupon(seed, rule, user);
+		Optional<Agent> optional = agentRepository.findById(coupon.getAgentId());
+		if (optional.isPresent()) {
+			Agent agent = optional.get();
+			if (agent != null) {
+				coupon.setAgentName(agent.getName());
+				coupon.setAgentNo(agent.getAgentNo());
+			}
+		}
 		
 		//更新数据库。放到队列，以免多人同时领取时脏读
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);

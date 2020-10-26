@@ -34,6 +34,7 @@ import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.user.Partner;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -45,6 +46,7 @@ import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.CartService;
 import com.yumu.hexie.service.sales.SalePlanService;
+import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.UserNoticeService;
 
 @Service
@@ -78,6 +80,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private OrderItemRepository orderItemRepository;
 	@Autowired
 	private BaseOrderService baseOrderService;
+	@Autowired
+	private CouponService couponService;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -515,6 +519,14 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 									redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + item.getProductId(), item.getCount());
 								}
 								
+								//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
+			                    couponService.comsume(order);
+			                    CouponSeed cs = couponService.createOrderSeed(order.getUserId(), order);
+			            		if(cs != null) {
+			            			order.setSeedStr(cs.getSeedStr());
+			            			serviceOrderRepository.save(order);
+			            		}
+								
 							}
 							
 						}
@@ -532,7 +544,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
 							serviceOrder.setConfirmDate(date);
 							serviceOrder.setPayDate(date);
-							serviceOrderRepository.save(serviceOrder);
 							salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
 							
 							if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
@@ -555,6 +566,14 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
 								evoucherService.enable(serviceOrder);	//激活核销券
 							}
+							
+							//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
+		                    couponService.comsume(serviceOrder);
+		                    CouponSeed cs = couponService.createOrderSeed(serviceOrder.getUserId(), serviceOrder);
+		            		if(cs != null) {
+		            			serviceOrder.setSeedStr(cs.getSeedStr());
+		            		}
+		            		serviceOrderRepository.save(serviceOrder);
 							
 						}
 						

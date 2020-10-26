@@ -42,5 +42,5 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 					+ "and IF (?6!='', r.title like CONCAT('%',?6,'%'), 1=1) "
 			, nativeQuery = true)
 	public Page<Object[]> findByMultiCondition(String ruleId, String seedId, String seedType, String ruleStatus, 
-			List<Integer> agentIds, String title, Pageable pageable);
+			List<Long> agentIds, String title, Pageable pageable);
 }
