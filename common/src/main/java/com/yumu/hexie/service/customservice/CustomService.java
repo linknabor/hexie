@@ -34,7 +34,7 @@ public interface CustomService {
 
 	List<ServiceOrder> queryOrderByUser(User user);
 
-	ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception;
+	ServiceOrderPrepayVO orderPay(User user, String orderId, String amount, String couponId) throws Exception;
 	
 	void comment(ServiceCommentDTO serviceCommentDTO);
 
