@@ -95,7 +95,18 @@ public class CouponServiceImpl implements CouponService {
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private RedisRepository redisRepository;
+	
+	@Override
+	public Coupon findById(Long couponId) {
+		Coupon coupon = null;
+		Optional<Coupon> optional = couponRepository.findById(couponId);
+		if (optional.isPresent()) {
+			coupon = optional.get();
+		}
+		return coupon;
+	}
 
+	@Override
 	public CouponSeed findSeedByStr(String seedStr){
 		return couponSeedRepository.findBySeedStr(seedStr);
 	}

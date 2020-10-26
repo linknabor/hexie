@@ -356,6 +356,7 @@ public class ServiceOrder  extends BaseModel {
 		if(coupon == null) {
 			setCouponId(null);
 			setCouponAmount(null);
+			return;
 		}
 		setCouponId(coupon.getId());
 		setCouponAmount(coupon.getAmount());

@@ -24,23 +24,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class Swagger2Config {
 
-	@Bean("swagger4sales")
+	@Bean("swagger4hexie")
 	public Docket api4Sales() throws UnsupportedEncodingException {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("Sales").apiInfo(apiInfo()).select()
+		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
 				// 自行修改为自己的包路径
 				.apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
 				.paths(PathSelectors.any()).build();
 	}
 	
-	@Bean("swagger4coupon")
-	public Docket api4Coupon() throws UnsupportedEncodingException {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("Coupon").apiInfo(apiInfo()).select()
-				// 自行修改为自己的包路径
-				.apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
-				.paths(PathSelectors.any()).build();
-	}
-
-
 	private ApiInfo apiInfo() {
 		return new ApiInfoBuilder().title("模块接口").description("")// swagger UI接入教程
 				// 服务条款网
