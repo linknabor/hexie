@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.customservice.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -298,7 +299,7 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Override
 	@Transactional
-	public ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception {
+	public ServiceOrderPrepayVO orderPay(User user, String orderId, String amount, String couponId) throws Exception {
 
 		long begin = System.currentTimeMillis();
 		
@@ -327,6 +328,24 @@ public class CustomServiceImpl implements CustomService {
 		dto.setServiceId(String.valueOf(serviceOrder.getProductId()));
 		dto.setTradeWaterId(serviceOrder.getOrderNo());
 		dto.setTranAmt(amount);
+		Coupon coupon = null;
+		if (!StringUtils.isEmpty(couponId)) {
+			coupon = couponService.findById(Long.valueOf(couponId));
+			if (coupon != null) {
+				dto.setCouponId(couponId);
+				dto.setCouponAmt(String.valueOf(coupon.getAmount()));
+				BigDecimal tranAmt = new BigDecimal(amount);
+				BigDecimal couponAmt = new BigDecimal(coupon.getAmount());
+				BigDecimal payAmt = BigDecimal.ZERO;
+				if (tranAmt.compareTo(couponAmt) > 0) {
+					payAmt = tranAmt.subtract(couponAmt);
+				}else {
+					payAmt = new BigDecimal("0.01");
+				}
+				dto.setTranAmt(payAmt.toString());
+			}
+		}
+		
 		dto.setUser(user);
 		CommonPayResponse data = customServiceUtil.createOrder(dto);
 		
@@ -336,6 +355,9 @@ public class CustomServiceImpl implements CustomService {
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
 		vo.setOrderId(orderId);
 		serviceOrder.setPrice(Float.valueOf(amount));
+		if (coupon != null) {
+			serviceOrder.configCoupon(coupon);
+		}
 		serviceOrderRepository.save(serviceOrder);
 		
 		end = System.currentTimeMillis();
