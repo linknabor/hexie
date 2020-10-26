@@ -116,11 +116,17 @@ public class CustomServiceImpl implements CustomService {
 			}
 			customerServiceOrderDTO.setCouponId(String.valueOf(coupon.getId()));
 			customerServiceOrderDTO.setCouponAmt(String.valueOf(coupon.getAmount()));
+			
+			Float tranAmt = Float.valueOf(customerServiceOrderDTO.getTranAmt());
+			Float couponAmt = coupon.getAmount();
+			if (tranAmt > couponAmt ) {
+				customerServiceOrderDTO.setTranAmt(String.valueOf(tranAmt-couponAmt));
+			} else {
+				customerServiceOrderDTO.setTranAmt("0.01");
+			}
+			
 		}
-		 
-		
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
-		
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
 		
@@ -153,10 +159,13 @@ public class CustomServiceImpl implements CustomService {
 			serviceOrder.setAgentId(agent.getId());
 			serviceOrder.setAgentName(agent.getName());
 			serviceOrder.setAgentNo(agent.getAgentNo());
+		} else {
+			agent = new Agent();
+			agent.setAgentNo(customerServiceOrderDTO.getAgentNo());
+			agent.setName(customerServiceOrderDTO.getAgentName());
+			agent.setStatus(1);
 		}
-		if (!StringUtils.isEmpty(customerServiceOrderDTO.getCouponId())) {
-			serviceOrder.setCouponId(Long.valueOf(customerServiceOrderDTO.getCouponId()));
-		}
+		serviceOrder.configCoupon(coupon);	//配置红包
 		
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
