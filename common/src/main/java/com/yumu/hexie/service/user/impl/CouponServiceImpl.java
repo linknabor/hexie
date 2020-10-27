@@ -384,9 +384,12 @@ public class CouponServiceImpl implements CouponService {
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
 		
+		long currTime = System.currentTimeMillis();
 		for(Coupon coupon : coupons) {
 			if (checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, salePlan.getProductId(), null, coupon, false)) {
-				result.add(coupon);
+				if (coupon.getExpiredDate().getTime() > currTime ) {
+					result.add(coupon);
+				}
 			}
 		}
 		return result;
@@ -1017,7 +1020,7 @@ public class CouponServiceImpl implements CouponService {
     			}
 			}
     		if (coupon.getSupportType() == 2) {
-    			if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId)) >-1) {
+    			if (!StringUtils.isEmpty(coupon.getuProductId()) && coupon.getuProductId().indexOf(String.valueOf(productId)) >-1) {
 					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 在不支持的列表中。");
 					return false;
 				}
@@ -1045,7 +1048,5 @@ public class CouponServiceImpl implements CouponService {
 		return true;
 	}
 
-	
-	
 	
 }
