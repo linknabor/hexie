@@ -11,6 +11,7 @@ import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -56,5 +57,7 @@ public interface EshopSerivce {
 	void saveCouponCfg(SaveCouponCfgVO saveCouponCfgVO) throws Exception;
 	
 	CommonResponse<Object> getCouponList(QueryCouponVO queryCouponVO);
+
+	CommonResponse<Object> saveCoupon(SaveCouponVO saveCouponVO);
 
 }

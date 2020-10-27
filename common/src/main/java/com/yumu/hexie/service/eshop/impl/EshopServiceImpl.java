@@ -53,6 +53,7 @@ import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO.LogisticInfo;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
@@ -101,6 +102,7 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.user.CouponService;
 
 /**
  * 商品上、下架
@@ -155,6 +157,8 @@ public class EshopServiceImpl implements EshopSerivce {
 	private CouponSeedRepository couponSeedRepository;
 	@Autowired
 	private CouponRepository couponRepository;
+	@Autowired
+	private CouponService couponService;
 	
 	
 	@Value("${promotion.qrcode.url}")
@@ -1558,6 +1562,31 @@ public class EshopServiceImpl implements EshopSerivce {
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}
 		return commonResponse;
+	}
+	
+	/**
+	 * 保存商品上架内容
+	 */
+	@Override
+	public CommonResponse<Object> saveCoupon(SaveCouponVO saveCouponVO) {
+	
+		Assert.hasText(saveCouponVO.getUserId(), "用户id不能为空。");
+		Assert.hasText(saveCouponVO.getSeedStr(), "优惠券种子不能为空。");
+		
+		long userId = Long.valueOf(saveCouponVO.getUserId());
+		User user = userRepository.findById(userId);
+
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			couponService.gainCouponFromSeed(user, saveCouponVO.getSeedStr());
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+		
+	
 	}
 	
 

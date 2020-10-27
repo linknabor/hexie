@@ -19,6 +19,7 @@ import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -302,6 +303,19 @@ public class EshopController<T> extends BaseController {
 		logger.info("queryCouponVO : " + queryCouponVO);
 		return eshopSerivce.getCouponList(queryCouponVO);
 		
+	}
+	
+	/**
+	 * 查询优惠券配置
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/coupon/save", method = RequestMethod.POST)
+	public CommonResponse<Object> saveCoupon(@RequestBody SaveCouponVO saveCouponVO){
+		
+		logger.info("saveCouponVO : " + saveCouponVO);
+		CommonResponse<Object> commonResponse = eshopSerivce.saveCoupon(saveCouponVO);
+		return commonResponse;
 	}
 	
 	

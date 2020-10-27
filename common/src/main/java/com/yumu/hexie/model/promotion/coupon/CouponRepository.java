@@ -62,7 +62,7 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
 	
 	public Coupon findByOrderId(long orderId);
 	
-	String queryCoumn = "id, title, ruleId, createDate, userId, tel, seedType, status, amount, useStartDate, expiredDate, usedDate, couponDesc, agentNo, agentName ";
+	String queryCoumn = "id, title, ruleId, createDate, userId, tel, seedType, status, amount, useStartDate, expiredDate, usedDate, couponDesc, agentName, agentNo ";
 	
 	@Query(value = "select " + queryCoumn + "from coupon where status in ( ?1 ) "
 			+ "and IF (?2!='', title like CONCAT('%',?2,'%'), 1=1) "

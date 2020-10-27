@@ -20,6 +20,8 @@ public class QueryCouponCfgMapper implements Serializable {
 	private String title;
 	@JsonProperty("seed_type")
 	private Integer seedType;
+	@JsonProperty("seed_str")
+	private String seedStr;
 	@JsonProperty("item_type")
 	private Integer itemType;
 	private Integer status;
@@ -59,8 +61,8 @@ public class QueryCouponCfgMapper implements Serializable {
 	@JsonProperty("coupon_desc")
 	private String couponDesc;
 	
-	public QueryCouponCfgMapper(BigInteger ruleId, BigInteger seedId, String title, Integer seedType, Integer itemType, 
-			Integer status, Integer supportType, Integer totalCount, Integer receivedCount, Integer usedCount, 
+	public QueryCouponCfgMapper(BigInteger ruleId, BigInteger seedId, String title, Integer seedType, String seedStr,
+			Integer itemType, Integer status, Integer supportType, Integer totalCount, Integer receivedCount, Integer usedCount, 
 			Float amount, Float usageCondition, String productId, String uProductId, Timestamp startDate, 
 			Timestamp endDate, Timestamp useStartDate, Timestamp useEndDate, Integer expiredDays,
 			String suggestUrl, String seedImg, String agentName, String agentNo, String couponDesc) {
@@ -69,6 +71,7 @@ public class QueryCouponCfgMapper implements Serializable {
 		this.seedId = seedId;
 		this.title = title;
 		this.seedType = seedType;
+		this.seedStr = seedStr;
 		this.itemType = itemType;
 		this.status = status;
 		this.supportType = supportType;
@@ -281,6 +284,14 @@ public class QueryCouponCfgMapper implements Serializable {
 
 	public void setSupportType(Integer supportType) {
 		this.supportType = supportType;
+	}
+
+	public String getSeedStr() {
+		return seedStr;
+	}
+
+	public void setSeedStr(String seedStr) {
+		this.seedStr = seedStr;
 	}
 	
 	
