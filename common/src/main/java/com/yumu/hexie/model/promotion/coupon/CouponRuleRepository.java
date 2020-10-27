@@ -17,7 +17,7 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 	public List<CouponRule> findBySeedIdAndStatus(long seedId,int status);
 	
 	
-	String queryColumn = "r.id as ruleId, s.id as seedId, r.title, s.seedType, r.itemType, r.status, r.supportType, "
+	String queryColumn = "r.id as ruleId, s.id as seedId, r.title, s.seedType, s.seedStr, r.itemType, r.status, r.supportType, "
 			+ "r.totalCount, r.receivedCount, r.usedCount, r.amount, r.usageCondition, r.productId, r.uProductId, "
 			+ "r.startDate, r.endDate, r.useStartDate, r.useEndDate, r.expiredDays, r.suggestUrl, s.seedImg, a.name as agentName, a.agentNo, r.couponDesc";
 	
@@ -42,5 +42,5 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 					+ "and IF (?6!='', r.title like CONCAT('%',?6,'%'), 1=1) "
 			, nativeQuery = true)
 	public Page<Object[]> findByMultiCondition(String ruleId, String seedId, String seedType, String ruleStatus, 
-			List<Integer> agentIds, String title, Pageable pageable);
+			List<Long> agentIds, String title, Pageable pageable);
 }

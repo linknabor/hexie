@@ -42,6 +42,8 @@ public class Coupon extends BaseModel {
 	
 	private String userHeadImg;
 	private String userName;
+	private String tel;
+	private String openid;
 	
 	private int seedType;
 	private String seedStr;
@@ -72,6 +74,8 @@ public class Coupon extends BaseModel {
 	private String appid;	//所属平台
 	
 	private long agentId;	//代理商
+	private String agentName;
+	private String agentNo;
 	
 	@Transient
 	public String getUseStartDateStr(){
@@ -105,6 +109,8 @@ public class Coupon extends BaseModel {
 		c.userId = user.getId();
 		c.setUserName(user.getName());
 		c.setUserHeadImg(user.getHeadimgurl());
+		c.setTel(user.getTel());
+		c.setOpenid(user.getOpenid());
 		return c;
 	}
 	public Coupon(CouponSeed seed,CouponRule rule,User user) {
@@ -127,6 +133,8 @@ public class Coupon extends BaseModel {
 		super.setCreateDate(System.currentTimeMillis());
 		setUserName(user.getName());
 		setUserHeadImg(user.getHeadimgurl());
+		setTel(user.getTel());
+		setOpenid(user.getOpenid());
 	}
 
 	@Transient
@@ -378,20 +386,53 @@ public class Coupon extends BaseModel {
 	public void setSupportType(int supportType) {
 		this.supportType = supportType;
 	}
+	
+	public String getTel() {
+		return tel;
+	}
+
+	public void setTel(String tel) {
+		this.tel = tel;
+	}
+
+	public String getOpenid() {
+		return openid;
+	}
+
+	public void setOpenid(String openid) {
+		this.openid = openid;
+	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+
+	public String getAgentNo() {
+		return agentNo;
+	}
+
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
 
 	@Override
 	public String toString() {
 		return "Coupon [seedId=" + seedId + ", userId=" + userId + ", ruleId=" + ruleId + ", empty=" + empty
 				+ ", orderId=" + orderId + ", useStartDate=" + useStartDate + ", expiredDate=" + expiredDate
 				+ ", status=" + status + ", usedDate=" + usedDate + ", selected=" + selected + ", title=" + title
-				+ ", amount=" + amount + ", userHeadImg=" + userHeadImg + ", userName=" + userName + ", seedType="
-				+ seedType + ", seedStr=" + seedStr + ", couponDesc=" + couponDesc + ", usageCondition="
-				+ usageCondition + ", availableForAll=" + availableForAll + ", supportType=" + supportType
-				+ ", itemType=" + itemType + ", subItemType=" + subItemType + ", serviceType=" + serviceType
-				+ ", productId=" + productId + ", merchantId=" + merchantId + ", uItemType=" + uItemType
-				+ ", uSubItemType=" + uSubItemType + ", uServiceType=" + uServiceType + ", uProductId=" + uProductId
-				+ ", uMerchantId=" + uMerchantId + ", suggestUrl=" + suggestUrl + ", appid=" + appid + ", agentId="
-				+ agentId + "]";
+				+ ", amount=" + amount + ", userHeadImg=" + userHeadImg + ", userName=" + userName + ", tel=" + tel
+				+ ", openid=" + openid + ", seedType=" + seedType + ", seedStr=" + seedStr + ", couponDesc="
+				+ couponDesc + ", usageCondition=" + usageCondition + ", availableForAll=" + availableForAll
+				+ ", supportType=" + supportType + ", itemType=" + itemType + ", subItemType=" + subItemType
+				+ ", serviceType=" + serviceType + ", productId=" + productId + ", merchantId=" + merchantId
+				+ ", uItemType=" + uItemType + ", uSubItemType=" + uSubItemType + ", uServiceType=" + uServiceType
+				+ ", uProductId=" + uProductId + ", uMerchantId=" + uMerchantId + ", suggestUrl=" + suggestUrl
+				+ ", appid=" + appid + ", agentId=" + agentId + ", agentName=" + agentName + ", agentNo=" + agentNo
+				+ "]";
 	}
 
 	

@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -289,6 +291,31 @@ public class EshopController<T> extends BaseController {
 		commonResponse.setResult("00");
 		return commonResponse;
 	
+	}
+	
+	/**
+	 * 查询优惠券配置
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/get", method = RequestMethod.POST)
+	public CommonResponse<Object> getCouponList(@RequestBody QueryCouponVO queryCouponVO){
+		
+		logger.info("queryCouponVO : " + queryCouponVO);
+		return eshopSerivce.getCouponList(queryCouponVO);
+		
+	}
+	
+	/**
+	 * 查询优惠券配置
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/coupon/save", method = RequestMethod.POST)
+	public CommonResponse<Object> saveCoupon(@RequestBody SaveCouponVO saveCouponVO){
+		
+		logger.info("saveCouponVO : " + saveCouponVO);
+		CommonResponse<Object> commonResponse = eshopSerivce.saveCoupon(saveCouponVO);
+		return commonResponse;
 	}
 	
 	

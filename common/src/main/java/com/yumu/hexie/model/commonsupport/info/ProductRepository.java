@@ -52,7 +52,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 					+ "and IF (?3!='', p.name like CONCAT('%',?3,'%'), 1=1) "
 					+ "and (COALESCE(?4) IS NULL OR (p.agentId IN (?4) )) "
 					, nativeQuery = true)
-	Page<Object[]> getSupportProduct(List<String> productType, String status, String productName, List<Integer>agentId, Pageable pageable);
+	Page<Object[]> getSupportProduct(List<String> productType, String status, String productName, List<Long>agentId, Pageable pageable);
 	
 	/**
 	 * 团购
@@ -92,7 +92,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 					+ "and IF (?6!='', p.demo = ?6, 1=1) "
 					+ "group by p.id ", nativeQuery = true)
 	Page<Object[]> findByMultiCondRgroup(String productType, String productId, String productName, String status, 
-			List<Integer>agentId, String isDemo, Pageable pageable);
+			List<Long>agentId, String isDemo, Pageable pageable);
 	
 	
 	/**
@@ -134,7 +134,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 					+ "and IF (?6!='', p.demo = ?6, 1=1) "
 					+ "group by p.id ", nativeQuery = true)
 	Page<Object[]> findByMultiCondOnsale(String productType, String productId, String productName, String status, 
-			List<Integer>agentId, String isDemo, Pageable pageable);
+			List<Long>agentId, String isDemo, Pageable pageable);
 	
 
 	@Transactional

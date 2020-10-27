@@ -54,6 +54,7 @@ public class CustomServiceController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "获取自定义服务列表")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/service", method = RequestMethod.GET)
 	public BaseResult<List<CustomServiceVO>> getService(@ModelAttribute(Constants.USER) User user) throws Exception {
@@ -260,10 +261,10 @@ public class CustomServiceController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/pay", method = RequestMethod.POST)
 	public BaseResult<CommonPayResponse> orderPay(@ModelAttribute(Constants.USER) User user, 
-			@RequestParam String orderId, @RequestParam String amount, @RequestParam String couponId) throws Exception {
+			@RequestParam String orderId, @RequestParam String amount, @RequestParam(required = false) String couponId) throws Exception {
 		
 		logger.info("orderPay, user : " + user);
-		logger.info("orderPay orderId : " + orderId + ", amout : " + amount);
+		logger.info("orderPay orderId : " + orderId + ", amout : " + amount + ", couponId : " + couponId);
 		ServiceOrderPrepayVO vo = customService.orderPay(user, orderId, amount, couponId);
 		return BaseResult.successResult(vo);
 	}
