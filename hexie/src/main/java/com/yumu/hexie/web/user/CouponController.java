@@ -18,6 +18,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.promotion.coupon.CouponView;
@@ -103,12 +104,24 @@ public class CouponController extends BaseController{
 		return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(order));
 	}
     
-    @ApiOperation(value = "特卖、团购获取可以用的红包", notes = "salePlanType --> 特卖3, 团购4, 服务11, 核销券12")
+    @ApiOperation(value = "特卖、团购获取可以使用的红包", notes = "salePlanType --> 特卖3, 团购4, 服务11, 核销券12")
     @RequestMapping(value = "/coupon/valid/{salePlanType}/{salePlanId}", method = RequestMethod.GET)
    	@ResponseBody
    	public BaseResult<List<Coupon>> findValidCoupons(@PathVariable int salePlanType,
    			@PathVariable long salePlanId,@ModelAttribute(Constants.USER)User user) throws Exception {
    		return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(user.getId(),salePlanService.getService(salePlanType).findSalePlan(salePlanId)));
+   	}
+    
+    @ApiOperation(value = "自定义服务获取可以使用的红包")
+    @RequestMapping(value = "/coupon/valid4service/{serviceId}/{agentNo}", method = RequestMethod.GET)
+   	@ResponseBody
+   	public BaseResult<List<Coupon>> findValidCoupons4Service(@PathVariable long serviceId, @PathVariable String agentNo, 
+   				@ModelAttribute(Constants.USER)User user) throws Exception {
+   	
+    	SalePlan salePlan = new SalePlan();
+    	salePlan.setProductId(serviceId);
+    	List<Coupon> couponList = couponService.findAvaibleCoupon4CustomService(user.getId(), serviceId, agentNo);
+    	return new BaseResult<List<Coupon>>().success(couponList);
    	}
     
     @RequestMapping(value = "/coupon/valid4Cart", method = RequestMethod.GET)

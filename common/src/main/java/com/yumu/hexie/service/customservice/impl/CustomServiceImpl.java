@@ -35,6 +35,7 @@ import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
+import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
@@ -105,13 +106,28 @@ public class CustomServiceImpl implements CustomService {
 		customerServiceOrderDTO.setUser(currUser);
 		customerServiceOrderDTO.setOrderType(String.valueOf(ModelConstant.ORDER_TYPE_SERVICE));
 		
+		Agent agent = null;
+		if (!StringUtils.isEmpty(customerServiceOrderDTO.getAgentNo())) {
+			agent = agentRepository.findByAgentNo(customerServiceOrderDTO.getAgentNo());
+		}
+		if (agent==null) {
+			agent = new Agent();
+			agent.setAgentNo(customerServiceOrderDTO.getAgentNo());
+			agent.setName(customerServiceOrderDTO.getAgentName());
+			agent.setStatus(1);
+		}
+		
 		Coupon coupon = null;
 		if (!StringUtils.isEmpty(customerServiceOrderDTO.getCouponId())) {
 			coupon = couponService.findById(Long.valueOf(customerServiceOrderDTO.getCouponId()));
 			
 			Float amount = Float.valueOf(customerServiceOrderDTO.getTranAmt());
 			Long serviceId = Long.valueOf(customerServiceOrderDTO.getServiceId());
-			boolean isAvailable = couponService.checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, serviceId, amount, coupon, false);
+			Product product = new Product();
+			product.setId(serviceId);
+			product.setService(true);
+			product.setAgentId(agent.getId());
+			boolean isAvailable = couponService.checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
 			if (isAvailable) {
 				throw new BizValidateException("当前优惠券不可用。coupon id : " + coupon.getId());
 			}
@@ -152,19 +168,10 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setSubType(Long.valueOf(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
 		
-		Agent agent = null;
-		if (!StringUtils.isEmpty(customerServiceOrderDTO.getAgentNo())) {
-			agent = agentRepository.findByAgentNo(customerServiceOrderDTO.getAgentNo());
-		}
 		if (agent!=null) {
 			serviceOrder.setAgentId(agent.getId());
 			serviceOrder.setAgentName(agent.getName());
 			serviceOrder.setAgentNo(agent.getAgentNo());
-		} else {
-			agent = new Agent();
-			agent.setAgentNo(customerServiceOrderDTO.getAgentNo());
-			agent.setName(customerServiceOrderDTO.getAgentName());
-			agent.setStatus(1);
 		}
 		serviceOrder.configCoupon(coupon);	//配置红包
 		

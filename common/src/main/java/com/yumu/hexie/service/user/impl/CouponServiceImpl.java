@@ -45,6 +45,8 @@ import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.promotion.coupon.CouponCombinationRepository;
+import com.yumu.hexie.model.promotion.coupon.CouponHis;
+import com.yumu.hexie.model.promotion.coupon.CouponHisRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponRuleRepository;
@@ -99,6 +101,8 @@ public class CouponServiceImpl implements CouponService {
 	private RedisRepository redisRepository;
 	@Autowired
 	private AgentRepository agentRepository;
+	@Autowired
+	private CouponHisRepository couponHisRepository;
 	
 	@Override
 	public Coupon findById(Long couponId) {
@@ -376,17 +380,21 @@ public class CouponServiceImpl implements CouponService {
      */
 	@Override
 	public List<Coupon> findAvaibleCoupon(long userId, SalePlan salePlan){
+		
 		List<Coupon> result = new ArrayList<Coupon>();
 		if(salePlan == null) {
 			return result;
 		}
+		Product product = new Product();
+		product.setId(salePlan.getProductId());
+		
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
 		
 		long currTime = System.currentTimeMillis();
 		for(Coupon coupon : coupons) {
-			if (checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, salePlan.getProductId(), null, coupon, false)) {
+			if (checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, null, coupon, false)) {
 				if (coupon.getExpiredDate().getTime() > currTime ) {
 					result.add(coupon);
 				}
@@ -394,6 +402,28 @@ public class CouponServiceImpl implements CouponService {
 		}
 		return result;
 	}
+	
+	@Override
+    public List<Coupon> findAvaibleCoupon4CustomService(long userId, long serviceId, String agentNo){
+        
+		List<Integer> status = new ArrayList<Integer>();
+        status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
+        List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId, status, PageRequest.of(0,200));
+        
+        Agent agent = agentRepository.findByAgentNo(agentNo);
+        Product product = new Product();
+        product.setId(serviceId);
+        product.setService(true);
+        product.setAgentId(agent.getId());
+        
+        List<Coupon> result = new ArrayList<Coupon>();
+        for(Coupon coupon : coupons) {
+            if(checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false)){
+                result.add(coupon);
+            }
+        }
+        return result;
+    }
 	
 	//服务-洗衣-服务项父类型-服务项 商户ID
 	public boolean isAvaible(int itemType, Long subItemType, Long serviceType, Long productId, 
@@ -597,7 +627,7 @@ public class CouponServiceImpl implements CouponService {
 	public void lock(ServiceOrder order, Coupon coupon){
 
         log.warn("lock红包["+order.getId()+"]Coupon["+coupon.getId()+"]");
-		if(!checkAvaibleV2(order, coupon, false)){
+		if(!checkAvailableV2(order, coupon, false)){
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
 		}
 		coupon.lock(order.getId());
@@ -621,7 +651,7 @@ public class CouponServiceImpl implements CouponService {
             return;
         }
         Coupon coupon = couponRepository.findById(order.getCouponId()).get();
-        if (checkAvaibleV2(order, coupon, true)) {
+        if (checkAvailableV2(order, coupon, true)) {
             throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
         }
         log.warn("comsume红包before["+order.getId()+"]Coupon["+coupon.getId()+"]");
@@ -940,6 +970,15 @@ public class CouponServiceImpl implements CouponService {
 		int validNum = couponRepository.countByUserIdAndStatusIn(user.getId(),status);
 		log.info("当前用户:" + user.getId() + ", 实际拥有红包：" + validNum);
 		userRepository.updateUserCoupon(validNum, user.getId(), user.getCouponCount());
+		
+		//5.记录红包领取记录
+		CouponHis couponHis = new CouponHis();
+		couponHis.setUserId(user.getId());
+		couponHis.setUserName(user.getName());
+		couponHis.setSeedStr(coupon.getSeedStr());
+		couponHis.setCouponId(coupon.getId());
+		couponHis.setTitle(coupon.getTitle());
+		couponHisRepository.save(couponHis);
 		return coupon;
 		
 	}
@@ -948,7 +987,7 @@ public class CouponServiceImpl implements CouponService {
 	 * 根据订单验证红包是否可用
 	 */
 	@Override
-    public boolean checkAvaibleV2(ServiceOrder order, Coupon coupon, boolean withLocked) {
+    public boolean checkAvailableV2(ServiceOrder order, Coupon coupon, boolean withLocked) {
     	if(withLocked) {
     		if(coupon.getOrderId() != 0&& coupon.getOrderId() != order.getId()) {
     			return false;
@@ -956,7 +995,9 @@ public class CouponServiceImpl implements CouponService {
     	}
     	if(order.getItems() != null) {
     	    for(OrderItem item : order.getItems()) {
-                if (checkAvaibleV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, item.getProductId(), order.getTotalAmount(), coupon, withLocked)) {
+    	    	Product product = new Product();
+    	    	product.setId(item.getProductId());
+                if (checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, order.getTotalAmount(), coupon, withLocked)) {
                 	return true;
 				}
             }
@@ -972,14 +1013,18 @@ public class CouponServiceImpl implements CouponService {
 	 * @param amount	此次购买金额
 	 * @param coupon	此次使用的红包
 	 * @param locked	是否锁
+	 * @param type	0商品 1服务
 	 * @return
 	 */
 	@Override
-	public boolean checkAvaibleV2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked) {
+	public boolean checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked) {
 	    
 		if(coupon == null) {
 	        return false;
 	    }
+		
+		long productId = product.getId();
+		
 	    log.warn("Check Coupon, couponId : " + coupon.getId() + ", ["+itemType+"]["+productId+"]["+amount+"]["+coupon.getId()+"]["+locked+"]");
 	    //1.状态验证
         if(!locked && coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
@@ -1029,18 +1074,22 @@ public class CouponServiceImpl implements CouponService {
 	    
 	    //5.验证代理商
 	    if (coupon.getAgentId() > 0) {
-	    	Optional<Product> optional = productRepository.findById(productId);
-	    	if (optional.isPresent()) {
-				Product product = optional.get();
-				if (product == null) {
-					log.warn("未找到当前商品, productId: " + productId);
-					return false;
-				}
-				if (product.getAgentId() != coupon.getAgentId()) {
-					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 非指定代理商, agentId : " + product.getAgentId() + ", 不能使用。");
-					return false;
-				}
+	    	if (!product.isService()) {
+	    		Optional<Product> optional = productRepository.findById(productId);
+		    	if (optional.isPresent()) {
+		    		product = optional.get();
+					if (product == null) {
+						log.warn("未找到当前商品, productId: " + productId);
+						return false;
+					}
+		    	}
 			}
+	    	
+	    	if (coupon.getAgentId() != product.getAgentId() ) {
+				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 非指定代理商, agentId : " + product.getAgentId() + ", 不能使用。");
+				return false;
+			}
+			
 	    }
 
 	    //TODO 商户校验

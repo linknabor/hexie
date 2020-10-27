@@ -154,6 +154,9 @@ public class ModelConstant {
 	public static final int RGROUP_PRODUCT_TYPE_GANCHANGXIAN = 5; //敢试鲜
 	public static final int RGROUP_PRODUCT_TYPE_FEATURED = 100;//精选，仅限于查询
 	
+	public static final int GOODS_TYPE_PRODUCT = 0;	//商品类售卖
+	public static final int GOODS_TYPE_SERVICE = 1;	//服务类
+	
 	public static final int RULE_TYPE_CITY = 0;
 	public static final int RULE_TYPE_NEARBY = 1;
 

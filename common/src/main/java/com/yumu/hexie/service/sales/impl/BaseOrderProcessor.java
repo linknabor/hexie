@@ -126,7 +126,7 @@ public abstract class BaseOrderProcessor {
 		if(coupon == null) {
 		    return;
 		}
-		if(!couponService.checkAvaibleV2(order, coupon, false)){
+		if(!couponService.checkAvailableV2(order, coupon, false)){
 			throw new BizValidateException("该现金券已被其它订单锁定或不可使用，请选择其它可用现金券"+coupon.getId());
 		}
 		order.configCoupon(coupon);

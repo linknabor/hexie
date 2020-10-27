@@ -3,6 +3,7 @@ package com.yumu.hexie.service.user;
 import java.util.Date;
 import java.util.List;
 
+import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.Cart;
@@ -49,6 +50,8 @@ public interface CouponService {
 	public List<Coupon> findAvaibleCoupon(long userId,SalePlan salePlan);
     public List<Coupon> findAvaibleCoupon(long userId,Cart cart);
     public List<Coupon> findAvaibleCoupon(long userId,HomeCart cart);
+    List<Coupon> findAvaibleCoupon4CustomService(long userId, long serviceId, String agentNo);
+    
     //查看服务类型是否支持红包
     public List<Coupon> findAvaibleCoupon4ServiceType(long userId,long homeServiceType,Long parentType, Long itemId);
 	public List<Coupon> findAvaibleCouponForWuye(User user, String payType);
@@ -87,11 +90,11 @@ public interface CouponService {
 
 	Coupon updateCouponReceived(Coupon coupon);
 
-	boolean checkAvaibleV2(ServiceOrder order, Coupon coupon, boolean withLocked);
+	boolean checkAvailableV2(ServiceOrder order, Coupon coupon, boolean withLocked);
 	
-	boolean checkAvaibleV2(int itemType, Long productId, Float amount, Coupon coupon, boolean locked);
-
 	Coupon findById(Long couponId);
+
+	boolean checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
 
 	
 	
