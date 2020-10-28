@@ -1063,7 +1063,7 @@ public class CouponServiceImpl implements CouponService {
             BigDecimal minAmt = new BigDecimal("0.01");
             BigDecimal usageCondition = new BigDecimal(String.valueOf(coupon.getUsageCondition()));
             
-            if(amt.subtract(usageCondition).compareTo(minAmt) <= 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+            if(amt.subtract(usageCondition).compareTo(minAmt) < 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
             	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
             	throw new BizValidateException("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + usageCondition + ", 不可用。");
             }
