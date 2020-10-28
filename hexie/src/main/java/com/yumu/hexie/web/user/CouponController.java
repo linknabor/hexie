@@ -109,12 +109,12 @@ public class CouponController extends BaseController{
     @RequestMapping(value = "/coupon/valid/{salePlanType}/{salePlanId}", method = RequestMethod.GET)
    	@ResponseBody
    	public BaseResult<List<Coupon>> findValidCoupons(@PathVariable int salePlanType,
-   			@PathVariable String salePlanIds,@ModelAttribute(Constants.USER)User user) throws Exception {
+   			@PathVariable String salePlanId, @ModelAttribute(Constants.USER)User user) throws Exception {
    		
     	List<SalePlan> salePlans = new ArrayList<>();
-    	String[]salePlanArr = salePlanIds.split(",");
-    	for (String salePlanId : salePlanArr) {
-    		SalePlan salePlan = salePlanService.getService(salePlanType).findSalePlan(Long.valueOf(salePlanId));
+    	String[]salePlanArr = salePlanId.split(",");
+    	for (String planId : salePlanArr) {
+    		SalePlan salePlan = salePlanService.getService(salePlanType).findSalePlan(Long.valueOf(planId));
     		salePlans.add(salePlan);
 		}
     	List<Coupon> couponList = couponService.findAvaibleCoupon(user.getId(), salePlans);
