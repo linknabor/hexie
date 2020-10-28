@@ -170,8 +170,6 @@ public class CustomServiceImpl implements CustomService {
 			serviceOrder.setAgentName(agent.getName());
 			serviceOrder.setAgentNo(agent.getAgentNo());
 		}
-		serviceOrder.configCoupon(coupon);	//配置红包
-		
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
 		logger.info("createOrder, xiaoquId : " + xiaoquId);
@@ -191,6 +189,11 @@ public class CustomServiceImpl implements CustomService {
 			serviceOrder.setXiaoquName(xiaoquName);
 		}
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
+		
+		//配置红包，并锁定
+		serviceOrder.configCoupon(coupon);
+		coupon.lock(serviceOrder.getId());
+		
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		end = System.currentTimeMillis();
 		logger.info("createOrderService location 2 : " + (end - begin)/1000);
