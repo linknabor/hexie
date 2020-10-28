@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.user;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -108,8 +109,16 @@ public class CouponController extends BaseController{
     @RequestMapping(value = "/coupon/valid/{salePlanType}/{salePlanId}", method = RequestMethod.GET)
    	@ResponseBody
    	public BaseResult<List<Coupon>> findValidCoupons(@PathVariable int salePlanType,
-   			@PathVariable long salePlanId,@ModelAttribute(Constants.USER)User user) throws Exception {
-   		return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(user.getId(),salePlanService.getService(salePlanType).findSalePlan(salePlanId)));
+   			@PathVariable String salePlanIds,@ModelAttribute(Constants.USER)User user) throws Exception {
+   		
+    	List<SalePlan> salePlans = new ArrayList<>();
+    	String[]salePlanArr = salePlanIds.split(",");
+    	for (String salePlanId : salePlanArr) {
+    		SalePlan salePlan = salePlanService.getService(salePlanType).findSalePlan(Long.valueOf(salePlanId));
+    		salePlans.add(salePlan);
+		}
+    	List<Coupon> couponList = couponService.findAvaibleCoupon(user.getId(), salePlans);
+    	return new BaseResult<List<Coupon>>().success(couponList);
    	}
     
     @ApiOperation(value = "自定义服务获取可以使用的红包")

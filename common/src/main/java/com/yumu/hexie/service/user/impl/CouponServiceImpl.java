@@ -382,14 +382,12 @@ public class CouponServiceImpl implements CouponService {
      * 获取可用的红包
      */
 	@Override
-	public List<Coupon> findAvaibleCoupon(long userId, SalePlan salePlan){
+	public List<Coupon> findAvaibleCoupon(long userId, List<SalePlan> salePlans){
 		
 		List<Coupon> result = new ArrayList<Coupon>();
-		if(salePlan == null) {
+		if(salePlans == null || salePlans.isEmpty()) {
 			return result;
 		}
-		Product product = new Product();
-		product.setId(salePlan.getProductId());
 		
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
@@ -397,15 +395,18 @@ public class CouponServiceImpl implements CouponService {
 		
 		long currTime = System.currentTimeMillis();
 		for(Coupon coupon : coupons) {
-			try {
-				checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, null, coupon, false);
-				if (coupon.getExpiredDate().getTime() > currTime ) {
-					result.add(coupon);
+			for (SalePlan salePlan : salePlans) {
+				try {
+					Product product = new Product();
+					product.setId(salePlan.getProductId());
+					checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, null, coupon, false);
+					if (coupon.getExpiredDate().getTime() > currTime ) {
+						result.add(coupon);
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
 				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
 			}
-			
 		}
 		return result;
 	}
