@@ -1473,6 +1473,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					}
 					
 					//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
+					List<OrderItem> items = orderItemRepository.findByServiceOrder(order);
+					order.setItems(items);
                     couponService.comsume(order);
                     CouponSeed cs = couponService.createOrderSeed(order.getUserId(), order);
             		if(cs != null) {

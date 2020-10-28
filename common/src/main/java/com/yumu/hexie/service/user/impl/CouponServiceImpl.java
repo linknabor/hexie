@@ -2,9 +2,13 @@ package com.yumu.hexie.service.user.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -36,7 +40,6 @@ import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.Collocation;
 import com.yumu.hexie.model.market.OrderItem;
-import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
@@ -104,8 +107,6 @@ public class CouponServiceImpl implements CouponService {
 	private AgentRepository agentRepository;
 	@Autowired
 	private CouponHisRepository couponHisRepository;
-	@Autowired
-	private OrderItemRepository orderItemRepository;
 	
 	@Override
 	public Coupon findById(Long couponId) {
@@ -385,6 +386,7 @@ public class CouponServiceImpl implements CouponService {
 	public List<Coupon> findAvaibleCoupon(long userId, List<SalePlan> salePlans){
 		
 		List<Coupon> result = new ArrayList<Coupon>();
+		List<Coupon> couponList = new ArrayList<>();
 		if(salePlans == null || salePlans.isEmpty()) {
 			return result;
 		}
@@ -408,7 +410,15 @@ public class CouponServiceImpl implements CouponService {
 				}
 			}
 		}
-		return result;
+		if (!result.isEmpty()) {
+			Set<Coupon> couponSet = new TreeSet<>((c1, c2)-> String.valueOf(c1.getId()).equals(String.valueOf(c2.getId()))?1:0);
+			couponSet.addAll(result);	//根据ID去重
+			
+			couponList.addAll(couponSet);
+			Comparator<Coupon> comparator = (c1, c2)-> (int)(c2.getAmount() - c1.getAmount());
+			Collections.sort(couponList, comparator);	//根据金额排序
+		}
+		return couponList;
 	}
 	
 	@Override
@@ -1004,10 +1014,9 @@ public class CouponServiceImpl implements CouponService {
     			return false;
     		}
     	}
-    	List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(order);
     	
-    	if(orderItems != null) {
-    	    for(OrderItem item : orderItems) {
+    	if(order.getItems() != null) {
+    	    for(OrderItem item : order.getItems()) {
     	    	Product product = new Product();
     	    	product.setId(item.getProductId());
     	    	checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, order.getTotalAmount(), coupon, withLocked);
