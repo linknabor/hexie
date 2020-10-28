@@ -238,8 +238,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		Address address = fillAddressInfo(o);
 		//2. 填充订单信息并校验规则,设置价格信息
 		preOrderCreate(o, address);
-		computeCoupon(o);
 		//3. 订单创建
+		o = serviceOrderRepository.save(o);
+		//4.计算优惠券
+		computeCoupon(o);
+		//5.保存优惠券信息
 		o = serviceOrderRepository.save(o);
 		for(OrderItem item : o.getItems()) {
 			item.setServiceOrder(o);
