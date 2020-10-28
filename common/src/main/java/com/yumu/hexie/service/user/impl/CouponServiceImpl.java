@@ -411,7 +411,7 @@ public class CouponServiceImpl implements CouponService {
 			}
 		}
 		if (!result.isEmpty()) {
-			Set<Coupon> couponSet = new TreeSet<>((c1, c2)-> String.valueOf(c1.getId()).equals(String.valueOf(c2.getId()))?1:0);
+			Set<Coupon> couponSet = new TreeSet<>((c1, c2)-> c1.getId()==c2.getId()?0:1);
 			couponSet.addAll(result);	//根据ID去重
 			
 			couponList.addAll(couponSet);
