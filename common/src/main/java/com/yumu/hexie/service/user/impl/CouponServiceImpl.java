@@ -1026,6 +1026,23 @@ public class CouponServiceImpl implements CouponService {
     	return true;
     }
 	
+	public static void main(String[] args) {
+		Float amount = 0.01f;
+//		Float uc = 0f;
+//		if(uc -0.009 > amount) {
+//			System.out.println("1234567");
+//		}
+		
+		String usage = "0.01";
+		BigDecimal amt = new BigDecimal(String.valueOf(amount));
+        BigDecimal minAmt = new BigDecimal("0.009");
+        BigDecimal usageCondition = new BigDecimal(usage);
+        
+        if(usageCondition.subtract(minAmt).compareTo(amt) > 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+        	System.out.println("~~~~~~~~~~~~");
+        }
+	}
+	
 	/**
 	 * 验证红包是否可用
 	 * @param itemType	0全部，1特卖团购商品，2电子核销券,3服务，4物业缴费
@@ -1059,13 +1076,9 @@ public class CouponServiceImpl implements CouponService {
         
         //3.金额验证
         if (amount != null) {
-        	BigDecimal amt = new BigDecimal(String.valueOf(amount));
-            BigDecimal minAmt = new BigDecimal("0.01");
-            BigDecimal usageCondition = new BigDecimal(String.valueOf(coupon.getUsageCondition()));
-            
-            if(amt.subtract(usageCondition).compareTo(minAmt) < 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+            if(coupon.getUsageCondition()-0.009 > amount) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
             	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
-            	throw new BizValidateException("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + usageCondition + ", 不可用。");
+            	throw new BizValidateException("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
             }
 		}
 
