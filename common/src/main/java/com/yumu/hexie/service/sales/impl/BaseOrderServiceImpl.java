@@ -240,11 +240,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		preOrderCreate(o, address);
 		//3. 订单创建
 		o = serviceOrderRepository.save(o);
-		//4.计算优惠券
-		computeCoupon(o);
-		//5.保存优惠券信息
-		o = serviceOrderRepository.save(o);
-		for(OrderItem item : o.getItems()) {
+		
+		List<OrderItem> items = o.getItems();
+		for(OrderItem item : items) {
 			item.setServiceOrder(o);
 			item.setUserId(o.getUserId());
 			orderItemRepository.save(item);
@@ -256,12 +254,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		evoucherService.createEvoucher(o);
 		
         log.warn("[Create]订单创建OrderId:" + o.getId());
-		//6. 订单后处理
+        
+        //6.计算优惠券
+        computeCoupon(o);
+        
+		//7. 订单后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
 		
 		
-		//7.冻结库存，这步必须最后
-		for(OrderItem item : o.getItems()) {
+		//8.冻结库存，这步必须最后
+		for(OrderItem item : items) {
 			Product pro = new Product();
 			pro.setId(item.getProductId());
 			productService.freezeCount(pro, item.getCount());
@@ -281,14 +283,17 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		Address address = fillAddressInfo(o);
 		//2. 填充订单信息并校验规则,设置价格信息
 		preOrderCreate(o, address);
-		computeCoupon(o);
 		//3. 订单创建
 		o = serviceOrderRepository.save(o);
-		for(OrderItem item : o.getItems()) {
+		List<OrderItem> items = o.getItems();
+		for(OrderItem item : items) {
 			item.setServiceOrder(o);
 			item.setUserId(o.getUserId());
 			orderItemRepository.save(item);
 		}
+		
+		computeCoupon(o);
+		
 		//4.保存车辆信息 20160721 车大大的车辆服务
 		carService.saveOrderCarInfo(o);
 		
@@ -342,7 +347,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
 		Iterator<Entry<Long, List<OrderItem>>> it = itemsMap.entrySet().iterator();
-		
+		int couponUsed = 0;
+		StringBuffer errMsg = new StringBuffer();
 		while(it.hasNext()) {
 			Entry<Long, List<OrderItem>> entry = it.next();
 			CreateOrderReq orderRequest = new CreateOrderReq();
@@ -356,27 +362,41 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			Address address = fillAddressInfo(o);
 			//2. 填充订单信息并校验规则,设置价格信息
 			preOrderCreate(o, address);
-			//如果是拆分的订单，则红包需要放在相应的订单上面，红包和商品的代理商需要一致。
-			try {
-				computeCoupon(o);
-			} catch (Exception e) {
-				log.info("当前拆分的订单不适用于此红包，红包id: " + o.getCouponId() + "， 订单代理商: " + o.getAgentId());
-			}
-			//3. 订单创建
+			//3. 先保存order，产生一个orderId
 			o = serviceOrderRepository.save(o);
-			for(OrderItem item : o.getItems()) {
+			
+			List<OrderItem> items = o.getItems();
+			
+			//4. 保存orderItem
+			for(OrderItem item : items) {
 				item.setServiceOrder(o);
 				item.setUserId(o.getUserId());
 				orderItemRepository.save(item);
 			}
-			//4. 订单后处理
+			//5. 订单后处理
 			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
+			
+			//6. 如果是拆分的订单，则红包需要放在相应的订单上面，红包和商品的代理商需要一致。
+			try {
+				computeCoupon(o);
+				couponUsed++;
+			} catch (Exception e) {
+				log.info(e.getMessage(), e);
+				errMsg.append(e.getMessage()).append(",");
+			}
 		
 		}
+		if (!StringUtils.isEmpty(req.getCouponId()) && req.getCouponId() > 0) {
+			if (couponUsed == 0) {
+				String msg = errMsg.substring(0, errMsg.length()-1);
+				throw new BizValidateException(msg);
+			}
+		}
+		
 		ServiceOrder newOrder = new ServiceOrder();
 		newOrder.setId(groupId);
 		
-		//5.冻结库存。这步必须放最后，因为redis没法跟随数据库一起回滚
+		//7.冻结库存。这步必须放最后，因为redis没法跟随数据库一起回滚
 		for (OrderItem orderItem : itemList) {
 			Product pro = new Product();
 			pro.setId(orderItem.getProductId());
