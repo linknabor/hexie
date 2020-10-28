@@ -2,7 +2,6 @@ package com.yumu.hexie.service.notify.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,24 +29,15 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
-import com.yumu.hexie.model.market.OrderItem;
-import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
-import com.yumu.hexie.model.promotion.coupon.CouponSeed;
-import com.yumu.hexie.model.user.Partner;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
-import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
-import com.yumu.hexie.service.sales.CartService;
-import com.yumu.hexie.service.sales.SalePlanService;
-import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.UserNoticeService;
 
 @Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
@@ -67,21 +57,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
 	@Autowired
-	private SalePlanService salePlanService;
-	@Autowired
-	private UserNoticeService userNoticeService;
-	@Autowired
-	private EvoucherService evoucherService;
-	@Autowired
 	private PartnerService partnerService;
 	@Autowired
-	private CartService cartService;
-	@Autowired
-	private OrderItemRepository orderItemRepository;
-	@Autowired
 	private BaseOrderService baseOrderService;
-	@Autowired
-	private CouponService couponService;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -486,122 +464,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				
 				boolean isSuccess = false;
 				try {
-					logger.info("update orderStatus, tradeWaterId : " + tradeWaterId);
-					
-					ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
-					if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
-						continue;
-					}
-					logger.info("update orderStatus, orderId : " + serviceOrder.getId());
-					logger.info("update orderStatus, orderType : " + serviceOrder.getOrderType());
-					logger.info("update orderStatus, orderStatus : " + serviceOrder.getStatus());
-					
-					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
-						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
-						for (ServiceOrder order : orderList) {
-							
-							if (ModelConstant.ORDER_STATUS_INIT == order.getStatus()) {
-								Date date = new Date();
-								order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-								order.setConfirmDate(date);
-								order.setPayDate(date);
-//								serviceOrderRepository.save(order);
-								salePlanService.getService(order.getOrderType()).postPaySuccess(order);	//修改orderItems
-								
-								//发送模板消息和短信
-								userNoticeService.orderSuccess(order.getUserId(), order.getTel(),
-										order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
-								//清空购物车中已购买的商品
-								List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
-								cartService.delFromCart(order.getUserId(), itemList);
-								//减库存
-								for (OrderItem item : itemList) {
-									redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + item.getProductId(), item.getCount());
-								}
-								
-								//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
-			                    couponService.comsume(order);
-			                    CouponSeed cs = couponService.createOrderSeed(order.getUserId(), order);
-			            		if(cs != null) {
-			            			order.setSeedStr(cs.getSeedStr());
-			            			serviceOrderRepository.save(order);
-			            		}
-								
-							}
-							
-						}
-					
-					}
-					
-					//核销券、团购、合伙人、saas售卖
-					if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || 
-							ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType() ||
-							ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType() ||
-							ModelConstant.ORDER_TYPE_SAASSALE == serviceOrder.getOrderType()) {
-						
-						if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
-							Date date = new Date();
-							serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-							serviceOrder.setConfirmDate(date);
-							serviceOrder.setPayDate(date);
-							salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
-							
-							if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
-								//减库存
-								redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
-							}
-							
-							if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
-								//发送模板消息和短信
-								userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
-										serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
-								//清空购物车中已购买的商品
-								if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
-									List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
-									cartService.delFromCart(serviceOrder.getUserId(), itemList);
-								}
-								
-							}
-							
-							if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
-								evoucherService.enable(serviceOrder);	//激活核销券
-							}
-							
-							//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
-		                    couponService.comsume(serviceOrder);
-		                    CouponSeed cs = couponService.createOrderSeed(serviceOrder.getUserId(), serviceOrder);
-		            		if(cs != null) {
-		            			serviceOrder.setSeedStr(cs.getSeedStr());
-		            		}
-		            		serviceOrderRepository.save(serviceOrder);
-							
-						}
-						
-						if (ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
-							Partner partner = new Partner();
-							partner.setTel(serviceOrder.getTel());
-							partner.setName(serviceOrder.getReceiverName());
-							partner.setUserId(serviceOrder.getUserId());
-							partnerService.save(partner);
-						}
-						
-						
-					}
-					
-					//服务
-					if (ModelConstant.ORDER_TYPE_SERVICE == serviceOrder.getOrderType()) {
-						
-						if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
-							if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
-								//do nothing
-							}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
-								serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
-							}
-							serviceOrder.setPayDate(new Date());
-							serviceOrderRepository.save(serviceOrder);
-						}
-					}
-					
+					baseOrderService.finishOrder(tradeWaterId);
 					isSuccess = true;
 					
 				} catch (Exception e) {

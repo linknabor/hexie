@@ -68,5 +68,7 @@ public interface BaseOrderService {
 	ServiceOrder getOrder(User user, long orderId);
 	//退款处理
 	void finishRefund(ServiceOrder serviceOrder);
+	//订单支付成功回调处理，包括消费红包，改状态等操作
+	void finishOrder(String tradeWaterId);
 		
 }

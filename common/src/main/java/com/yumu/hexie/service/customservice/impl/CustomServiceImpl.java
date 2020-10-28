@@ -127,10 +127,7 @@ public class CustomServiceImpl implements CustomService {
 			product.setId(serviceId);
 			product.setService(true);
 			product.setAgentId(agent.getId());
-			boolean isAvailable = couponService.checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
-			if (isAvailable) {
-				throw new BizValidateException("当前优惠券不可用。coupon id : " + coupon.getId());
-			}
+			couponService.checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
 			customerServiceOrderDTO.setCouponId(String.valueOf(coupon.getId()));
 			customerServiceOrderDTO.setCouponAmt(String.valueOf(coupon.getAmount()));
 			

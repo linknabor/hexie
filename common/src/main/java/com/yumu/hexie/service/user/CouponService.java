@@ -94,7 +94,7 @@ public interface CouponService {
 	
 	Coupon findById(Long couponId);
 
-	boolean checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+	void checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
 
 	
 	

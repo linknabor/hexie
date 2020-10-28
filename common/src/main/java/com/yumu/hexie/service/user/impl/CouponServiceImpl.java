@@ -36,6 +36,7 @@ import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.Collocation;
 import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
@@ -103,6 +104,8 @@ public class CouponServiceImpl implements CouponService {
 	private AgentRepository agentRepository;
 	@Autowired
 	private CouponHisRepository couponHisRepository;
+	@Autowired
+	private OrderItemRepository orderItemRepository;
 	
 	@Override
 	public Coupon findById(Long couponId) {
@@ -394,11 +397,15 @@ public class CouponServiceImpl implements CouponService {
 		
 		long currTime = System.currentTimeMillis();
 		for(Coupon coupon : coupons) {
-			if (checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, null, coupon, false)) {
+			try {
+				checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, null, coupon, false);
 				if (coupon.getExpiredDate().getTime() > currTime ) {
 					result.add(coupon);
 				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
 			}
+			
 		}
 		return result;
 	}
@@ -418,8 +425,11 @@ public class CouponServiceImpl implements CouponService {
         
         List<Coupon> result = new ArrayList<Coupon>();
         for(Coupon coupon : coupons) {
-            if(checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false)){
-                result.add(coupon);
+            try {
+            	checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false);
+            	result.add(coupon);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
             }
         }
         return result;
@@ -993,13 +1003,13 @@ public class CouponServiceImpl implements CouponService {
     			return false;
     		}
     	}
-    	if(order.getItems() != null) {
-    	    for(OrderItem item : order.getItems()) {
+    	List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(order);
+    	
+    	if(orderItems != null) {
+    	    for(OrderItem item : orderItems) {
     	    	Product product = new Product();
     	    	product.setId(item.getProductId());
-                if (checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, order.getTotalAmount(), coupon, withLocked)) {
-                	return true;
-				}
+    	    	checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, order.getTotalAmount(), coupon, withLocked);
             }
     	}
         
@@ -1017,10 +1027,10 @@ public class CouponServiceImpl implements CouponService {
 	 * @return
 	 */
 	@Override
-	public boolean checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked) {
+	public void checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked) {
 	    
 		if(coupon == null) {
-	        return false;
+	        return;
 	    }
 		
 		long productId = product.getId();
@@ -1029,12 +1039,12 @@ public class CouponServiceImpl implements CouponService {
 	    //1.状态验证
         if(!locked && coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
             log.warn("coupon " + coupon.getId() + ", 不可用（状态验证）");
-            return false;
+            throw new BizValidateException("优惠券：" + coupon.getId() + ", 状态：" + coupon.getStatus() + ", 不可用。");
         }
         //2.是否锁定验证
         if(locked && coupon.getStatus() != ModelConstant.COUPON_STATUS_LOCKED && coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
         	log.warn("coupon " + coupon.getId() + ", 不可用（锁定状态）");
-            return false;
+        	throw new BizValidateException("优惠券：" + coupon.getId() + ", 已被其他商品锁定，不可用。");
         }
         
         //3.金额验证
@@ -1043,15 +1053,15 @@ public class CouponServiceImpl implements CouponService {
             BigDecimal minAmt = new BigDecimal("0.01");
             BigDecimal usageCondition = new BigDecimal(String.valueOf(coupon.getUsageCondition()));
             
-            if(amount != null && amt.subtract(usageCondition).compareTo(minAmt) <= 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+            if(amt.subtract(usageCondition).compareTo(minAmt) <= 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
             	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
-                return false;
+            	throw new BizValidateException("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + usageCondition + ", 不可用。");
             }
 		}
 
 	    //4.支持产品类型验证
         if (PromotionConstant.COUPON_ITEM_TYPE_ALL != coupon.getItemType() && itemType != coupon.getItemType()) {
-        	return false;
+        	throw new BizValidateException("优惠券：" + coupon.getId() + ", 当前商品不可用。");
         }
         
         //5.支持(或不支持)的商品验证
@@ -1061,13 +1071,13 @@ public class CouponServiceImpl implements CouponService {
     				//do nothing
     			} else {
 					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 不在支持的列表中。");
-					return false;
+    				throw new BizValidateException("优惠券：" + coupon.getId() + ", 当前商品不可用。");
     			}
 			}
     		if (coupon.getSupportType() == 2) {
     			if (!StringUtils.isEmpty(coupon.getuProductId()) && coupon.getuProductId().indexOf(String.valueOf(productId)) >-1) {
 					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 在不支持的列表中。");
-					return false;
+					throw new BizValidateException("优惠券：" + coupon.getId() + ", 当前商品不可用。");
 				}
     		}
         }
@@ -1080,21 +1090,20 @@ public class CouponServiceImpl implements CouponService {
 		    		product = optional.get();
 					if (product == null) {
 						log.warn("未找到当前商品, productId: " + productId);
-						return false;
+						throw new BizValidateException("当前商品可能已下架。");
 					}
 		    	}
 			}
 	    	
 	    	if (coupon.getAgentId() != product.getAgentId() ) {
 				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 非指定代理商, agentId : " + product.getAgentId() + ", 不能使用。");
-				return false;
+				throw new BizValidateException("优惠券：" + coupon.getId() + ", 当前商品不可用。");
 			}
 			
 	    }
-
 	    //TODO 商户校验
-        log.warn("可以用（全部通过）");
-		return true;
+        log.warn("coupon " + coupon.getId()+ " 可以用（全部通过）");
+        
 	}
 
 	
