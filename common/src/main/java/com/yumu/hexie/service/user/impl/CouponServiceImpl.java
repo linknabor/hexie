@@ -866,6 +866,7 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public List<CouponView> getSeedList(User user){
 		
+		user = userRepository.findById(user.getId());	//TODO 缓存不能通过session.setAttribute修改，需要FIX 
 		String gainedSeedKey = ModelConstant.KEY_USER_COUPON_SEED + user.getId();
 		String gainedSeedStr = redisTemplate.opsForValue().get(gainedSeedKey);
 		
