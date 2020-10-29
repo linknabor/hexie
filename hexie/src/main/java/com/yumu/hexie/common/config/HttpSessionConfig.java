@@ -3,12 +3,13 @@ package com.yumu.hexie.common.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.session.data.redis.RedisFlushMode;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 
 @Configuration
-@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 360000)
+@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 360000, redisFlushMode = RedisFlushMode.IMMEDIATE)
 public class HttpSessionConfig {
 	
 	@Value("${testMode}")
@@ -27,7 +28,7 @@ public class HttpSessionConfig {
 				cookieSerializer.setUseHttpOnlyCookie(false);
 				cookieSerializer.setSameSite("None");
 				cookieSerializer.setCookiePath("/");
-				cookieSerializer.setUseSecureCookie(true);
+//				cookieSerializer.setUseSecureCookie(false);
 			}
 			return cookieSerializer;
 		}
