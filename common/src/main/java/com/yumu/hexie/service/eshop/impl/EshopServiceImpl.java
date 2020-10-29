@@ -1148,15 +1148,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		try {
 			List<Long> agentList = null;
 			if (StringUtils.isEmpty(queryCouponCfgVO.getAgentNo()) && StringUtils.isEmpty(queryCouponCfgVO.getAgentName())) {
-				//do nothing
 			}else {
 				agentList = agentRepository.findByAgentNoOrName(1, queryCouponCfgVO.getAgentNo(), 
 						queryCouponCfgVO.getAgentName());
-			}
-			if (agentList != null ) {
-				if (agentList.isEmpty()) {
-					agentList.add(0l);
-				}
 			}
 			
 			List<Order> orderList = new ArrayList<>();
@@ -1229,15 +1223,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		try {
 			List<Long> agentList = null;
 			if (StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName())) {
-				//do nothing
 			}else {
 				agentList = agentRepository.findByAgentNoOrName(1, queryProductVO.getAgentNo(), 
 						queryProductVO.getAgentName());
-			}
-			if (agentList != null ) {
-				if (agentList.isEmpty()) {
-					agentList.add(0l);
-				}
 			}
 			
 			List<Order> orderList = new ArrayList<>();
@@ -1283,13 +1271,19 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Transactional
 	public void saveCouponCfg(SaveCouponCfgVO saveCouponCfgVO) throws Exception {
 	
-		String agentNo = saveCouponCfgVO.getAgentNo();
-		Agent agent = agentRepository.findByAgentNo(agentNo);
+		Agent agent = null;
+		if ("1".equals(saveCouponCfgVO.getSupportAllAgent())) {	//全平台通用
+			agent = new Agent();
+			agent.setId(0l);
+		} else {	
+			agent = agentRepository.findByAgentNo(saveCouponCfgVO.getAgentNo());
+		}
+		
 		if ("add".equals(saveCouponCfgVO.getOperType())) {
 			if (agent == null) {
 				agent = new Agent();
 				agent.setName(saveCouponCfgVO.getAgentName());
-				agent.setAgentNo(agentNo);
+				agent.setAgentNo(saveCouponCfgVO.getAgentNo());
 				agent.setStatus(1);
 				agent = agentRepository.save(agent);
 			}
@@ -1354,9 +1348,12 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (couponRule == null) {
 				throw new BizValidateException("未查询到商品，id : " + saveCouponCfgVO.getRuleId());
 			}
-		}
-		if (agent == null) {	//编辑的时候为空
-			agent = agentRepository.findById(couponRule.getAgentId()).get();
+			if ("1".equals(saveCouponCfgVO.getSupportAllAgent())) {	//全平台通用
+				couponRule.setAgentId(0l);
+			} else {
+				agent = agentRepository.findById(couponRule.getAgentId()).get();
+			}
+			
 		}
 		
 		List<String> marketRegions = null;
@@ -1482,21 +1479,26 @@ public class EshopServiceImpl implements EshopSerivce {
 	 */
 	private List<String> getMarketRegions(String supported, String unsupported, Agent agent, String supportType) {
 		
+		String agentId = String.valueOf(agent.getId());
+		if (agent.getId() == 0) {	//全平台通用券
+			agentId = "";
+		}
+		
 		List<Region> onsaleList = null;
 		List<Region> rgroupList = null;
 		if ("0".equals(supportType) || StringUtils.isEmpty(supportType)) {
-			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, null, null, String.valueOf(agent.getId()));
-			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, null, null, String.valueOf(agent.getId()));
+			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, null, null, agentId);
+			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, null, null, agentId);
 		}else if ("1".equals(supportType)) {
 			String[]products = supported.split(",");
 			List<String> productList = Arrays.asList(products);
-			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, productList, null, String.valueOf(agent.getId()));
-			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, productList, null, String.valueOf(agent.getId()));
+			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, productList, null, agentId);
+			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, productList, null, agentId);
 		}else if ("2".equals(supportType)) {
 			String[]uproducts = unsupported.split(",");
 			List<String> uproductList = Arrays.asList(uproducts);
-			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, String.valueOf(agent.getId()));
-			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, String.valueOf(agent.getId()));
+			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, agentId);
+			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, agentId);
 		}
 		
 		onsaleList.removeAll(rgroupList);	//去重

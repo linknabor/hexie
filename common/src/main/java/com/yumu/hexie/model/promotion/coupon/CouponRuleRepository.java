@@ -19,7 +19,8 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 	
 	String queryColumn = "r.id as ruleId, s.id as seedId, r.title, s.seedType, s.seedStr, r.itemType, r.status, r.supportType, "
 			+ "r.totalCount, r.receivedCount, r.usedCount, r.amount, r.usageCondition, r.productId, r.uProductId, "
-			+ "r.startDate, r.endDate, r.useStartDate, r.useEndDate, r.expiredDays, r.suggestUrl, s.seedImg, a.name as agentName, a.agentNo, r.couponDesc";
+			+ "r.startDate, r.endDate, r.useStartDate, r.useEndDate, r.expiredDays, r.suggestUrl, s.seedImg, "
+			+ "a.name as agentName, a.agentNo, a.id as agentId, r.couponDesc ";
 	
 	@Query(value = "select " + queryColumn + " from couponRule r "
 			+ "join couponSeed s on r.seedId = s.id "

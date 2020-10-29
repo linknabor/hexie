@@ -58,6 +58,8 @@ public class QueryCouponCfgMapper implements Serializable {
 	private String agentName;
 	@JsonProperty("agent_no")
 	private String agentNo;
+	@JsonProperty("agent_id")
+	private BigInteger agentId;
 	@JsonProperty("coupon_desc")
 	private String couponDesc;
 	
@@ -65,7 +67,7 @@ public class QueryCouponCfgMapper implements Serializable {
 			Integer itemType, Integer status, Integer supportType, Integer totalCount, Integer receivedCount, Integer usedCount, 
 			Float amount, Float usageCondition, String productId, String uProductId, Timestamp startDate, 
 			Timestamp endDate, Timestamp useStartDate, Timestamp useEndDate, Integer expiredDays,
-			String suggestUrl, String seedImg, String agentName, String agentNo, String couponDesc) {
+			String suggestUrl, String seedImg, String agentName, String agentNo, BigInteger agentId, String couponDesc) {
 		super();
 		this.ruleId = ruleId;
 		this.seedId = seedId;
@@ -91,6 +93,7 @@ public class QueryCouponCfgMapper implements Serializable {
 		this.seedImg = seedImg;
 		this.agentName = agentName;
 		this.agentNo = agentNo;
+		this.agentId = agentId;
 		this.couponDesc = couponDesc;
 	}
 
@@ -293,6 +296,13 @@ public class QueryCouponCfgMapper implements Serializable {
 	public void setSeedStr(String seedStr) {
 		this.seedStr = seedStr;
 	}
-	
+
+	public BigInteger getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(BigInteger agentId) {
+		this.agentId = agentId;
+	}
 	
 }

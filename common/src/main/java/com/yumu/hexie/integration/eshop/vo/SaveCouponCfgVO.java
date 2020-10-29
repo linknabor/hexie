@@ -34,6 +34,7 @@ public class SaveCouponCfgVO implements Serializable {
 	
 	private String agentName;
 	private String agentNo;
+	private String supportAllAgent;	//全平台通用券, 0否，1是
 	
 	private String serviceSupportedSect;	//自定义服务支持的小区
 	
@@ -181,16 +182,22 @@ public class SaveCouponCfgVO implements Serializable {
 	public void setServiceSupportedSect(String serviceSupportedSect) {
 		this.serviceSupportedSect = serviceSupportedSect;
 	}
+	public String getSupportAllAgent() {
+		return supportAllAgent;
+	}
+	public void setSupportAllAgent(String supportAllAgent) {
+		this.supportAllAgent = supportAllAgent;
+	}
 	@Override
 	public String toString() {
-		return "SaveCouponCfgVO [operType=" + operType + ", ruleId=" + ruleId + ", title=" + title + ", seedId="
-				+ seedId + ", seedType=" + seedType + ", amount=" + amount + ", usageCondition=" + usageCondition
+		return "SaveCouponCfgVO [operType=" + operType + ", ruleId=" + ruleId + ", seedId=" + seedId + ", title="
+				+ title + ", seedType=" + seedType + ", amount=" + amount + ", usageCondition=" + usageCondition
 				+ ", totalCount=" + totalCount + ", itemType=" + itemType + ", supportType=" + supportType
 				+ ", supported=" + supported + ", unsupported=" + unsupported + ", expiredDays=" + expiredDays
 				+ ", startDate=" + startDate + ", endDate=" + endDate + ", useStartDate=" + useStartDate
 				+ ", useEndDate=" + useEndDate + ", status=" + status + ", suggestUrl=" + suggestUrl + ", seedImg="
 				+ seedImg + ", couponDesc=" + couponDesc + ", agentName=" + agentName + ", agentNo=" + agentNo
-				+ ", serviceSupportedSect=" + serviceSupportedSect + "]";
+				+ ", supportAllAgent=" + supportAllAgent + ", serviceSupportedSect=" + serviceSupportedSect + "]";
 	}
 	
 

@@ -58,7 +58,6 @@ import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service("wuyeService")
@@ -68,9 +67,6 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private AddressService addressService;
-	
-	@Autowired
-	private UserService userService;
 	
 	@Autowired
 	private CouponService couponService;
@@ -109,7 +105,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public boolean deleteHouse(User user, String houseId) {
 		
-		User curruser = userService.getById(user.getId());
+		User curruser = userRepository.findById(user.getId());
 		BaseResult<String> result = WuyeUtil.deleteHouse(curruser, houseId);
 		if (result.isSuccess()) {
 			// 添加电话到user表
@@ -271,7 +267,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public BindHouseDTO bindHouseNoStmt(User user, String houseId, String area) {
 		
-		User currUser = userService.getById(user.getId());
+		User currUser = userRepository.findById(user.getId());
 		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(currUser, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
@@ -297,7 +293,7 @@ public class WuyeServiceImpl implements WuyeService {
 
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
-		User currUser = userService.getById(user.getId());
+		User currUser = userRepository.findById(user.getId());
 		
 		addressService.updateDefaultAddress(currUser, hexieAddress);
 		Integer totalBind = currUser.getTotalBind();
@@ -356,7 +352,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public BindHouseDTO bindHouse(User user, String stmtId, String houseId) {
 		
-		User currUser = userService.getById(user.getId());
+		User currUser = userRepository.findById(user.getId());
 		BaseResult<HexieUser> r= WuyeUtil.bindHouse(currUser, stmtId, houseId);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");

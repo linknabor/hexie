@@ -132,8 +132,9 @@ public class WuyeController extends BaseController {
 			@PathVariable String houseId) throws Exception {
 		
 		boolean isSuccess = wuyeService.deleteHouse(user, houseId);
+		User currUser = userService.getById(user.getId());
 		if (isSuccess) {
-			httpSession.setAttribute(Constants.USER, user);
+			httpSession.setAttribute(Constants.USER, currUser);
 			return BaseResult.successResult("解绑房子成功！");
 		}else {
 			return BaseResult.fail("解绑房子失败！");
