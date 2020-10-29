@@ -360,7 +360,7 @@ public class ServiceOrder  extends BaseModel {
 		}
 		setCouponId(coupon.getId());
 		setCouponAmount(coupon.getAmount());
-		if(coupon.getAmount() > getPrice()) {
+		if(coupon.getAmount() >= getPrice()) {
 			setPrice(0.01f);
 		} else {
 			setPrice(getPrice() - coupon.getAmount());
