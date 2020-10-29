@@ -191,9 +191,10 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
 		
 		//配置红包，并锁定
-		serviceOrder.configCoupon(coupon);
-		coupon.lock(serviceOrder.getId());
-		
+		if (coupon != null) {
+			serviceOrder.configCoupon(coupon);
+			coupon.lock(serviceOrder.getId());
+		}
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		end = System.currentTimeMillis();
 		logger.info("createOrderService location 2 : " + (end - begin)/1000);
