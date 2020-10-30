@@ -68,6 +68,8 @@ import com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.vo.CouponsSummary;
 
+import io.netty.util.internal.ObjectUtil;
+
 /**
  * 
  * @author ouyezi
@@ -866,7 +868,11 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public List<CouponView> getSeedList(User user){
 		
-		user = userRepository.findById(user.getId());	//TODO 缓存不能通过session.setAttribute修改，需要FIX 
+		log.info("getSeedList, user : " + user);
+		String sectId = user.getSectId();
+		if (StringUtils.isEmpty(sectId) || "0".equals(sectId)) {
+			throw new BizValidateException("当前用户未绑定房屋");
+		}
 		String gainedSeedKey = ModelConstant.KEY_USER_COUPON_SEED + user.getId();
 		String gainedSeedStr = redisTemplate.opsForValue().get(gainedSeedKey);
 		
