@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.market;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -360,10 +361,13 @@ public class ServiceOrder  extends BaseModel {
 		}
 		setCouponId(coupon.getId());
 		setCouponAmount(coupon.getAmount());
+		BigDecimal price = BigDecimal.ZERO;
 		if(coupon.getAmount() >= getPrice()) {
-			setPrice(0.01f);
+			price = new BigDecimal("0.01");
+			setPrice(price.floatValue());
 		} else {
-			setPrice(getPrice() - coupon.getAmount());
+			price = new BigDecimal(String.valueOf(getPrice())).subtract(new BigDecimal(String.valueOf(coupon.getAmount())));
+			setPrice(price.floatValue());
 		}
 	}
 
