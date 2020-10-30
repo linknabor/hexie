@@ -30,8 +30,7 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 	private UserService userService;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request,
-			HttpServletResponse response, Object handler) throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		if (request.getSession().getAttribute(Constants.USER) == null) {
 			String code = request.getParameter("code");
 			if (StringUtil.isNotEmpty(code)) {

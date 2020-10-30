@@ -1292,7 +1292,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		return result;
 	}
 	
-	private User createUser(User user, String name, String mobile) {
+	private void createUser(User user, String name, String mobile) {
 		
 		if (!StringUtils.isEmpty(name)) {
 			user.setName(name);
@@ -1305,7 +1305,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			user.setTel(mobile);
 		}
 		
-		return userService.simpleRegister(user);
+		userService.simpleRegister(user);
 	}
 	
 	private void createAgent(String name, String mobile) {

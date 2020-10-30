@@ -7,8 +7,9 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 
+//10天过期
 @Configuration
-@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 360000)
+@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 24*3600*10)	
 public class HttpSessionConfig {
 	
 	@Value("${testMode}")
