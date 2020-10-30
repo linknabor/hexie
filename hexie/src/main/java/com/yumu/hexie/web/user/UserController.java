@@ -241,9 +241,7 @@ public class UserController extends BaseController{
 		    	
 		    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
 		    }
-		    User sessionUser = (User) session.getAttribute(Constants.USER);
-		    BeanUtils.copyProperties(userAccount, sessionUser);
-			session.setAttribute(Constants.USER, sessionUser);
+		    session.setAttribute(Constants.USER, userAccount);
 		}
 		if(userAccount == null) {
 		    return new BaseResult<UserInfo>().failMsg("用户不存在！");
