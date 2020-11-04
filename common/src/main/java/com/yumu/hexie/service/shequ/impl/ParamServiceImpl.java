@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.model.ModelConstant;
@@ -28,6 +28,9 @@ public class ParamServiceImpl implements ParamService {
 	@Autowired
 	private SystemConfigService systemConfigService;
 	
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
+	
 	/**
 	 * 缓存物业公司参数到redis中，如果失败重新请求，总共请求3次
 	 */
@@ -35,7 +38,7 @@ public class ParamServiceImpl implements ParamService {
 	public void cacheWuyeParam(User user, String infoId, String type) {
 
 		try {
-			BaseResult<HexieConfig> baseResult = WuyeUtil.queryServiceCfg(user, infoId, type, PARAM_NAMES);//远程访问，可能会超时，不用管
+			BaseResult<HexieConfig> baseResult = wuyeUtil2.queryServiceCfg(user, infoId, type, PARAM_NAMES);
 			HexieConfig hexieConfig = baseResult.getData();
 			if (hexieConfig == null) {
 				logger.error("未查询到参数：" + PARAM_NAMES);
