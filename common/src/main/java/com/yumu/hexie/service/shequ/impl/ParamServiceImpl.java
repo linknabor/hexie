@@ -34,24 +34,16 @@ public class ParamServiceImpl implements ParamService {
 	@Override
 	public void cacheWuyeParam(User user, String infoId, String type) {
 
-		boolean isSuccess = false;
-		int count = 0;
-		while(!isSuccess && count <3) {	//请求三次
-			try {
-				BaseResult<HexieConfig> baseResult = WuyeUtil.queryServiceCfg(user, infoId, type, PARAM_NAMES);
-				HexieConfig hexieConfig = baseResult.getData();
-				if (hexieConfig == null) {
-					logger.error("未查询到参数：" + PARAM_NAMES);
-					break;
-				}
-				Map<String, String> paramMap = hexieConfig.getParamMap();
-				cachedMap.put(infoId, paramMap);
-				isSuccess = true;
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-				count++;
+		try {
+			BaseResult<HexieConfig> baseResult = WuyeUtil.queryServiceCfg(user, infoId, type, PARAM_NAMES);//远程访问，可能会超时，不用管
+			HexieConfig hexieConfig = baseResult.getData();
+			if (hexieConfig == null) {
+				logger.error("未查询到参数：" + PARAM_NAMES);
 			}
-			
+			Map<String, String> paramMap = hexieConfig.getParamMap();
+			cachedMap.put(infoId, paramMap);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 		}
 		
 	}

@@ -557,7 +557,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		redisRepository.setProdcutRule(key, productRule);
 		
 		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
-		if ("add".equals(saveProductVO.getOperType())) {
+		
+		//只有第一次新增时才将冻结商品数量置0
+		String freezeCount = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + product.getId());
+		if (StringUtils.isEmpty(freezeCount)) {
 			redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");	//初始化冻结数量
 		}
 		

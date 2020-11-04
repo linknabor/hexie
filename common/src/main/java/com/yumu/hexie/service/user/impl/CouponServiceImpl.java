@@ -68,8 +68,6 @@ import com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.vo.CouponsSummary;
 
-import io.netty.util.internal.ObjectUtil;
-
 /**
  * 
  * @author ouyezi
@@ -892,6 +890,11 @@ public class CouponServiceImpl implements CouponService {
 					}
 					if (!StringUtils.isEmpty(gainedSeedStr) && gainedSeedStr.indexOf(couponCfg.getSeedStr())>-1) {
 						couponView.setGained(true);
+					}
+					
+					Date endDate = couponView.getEndDate();
+					if (endDate!=null && endDate.getTime() <= System.currentTimeMillis()) {
+						continue;
 					}
 					availableList.add(couponView);
 				}
