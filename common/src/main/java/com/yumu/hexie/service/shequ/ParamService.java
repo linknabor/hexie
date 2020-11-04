@@ -8,7 +8,7 @@ public interface ParamService {
 
 	void cacheWuyeParam(User user, String infoId, String type);
 	
-	Map<String, String> getWuyeParamByUser(User user);
+	Map<Object, Object> getWuyeParamByUser(User user);
 
 	void updateSysParam();
 }

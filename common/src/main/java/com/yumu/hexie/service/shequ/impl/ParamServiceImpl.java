@@ -6,6 +6,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.StringUtil;
@@ -23,13 +24,12 @@ public class ParamServiceImpl implements ParamService {
 	private final static Logger logger = LoggerFactory.getLogger(ParamServiceImpl.class);
 	public final static String PARAM_NAMES = "ONLINE_REPAIR,ONLINE_SUGGESTION,ONLINE_MESSAGE,CORONA_PREVENTION_MODE";
 	
-	public static Map<String, Map<String, String>> cachedMap = new HashMap<>();
-	
 	@Autowired
 	private SystemConfigService systemConfigService;
-	
 	@Autowired
 	private WuyeUtil2 wuyeUtil2;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 	
 	/**
 	 * 缓存物业公司参数到redis中，如果失败重新请求，总共请求3次
@@ -44,7 +44,8 @@ public class ParamServiceImpl implements ParamService {
 				logger.error("未查询到参数：" + PARAM_NAMES);
 			}
 			Map<String, String> paramMap = hexieConfig.getParamMap();
-			cachedMap.put(infoId, paramMap);
+			String key = ModelConstant.KEY_WUYE_PARAM_CFG + infoId;
+			redisTemplate.opsForHash().putAll(key, paramMap);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -57,16 +58,17 @@ public class ParamServiceImpl implements ParamService {
 	 * @return
 	 */
 	@Override
-	public Map<String, String> getWuyeParamByUser(User user) {
+	public Map<Object, Object> getWuyeParamByUser(User user) {
 
 		String cspId = user.getCspId();
 		if (StringUtil.isEmpty(cspId) || "0".equals(cspId)) {
-			return new HashMap<String, String>();
+			return new HashMap<Object, Object>();
 		}
-		Map<String, String> paramMap = cachedMap.get(cspId);
-		if (paramMap == null) {
+		String key = ModelConstant.KEY_WUYE_PARAM_CFG + cspId;
+		Map<Object, Object> paramMap = redisTemplate.opsForHash().entries(key);
+		if (paramMap == null || paramMap.isEmpty()) {
 			cacheWuyeParam(user, cspId, ModelConstant.PARA_TYPE_CSP);
-			paramMap = cachedMap.get(cspId);
+			paramMap = redisTemplate.opsForHash().entries(key);
 		}
 		return paramMap;
 	}
