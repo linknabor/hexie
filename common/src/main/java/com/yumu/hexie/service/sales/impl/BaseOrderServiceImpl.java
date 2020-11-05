@@ -1495,15 +1495,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 						redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + item.getProductId(), item.getCount());
 					}
 					
-					//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
-					List<OrderItem> items = orderItemRepository.findByServiceOrder(order);
-					order.setItems(items);
-                    couponService.comsume(order);
-                    CouponSeed cs = couponService.createOrderSeed(order.getUserId(), order);
-            		if(cs != null) {
-            			order.setSeedStr(cs.getSeedStr());
-            			serviceOrderRepository.save(order);
-            		}
+					consumeAndCreateOrderSeed(order);
 					
 				}
 				
@@ -1546,12 +1538,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				}
 				
 				//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
-                couponService.comsume(serviceOrder);
-                CouponSeed cs = couponService.createOrderSeed(serviceOrder.getUserId(), serviceOrder);
-        		if(cs != null) {
-        			serviceOrder.setSeedStr(cs.getSeedStr());
-        		}
-        		serviceOrderRepository.save(serviceOrder);
+        		consumeAndCreateOrderSeed(serviceOrder);
 				
 			}
 			
@@ -1577,9 +1564,23 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				}
 				serviceOrder.setPayDate(new Date());
 				serviceOrderRepository.save(serviceOrder);
+				
+				consumeAndCreateOrderSeed(serviceOrder);
 			}
 		}
 		
+	}
+
+	private void consumeAndCreateOrderSeed(ServiceOrder order) {
+		//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
+		List<OrderItem> items = orderItemRepository.findByServiceOrder(order);
+		order.setItems(items);
+		couponService.comsume(order);
+		CouponSeed cs = couponService.createOrderSeed(order.getUserId(), order);
+		if(cs != null) {
+			order.setSeedStr(cs.getSeedStr());
+			serviceOrderRepository.save(order);
+		}
 	}
 	
 	
