@@ -365,6 +365,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setPrice(Float.valueOf(amount));
 		if (coupon != null) {
 			serviceOrder.configCoupon(coupon);
+			coupon.lock(serviceOrder.getId());
 		}
 		serviceOrderRepository.save(serviceOrder);
 		
