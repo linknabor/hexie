@@ -1030,6 +1030,7 @@ public class CouponServiceImpl implements CouponService {
     public boolean checkAvailableV2(ServiceOrder order, Coupon coupon, boolean withLocked) {
     	if(withLocked) {
     		if(coupon.getOrderId() != 0&& coupon.getOrderId() != order.getId()) {
+    			log.info("coupon orderId : " + coupon.getOrderId() + ", 与订单ID["+order.getId()+"]不符");
     			return false;
     		}
     	}
@@ -1046,20 +1047,12 @@ public class CouponServiceImpl implements CouponService {
     }
 	
 	public static void main(String[] args) {
-		Float amount = 0.01f;
-//		Float uc = 0f;
-//		if(uc -0.009 > amount) {
-//			System.out.println("1234567");
-//		}
+		Float amount = 0.02f;
+		Float uc = 0.02f;
+		if(uc > amount) {
+			System.out.println("1234567");
+		}
 		
-		String usage = "0.01";
-		BigDecimal amt = new BigDecimal(String.valueOf(amount));
-        BigDecimal minAmt = new BigDecimal("0.009");
-        BigDecimal usageCondition = new BigDecimal(usage);
-        
-        if(usageCondition.subtract(minAmt).compareTo(amt) > 0) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
-        	System.out.println("~~~~~~~~~~~~");
-        }
 	}
 	
 	/**
