@@ -146,7 +146,12 @@ public class CouponServiceImpl implements CouponService {
 	public CouponSeed createOrderSeed(long userId,ServiceOrder order) {
 		log.error("CREATE SEED:" + userId + " -- " +order.getId());
 		//查询类型为订单分裂模板类型的优惠卷种子
-		List<CouponSeed> templates = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_ORDER_BUY_TEMPLATE);
+//		List<CouponSeed> templates = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_ORDER_BUY_TEMPLATE);
+		List<Integer> seedTypes = new ArrayList<>();
+		seedTypes.add(ModelConstant.COUPON_SEED_ORDER_BUY_TEMPLATE);
+		seedTypes.add(ModelConstant.COUPON_SEED_ORDER_BUY2_TEMPLATE);
+		
+		List<CouponSeed> templates = couponSeedRepository.findBySeedType(seedTypes);
 		for(CouponSeed template : templates) {
 			log.error("CREATE SEED:templateId:" + template.getId());
 			if(template == null||!template.isCanUse()||!canUse(template,order)) {
@@ -164,7 +169,11 @@ public class CouponServiceImpl implements CouponService {
 				cs.setUserId(userId);
 				cs.setUserImgUrl(user.getHeadimgurl());
 				cs.setBizId(order.getId());
-				cs.setSeedType(ModelConstant.COUPON_SEED_ORDER_BUY);
+				int seedType = ModelConstant.COUPON_SEED_ORDER_BUY;
+				if (ModelConstant.COUPON_SEED_ORDER_BUY2_TEMPLATE == template.getSeedType()) {
+					seedType = ModelConstant.COUPON_SEED_ORDER_BUY2;
+				}
+				cs.setSeedType(seedType);
 				cs.setSeedStr(cs.getGeneratedCouponSeedStr());
 				cs = couponSeedRepository.save(cs);
 				for(CouponRule rule: rules) {
@@ -401,7 +410,7 @@ public class CouponServiceImpl implements CouponService {
 				try {
 					Product product = new Product();
 					product.setId(salePlan.getProductId());
-					checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, null, coupon, false);
+					checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, salePlan.getPrice(), coupon, false);
 					if (coupon.getExpiredDate().getTime() > currTime ) {
 						result.add(coupon);
 					}
