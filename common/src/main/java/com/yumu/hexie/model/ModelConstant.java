@@ -299,7 +299,7 @@ public class ModelConstant {
 	public static final int NOTICE_SUB_TYPE_GROUPNOTIFY = 3;
 	
 	
-	/***********现金券************** 1:订单分裂|2:用户注册|3:关注红包|4:活动发布|5:订单分裂模板|6:会员注册   */
+	/***********现金券************** 1:订单分裂（支付成功通过分享产生红包）|2:用户注册|3:关注红包|4:活动发布|5:订单分裂模板(详见1)|6:会员注册|7.订单分裂2（支付成功直接塞红包） 8.订单分裂模板2（(详见7)）  */
 	//种子类型
 	public static final int COUPON_SEED_ORDER_BUY = 1;
 	public static final int COUPON_SEED_USER_REGIST = 2;
@@ -307,6 +307,8 @@ public class ModelConstant {
 	public static final int COUPON_SEED_ACTIVITY = 4;
 	public static final int COUPON_SEED_ORDER_BUY_TEMPLATE = 5;
 	public static final int COUPON_SEED_MEMBER = 6;
+	public static final int COUPON_SEED_ORDER_BUY2 = 7;
+	public static final int COUPON_SEED_ORDER_BUY2_TEMPLATE = 8;
 	
 	//种子状态
 	public static final int COUPON_SEED_STATUS_AVAILABLE = 0;
