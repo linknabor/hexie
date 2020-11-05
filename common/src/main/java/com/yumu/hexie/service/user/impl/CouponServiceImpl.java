@@ -1095,7 +1095,7 @@ public class CouponServiceImpl implements CouponService {
         
         //3.金额验证
         if (amount != null) {
-            if(coupon.getUsageCondition()-0.009 > amount) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+            if(coupon.getUsageCondition() > amount) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
             	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
             	throw new BizValidateException("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
             }
