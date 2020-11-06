@@ -343,7 +343,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     	}
 	}
 	@Override
-    @Scheduled(cron = "15 */2 0 * * ?")
+    @Scheduled(cron = "15 */2 * * * ?")
 	public void executeCouponTimeoutJob() {
 		
 		SCHEDULE_LOG.info("--------------------start executeCouponTimeoutJob-------------------");

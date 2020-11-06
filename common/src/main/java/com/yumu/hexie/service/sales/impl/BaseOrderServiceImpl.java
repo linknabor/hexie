@@ -802,8 +802,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		//4.操作后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CANCEL,order);
 		//5.商品中取消冻结
-		salePlanService.getService(order.getOrderType()).postOrderCancel(order);
-        log.warn("[cancelOrder]unfrezee:"+order.getId());
+		if (ModelConstant.ORDER_TYPE_SERVICE != order.getOrderType()) {
+			salePlanService.getService(order.getOrderType()).postOrderCancel(order);
+	        log.warn("[cancelOrder]unfrezee:"+order.getId());
+		}
 		return order;
 	}
 
