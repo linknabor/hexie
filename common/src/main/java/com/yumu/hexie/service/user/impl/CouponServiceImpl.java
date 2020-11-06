@@ -26,7 +26,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisUtil;
 import com.yumu.hexie.model.ModelConstant;
@@ -784,7 +783,7 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	public List<Coupon> findTop100TimeoutCoupon(){
-		return couponRepository.findTimeoutByPage(DateUtil.getDateFromString(DateUtil.dtFormat(new Date())), PageRequest.of(0, 100));
+		return couponRepository.findTimeoutByPage(new Date(), PageRequest.of(0, 100));
 	}
 
 	@Override

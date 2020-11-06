@@ -1354,6 +1354,9 @@ public class EshopServiceImpl implements EshopSerivce {
 			if ("1".equals(saveCouponCfgVO.getSupportAllAgent())) {	//全平台通用
 				couponRule.setAgentId(0l);
 			} else {
+				if (couponRule.getAgentId() == 0l) {
+					couponRule.setAgentId(1l);	//奈博的
+				}
 				agent = agentRepository.findById(couponRule.getAgentId()).get();
 			}
 			
