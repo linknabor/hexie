@@ -777,7 +777,7 @@ public class CouponServiceImpl implements CouponService {
 		couponRepository.save(coupon);
 		
 		User user = userRepository.findById(coupon.getUserId());
-		if(user.getCouponCount()>0) {
+		if(user!=null && user.getCouponCount()>0) {
 			user.setCouponCount(user.getCouponCount()-1);
 			userRepository.save(user);
 		}
