@@ -16,7 +16,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -367,15 +366,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				//3. 先保存order，产生一个orderId
 				serviceOrderRepository.save(o);
 				
-				log.info("generate order id : " + o.getId());
+				log.info("generated order id : " + o.getId());
 				List<OrderItem> items = o.getItems();
 				log.info("items : " + items);
 				
 				//4. 保存orderItem
 				for(OrderItem item : items) {
+					
+					log.info("insert foreign key id : " + o.getId());
+					
 					item.setServiceOrder(o);
 					item.setUserId(o.getUserId());
 					orderItemRepository.save(item);
+					
+					log.info("generated item id : " + item.getId());
 				}
 				//5. 订单后处理
 				commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
