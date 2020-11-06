@@ -15,6 +15,7 @@ import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.promotion.coupon.CouponView;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.user.dto.CheckCouponDTO;
 import com.yumu.hexie.vo.CouponsSummary;
 
 /**
@@ -95,7 +96,8 @@ public interface CouponService {
 	
 	Coupon findById(Long couponId);
 
-	void checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+	CheckCouponDTO checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+
 
 	
 

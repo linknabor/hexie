@@ -51,6 +51,7 @@ import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.dto.CheckCouponDTO;
 
 @Service
 public class CustomServiceImpl implements CustomService {
@@ -127,7 +128,10 @@ public class CustomServiceImpl implements CustomService {
 			product.setId(serviceId);
 			product.setService(true);
 			product.setAgentId(agent.getId());
-			couponService.checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
+			CheckCouponDTO check = couponService.checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
+			if (!check.isValid()) {
+				throw new BizValidateException(check.getErrMsg());
+			}
 			customerServiceOrderDTO.setCouponId(String.valueOf(coupon.getId()));
 			customerServiceOrderDTO.setCouponAmt(String.valueOf(coupon.getAmount()));
 			

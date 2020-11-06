@@ -118,19 +118,20 @@ public abstract class BaseOrderProcessor {
 	 * 计算红包减免后的订单金额，并且锁定红包
 	 * @param order
 	 */
-	protected void computeCoupon(ServiceOrder order) {
+	protected boolean computeCoupon(ServiceOrder order) {
 		if(order.getCouponId() == null || order.getCouponId() ==0) {
-			return;
+			return false;
 		}
 		Coupon coupon = couponService.findOne(order.getCouponId());
 		if(coupon == null) {
-		    return;
+		    return false;
 		}
 		if(!couponService.checkAvailableV2(order, coupon, false)){
-			throw new BizValidateException("该现金券已被其它订单锁定或不可使用，请选择其它可用现金券"+coupon.getId());
+			return false;
 		}
 		order.configCoupon(coupon);
 		couponService.lock(order, coupon);
+		return true;
 	}
 	
 	protected Address fillAddressInfo(ServiceOrder o) {
