@@ -345,14 +345,18 @@ public class ScheduleServiceImpl implements ScheduleService{
 	@Override
     @Scheduled(cron = "15 */2 0 * * ?")
 	public void executeCouponTimeoutJob() {
+		
+		SCHEDULE_LOG.info("--------------------start executeCouponTimeoutJob-------------------");
+		
 		List<Coupon> coupons = couponService.findTop100TimeoutCoupon();
 		for(Coupon coupon : coupons) {
 			try{
 				couponService.timeout(coupon);
 			}catch(Exception e) {
-				SCHEDULE_LOG.error("[TIMEOUT]COUPON_ID:" + coupon.getId(),e);
+				SCHEDULE_LOG.error("exec coupon timeout job error, couponId : " + coupon.getId(), e);
 			}
 		}
+		SCHEDULE_LOG.info("--------------------end executeCouponTimeoutJob-------------------");
 	}
 	
 	/**
