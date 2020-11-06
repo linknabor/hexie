@@ -681,7 +681,7 @@ public class CouponServiceImpl implements CouponService {
             return;
         }
         Coupon coupon = couponRepository.findById(order.getCouponId()).get();
-        if (checkAvailableV2(order, coupon, true)) {
+        if (!checkAvailableV2(order, coupon, true)) {
             throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
         }
         log.warn("comsume红包before["+order.getId()+"]Coupon["+coupon.getId()+"]");
@@ -1035,11 +1035,12 @@ public class CouponServiceImpl implements CouponService {
     		}
     	}
     	
+    	log.info("orderItems : " + order.getItems());
     	if(order.getItems() != null) {
     	    for(OrderItem item : order.getItems()) {
     	    	Product product = new Product();
     	    	product.setId(item.getProductId());
-    	    	checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, order.getTotalAmount(), coupon, withLocked);
+    	    	checkAvailableV2(coupon.getItemType(), product, order.getTotalAmount(), coupon, withLocked);
             }
     	}
         
