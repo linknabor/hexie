@@ -7,8 +7,8 @@ import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
-import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
@@ -47,7 +47,8 @@ public interface CouponService {
                              Float amount, Coupon coupon, boolean locked);
     
 	public List<Coupon> findAvaibleCoupon(ServiceOrder order);
-	public List<Coupon> findAvaibleCoupon(long userId,List<SalePlan> salePlans, int salePlanType);
+	List<Coupon> findAvaibleCoupon(long userId, List<OrderItem> itemList, int salePlanType);
+	
     public List<Coupon> findAvaibleCoupon(long userId,Cart cart);
     public List<Coupon> findAvaibleCoupon(long userId,HomeCart cart);
     List<Coupon> findAvaibleCoupon4CustomService(long userId, long serviceId, String agentNo);
@@ -95,6 +96,8 @@ public interface CouponService {
 	Coupon findById(Long couponId);
 
 	void checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+
+	
 
 	
 	

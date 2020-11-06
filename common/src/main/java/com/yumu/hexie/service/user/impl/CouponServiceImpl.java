@@ -34,6 +34,7 @@ import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.localservice.ServiceType;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
@@ -43,7 +44,6 @@ import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
-import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.promotion.PromotionConstant;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCfg;
@@ -392,11 +392,11 @@ public class CouponServiceImpl implements CouponService {
      * 获取可用的红包
      */
 	@Override
-	public List<Coupon> findAvaibleCoupon(long userId, List<SalePlan> salePlans, int salePlanType){
+	public List<Coupon> findAvaibleCoupon(long userId, List<OrderItem> itemList, int salePlanType){
 		
 		List<Coupon> result = new ArrayList<Coupon>();
 		List<Coupon> couponList = new ArrayList<>();
-		if(salePlans == null || salePlans.isEmpty()) {
+		if(itemList == null || itemList.isEmpty()) {
 			return result;
 		}
 		
@@ -406,10 +406,21 @@ public class CouponServiceImpl implements CouponService {
 		
 		long currTime = System.currentTimeMillis();
 		for(Coupon coupon : coupons) {
-			for (SalePlan salePlan : salePlans) {
+			for (OrderItem orderItem : itemList) {
 				try {
+					
+					String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
+					ProductRule productRule = redisRepository.getProdcutRule(key);
+					if (productRule == null) {
+						throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
+					}
+					
 					Product product = new Product();
-					product.setId(salePlan.getProductId());
+					product.setId(productRule.getProductId());
+					BigDecimal totalPrice = BigDecimal.ZERO;
+					BigDecimal singlePrice = new BigDecimal(String.valueOf(productRule.getSinglePrice()));	//单价
+					totalPrice = singlePrice.multiply(new BigDecimal(orderItem.getCount()));
+					
 					int itemType = 0;
 					if (ModelConstant.ORDER_TYPE_EVOUCHER == salePlanType) {
 						itemType = PromotionConstant.COUPON_ITEM_TYPE_EVOUCHER;
@@ -418,7 +429,7 @@ public class CouponServiceImpl implements CouponService {
 					}else if (ModelConstant.ORDER_TYPE_RGROUP == salePlanType) {
 						itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
 					}
-					checkAvailableV2(itemType, product, salePlan.getPrice(), coupon, false);
+					checkAvailableV2(itemType, product, totalPrice.floatValue(), coupon, false);
 					if (coupon.getExpiredDate().getTime() > currTime ) {
 						result.add(coupon);
 					}
