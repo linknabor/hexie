@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -350,39 +351,46 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		int couponUsed = 0;
 		StringBuffer errMsg = new StringBuffer();
 		while(it.hasNext()) {
-			Entry<Long, List<OrderItem>> entry = it.next();
-			CreateOrderReq orderRequest = new CreateOrderReq();
-			BeanUtils.copyProperties(req, orderRequest);
-			orderRequest.setItemList(entry.getValue());
-			
-			ServiceOrder o = new ServiceOrder(user, orderRequest);
-			o.setGroupOrderId(groupId);
-			
-			//1. 填充地址信息
-			Address address = fillAddressInfo(o);
-			//2. 填充订单信息并校验规则,设置价格信息
-			preOrderCreate(o, address);
-			//3. 先保存order，产生一个orderId
-			o = serviceOrderRepository.save(o);
-			
-			List<OrderItem> items = o.getItems();
-			
-			//4. 保存orderItem
-			for(OrderItem item : items) {
-				item.setServiceOrder(o);
-				item.setUserId(o.getUserId());
-				orderItemRepository.save(item);
-			}
-			//5. 订单后处理
-			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
-			
-			//6. 如果是拆分的订单，则红包需要放在相应的订单上面，红包和商品的代理商需要一致。
 			try {
-				computeCoupon(o);
-				couponUsed++;
+				Entry<Long, List<OrderItem>> entry = it.next();
+				CreateOrderReq orderRequest = new CreateOrderReq();
+				BeanUtils.copyProperties(req, orderRequest);
+				orderRequest.setItemList(entry.getValue());
+				
+				ServiceOrder o = new ServiceOrder(user, orderRequest);
+				o.setGroupOrderId(groupId);
+				
+				//1. 填充地址信息
+				Address address = fillAddressInfo(o);
+				//2. 填充订单信息并校验规则,设置价格信息
+				preOrderCreate(o, address);
+				//3. 先保存order，产生一个orderId
+				serviceOrderRepository.save(o);
+				
+				log.info("generate order id : " + o.getId());
+				List<OrderItem> items = o.getItems();
+				log.info("items : " + items);
+				
+				//4. 保存orderItem
+				for(OrderItem item : items) {
+					item.setServiceOrder(o);
+					item.setUserId(o.getUserId());
+					orderItemRepository.save(item);
+				}
+				//5. 订单后处理
+				commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
+				
+				//6. 如果是拆分的订单，则红包需要放在相应的订单上面，红包和商品的代理商需要一致。
+				try {
+					computeCoupon(o);
+					couponUsed++;
+				} catch (Exception e) {
+					log.info(e.getMessage(), e);
+					errMsg.append(e.getMessage()).append(",");
+				}
 			} catch (Exception e) {
-				log.info(e.getMessage(), e);
-				errMsg.append(e.getMessage()).append(",");
+				log.error(e.getMessage(), e);
+				throw new BizValidateException();
 			}
 		
 		}
