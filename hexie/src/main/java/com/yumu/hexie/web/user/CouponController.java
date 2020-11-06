@@ -117,7 +117,7 @@ public class CouponController extends BaseController{
     		SalePlan salePlan = salePlanService.getService(salePlanType).findSalePlan(Long.valueOf(planId));
     		salePlans.add(salePlan);
 		}
-    	List<Coupon> couponList = couponService.findAvaibleCoupon(user.getId(), salePlans);
+    	List<Coupon> couponList = couponService.findAvaibleCoupon(user.getId(), salePlans, salePlanType);
     	return new BaseResult<List<Coupon>>().success(couponList);
    	}
     

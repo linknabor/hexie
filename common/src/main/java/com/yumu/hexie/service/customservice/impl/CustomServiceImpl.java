@@ -193,7 +193,8 @@ public class CustomServiceImpl implements CustomService {
 		//配置红包，并锁定
 		if (coupon != null) {
 			serviceOrder.configCoupon(coupon);
-			coupon.lock(serviceOrder.getId());
+//			coupon.lock(serviceOrder.getId());	//服务的券不能锁
+			coupon.setOrderId(serviceOrder.getId());
 		}
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		end = System.currentTimeMillis();
@@ -365,7 +366,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setPrice(Float.valueOf(amount));
 		if (coupon != null) {
 			serviceOrder.configCoupon(coupon);
-			coupon.lock(serviceOrder.getId());
+//			coupon.lock(serviceOrder.getId());	//服务的券不能锁
+			coupon.setOrderId(serviceOrder.getId());
 		}
 		serviceOrderRepository.save(serviceOrder);
 		

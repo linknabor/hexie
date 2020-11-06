@@ -47,7 +47,7 @@ public interface CouponService {
                              Float amount, Coupon coupon, boolean locked);
     
 	public List<Coupon> findAvaibleCoupon(ServiceOrder order);
-	public List<Coupon> findAvaibleCoupon(long userId,List<SalePlan> salePlans);
+	public List<Coupon> findAvaibleCoupon(long userId,List<SalePlan> salePlans, int salePlanType);
     public List<Coupon> findAvaibleCoupon(long userId,Cart cart);
     public List<Coupon> findAvaibleCoupon(long userId,HomeCart cart);
     List<Coupon> findAvaibleCoupon4CustomService(long userId, long serviceId, String agentNo);

@@ -392,7 +392,7 @@ public class CouponServiceImpl implements CouponService {
      * 获取可用的红包
      */
 	@Override
-	public List<Coupon> findAvaibleCoupon(long userId, List<SalePlan> salePlans){
+	public List<Coupon> findAvaibleCoupon(long userId, List<SalePlan> salePlans, int salePlanType){
 		
 		List<Coupon> result = new ArrayList<Coupon>();
 		List<Coupon> couponList = new ArrayList<>();
@@ -410,7 +410,15 @@ public class CouponServiceImpl implements CouponService {
 				try {
 					Product product = new Product();
 					product.setId(salePlan.getProductId());
-					checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, salePlan.getPrice(), coupon, false);
+					int itemType = 0;
+					if (ModelConstant.ORDER_TYPE_EVOUCHER == salePlanType) {
+						itemType = PromotionConstant.COUPON_ITEM_TYPE_EVOUCHER;
+					}else if (ModelConstant.ORDER_TYPE_ONSALE == salePlanType) {
+						itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
+					}else if (ModelConstant.ORDER_TYPE_RGROUP == salePlanType) {
+						itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
+					}
+					checkAvailableV2(itemType, product, salePlan.getPrice(), coupon, false);
 					if (coupon.getExpiredDate().getTime() > currTime ) {
 						result.add(coupon);
 					}
