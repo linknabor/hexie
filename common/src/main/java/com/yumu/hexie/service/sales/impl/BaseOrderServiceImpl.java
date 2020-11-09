@@ -367,13 +367,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			Address address = fillAddressInfo(o);
 			//2. 填充订单信息并校验规则,设置价格信息
 			preOrderCreate(o, address);
-			//3.如果是一拆多的交易，并且红包是某一个代理商单独发的，需要检查一下此次使用的优惠券是否已经拆到了其他order里，如果已经拆掉了，则当前的交易不设置优惠券ID
-			if (couponUsed) {
-				o.setCouponId(null);
-				o.setCouponAmount(null);
-			}
-			
-			//4. 先保存order，产生一个orderId
+			//3. 先保存order，产生一个orderId
 			serviceOrderRepository.save(o);
 			
 			totalOrderAmount = totalOrderAmount.add(new BigDecimal(String.valueOf(o.getPrice())));	//这里面含运费
@@ -391,9 +385,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			//5. 订单后处理
 			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
 			
-			//6. 如果是拆分的订单，则检查当前order是否使用了红包
+			//6. 如果是一拆多的交易，并且红包是某一个代理商单独发的，需要检查一下此次使用的优惠券是否已经拆到了其他order里，如果已经拆掉了，则当前的交易不设置优惠券ID
 			couponUsed = computeCoupon(o);	//couponId在serviceOrder表上唯一。如果有多个订单公用一个红包，只重新计算订单金额，红包锁定在其中的某一个自交易上。
 			if (couponUsed) {
+				o.setCouponId(null);
+				o.setCouponAmount(null);
 				couponUseFlag = true;
 			}
 		}

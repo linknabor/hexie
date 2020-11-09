@@ -145,6 +145,11 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public CouponSeed createOrderSeed(long userId,ServiceOrder order) {
 		log.error("CREATE SEED:" + userId + " -- " +order.getId());
+		
+		if(StringUtils.isEmpty(order.getOrderNo())){	//拆单的交易，只产生一个种子。拆单的交易也只有一个serviceOrder有orderNo
+            return null;
+        }
+		
 		//查询类型为订单分裂模板类型的优惠卷种子
 //		List<CouponSeed> templates = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_ORDER_BUY_TEMPLATE);
 		List<Integer> seedTypes = new ArrayList<>();
@@ -399,6 +404,14 @@ public class CouponServiceImpl implements CouponService {
 		if(itemList == null || itemList.isEmpty()) {
 			return result;
 		}
+		int itemType = 0;
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == salePlanType) {
+			itemType = PromotionConstant.COUPON_ITEM_TYPE_EVOUCHER;
+		}else if (ModelConstant.ORDER_TYPE_ONSALE == salePlanType) {
+			itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
+		}else if (ModelConstant.ORDER_TYPE_RGROUP == salePlanType) {
+			itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
+		}
 		
 		List<Integer> status = new ArrayList<Integer>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
@@ -406,39 +419,13 @@ public class CouponServiceImpl implements CouponService {
 		
 		long currTime = System.currentTimeMillis();
 		for(Coupon coupon : coupons) {
-			for (OrderItem orderItem : itemList) {
-				try {
-					
-					String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
-					ProductRule productRule = redisRepository.getProdcutRule(key);
-					if (productRule == null) {
-						throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
-					}
-					
-					Product product = new Product();
-					product.setId(productRule.getProductId());
-					BigDecimal totalPrice = BigDecimal.ZERO;
-					BigDecimal singlePrice = new BigDecimal(String.valueOf(productRule.getSinglePrice()));	//单价
-					totalPrice = singlePrice.multiply(new BigDecimal(orderItem.getCount()));
-					
-					int itemType = 0;
-					if (ModelConstant.ORDER_TYPE_EVOUCHER == salePlanType) {
-						itemType = PromotionConstant.COUPON_ITEM_TYPE_EVOUCHER;
-					}else if (ModelConstant.ORDER_TYPE_ONSALE == salePlanType) {
-						itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
-					}else if (ModelConstant.ORDER_TYPE_RGROUP == salePlanType) {
-						itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
-					}
-					CheckCouponDTO check = checkAvailableV2(itemType, product, totalPrice.floatValue(), coupon, false);
-					if (!check.isValid()) {
-						continue;
-					}
-					if (coupon.getExpiredDate().getTime() > currTime ) {
-						result.add(coupon);
-					}
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-				}
+			
+			CheckCouponDTO check = checkAvailable4MultiSales(itemType, itemList, coupon, false);
+			if (!check.isValid()) {
+				continue;
+			}
+			if (coupon.getExpiredDate().getTime() > currTime ) {
+				result.add(coupon);
 			}
 		}
 		if (!result.isEmpty()) {
@@ -467,7 +454,7 @@ public class CouponServiceImpl implements CouponService {
         
         List<Coupon> result = new ArrayList<Coupon>();
         for(Coupon coupon : coupons) {
-        	CheckCouponDTO dto = checkAvailableV2(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false);
+        	CheckCouponDTO dto = checkAvailable4SingleSales(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false);
         	if (dto.isValid()) {
         		result.add(coupon);
 			}
@@ -1059,7 +1046,8 @@ public class CouponServiceImpl implements CouponService {
     	    for(OrderItem item : order.getItems()) {
     	    	Product product = new Product();
     	    	product.setId(item.getProductId());
-    	    	CheckCouponDTO check = checkAvailableV2(coupon.getItemType(), product, order.getTotalAmount(), coupon, withLocked);
+    	    	Float totalPrice = order.getTotalAmount() + order.getShipFee(); //理论上应该跟price字段是一样的。但price字段在使用红包后会修改为减免后的金额。这个函数会再最后消费红包时调用，所以price的值已经是减免了红包的金额
+    	    	CheckCouponDTO check = checkAvailable4SingleSales(coupon.getItemType(), product, totalPrice, coupon, withLocked);
     	    	if (!check.isValid()) {
 					return false;
 				}
@@ -1089,8 +1077,28 @@ public class CouponServiceImpl implements CouponService {
 	 * @return
 	 */
 	@Override
-	public CheckCouponDTO checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked) {
+	public CheckCouponDTO checkAvailable4SingleSales(int itemType, Product product, Float amount, Coupon coupon, boolean locked) {
 	    
+		log.warn("Check Coupon, couponId : " + coupon.getId() + ", ["+itemType+"]["+product.getId()+"]["+amount+"]["+coupon.getId()+"]["+locked+"]");
+		CheckCouponDTO dto = checkCouponAvailable(itemType, product, coupon, locked);
+		boolean isAmountValid = checkCouponUsageCondition(amount, coupon);
+		if (!isAmountValid) {
+			dto.setErrMsg("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
+		}
+        return dto;
+        
+	}
+
+	/**
+	 * 红包校验，除了优惠券以外
+	 * @param itemType
+	 * @param product
+	 * @param coupon
+	 * @param locked
+	 * @return
+	 */
+	private CheckCouponDTO checkCouponAvailable(int itemType, Product product, Coupon coupon, boolean locked) {
+		
 		CheckCouponDTO dto = new CheckCouponDTO();
 		if(coupon == null) {
 			dto.setErrMsg("优惠券为空。");
@@ -1098,8 +1106,7 @@ public class CouponServiceImpl implements CouponService {
 	    }
 		
 		long productId = product.getId();
-		
-	    log.warn("Check Coupon, couponId : " + coupon.getId() + ", ["+itemType+"]["+productId+"]["+amount+"]["+coupon.getId()+"]["+locked+"]");
+	    
 	    //1.状态验证
         if(!locked && coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
             log.warn("coupon " + coupon.getId() + ", 不可用（状态验证）");
@@ -1113,15 +1120,6 @@ public class CouponServiceImpl implements CouponService {
         	return dto;
         }
         
-        //3.金额验证
-        if (amount != null) {
-            if(coupon.getUsageCondition() > amount) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
-            	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
-            	dto.setErrMsg("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
-            	return dto;
-            }
-		}
-
 	    //4.支持产品类型验证
         if (PromotionConstant.COUPON_ITEM_TYPE_ALL != coupon.getItemType() && itemType != coupon.getItemType()) {
         	dto.setErrMsg("优惠券：" + coupon.getId() + ", 当前商品不可用。");
@@ -1150,18 +1148,6 @@ public class CouponServiceImpl implements CouponService {
 	    
 	    //5.验证代理商
 	    if (coupon.getAgentId() > 0) {
-	    	if (!product.isService()) {
-	    		Optional<Product> optional = productRepository.findById(productId);
-		    	if (optional.isPresent()) {
-		    		product = optional.get();
-					if (product == null) {
-						log.warn("未找到当前商品, productId: " + productId);
-						dto.setErrMsg("当前商品可能已下架。");
-						return dto;
-					}
-		    	}
-			}
-	    	
 	    	if (coupon.getAgentId() != product.getAgentId() ) {
 				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 非指定代理商, agentId : " + product.getAgentId() + ", 不能使用。");
 				dto.setErrMsg("优惠券：" + coupon.getId() + ", 当前商品不可用。");
@@ -1172,9 +1158,76 @@ public class CouponServiceImpl implements CouponService {
 	    //TODO 商户校验
         log.warn("coupon " + coupon.getId()+ " 可以用（全部通过）");
         dto.setValid(true);
-        return dto;
-        
+		return dto;
 	}
 
+	/**
+	 * 校验金额是否可用
+	 * @param amount
+	 * @param coupon
+	 * @param dto
+	 */
+	private boolean checkCouponUsageCondition(Float amount, Coupon coupon) {
+		//3.金额验证
+        if (amount != null) {
+            if(coupon.getUsageCondition() > amount) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
+            	log.warn("coupon " + coupon.getId() + ", 不可用（金额不支持）");
+            	return false;
+            }
+		}
+        return true;
+	}
+	
+	/**
+	 * 验证红包是否可用（购物车种商品，一般是多个，也有可能单个）
+	 * @param itemType	0全部，1特卖团购商品，2电子核销券,3服务，4物业缴费
+	 * @param proList	需要验证的产品ID的list
+	 * @param amount	此次购买金额
+	 * @param coupon	此次使用的红包
+	 * @param locked	是否锁
+	 * @param type	0商品 1服务
+	 * @return
+	 */
+	@Override
+	public CheckCouponDTO checkAvailable4MultiSales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked) {
+	    
+		CheckCouponDTO dto = new CheckCouponDTO();
+		if(coupon == null) {
+			dto.setErrMsg("优惠券为空。");
+	        return dto;
+	    }
+		List<Long> productList = new ArrayList<>();
+		BigDecimal totalAmount = BigDecimal.ZERO;
+		for (OrderItem orderItem : itemList) {
+			String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
+			ProductRule productRule = redisRepository.getProdcutRule(key);
+			if (productRule == null) {
+				throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
+			}
+			
+			BigDecimal amt = new BigDecimal(String.valueOf(productRule.getPrice())).multiply(new BigDecimal(String.valueOf(orderItem.getCount())));
+			orderItem.setAmount(amt.floatValue());
+			
+			Product product = new Product();
+			product.setId(orderItem.getProductId());
+			product.setAgentId(productRule.getAgentId());
+			
+			dto = checkCouponAvailable(itemType, product, coupon, locked);
+			if (!dto.isValid()) {	//不可用的商品跳过，不作总价格累计
+				continue;
+			}
+			productList.add(product.getId());
+			totalAmount = totalAmount.add(amt);
+		}
+			
+		boolean isAmountValid = checkCouponUsageCondition(totalAmount.floatValue(), coupon);
+		if (!isAmountValid) {
+			dto.setValid(false);
+			dto.setErrMsg("优惠券：" + coupon.getId() + ", 商品[" + productList+ "], 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
+		}
+		dto.setValid(true);
+		dto.setErrMsg("");
+		return dto;
+	}
 	
 }

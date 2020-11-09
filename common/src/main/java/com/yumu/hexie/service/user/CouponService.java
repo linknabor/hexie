@@ -96,7 +96,9 @@ public interface CouponService {
 	
 	Coupon findById(Long couponId);
 
-	CheckCouponDTO checkAvailableV2(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+	CheckCouponDTO checkAvailable4SingleSales(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+
+	CheckCouponDTO checkAvailable4MultiSales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked);
 
 
 	
