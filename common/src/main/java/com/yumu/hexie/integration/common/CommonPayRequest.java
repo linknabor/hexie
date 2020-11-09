@@ -92,11 +92,11 @@ public class CommonPayRequest extends CommonRequest {
 		@JsonProperty("sub_count")
 		private int count;
 		@JsonProperty("sub_amount")
-		private float amount;
+		private Float amount;
 		@JsonProperty("sub_coupon_id")
 		private Long subCouponId;
 		@JsonProperty("sub_coupon_amt")
-		private float subCouponAmt;
+		private Float subCouponAmt;
 		
 		public String getProductName() {
 			return productName;
@@ -122,10 +122,10 @@ public class CommonPayRequest extends CommonRequest {
 		public void setCount(int count) {
 			this.count = count;
 		}
-		public float getAmount() {
+		public Float getAmount() {
 			return amount;
 		}
-		public void setAmount(float amount) {
+		public void setAmount(Float amount) {
 			this.amount = amount;
 		}
 		public Long getProductId() {
@@ -140,10 +140,10 @@ public class CommonPayRequest extends CommonRequest {
 		public void setSubCouponId(Long subCouponId) {
 			this.subCouponId = subCouponId;
 		}
-		public float getSubCouponAmt() {
+		public Float getSubCouponAmt() {
 			return subCouponAmt;
 		}
-		public void setSubCouponAmt(float subCouponAmt) {
+		public void setSubCouponAmt(Float subCouponAmt) {
 			this.subCouponAmt = subCouponAmt;
 		}
 		@Override

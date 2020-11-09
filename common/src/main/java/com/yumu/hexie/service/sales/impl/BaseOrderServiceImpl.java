@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.sales.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,6 +60,7 @@ import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.Address;
@@ -345,9 +347,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			
 		}
+		
+		BigDecimal totalOrderAmount = BigDecimal.ZERO;
 		Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
 		Iterator<Entry<Long, List<OrderItem>>> it = itemsMap.entrySet().iterator();
-		boolean couponUsed = false;
+		boolean couponUsed = false;	//调用computeCoupon函数时会返回一个布尔值，表示红包有没用。
+		boolean couponUseFlag = false;	//本次订单是否有使用红包,跟上面的不同，上面的每次循环调用computeCoupon后会重置。这个一旦置为true后不会再做更改
 		while(it.hasNext()) {
 
 			Entry<Long, List<OrderItem>> entry = it.next();
@@ -362,15 +367,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			Address address = fillAddressInfo(o);
 			//2. 填充订单信息并校验规则,设置价格信息
 			preOrderCreate(o, address);
-			//3.如果是一拆多的交易，需要检查一下此次使用的优惠券是否已经拆到了其他order里，如果已经拆掉了，则当前的交易不设置优惠券ID
-			if (o.getCouponId() != null && o.getCouponId() > 0) {
-				if (couponUsed) {
-					o.setCouponId(null);
-				}
+			//3.如果是一拆多的交易，并且红包是某一个代理商单独发的，需要检查一下此次使用的优惠券是否已经拆到了其他order里，如果已经拆掉了，则当前的交易不设置优惠券ID
+			if (couponUsed) {
+				o.setCouponId(null);
+				o.setCouponAmount(null);
 			}
 			
 			//4. 先保存order，产生一个orderId
 			serviceOrderRepository.save(o);
+			
+			totalOrderAmount = totalOrderAmount.add(new BigDecimal(String.valueOf(o.getPrice())));	//这里面含运费
 			
 			log.info("generated order id : " + o.getId());
 			List<OrderItem> items = o.getItems();
@@ -386,8 +392,52 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
 			
 			//6. 如果是拆分的订单，则检查当前order是否使用了红包
-			couponUsed = computeCoupon(o);
+			couponUsed = computeCoupon(o);	//couponId在serviceOrder表上唯一。如果有多个订单公用一个红包，只重新计算订单金额，红包锁定在其中的某一个自交易上。
+			if (couponUsed) {
+				couponUseFlag = true;
+			}
 		}
+		
+		//7.共用红包的，重新分摊订单金额 -->start
+		if (couponUseFlag) {
+			BigDecimal totalCouponAmount = BigDecimal.ZERO;
+			BigDecimal leftCouponAmount = BigDecimal.ZERO;	//红包分摊剩余金额
+			boolean coupon4All = false;	//是否是所有代理商通用券，如果是，需要平摊优惠券金额
+			if (req.getCouponId() != null) {
+				Coupon coupon = couponService.findById(req.getCouponId());
+				if (coupon.getAgentId() == 0) {
+					coupon4All = true;
+					totalCouponAmount = new BigDecimal(String.valueOf(coupon.getAmount()));
+					leftCouponAmount = totalCouponAmount;
+				}
+			}
+			
+			if (coupon4All) {	//公用红包，分摊
+				List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupId);
+				for (int i = 0; i < orderList.size(); i++) {
+					ServiceOrder serviceOrder = orderList.get(i);
+					//订单金额orderAmount,这里用totalAmount + shipFee，因为有一个订单的price字段已经扣减过红包了。price = totalAmount + shipFee
+					BigDecimal orderAmount = new BigDecimal(String.valueOf(serviceOrder.getTotalAmount())).add(new BigDecimal(String.valueOf(serviceOrder.getShipFee())));
+					BigDecimal ratio = orderAmount.divide(totalOrderAmount, 4, RoundingMode.HALF_UP);	//先保留四位
+					BigDecimal unitCouponAmount = totalCouponAmount.multiply(ratio).setScale(2, RoundingMode.HALF_UP);
+					
+					leftCouponAmount = leftCouponAmount.subtract(unitCouponAmount);
+					if (i==orderList.size()-1 && leftCouponAmount.compareTo(BigDecimal.ZERO) > 0) {
+						unitCouponAmount = unitCouponAmount.add(leftCouponAmount);	//最后一个订单，所有余额都分摊进去
+					}
+					BigDecimal orderPayAmount = orderAmount.subtract(unitCouponAmount);
+					if (orderPayAmount.compareTo(BigDecimal.ZERO) <=0) {
+						orderPayAmount = BigDecimal.ZERO;
+					}
+					if (i==orderList.size()-1 && totalOrderAmount.compareTo(totalCouponAmount)<=0) {
+						orderPayAmount = new BigDecimal("0.01");
+					}
+					serviceOrder.setCouponAmount(unitCouponAmount.floatValue());
+					serviceOrder.setPrice(orderPayAmount.floatValue());
+				}
+			}
+		}
+		//共用红包的，重新分摊订单金额 -->end
 		
 		ServiceOrder newOrder = new ServiceOrder();
 		newOrder.setId(groupId);
@@ -403,7 +453,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		return newOrder;
 		
 	}
-
+	
 	@Async
 	protected void commonPostProcess(int orderOp, ServiceOrder order) {
 
@@ -589,12 +639,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if(!o.payable()){
             throw new BizValidateException(orderId,"订单状态不可支付，请重新查询确认订单状态！").setError();
         }
-			
+	
 		CommonPayRequest request = new CommonPayRequest();
 		List<SubOrder> subOrderList = new ArrayList<>(orderList.size());
 		
 		Long couponId = 0l;
-		float couponAmt = 0f;
+		Float couponAmt = 0f;
 		BigDecimal totalPrice = BigDecimal.ZERO;
 		int totalCount = 0;
 		for (ServiceOrder order : orderList) {
@@ -617,9 +667,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			
 			if (order.getCouponId() != null && order.getCouponId() > 0) {
 				subOrder.setSubCouponId(order.getCouponId());
-				subOrder.setSubCouponAmt(order.getCouponAmount());
 				couponId = order.getCouponId();
-				couponAmt = order.getCouponAmount();
+			}
+			if (order.getCouponAmount() != null) {	//拆单交易，多个订单只有一个couponId，只记录再一个serivceOrder中，其他子订单不记录couponId，但记录订单金额
+				subOrder.setSubCouponAmt(order.getCouponAmount());
+				couponAmt += order.getCouponAmount();
 			}
 			subOrderList.add(subOrder);
 			

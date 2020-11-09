@@ -134,7 +134,14 @@ public class CustomServiceImpl implements CustomService {
 			}
 			customerServiceOrderDTO.setCouponId(String.valueOf(coupon.getId()));
 			customerServiceOrderDTO.setCouponAmt(String.valueOf(coupon.getAmount()));
-			customerServiceOrderDTO.setTranAmt(customerServiceOrderDTO.getTranAmt());
+			
+			Float tranAmt = Float.valueOf(customerServiceOrderDTO.getTranAmt());
+			Float couponAmt = coupon.getAmount();
+			if (tranAmt > couponAmt ) {
+				customerServiceOrderDTO.setTranAmt(String.valueOf(tranAmt-couponAmt));
+			} else {
+				customerServiceOrderDTO.setTranAmt("0.01");
+			}
 			
 		}
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
