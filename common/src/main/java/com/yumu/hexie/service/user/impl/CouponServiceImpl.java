@@ -701,19 +701,18 @@ public class CouponServiceImpl implements CouponService {
             return;
         }
         Coupon coupon = couponRepository.findById(order.getCouponId()).get();
-        if (!checkAvailableV2(order, coupon, true)) {
-            throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
+        if (checkAvailableV2(order, coupon, true)) {
+        	 log.warn("comsume红包before["+order.getId()+"]Coupon["+coupon.getId()+"]");
+             coupon.cousume(order.getId());
+             couponRepository.save(coupon);
+             
+             User user = userRepository.findById(coupon.getUserId());
+             if(user.getCouponCount()>0) {
+                 user.setCouponCount(user.getCouponCount()-1);
+                 userRepository.save(user);
+             }
+             updateSeedAndRuleForCouponUse(coupon);
         }
-        log.warn("comsume红包before["+order.getId()+"]Coupon["+coupon.getId()+"]");
-        coupon.cousume(order.getId());
-        couponRepository.save(coupon);
-        
-        User user = userRepository.findById(coupon.getUserId());
-        if(user.getCouponCount()>0) {
-            user.setCouponCount(user.getCouponCount()-1);
-            userRepository.save(user);
-        }
-        updateSeedAndRuleForCouponUse(coupon);
         log.warn("comsume红包END["+order.getId()+"]Coupon["+coupon.getId()+"]");
     }
 	
