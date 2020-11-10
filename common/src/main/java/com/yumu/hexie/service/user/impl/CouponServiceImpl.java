@@ -1129,7 +1129,12 @@ public class CouponServiceImpl implements CouponService {
 		CheckCouponDTO dto = checkCouponAvailable(itemType, product, coupon, locked);
 		boolean isAmountValid = checkCouponUsageCondition(amount, coupon);
 		if (!isAmountValid) {
+			dto.setValid(false);
 			dto.setErrMsg("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
+			log.warn("优惠券：" + coupon.getId() + ", 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
+		}else {
+			dto.setValid(true);
+			dto.setErrMsg("");
 		}
         return dto;
         
