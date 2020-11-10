@@ -1224,7 +1224,7 @@ public class CouponServiceImpl implements CouponService {
 			orderItem.setAmount(amt.floatValue());
 			
 			Product product = new Product();
-			product.setId(orderItem.getProductId());
+			product.setId(productRule.getProductId());
 			product.setAgentId(productRule.getAgentId());
 			
 			dto = checkCouponAvailable(itemType, product, coupon, locked);
