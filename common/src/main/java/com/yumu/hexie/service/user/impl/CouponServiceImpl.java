@@ -670,8 +670,14 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public void lock(ServiceOrder order, Coupon coupon){
 
-        log.warn("lock红包["+order.getId()+"]Coupon["+coupon.getId()+"]");
-		if(!checkAvailable4Service(order, coupon, false)){
+		log.warn("lock红包["+order.getId()+"]Coupon["+coupon.getId()+"]");
+		boolean canUse = false;
+		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+			canUse = checkAvailable4Service(order, coupon, false);
+		}else {
+			canUse = checkAvailable4Sales(order, coupon, false);
+		}
+        if (!canUse) {
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
 		}
 		coupon.lock(order.getId());
