@@ -277,12 +277,18 @@ public class ScheduleServiceImpl implements ScheduleService{
     	}
     	String ids = "";
     	for(ServiceOrder order : serviceOrders) {
+    		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+				continue;
+			}
     		ids += order.getId()+",";
     	}
     	ScheduleRecord sr = new ScheduleRecord(ModelConstant.SCHEDULE_TYPE_PAY_TIMEOUT,ids);
     	sr = scheduleRecordRepository.save(sr);
     	for(ServiceOrder order : serviceOrders) {
     		try{
+    			if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+    				continue;
+    			}
     	    	SCHEDULE_LOG.info("CancelOrder:" + order.getId());
     	    	baseOrderService.cancelOrder(order);
     		} catch(Exception e){

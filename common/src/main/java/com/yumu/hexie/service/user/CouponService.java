@@ -92,16 +92,15 @@ public interface CouponService {
 
 	Coupon updateCouponReceived(Coupon coupon);
 
-	boolean checkAvailableV2(ServiceOrder order, Coupon coupon, boolean withLocked);
-	
 	Coupon findById(Long couponId);
-
-	CheckCouponDTO checkAvailable4SingleSales(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
-
-	CheckCouponDTO checkAvailable4MultiSales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked);
-
-
 	
+	boolean checkAvailable4Service(ServiceOrder order, Coupon coupon, boolean withLocked);
+
+	CheckCouponDTO checkAvailable4Service(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+
+	boolean checkAvailable4Sales(ServiceOrder order, Coupon coupon, boolean withLocked);
+	
+	CheckCouponDTO checkAvailable4Sales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked);
 
 	
 	

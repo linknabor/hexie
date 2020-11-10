@@ -412,8 +412,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupId);
 				for (int i = 0; i < orderList.size(); i++) {
 					ServiceOrder serviceOrder = orderList.get(i);
-					//订单金额orderAmount,这里用totalAmount + shipFee，因为有一个订单的price字段已经扣减过红包了。price = totalAmount + shipFee
-					BigDecimal orderAmount = new BigDecimal(String.valueOf(serviceOrder.getTotalAmount())).add(new BigDecimal(String.valueOf(serviceOrder.getShipFee())));
+					//订单金额这里用totalAmount，只包含商品的金额，不包括运费
+					BigDecimal orderAmount = new BigDecimal(String.valueOf(serviceOrder.getTotalAmount()));
 					BigDecimal ratio = orderAmount.divide(totalOrderAmount, 4, RoundingMode.HALF_UP);	//先保留四位
 					BigDecimal unitCouponAmount = totalCouponAmount.multiply(ratio).setScale(2, RoundingMode.HALF_UP);
 					
@@ -429,7 +429,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 						orderPayAmount = new BigDecimal("0.01");
 					}
 					serviceOrder.setCouponAmount(unitCouponAmount.floatValue());
-					serviceOrder.setPrice(orderPayAmount.floatValue());
+					serviceOrder.setPrice(orderPayAmount.floatValue() + serviceOrder.getShipFee());
 				}
 			}
 		}

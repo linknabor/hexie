@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.market.Collocation;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -126,11 +127,17 @@ public abstract class BaseOrderProcessor {
 		if(coupon == null) {
 		    return false;
 		}
-		if(!couponService.checkAvailableV2(order, coupon, false)){
-			return false;
+		
+		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+			
+		} else {
+			
+			if(!couponService.checkAvailable4Sales(order, coupon, false)){
+				return false;
+			}
+			order.configCoupon(coupon);
+			couponService.lock(order, coupon);
 		}
-		order.configCoupon(coupon);
-		couponService.lock(order, coupon);
 		return true;
 	}
 	

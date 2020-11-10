@@ -128,7 +128,7 @@ public class CustomServiceImpl implements CustomService {
 			product.setId(serviceId);
 			product.setService(true);
 			product.setAgentId(agent.getId());
-			CheckCouponDTO check = couponService.checkAvailable4SingleSales(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
+			CheckCouponDTO check = couponService.checkAvailable4Service(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
 			if (!check.isValid()) {
 				throw new BizValidateException(check.getErrMsg());
 			}

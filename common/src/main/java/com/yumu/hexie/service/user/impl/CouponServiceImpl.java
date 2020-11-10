@@ -420,7 +420,7 @@ public class CouponServiceImpl implements CouponService {
 		long currTime = System.currentTimeMillis();
 		for(Coupon coupon : coupons) {
 			
-			CheckCouponDTO check = checkAvailable4MultiSales(itemType, itemList, coupon, false);
+			CheckCouponDTO check = checkAvailable4Sales(itemType, itemList, coupon, false);
 			if (!check.isValid()) {
 				continue;
 			}
@@ -454,7 +454,7 @@ public class CouponServiceImpl implements CouponService {
         
         List<Coupon> result = new ArrayList<Coupon>();
         for(Coupon coupon : coupons) {
-        	CheckCouponDTO dto = checkAvailable4SingleSales(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false);
+        	CheckCouponDTO dto = checkAvailable4Service(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false);
         	if (dto.isValid()) {
         		result.add(coupon);
 			}
@@ -664,7 +664,7 @@ public class CouponServiceImpl implements CouponService {
 	public void lock(ServiceOrder order, Coupon coupon){
 
         log.warn("lock红包["+order.getId()+"]Coupon["+coupon.getId()+"]");
-		if(!checkAvailableV2(order, coupon, false)){
+		if(!checkAvailable4Service(order, coupon, false)){
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
 		}
 		coupon.lock(order.getId());
@@ -683,23 +683,31 @@ public class CouponServiceImpl implements CouponService {
 	}
 	@Override
     public void comsume(ServiceOrder order) {
-        log.warn("comsume红包["+order.getId()+"]");
+        log.warn("comsume红包["+order.getId()+"], orderType : " + order.getOrderType());
         if(order.getCouponId() == null || order.getCouponId() == 0){
             return;
         }
         Coupon coupon = couponRepository.findById(order.getCouponId()).get();
-        if (checkAvailableV2(order, coupon, true)) {
-        	 log.warn("comsume红包before["+order.getId()+"]Coupon["+coupon.getId()+"]");
-             coupon.cousume(order.getId());
-             couponRepository.save(coupon);
-             
-             User user = userRepository.findById(coupon.getUserId());
-             if(user.getCouponCount()>0) {
-                 user.setCouponCount(user.getCouponCount()-1);
-                 userRepository.save(user);
-             }
-             updateSeedAndRuleForCouponUse(coupon);
+        boolean canConsume = false;
+        if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+        	canConsume = checkAvailable4Service(order, coupon, false);	//服务类交易不锁券，所以这里传false
+		}else {
+			canConsume = checkAvailable4Sales(order, coupon, true);
+		}
+        if (!canConsume) {
+			return;
+		}
+        log.warn("comsume红包before["+order.getId()+"]Coupon["+coupon.getId()+"]");
+        coupon.cousume(order.getId());
+        couponRepository.save(coupon);
+        
+        User user = userRepository.findById(coupon.getUserId());
+        if(user.getCouponCount()>0) {
+            user.setCouponCount(user.getCouponCount()-1);
+            userRepository.save(user);
         }
+        updateSeedAndRuleForCouponUse(coupon);
+        
         log.warn("comsume红包END["+order.getId()+"]Coupon["+coupon.getId()+"]");
     }
 	
@@ -1030,10 +1038,10 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	/**
-	 * 根据订单验证红包是否可用
+	 * 根据订单验证红包是否可用,服务
 	 */
 	@Override
-    public boolean checkAvailableV2(ServiceOrder order, Coupon coupon, boolean withLocked) {
+    public boolean checkAvailable4Service(ServiceOrder order, Coupon coupon, boolean withLocked) {
     	if(withLocked) {
     		if(coupon.getOrderId() != 0&& coupon.getOrderId() != order.getId()) {
     			log.info("coupon orderId : " + coupon.getOrderId() + ", 与订单ID["+order.getId()+"]不符");
@@ -1047,7 +1055,7 @@ public class CouponServiceImpl implements CouponService {
     	    	Product product = new Product();
     	    	product.setId(item.getProductId());
     	    	Float totalPrice = order.getTotalAmount() + order.getShipFee(); //理论上应该跟price字段是一样的。但price字段在使用红包后会修改为减免后的金额。这个函数会再最后消费红包时调用，所以price的值已经是减免了红包的金额
-    	    	CheckCouponDTO check = checkAvailable4SingleSales(coupon.getItemType(), product, totalPrice, coupon, withLocked);
+    	    	CheckCouponDTO check = checkAvailable4Service(coupon.getItemType(), product, totalPrice, coupon, withLocked);
     	    	if (!check.isValid()) {
 					return false;
 				}
@@ -1057,14 +1065,21 @@ public class CouponServiceImpl implements CouponService {
     	return true;
     }
 	
-	public static void main(String[] args) {
-		Float amount = 0.02f;
-		Float uc = 0.02f;
-		if(uc > amount) {
-			System.out.println("1234567");
-		}
-		
-	}
+	/**
+	 * 根据订单验证红包是否可用,商品
+	 */
+	@Override
+    public boolean checkAvailable4Sales(ServiceOrder order, Coupon coupon, boolean withLocked) {
+    	if(withLocked) {
+    		if(coupon.getOrderId() != 0&& coupon.getOrderId() != order.getId()) {
+    			log.info("coupon orderId : " + coupon.getOrderId() + ", 与订单ID["+order.getId()+"]不符");
+    			return false;
+    		}
+    	}
+    	log.info("orderItems : " + order.getItems());
+    	CheckCouponDTO check = checkAvailable4Sales(coupon.getItemType(), order.getItems(), coupon, withLocked);
+    	return check.isValid();
+    }
 	
 	/**
 	 * 验证红包是否可用
@@ -1077,7 +1092,7 @@ public class CouponServiceImpl implements CouponService {
 	 * @return
 	 */
 	@Override
-	public CheckCouponDTO checkAvailable4SingleSales(int itemType, Product product, Float amount, Coupon coupon, boolean locked) {
+	public CheckCouponDTO checkAvailable4Service(int itemType, Product product, Float amount, Coupon coupon, boolean locked) {
 	    
 		log.warn("Check Coupon, couponId : " + coupon.getId() + ", ["+itemType+"]["+product.getId()+"]["+amount+"]["+coupon.getId()+"]["+locked+"]");
 		CheckCouponDTO dto = checkCouponAvailable(itemType, product, coupon, locked);
@@ -1189,7 +1204,7 @@ public class CouponServiceImpl implements CouponService {
 	 * @return
 	 */
 	@Override
-	public CheckCouponDTO checkAvailable4MultiSales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked) {
+	public CheckCouponDTO checkAvailable4Sales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked) {
 	    
 		CheckCouponDTO dto = new CheckCouponDTO();
 		if(coupon == null) {
