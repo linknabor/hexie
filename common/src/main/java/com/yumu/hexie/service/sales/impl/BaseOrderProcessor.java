@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -33,6 +35,9 @@ import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.dto.CheckCouponDTO;
 
 public abstract class BaseOrderProcessor {
+	
+	private static Logger logger = LoggerFactory.getLogger(BaseOrderProcessor.class);
+	
 	@Inject
 	protected CollocationService collocationService;
 	@Inject
@@ -179,13 +184,13 @@ public abstract class BaseOrderProcessor {
 		}
 		
 		BigDecimal couponAmount = new BigDecimal(String.valueOf(coupon.getAmount()));	//红包总金额
-		BigDecimal couponUsedItemAmount = BigDecimal.ZERO;	//商品总金额 （不含运费）
+		BigDecimal couponUsedItemAmount = BigDecimal.ZERO;	//使用了红包的商品总金额 （不含运费）
 		
 		Map<Long, OrderItem> couponUsedItemMap = new HashMap<>();	//用了红包的item, key:item的id,value: item
 		Map<Long, ServiceOrder> orderMap = new HashMap<>();	//key: orderId, value: serviceOrder
 		Map<Long, ServiceOrder> itemOrderMap = new HashMap<>();	//key:itemId, value: orderId
 		List<Long> couponUsedList = new ArrayList<>();
-		for (ServiceOrder serviceOrder : orderList) {
+		for (ServiceOrder serviceOrder : orderList) {	//这里的order已经按代理商分过组了。相同代理商的商品在一个order下
 			
 			List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
 			serviceOrder.setItems(itemList);
@@ -196,15 +201,27 @@ public abstract class BaseOrderProcessor {
 				product.setId(orderItem.getProductId());
 				product.setAgentId(orderItem.getAgentId());
 				
-				CheckCouponDTO check = couponService.checkAvailable4Service(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, orderItem.getAmount(), coupon, false); //单个商品都可用
+				//1.验证1：商品是否可用
+				CheckCouponDTO check = couponService.checkCouponAvailable(PromotionConstant.COUPON_ITEM_TYPE_MARKET, product, coupon, false);
 				if (check.isValid()) {
 					couponUsedItemMap.put(orderItem.getId(), orderItem);
-					couponUsedItemAmount = couponUsedItemAmount.add(new BigDecimal(String.valueOf(orderItem.getAmount())));	//会在这个基础商进行红包分摊，而不是根据总交易金额分摊。并非所有商品都可以使用红包
 					itemOrderMap.put(orderItem.getId(), serviceOrder);
+					couponUsedItemAmount = couponUsedItemAmount.add(new BigDecimal(String.valueOf(orderItem.getAmount())));
 				}
 			}
 			
 		}
+		
+		boolean amountCheckFlag = false;
+		if (couponUsedItemAmount.compareTo(BigDecimal.ZERO) > 0) {	//如果有可以使用优惠券的商品
+			//2.验证2：金额是否可用
+			amountCheckFlag = couponService.checkCouponUsageCondition(couponUsedItemAmount.floatValue(), coupon);
+		}
+		if (!amountCheckFlag) {
+			logger.error("groupOrderId : " + groupOrderId + ", 金额不可用。");
+			return false;
+		}
+		
 		BigDecimal remaiderCouponAmount = couponAmount;	//剩余未分摊的红包
 		Iterator<Entry<Long, OrderItem>> it = couponUsedItemMap.entrySet().iterator();
 		int seq = 0;
@@ -223,27 +240,25 @@ public abstract class BaseOrderProcessor {
 			if (couponUsedItemMap.entrySet().size()-1 == seq && remaiderCouponAmount.compareTo(BigDecimal.ZERO) != 0) {
 				unitCouponAmount = unitCouponAmount.add(remaiderCouponAmount);	//最后一个item，所有余额都分摊进去
 			}
-			BigDecimal unitItemAmount = itemAmount.subtract(unitCouponAmount);
-			if (unitItemAmount.compareTo(BigDecimal.ZERO) <=0) {
-				unitItemAmount = BigDecimal.ZERO;
-			}
+//			BigDecimal unitItemAmount = itemAmount.subtract(unitCouponAmount);
+//			if (unitItemAmount.compareTo(BigDecimal.ZERO) <=0) {
+//				unitItemAmount = BigDecimal.ZERO;
+//			}
 			orderItem.setCouponId(couponId);
 			orderItem.setCouponAmount(unitCouponAmount.floatValue());
-			orderItem.setPrice(unitItemAmount.floatValue());
 			
 			ServiceOrder order = itemOrderMap.get(orderItem.getId());
-			
 			BigDecimal orderCoupouAmount = BigDecimal.ZERO;
 			if (!StringUtils.isEmpty(order.getCouponAmount())) {
 				orderCoupouAmount = new BigDecimal(String.valueOf(order.getCouponAmount()));
 			}
 			orderCoupouAmount = orderCoupouAmount.add(unitCouponAmount);
-			
 			BigDecimal orderPrice = new BigDecimal(String.valueOf(order.getPrice()));
-			orderPrice = orderPrice.subtract(orderCoupouAmount);
+			orderPrice = orderPrice.subtract(unitCouponAmount);
 			if (orderPrice.compareTo(BigDecimal.ZERO) < 0) {
 				orderPrice = BigDecimal.ZERO;
 			}
+			
 			order.setCouponId(couponId);
 			order.setCouponAmount(orderCoupouAmount.floatValue());
 			order.setPrice(orderPrice.floatValue());

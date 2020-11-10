@@ -102,6 +102,8 @@ public interface CouponService {
 	
 	CheckCouponDTO checkAvailable4Sales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked);
 
-	
-	
+	CheckCouponDTO checkCouponAvailable(int itemType, Product product, Coupon coupon, boolean locked);
+
+	boolean checkCouponUsageCondition(Float amount, Coupon coupon);
+
 }

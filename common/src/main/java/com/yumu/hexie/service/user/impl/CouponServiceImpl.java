@@ -1148,7 +1148,8 @@ public class CouponServiceImpl implements CouponService {
 	 * @param locked
 	 * @return
 	 */
-	private CheckCouponDTO checkCouponAvailable(int itemType, Product product, Coupon coupon, boolean locked) {
+	@Override
+	public CheckCouponDTO checkCouponAvailable(int itemType, Product product, Coupon coupon, boolean locked) {
 		
 		CheckCouponDTO dto = new CheckCouponDTO();
 		if(coupon == null) {
@@ -1181,7 +1182,7 @@ public class CouponServiceImpl implements CouponService {
 	    if(PromotionConstant.COUPON_ITEM_TYPE_ALL != coupon.getItemType()&& productId > 0) {
 	    	if (coupon.getSupportType() == 1) {	//0全部支持，1部分支持，2部分不支持
     			if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId))>-1) {
-    				//do nothing
+    				//do nothings
     			} else {
 					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 不在支持的列表中。");
 					dto.setErrMsg("优惠券：" + coupon.getId() + ", 当前商品不可用。");
@@ -1198,7 +1199,7 @@ public class CouponServiceImpl implements CouponService {
         }
 	    
 	    //5.验证代理商
-	    if (coupon.getAgentId() > 0) {
+	    if (coupon.getAgentId() > 1) {
 	    	if (coupon.getAgentId() != product.getAgentId() ) {
 				log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 非指定代理商, agentId : " + product.getAgentId() + ", 不能使用。");
 				dto.setErrMsg("优惠券：" + coupon.getId() + ", 当前商品不可用。");
@@ -1207,7 +1208,7 @@ public class CouponServiceImpl implements CouponService {
 			
 	    }
 	    //TODO 商户校验
-        log.warn("coupon " + coupon.getId()+ " 可以用（全部通过）");
+	    log.info("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 可以用（全部通过）。");
         dto.setValid(true);
 		return dto;
 	}
@@ -1218,7 +1219,8 @@ public class CouponServiceImpl implements CouponService {
 	 * @param coupon
 	 * @param dto
 	 */
-	private boolean checkCouponUsageCondition(Float amount, Coupon coupon) {
+	@Override
+	public boolean checkCouponUsageCondition(Float amount, Coupon coupon) {
 		//3.金额验证
         if (amount != null) {
             if(coupon.getUsageCondition() > amount) {		//coupon.getUsageCondition()-0.009 > amount 原来的逻辑
