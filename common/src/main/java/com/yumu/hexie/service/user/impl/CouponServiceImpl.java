@@ -976,6 +976,14 @@ public class CouponServiceImpl implements CouponService {
 		}
 		String ruleKey = ModelConstant.KEY_COUPON_RULE + ruleId;
 		CouponCfg couponCfg = redisRepository.getCouponCfg(ruleKey);
+		if (ModelConstant.COUPON_RULE_STATUS_AVAILABLE != couponCfg.getStatus()) {
+			throw new BizValidateException("当前规则["+ruleId+"]已失效。");
+		}
+		Date today = new Date();
+		Date endDate = couponCfg.getEndDate();
+		if (endDate.before(today)) {
+			throw new BizValidateException("发放截止日期["+endDate+"]已过期。");
+		}
 		
 		String stockKey = ModelConstant.KEY_COUPON_TOTAL + ruleId;
 		Long stock = redisTemplate.opsForValue().decrement(stockKey);	//直接减，不要用get获取一遍值，非原子性操作，有脏读
