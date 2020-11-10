@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import javax.inject.Inject;
 
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -398,6 +399,12 @@ public class CouponServiceImpl implements CouponService {
      */
 	@Override
 	public List<Coupon> findAvaibleCoupon(long userId, List<OrderItem> itemList, int salePlanType){
+		
+		try {
+			log.info("user : " + userId + ", itemList : " + JacksonJsonUtil.beanToJson(itemList));
+		} catch (JSONException e) {
+			log.error(e.getMessage(), e);
+		}
 		
 		List<Coupon> result = new ArrayList<Coupon>();
 		List<Coupon> couponList = new ArrayList<>();
@@ -1239,9 +1246,12 @@ public class CouponServiceImpl implements CouponService {
 		if (!isAmountValid) {
 			dto.setValid(false);
 			dto.setErrMsg("优惠券：" + coupon.getId() + ", 商品[" + productList+ "], 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
+			log.warn("优惠券：" + coupon.getId() + ", 商品[" + productList+ "], 商品最小使用金额：" + coupon.getUsageCondition() + ", 不可用。");
+		} else {
+			dto.setValid(true);
+			dto.setErrMsg("");
 		}
-		dto.setValid(true);
-		dto.setErrMsg("");
+		
 		return dto;
 	}
 	

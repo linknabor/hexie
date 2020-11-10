@@ -5,8 +5,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -41,8 +39,6 @@ import io.swagger.annotations.ApiOperation;
 
 @Controller(value = "couponController")
 public class CouponController extends BaseController{
-	
-	private static Logger logger = LoggerFactory.getLogger(CouponController.class);
 	
     @Inject
     private CouponService couponService;
@@ -114,7 +110,6 @@ public class CouponController extends BaseController{
    	public BaseResult<List<Coupon>> findValidCoupons(@ModelAttribute(Constants.USER)User user, 
    			@RequestBody GetValidCouponReq getValidCouponReq) throws Exception {
    		
-    	logger.info("findValidCoupons : " + getValidCouponReq);
     	List<Coupon> couponList = couponService.findAvaibleCoupon(user.getId(), getValidCouponReq.getItemList(), getValidCouponReq.getSalePlanType());
     	return new BaseResult<List<Coupon>>().success(couponList);
    	}
