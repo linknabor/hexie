@@ -449,6 +449,7 @@ public class CouponServiceImpl implements CouponService {
 	@Override
     public List<Coupon> findAvaibleCoupon4CustomService(long userId, long serviceId, String agentNo){
         
+		List<Coupon> couponList = new ArrayList<>();
 		List<Integer> status = new ArrayList<Integer>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
         List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId, status, PageRequest.of(0,200));
@@ -466,7 +467,16 @@ public class CouponServiceImpl implements CouponService {
         		result.add(coupon);
 			}
         }
-        return result;
+        
+        if (!result.isEmpty()) {
+			Set<Coupon> couponSet = new TreeSet<>((c1, c2)-> c1.getId()==c2.getId()?0:1);
+			couponSet.addAll(result);	//根据ID去重
+			
+			couponList.addAll(couponSet);
+			Comparator<Coupon> comparator = (c1, c2)-> (int)(c2.getAmount() - c1.getAmount());
+			Collections.sort(couponList, comparator);	//根据金额排序
+		}
+        return couponList;
     }
 	
 	//服务-洗衣-服务项父类型-服务项 商户ID
