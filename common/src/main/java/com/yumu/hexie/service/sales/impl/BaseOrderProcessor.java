@@ -120,7 +120,8 @@ public abstract class BaseOrderProcessor {
 				}
 				if (item.getCount() < plan.getFreeShippingNum()) {
 					BigDecimal unitShipFee = new BigDecimal(String.valueOf(plan.getPostageFee()));
-					itemShipFee = unitShipFee.multiply(new BigDecimal(item.getCount()));
+//					itemShipFee = unitShipFee.multiply(new BigDecimal(item.getCount()));
+					itemShipFee = unitShipFee;
 				}else {
 					itemShipFee = BigDecimal.ZERO;
 				}
@@ -287,9 +288,7 @@ public abstract class BaseOrderProcessor {
 			lastItem.setPrice(totalPrice.floatValue());
 			orderItemRepository.save(lastItem);
 		}
-		
-		ServiceOrder lockOrder = orderMap.get(couponUsedList.get(0));
-		couponService.lock(lockOrder, coupon);
+		coupon.lock(couponUsedList.get(0));
 		return true;
 	}
 	

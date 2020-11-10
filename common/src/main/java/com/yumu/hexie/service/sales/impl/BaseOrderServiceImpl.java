@@ -1408,6 +1408,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Override
 	public ServiceOrder orderCheck(User user, CreateOrderReq req) {
 		
+		Map<Long, List<OrderItem>> itemsMap = new HashMap<>();
+		
 		//重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
 		List<OrderItem> itemList = req.getItemList();
 		if (itemList == null || itemList.isEmpty()) {
@@ -1434,6 +1436,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderItem.setRuleName(productRule.getName());
 			orderItem.setProductPic(productRule.getMainPicture());
 			orderItem.setProductThumbPic(productRule.getSmallPicture());
+			orderItem.setOrderType(productRule.getSalePlanType());
+			
+			Long agentId = productRule.getAgentId();
+			orderItem.setAgentId(productRule.getAgentId());
+			
+			if (!itemsMap.containsKey(agentId)) {
+				List<OrderItem> oList = new ArrayList<>();
+				oList.add(orderItem);
+				itemsMap.put(agentId, oList);
+			} else {
+				List<OrderItem> oList = itemsMap.get(agentId);
+				oList.add(orderItem);
+			}
+			
 			
 			String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + productRule.getProductId());
 			String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + productRule.getProductId());
@@ -1448,10 +1464,39 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
 		}
 		
-		ServiceOrder o = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用
-		computePrice(o);
-		o.setOrderItems(req.getItemList());	//serviceOrder中的items是懒加载，因此一旦hibernate的session关闭，将加载不到items的值。拿到页面序列化的时候会报错
-		return o;
+		BigDecimal totalAmount = BigDecimal.ZERO;
+		BigDecimal shipfee = BigDecimal.ZERO;
+		BigDecimal price = BigDecimal.ZERO;
+		BigDecimal discount = BigDecimal.ZERO;
+		int count = 0;
+		long closeTime = System.currentTimeMillis() + 900000;// 默认15分
+		
+		Iterator<Entry<Long, List<OrderItem>>> it = itemsMap.entrySet().iterator();
+		while(it.hasNext()) {
+
+			Entry<Long, List<OrderItem>> entry = it.next();
+			CreateOrderReq orderRequest = new CreateOrderReq();
+			BeanUtils.copyProperties(req, orderRequest);
+			orderRequest.setItemList(entry.getValue());
+			ServiceOrder o = new ServiceOrder(user, orderRequest);
+			computePrice(o);
+			totalAmount = totalAmount.add(new BigDecimal(String.valueOf(o.getTotalAmount())));
+			shipfee = shipfee.add(new BigDecimal(String.valueOf(o.getShipFee())));
+			price = price.add(new BigDecimal(String.valueOf(o.getPrice())));
+			discount = discount.add(new BigDecimal(String.valueOf(o.getDiscountAmount())));
+			count += o.getCount();
+			
+		}
+		
+		ServiceOrder order = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用
+		order.setTotalAmount(totalAmount.floatValue());
+		order.setShipFee(shipfee.floatValue());
+		order.setDiscountAmount(discount.floatValue());
+		order.setPrice(price.floatValue());
+		order.setCloseTime(closeTime);
+		order.setCount(count);
+		order.setOrderItems(req.getItemList());	//serviceOrder中的items是懒加载，因此一旦hibernate的session关闭，将加载不到items的值。拿到页面序列化的时候会报错
+		return order;
 		
 	}
 	
