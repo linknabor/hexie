@@ -52,7 +52,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 	
 	@Override
 	public void couponSuccess(Coupon coupon) {
-		String msg = "感谢您对我们的支持。送您一张价值"+coupon.getAmount()+"元的优惠券。";
+		String msg = "一张"+coupon.getAmount()+"元优惠券已送至您的账户，快点击进入公众号去使用吧！";
 		userNoticeRepository.save(new UserNotice(coupon.getUserId(), ModelConstant.NOTICE_TYPE_COUPON, ModelConstant.NOTICE_SUB_TYPE_ORDERSUCCESS,
 				msg, coupon.getSeedId()));
 		User user = userRepository.findById(coupon.getUserId());

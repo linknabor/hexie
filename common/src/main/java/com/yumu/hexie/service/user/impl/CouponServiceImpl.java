@@ -170,7 +170,7 @@ public class CouponServiceImpl implements CouponService {
 		seedTypes.add(ModelConstant.COUPON_SEED_ORDER_BUY_TEMPLATE);
 		seedTypes.add(ModelConstant.COUPON_SEED_ORDER_BUY2_TEMPLATE);
 		
-		List<CouponSeed> templates = couponSeedRepository.findBySeedType(seedTypes);
+		List<CouponSeed> templates = couponSeedRepository.findBySeedType(seedTypes, order.getAgentId());
 		for(CouponSeed template : templates) {
 			log.info("CREATE SEED:templateId:" + template.getId());
 			if(template == null||!template.isCanUse()||!canUse(template,order)) {
@@ -185,7 +185,6 @@ public class CouponServiceImpl implements CouponService {
 					log.info("种子已过期或者使用日期未开始，种子id: " + template.getId());
 					continue;
 				}
-				
 				//根据种子id查询优惠卷规则表
 				List<CouponRule> rules = couponRuleRepository.findBySeedId(template.getId());
 				if(rules.isEmpty()) {
@@ -196,7 +195,6 @@ public class CouponServiceImpl implements CouponService {
 					log.info("当前种子模板可领券剩余数量不足。");
 					continue;
 				}
-
 				log.error("CREATE SEED: rules:" + rules.size());
 				CouponRule templateRule = rules.get(rules.size()-1);
 				
@@ -983,7 +981,10 @@ public class CouponServiceImpl implements CouponService {
 					if (!StringUtils.isEmpty(gainedSeedStr) && gainedSeedStr.indexOf(couponCfg.getSeedStr())>-1) {
 						couponView.setGained(true);
 					}
-					
+					Date startDate = couponCfg.getStartDate();
+					if (startDate!=null && startDate.getTime() > System.currentTimeMillis()) {
+						continue;
+					}
 					Date endDate = couponCfg.getEndDate();
 					if (endDate!=null && endDate.getTime() <= System.currentTimeMillis()) {
 						continue;
