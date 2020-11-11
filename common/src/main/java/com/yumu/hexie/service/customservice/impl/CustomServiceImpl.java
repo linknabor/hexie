@@ -118,6 +118,7 @@ public class CustomServiceImpl implements CustomService {
 			agent.setStatus(1);
 		}
 		
+		String oriAmount = customerServiceOrderDTO.getTranAmt();
 		Coupon coupon = null;
 		if (!StringUtils.isEmpty(customerServiceOrderDTO.getCouponId())) {
 			coupon = couponService.findById(Long.valueOf(customerServiceOrderDTO.getCouponId()));
@@ -153,7 +154,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
 		serviceOrder.setProductId(Long.valueOf(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setUserId(currUser.getId());
-		serviceOrder.setPrice(Float.valueOf(customerServiceOrderDTO.getTranAmt()));
+		serviceOrder.setPrice(Float.valueOf(customerServiceOrderDTO.getTranAmt()));	//使用券之后的金额
+		serviceOrder.setTotalAmount(Float.valueOf(oriAmount));	//原价
 		serviceOrder.setCount(1);
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_INIT);
 		serviceOrder.setPingjiaStatus(ModelConstant.ORDER_PINGJIA_TYPE_N);
