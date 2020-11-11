@@ -85,6 +85,7 @@ import com.yumu.hexie.service.sales.SalePlanService;
 import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
@@ -1628,6 +1629,17 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if(cs != null) {
 			order.setSeedStr(cs.getSeedStr());
 			serviceOrderRepository.save(order);
+			if (ModelConstant.COUPON_SEED_ORDER_BUY2 == cs.getSeedType()) {
+				User user = userService.getById(order.getUserId());
+				try {
+					GainCouponDTO dto = couponService.gainCouponFromSeed(user, cs.getSeedStr());
+					if (!dto.isSuccess()) {
+						log.error(dto.getErrMsg());
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
 		}
 	}
 	

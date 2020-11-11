@@ -103,6 +103,7 @@ import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 
 /**
  * 商品上、下架
@@ -1586,8 +1587,13 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			couponService.gainCouponFromSeed(user, saveCouponVO.getSeedStr());
-			commonResponse.setResult("00");
+			GainCouponDTO dto = couponService.gainCouponFromSeed(user, saveCouponVO.getSeedStr());
+			if (dto.isSuccess()) {
+				commonResponse.setResult("00");
+			}else {
+				throw new BizValidateException(dto.getErrMsg());
+			}
+			
 		} catch (Exception e) {
 			commonResponse.setErrMsg(e.getMessage());
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理

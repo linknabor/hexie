@@ -67,6 +67,7 @@ import com.yumu.hexie.service.sales.CollocationService;
 import com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.dto.CheckCouponDTO;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CouponsSummary;
 
 /**
@@ -141,6 +142,17 @@ public class CouponServiceImpl implements CouponService {
 		CouponRule rule = couponRuleRepository.findById(coupon.getRuleId()).get();
 		rule.addUsed();
 		saveRule(rule);
+	}
+	
+	public static void main(String[] args) {
+		
+		CouponSeed template = new CouponSeed();
+		ServiceOrder order = new ServiceOrder();
+		
+		System.out.println(template.getMerchantId() == null || template.getMerchantId() == 0
+				|| template.getMerchantId() == order.getMerchantId());
+		
+		
 	}
 
 	@Override
@@ -956,40 +968,57 @@ public class CouponServiceImpl implements CouponService {
 	 * @throws JsonProcessingException 
 	 */
 	@Override
-	public Coupon gainCouponFromSeed(User user, String seedStr) throws Exception {
+	public GainCouponDTO gainCouponFromSeed(User user, String seedStr) throws Exception {
 		
 		Assert.hasText(seedStr, "种子不能为空。");
 		
-		log.info("当前用户:" + user.getId() + ", session中拥有红包：" + user.getCouponCount());
+		GainCouponDTO dto = new GainCouponDTO();
+		String errMsg = "";
+		
+		log.info("当前用户:" + user.getId() + ", 拥有红包：" + user.getCouponCount());
 		String couponKey = ModelConstant.KEY_USER_COUPON_SEED + user.getId();
 		String gainedSeeds = redisTemplate.opsForValue().get(couponKey);
 		if (!StringUtils.isEmpty(gainedSeeds)) {
 			if (gainedSeeds.indexOf(seedStr) > -1) {
-				throw new BizValidateException("已经领过红包啦。");
+				errMsg = "已经领过红包啦。";
+				log.info(errMsg);
+				dto.setErrMsg(errMsg);
+				return dto;
 			}
 		}
 		
 		String seedStrKey = ModelConstant.KEY_COUPON_SEED + seedStr;
 		String ruleId = redisTemplate.opsForValue().get(seedStrKey);
 		if (StringUtils.isEmpty(ruleId)) {
-			throw new BizValidateException("未找到当前种子对应的规则ID， 种子：" + seedStr);
+			errMsg = "未找到当前种子对应的规则ID， 种子：" + seedStr;
+			log.info(errMsg);
+			dto.setErrMsg(errMsg);
+			return dto;
 		}
 		String ruleKey = ModelConstant.KEY_COUPON_RULE + ruleId;
 		CouponCfg couponCfg = redisRepository.getCouponCfg(ruleKey);
 		if (ModelConstant.COUPON_RULE_STATUS_AVAILABLE != couponCfg.getStatus()) {
-			throw new BizValidateException("当前规则["+ruleId+"]已失效。");
+			errMsg = "当前规则["+ruleId+"]已失效。";
+			log.info(errMsg);
+			dto.setErrMsg(errMsg);
+			return dto;
 		}
 		Date today = new Date();
 		Date endDate = couponCfg.getEndDate();
 		if (endDate.before(today)) {
-			throw new BizValidateException("发放截止日期["+endDate+"]已过期。");
+			errMsg = "发放截止日期["+endDate+"]已过期。";
+			log.info(errMsg);
+			dto.setErrMsg(errMsg);
+			return dto;
 		}
 		
 		String stockKey = ModelConstant.KEY_COUPON_TOTAL + ruleId;
 		Long stock = redisTemplate.opsForValue().decrement(stockKey);	//直接减，不要用get获取一遍值，非原子性操作，有脏读
 		if (stock < 0) {
-			log.info("红包已领完, ruleId : " + ruleId);
-			throw new BizValidateException("现金券已领完。");
+			errMsg = "红包已领完, ruleId : " + ruleId;
+			log.info(errMsg);
+			dto.setErrMsg(errMsg);
+			return dto;
 		}
 		CouponSeed seed = new CouponSeed();
 		seed.setId(couponCfg.getSeedId());
@@ -1016,7 +1045,9 @@ public class CouponServiceImpl implements CouponService {
 		//塞红包到缓存
 		user.setCouponCount(user.getCouponCount()+1);
 		redisTemplate.opsForValue().append(couponKey, seedStr + ",");	//后面加逗号分割
-		return coupon;
+		dto.setCoupon(coupon);
+		dto.setSuccess(true);
+		return dto;
 	}
 	
 	@Transactional

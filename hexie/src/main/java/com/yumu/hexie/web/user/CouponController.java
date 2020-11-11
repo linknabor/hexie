@@ -29,6 +29,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CouponsSummary;
 import com.yumu.hexie.vo.GetValidCouponReq;
 import com.yumu.hexie.web.BaseController;
@@ -166,9 +167,12 @@ public class CouponController extends BaseController{
 	@ResponseBody
 	public BaseResult<Coupon> gainCoupon(HttpSession session, @ModelAttribute(Constants.USER)User user, @PathVariable String seedStr) throws Exception {
     	
-    	Coupon coupon = couponService.gainCouponFromSeed(user, seedStr);
+    	GainCouponDTO dto = couponService.gainCouponFromSeed(user, seedStr);
+    	if (!dto.isSuccess()) {
+			throw new BizValidateException(dto.getErrMsg());
+		}
     	session.setAttribute(Constants.USER, user);
-		return new BaseResult<Coupon>().success(coupon);
+		return new BaseResult<Coupon>().success(dto.getCoupon());
 	}
     
 }

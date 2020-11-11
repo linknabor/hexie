@@ -16,6 +16,7 @@ import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.promotion.coupon.CouponView;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.dto.CheckCouponDTO;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CouponsSummary;
 
 /**
@@ -88,8 +89,8 @@ public interface CouponService {
 	/********v2 新版 start ************/
 	List<CouponView> getSeedList(User user);
 
-	Coupon gainCouponFromSeed(User user, String seedStr) throws Exception;
-
+	GainCouponDTO gainCouponFromSeed(User user, String seedStr) throws Exception;
+	
 	Coupon updateCouponReceived(Coupon coupon);
 
 	Coupon findById(Long couponId);
