@@ -984,8 +984,11 @@ public class CouponServiceImpl implements CouponService {
 						couponView.setGained(true);
 					}
 					
-					Date endDate = couponView.getEndDate();
+					Date endDate = couponCfg.getEndDate();
 					if (endDate!=null && endDate.getTime() <= System.currentTimeMillis()) {
+						continue;
+					}
+					if (ModelConstant.COUPON_SEED_ACTIVITY != couponCfg.getSeedType()) {
 						continue;
 					}
 					availableList.add(couponView);

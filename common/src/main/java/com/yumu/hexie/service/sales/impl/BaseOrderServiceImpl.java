@@ -1633,7 +1633,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				User user = userService.getById(order.getUserId());
 				try {
 					GainCouponDTO dto = couponService.gainCouponFromSeed(user, cs.getSeedStr());
-					if (!dto.isSuccess()) {
+					if (dto.isSuccess()) {
+						userNoticeService.couponSuccess(dto.getCoupon());	//发送短信
+					} else {
 						log.error(dto.getErrMsg());
 					}
 				} catch (Exception e) {

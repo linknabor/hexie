@@ -25,7 +25,7 @@ public interface CouponRuleRepository extends JpaRepository<CouponRule, Long> {
 	@Query(value = "select " + queryColumn + " from couponRule r "
 			+ "join couponSeed s on r.seedId = s.id "
 			+ "left join agent a on a.id = r.agentId "
-			+ "where s.seedType <> 1 "	//分裂红包不显示，因为每分享一次，会产生一条新的规则，产生的规则部可人为编辑
+			+ "where s.seedType not in ( 1, 7 ) "	//分裂红包不显示，因为每分享一次，会产生一条新的规则，产生的规则部可人为编辑
 			+ "and IF (?1!='', r.id = ?1, 1=1) "
 			+ "and IF (?2!='', s.id = ?2, 1=1) "
 			+ "and IF (?3!='', s.seedType = ?3, 1=1) "

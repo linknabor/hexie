@@ -290,6 +290,7 @@ public class ModelConstant {
 	public static final int NOTICE_TYPE_RGROUP = 3;//团购消息
 	public static final int NOTICE_TYPE_SYS_PUSH = 4;//推送消息
 	public static final int NOTICE_TYPE_YUYUE = 5;//预约消息
+	public static final int NOTICE_TYPE_COUPON = 6;//预约消息
 	
 	public static final int NOTICE_SUB_TYPE_ORDERSUCCESS = 1;
 	public static final int NOTICE_SUB_TYPE_ORDERSENDGOODS = 2;

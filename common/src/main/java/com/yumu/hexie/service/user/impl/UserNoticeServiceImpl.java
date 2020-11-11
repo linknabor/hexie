@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserNotice;
 import com.yumu.hexie.model.user.UserNoticeRepository;
@@ -47,6 +48,15 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 				msg, orderId));
 		User user = userRepository.findById(userId);
 		smsService.sendMsg(user, tel, msg, getKey(userId,orderId,1));
+	}
+	
+	@Override
+	public void couponSuccess(Coupon coupon) {
+		String msg = "感谢您对我们的支持。送您一张价值"+coupon.getAmount()+"元的优惠券。";
+		userNoticeRepository.save(new UserNotice(coupon.getUserId(), ModelConstant.NOTICE_TYPE_COUPON, ModelConstant.NOTICE_SUB_TYPE_ORDERSUCCESS,
+				msg, coupon.getSeedId()));
+		User user = userRepository.findById(coupon.getUserId());
+		smsService.sendMsg(user, user.getTel(), msg, getKey(coupon.getUserId(), coupon.getSeedId(), 1));
 	}
 
 	@Override
