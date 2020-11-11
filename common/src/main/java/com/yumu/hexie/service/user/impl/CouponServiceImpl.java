@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -157,8 +158,8 @@ public class CouponServiceImpl implements CouponService {
 
 	@Override
 	public CouponSeed createOrderSeed(long userId,ServiceOrder order) {
-		log.error("CREATE SEED:" + userId + " -- " +order.getId());
 		
+		log.info("CREATE SEED:" + userId + " -- " +order.getId());
 		if(StringUtils.isEmpty(order.getOrderNo())){	//拆单的交易，只产生一个种子。拆单的交易也只有一个serviceOrder有orderNo
             return null;
         }
@@ -171,34 +172,67 @@ public class CouponServiceImpl implements CouponService {
 		
 		List<CouponSeed> templates = couponSeedRepository.findBySeedType(seedTypes);
 		for(CouponSeed template : templates) {
-			log.error("CREATE SEED:templateId:" + template.getId());
+			log.info("CREATE SEED:templateId:" + template.getId());
 			if(template == null||!template.isCanUse()||!canUse(template,order)) {
 			} else {
+				
+				if (ModelConstant.COUPON_SEED_STATUS_AVAILABLE != template.getStatus()) {
+					log.info("种子状态不可用, 种子id：" + template.getId());
+					continue;
+				}
+				long currTime = System.currentTimeMillis();
+				if (currTime < template.getStartDate().getTime() || currTime > template.getEndDate().getTime()) {
+					log.info("种子已过期或者使用日期未开始，种子id: " + template.getId());
+					continue;
+				}
+				
 				//根据种子id查询优惠卷规则表
 				List<CouponRule> rules = couponRuleRepository.findBySeedId(template.getId());
 				if(rules.isEmpty()) {
+					log.info("未找到种子对应的优惠券规则，种子id： " + template.getId());
+					continue;
+				}
+				if (template.getTotalCount() <= template.getReceivedCount()) {
+					log.info("当前种子模板可领券剩余数量不足。");
 					continue;
 				}
 
 				log.error("CREATE SEED: rules:" + rules.size());
+				CouponRule templateRule = rules.get(rules.size()-1);
+				
 				User user = userRepository.findById(userId);
 				CouponSeed cs = new CouponSeed();
 				cs.update(template);
 				cs.setUserId(userId);
 				cs.setUserImgUrl(user.getHeadimgurl());
 				cs.setBizId(order.getId());
+				cs.setSeedTemplateId(template.getId());
 				int seedType = ModelConstant.COUPON_SEED_ORDER_BUY;
 				if (ModelConstant.COUPON_SEED_ORDER_BUY2_TEMPLATE == template.getSeedType()) {
 					seedType = ModelConstant.COUPON_SEED_ORDER_BUY2;
 				}
 				cs.setSeedType(seedType);
 				cs.setSeedStr(cs.getGeneratedCouponSeedStr());
-				cs = couponSeedRepository.save(cs);
-				for(CouponRule rule: rules) {
-					CouponRule r = rule.copy(cs.getId());
-					couponRuleRepository.save(r);
-				}
-				updateSeedForRuleUpdate(cs.getId());
+				cs.setTotalCount(1);
+				cs.setTotalAmount(templateRule.getAmount());
+				cs.setReceivedCount(1);
+				cs.setReceivedAmount(templateRule.getAmount());
+				couponSeedRepository.save(cs);
+				
+				CouponRule rule = templateRule.copy(cs.getId());
+				rule.setTotalCount(1);
+				rule.setReceivedCount(1);
+				couponRuleRepository.save(rule);
+				
+				updateSeedAndRuleForCouponReceive(templateRule);
+				
+				CouponCfg couponCfg = new CouponCfg(rule, cs);
+				String key = ModelConstant.KEY_COUPON_RULE + rule.getId();
+				redisRepository.setCouponCfg(key, couponCfg);
+				
+				redisTemplate.opsForValue().increment(ModelConstant.KEY_COUPON_TOTAL + rule.getId(), 1);
+				long expire = rule.getEndDate().getTime() - rule.getStartDate().getTime();
+				redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_SEED + cs.getSeedStr(), String.valueOf(rule.getId()), expire, TimeUnit.SECONDS);
 				return cs;
 			}
 		}
