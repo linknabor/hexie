@@ -91,10 +91,14 @@ public class Coupon extends BaseModel {
 		if(status == ModelConstant.COUPON_STATUS_USED) {
 			return "已使用";
 		}
-		int days = DateUtil.getDurationDays(System.currentTimeMillis(),expiredDate.getTime());
+		long currTime = System.currentTimeMillis();
+		int days = DateUtil.getDurationDays(currTime, expiredDate.getTime());
 		if(days<0) {
 			return "已过期";
 		} else if(days == 0) {
+			if (currTime > expiredDate.getTime() ) {
+				return "已过期";
+			}
 			return "今天到期";
 		} else {
 			return days+"天后过期";
