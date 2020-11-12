@@ -3,16 +3,20 @@ package com.yumu.hexie.service.user;
 import java.util.Date;
 import java.util.List;
 
+import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
-import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
+import com.yumu.hexie.model.promotion.coupon.CouponView;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.user.dto.CheckCouponDTO;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CouponsSummary;
 
 /**
@@ -45,9 +49,12 @@ public interface CouponService {
                              Float amount, Coupon coupon, boolean locked);
     
 	public List<Coupon> findAvaibleCoupon(ServiceOrder order);
-	public List<Coupon> findAvaibleCoupon(long userId,SalePlan salePlan);
+	List<Coupon> findAvaibleCoupon(long userId, List<OrderItem> itemList, int salePlanType);
+	
     public List<Coupon> findAvaibleCoupon(long userId,Cart cart);
     public List<Coupon> findAvaibleCoupon(long userId,HomeCart cart);
+    List<Coupon> findAvaibleCoupon4CustomService(long userId, long serviceId, String agentNo);
+    
     //查看服务类型是否支持红包
     public List<Coupon> findAvaibleCoupon4ServiceType(long userId,long homeServiceType,Long parentType, Long itemId);
 	public List<Coupon> findAvaibleCouponForWuye(User user, String payType);
@@ -78,4 +85,26 @@ public interface CouponService {
 	Coupon findByOrderId(long orderId);
 
 	boolean isAvaible(String appId, String payType);
+	
+	/********v2 新版 start ************/
+	List<CouponView> getSeedList(User user);
+
+	GainCouponDTO gainCouponFromSeed(User user, String seedStr) throws Exception;
+	
+	Coupon updateCouponReceived(Coupon coupon);
+
+	Coupon findById(Long couponId);
+	
+	boolean checkAvailable4Service(ServiceOrder order, Coupon coupon, boolean withLocked);
+
+	CheckCouponDTO checkAvailable4Service(int itemType, Product product, Float amount, Coupon coupon, boolean locked);
+
+	boolean checkAvailable4Sales(ServiceOrder order, Coupon coupon, boolean withLocked);
+	
+	CheckCouponDTO checkAvailable4Sales(int itemType, List<OrderItem> itemList, Coupon coupon, boolean locked);
+
+	CheckCouponDTO checkCouponAvailable(int itemType, Product product, Coupon coupon, boolean locked);
+
+	boolean checkCouponUsageCondition(Float amount, Coupon coupon);
+
 }

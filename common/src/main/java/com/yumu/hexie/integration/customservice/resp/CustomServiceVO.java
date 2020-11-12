@@ -24,6 +24,10 @@ public class CustomServiceVO implements Serializable {
 	private String serviceLevel;
 	@JsonProperty("context")
 	private String content;
+	@JsonProperty("org_id")
+	private String agentNo;
+	@JsonProperty("org_name")
+	private String agentName;
 	
 	public String getServiceTitle() {
 		return serviceTitle;
@@ -66,12 +70,24 @@ public class CustomServiceVO implements Serializable {
 		}
 		this.content = retStr;
 	}
+	public String getAgentNo() {
+		return agentNo;
+	}
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+	public String getAgentName() {
+		return agentName;
+	}
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
 	@Override
 	public String toString() {
-		return "CustomService [serviceTitle=" + serviceTitle + ", image=" + image + ", price=" + price + ", serviceId="
-				+ serviceId + ", serviceLevel=" + serviceLevel + ", content=" + content + "]";
+		return "CustomServiceVO [serviceTitle=" + serviceTitle + ", image=" + image + ", price=" + price
+				+ ", serviceId=" + serviceId + ", serviceLevel=" + serviceLevel + ", content=" + content + ", agentNo="
+				+ agentNo + ", agentName=" + agentName + "]";
 	}
-
 	
 
 }

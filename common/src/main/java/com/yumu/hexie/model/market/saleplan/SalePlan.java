@@ -235,5 +235,6 @@ public class SalePlan extends BaseModel {
 	public void setTagUrl(String tagUrl) {
 		this.tagUrl = tagUrl;
 	}
+	
 
 }

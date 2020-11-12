@@ -75,6 +75,9 @@ public class CommunityController extends BaseController{
 	@Autowired
 	private QiniuUtil qiniuUtil;
 	
+	@Autowired
+	private FileService fileService;
+	
 	/*****************[BEGIN]帖子********************/
 	
 	/**
@@ -354,40 +357,26 @@ public class CommunityController extends BaseController{
 			String imgWidth = "";
 			
 			PutExtra extra = new PutExtra();
-			File img = null;
 			User user = userService.getById(ret.getUserId());
-			String accessToken=systemConfigService.queryWXAToken(user.getAppId());
+			String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
 					
 					String uploadId = uploadIdArr[i];
-					int imgcounter = 0;
-					inputStream = null;
-					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId,accessToken);		//下载图片
-						if (inputStream==null) {
-							log.error("获取图片附件失败。");
-						}
-						imgcounter++;
-					}
-					
-					if (inputStream==null) {
-						log.error("多次从腾讯获取图片失败。");
-						return;
-					}
 					String tmpPath = tmpPathRoot+currTime+"_"+ret.getThreadId()+"_"+i;
-					FileService.inputStream2File(inputStream, tmpPath);
-					String key = currDate+"_"+currTime+"_"+ret.getThreadId()+"_"+i;
-					img = new File(tmpPath);
+					File imgFile = new File(tmpPath);
+					fileService.downloadFile(uploadId, accessToken, imgFile);
 					
-					if (img.exists() && img.getTotalSpace()>0) {
+					String key = currDate+"_"+currTime+"_"+ret.getThreadId()+"_"+i;
+					
+					if (imgFile.exists() && imgFile.getTotalSpace()>0) {
 
-						PutRet putRet = IoApi.putFile(uptoken, key, img, extra);
+						PutRet putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 						log.error("ret msg is : " + putRet.getException());
 						log.error("putRet is : " + putRet.toString());
 						
 						while (putRet.getException()!=null) {
-							putRet = IoApi.putFile(uptoken, key, img, extra);
+							putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 							java.lang.Thread.sleep(100);
 						}
 						
@@ -401,7 +390,7 @@ public class CommunityController extends BaseController{
 							if (error != null) {
 								log.error((String)error);
 								log.error("start to re-upload ...");
-								putRet = IoApi.putFile(uptoken, key, img, extra);
+								putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 								java.lang.Thread.sleep(100);
 							}else {
 								isUploaded = true;
@@ -433,14 +422,12 @@ public class CommunityController extends BaseController{
 					
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				log.error(e.getMessage());
 			}finally{
 				if (inputStream!=null) {
 					try {
 						inputStream.close();
 					} catch (IOException e) {
-						e.printStackTrace();
 						log.error(e.getMessage());
 					}
 				}
@@ -902,42 +889,29 @@ public class CommunityController extends BaseController{
 			String imgWidth = "";
 			
 			PutExtra extra = new PutExtra();
-			File img = null;
 			
 			User user = userService.getById(ret.getCommentUserId());
 			String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 			
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
-					
-					String uploadId = uploadIdArr[i];
-					int imgcounter = 0;
-					inputStream = null;
-					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId, accessToken);		//下载图片
-						if (inputStream==null) {
-							log.error("获取图片附件失败。");
-						}
-						imgcounter++;
-					}
-					
-					if (inputStream==null) {
-						log.error("多次从腾讯获取图片失败。");
-						return;
-					}
-					String tmpPath = tmpPathRoot+currTime+"_"+ret.getCommentId()+"_"+i;
-					FileService.inputStream2File(inputStream, tmpPath);
-					String key = currDate+"_"+currTime+"_"+ret.getCommentId()+"_"+i;
-					img = new File(tmpPath);
-					
-					if (img.exists() && img.getTotalSpace()>0) {
 
-						PutRet putRet = IoApi.putFile(uptoken, key, img, extra);
+					String tmpPath = tmpPathRoot+currTime+"_"+ret.getCommentId()+"_"+i;
+					File imgFile = new File(tmpPath);
+					String uploadId = uploadIdArr[i];
+					fileService.downloadFile(uploadId, accessToken, imgFile);
+					
+					String key = currDate+"_"+currTime+"_"+ret.getCommentId()+"_"+i;
+					imgFile = new File(tmpPath);
+					
+					if (imgFile.exists() && imgFile.getTotalSpace()>0) {
+
+						PutRet putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 						log.error("ret msg is : " + putRet.getException());
 						log.error("putRet is : " + putRet.toString());
 						
 						while (putRet.getException()!=null) {
-							putRet = IoApi.putFile(uptoken, key, img, extra);
+							putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 							java.lang.Thread.sleep(100);
 						}
 						
@@ -951,7 +925,7 @@ public class CommunityController extends BaseController{
 							if (error != null) {
 								log.error((String)error);
 								log.error("start to re-upload ...");
-								putRet = IoApi.putFile(uptoken, key, img, extra);
+								putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 								java.lang.Thread.sleep(100);
 							}else {
 								isUploaded = true;
@@ -983,14 +957,12 @@ public class CommunityController extends BaseController{
 					
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				log.error(e.getMessage());
 			}finally{
 				if (inputStream!=null) {
 					try {
 						inputStream.close();
 					} catch (IOException e) {
-						e.printStackTrace();
 						log.error(e.getMessage());
 					}
 				}

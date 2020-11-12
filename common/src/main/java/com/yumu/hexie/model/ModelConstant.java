@@ -154,6 +154,9 @@ public class ModelConstant {
 	public static final int RGROUP_PRODUCT_TYPE_GANCHANGXIAN = 5; //敢试鲜
 	public static final int RGROUP_PRODUCT_TYPE_FEATURED = 100;//精选，仅限于查询
 	
+	public static final int GOODS_TYPE_PRODUCT = 0;	//商品类售卖
+	public static final int GOODS_TYPE_SERVICE = 1;	//服务类
+	
 	public static final int RULE_TYPE_CITY = 0;
 	public static final int RULE_TYPE_NEARBY = 1;
 
@@ -287,6 +290,7 @@ public class ModelConstant {
 	public static final int NOTICE_TYPE_RGROUP = 3;//团购消息
 	public static final int NOTICE_TYPE_SYS_PUSH = 4;//推送消息
 	public static final int NOTICE_TYPE_YUYUE = 5;//预约消息
+	public static final int NOTICE_TYPE_COUPON = 6;//预约消息
 	
 	public static final int NOTICE_SUB_TYPE_ORDERSUCCESS = 1;
 	public static final int NOTICE_SUB_TYPE_ORDERSENDGOODS = 2;
@@ -296,7 +300,7 @@ public class ModelConstant {
 	public static final int NOTICE_SUB_TYPE_GROUPNOTIFY = 3;
 	
 	
-	/***********现金券************** 1:订单分裂|2:用户注册|3:关注红包|4:活动发布|5:订单分裂模板|6:会员注册   */
+	/***********现金券************** 1:订单分裂（支付成功通过分享产生红包）|2:用户注册|3:关注红包|4:活动发布|5:订单分裂模板(详见1)|6:会员注册|7.订单分裂2（支付成功直接塞红包） 8.订单分裂模板2（(详见7)）  */
 	//种子类型
 	public static final int COUPON_SEED_ORDER_BUY = 1;
 	public static final int COUPON_SEED_USER_REGIST = 2;
@@ -304,6 +308,8 @@ public class ModelConstant {
 	public static final int COUPON_SEED_ACTIVITY = 4;
 	public static final int COUPON_SEED_ORDER_BUY_TEMPLATE = 5;
 	public static final int COUPON_SEED_MEMBER = 6;
+	public static final int COUPON_SEED_ORDER_BUY2 = 7;
+	public static final int COUPON_SEED_ORDER_BUY2_TEMPLATE = 8;
 	
 	//种子状态
 	public static final int COUPON_SEED_STATUS_AVAILABLE = 0;
@@ -391,6 +397,8 @@ public class ModelConstant {
 	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template:";
 	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url:";
 	
+	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam:";
+	
 	public static final int SMS_TYPE_REG = 101;	//用户注册短信
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
 	public static final int SMS_TYPE_PROMOTION_PAY = 103;	//发票验证码获取
@@ -399,6 +407,14 @@ public class ModelConstant {
 	public static final String KEY_PRO_RULE_INFO = "product:rule:";
 	public static final String KEY_PRO_STOCK = "product:stock:";
 	public static final String KEY_PRO_FREEZE = "product:freeze:";
+	
+	public static final String KEY_COUPON_RULE = "coupon:rule:";
+	public static final String KEY_COUPON_TOTAL = "coupon:total:";	//总数
+	public static final String KEY_COUPON_USED = "coupon:used:";	//已使用的
+	public static final String KEY_COUPON_SEED = "coupon:seed:";
+	public static final String KEY_COUPON_GAIN_QUEUE = "queue:coupon:gain";
+	
+	public static final String KEY_USER_COUPON_SEED = "user:gaiedCouponSeed:";	//用户已领过的红包种子
 	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码

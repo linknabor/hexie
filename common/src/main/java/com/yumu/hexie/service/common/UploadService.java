@@ -4,6 +4,7 @@
  */
 package com.yumu.hexie.service.common;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -22,4 +23,6 @@ public interface UploadService {
     public void updateRepairImg(RepairOrder order);
 
     Map<String, String> uploadImages(String appId, List<String> imgUrlList);
+
+	File downloadFromWechat(String accessToken, String mediaId);
 }

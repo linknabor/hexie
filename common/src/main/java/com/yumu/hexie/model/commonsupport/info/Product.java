@@ -72,6 +72,9 @@ public class Product extends BaseModel {
 	
 	private long productCategoryId;	//分类ID
 	
+	@Transient
+	private boolean isService = false;
+	
 	
 	public long getMerchantId() {
 		return merchantId;
@@ -339,6 +342,12 @@ public class Product extends BaseModel {
 	}
 	public void setProductCategoryId(long productCategoryId) {
 		this.productCategoryId = productCategoryId;
+	}
+	public boolean isService() {
+		return isService;
+	}
+	public void setService(boolean isService) {
+		this.isService = isService;
 	}
 	
 }

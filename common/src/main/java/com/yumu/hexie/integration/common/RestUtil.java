@@ -124,7 +124,7 @@ public class RestUtil {
 	 * @param requestUrl	请求链接
 	 * @param jsonObject	请继承wuyeRequest
 	 * @param typeReference	HexieResponse类型的子类
-	 * @return
+	 * @return CommonResponse
 	 * @throws IOException
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
@@ -229,7 +229,7 @@ public class RestUtil {
 	 * @param requestUrl
 	 * @param jsonObject
 	 * @param typeReference
-	 * @return
+	 * @return V
 	 * @throws Exception
 	 */
 	public <T, V> V exchangeOnUri(String requestUrl, T jsonObject, TypeReference<V> typeReference) throws Exception {
@@ -252,6 +252,44 @@ public class RestUtil {
 		}
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 		return objectMapper.readValue(respEntity.getBody(), typeReference);
+	}
+	
+	/**
+	 * 非物业模块的rest请求公共函数
+	 * @param <V>
+	 * @param requestUrl	请求链接
+	 * @param jsonObject	请继承wuyeRequest
+	 * @param typeReference	HexieResponse类型的子类
+	 * @return CommonResponse<byte[]>
+	 * @throws IOException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 */
+	public <T> CommonResponse<byte[]> exchange4ResourceOnUri(String requestUrl, T jsonObject, TypeReference<CommonResponse<byte[]>> typeReference)
+			throws IOException, JsonParseException, JsonMappingException {
+		
+		HttpHeaders headers = new HttpHeaders();
+       headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+       LinkedMultiValueMap<String, String>paramsMap = new LinkedMultiValueMap<>();
+       convertObject2Map(jsonObject, paramsMap);
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(requestUrl);
+		URI uri = builder.queryParams(paramsMap).build().encode().toUri();
+       HttpEntity<Object> httpEntity = new HttpEntity<>(null, headers);
+       
+       logger.info("requestUrl : " + requestUrl + ", param : " + paramsMap);
+       ResponseEntity<Resource> respEntity = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, Resource.class);
+       logger.info("response : " + respEntity);
+       
+		if (!HttpStatus.OK.equals(respEntity.getStatusCode())) {
+			throw new BizValidateException("请求失败！ code : " + respEntity.getStatusCodeValue());
+		}
+		InputStream inputStream = respEntity.getBody().getInputStream();
+		CommonResponse<byte[]> hexieResponse = new CommonResponse<>();
+		byte[] bytes = new byte[inputStream.available()];
+		inputStream.read(bytes, 0, inputStream.available());
+		hexieResponse.setData(bytes);
+		hexieResponse.setResult("00");
+		return hexieResponse;
 	}
 	
 }

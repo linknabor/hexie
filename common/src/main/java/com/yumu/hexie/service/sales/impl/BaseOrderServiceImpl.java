@@ -63,6 +63,7 @@ import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
+import com.yumu.hexie.model.user.Partner;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.car.CarService;
 import com.yumu.hexie.service.comment.CommentService;
@@ -71,6 +72,7 @@ import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.eshop.EvoucherService;
+import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
@@ -83,6 +85,7 @@ import com.yumu.hexie.service.sales.SalePlanService;
 import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
@@ -146,7 +149,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private OperatorService operatorService;
 	@Autowired
 	private CacheableService cacheableService;
-		
+	@Autowired
+	private PartnerService partnerService;
+
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -158,7 +163,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			Product product = productService.getProduct(plan.getProductId());
 			productService.checkSalable(product, item.getCount());
 			//填充信息
-			productService.freezeCount(product, item.getCount());
+//			productService.freezeCount(product, item.getCount());	放到外面
             item.fillDetail(plan, product);
             
             Long agentId = product.getAgentId();
@@ -223,7 +228,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         return sOrder;
     }
 	
-	//创建订单
+	/**
+	 * 创建订单，单个种类物品
+	 */
 	@Override
 	@Transactional
 	public ServiceOrder createOrder(SingleItemOrder order){
@@ -233,10 +240,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		Address address = fillAddressInfo(o);
 		//2. 填充订单信息并校验规则,设置价格信息
 		preOrderCreate(o, address);
-		computeCoupon(o);
 		//3. 订单创建
 		o = serviceOrderRepository.save(o);
-		for(OrderItem item : o.getItems()) {
+		
+		List<OrderItem> items = o.getItems();
+		for(OrderItem item : items) {
 			item.setServiceOrder(o);
 			item.setUserId(o.getUserId());
 			orderItemRepository.save(item);
@@ -248,14 +256,25 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		evoucherService.createEvoucher(o);
 		
         log.warn("[Create]订单创建OrderId:" + o.getId());
-		//4. 订单后处理
+        
+        //6.计算优惠券
+        computeCoupon(o);
+        
+		//7. 订单后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CREATE,o);
 		
+		
+		//8.冻结库存，这步必须最后
+		for(OrderItem item : items) {
+			Product pro = new Product();
+			pro.setId(item.getProductId());
+			productService.freezeCount(pro, item.getCount());
+		}
 		return o;
 	}
 
 	/**
-	 * 根据购物车创建订单
+	 * 根据购物车创建订单(老版本)
 	 */
 	@Override
 	@Transactional
@@ -266,14 +285,17 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		Address address = fillAddressInfo(o);
 		//2. 填充订单信息并校验规则,设置价格信息
 		preOrderCreate(o, address);
-		computeCoupon(o);
 		//3. 订单创建
 		o = serviceOrderRepository.save(o);
-		for(OrderItem item : o.getItems()) {
+		List<OrderItem> items = o.getItems();
+		for(OrderItem item : items) {
 			item.setServiceOrder(o);
 			item.setUserId(o.getUserId());
 			orderItemRepository.save(item);
 		}
+		
+		computeCoupon(o);
+		
 		//4.保存车辆信息 20160721 车大大的车辆服务
 		carService.saveOrderCarInfo(o);
 		
@@ -325,43 +347,62 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			
 		}
+		
+		BigDecimal totalOrderAmount = BigDecimal.ZERO;
 		Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
 		Iterator<Entry<Long, List<OrderItem>>> it = itemsMap.entrySet().iterator();
 		while(it.hasNext()) {
+
 			Entry<Long, List<OrderItem>> entry = it.next();
 			CreateOrderReq orderRequest = new CreateOrderReq();
 			BeanUtils.copyProperties(req, orderRequest);
 			orderRequest.setItemList(entry.getValue());
 			
 			ServiceOrder o = new ServiceOrder(user, orderRequest);
+			o.setGroupOrderId(groupId);
+			
 			//1. 填充地址信息
 			Address address = fillAddressInfo(o);
 			//2. 填充订单信息并校验规则,设置价格信息
 			preOrderCreate(o, address);
-			computeCoupon(o);
+			//3. 先保存order，产生一个orderId
+			serviceOrderRepository.save(o);
 			
-			//3. 订单创建
-			o.setGroupOrderId(groupId);
-			o = serviceOrderRepository.save(o);
-			for(OrderItem item : o.getItems()) {
+			totalOrderAmount = totalOrderAmount.add(new BigDecimal(String.valueOf(o.getPrice())));	//这里面含运费
+			
+			log.info("generated order id : " + o.getId());
+			List<OrderItem> items = o.getItems();
+			log.info("items : " + items);
+			
+			//4. 保存orderItem
+			for(OrderItem item : items) {
 				item.setServiceOrder(o);
 				item.setUserId(o.getUserId());
 				orderItemRepository.save(item);
-				
-				//清空购物车中已购买的商品
-				cartService.delFromCart(user.getId(), itemList);
-				
 			}
-			//4. 订单后处理
+			//5. 订单后处理
 			commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
-		
+			
 		}
+		
+		//6.红包分摊
+		computeCoupon4GroupOrders(groupId);
+		
 		ServiceOrder newOrder = new ServiceOrder();
 		newOrder.setId(groupId);
+		
+		//7.冻结库存。这步必须放最后，因为redis没法跟随数据库一起回滚
+		for (OrderItem orderItem : itemList) {
+			Product pro = new Product();
+			pro.setId(orderItem.getProductId());
+			productService.freezeCount(pro, orderItem.getCount());
+			//6.清空购物车中已购买的商品
+			cartService.delFromCart(user.getId(), itemList);
+		}
 		return newOrder;
 		
 	}
-
+	
 	@Async
 	protected void commonPostProcess(int orderOp, ServiceOrder order) {
 
@@ -451,6 +492,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setServiceName(productName);
 			request.setOrderType(String.valueOf(order.getOrderType()));
 			
+			if (order.getCouponId() !=null && order.getCouponId() > 0) {
+				request.setCouponId(String.valueOf(order.getCouponId()));
+				request.setCouponAmt(String.valueOf(order.getCouponAmount()));
+			}
+			
 			Optional<Agent> optional = agentRepository.findById(order.getAgentId());
 			if (optional.isPresent()) {
 				Agent agent = optional.get();
@@ -485,6 +531,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				subOrder.setProductId(orderItem.getProductId());
 				subOrderList.add(subOrder);
 			}
+			if (order.getCouponId() !=null && order.getCouponId() > 0) {
+				SubOrder subOrder = subOrderList.get(0);
+				if (subOrder!=null) {
+					subOrder.setSubCouponId(order.getCouponId());
+					subOrder.setSubCouponAmt(order.getCouponAmount());
+				}
+			}
+			
 			request.setSubOrders(subOrderList);
 			
 			CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
@@ -518,7 +572,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		return sign;
 	}
-
+	
 	@Override
 	@Transactional
 	public JsSign requestGroupPay(long orderId) throws Exception {
@@ -534,10 +588,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if(!o.payable()){
             throw new BizValidateException(orderId,"订单状态不可支付，请重新查询确认订单状态！").setError();
         }
-			
+	
 		CommonPayRequest request = new CommonPayRequest();
 		List<SubOrder> subOrderList = new ArrayList<>(orderList.size());
 		
+		Long couponId = 0l;
+		Float couponAmt = 0f;
 		BigDecimal totalPrice = BigDecimal.ZERO;
 		int totalCount = 0;
 		for (ServiceOrder order : orderList) {
@@ -557,15 +613,27 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			}
 			subOrder.setProductName(subProductName);
 			subOrder.setProductId(order.getProductId());
+			
+			if (order.getCouponId() != null && order.getCouponId() > 0) {
+				subOrder.setSubCouponId(order.getCouponId());
+				couponId = order.getCouponId();
+			}
+			if (order.getCouponAmount() != null) {	//拆单交易，多个订单只有一个couponId，只记录再一个serivceOrder中，其他子订单不记录couponId，但记录订单金额
+				subOrder.setSubCouponAmt(order.getCouponAmount());
+				couponAmt += order.getCouponAmount();
+			}
 			subOrderList.add(subOrder);
 			
 			totalPrice = totalPrice.add(new BigDecimal(String.valueOf(order.getPrice())));
 			totalCount += order.getCount();
 		}
 		request.setSubOrders(subOrderList);
-		
+		if (couponId > 0 ) {
+			request.setCouponId(String.valueOf(couponId));
+			request.setCouponAmt(String.valueOf(couponAmt));
+		}
+
 		User user = userService.getById(o.getUserId());
-		
 		request.setUserId(user.getWuyeId());
 		request.setAppid(user.getAppId());
 		Optional<Region> optional = regionRepository.findById(o.getXiaoquId());
@@ -728,11 +796,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		//3.解锁红包
 		couponService.unlock(order.getCouponId());
         log.warn("[cancelOrder]coupon:"+order.getCouponId());
-		//4.商品中取消冻结
-		salePlanService.getService(order.getOrderType()).postOrderCancel(order);
-        log.warn("[cancelOrder]unfrezee:"+order.getId());
-		//5.操作后处理
+		//4.操作后处理
 		commonPostProcess(ModelConstant.ORDER_OP_CANCEL,order);
+		//5.商品中取消冻结
+		if (ModelConstant.ORDER_TYPE_SERVICE != order.getOrderType()) {
+			salePlanService.getService(order.getOrderType()).postOrderCancel(order);
+	        log.warn("[cancelOrder]unfrezee:"+order.getId());
+		}
 		return order;
 	}
 
@@ -841,16 +911,17 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					cacheableService.save(rule);
 				}
 			}
-			/*2.修改i当你孤单状态为已退款*/
+			/*2.修改订单状态为已退款*/
 			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+			serviceOrder.setRefundDate(new Date());
 			serviceOrderRepository.save(serviceOrder);
 			
 			/*3.修改已售份数*/
-			productService.saledCount(serviceOrder.getProductId(), serviceOrder.getCount()*-1);
-			
-			/*4.修改库存*/
-			redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
-			
+			if (ModelConstant.ORDER_TYPE_SERVICE != serviceOrder.getOrderType()) {
+				productService.saledCount(serviceOrder.getProductId(), serviceOrder.getCount()*-1);
+				/*4.修改库存*/
+				redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
+			}
 			
 	        log.warn("[finishRefund]refund-saved:"+serviceOrder.getId());
 		}else {
@@ -1220,7 +1291,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		return result;
 	}
 	
-	private User createUser(User user, String name, String mobile) {
+	private void createUser(User user, String name, String mobile) {
 		
 		if (!StringUtils.isEmpty(name)) {
 			user.setName(name);
@@ -1233,7 +1304,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			user.setTel(mobile);
 		}
 		
-		return userService.simpleRegister(user);
+		userService.simpleRegister(user);
 	}
 	
 	private void createAgent(String name, String mobile) {
@@ -1339,6 +1410,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	@Override
 	public ServiceOrder orderCheck(User user, CreateOrderReq req) {
 		
+		Map<Long, List<OrderItem>> itemsMap = new HashMap<>();
+		
 		//重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
 		List<OrderItem> itemList = req.getItemList();
 		if (itemList == null || itemList.isEmpty()) {
@@ -1365,6 +1438,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderItem.setRuleName(productRule.getName());
 			orderItem.setProductPic(productRule.getMainPicture());
 			orderItem.setProductThumbPic(productRule.getSmallPicture());
+			orderItem.setOrderType(productRule.getSalePlanType());
+			
+			Long agentId = productRule.getAgentId();
+			orderItem.setAgentId(productRule.getAgentId());
+			
+			if (!itemsMap.containsKey(agentId)) {
+				List<OrderItem> oList = new ArrayList<>();
+				oList.add(orderItem);
+				itemsMap.put(agentId, oList);
+			} else {
+				List<OrderItem> oList = itemsMap.get(agentId);
+				oList.add(orderItem);
+			}
+			
 			
 			String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + productRule.getProductId());
 			String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + productRule.getProductId());
@@ -1379,11 +1466,184 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
 		}
 		
-		ServiceOrder o = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用
-		computePrice(o);
-		o.setOrderItems(req.getItemList());	//serviceOrder中的items是懒加载，因此一旦hibernate的session关闭，将加载不到items的值。拿到页面序列化的时候会报错
-		return o;
+		BigDecimal totalAmount = BigDecimal.ZERO;
+		BigDecimal shipfee = BigDecimal.ZERO;
+		BigDecimal price = BigDecimal.ZERO;
+		BigDecimal discount = BigDecimal.ZERO;
+		int count = 0;
+		long closeTime = System.currentTimeMillis() + 900000;// 默认15分
 		
+		Iterator<Entry<Long, List<OrderItem>>> it = itemsMap.entrySet().iterator();
+		while(it.hasNext()) {
+
+			Entry<Long, List<OrderItem>> entry = it.next();
+			CreateOrderReq orderRequest = new CreateOrderReq();
+			BeanUtils.copyProperties(req, orderRequest);
+			orderRequest.setItemList(entry.getValue());
+			ServiceOrder o = new ServiceOrder(user, orderRequest);
+			computePrice(o);
+			totalAmount = totalAmount.add(new BigDecimal(String.valueOf(o.getTotalAmount())));
+			shipfee = shipfee.add(new BigDecimal(String.valueOf(o.getShipFee())));
+			price = price.add(new BigDecimal(String.valueOf(o.getPrice())));
+			discount = discount.add(new BigDecimal(String.valueOf(o.getDiscountAmount())));
+			count += o.getCount();
+			
+		}
+		
+		ServiceOrder order = new ServiceOrder(user, req);	//虚拟一个serviceOrder,计算金额用
+		order.setTotalAmount(totalAmount.floatValue());
+		order.setShipFee(shipfee.floatValue());
+		order.setDiscountAmount(discount.floatValue());
+		order.setPrice(price.floatValue());
+		order.setCloseTime(closeTime);
+		order.setCount(count);
+		order.setOrderItems(req.getItemList());	//serviceOrder中的items是懒加载，因此一旦hibernate的session关闭，将加载不到items的值。拿到页面序列化的时候会报错
+		return order;
+		
+	}
+	
+	@Transactional
+	@Override
+	public void finishOrder(String tradeWaterId) {
+		
+		log.info("update orderStatus, tradeWaterId : " + tradeWaterId);
+		
+		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
+		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			return;
+		}
+		log.info("update orderStatus, orderId : " + serviceOrder.getId());
+		log.info("update orderStatus, orderType : " + serviceOrder.getOrderType());
+		log.info("update orderStatus, orderStatus : " + serviceOrder.getStatus());
+		
+		if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+			List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
+			for (ServiceOrder order : orderList) {
+				
+				if (ModelConstant.ORDER_STATUS_INIT == order.getStatus()) {
+					Date date = new Date();
+					order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+					order.setConfirmDate(date);
+					order.setPayDate(date);
+//					serviceOrderRepository.save(order);
+					salePlanService.getService(order.getOrderType()).postPaySuccess(order);	//修改orderItems
+					
+					//发送模板消息和短信
+					userNoticeService.orderSuccess(order.getUserId(), order.getTel(),
+							order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
+					//清空购物车中已购买的商品
+					List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
+					cartService.delFromCart(order.getUserId(), itemList);
+					//减库存
+					for (OrderItem item : itemList) {
+						redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + item.getProductId(), item.getCount());
+					}
+					
+					consumeAndCreateOrderSeed(order);
+					
+				}
+				
+			}
+		
+		}
+		
+		//核销券、团购、合伙人、saas售卖
+		if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || 
+				ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType() ||
+				ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType() ||
+				ModelConstant.ORDER_TYPE_SAASSALE == serviceOrder.getOrderType()) {
+			
+			if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+				Date date = new Date();
+				serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+				serviceOrder.setConfirmDate(date);
+				serviceOrder.setPayDate(date);
+				salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);	//修改orderItems
+				
+				if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+					//减库存
+					redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
+				}
+				
+				if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
+					//发送模板消息和短信
+					userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
+							serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+					//清空购物车中已购买的商品
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+						List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
+						cartService.delFromCart(serviceOrder.getUserId(), itemList);
+					}
+					
+				}
+				
+				if (ModelConstant.ORDER_TYPE_EVOUCHER == serviceOrder.getOrderType() || ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+					evoucherService.enable(serviceOrder);	//激活核销券
+				}
+				
+				//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
+        		consumeAndCreateOrderSeed(serviceOrder);
+				
+			}
+			
+			if (ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
+				Partner partner = new Partner();
+				partner.setTel(serviceOrder.getTel());
+				partner.setName(serviceOrder.getReceiverName());
+				partner.setUserId(serviceOrder.getUserId());
+				partnerService.save(partner);
+			}
+			
+			
+		}
+		
+		//服务
+		if (ModelConstant.ORDER_TYPE_SERVICE == serviceOrder.getOrderType()) {
+			
+			if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
+				if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+					//do nothing
+				}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+					serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+				}
+				serviceOrder.setPayDate(new Date());
+				serviceOrderRepository.save(serviceOrder);
+				
+				consumeAndCreateOrderSeed(serviceOrder);
+			}
+		}
+		
+	}
+
+	private void consumeAndCreateOrderSeed(ServiceOrder order) {
+		//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
+		List<OrderItem> items = orderItemRepository.findByServiceOrder(order);
+		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+			OrderItem orderItem = new OrderItem();
+			orderItem.setProductId(order.getProductId());
+			items = new ArrayList<>();
+			items.add(orderItem);
+		}
+		order.setItems(items);
+		couponService.comsume(order);
+		CouponSeed cs = couponService.createOrderSeed(order.getUserId(), order);
+		if(cs != null) {
+			order.setSeedStr(cs.getSeedStr());
+			serviceOrderRepository.save(order);
+			if (ModelConstant.COUPON_SEED_ORDER_BUY2 == cs.getSeedType()) {
+				User user = userService.getById(order.getUserId());
+				try {
+					GainCouponDTO dto = couponService.gainCouponFromSeed(user, cs.getSeedStr());
+					if (dto.isSuccess()) {
+						userNoticeService.couponSuccess(dto.getCoupon());	//发送短信
+					} else {
+						log.error(dto.getErrMsg());
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
 	}
 	
 	

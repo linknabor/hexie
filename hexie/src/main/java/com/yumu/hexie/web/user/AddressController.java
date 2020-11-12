@@ -67,6 +67,7 @@ public class AddressController extends BaseController{
 		return BaseResult.successResult(addressService.queryAddressById(addressId));
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/address/default/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<String> defaultAddress(HttpSession session,@ModelAttribute(Constants.USER)User user,@PathVariable long addressId) throws Exception {

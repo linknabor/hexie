@@ -46,19 +46,20 @@ public class CouponRule extends BaseModel {
     /**************现金券适用范围**************/
     private float usageCondition;//最小金额
     private boolean availableForAll = true;//与以下三条互斥
+    private int supportType;	//适用类型，0全部，1部分支持，2部分不支持
     
     //支持项目，不支持的优先过滤
     private int itemType = PromotionConstant.COUPON_ITEM_TYPE_ALL;//全部，商品项，服务项，服务类型
     private Long subItemType;//子类型，默认为空  对服务是base的serviceType，对集市是销售方案
     private Long serviceType;//低于subItemType,如对洗衣是按件洗、按袋洗。对保洁是日常保洁，深度保洁。对特卖是频道
-    private Long productId;//对集市是商品ID，对服务是服务项
+    private String productId;//对集市是商品ID，对服务是服务项
     private Long merchantId;//商户类型
     
     //不支持项目
     private Integer uItemType;
     private Long uSubItemType;
     private Long uServiceType;
-    private Long uProductId;
+    private String uProductId;
     private Long uMerchantId;
     /**************现金券适用范围**************/
 
@@ -70,16 +71,16 @@ public class CouponRule extends BaseModel {
 
     /**************使用时间**************/
 
-    
-
-
     /** 发放 **/
 	private int totalCount = 0;
 	private Date startDate;//发放时间
 	private Date endDate;//发放时间
     /** 发放 **/
 	
-
+	/**代理商、合伙人信息**/
+	private long agentId;
+	
+	private String sectIds;	//支持的小区
 
 	public CouponRule copy(long seedId){
 		CouponRule cr = new CouponRule();
@@ -233,10 +234,10 @@ public class CouponRule extends BaseModel {
     public void setAvailableForAll(boolean availableForAll) {
         this.availableForAll = availableForAll;
     }
-    public Long getProductId() {
+    public String getProductId() {
         return productId;
     }
-    public void setProductId(Long productId) {
+    public void setProductId(String productId) {
         this.productId = productId;
     }
     public Long getMerchantId() {
@@ -287,10 +288,10 @@ public class CouponRule extends BaseModel {
     public void setuServiceType(Long uServiceType) {
         this.uServiceType = uServiceType;
     }
-    public Long getuProductId() {
+    public String getuProductId() {
         return uProductId;
     }
-    public void setuProductId(Long uProductId) {
+    public void setuProductId(String uProductId) {
         this.uProductId = uProductId;
     }
     public Long getuMerchantId() {
@@ -299,5 +300,23 @@ public class CouponRule extends BaseModel {
     public void setuMerchantId(Long uMerchantId) {
         this.uMerchantId = uMerchantId;
     }
+	public long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+	public int getSupportType() {
+		return supportType;
+	}
+	public void setSupportType(int supportType) {
+		this.supportType = supportType;
+	}
+	public String getSectIds() {
+		return sectIds;
+	}
+	public void setSectIds(String sectIds) {
+		this.sectIds = sectIds;
+	}
 	
 }

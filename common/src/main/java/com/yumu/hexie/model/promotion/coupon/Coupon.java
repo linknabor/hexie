@@ -42,6 +42,8 @@ public class Coupon extends BaseModel {
 	
 	private String userHeadImg;
 	private String userName;
+	private String tel;
+	private String openid;
 	
 	private int seedType;
 	private String seedStr;
@@ -51,72 +53,34 @@ public class Coupon extends BaseModel {
 	/**************现金券适用范围**************/
 	private float usageCondition;//最小金额
     private boolean availableForAll = true;//与以下互斥
+    private int supportType;	//适用类型，0全部，1部分支持，2部分不支持
     
     //支持项目，不支持的优先过滤
     private int itemType = PromotionConstant.COUPON_ITEM_TYPE_ALL;//全部，商品项，服务项，服务类型
     private Long subItemType;//子类型，默认为空  对服务是base的serviceType，对集市是销售方案
     private Long serviceType;//低于subItemType,如对洗衣是按件洗、按袋洗。对保洁是日常保洁，深度保洁。对特卖是频道
-    private Long productId;//对集市是商品ID，对服务是服务项
+    private String productId;//对集市是商品ID，对服务是服务项
     private Long merchantId;//商户类型
     
     //不支持项目
     private Integer uItemType;
     private Long uSubItemType;
     private Long uServiceType;
-    private Long uProductId;
+    private String uProductId;
     private Long uMerchantId;
 	/**************现金券适用范围**************/
-
+    
 	private String suggestUrl;
 	private String appid;	//所属平台
+	
+	private long agentId;	//代理商
+	private String agentName;
+	private String agentNo;
 	
 	@Transient
 	public String getUseStartDateStr(){
 		return DateUtil.dtFormat(useStartDate, "yyyy.MM.dd");
 	}
-
-    @Transient
-    private boolean notZero(Long value) {
-        return value != null && value > 0;
-    }
-    @Transient
-    public String getPassTypePrefix(){
-        if(getItemType() == PromotionConstant.COUPON_ITEM_TYPE_ALL) {
-            //正向验证通过
-            return "";
-        } else {
-            String couponPrefix = getItemType() + "-";
-            if(notZero(getSubItemType())) {
-                couponPrefix += getSubItemType() + "-";
-                if(notZero(getServiceType())) {
-                    couponPrefix += getServiceType() + "-";
-                    if(notZero(getProductId())) {
-                        couponPrefix += getProductId() + "-";
-                    }
-                }
-            }
-            return couponPrefix;
-        }
-    }
-    @Transient
-    public String getUnPassTypePrefix(){
-        if(getuItemType() == PromotionConstant.COUPON_ITEM_TYPE_ALL) {
-            //反向验证通过 FIXME 应该不存在，
-            return "";
-        } else {
-            String couponPrefix = getuItemType() + "-";
-            if(notZero(getuSubItemType())) {
-                couponPrefix += getuSubItemType() + "-";
-                if(notZero(getuServiceType())) {
-                    couponPrefix += getuServiceType() + "-";
-                    if(notZero(getuProductId())) {
-                        couponPrefix += getuProductId() + "-";
-                    }
-                }
-            }
-            return couponPrefix;
-        }
-    }
 
 	@Transient
 	public String getUseEndDateStr(){
@@ -127,10 +91,14 @@ public class Coupon extends BaseModel {
 		if(status == ModelConstant.COUPON_STATUS_USED) {
 			return "已使用";
 		}
-		int days = DateUtil.getDurationDays(System.currentTimeMillis(),expiredDate.getTime());
+		long currTime = System.currentTimeMillis();
+		int days = DateUtil.getDurationDays(currTime, expiredDate.getTime());
 		if(days<0) {
 			return "已过期";
 		} else if(days == 0) {
+			if (currTime > expiredDate.getTime() ) {
+				return "已过期";
+			}
 			return "今天到期";
 		} else {
 			return days+"天后过期";
@@ -145,6 +113,8 @@ public class Coupon extends BaseModel {
 		c.userId = user.getId();
 		c.setUserName(user.getName());
 		c.setUserHeadImg(user.getHeadimgurl());
+		c.setTel(user.getTel());
+		c.setOpenid(user.getOpenid());
 		return c;
 	}
 	public Coupon(CouponSeed seed,CouponRule rule,User user) {
@@ -167,6 +137,8 @@ public class Coupon extends BaseModel {
 		super.setCreateDate(System.currentTimeMillis());
 		setUserName(user.getName());
 		setUserHeadImg(user.getHeadimgurl());
+		setTel(user.getTel());
+		setOpenid(user.getOpenid());
 	}
 
 	@Transient
@@ -267,10 +239,10 @@ public class Coupon extends BaseModel {
 	public void setAvailableForAll(boolean availableForAll) {
 		this.availableForAll = availableForAll;
 	}
-	public Long getProductId() {
+	public String getProductId() {
 		return productId;
 	}
-	public void setProductId(Long productId) {
+	public void setProductId(String productId) {
 		this.productId = productId;
 	}
 	public Date getUseStartDate() {
@@ -378,11 +350,11 @@ public class Coupon extends BaseModel {
         this.uServiceType = uServiceType;
     }
 
-    public Long getuProductId() {
+    public String getuProductId() {
         return uProductId;
     }
 
-    public void setuProductId(Long uProductId) {
+    public void setuProductId(String uProductId) {
         this.uProductId = uProductId;
     }
 
@@ -403,18 +375,68 @@ public class Coupon extends BaseModel {
 		this.appid = appid;
 	}
 
+	public long getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+
+	public int getSupportType() {
+		return supportType;
+	}
+
+	public void setSupportType(int supportType) {
+		this.supportType = supportType;
+	}
+	
+	public String getTel() {
+		return tel;
+	}
+
+	public void setTel(String tel) {
+		this.tel = tel;
+	}
+
+	public String getOpenid() {
+		return openid;
+	}
+
+	public void setOpenid(String openid) {
+		this.openid = openid;
+	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+
+	public String getAgentNo() {
+		return agentNo;
+	}
+
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+
 	@Override
 	public String toString() {
 		return "Coupon [seedId=" + seedId + ", userId=" + userId + ", ruleId=" + ruleId + ", empty=" + empty
 				+ ", orderId=" + orderId + ", useStartDate=" + useStartDate + ", expiredDate=" + expiredDate
 				+ ", status=" + status + ", usedDate=" + usedDate + ", selected=" + selected + ", title=" + title
-				+ ", amount=" + amount + ", userHeadImg=" + userHeadImg + ", userName=" + userName + ", seedType="
-				+ seedType + ", seedStr=" + seedStr + ", couponDesc=" + couponDesc + ", usageCondition="
-				+ usageCondition + ", availableForAll=" + availableForAll + ", itemType=" + itemType + ", subItemType="
-				+ subItemType + ", serviceType=" + serviceType + ", productId=" + productId + ", merchantId="
-				+ merchantId + ", uItemType=" + uItemType + ", uSubItemType=" + uSubItemType + ", uServiceType="
-				+ uServiceType + ", uProductId=" + uProductId + ", uMerchantId=" + uMerchantId + ", suggestUrl="
-				+ suggestUrl + ", appid=" + appid + "]";
+				+ ", amount=" + amount + ", userHeadImg=" + userHeadImg + ", userName=" + userName + ", tel=" + tel
+				+ ", openid=" + openid + ", seedType=" + seedType + ", seedStr=" + seedStr + ", couponDesc="
+				+ couponDesc + ", usageCondition=" + usageCondition + ", availableForAll=" + availableForAll
+				+ ", supportType=" + supportType + ", itemType=" + itemType + ", subItemType=" + subItemType
+				+ ", serviceType=" + serviceType + ", productId=" + productId + ", merchantId=" + merchantId
+				+ ", uItemType=" + uItemType + ", uSubItemType=" + uSubItemType + ", uServiceType=" + uServiceType
+				+ ", uProductId=" + uProductId + ", uMerchantId=" + uMerchantId + ", suggestUrl=" + suggestUrl
+				+ ", appid=" + appid + ", agentId=" + agentId + ", agentName=" + agentName + ", agentNo=" + agentNo
+				+ "]";
 	}
 
 	

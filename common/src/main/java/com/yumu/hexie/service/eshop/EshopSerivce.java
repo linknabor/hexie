@@ -3,11 +3,15 @@ package com.yumu.hexie.service.eshop;
 import java.util.Map;
 
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -43,5 +47,17 @@ public interface EshopSerivce {
 	CommonResponse<Object> getOrder(QueryOrderVO queryOrderVO);
 
 	void saveLogistics(SaveLogisticsVO saveLogisticsVO);
+
+	CommonResponse<Object> getCouponCfg(QueryCouponCfgVO queryCouponCfgVO);
+
+	CommonResponse<Object> getCouponCfgByRuleId(QueryCouponCfgVO queryCouponCfgVO);
+
+	CommonResponse<Object> getSupportProduct(QueryProductVO queryProductVO);
+
+	void saveCouponCfg(SaveCouponCfgVO saveCouponCfgVO) throws Exception;
+	
+	CommonResponse<Object> getCouponList(QueryCouponVO queryCouponVO);
+
+	CommonResponse<Object> saveCoupon(SaveCouponVO saveCouponVO);
 
 }
