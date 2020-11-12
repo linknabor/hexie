@@ -277,12 +277,18 @@ public class ScheduleServiceImpl implements ScheduleService{
     	}
     	String ids = "";
     	for(ServiceOrder order : serviceOrders) {
+    		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+				continue;
+			}
     		ids += order.getId()+",";
     	}
     	ScheduleRecord sr = new ScheduleRecord(ModelConstant.SCHEDULE_TYPE_PAY_TIMEOUT,ids);
     	sr = scheduleRecordRepository.save(sr);
     	for(ServiceOrder order : serviceOrders) {
     		try{
+    			if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+    				continue;
+    			}
     	    	SCHEDULE_LOG.info("CancelOrder:" + order.getId());
     	    	baseOrderService.cancelOrder(order);
     		} catch(Exception e){
@@ -343,16 +349,20 @@ public class ScheduleServiceImpl implements ScheduleService{
     	}
 	}
 	@Override
-//    @Scheduled(cron = "15 */2 0 * * ?")
+    @Scheduled(cron = "15 */2 * * * ?")
 	public void executeCouponTimeoutJob() {
+		
+		SCHEDULE_LOG.info("--------------------start executeCouponTimeoutJob-------------------");
+		
 		List<Coupon> coupons = couponService.findTop100TimeoutCoupon();
 		for(Coupon coupon : coupons) {
 			try{
 				couponService.timeout(coupon);
 			}catch(Exception e) {
-				SCHEDULE_LOG.error("[TIMEOUT]COUPON_ID:" + coupon.getId(),e);
+				SCHEDULE_LOG.error("exec coupon timeout job error, couponId : " + coupon.getId(), e);
 			}
 		}
+		SCHEDULE_LOG.info("--------------------end executeCouponTimeoutJob-------------------");
 	}
 	
 	/**
@@ -541,7 +551,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 	
 	}
 	
-//	@Scheduled(cron = "0 */5 * * * ?")
+	@Scheduled(cron = "0 */5 * * * ?")
 	@Override
 	public void initStockAndFreeze() {
 		

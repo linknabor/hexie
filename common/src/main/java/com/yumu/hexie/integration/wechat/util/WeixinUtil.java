@@ -167,7 +167,7 @@ public class WeixinUtil {
 			String result = queryForString(requestUrl, requestMethod, outputStr);
 			jsonObject = (WechatResponse)JacksonJsonUtil.jsonToBean(result, WechatResponse.class);
 		} catch (ConnectException ce) {
-			log.error("server connection timed out.");
+			log.error(ce.getMessage(), ce);
 		} catch (Exception e) {
 			log.error("https request error:", e);
 		}

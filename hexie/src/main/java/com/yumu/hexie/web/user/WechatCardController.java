@@ -5,6 +5,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -73,7 +74,10 @@ public class WechatCardController extends BaseController {
 		preActivateResp.setUser(user);
 		if (!StringUtil.isEmpty(user.getTel())) {
 			logger.info("new user activated, will reset user session !");
-			httpSession.setAttribute(Constants.USER, user);
+			
+			User sessionUser = (User) httpSession.getAttribute(Constants.USER);
+			BeanUtils.copyProperties(user, sessionUser);
+			httpSession.setAttribute(Constants.USER, sessionUser);
 		}
 		return BaseResult.successResult(preActivateResp);
 		

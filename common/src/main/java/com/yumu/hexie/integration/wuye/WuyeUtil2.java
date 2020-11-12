@@ -31,10 +31,12 @@ import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
+import com.yumu.hexie.integration.wuye.req.WuyeParamRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
+import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -70,6 +72,7 @@ public class WuyeUtil2 {
 	private static final String QRCODE_URL = "getQRCodeSDO.do";	//二维码支付服务信息
 	private static final String SIGN_IN_OUT_URL = "signInSDO.do";	//二维码支付服务信息
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"; //合协社区物业缴费的小区级联
+	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do";
 	
 	/**
 	 * 标准版查询账单
@@ -366,6 +369,29 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		
+	}
+	
+	/**
+	 * 查询参数配置
+	 * @param reqUrl
+	 * @param c
+	 * @return
+	 */
+	public BaseResult<HexieConfig> queryServiceCfg(User user, String infoId, String type, String paraName) throws Exception {
+
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += SYNC_SERVICE_CFG_URL;
+		
+		WuyeParamRequest wuyeParamRequest = new WuyeParamRequest();
+		wuyeParamRequest.setInfoId(infoId);
+		wuyeParamRequest.setType(type);
+		wuyeParamRequest.setParaName(paraName);
+		
+		TypeReference<CommonResponse<HexieConfig>> typeReference = new TypeReference<CommonResponse<HexieConfig>>(){};
+		CommonResponse<HexieConfig> hexieResponse = restUtil.exchangeOnUri(requestUrl, wuyeParamRequest, typeReference);
+		BaseResult<HexieConfig> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
 	}
 	
 	

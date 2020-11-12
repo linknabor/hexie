@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import io.swagger.annotations.ApiOperation;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -23,15 +24,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class Swagger2Config {
 
-	@Bean("swagger4sales")
+	@Bean("swagger4hexie")
 	public Docket api4Sales() throws UnsupportedEncodingException {
-		return new Docket(DocumentationType.SWAGGER_2).groupName("Sales").apiInfo(apiInfo()).select()
+		return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
 				// 自行修改为自己的包路径
-				.apis(RequestHandlerSelectors.basePackage("com.yumu.hexie.web.sales"))
+				.apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation.class))
 				.paths(PathSelectors.any()).build();
 	}
-
-
+	
 	private ApiInfo apiInfo() {
 		return new ApiInfoBuilder().title("模块接口").description("")// swagger UI接入教程
 				// 服务条款网

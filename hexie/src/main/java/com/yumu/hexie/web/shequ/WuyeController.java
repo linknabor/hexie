@@ -41,7 +41,6 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
-import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -179,20 +178,18 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String stmtId, 
 			@RequestParam(required = false) String houseId) throws Exception {
 		
-		BindHouseDTO dto = wuyeService.bindHouse(user, stmtId, houseId);
-		HexieUser u = dto.getHexieUser();
-		User currUser = dto.getUser();
+		HexieUser u = wuyeService.bindHouse(user, stmtId, houseId);
 		log.info("HexieUser u = " + u);
 		if (u != null) {
-			currUser = wuyeService.setDefaultAddress(currUser, u);
-			if (!systemConfigService.isCardServiceAvailable(currUser.getAppId())) {
-				pointService.updatePoint(currUser, "1000", "zhima-house-" + currUser.getId() + "-" + houseId);
+			wuyeService.setDefaultAddress(user, u);
+			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			}
-			httpSession.setAttribute(Constants.USER, currUser);
+			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
 	}
-
+	
 	/**
 	 * 无账单绑定房屋
 	 * @param user
@@ -209,16 +206,14 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String houseId, 
 			@RequestParam(required = false) String area) throws Exception {
 		
-		BindHouseDTO dto = wuyeService.bindHouseNoStmt(user, houseId, area);
-		HexieUser u = dto.getHexieUser();
-		User currUser = dto.getUser();
+		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
 		log.info("HexieUser : " + u);
 		if (u != null) {
-			currUser = wuyeService.setDefaultAddress(currUser, u);
-			if (!systemConfigService.isCardServiceAvailable(currUser.getAppId())) {
-				pointService.updatePoint(currUser, "1000", "zhima-house-" + currUser.getId() + "-" + houseId);
+			wuyeService.setDefaultAddress(user, u);
+			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			}
-			httpSession.setAttribute(Constants.USER, currUser);
+			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
 	}
@@ -542,11 +537,12 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings({ "rawtypes" })
 	@RequestMapping(value = "/initSession4Test/{userId}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId) {
+	public BaseResult initSessionForTest(HttpSession session, @ModelAttribute(Constants.USER) User user, @PathVariable String userId) {
 
 		if (!StringUtil.isEmpty(userId)) {
-			User user = userRepository.findById(Long.valueOf(userId)).get();
-			session.setAttribute("sessionUser", user);
+			User currUser = userRepository.findById(Long.valueOf(userId)).get();
+			BeanUtils.copyProperties(currUser, user);
+			session.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult("succeeded");
 

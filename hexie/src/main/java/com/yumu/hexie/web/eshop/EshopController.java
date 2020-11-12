@@ -11,11 +11,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
@@ -234,6 +238,86 @@ public class EshopController<T> extends BaseController {
 		return commonResponse;
 	
 	}
+	
+	/**
+	 * 查询优惠券配置
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/cfg/get", method = RequestMethod.POST)
+	public CommonResponse<Object> getCouponCfg(@RequestBody QueryCouponCfgVO queryCouponCfgVO){
+		
+		logger.info("queryCouponCfgVO : " + queryCouponCfgVO);
+		return eshopSerivce.getCouponCfg(queryCouponCfgVO);
+		
+	}
+	
+	/**
+	 * 根据规则ID查询优惠券配置
+	 * @param queryProductVO
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/cfg/getById", method = RequestMethod.POST)
+	public CommonResponse<Object> getCouponCfgById(@RequestBody QueryCouponCfgVO queryCouponCfgVO) {
+		
+		logger.info("getById queryCouponCfgVO : " + queryCouponCfgVO);
+		return eshopSerivce.getCouponCfgByRuleId(queryCouponCfgVO);
+		
+	}
+	
+	/**
+	 * 选择支持优惠券的商品
+	 * @return
+	 */
+	@RequestMapping(value = "/product/getSupport", method = RequestMethod.POST)
+	public CommonResponse<Object> getSupportProduct(@RequestBody QueryProductVO queryProductVO){
+		
+		logger.info("getSupportProduct : " + queryProductVO);
+		CommonResponse<Object> commonResponse = eshopSerivce.getSupportProduct(queryProductVO);
+		return commonResponse;
+	
+	}
+	
+	/**
+	 * 保存优惠券配置
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/cfg/save", method = RequestMethod.POST)
+	public CommonResponse<String> saveCouponCfg(@RequestBody SaveCouponCfgVO saveCouponCfgVO) throws Exception {
+		
+		logger.info("saveCouponCfgVO : " + saveCouponCfgVO);
+		eshopSerivce.saveCouponCfg(saveCouponCfgVO);
+		
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+	
+	}
+	
+	/**
+	 * 查询优惠券配置
+	 * @return
+	 */
+	@RequestMapping(value = "/coupon/get", method = RequestMethod.POST)
+	public CommonResponse<Object> getCouponList(@RequestBody QueryCouponVO queryCouponVO){
+		
+		logger.info("queryCouponVO : " + queryCouponVO);
+		return eshopSerivce.getCouponList(queryCouponVO);
+		
+	}
+	
+	/**
+	 * 查询优惠券配置
+	 * @return
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/coupon/save", method = RequestMethod.POST)
+	public CommonResponse<Object> saveCoupon(@RequestBody SaveCouponVO saveCouponVO){
+		
+		logger.info("saveCouponVO : " + saveCouponVO);
+		CommonResponse<Object> commonResponse = eshopSerivce.saveCoupon(saveCouponVO);
+		return commonResponse;
+	}
+
 	
 	
 }

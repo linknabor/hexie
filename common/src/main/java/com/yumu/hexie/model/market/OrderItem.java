@@ -47,9 +47,12 @@ public class OrderItem  extends BaseModel {
 	private String ruleName;
 	private Long productCategoryId;
 	
-	private long agentId;
+	private Long agentId;
 	private String agentName;
 	private String agentNo;
+	
+	private Long couponId;
+	private Float couponAmount;
 	
 	@Transient
 	private long totalCount;	//总库存 
@@ -162,12 +165,6 @@ public class OrderItem  extends BaseModel {
 	public void setOriPrice(Float oriPrice) {
 		this.oriPrice = oriPrice;
 	}
-	public long getAgentId() {
-		return agentId;
-	}
-	public void setAgentId(long agentId) {
-		this.agentId = agentId;
-	}
 	public String getAgentName() {
 		return agentName;
 	}
@@ -209,6 +206,24 @@ public class OrderItem  extends BaseModel {
 	}
 	public void setTotalCount(long totalCount) {
 		this.totalCount = totalCount;
+	}
+	public Long getCouponId() {
+		return couponId;
+	}
+	public void setCouponId(Long couponId) {
+		this.couponId = couponId;
+	}
+	public Float getCouponAmount() {
+		return couponAmount;
+	}
+	public void setCouponAmount(Float couponAmount) {
+		this.couponAmount = couponAmount;
+	}
+	public Long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(Long agentId) {
+		this.agentId = agentId;
 	}
 	
 	

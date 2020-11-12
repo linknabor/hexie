@@ -24,6 +24,8 @@ import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
+import io.swagger.annotations.ApiOperation;
+
 @Controller(value = "saleController")
 public class SaleController extends BaseController{
     @Inject
@@ -49,6 +51,7 @@ public class SaleController extends BaseController{
 		return new BaseResult<SalePlan>().success(customOnSaleService.findSalePlan(ruleId));
     }
 	
+	@ApiOperation(value = "获取特卖、核销券商品", notes = "type->商品类型， category->商品分类")
 	@RequestMapping(value = "/onsales/v2/{type}/{category}/{page}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<OnSaleAreaItem>> getOnSales(@ModelAttribute(Constants.USER)User user, 
@@ -57,6 +60,7 @@ public class SaleController extends BaseController{
 		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesV2(user,type,category,page));
     }
 	
+	@ApiOperation(value = "获取特卖商品的分类", notes = "type->分类类型")
 	@RequestMapping(value = "/getOnsaleCategory/{type}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<ProductCategory>> getOnSales(@ModelAttribute(Constants.USER)User user, 
@@ -73,6 +77,7 @@ public class SaleController extends BaseController{
 		return new BaseResult<List<OnSaleAreaItem>>().success(distributionService.queryOnsalesByName(user,type,name,page));
     }
 	
+	@ApiOperation(value = "获取推广商品")
 	@RequestMapping(value = "/onsales/getPromotion", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<OnSaleAreaItem>> getPromotion(@RequestParam(required = false) String prodcutType) throws Exception {

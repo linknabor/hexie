@@ -47,6 +47,8 @@ import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.sales.resp.BuyInfoVO;
 
+import io.swagger.annotations.ApiOperation;
+
 @Controller(value = "orderController")
 public class OrderController extends BaseController{
     @Inject
@@ -223,6 +225,7 @@ public class OrderController extends BaseController{
 		return new BaseResult<ServiceOrder>().success(order);
     }
 
+	@ApiOperation(value = "订单支付")
 	@RequestMapping(value = "/requestPay/{orderId}", method = {RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
 	public BaseResult<JsSign> requestPay(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
@@ -239,7 +242,6 @@ public class OrderController extends BaseController{
 		return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
 	}
 	
-
 	@RequestMapping(value = "/cancelOrder/{orderId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<ServiceOrder> cancelOrder(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
@@ -327,6 +329,7 @@ public class OrderController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "购物车支付页面创建订单")
 	@RequestMapping(value = "/createOrderFromCart", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<ServiceOrder> createOrderFromCart(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req) throws Exception {
@@ -339,12 +342,13 @@ public class OrderController extends BaseController{
 	}
 	
 	/**
-	 * 购物车支付页面创建订单
+	 * 社区合伙人购买
 	 * @param user
 	 * @param req
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "社区合伙人购买")
 	@RequestMapping(value = "/promotionPay", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<JsSign> promotionPay(HttpSession session, @ModelAttribute(Constants.USER)User user, 
@@ -357,12 +361,13 @@ public class OrderController extends BaseController{
 	}
 	
 	/**
-	 * 购物车支付页面创建订单
+	 * saas软件售卖
 	 * @param user
 	 * @param req
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "saas软件售卖")
 	@RequestMapping(value = "/promotionPayV2", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<JsSign> promotionPayV2(@ModelAttribute(Constants.USER)User user, @RequestBody PromotionOrder promotionOrder) throws Exception {
@@ -379,6 +384,7 @@ public class OrderController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "查询是否购买过推广商品(有退款的也算)")
 	@RequestMapping(value = "/queryPromotionOrder", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Long> queryPromotionOrder(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String orderType) throws Exception {

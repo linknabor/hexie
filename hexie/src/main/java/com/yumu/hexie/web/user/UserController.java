@@ -6,11 +6,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -77,59 +77,56 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
 	@ResponseBody
-    public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user,
-    		HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public BaseResult<UserInfo> userInfo(HttpServletRequest request, @ModelAttribute(Constants.USER)User user) throws Exception {
 		
 		long beginTime = System.currentTimeMillis();
-		User sessionUser = user;
+		User dbUser = null;
 		try {
-			
+
 			String oriApp = request.getParameter("oriApp");
-			log.info("oriApp : " + oriApp);
 			if (StringUtil.isEmpty(oriApp)) {
 				oriApp = ConstantWeChat.APPID;
 			}
+			log.info("oriApp : " + oriApp);
+			log.info("user in session :" + user);
 			
-			log.info("user in session :" + sessionUser);
-			List<User> userList = userService.getByOpenId(user.getOpenid());
+			List<User> userList = userService.getByOpenId(user.getOpenid());	//数据库访问。尽量避免一登陆就操作。
 			if (userList!=null) {
 				for (User baseduser : userList) {
-					
 					if (baseduser.getId() == user.getId()) {
-						user = baseduser;
+						dbUser = baseduser;
 						break;
 					}else if (baseduser.getOriUserId() == user.getId() && !ConstantWeChat.APPID.equals(baseduser.getAppId())) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
-						user = baseduser;
+						dbUser = baseduser;
 						break;
 					}
 				}
 			}
-			user = userService.getById(user.getId());
-			if (user != null) {
-				String userAppId = user.getAppId();	//如果根据session中信息获得的用户并非当前公众号的，比如宝房用户登陆合协公众号，则需要清空session，让他重新登陆
+			if (dbUser != null) {
+				String userAppId = dbUser.getAppId();	//如果根据session中信息获得的用户并非当前公众号的，比如宝房用户登陆合协公众号，则需要清空session，让他重新登陆
 				if (!oriApp.equals(userAppId)) {
-					user = null;
+					dbUser = null;
 				}
 			}
 			
-			log.info("user in db :" + user);
-			if(user != null){
+			log.info("user in db :" + dbUser);
+			if(dbUser != null){
 				
 				long endTime = System.currentTimeMillis();
-				
-			    session.setAttribute(Constants.USER, user);
+				BeanUtils.copyProperties(dbUser, user);
+			    request.getSession().setAttribute(Constants.USER, user);
 		    
 			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
 			    UserInfo userInfo = new UserInfo(user, odDefinition);
 
 			    endTime = System.currentTimeMillis();
-			    log.info("user1，耗时：" + ((endTime-beginTime)));
+			    log.info("userInfo1，耗时：" + ((endTime-beginTime)));
 
-			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
+			    Map<Object, Object> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    endTime = System.currentTimeMillis();
-			    log.info("user2，耗时：" + ((endTime-beginTime)));
+			    log.info("userInfo2，耗时：" + ((endTime-beginTime)));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 //			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
@@ -170,8 +167,8 @@ public class UserController extends BaseController{
 
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());
-				session.setMaxInactiveInterval(1);//将会话过期
+				log.error("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
+				request.getSession().setMaxInactiveInterval(1);//将会话过期
 				Thread.sleep(50);	//延时，因为上面设置了1秒。页面上也设置了延时，所以这里不需要1秒
 				return new BaseResult<UserInfo>().success(null);
 			}
@@ -212,7 +209,7 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/login/{code}", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestBody(required = false) Map<String, String> postData) throws Exception {
+    public BaseResult<UserInfo> login(HttpSession session, @PathVariable String code, @RequestBody(required = false) Map<String, String> postData) throws Exception {
 		
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
@@ -244,8 +241,7 @@ public class UserController extends BaseController{
 		    	
 		    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
 		    }
-		    
-			session.setAttribute(Constants.USER, userAccount);
+		    session.setAttribute(Constants.USER, userAccount);
 		}
 		if(userAccount == null) {
 		    return new BaseResult<UserInfo>().failMsg("用户不存在！");
@@ -323,7 +319,8 @@ public class UserController extends BaseController{
 			user.setSex(editUser.getSex());
 			user.setRealName(editUser.getRealName());
 			user.setName(editUser.getName());
-			session.setAttribute(Constants.USER, userService.save(user));
+			userService.save(user);
+			session.setAttribute(Constants.USER, user);
 
 	        return new BaseResult<UserInfo>().success(new UserInfo(user));
 		} else {
@@ -334,7 +331,8 @@ public class UserController extends BaseController{
 				user.setSex(editUser.getSex());
 				user.setRealName(editUser.getRealName());
 				user.setName(editUser.getName());
-				session.setAttribute(Constants.USER, userService.save(user));
+				userService.save(user);
+				session.setAttribute(Constants.USER, user);
 	            return new BaseResult<UserInfo>().success(new UserInfo(user));
 			}
 		}
@@ -358,9 +356,9 @@ public class UserController extends BaseController{
             if (!StringUtils.isEmpty(req.getMobile())) {
             	 user.setTel(req.getMobile());
 			}
-            User savedUser = userService.simpleRegister(user);
-            session.setAttribute(Constants.USER, savedUser);
-            return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
+            userService.simpleRegister(user);
+            session.setAttribute(Constants.USER, user);
+            return new BaseResult<UserInfo>().success(new UserInfo(user));
 
         }
     }

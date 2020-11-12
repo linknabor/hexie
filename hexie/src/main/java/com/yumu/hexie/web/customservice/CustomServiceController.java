@@ -32,6 +32,8 @@ import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.customservice.vo.CustomServiceOrderVO;
 import com.yumu.hexie.web.customservice.vo.OrderQueryVO;
 import com.yumu.hexie.web.customservice.vo.ServiceCommentVO;
+
+import io.swagger.annotations.ApiOperation;
 /**
  * 自定义服务
  * @author david
@@ -52,6 +54,7 @@ public class CustomServiceController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "获取自定义服务列表")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/service", method = RequestMethod.GET)
 	public BaseResult<List<CustomServiceVO>> getService(@ModelAttribute(Constants.USER) User user) throws Exception {
@@ -69,6 +72,7 @@ public class CustomServiceController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "自定义服务创建订单")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order", method = RequestMethod.POST)
 	public BaseResult<CommonPayResponse> createOrder(@ModelAttribute(Constants.USER) User user, @RequestBody CustomServiceOrderVO customServiceOrderVO) throws Exception {
@@ -253,14 +257,15 @@ public class CustomServiceController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "自定义服务，非一口价支付")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/pay", method = RequestMethod.POST)
 	public BaseResult<CommonPayResponse> orderPay(@ModelAttribute(Constants.USER) User user, 
-			@RequestParam String orderId, @RequestParam String amount) throws Exception {
+			@RequestParam String orderId, @RequestParam String amount, @RequestParam(required = false) String couponId) throws Exception {
 		
 		logger.info("orderPay, user : " + user);
-		logger.info("orderPay orderId : " + orderId + ", amout : " + amount);
-		ServiceOrderPrepayVO vo = customService.orderPay(user, orderId, amount);
+		logger.info("orderPay orderId : " + orderId + ", amout : " + amount + ", couponId : " + couponId);
+		ServiceOrderPrepayVO vo = customService.orderPay(user, orderId, amount, couponId);
 		return BaseResult.successResult(vo);
 	}
 	

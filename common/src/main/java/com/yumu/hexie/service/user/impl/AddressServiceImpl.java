@@ -231,7 +231,7 @@ public class AddressServiceImpl implements AddressService {
         user.setLongitude(currentAddr.getLongitude());
 
         log.error("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + currentAddr.getId());
-        user = userService.save(user);
+        userService.save(user);
         log.error("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + currentAddr.getId());
         
         return currentAddr;

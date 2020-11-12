@@ -18,6 +18,10 @@ public class CustomerServiceOrderDTO {
 	private String memo;
 	private String sectName;
 	private String orderType;
+	private String couponId;
+	private String couponAmt;
+	private String agentNo;
+	private String agentName;
 	
 	public User getUser() {
 		return user;
@@ -97,12 +101,37 @@ public class CustomerServiceOrderDTO {
 	public void setOrderType(String orderType) {
 		this.orderType = orderType;
 	}
+	public String getCouponId() {
+		return couponId;
+	}
+	public void setCouponId(String couponId) {
+		this.couponId = couponId;
+	}
+	public String getAgentNo() {
+		return agentNo;
+	}
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+	public String getAgentName() {
+		return agentName;
+	}
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+	public String getCouponAmt() {
+		return couponAmt;
+	}
+	public void setCouponAmt(String couponAmt) {
+		this.couponAmt = couponAmt;
+	}
 	@Override
 	public String toString() {
 		return "CustomerServiceOrderDTO [user=" + user + ", serviceId=" + serviceId + ", serviceName=" + serviceName
 				+ ", image=" + image + ", sectId=" + sectId + ", linkman=" + linkman + ", linktel=" + linktel
 				+ ", serviceAddr=" + serviceAddr + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", memo="
-				+ memo + ", sectName=" + sectName + ", orderType=" + orderType + "]";
+				+ memo + ", sectName=" + sectName + ", orderType=" + orderType + ", couponId=" + couponId
+				+ ", couponAmt=" + couponAmt + ", agentNo=" + agentNo + ", agentName=" + agentName + "]";
 	}
 	
 	

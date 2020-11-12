@@ -17,6 +17,7 @@ public class RestConfig {
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
         requestFactory.setReadTimeout(REST_READ_TIME_OUT);
         requestFactory.setConnectTimeout(REST_CONNECT_TIME_OUT);
+        requestFactory.setConnectionRequestTimeout(REST_CONNECT_TIME_OUT);
         RestTemplate restTemplate = new RestTemplate(requestFactory);
         return restTemplate;
     }

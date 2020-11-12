@@ -32,7 +32,6 @@ import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
-import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
@@ -58,7 +57,6 @@ import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service("wuyeService")
@@ -68,9 +66,6 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private AddressService addressService;
-	
-	@Autowired
-	private UserService userService;
 	
 	@Autowired
 	private CouponService couponService;
@@ -109,8 +104,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public boolean deleteHouse(User user, String houseId) {
 		
-		User curruser = userService.getById(user.getId());
-		BaseResult<String> result = WuyeUtil.deleteHouse(curruser, houseId);
+		BaseResult<String> result = WuyeUtil.deleteHouse(user, houseId);
 		if (result.isSuccess()) {
 			// 添加电话到user表
 			String data = result.getData();
@@ -122,9 +116,19 @@ public class WuyeServiceImpl implements WuyeService {
 				totalBind = 0;
 			}
 			if (totalBind == 0) {
-				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", curruser.getId());
+				user.setXiaoquId(0l);
+				user.setXiaoquName("");
+				user.setTotalBind(totalBind);
+				user.setProvince("");
+				user.setCity("");
+				user.setCountry("");
+				user.setSectId("0");
+				user.setCspId("0");
+				user.setTel("");
+				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", user.getId());
 			}else {
-				userRepository.updateUserTotalBind(totalBind, curruser.getId());
+				user.setTotalBind(totalBind);
+				userRepository.updateUserTotalBind(totalBind, user.getId());
 			}
 			
 		} else {
@@ -269,10 +273,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public BindHouseDTO bindHouseNoStmt(User user, String houseId, String area) {
+	public HexieUser bindHouseNoStmt(User user, String houseId, String area) {
 		
-		User currUser = userService.getById(user.getId());
-		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(currUser, houseId, area);
+		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(user, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -285,22 +288,18 @@ public class WuyeServiceImpl implements WuyeService {
 		if("06".equals(r.getResult())) {
 			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
 		}
-		BindHouseDTO dto = new BindHouseDTO();
-		dto.setHexieUser(r.getData());
-		dto.setUser(currUser);
-		return dto;
+		return r.getData();
 	}
 
 	@Override
 	@Transactional
-	public User setDefaultAddress(User user, HexieUser u) {
+	public void setDefaultAddress(User user, HexieUser u) {
 
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
-		User currUser = userService.getById(user.getId());
 		
-		addressService.updateDefaultAddress(currUser, hexieAddress);
-		Integer totalBind = currUser.getTotalBind();
+		addressService.updateDefaultAddress(user, hexieAddress);
+		Integer totalBind = user.getTotalBind();
 		if (totalBind == null) {
 			totalBind = 0;
 		}
@@ -312,19 +311,17 @@ public class WuyeServiceImpl implements WuyeService {
 		if (totalBind == 0) {
 			totalBind = totalBind + 1;
 		}
-		currUser.setTotalBind(totalBind);
-		currUser.setXiaoquName(u.getSect_name());
-		currUser.setProvince(u.getProvince_name());
-		currUser.setCity(u.getCity_name());
-		currUser.setCounty(u.getRegion_name());
-		currUser.setSectId(u.getSect_id());	
-		currUser.setCspId(u.getCsp_id());
-		currUser.setOfficeTel(u.getOffice_tel());
-		userRepository.updateUserByHouse(currUser.getXiaoquId(), currUser.getXiaoquName(), 
-				currUser.getTotalBind(), currUser.getProvince(), currUser.getCity(), currUser.getCountry(), 
-				currUser.getSectId(), currUser.getCspId(), currUser.getOfficeTel(), currUser.getId());
-		
-		return currUser;
+		user.setTotalBind(totalBind);
+		user.setXiaoquName(u.getSect_name());
+		user.setProvince(u.getProvince_name());
+		user.setCity(u.getCity_name());
+		user.setCounty(u.getRegion_name());
+		user.setSectId(u.getSect_id());	
+		user.setCspId(u.getCsp_id());
+		user.setOfficeTel(u.getOffice_tel());
+		userRepository.updateUserByHouse(user.getXiaoquId(), user.getXiaoquName(), 
+				user.getTotalBind(), user.getProvince(), user.getCity(), user.getCountry(), 
+				user.getSectId(), user.getCspId(), user.getOfficeTel(), user.getId());
 		
 	}
 
@@ -354,10 +351,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public BindHouseDTO bindHouse(User user, String stmtId, String houseId) {
+	public HexieUser bindHouse(User user, String stmtId, String houseId) {
 		
-		User currUser = userService.getById(user.getId());
-		BaseResult<HexieUser> r= WuyeUtil.bindHouse(currUser, stmtId, houseId);
+		BaseResult<HexieUser> r = WuyeUtil.bindHouse(user, stmtId, houseId);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -367,10 +363,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if("01".equals(r.getResult())) {
 			throw new BizValidateException("账户不存在！");
 		}
-		BindHouseDTO dto = new BindHouseDTO();
-		dto.setHexieUser(r.getData());
-		dto.setUser(currUser);
-		return dto;
+		return r.getData();
 	}
 	
 	/**
