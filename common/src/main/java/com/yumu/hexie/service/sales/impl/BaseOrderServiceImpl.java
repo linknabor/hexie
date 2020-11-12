@@ -1609,8 +1609,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				serviceOrder.setPayDate(new Date());
 				serviceOrderRepository.save(serviceOrder);
 				
-				consumeAndCreateOrderSeed(serviceOrder);
 			}
+			consumeAndCreateOrderSeed(serviceOrder);
 		}
 		
 	}
@@ -1623,7 +1623,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			orderItem.setProductId(order.getProductId());
 			items = new ArrayList<>();
 			items.add(orderItem);
-			log.info("item : " + orderItem.getProductId());
 		}
 		order.setItems(items);
 		couponService.comsume(order);
