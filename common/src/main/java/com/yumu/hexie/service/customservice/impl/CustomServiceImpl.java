@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.customservice.impl;
 
 import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -372,6 +373,7 @@ public class CustomServiceImpl implements CustomService {
 		vo.setOrderId(orderId);
 		serviceOrder.setPrice(Float.valueOf(amount));
 		serviceOrder.setTotalAmount(Float.valueOf(amount));
+
 		if (coupon != null) {
 			serviceOrder.configCoupon(coupon);
 //			coupon.lock(serviceOrder.getId());	//服务的券不能锁
