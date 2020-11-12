@@ -73,9 +73,8 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.sendDeliveryNotificationAsyc();
 		notifyQueueTask.updatePartnerAsync();
 		notifyQueueTask.eshopRefundAsync();
-		
 		couponQueueTask.gainCouponAsync();
-		
+
 		logger.info("异步队列任务启动完成。");
 		
 	}

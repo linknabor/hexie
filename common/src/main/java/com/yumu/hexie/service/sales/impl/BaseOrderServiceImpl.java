@@ -151,6 +151,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private CacheableService cacheableService;
 	@Autowired
 	private PartnerService partnerService;
+
 	
 	private void preOrderCreate(ServiceOrder order, Address address){
 	    log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());

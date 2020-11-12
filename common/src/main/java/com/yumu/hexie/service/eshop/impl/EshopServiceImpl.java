@@ -160,8 +160,7 @@ public class EshopServiceImpl implements EshopSerivce {
 	private CouponRepository couponRepository;
 	@Autowired
 	private CouponService couponService;
-	
-	
+		
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
 	
@@ -1049,8 +1048,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				statusList.add(ModelConstant.ORDER_STATUS_CONFIRM);
 			} else {
 				statusList.add(Integer.valueOf(status));
-			} 
-	
+			} 	
 			List<Order> sortList = new ArrayList<>();
 	    	Order order = new Order(Direction.DESC, "id");
 	    	sortList.add(order);
@@ -1252,6 +1250,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			List<QuerySupportProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QuerySupportProductMapper.class);
 			QueryListDTO<List<QuerySupportProductMapper>> responsePage = new QueryListDTO<>();
+
 			responsePage.setTotalPages(page.getTotalPages());
 			responsePage.setTotalSize(page.getTotalElements());
 			responsePage.setContent(list);
@@ -1600,8 +1599,12 @@ public class EshopServiceImpl implements EshopSerivce {
 		}
 		return commonResponse;
 		
-	
 	}
 	
+//	public void getCouponCfg(Query) {
+//		
+//		
+//		
+//	}
 
 }
