@@ -1609,8 +1609,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				serviceOrder.setPayDate(new Date());
 				serviceOrderRepository.save(serviceOrder);
 				
-				consumeAndCreateOrderSeed(serviceOrder);
 			}
+			consumeAndCreateOrderSeed(serviceOrder);
 		}
 		
 	}
