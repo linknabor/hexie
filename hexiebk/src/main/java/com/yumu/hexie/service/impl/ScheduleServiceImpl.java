@@ -551,7 +551,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 	
 	}
 	
-//	@Scheduled(cron = "0 */5 * * * ?")
+	@Scheduled(cron = "0 */5 * * * ?")
 	@Override
 	public void initStockAndFreeze() {
 		
