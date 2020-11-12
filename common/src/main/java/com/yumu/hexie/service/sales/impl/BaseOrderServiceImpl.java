@@ -1618,17 +1618,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 	private void consumeAndCreateOrderSeed(ServiceOrder order) {
 		//1.消费优惠券 2.如果配了分裂红包，则创建分裂红包的种子
 		List<OrderItem> items = orderItemRepository.findByServiceOrder(order);
-		log.info("items : " + items);
 		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
 			OrderItem orderItem = new OrderItem();
 			orderItem.setProductId(order.getProductId());
-			if (items == null) {
-				
-			}
 			items = new ArrayList<>();
 			items.add(orderItem);
+			log.info("item : " + orderItem.getProductId());
 		}
-		log.info("begin to set items, order id : " + order.getId());
 		order.setItems(items);
 		couponService.comsume(order);
 		CouponSeed cs = couponService.createOrderSeed(order.getUserId(), order);
