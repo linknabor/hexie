@@ -90,7 +90,7 @@ public class ConstantConfig {
 	@Bean
 	public AlipayClient alipayClient() {
 		
-		AlipayClient alipayClient = null;
+		AlipayClient alipayClient = new DefaultAlipayClient("", "", "");
 		if (mainServer) {
 			return alipayClient;
 		}

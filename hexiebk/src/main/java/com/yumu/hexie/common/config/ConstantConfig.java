@@ -5,8 +5,11 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -82,5 +85,32 @@ public class ConstantConfig {
 		ConstantAlipay.APP_PRIVATE_KEY = alipayAppPrivateKey;
 		ConstantAlipay.PUBLIC_KEY = alipayPublicKey;
 		ConstantAlipay.GATEWAY = alipayGateway;
+	}
+	
+	@Bean
+	public AlipayClient alipayClient() {
+		
+		AlipayClient alipayClient = new DefaultAlipayClient("", "", "");
+		if (mainServer) {
+			return alipayClient;
+		}
+		
+		try {
+			
+			logger.info("start to init alipay client ...");
+			logger.info("alipayAppId : " + alipayAppId);
+			logger.info("alipayAppPrivateKey : " + alipayAppPrivateKey);
+			logger.info("alipayPublicKey : " + alipayPublicKey);
+			
+			alipayClient = new DefaultAlipayClient(ConstantAlipay.GATEWAY, alipayAppId, 
+					alipayAppPrivateKey, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
+					alipayPublicKey, ConstantAlipay.SIGNTYPE);
+			
+			logger.info("init alipay client finished .");
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return alipayClient; 
 	}
 }
