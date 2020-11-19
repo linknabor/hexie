@@ -94,6 +94,7 @@ public class ConstantConfig {
 		if (mainServer) {
 			return alipayClient;
 		}
+		
 		try {
 			
 			logger.info("start to init alipay client ...");
