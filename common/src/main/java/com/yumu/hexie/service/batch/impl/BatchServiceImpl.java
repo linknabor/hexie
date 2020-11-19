@@ -100,7 +100,7 @@ public class BatchServiceImpl implements BatchService {
 	/*支付宝参数end#################################*/
 	
 	@PostConstruct
-	private void runBatch() throws InterruptedException {
+	public void runBatch() throws InterruptedException {
 		
 		if (mainServer) {	//BK程序不跑下面的队列轮询
 			return;
