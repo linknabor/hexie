@@ -89,6 +89,11 @@ public class UserServiceImpl implements UserService {
 				return;
 			}
 			logger.info("start to init alipay client ...");
+			
+			logger.info("ConstantAlipay.APPID : " + ConstantAlipay.APPID);
+			logger.info("ConstantAlipay.APP_PRIVATE_KEY : " + ConstantAlipay.APP_PRIVATE_KEY);
+			logger.info("ConstantAlipay.PUBLIC_KEY : " + ConstantAlipay.PUBLIC_KEY);
+			
 			alipayClient = new DefaultAlipayClient(ConstantAlipay.GATEWAY, ConstantAlipay.APPID, 
 					ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
 					ConstantAlipay.PUBLIC_KEY, ConstantAlipay.SIGNTYPE);
@@ -409,6 +414,8 @@ public class UserServiceImpl implements UserService {
 		request.setGrantType(ConstantAlipay.AUTHORIZATION_TYPE);
 		AccessTokenOAuth oAuth = new AccessTokenOAuth();
 		try {
+			logger.info("alipayClient: " + alipayClient);
+			logger.info("grantType: " + ConstantAlipay.AUTHORIZATION_TYPE);
 		    AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
 		    oAuth.setOpenid(oauthTokenResponse.getUserId());
 		    oAuth.setAccessToken(oauthTokenResponse.getAccessToken());
