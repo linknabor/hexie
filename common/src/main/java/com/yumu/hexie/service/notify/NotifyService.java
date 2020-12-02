@@ -23,4 +23,6 @@ public interface NotifyService {
 
 	void notifyEshopRefund(String orderId);
 
+	void notifyWuyeCouponConsumeAsync(String orderId, String couponId);
+
 }
