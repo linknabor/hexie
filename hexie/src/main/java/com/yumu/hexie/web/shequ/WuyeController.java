@@ -50,7 +50,6 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
-import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -452,42 +451,17 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getCouponsPayWuYe", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<Coupon>> getCoupons(HttpSession session, @RequestParam(required = false)String payType) {
+	public BaseResult<List<Coupon>> getCoupons(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false)String payType, 
+			@RequestParam(required = false)String amount, @RequestParam(required = false) String agentNo) {
 		
-		log.info("payType is : " + payType);
-		User user = (User) session.getAttribute(Constants.USER);
-		List<Coupon> list = couponService.findAvaibleCouponForWuye(user, payType);
+		log.info("payType is : " + payType + ", amount : " + amount + ", agentNo :" + agentNo);
+		List<Coupon> list = couponService.findAvaibleCouponForWuye(user, payType, amount, agentNo);
 		if (list == null) {
 			list = new ArrayList<Coupon>();
 		}
 		return BaseResult.successResult(list);
 
 	}
-
-	/**
-	 * 为物业缴费成功的用户发放红包
-	 * TODO 这个函数前端目前没有调用了
-	 * @param session
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes" })
-	@RequestMapping(value = "sendCoupons4WuyePay", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult sendCoupons(HttpSession session, @RequestParam(required = false) String tradeWaterId,
-			@RequestParam(required = false) String feePrice) {
-
-		User user = (User) session.getAttribute(Constants.USER);
-		int couponCombination = 1;
-		List<CouponCombination> list = couponService.findCouponCombination(couponCombination);
-
-		wuyeService.addCouponsFromSeed(user, list);
-
-		wuyeService.sendPayTemplateMsg(user, tradeWaterId, feePrice);
-
-		return BaseResult.successResult("send succeeded !");
-	}
-
-	
 
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)
@@ -532,20 +506,6 @@ public class WuyeController extends BaseController {
 		response.addHeader("Access-Control-Allow-Token", token);
 		return BaseResult.successResult(invoice);
 		
-	}
-
-	@SuppressWarnings({ "rawtypes" })
-	@RequestMapping(value = "/initSession4Test/{userId}", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult initSessionForTest(HttpSession session, @ModelAttribute(Constants.USER) User user, @PathVariable String userId) {
-
-		if (!StringUtil.isEmpty(userId)) {
-			User currUser = userRepository.findById(Long.valueOf(userId)).get();
-			BeanUtils.copyProperties(currUser, user);
-			session.setAttribute(Constants.USER, user);
-		}
-		return BaseResult.successResult("succeeded");
-
 	}
 
 	/**
