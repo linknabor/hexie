@@ -40,6 +40,7 @@ public class Thread implements Serializable{
 	private String xiaoquName;	//对应region表的name
 	private String userSectId;		//用户所在小区ID,对应saas的sect_id
 	private String userSectName; 	//用户所在小区名称,对应的saas的sect_name_frst
+	private String userCspId;	//用户所在物业公司ID
 	private String userAddress;		//用户地址
 	private double userSectLatitude;	//用户所在小区纬度
 	private double userSectLongtitude;	//用户所在小区精度
@@ -311,6 +312,12 @@ public class Thread implements Serializable{
 	}
 	public void setXiaoquName(String xiaoquName) {
 		this.xiaoquName = xiaoquName;
+	}
+	public String getUserCspId() {
+		return userCspId;
+	}
+	public void setUserCspId(String userCspId) {
+		this.userCspId = userCspId;
 	}
 	
 	

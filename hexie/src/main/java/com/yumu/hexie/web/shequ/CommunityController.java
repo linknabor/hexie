@@ -180,16 +180,9 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		if(StringUtil.isEmpty(user.getSectId())){
-			
-			return BaseResult.fail("用户没有注册小区。");
-		}
-		
 		if(thread.getThreadContent().length()>200){
-			
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
-		
 		communityService.addThread(user, thread);
 		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
 
@@ -521,7 +514,7 @@ public class CommunityController extends BaseController{
 		
 	}
 	
-		private void moveImgsFromTencent2Qiniu(ThreadComment ret){
+	private void moveImgsFromTencent2Qiniu(ThreadComment ret){
 				
 				//从腾讯下载用户上传的图片。并放到图片服务器上。
 		String uploadIds = ret.getUploadPicId();
