@@ -30,6 +30,7 @@ import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.community.ThreadCommentRepository;
 import com.yumu.hexie.model.community.ThreadRepository;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.PostingService;
 
@@ -38,9 +39,11 @@ public class PostingServiceImpl implements PostingService {
 	
 	@Autowired
 	private ThreadRepository threadRepository;
-
 	@Autowired
 	private ThreadCommentRepository threadCommentRepository;
+	@Autowired
+	private GotongService gotongService;
+	
 	
 	@Override
 	public CommonResponse<Object> getPosting(QueryPostingVO queryPostingVO) {
@@ -158,6 +161,8 @@ public class PostingServiceImpl implements PostingService {
 		threadRepository.save(thread);
 		
 		ThreadComment comment = new ThreadComment();
+		comment.setThreadId(thread.getThreadId());
+		comment.setCommentContent(saveCommentVO.getContent());
 		comment.setToUserId(thread.getUserId());
 		comment.setToUserName(thread.getUserName());
 		comment.setToUserReaded("false");
@@ -167,6 +172,11 @@ public class PostingServiceImpl implements PostingService {
 		comment.setCommentUserId(Long.valueOf(saveCommentVO.getUserId()));
 		comment.setCommentUserName(saveCommentVO.getUserName());
 		threadCommentRepository.save(comment);
+		
+//		if (comment.getCommentUserId() != thread.getUserId()) {
+//			gotongService.sendPostingReplyMsg(thread);
+//		}
+		
 	}
 	
 }

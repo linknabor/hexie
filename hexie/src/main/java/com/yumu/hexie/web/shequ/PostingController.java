@@ -55,7 +55,7 @@ public class PostingController extends BaseController {
 		return postingService.getComment(queryPostingVO);
 	}
 	
-	@RequestMapping(value = "/save", method = RequestMethod.POST)
+	@RequestMapping(value = "/comment/save", method = RequestMethod.POST)
 	public CommonResponse<String> addComment(@RequestBody SaveCommentVO saveCommentVO) {
 		
 		logger.info("saveCommentVO : " + saveCommentVO);
