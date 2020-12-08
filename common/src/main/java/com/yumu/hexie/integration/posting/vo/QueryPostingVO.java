@@ -28,7 +28,7 @@ public class QueryPostingVO implements Serializable {
 
 	public String getStartDate() {
 		if (!StringUtils.isEmpty(startDate)) {
-			Date d = DateUtil.getDateFromString(startDate);
+			Date d = DateUtil.getDateTimeFromString(startDate);
 			return String.valueOf(d.getTime());
 		}
 		return startDate;
@@ -38,7 +38,7 @@ public class QueryPostingVO implements Serializable {
 	}
 	public String getEndDate() {
 		if (!StringUtils.isEmpty(endDate)) {
-			Date d = DateUtil.getDateFromString(endDate);
+			Date d = DateUtil.getDateTimeFromString(endDate);
 			return String.valueOf(d.getTime());
 		}
 		return endDate;

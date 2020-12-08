@@ -104,7 +104,7 @@ public class DateUtil {
     }
 
     /**
-     * 
+     *优先格式化成yyyy-MM-dd形式的Date，如果不传时分秒，则取当天零点
      *description: yyyy-MM-dd 或者 yyyy-MM-dd hh:mm:ss
      *@author rongnian.lu gfwu321@163.com
      *date： 2015-7-28
@@ -124,6 +124,25 @@ public class DateUtil {
 			}
 		}
     	
+        return date;
+    }
+    
+    /**
+     *优先格式化成yyyy-MM-dd HH:mm:ss形式的Date，如果不传时分秒，则取当天零点 
+     *description: yyyy-MM-dd 或者 yyyy-MM-dd hh:mm:ss
+     *@author rongnian.lu gfwu321@163.com
+     *date： 2015-7-28
+     *param:@param dateString
+     *param:@return
+     *return：Date
+     */
+    public static final Date getDateTimeFromString(String dateString) {
+    	Date date=null;
+    	try {
+    		date=	new SimpleDateFormat(dttmSimple).parse(dateString);
+		} catch (Exception e) {
+			date=null;
+		}
         return date;
     }
     
