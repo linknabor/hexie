@@ -25,4 +25,5 @@ public interface NotifyService {
 
 	void notifyWuyeCouponConsumeAsync(String orderId, String couponId);
 
+
 }

@@ -456,6 +456,7 @@ public class Coupon extends BaseModel {
 				+ ", uProductId=" + uProductId + ", uMerchantId=" + uMerchantId + ", suggestUrl=" + suggestUrl
 				+ ", appid=" + appid + ", agentId=" + agentId + ", agentName=" + agentName + ", agentNo=" + agentNo
 				+ ", orderNo=" + orderNo + "]";
+
 	}
 
 	

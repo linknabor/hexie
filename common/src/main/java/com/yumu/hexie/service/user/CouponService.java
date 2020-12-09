@@ -102,4 +102,5 @@ public interface CouponService {
 	List<Coupon> findAvaibleCouponForWuye(User user, String payType, String amount, String agentNo);
 
 	void consume(String orderNo, String couponId);
+
 }

@@ -63,6 +63,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private BaseOrderService baseOrderService;
 	@Autowired
 	private CouponService couponService;
+
 	
 	/**
 	 * 异步发送到账模板消息
@@ -712,6 +713,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 		}
 		
 	}
-	
+
 
 }
