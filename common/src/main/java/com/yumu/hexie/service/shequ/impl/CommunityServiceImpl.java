@@ -114,7 +114,6 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserName(currUser.getNickname());
 		thread.setUserSectId(currUser.getSectId());
 		thread.setUserSectName(currUser.getXiaoquName());
-		thread.setUserCspId(currUser.getCspId());
 		thread.setUserAddress(currAdddr.getDetailAddress());
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());

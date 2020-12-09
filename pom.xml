@@ -36,43 +36,6 @@
 
 		</dependencies>
 	</dependencyManagement>
-	
-	<profiles>
-		<!-- 本地开发 -->
-		<profile>
-			<!-- profile的id -->
-			<id>dev</id>
-			<properties>
-				<!-- 此处的jastar.env可以自定义，其他地方可以使用${jastar.env}来引用此属性 -->
-				<profileActive>dev</profileActive>
-			</properties>
-			<activation>
-				<!-- 默认激活此配置 -->
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
-		<!-- 测试 -->
-		<profile>
-			<id>test</id>
-			<properties>
-				<profileActive>test</profileActive>
-			</properties>
-		</profile>
-		<!-- uat -->
-		<profile>
-			<id>uat</id>
-			<properties>
-				<profileActive>uat</profileActive>
-			</properties>
-		</profile>
-		<!-- 生产 -->
-		<profile>
-			<id>prd</id>
-			<properties>
-				<profileActive>prod</profileActive>
-			</properties>
-		</profile>
-	</profiles>
 
 	<build>
 		<finalName>${project.artifactId}-${project.version}</finalName>
@@ -150,36 +113,6 @@
 					<configuration>
 						<executable>true</executable>
 					</configuration>
-				</plugin>
-				
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-	
-					<executions>
-						<execution>
-							<id>copy-resources</id>
-							<phase>compile</phase>
-							<goals>
-								<goal>copy-resources</goal>
-							</goals>
-							<configuration>
-								<!-- 覆盖原有文件 -->
-								<overwrite>true</overwrite>
-								<!-- 也可以用下面这样的方式（指定相对url的方式指定outputDirectory） 
-								 -->
-								<outputDirectory>${basedir}/target/classes</outputDirectory>
-								<!-- 待处理的资源定义 -->
-								<resources>
-									<resource>
-										<!-- 指定resources插件处理哪个目录下的资源文件 -->
-										<directory>src/main/resources/env/${profileActive}</directory>
-										<filtering>true</filtering>
-									</resource>
-								</resources>
-							</configuration>
-						</execution>
-					</executions>
 				</plugin>
 				
 			</plugins>

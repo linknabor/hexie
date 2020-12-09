@@ -75,26 +75,14 @@ public class UploadServiceImpl implements UploadService {
     @Override
     @Async
     public void updateRepairImg(RepairOrder order) {
-    	
-    	log.info("start to move image, isUploaded : " + order.isImageUploaded());
-    	
-    	
-        if (order.isImageUploaded()) {
+        if (order.isImageUploaded()
+                ||( StringUtil.isEmpty(order.getImgUrls()) 
+                && StringUtil.isEmpty(order.getCommentImgUrls()))) {
             return;
         }
-        
         User user = userService.getById(order.getUserId());
-        String imgUrls = "";
-        String commentImgUrls = "";
-        if (!StringUtils.isEmpty(order.getImgUrls())) {
-        	log.info("imgUrls : " + order.getImgUrls());
-        	imgUrls = moveImges(user.getAppId(), order.getImgUrls());
-		}
-        
-        if (!StringUtils.isEmpty(order.getCommentImgUrls())) {
-        	log.info("commentImgUrls : " + order.getCommentImgUrls());
-        	commentImgUrls = moveImges(user.getAppId(), order.getCommentImgUrls());
-		}
+        String imgUrls = moveImges(user.getAppId(), order.getImgUrls());
+        String commentImgUrls = moveImges(user.getAppId(), order.getCommentImgUrls());
         
         RepairOrder nOrder = repairOrderRepository.findById(order.getId()).get();
         nOrder.setImgUrls(imgUrls);

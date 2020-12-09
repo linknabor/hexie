@@ -6,11 +6,13 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
@@ -140,15 +142,26 @@ public class CouponController extends BaseController{
         return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(user.getId(),cart));
     }
     
+    @RequestMapping(value = "/coupon/comsume", method = RequestMethod.GET)
+    @ResponseBody
+    public String consume(@RequestParam(required = false, name = "trade_water_id") String tradeWaterId) throws Exception {
+
+    	if (StringUtils.isEmpty(tradeWaterId)) {
+			return "";
+		}
+    	couponService.consume(Long.valueOf(tradeWaterId));
+        return Constants.SERVICE_SUCCESS;	//TODO 应该用PAGE_SUCCESS，前端需要修改
+    }
+    
     @ApiOperation(value = "获取红包种子列表")
     @RequestMapping(value = "/coupon/v2/seedList", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<CouponView>> getSeedList(@ModelAttribute(Constants.USER)User user) throws Exception {
+
     	List<CouponView> viewList = couponService.getSeedList(user);
         return new BaseResult<List<CouponView>>().success(viewList);
     }
     
-
     @ApiOperation(value = "根据种子领取红包")
     @RequestMapping(value = "/coupon/v2/gain/{seedStr}", method = RequestMethod.GET)
 	@ResponseBody

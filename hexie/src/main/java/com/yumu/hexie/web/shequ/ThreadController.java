@@ -11,10 +11,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResponse;
@@ -28,7 +29,7 @@ import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 
-@RestController
+@Controller
 @RequestMapping(value = "/servplat/thread")
 public class ThreadController extends BaseController {
 
@@ -39,6 +40,7 @@ public class ThreadController extends BaseController {
 	private UserService userService;
     
 	@RequestMapping(value = "/getThreadList", method = RequestMethod.POST)
+	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getThreadList(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		Map<String,Object> map=new HashMap<>();
 		try {
@@ -62,6 +64,7 @@ public class ThreadController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/deleteThread", method = RequestMethod.POST,produces = "application/json")
+	@ResponseBody
 	public BaseResponseDTO<String> deleteThread(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		try {
 		    String threadIds=baseRequestDTO.getData().get("threadIds");
@@ -74,6 +77,7 @@ public class ThreadController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/getThreadDetail", method = RequestMethod.POST,produces = "application/json")
+	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getThreadDetail(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		Map<String,Object> map=new HashMap<>();
 		try {
@@ -89,6 +93,7 @@ public class ThreadController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/saveThreadComment", method = RequestMethod.POST,produces = "application/json")
+	@ResponseBody
 	public BaseResponseDTO<String> saveThreadComment(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		try {
 			Map<String,String> map=baseRequestDTO.getData();
@@ -104,6 +109,7 @@ public class ThreadController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/getUserInfo", method = RequestMethod.POST,produces = "application/json")
+	@ResponseBody
 	public BaseResponseDTO<Map<String,Object>> getUserInfo(@RequestBody BaseRequestDTO<Map<String,String>> baseRequestDTO) {
 		     	Map<String,Object> map=new HashMap<>();	
 		    try {
@@ -115,6 +121,5 @@ public class ThreadController extends BaseController {
 			}
 			return BaseResponse.success(baseRequestDTO.getRequestId(), map);
 	}
-	
 
 }

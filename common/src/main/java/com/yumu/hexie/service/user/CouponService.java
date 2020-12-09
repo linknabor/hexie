@@ -10,6 +10,7 @@ import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
+import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.promotion.coupon.CouponRule;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
 import com.yumu.hexie.model.promotion.coupon.CouponView;
@@ -56,6 +57,7 @@ public interface CouponService {
     
     //查看服务类型是否支持红包
     public List<Coupon> findAvaibleCoupon4ServiceType(long userId,long homeServiceType,Long parentType, Long itemId);
+	public List<Coupon> findAvaibleCouponForWuye(User user, String payType);
 	
 	public List<Coupon> findInvalidCoupons(long userId,int page);
 	public CouponsSummary findCouponSummary(long userId);
@@ -63,10 +65,12 @@ public interface CouponService {
 
     public void lock(ServiceOrder order,Coupon coupon);//锁定现金券
     public boolean lock(BaseO2OService bill, Coupon coupon);//使用现金券
+    public void lockWuyeCoupon(String tradeWaterId, Coupon coupon);	//锁定物业支付现金券
     
     public void comsume(ServiceOrder order);//使用现金券
     public boolean comsume(BaseO2OService bill);//使用现金券
-    
+	public void comsume(String feePrice, long couponId);
+	public void consume(long orderId);
 	public void unlock(Long couponId);//解锁现金券
 	public void timeout(Coupon coupon);//现金券过期
 	
@@ -74,6 +78,10 @@ public interface CouponService {
 	public List<Coupon> findTop100TimeoutCoupon();
 	public List<Coupon> findTimeoutCouponByDate(Date fromDate, Date toDate);
 	
+	public List<CouponCombination> findCouponCombination(int combinationType);	//获取现金券组合
+	
+	public void updateWuyeCouponOrderId(long orderId, long couponId);
+
 	Coupon findByOrderId(long orderId);
 
 	boolean isAvaible(String appId, String payType);
@@ -98,9 +106,5 @@ public interface CouponService {
 	CheckCouponDTO checkCouponAvailable(int itemType, Product product, Coupon coupon, boolean locked);
 
 	boolean checkCouponUsageCondition(Float amount, Coupon coupon);
-
-	List<Coupon> findAvaibleCouponForWuye(User user, String payType, String amount, String agentNo);
-
-	void consume(String orderNo, String couponId);
 
 }

@@ -38,7 +38,6 @@ import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
-import com.yumu.hexie.service.user.CouponService;
 
 @Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
@@ -61,9 +60,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private PartnerService partnerService;
 	@Autowired
 	private BaseOrderService baseOrderService;
-	@Autowired
-	private CouponService couponService;
-
 	
 	/**
 	 * 异步发送到账模板消息
@@ -670,49 +666,5 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 		
 	}
 	
-	/**
-	 * 商品订单退款，包括：特卖、团购、核销券、合伙人、saas套件的售卖、自定义服务订单
-	 */
-	@Override
-	@Async("taskExecutor")
-	public void consumeWuyeCouponAsync() {
-
-		while(true) {
-			try {
-				if (!maintenanceService.isQueueSwitchOn()) {
-					logger.info("queue switch off ! ");
-					Thread.sleep(60000);
-					continue;
-				}
-				String value = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_WUYE_COUPON_QUEUE, 30, TimeUnit.SECONDS);
-				if (StringUtils.isEmpty(value)) {
-					continue;
-				}
-				boolean isSuccess = false;
-				try {
-					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-					TypeReference<Map<String, String>> typeReference = new TypeReference<Map<String,String>>() {};
-					Map<String, String> map = objectMapper.readValue(value, typeReference);
-					String couponId = map.get("couponId");
-					String orderId = map.get("orderId");
-					logger.info("start to consume wuye conpon queue, couponId : " + couponId + ", orderId : " + orderId);
-					couponService.consume(orderId, couponId);
-					isSuccess = true;
-					
-				} catch (Exception e) {
-					logger.error(e.getMessage(), e);
-				}
-						
-				if (!isSuccess) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_WUYE_COUPON_QUEUE, value);
-				}
-			
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-		
-	}
-
 
 }

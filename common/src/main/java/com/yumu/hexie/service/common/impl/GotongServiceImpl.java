@@ -25,7 +25,6 @@ import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
-import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
@@ -299,21 +298,5 @@ public class GotongServiceImpl implements GotongService {
 		templateMsgService.sendCustomerDeliveryMessage(user, serviceOrder, accessToken);
 	}
 	
-    @Override
-    public void sendPostingReplyMsg(Thread thread){
-        
-    	User user = userRepository.findById(thread.getUserId());
-        String url = templateMsgService.getMsgUrl(MsgCfg.URL_SERVICE_RESV) + thread.getThreadId();
-        News news = new News(new ArrayList<Article>());
-        Article article = new Article();
-        article.setTitle("您有新的回复消息");
-        article.setDescription("点击查看详情");
-        article.setUrl(url);
-        news.getArticles().add(article);
-        NewsMessage msg = new NewsMessage(news);
-        msg.setTouser(user.getOpenid());
-        msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-        CustomService.sendCustomerMessage(msg, accessToken);
-    }
+
 }
