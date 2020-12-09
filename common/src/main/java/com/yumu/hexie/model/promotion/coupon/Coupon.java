@@ -77,6 +77,8 @@ public class Coupon extends BaseModel {
 	private String agentName;
 	private String agentNo;
 	
+	private String orderNo;	//物业订单号
+	
 	@Transient
 	public String getUseStartDateStr(){
 		return DateUtil.dtFormat(useStartDate, "yyyy.MM.dd");
@@ -157,6 +159,15 @@ public class Coupon extends BaseModel {
 		this.status = ModelConstant.COUPON_STATUS_USED;
 		this.usedDate = new Date();
 	}
+	
+	@Transient
+	public void cousume(long orderId, String orderNo) {
+		this.orderId = orderId;
+		this.status = ModelConstant.COUPON_STATUS_USED;
+		this.usedDate = new Date();
+		this.orderNo = orderNo;
+	}
+	
 	public void timeout(){
 		this.orderId = 0l;
 		this.status = ModelConstant.COUPON_STATUS_TIMEOUT;
@@ -423,6 +434,14 @@ public class Coupon extends BaseModel {
 		this.agentNo = agentNo;
 	}
 
+	public String getOrderNo() {
+		return orderNo;
+	}
+
+	public void setOrderNo(String orderNo) {
+		this.orderNo = orderNo;
+	}
+
 	@Override
 	public String toString() {
 		return "Coupon [seedId=" + seedId + ", userId=" + userId + ", ruleId=" + ruleId + ", empty=" + empty
@@ -436,7 +455,8 @@ public class Coupon extends BaseModel {
 				+ ", uItemType=" + uItemType + ", uSubItemType=" + uSubItemType + ", uServiceType=" + uServiceType
 				+ ", uProductId=" + uProductId + ", uMerchantId=" + uMerchantId + ", suggestUrl=" + suggestUrl
 				+ ", appid=" + appid + ", agentId=" + agentId + ", agentName=" + agentName + ", agentNo=" + agentNo
-				+ "]";
+				+ ", orderNo=" + orderNo + "]";
+
 	}
 
 	

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
@@ -22,7 +21,6 @@ import org.springframework.util.StringUtils;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.yumu.hexie.common.util.AppUtil;
@@ -75,31 +73,11 @@ public class UserServiceImpl implements UserService {
 	private CouponStrategyFactory couponStrategyFactory;
 	@Autowired
 	private RedisRepository redisRepository;
-	@Value("${mainServer}")
-	private Boolean mainServer;
-	
+	@Autowired
 	private AlipayClient alipayClient;
 	
-	@PostConstruct
-	public void initAlipay() {
-		
-		try {
-			
-			if (mainServer) {
-				return;
-			}
-			logger.info("start to init alipay client ...");
-			alipayClient = new DefaultAlipayClient(ConstantAlipay.GATEWAY, ConstantAlipay.APPID, 
-					ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
-					ConstantAlipay.PUBLIC_KEY, ConstantAlipay.SIGNTYPE);
-			
-			logger.info("init alipay client finished .");
-			
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		} 
-		
-	}
+	@Value("${mainServer}")
+	private Boolean mainServer;
 	
 	@Override
 	public User getById(long uId) {
@@ -409,6 +387,8 @@ public class UserServiceImpl implements UserService {
 		request.setGrantType(ConstantAlipay.AUTHORIZATION_TYPE);
 		AccessTokenOAuth oAuth = new AccessTokenOAuth();
 		try {
+			logger.info("alipayClient: " + alipayClient);
+			logger.info("grantType: " + ConstantAlipay.AUTHORIZATION_TYPE);
 		    AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
 		    oAuth.setOpenid(oauthTokenResponse.getUserId());
 		    oAuth.setAccessToken(oauthTokenResponse.getAccessToken());
