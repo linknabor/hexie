@@ -18,4 +18,6 @@ public interface NotifyQueueTask {
 
 	void eshopRefundAsync();
 
+	void consumeWuyeCouponAsync();
+
 }

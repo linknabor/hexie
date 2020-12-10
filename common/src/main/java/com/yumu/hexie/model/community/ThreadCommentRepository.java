@@ -27,4 +27,10 @@ public interface ThreadCommentRepository extends JpaRepository<ThreadComment, Lo
 	@Transactional
 	public void updateCommentReaded(long toUserId, long threadId);
 	
+
+	final String column1 = "tc.commentDateTime, tc.commentUserName, tc.commentContent ";
+	
+	@Query(value = "select " + column1 + " from ThreadComment tc where threadId = ?1 order by commentDateTime desc", nativeQuery = true)
+	public List<Object[]> getCommentList(long threadId);
+	
 }
