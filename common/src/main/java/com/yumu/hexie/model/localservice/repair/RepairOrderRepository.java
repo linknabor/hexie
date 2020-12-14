@@ -52,8 +52,28 @@ public interface RepairOrderRepository  extends JpaRepository<RepairOrder, Long>
 			+ " and IF (?9!='', o.sectId = ?9, 1=1)"
 			+ " and o.sectId  in ?10 "
 			,nativeQuery = true)
-	 public Page<RepairOrder> getRepairOderList(String payType, String status, String finishByUser, String finishByOpeator,
+	public Page<RepairOrder> getRepairOderList(String payType, String status, String finishByUser, String finishByOpeator,
 			String address, String tel, String operatorName, String operatorTel,String sectId,List<String> sectIds,Pageable pageable);
     
+	final String column1 = "o.id, o.createDate, o.status, o.cspId, o.sectId, o.xiaoquName, o.address, o.receiverName, o.tel,"  
+			+ "o.operatorName, o.operatorTel, o.payType, s.price, o.finishTime, o.operatorFinishTime, "
+			+ "o.commentQuality, o.commentAttitude, o.commentService, o.comment, o.memo ";
+	
+	@Query(value = "select " + column1 + " from repairOrder o join serviceOrder s on o.orderId = s.id where "
+			+ "IF (?1!='', o.createDate >= ?1, 1=1) "
+			+ "and IF (?2!='', o.createDate <= ?2, 1=1) "
+			+ "and IF (?3!='', o.address like CONCAT('%',?3,'%'), 1=1) "
+			+ "and IF (?4!='', o.tel = ?4, 1=1) "
+			+ "and IF (?5!='', o.operatorName like CONCAT('%',?5,'%'), 1=1) "
+			+ "and IF (?6!='', o.operatorTel = ?6, 1=1) "
+			+ "and IF (?7!='', o.status = ?7, 1=1) "
+			+ "and IF (?8!='', o.payType = ?8, 1=1) "
+			+ "and IF (?9!='', o.finishByUser = ?9, 1=1) "
+			+ "and IF (?10!='', o.finishByOperator = ?10, 1=1) "
+			+ "and (COALESCE(?11) IS NULL OR (o.sectId IN (?11) )) "
+			,nativeQuery = true)
+	public Page<Object[]> getROrderList(String startDate, String endDate, String address, String tel, 
+			String operatorName, String operatorTel, String status, String payType, String finishByUser, String finishByOperator, 
+			List<String> sectIds, Pageable pageable);
 	
 }
