@@ -59,7 +59,7 @@ public interface RepairOrderRepository  extends JpaRepository<RepairOrder, Long>
 			+ "o.operatorName, o.operatorTel, o.payType, s.price, o.finishTime, o.operatorFinishTime, "
 			+ "o.commentQuality, o.commentAttitude, o.commentService, o.comment, o.memo ";
 	
-	@Query(value = "select " + column1 + " from repairOrder o join serviceOrder s on o.orderId = s.id where "
+	@Query(value = "select " + column1 + " from repairOrder o left join serviceOrder s on o.orderId = s.id where "
 			+ "IF (?1!='', o.createDate >= ?1, 1=1) "
 			+ "and IF (?2!='', o.createDate <= ?2, 1=1) "
 			+ "and IF (?3!='', o.address like CONCAT('%',?3,'%'), 1=1) "
@@ -71,7 +71,7 @@ public interface RepairOrderRepository  extends JpaRepository<RepairOrder, Long>
 			+ "and IF (?9!='', o.finishByUser = ?9, 1=1) "
 			+ "and IF (?10!='', o.finishByOperator = ?10, 1=1) "
 			+ "and (COALESCE(?11) IS NULL OR (o.sectId IN (?11) )) "
-			, countQuery = "select count(1) from repairOrder o join serviceOrder s on o.orderId = s.id where "
+			, countQuery = "select count(1) from repairOrder o left join serviceOrder s on o.orderId = s.id where "
 					+ "IF (?1!='', o.createDate >= ?1, 1=1) "
 					+ "and IF (?2!='', o.createDate <= ?2, 1=1) "
 					+ "and IF (?3!='', o.address like CONCAT('%',?3,'%'), 1=1) "
