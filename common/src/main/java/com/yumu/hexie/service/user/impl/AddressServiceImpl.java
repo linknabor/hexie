@@ -317,6 +317,8 @@ public class AddressServiceImpl implements AddressService {
 	@Transactional
 	public void updateDefaultAddress(User user, HexieAddress addr) {
 		
+		log.info("start to set default address, user : " + user.getId() + ", tel : " + user.getTel());
+		
 		boolean result = true;
 		List<Address> list = getAddressByuserIdAndAddress(user.getId(), addr.getCell_addr());
 		for (Address address : list) {
@@ -326,6 +328,7 @@ public class AddressServiceImpl implements AddressService {
 				break;
 			}
 		}
+		log.info("result : " + result);
 		if (result) {
 			List<Address> addressList= getAddressByMain(user.getId(), true);
 			for (Address address : addressList) {
@@ -360,6 +363,7 @@ public class AddressServiceImpl implements AddressService {
 			
 			Address add = new Address();
 			boolean hasAddr = false;
+			log.info("list size : " + list.size());
 			if (list.size() > 0) {
 				add = list.get(0);
 				hasAddr = true;
@@ -409,6 +413,7 @@ public class AddressServiceImpl implements AddressService {
 				}
 
 			}
+			log.info("hasAddr : " + hasAddr);
 			if (hasAddr) {
 				add.setBind(true);
 				add.setMain(true);
