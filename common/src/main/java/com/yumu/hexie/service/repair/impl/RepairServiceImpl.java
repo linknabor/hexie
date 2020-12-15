@@ -320,7 +320,7 @@ public class RepairServiceImpl implements RepairService {
     @Transactional
     public void accept(long repairOrderId, User user) {
         RepairOrder ro = repairOrderRepository.findById(repairOrderId).get();
-        List<ServiceOperator> ops = serviceOperatorRepository.findByUserId(user.getId());
+        List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_WEIXIU, user.getId());
         if(ops != null && ops.size() >0) {
             ServiceOperator op = ops.get(0);
             ro.accept(op);
