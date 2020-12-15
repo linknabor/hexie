@@ -171,5 +171,15 @@ public class HexieUser implements Serializable {
 	public void setTotal_bind(Integer total_bind) {
 		this.total_bind = total_bind;
 	}
+	@Override
+	public String toString() {
+		return "HexieUser [user_id=" + user_id + ", user_name=" + user_name + ", user_head=" + user_head + ", user_sex="
+				+ user_sex + ", user_email=" + user_email + ", email_activie=" + email_activie + ", user_tel="
+				+ user_tel + ", is_house=" + is_house + ", office_tel=" + office_tel + ", cell_addr=" + cell_addr
+				+ ", sect_name=" + sect_name + ", province_id=" + province_id + ", province_name=" + province_name
+				+ ", city_id=" + city_id + ", city_name=" + city_name + ", region_id=" + region_id + ", region_name="
+				+ region_name + ", sect_addr=" + sect_addr + ", sect_id=" + sect_id + ", csp_id=" + csp_id
+				+ ", center_id=" + center_id + ", total_bind=" + total_bind + "]";
+	}
 	
 }
