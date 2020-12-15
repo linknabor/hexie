@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.DistanceUtil;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.repair.RepairConstant;
@@ -70,7 +71,7 @@ public class RepairAssignServiceImpl implements RepairAssignService {
             //业务判断-通知下单失败
         }
         */
-        List<ServiceOperator> ops=serviceOperatorRepository.findBySectId(order.getSectId());
+        List<ServiceOperator> ops=serviceOperatorRepository.findBySectId(order.getSectId(), ModelConstant.SERVICE_OPER_TYPE_WEIXIU);
         assign(address,order, ops);
     }
     private void assign(Address address,RepairOrder ro, List<ServiceOperator> ops) {
