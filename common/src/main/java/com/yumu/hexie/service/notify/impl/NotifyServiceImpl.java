@@ -288,6 +288,9 @@ public class NotifyServiceImpl implements NotifyService {
 		
 	}
 	
+	/**
+	 * 电商类退款
+	 */
 	@Override
 	public void notifyEshopRefund(String orderId) {
 	

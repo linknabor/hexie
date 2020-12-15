@@ -64,6 +64,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	@Autowired
 	private CouponService couponService;
 	
+	
 	/**
 	 * 异步发送到账模板消息
 	 */
