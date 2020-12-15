@@ -124,7 +124,7 @@ public class WuyeServiceImpl implements WuyeService {
 				user.setCountry("");
 				user.setSectId("0");
 				user.setCspId("0");
-				user.setTel("");
+				user.setOfficeTel("");
 				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", user.getId());
 			}else {
 				user.setTotalBind(totalBind);
