@@ -34,6 +34,7 @@ import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
+import com.yumu.hexie.model.view.CsHotline;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.card.WechatCardService;
@@ -154,7 +155,14 @@ public class UserController extends BaseController{
 			    	qrLink = qrCode.getQrLink();
 				}
 			    
+			    CsHotline csHotline = pageConfigService.getCsHotline(user.getAppId());
+			    String hotline = "";
+			    if (csHotline != null) {
+			    	hotline = csHotline.getHotline();
+				}
+			    
 			    userInfo.setQrCode(qrLink);
+			    userInfo.setCsHotline(hotline);
 			    userInfo.setCardStatus(wechatCard.getStatus());
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));

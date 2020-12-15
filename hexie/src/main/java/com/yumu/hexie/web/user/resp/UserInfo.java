@@ -78,6 +78,7 @@ public class UserInfo implements Serializable {
  	private List<BgImage> bgImageList = new ArrayList<>();
  	private List<WuyePayTabs> wuyeTabsList = new ArrayList<>();
  	private String qrCode;
+ 	private String csHotline;	//公众号客服电话
  	
  	private int point;	//用户积分
  	private int cardStatus;	//用户会员卡状态
@@ -376,6 +377,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setMerchant(boolean isMerchant) {
 		this.isMerchant = isMerchant;
+	}
+	public String getCsHotline() {
+		return csHotline;
+	}
+	public void setCsHotline(String csHotline) {
+		this.csHotline = csHotline;
 	}
 	
 	
