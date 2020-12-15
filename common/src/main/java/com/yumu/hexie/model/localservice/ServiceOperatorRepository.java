@@ -44,8 +44,11 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Query("From ServiceOperator r order by POWER(MOD(ABS(r.longitude - ?1),360),2) + POWER(ABS(r.latitude - ?2),2)")
     public List<ServiceOperator> findByLongitudeAndLatitude(Double longitude, Double latitude, Pageable pageable);
     
-    @Query(nativeQuery = true,value="select * from serviceoperator a join serviceoperatorSect b on a.id=b.operatorId where b.sectId = ?1 ")
-    public List<ServiceOperator> findBySectId(String sectId);
+    @Query(nativeQuery = true,value="select * from serviceoperator a "
+    		+ "join serviceoperatorSect b on a.id=b.operatorId "
+    		+ "where b.sectId = ?1 "
+    		+ "and a.type = ?2 ")
+    public List<ServiceOperator> findBySectId(String sectId, int type);
     
     @Query(value="select a.*,b.sectId from serviceoperator a "
     		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
