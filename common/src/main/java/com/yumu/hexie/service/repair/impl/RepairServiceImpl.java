@@ -123,6 +123,8 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public Long repair(RepairOrderReq req, User user) {
+    	
+    	User currUser = userRepository.findById(user.getId());
         RepairProject project = repairProjectRepository.findById(req.getProjectId()).get();
         Address address = addressRepository.findById(req.getAddressId()).get();
         
@@ -133,15 +135,15 @@ public class RepairServiceImpl implements RepairService {
 			region = optional.get();
 		}
         if(region != null && StringUtil.isNotEmpty(region.getSectId())){
-        	user.setSectId(region.getSectId());
+        	currUser.setSectId(region.getSectId());
         }
         
         //校验小区是否在开通为序服务的范围内
-        List<RepairArea> areaList = repairAreaRepository.findBySectId(user.getSectId());
+        List<RepairArea> areaList = repairAreaRepository.findBySectId(currUser.getSectId());
         if (areaList == null || areaList.size() == 0) {
 			throw new BizValidateException("当前地址 [" + address.getRegionStr() + "]尚未开通维修服务，请联系小区所在物业。");
 		}
-        RepairOrder order = new RepairOrder(req, user, project, address);
+        RepairOrder order = new RepairOrder(req, currUser, project, address);
         order = repairOrderRepository.save(order);
         uploadService.updateRepairImg(order);
         repairAssignService.assignOrder(order);
@@ -318,7 +320,8 @@ public class RepairServiceImpl implements RepairService {
     @Transactional
     public void accept(long repairOrderId, User user) {
         RepairOrder ro = repairOrderRepository.findById(repairOrderId).get();
-        List<ServiceOperator> ops = serviceOperatorRepository.findByUserId(user.getId());
+//        List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_WEIXIU, user.getId());
+        List<ServiceOperator> ops = serviceOperatorRepository.findByUserIdAndSectIdAndType(user.getId(), ro.getSectId(), ModelConstant.SERVICE_OPER_TYPE_WEIXIU);
         if(ops != null && ops.size() >0) {
             ServiceOperator op = ops.get(0);
             ro.accept(op);

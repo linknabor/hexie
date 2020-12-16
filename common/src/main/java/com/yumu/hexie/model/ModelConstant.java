@@ -339,6 +339,7 @@ public class ModelConstant {
 	public static final String KEY_TYPE_BGIMAGE = "bgImage";	//空白背景图
 	public static final String KEY_TYPE_BANNER = "banner";		//页面顶部轮播图
 	public static final String KEY_TYPE_QRCODE = "qrcode";		//公众号二维码
+	public static final String KEY_TYPE_CSHOTLINE = "csHotline";
 	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";	//页面配置
 	public static final String KEY_TYPE_WUYEPAY_TABS = "wuyePayTabs";	//物业缴费选项卡
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
