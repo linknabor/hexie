@@ -32,6 +32,8 @@ import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BgImageRepository;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.BottomIconRepository;
+import com.yumu.hexie.model.view.CsHotline;
+import com.yumu.hexie.model.view.CsHotlineRepository;
 import com.yumu.hexie.model.view.PageConfigView;
 import com.yumu.hexie.model.view.PageConfigViewRepository;
 import com.yumu.hexie.model.view.QrCode;
@@ -56,6 +58,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private QrCodeRepository qrCodeRepository;
+	@Autowired
+	private CsHotlineRepository csHotlineRepository;
 	@Autowired
 	private BgImageRepository bgImageRepository;
 	@Autowired
@@ -291,6 +295,30 @@ public class PageConfigServiceImpl implements PageConfigService {
 			showList.remove(index);
 		}
 		return showList;
+	}
+	
+	/**
+	 * 动态获取公众号客服电话
+	 * @throws IOException 
+	 * @throws JsonProcessingException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public CsHotline getCsHotline(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+
+		if (StringUtil.isEmpty(appId)) {
+			appId = ConstantWeChat.APPID;
+		}
+		final String sysAppId = appId;
+		TypeReference typeReference = new TypeReference<QrCode>() {};
+		CsHotline csHotline = (CsHotline) getConfigFromCache(ModelConstant.KEY_TYPE_CSHOTLINE, appId, typeReference);
+		if (csHotline == null || csHotline.getId() == 0) {
+			Supplier<CsHotline> supplier = ()->csHotlineRepository.findByFromSys(sysAppId);
+			csHotline = (CsHotline) setConfigCache(ModelConstant.KEY_TYPE_CSHOTLINE, appId, supplier);
+		}
+		return csHotline;
 	}
 	
 	
