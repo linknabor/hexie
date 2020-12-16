@@ -50,6 +50,14 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     		+ "and a.type = ?2 ")
     public List<ServiceOperator> findBySectId(String sectId, int type);
     
+    
+    @Query(nativeQuery = true,value="select a.* from serviceoperator a "
+    		+ "join serviceoperatorSect b on a.id = b.operatorId "
+    		+ "where a.userId = ?1 "
+    		+ "and b.sectId = ?2 "
+    		+ "and a.type = ?3 ")
+    public List<ServiceOperator> findByUserIdAndSectIdAndType(long userId, String sectId, int type);
+    
     @Query(value="select a.*,b.sectId from serviceoperator a "
     		+ "join serviceoperatorSect b on a.id=b.operatorId where type = ?1 "
 			+ " and IF (?2!='', name like CONCAT('%',?2,'%'), 1=1)"
