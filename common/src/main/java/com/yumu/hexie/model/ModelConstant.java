@@ -335,13 +335,13 @@ public class ModelConstant {
 	
 	public static final String PARA_TYPE_CSP = "2";
 	
-	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";	//底部图标缓存key
-	public static final String KEY_TYPE_BGIMAGE = "bgImage";	//空白背景图
-	public static final String KEY_TYPE_BANNER = "banner";		//页面顶部轮播图
-	public static final String KEY_TYPE_QRCODE = "qrcode";		//公众号二维码
-	public static final String KEY_TYPE_CSHOTLINE = "csHotline";
-	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";	//页面配置
-	public static final String KEY_TYPE_WUYEPAY_TABS = "wuyePayTabs";	//物业缴费选项卡
+	public static final String KEY_TYPE_BOTTOM_ICON = "cfg:page:bottomIcon";	//底部图标缓存key
+	public static final String KEY_TYPE_BGIMAGE = "cfg:page:bgImage";	//空白背景图
+	public static final String KEY_TYPE_BANNER = "cfg:page:banner";		//页面顶部轮播图
+	public static final String KEY_TYPE_QRCODE = "cfg:page:qrcode";		//公众号二维码
+	public static final String KEY_TYPE_CSHOTLINE = "cfg:page:csHotline";
+	public static final String KEY_TYPE_PAGECONFIG = "cfg:page:pageConfigView";	//页面配置
+	public static final String KEY_TYPE_WUYEPAY_TABS = "cfg:page:wuyePayTabs";	//物业缴费选项卡
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
 	//微信会员卡领卡渠道
