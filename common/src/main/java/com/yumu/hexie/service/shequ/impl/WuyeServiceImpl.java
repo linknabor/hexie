@@ -321,12 +321,13 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.queryBillList(user, startDate, endDate, house_id, regionName).getData();
 	}
-	
+
 	/**
 	 * 通过物业交易ID异步绑定房屋
-	 * @param bindSwitch
 	 * @param user
-	 * @param tradeWaterId
+	 * @param house_id
+	 * @param regionName
+	 * @return
 	 */
 	@Override
 	public BillStartDate getBillStartDateSDO(User user, String house_id, String regionName) {
@@ -523,12 +524,9 @@ public class WuyeServiceImpl implements WuyeService {
 					
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
 					
-<<<<<<< HEAD
 					end = System.currentTimeMillis();
 					log.info("getQrCodePayService redis time : " + (end - begin));
 					
-=======
->>>>>>> master
 					if (objList.size() > 0) {
 						for (int i = 0; i < sTypes.length; i++) {
 							

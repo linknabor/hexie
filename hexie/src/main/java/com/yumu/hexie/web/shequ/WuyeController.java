@@ -168,7 +168,6 @@ public class WuyeController extends BaseController {
 	 * @param user
 	 * @param stmtId
 	 * @param houseId
-	 * @param area
 	 * @return
 	 * @throws Exception
 	 */
@@ -244,7 +243,6 @@ public class WuyeController extends BaseController {
 	/**
 	 * 查询缴费详情
 	 * 
-	 * @param session
 	 * @param trade_water_id
 	 *            流水号
 	 * @return
@@ -322,7 +320,6 @@ public class WuyeController extends BaseController {
 	 * 创建交易，获取预支付ID
 	 * stmtId在快捷支付的时候会用到
 	 * @param user
-	 * @param prepayReq
 	 * @return
 	 * @throws Exception
 	 */
@@ -345,10 +342,7 @@ public class WuyeController extends BaseController {
 	/**
 	 *  通知支付成功，并获取支付查询的返回结果
 	 * @param user
-	 * @param billId
-	 * @param stmtId
 	 * @param tradeWaterId
-	 * @param packageId
 	 * @param feePrice
 	 * @param couponId
 	 * @param bindSwitch
@@ -603,8 +597,6 @@ public class WuyeController extends BaseController {
 	/**
 	 * 根据户号添加绑定房屋
 	 * @param user
-	 * @param houseId
-	 * @param area
 	 * @return
 	 * @throws Exception
 	 */
@@ -698,8 +690,7 @@ public class WuyeController extends BaseController {
 	
 	/**
 	 * 获取用户绑定的银行卡信息
-	 * @param user
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/requestOtherPay", method = {RequestMethod.POST})
