@@ -15,6 +15,8 @@ public class BillDetailRequest extends WuyeRequest {
 	private String stmtId;
 	@JsonProperty("bill_id")
 	private String billId;	//多个，以逗号分隔
+	private String openid;
+	private String appid;
 	
 	public String getWuyeId() {
 		return wuyeId;
@@ -34,6 +36,18 @@ public class BillDetailRequest extends WuyeRequest {
 	public void setBillId(String billId) {
 		this.billId = billId;
 	}
-
+	public String getOpenid() {
+		return openid;
+	}
+	public void setOpenid(String openid) {
+		this.openid = openid;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+	
 	
 }

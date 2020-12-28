@@ -523,9 +523,12 @@ public class WuyeServiceImpl implements WuyeService {
 					
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
 					
+<<<<<<< HEAD
 					end = System.currentTimeMillis();
 					log.info("getQrCodePayService redis time : " + (end - begin));
 					
+=======
+>>>>>>> master
 					if (objList.size() > 0) {
 						for (int i = 0; i < sTypes.length; i++) {
 							

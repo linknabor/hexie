@@ -277,9 +277,12 @@ public class PageConfigServiceImpl implements PageConfigService {
 		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
 		logger.info("filterBottomIcon , map : " + map);
 		
+<<<<<<< HEAD
 		long end = System.currentTimeMillis();
 		logger.info("filterBottomIcon redis 获取耗费用时 ： " + (end - begin));
 		
+=======
+>>>>>>> master
 		if (map.size()>0) {
 			return showList;
 		}

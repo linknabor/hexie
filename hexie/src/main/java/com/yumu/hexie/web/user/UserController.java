@@ -115,29 +115,42 @@ public class UserController extends BaseController{
 			if(user != null){
 				
 				long endTime = System.currentTimeMillis();
+<<<<<<< HEAD
 				log.info("user:" + user.getName() + "location1，耗时：" + ((endTime-beginTime)/1000));
+=======
+>>>>>>> master
 				
 			    session.setAttribute(Constants.USER, user);
 			    boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
 			    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
 			    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+<<<<<<< HEAD
 			    
 			    endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "location2，耗时：" + ((endTime-beginTime)/1000));
 			    
+=======
+			    endTime = System.currentTimeMillis();
+>>>>>>> master
 			    Map<String, String> paramMap = paramService.getWuyeParamByUser(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    endTime = System.currentTimeMillis();
+<<<<<<< HEAD
 				log.info("user:" + user.getName() + "location3，耗时：" + ((endTime-beginTime)/1000));
+=======
+>>>>>>> master
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
 			    log.info("iconList : " + showIconList);
 			    
+<<<<<<< HEAD
 			    endTime = System.currentTimeMillis();
 				log.info("user:" + user.getName() + "location4，耗时：" + ((endTime-beginTime)/1000));
 			    
+=======
+>>>>>>> master
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(showIconList);
