@@ -399,7 +399,7 @@ public class ModelConstant {
 	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template";
 	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url";
 	
-	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam:";
+	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam";
 	
 	public static final int SMS_TYPE_REG = 101;	//用户注册短信
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
