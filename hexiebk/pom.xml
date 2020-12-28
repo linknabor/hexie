@@ -3,16 +3,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<parent>
-		<groupId>com.yumu</groupId>
-		<artifactId>hexie-parent</artifactId>
-		<version>2.0</version>
+   		<groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-parent</artifactId>
+	    <version>1.5.17.RELEASE</version>
+	    <relativePath/>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.yumu</groupId>
 	<artifactId>hexiebk</artifactId>
-	<version>${spring-boot.version}</version>
+	<version>1.2</version>
 	<name>hexie-bk</name>
 	<description>hexiebk</description>
-	<url>https://www.e-shequ.com</url>
+	<url>http://home.e-shequ.com</url>
 
 
 	<packaging>war</packaging>
@@ -22,11 +24,11 @@
 		<dependency>
 			<groupId>com.yumu</groupId>
 			<artifactId>hexie-common</artifactId>
-	        <version>2.0</version>
+	        <version>1.0</version>
 		</dependency>
 		<!-- Excel library --> 
 	</dependencies>
-
+	
 	<build>
 	    <plugins>
 	        <plugin>
@@ -36,20 +38,7 @@
 			        <executable>true</executable>
 			    </configuration>
 	        </plugin>
-	        
-	        <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>com.yumu.hexie.common.config.AppConfig</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
 	    </plugins>
 	</build>
-	
+
 </project>

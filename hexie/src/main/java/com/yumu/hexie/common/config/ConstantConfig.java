@@ -112,5 +112,4 @@ public class ConstantConfig {
 		}
 		return alipayClient; 
 	}
-
 }

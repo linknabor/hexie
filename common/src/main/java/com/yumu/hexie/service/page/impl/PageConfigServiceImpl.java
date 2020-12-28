@@ -161,46 +161,4 @@ public class PageConfigServiceImpl implements PageConfigService {
 
 	}
 
-<<<<<<< HEAD
-	@Override
-	public List<BottomIcon> filterBottomIcon(User user, List<BottomIcon>iconList) {
-		
-		long begin = System.currentTimeMillis();
-		
-		List<BottomIcon> showList = new ArrayList<>();
-		showList.addAll(iconList);
-		
-		String sectId = user.getSectId();
-		
-		Map<Object, Object> map = stringRedisTemplate.opsForHash().entries(ModelConstant.KEY_CS_SERVED_SECT + sectId);
-		logger.info("filterBottomIcon , map : " + map);
-		
-<<<<<<< HEAD
-		long end = System.currentTimeMillis();
-		logger.info("filterBottomIcon redis 获取耗费用时 ： " + (end - begin));
-		
-=======
->>>>>>> master
-		if (map.size()>0) {
-			return showList;
-		}
-		
-		int index = Integer.MAX_VALUE;
-		for (int i = 0; i < showList.size(); i++) {
-			BottomIcon bottomIcon = showList.get(i);
-			if ("customService".equals(bottomIcon.getIconKey())) {
-				index = i;
-				break;
-			}
-		}
-		if (index != Integer.MAX_VALUE) {
-			showList.remove(index);
-		}
-		return showList;
-	}
-	
-	
-
-=======
->>>>>>> 8438e8bfa0c4db2c4c0ad919b94d958f5664cff4
 }
