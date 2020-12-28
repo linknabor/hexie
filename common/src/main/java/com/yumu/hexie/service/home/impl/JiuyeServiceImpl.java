@@ -46,8 +46,8 @@ public class JiuyeServiceImpl implements JiuyeService {
 
 	@Override
 	public YuyueOrder addOrder(User user, JiuyeReq req, long addressId) {
-		Address address = addressRepository.findOne(addressId);
-		YuyueRule rule = yuyueRuleRepository.findOne(req.getRuleId());
+		Address address = addressRepository.findById(addressId).get();
+		YuyueRule rule = yuyueRuleRepository.findById(req.getRuleId()).get();
 		YuyueOrder yOrder = new YuyueOrder();
 		
 		Merchant merchant = merchantRepository.findMerchantByProductType(ModelConstant.YUYUE_PRODUCT_TYPE_JIUYE);
@@ -116,7 +116,7 @@ public class JiuyeServiceImpl implements JiuyeService {
 				calendar.add(Calendar.DAY_OF_MONTH, 7);
 			}
 		}else{
-			yuyueOrderRepository.delete(yOrder.getId());
+			yuyueOrderRepository.deleteById(yOrder.getId());
 			log.error("validateFlowerPlusServiceType:"+req.getServiceIsSingle());
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_DAOJIA,rule.getId(),"鲜花包月类型错误").setError();
 		}

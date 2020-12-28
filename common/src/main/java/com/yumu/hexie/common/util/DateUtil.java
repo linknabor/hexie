@@ -6,11 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 public class DateUtil {
     public static final String dSimple    = "yyyy-MM-dd";
     public static final String dttmSimple = "yyyy-MM-dd HH:mm:ss";
-
+    public static final String dateSimple = "EEE MMM dd HH:mm:ss z yyyy";
 
     public static Date addDate(Date current, int addedDays) {
     	 Calendar   calendar   =   new   GregorianCalendar(); 
@@ -48,8 +49,11 @@ public class DateUtil {
         if (timeText == null) {
             return null;
         }
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         try {
+	        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+	        if (dateSimple.equals(pattern)) {
+	        	sdf = new SimpleDateFormat(pattern, Locale.US);
+	        }
             return sdf.parse(timeText);
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
@@ -100,7 +104,7 @@ public class DateUtil {
     }
 
     /**
-     * 
+     *优先格式化成yyyy-MM-dd形式的Date，如果不传时分秒，则取当天零点
      *description: yyyy-MM-dd 或者 yyyy-MM-dd hh:mm:ss
      *@author rongnian.lu gfwu321@163.com
      *date： 2015-7-28
@@ -120,6 +124,25 @@ public class DateUtil {
 			}
 		}
     	
+        return date;
+    }
+    
+    /**
+     *优先格式化成yyyy-MM-dd HH:mm:ss形式的Date，如果不传时分秒，则取当天零点 
+     *description: yyyy-MM-dd 或者 yyyy-MM-dd hh:mm:ss
+     *@author rongnian.lu gfwu321@163.com
+     *date： 2015-7-28
+     *param:@param dateString
+     *param:@return
+     *return：Date
+     */
+    public static final Date getDateTimeFromString(String dateString) {
+    	Date date=null;
+    	try {
+    		date=	new SimpleDateFormat(dttmSimple).parse(dateString);
+		} catch (Exception e) {
+			date=null;
+		}
         return date;
     }
     
@@ -251,10 +274,11 @@ public class DateUtil {
     
     public static void main(String[] args) {
 
-    	long date = System.currentTimeMillis();
-    	String format = "yyyy-MM-dd HH:mm:ss";
-    	String s = dtFormat(date, format);
-    	System.out.println(s);
-		
+    	String sdate = "2020-09-11 23:59:59";
+    	Date date = parse(sdate, dttmSimple);
+    	System.out.println(date);
+    	Date now = new Date();
+    	System.out.println(now);
+    	System.out.println(now.before(date));
 	}
 }

@@ -10,4 +10,14 @@ public interface NotifyQueueTask {
 
 	void updateServiceCfgAysc();
 	
+	void updateOrderStatusAysc();
+	
+	void sendDeliveryNotificationAsyc();
+
+	void updatePartnerAsync();
+
+	void eshopRefundAsync();
+
+	void consumeWuyeCouponAsync();
+
 }

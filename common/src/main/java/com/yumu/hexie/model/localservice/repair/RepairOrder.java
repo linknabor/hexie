@@ -87,6 +87,7 @@ public class RepairOrder extends BaseModel {
     private String openId;
     
     private String sectId;
+    private String cspId;
     
     public RepairOrder(){ setOrderNo(OrderNoUtil.generateRepairOrderNo());}
     public RepairOrder(RepairOrderReq req, User user, RepairProject project, Address address){
@@ -109,6 +110,7 @@ public class RepairOrder extends BaseModel {
         setPublicProject(project.isPublicProject());
         setOpenId(user.getOpenid());
         setSectId(user.getSectId());
+        setCspId(user.getCspId());
         setOrderNo(OrderNoUtil.generateRepairOrderNo());
     }
 
@@ -447,6 +449,12 @@ public class RepairOrder extends BaseModel {
 	}
 	public void setSectId(String sectId) {
 		this.sectId = sectId;
+	}
+	public String getCspId() {
+		return cspId;
+	}
+	public void setCspId(String cspId) {
+		this.cspId = cspId;
 	}
     
 }

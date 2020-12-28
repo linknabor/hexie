@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.batch.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
@@ -8,11 +9,11 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -24,6 +25,7 @@ import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.user.CouponQueueTask;
 
 @Service
 public class BatchServiceImpl implements BatchService {
@@ -45,10 +47,16 @@ public class BatchServiceImpl implements BatchService {
 	@Autowired
 	private NotifyQueueTask notifyQueueTask;
 	
+	@Autowired
+	private CouponQueueTask couponQueueTask;
+	
+	@Value("${mainServer}")
+	private Boolean mainServer;
+	
 	@PostConstruct
 	public void runBatch() {
 		
-		if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+		if (mainServer) {	//BK程序不跑下面的队列轮询
 			return;
 		}
 		wuyeQueueTask.bindHouseByTrade();
@@ -61,6 +69,14 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.sendCustomServiceNotificationAysc();
 		notifyQueueTask.updateOpereratorAysc();
 		notifyQueueTask.updateServiceCfgAysc();
+		notifyQueueTask.updateOrderStatusAysc();
+		notifyQueueTask.sendDeliveryNotificationAsyc();
+		notifyQueueTask.updatePartnerAsync();
+		notifyQueueTask.eshopRefundAsync();
+		couponQueueTask.gainCouponAsync();
+		notifyQueueTask.consumeWuyeCouponAsync();
+
+		logger.info("异步队列任务启动完成。");
 		
 	}
 
@@ -69,7 +85,7 @@ public class BatchServiceImpl implements BatchService {
 		List<User> list = userRepository.getShareCodeIsNull();
 		for (User user : list) {
 			try {
-				String shareCode = DigestUtils.md5Hex("UID[" + user.getId() + "]");
+				String shareCode = DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]");
 				user.setShareCode(shareCode);
 				userRepository.save(user);
 			} catch (Exception e) {
@@ -86,7 +102,7 @@ public class BatchServiceImpl implements BatchService {
 			List<User> uList = userRepository.getUserByShareCode(string);
 			for (User user2 : uList) {
 				try {
-					String shareCode = DigestUtils.md5Hex("UID[" + user2.getId() + "]");
+					String shareCode = DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]");
 					user2.setShareCode(shareCode);
 					userRepository.save(user2);
 				} catch (Exception e) {
@@ -105,7 +121,7 @@ public class BatchServiceImpl implements BatchService {
 	@Override
 	public void fixBindHouse(String userId, String tradeWaterId) {
 
-		User user = userRepository.findById(Long.valueOf(userId));
+		User user = userRepository.findById(Long.valueOf(userId)).get();
 		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
 	}
 

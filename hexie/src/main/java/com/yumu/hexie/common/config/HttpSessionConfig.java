@@ -1,44 +1,38 @@
 package com.yumu.hexie.common.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
-import org.springframework.session.web.http.CookieHttpSessionStrategy;
-import org.springframework.session.web.http.HttpSessionStrategy;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
 
+//10天过期
 @Configuration
-@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 360000)
+@EnableRedisHttpSession(maxInactiveIntervalInSeconds = 24*3600*10)	
 public class HttpSessionConfig {
+	
+	@Value("${testMode}")
+	private Boolean testMode;
+	
+	/**
+	 * 应对chrome浏览器67及以上版本 set-cookie新属性SameSite=Strict或者SameSite=Lax时，cookie不能跨域保存的问题
+	 *
+	 */
+	@Configuration
+	public class SpringSessionConfig {
+		@Bean
+		public CookieSerializer httpSessionIdResolver() {
+			DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
+			if (testMode) {
+				cookieSerializer.setUseHttpOnlyCookie(false);
+				cookieSerializer.setSameSite("None");
+				cookieSerializer.setCookiePath("/");
+				cookieSerializer.setUseSecureCookie(true);
+			}
+			return cookieSerializer;
+		}
+	}
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSessionConfig.class);
-    @Value(value = "${redis.host}")
-    private String host;
-    @Value(value = "${redis.port}")
-    private Integer port;
-    @Value(value = "${redis.password}")
-    private String redisPassword;
-    @Value(value = "${redis.database}")
-    private int redisDatabase;
 
-    @Bean
-    public JedisConnectionFactory connectionFactory() {
-    	LOGGER.error("JedisConnectionFactory connectionFactory()");
-        JedisConnectionFactory factory = new JedisConnectionFactory();
-        factory.setHostName(host);
-        factory.setPort(port);
-        factory.setPassword(redisPassword);
-        factory.setDatabase(redisDatabase);
-        return factory;
-    }
-
-    @Bean
-    public HttpSessionStrategy httpSessionStrategy() {
-        //return new HeaderHttpSessionStrategy();
-    	CookieHttpSessionStrategy c =  new CookieHttpSessionStrategy();
-    	return c;
-    }
 }

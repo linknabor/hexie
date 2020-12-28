@@ -22,6 +22,7 @@ import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
@@ -31,7 +32,6 @@ import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
-import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
@@ -57,7 +57,6 @@ import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
-import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service("wuyeService")
@@ -67,9 +66,6 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private AddressService addressService;
-	
-	@Autowired
-	private UserService userService;
 	
 	@Autowired
 	private CouponService couponService;
@@ -96,6 +92,9 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private ServiceOperatorRepository serviceOperatorRepository;
 	
+	@Autowired
+	private TemplateMsgService templateMsgService;
+	
 	@Override
 	public HouseListVO queryHouse(User user) {
 		return WuyeUtil.queryHouse(user).getData();
@@ -105,8 +104,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public boolean deleteHouse(User user, String houseId) {
 		
-		User curruser = userService.getById(user.getId());
-		BaseResult<String> result = WuyeUtil.deleteHouse(curruser, houseId);
+		BaseResult<String> result = WuyeUtil.deleteHouse(user, houseId);
 		if (result.isSuccess()) {
 			// 添加电话到user表
 			String data = result.getData();
@@ -118,9 +116,19 @@ public class WuyeServiceImpl implements WuyeService {
 				totalBind = 0;
 			}
 			if (totalBind == 0) {
-				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", curruser.getId());
+				user.setXiaoquId(0l);
+				user.setXiaoquName("");
+				user.setTotalBind(totalBind);
+				user.setProvince("");
+				user.setCity("");
+				user.setCountry("");
+				user.setSectId("0");
+				user.setCspId("0");
+				user.setOfficeTel("");
+				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", user.getId());
 			}else {
-				userRepository.updateUserTotalBind(totalBind, curruser.getId());
+				user.setTotalBind(totalBind);
+				userRepository.updateUserTotalBind(totalBind, user.getId());
 			}
 			
 		} else {
@@ -168,6 +176,14 @@ public class WuyeServiceImpl implements WuyeService {
 	@Transactional
 	public WechatPayInfo getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
 		
+		User user = prepayRequestDTO.getUser();
+		if (user.getId() == 0) {
+			log.info("qrcode pay, no user id .");
+		}else {
+			User currUser = userRepository.findById(user.getId());
+			prepayRequestDTO.setUser(currUser);
+		}
+		
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
@@ -194,7 +210,7 @@ public class WuyeServiceImpl implements WuyeService {
 				bankCardRepository.save(bankCard);
 			} 
 			if (!StringUtils.isEmpty(prepayRequestDTO.getCardId())) {	//选卡支付
-				BankCard selBankCard = bankCardRepository.findOne(Long.valueOf(prepayRequestDTO.getCardId()));
+				BankCard selBankCard = bankCardRepository.findById(Long.valueOf(prepayRequestDTO.getCardId())).get();
 				if (StringUtils.isEmpty(selBankCard.getQuickToken())) {
 					throw new BizValidateException("未绑定的银行卡。");
 				}
@@ -257,10 +273,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public BindHouseDTO bindHouseNoStmt(User user, String houseId, String area) {
+	public HexieUser bindHouseNoStmt(User user, String houseId, String area) {
 		
-		User currUser = userService.getById(user.getId());
-		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(currUser, houseId, area);
+		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(user, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -273,22 +288,18 @@ public class WuyeServiceImpl implements WuyeService {
 		if("06".equals(r.getResult())) {
 			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
 		}
-		BindHouseDTO dto = new BindHouseDTO();
-		dto.setHexieUser(r.getData());
-		dto.setUser(currUser);
-		return dto;
+		return r.getData();
 	}
 
 	@Override
 	@Transactional
-	public User setDefaultAddress(User user, HexieUser u) {
+	public void setDefaultAddress(User user, HexieUser u) {
 
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
-		User currUser = userService.getById(user.getId());
 		
-		addressService.updateDefaultAddress(currUser, hexieAddress);
-		Integer totalBind = currUser.getTotalBind();
+		addressService.updateDefaultAddress(user, hexieAddress);
+		Integer totalBind = user.getTotalBind();
 		if (totalBind == null) {
 			totalBind = 0;
 		}
@@ -300,19 +311,17 @@ public class WuyeServiceImpl implements WuyeService {
 		if (totalBind == 0) {
 			totalBind = totalBind + 1;
 		}
-		currUser.setTotalBind(totalBind);
-		currUser.setXiaoquName(u.getSect_name());
-		currUser.setProvince(u.getProvince_name());
-		currUser.setCity(u.getCity_name());
-		currUser.setCounty(u.getRegion_name());
-		currUser.setSectId(u.getSect_id());	
-		currUser.setCspId(u.getCsp_id());
-		currUser.setOfficeTel(u.getOffice_tel());
-		userRepository.updateUserByHouse(currUser.getXiaoquId(), currUser.getXiaoquName(), 
-				currUser.getTotalBind(), currUser.getProvince(), currUser.getCity(), currUser.getCountry(), 
-				currUser.getSectId(), currUser.getCspId(), currUser.getOfficeTel(), currUser.getId());
-		
-		return currUser;
+		user.setTotalBind(totalBind);
+		user.setXiaoquName(u.getSect_name());
+		user.setProvince(u.getProvince_name());
+		user.setCity(u.getCity_name());
+		user.setCounty(u.getRegion_name());
+		user.setSectId(u.getSect_id());	
+		user.setCspId(u.getCsp_id());
+		user.setOfficeTel(u.getOffice_tel());
+		userRepository.updateUserByHouse(user.getXiaoquId(), user.getXiaoquName(), 
+				user.getTotalBind(), user.getProvince(), user.getCity(), user.getCountry(), 
+				user.getSectId(), user.getCspId(), user.getOfficeTel(), user.getId());
 		
 	}
 
@@ -343,10 +352,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public BindHouseDTO bindHouse(User user, String stmtId, String houseId) {
+	public HexieUser bindHouse(User user, String stmtId, String houseId) {
 		
-		User currUser = userService.getById(user.getId());
-		BaseResult<HexieUser> r= WuyeUtil.bindHouse(currUser, stmtId, houseId);
+		BaseResult<HexieUser> r = WuyeUtil.bindHouse(user, stmtId, houseId);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -356,10 +364,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if("01".equals(r.getResult())) {
 			throw new BizValidateException("账户不存在！");
 		}
-		BindHouseDTO dto = new BindHouseDTO();
-		dto.setHexieUser(r.getData());
-		dto.setUser(currUser);
-		return dto;
+		return r.getData();
 	}
 	
 	/**
@@ -466,7 +471,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
 
-		TemplateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
+		templateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
 	}
 
 	@Override
@@ -486,7 +491,7 @@ public class WuyeServiceImpl implements WuyeService {
 	public String getPaySmsCode(User user, String cardId) throws Exception {
 	
 		Assert.hasText(cardId, "卡ID不能为空。");
-		BankCard bankCard = bankCardRepository.findOne(Long.valueOf(cardId));
+		BankCard bankCard = bankCardRepository.findById(Long.valueOf(cardId)).get();
 		return wuyeUtil2.getPaySmsCode(user, bankCard).getData();
 	}
 	
@@ -498,14 +503,19 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public QrCodePayService getQrCodePayService(User user) throws Exception {
+	public QrCodePayService getQrCodePayService(User user) {
 		
 		long begin = System.currentTimeMillis();
 		
 		if (StringUtils.isEmpty(user.getTel())) {
-			user = userRepository.getOne(user.getId());
+			user = userRepository.findById(user.getId());
 		}
-		QrCodePayService service = wuyeUtil2.getQrCodePayService(user).getData();
+		QrCodePayService service = new QrCodePayService();
+		try {
+			service = wuyeUtil2.getQrCodePayService(user).getData();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(HomeServiceConstant.SERVICE_TYPE_CUSTOM, user.getId());
 		ServiceOperator serviceOperator = null;
 		List<PayCfg> serviceList = new ArrayList<>();
@@ -523,10 +533,14 @@ public class WuyeServiceImpl implements WuyeService {
 					log.info("getQrCodePayService before : " + (end - begin));
 					
 					List<Object> objList = redisTemplate.opsForHash().multiGet(ModelConstant.KEY_CUSTOM_SERVICE, collection);
+<<<<<<< HEAD
 					
 					end = System.currentTimeMillis();
 					log.info("getQrCodePayService redis time : " + (end - begin));
 					
+=======
+
+>>>>>>> 8438e8bfa0c4db2c4c0ad919b94d958f5664cff4
 					if (objList.size() > 0) {
 						for (int i = 0; i < sTypes.length; i++) {
 							
@@ -550,7 +564,11 @@ public class WuyeServiceImpl implements WuyeService {
 				
 			}
 		}
-		service.getServiceList().addAll(serviceList);
+		List<PayCfg> list = service.getServiceList();
+		if (list==null) {
+			list = new ArrayList<>();
+		}
+		list.addAll(serviceList);
 		return service;
 		
 	}
@@ -568,6 +586,12 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		wuyeUtil2.signInOut(signInOutDTO);
 		
+	}
+
+	@Override
+	public CellListVO querySectHeXieList(GetCellDTO getCellDTO) throws Exception {
+		
+		return wuyeUtil2.getMngHeXieList(getCellDTO).getData();
 	}
 
 	

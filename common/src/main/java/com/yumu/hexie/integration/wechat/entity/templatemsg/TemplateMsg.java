@@ -33,5 +33,10 @@ public class TemplateMsg<T> implements Serializable {
 	public void setData(T data) {
 		this.data = data;
 	}
+	@Override
+	public String toString() {
+		return "TemplateMsg [touser=" + touser + ", template_id=" + template_id + ", url=" + url + ", data=" + data
+				+ "]";
+	}
 	
 }

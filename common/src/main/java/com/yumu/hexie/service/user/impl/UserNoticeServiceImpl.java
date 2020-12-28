@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserNotice;
 import com.yumu.hexie.model.user.UserNoticeRepository;
@@ -42,11 +43,20 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 	}
 	@Override
 	public void orderSuccess(long userId, String tel,long orderId, String orderNo, String productName, float prices) {
-		String msg = "您好，您购买的"+productName+"已支付成功，支付总额" + prices + "元,关注微信号“合协社区”,了解更多订单信息。";
+		String msg = "您好，您购买的"+productName+"已支付成功，支付总额" + prices + "元。";
 		userNoticeRepository.save(new UserNotice(userId, ModelConstant.NOTICE_TYPE_ORDER, ModelConstant.NOTICE_SUB_TYPE_ORDERSUCCESS,
 				msg, orderId));
 		User user = userRepository.findById(userId);
 		smsService.sendMsg(user, tel, msg, getKey(userId,orderId,1));
+	}
+	
+	@Override
+	public void couponSuccess(Coupon coupon) {
+		String msg = "一张"+coupon.getAmount()+"元优惠券已送至您的账户，快点击进入公众号去使用吧！";
+		userNoticeRepository.save(new UserNotice(coupon.getUserId(), ModelConstant.NOTICE_TYPE_COUPON, ModelConstant.NOTICE_SUB_TYPE_ORDERSUCCESS,
+				msg, coupon.getSeedId()));
+		User user = userRepository.findById(coupon.getUserId());
+		smsService.sendMsg(user, user.getTel(), msg, getKey(coupon.getUserId(), coupon.getSeedId(), 1));
 	}
 
 	@Override
@@ -72,7 +82,7 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 
 	@Override
 	public void groupFail(User user, String tel,long groupId,  String productName, int ruleMinNum, String ruleName) {
-		String msg = "非常遗憾，您参与的"+ruleName+"因未达到的目标份数，团购，系统将自动为您退款退款。您可以通过微信支付通知进行核实。";
+		String msg = "非常遗憾，您参与的"+ruleName+"因未达到的目标份数，系统将自动为您退款退款。您可以通过微信支付通知进行核实。";
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPFAIL,
 				msg, groupId));
 		smsService.sendMsg(user, tel, msg,  getKey(user.getId(),groupId,5));

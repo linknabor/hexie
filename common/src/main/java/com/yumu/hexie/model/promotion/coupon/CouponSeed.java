@@ -59,6 +59,7 @@ public class CouponSeed extends BaseModel  {
 	private Integer usedCount = 0;
 	/*****汇总信息******/
 	
+	private Long seedTemplateId;	//如果是分裂出来的种子，则记录原模板种子ID
 	private String appid;	//公众号类别
 
 	@Transient
@@ -262,6 +263,12 @@ public class CouponSeed extends BaseModel  {
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+	}
+	public Long getSeedTemplateId() {
+		return seedTemplateId;
+	}
+	public void setSeedTemplateId(Long seedTemplateId) {
+		this.seedTemplateId = seedTemplateId;
 	}
 	
 }

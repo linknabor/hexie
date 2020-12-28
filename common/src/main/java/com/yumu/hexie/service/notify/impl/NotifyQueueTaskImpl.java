@@ -2,6 +2,7 @@ package com.yumu.hexie.service.notify.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,20 +22,25 @@ import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
+import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
-import com.yumu.hexie.model.maintenance.MaintenanceService;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.eshop.PartnerService;
+import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
+import com.yumu.hexie.service.sales.BaseOrderService;
+import com.yumu.hexie.service.user.CouponService;
 
+@Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	
 	private static Logger logger = LoggerFactory.getLogger(NotifyQueueTaskImpl.class);
@@ -50,6 +57,13 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private ServiceOperatorRepository serviceOperatorRepository;
 	@Autowired
 	private ServiceOrderRepository serviceOrderRepository;
+	@Autowired
+	private PartnerService partnerService;
+	@Autowired
+	private BaseOrderService baseOrderService;
+	@Autowired
+	private CouponService couponService;
+	
 	
 	/**
 	 * 异步发送到账模板消息
@@ -75,6 +89,60 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.info("start to consume wuyeNotificatione queue : " + queue);
 				
 				boolean isSuccess = false;
+				
+				/*推广订单 特殊处理 start*/
+				String tradeWaterId = queue.getOrderId();
+				ServiceOrder order = serviceOrderRepository.findByOrderNo(tradeWaterId);
+				if (order != null) {
+					int orderType = order.getOrderType();
+					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType || ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
+						List<Map<String, String>> openidList = new ArrayList<>();
+						int operType = 0;
+						if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+							operType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
+						}else if (ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
+							operType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
+						}
+						List<ServiceOperator> opList = serviceOperatorRepository.findByType(operType);
+						for (ServiceOperator serviceOperator : opList) {
+							Map<String, String> openids = new HashMap<>();
+							openids.put("openid", serviceOperator.getOpenId());
+							openidList.add(openids);
+						}
+						queue.setOpenids(openidList);
+						
+						if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+										
+							String address = order.getAddress();	//逗号分隔，需要split
+							String[]addrArr = address.split(",");
+							
+							String remark = "";
+							if (addrArr.length!=4) {
+								logger.error("当前地址: " + address + "，不能分成 省市区");
+							}else {
+								String province = addrArr[0];
+								String city = addrArr[1];
+								String county = addrArr[2];
+								String sect = addrArr[3];
+								
+								if(province.indexOf("上海")>=0
+										||province.indexOf("北京")>=0
+										||province.indexOf("重庆")>=0
+										||province.indexOf("天津")>=0){
+									province = "";
+								}
+								
+								remark = province + city + county + sect;
+								remark = order.getReceiverName() + "-" + remark;
+								logger.info("remark : " + remark);
+							}
+							queue.setRemark(remark);
+						}
+						
+					}
+				}
+				/*推广订单 特殊处理 end*/
+				
 				List<Map<String, String>> openidList = queue.getOpenids();
 				if (openidList == null || openidList.isEmpty()) {
 					continue;
@@ -362,14 +430,15 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						});
 					}
 					
+					isSuccess = true;
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 				
-				isSuccess = true;
 				if (!isSuccess) {
 					String value = objectMapper.writeValueAsString(json);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_SERVICE_CFG_QUEUE, value);
 				}
 			
 			} catch (Exception e) {
@@ -377,6 +446,271 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 			}
 		}
 	
+		
+	}
+
+	@Override
+	@Async("taskExecutor")
+	public void updateOrderStatusAysc() {
+		
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String tradeWaterId = redisTemplate.opsForList().leftPop(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(tradeWaterId)) {
+					continue;
+				}
+				logger.info("start to consume orderStatus update queue : " + tradeWaterId);
+				
+				boolean isSuccess = false;
+				try {
+					baseOrderService.finishOrder(tradeWaterId);
+					isSuccess = true;
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				
+				
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, tradeWaterId);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+		}
+	
+		
+	}
+
+	/**
+	 * 给操作员发送发货提醒
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void sendDeliveryNotificationAsyc() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String tradeWaterId = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(tradeWaterId)) {
+					continue;
+				}
+				logger.info("start to consume notify delivery queue : " + tradeWaterId);
+				
+				boolean isSuccess = false;
+				try {
+					logger.info("notify delivery, tradeWaterId : " + tradeWaterId);
+					
+					ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
+					if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+						continue;
+					}
+					logger.info("notify delivery, orderNo : " + serviceOrder.getOrderNo());
+					logger.info("notify delivery, orderType : " + serviceOrder.getOrderType());
+					
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+						
+						long groupOrderId = serviceOrder.getGroupOrderId();
+						logger.info("notify delivery, groupOrderId : " + groupOrderId);
+						
+						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupOrderId);
+						for (ServiceOrder o : orderList) {
+							int operType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
+							long agentId = o.getAgentId();
+							logger.info("agentId is : " + agentId);
+							List<ServiceOperator> opList = new ArrayList<>();
+							if (agentId > 1) {	//1是默认奈博的，所以跳过
+								opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
+							}else {
+								opList = serviceOperatorRepository.findByType(operType);
+							}
+							logger.info("oper list size : " + opList.size());
+							for (ServiceOperator serviceOperator : opList) {
+								logger.info("delivery user id : " + serviceOperator.getUserId());
+								User sendUser = userRepository.findById(serviceOperator.getUserId());
+								if (sendUser != null) {
+									logger.info("send user : " + sendUser.getId());
+									gotongService.sendDeliveryNotification(sendUser, o);
+								}
+							}
+						}
+						
+					} 
+
+					isSuccess = true;
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, tradeWaterId);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+	}
+	
+	/**
+	 * 合伙人退款更新有效期
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void updatePartnerAsync() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String queue = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_PARTNER_REFUND_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(queue)) {
+					continue;
+				}
+				boolean isSuccess = false;
+				try {
+					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+					List<PartnerNotification> list = objectMapper.readValue(queue, new TypeReference<List<PartnerNotification>>(){});
+					
+					logger.info("start to consume notify update partner refund queue : " + queue);
+				
+					if (list == null || list.isEmpty()) {
+						continue;
+					}
+					for (PartnerNotification partnerNotification : list) {
+						logger.info("partnerNotification : " + partnerNotification);
+						partnerService.invalidate(partnerNotification);
+					}
+					isSuccess = true;
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+						
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+	}
+	
+	/**
+	 * 商品订单退款，包括：特卖、团购、核销券、合伙人、saas套件的售卖、自定义服务订单
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void eshopRefundAsync() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String orderNo = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(orderNo)) {
+					continue;
+				}
+				boolean isSuccess = false;
+				try {
+					logger.info("start to consume eshop refund queue, orderNo : " + orderNo);
+					if (StringUtils.isEmpty(orderNo)) {
+						continue;
+					}
+					
+					ServiceOrder order = serviceOrderRepository.findByOrderNo(orderNo);
+					if (order != null) {
+						List<ServiceOrder> orderList = new ArrayList<>();
+						if (ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()) {
+							orderList = serviceOrderRepository.findByGroupOrderId(order.getGroupOrderId());
+						}else {
+							orderList.add(order);
+						}
+						for (ServiceOrder o : orderList) {
+							baseOrderService.finishRefund(o);
+						}
+						
+					}
+					isSuccess = true;
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+						
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, orderNo);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+	}
+	
+	/**
+	 * 商品订单退款，包括：特卖、团购、核销券、合伙人、saas套件的售卖、自定义服务订单
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void consumeWuyeCouponAsync() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String value = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_WUYE_COUPON_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(value)) {
+					continue;
+				}
+				boolean isSuccess = false;
+				try {
+					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+					TypeReference<Map<String, String>> typeReference = new TypeReference<Map<String,String>>() {};
+					Map<String, String> map = objectMapper.readValue(value, typeReference);
+					String couponId = map.get("couponId");
+					String orderId = map.get("orderId");
+					logger.info("start to consume wuye conpon queue, couponId : " + couponId + ", orderId : " + orderId);
+					couponService.consume(orderId, couponId);
+					isSuccess = true;
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+						
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_WUYE_COUPON_QUEUE, value);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
 		
 	}
 	

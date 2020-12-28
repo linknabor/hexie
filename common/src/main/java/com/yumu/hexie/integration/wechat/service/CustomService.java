@@ -56,6 +56,9 @@ public class CustomService {
 		if (null != jsonObject&&jsonObject.getErrcode()==0) {
 			bo = true;
 		}
+		if (jsonObject.getErrcode() == 45015) {	//45015是取关，或者超过48小时客服消息窗口期了，所以怎么发都是不会成功的，这种情况下不重发。
+			bo = true;
+		}
 		return bo;
 	}
 

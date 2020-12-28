@@ -51,6 +51,10 @@ public class PrepayRequestDTO implements Serializable {
 	private String ruleType;	//减免规则类型
 	private String reductionAmt;	//减免金额
 	private String payFeeType;	//费用类型，01：管理费 02：停车费
+	
+	//是否二维码支付
+	private String isQrcode;
+	private String appid;
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -208,6 +212,19 @@ public class PrepayRequestDTO implements Serializable {
 	public void setPayFeeType(String payFeeType) {
 		this.payFeeType = payFeeType;
 	}
+	public String getIsQrcode() {
+		return isQrcode;
+	}
+	public void setIsQrcode(String isQrcode) {
+		this.isQrcode = isQrcode;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
+
 	@Override
 	public String toString() {
 		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
@@ -217,7 +234,10 @@ public class PrepayRequestDTO implements Serializable {
 				+ ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo="
 				+ acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode
 				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
-				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + "]";
+				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
+				+ ", appid=" + appid + "]";
+
 	}
+	
 	
 }

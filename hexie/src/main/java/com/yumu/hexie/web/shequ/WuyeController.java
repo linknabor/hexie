@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -31,8 +30,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
@@ -42,7 +41,6 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
-import com.yumu.hexie.integration.wuye.vo.BindHouseDTO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -52,7 +50,6 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
-import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -67,6 +64,7 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
+import com.yumu.hexie.web.shequ.vo.GetCellVO;
 import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.shequ.vo.SignInOutVO;
@@ -178,20 +176,18 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String stmtId, 
 			@RequestParam(required = false) String houseId) throws Exception {
 		
-		BindHouseDTO dto = wuyeService.bindHouse(user, stmtId, houseId);
-		HexieUser u = dto.getHexieUser();
-		User currUser = dto.getUser();
+		HexieUser u = wuyeService.bindHouse(user, stmtId, houseId);
 		log.info("HexieUser u = " + u);
 		if (u != null) {
-			currUser = wuyeService.setDefaultAddress(currUser, u);
-			if (!systemConfigService.isCardServiceAvailable(currUser.getAppId())) {
-				pointService.updatePoint(currUser, "1000", "zhima-house-" + currUser.getId() + "-" + houseId);
+			wuyeService.setDefaultAddress(user, u);
+			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			}
-			httpSession.setAttribute(Constants.USER, currUser);
+			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
 	}
-
+	
 	/**
 	 * 无账单绑定房屋
 	 * @param user
@@ -208,16 +204,15 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String houseId, 
 			@RequestParam(required = false) String area) throws Exception {
 		
-		BindHouseDTO dto = wuyeService.bindHouseNoStmt(user, houseId, area);
-		HexieUser u = dto.getHexieUser();
-		User currUser = dto.getUser();
+		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
 		log.info("HexieUser : " + u);
 		if (u != null) {
-			currUser = wuyeService.setDefaultAddress(currUser, u);
-			if (!systemConfigService.isCardServiceAvailable(currUser.getAppId())) {
-				pointService.updatePoint(currUser, "1000", "zhima-house-" + currUser.getId() + "-" + houseId);
+			log.info("user : " + user);
+			wuyeService.setDefaultAddress(user, u);
+			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			}
-			httpSession.setAttribute(Constants.USER, currUser);
+			httpSession.setAttribute(Constants.USER, user);
 		}
 		return BaseResult.successResult(u);
 	}
@@ -338,6 +333,34 @@ public class WuyeController extends BaseController {
 		result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
+	
+	/**
+	 * 创建交易，获取预支付ID
+	 * stmtId在快捷支付的时候会用到
+	 * @param user
+	 * @param prepayReq
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getPrePayInfo4Qrcode", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
+		
+		WechatPayInfo result = new WechatPayInfo();
+		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
+		PrepayRequestDTO dto = new PrepayRequestDTO();
+		BeanUtils.copyProperties(prepayReqVo, dto);
+		
+		User user = new User();
+		dto.setUser(user);
+		user.setAppId(prepayReqVo.getAppid());
+		user.setOpenid(prepayReqVo.getOpenid());
+		
+		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
+		result = wuyeService.getPrePayInfo(dto);
+		return BaseResult.successResult(result);
+	}
 
 	/**
 	 *  通知支付成功，并获取支付查询的返回结果
@@ -391,7 +414,6 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult sendNotification(HttpSession session) {
 
-		User user = (User) session.getAttribute(Constants.USER);
 		String retValue = "false";
 		String[] dates = systemConfigService.queryActPeriod();
 		if (dates.length == 2) {
@@ -406,8 +428,7 @@ public class WuyeController extends BaseController {
 			}
 			/* 如果在活动日期内，则：1发送短信告知用户。2推送微信模版消息 */
 			if ("true".equals(retValue)) {
-				sendMsg(user);
-				sendRegTemplateMsg(user);
+				//TODO
 			}
 		}
 
@@ -415,16 +436,6 @@ public class WuyeController extends BaseController {
 
 	}
 
-	@Async
-	public void sendMsg(User user) {
-		String msg = "您好，欢迎加入合协社区。您已获得价值10元红包一份。感谢您对合协社区的支持。";
-		smsService.sendMsg(user, user.getTel(), msg, 11, 3);
-	}
-
-	@Async
-	public void sendRegTemplateMsg(User user) {
-		TemplateMsgService.sendRegisterSuccessMsg(user, systemConfigService.queryWXAToken(user.getAppId()));
-	}
 
 	/**
 	 * 获取支付物业费时可用的红包
@@ -435,42 +446,17 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getCouponsPayWuYe", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<Coupon>> getCoupons(HttpSession session, @RequestParam(required = false)String payType) {
+	public BaseResult<List<Coupon>> getCoupons(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false)String payType, 
+			@RequestParam(required = false)String amount, @RequestParam(required = false) String agentNo) {
 		
-		log.info("payType is : " + payType);
-		User user = (User) session.getAttribute(Constants.USER);
-		List<Coupon> list = couponService.findAvaibleCouponForWuye(user, payType);
+		log.info("payType is : " + payType + ", amount : " + amount + ", agentNo :" + agentNo);
+		List<Coupon> list = couponService.findAvaibleCouponForWuye(user, payType, amount, agentNo);
 		if (list == null) {
 			list = new ArrayList<Coupon>();
 		}
 		return BaseResult.successResult(list);
 
 	}
-
-	/**
-	 * 为物业缴费成功的用户发放红包
-	 * TODO 这个函数前端目前没有调用了
-	 * @param session
-	 * @return
-	 */
-	@SuppressWarnings({ "rawtypes" })
-	@RequestMapping(value = "sendCoupons4WuyePay", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult sendCoupons(HttpSession session, @RequestParam(required = false) String tradeWaterId,
-			@RequestParam(required = false) String feePrice) {
-
-		User user = (User) session.getAttribute(Constants.USER);
-		int couponCombination = 1;
-		List<CouponCombination> list = couponService.findCouponCombination(couponCombination);
-
-		wuyeService.addCouponsFromSeed(user, list);
-
-		wuyeService.sendPayTemplateMsg(user, tradeWaterId, feePrice);
-
-		return BaseResult.successResult("send succeeded !");
-	}
-
-	
 
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)
@@ -517,19 +503,6 @@ public class WuyeController extends BaseController {
 		
 	}
 
-	@SuppressWarnings({ "rawtypes" })
-	@RequestMapping(value = "/initSession4Test/{userId}", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult initSessionForTest(HttpSession session, @PathVariable String userId) {
-
-		if (!StringUtil.isEmpty(userId)) {
-			User user = userRepository.findOne(Long.valueOf(userId));
-			session.setAttribute("sessionUser", user);
-		}
-		return BaseResult.successResult("succeeded");
-
-	}
-
 	/**
 	 * 根据ID查询指定类型的合协社区物业信息
 	 * @param user
@@ -549,6 +522,40 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false, value = "regionname") String regionName)
 			throws Exception {
 		CellListVO cellMng = wuyeService.querySectHeXieList(user, sect_id, build_id, unit_id, data_type, regionName);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
+	}
+	
+	/**
+	 * 根据ID查询指定类型的合协社区物业信息
+	 * @param user
+	 * @param sect_id
+	 * @param build_id
+	 * @param unit_id
+	 * @param data_type
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getHeXieCellById4Qrcode", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<CellVO> getHeXieCellById4Qrcode(@RequestBody GetCellVO getCellVO)
+			throws Exception {
+		
+		log.info("getHeXieCellById4Qrcode : " + getCellVO);
+		
+		User user = new User();
+		user.setAppId(getCellVO.getAppid());
+		user.setOpenid(getCellVO.getOpenid());
+		
+		GetCellDTO getCellDTO = new GetCellDTO();
+		BeanUtils.copyProperties(getCellVO, getCellDTO);
+		getCellDTO.setUser(user);
+		
+		CellListVO cellMng = wuyeService.querySectHeXieList(getCellDTO);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
@@ -704,6 +711,9 @@ public class WuyeController extends BaseController {
 		User user = new User();
 		dto.setUser(user);
 		user.setAppId(otherPayVo.getAppid());
+		if (!StringUtils.isEmpty(otherPayVo.getRealAppid())) {
+			user.setAppId(otherPayVo.getRealAppid());
+		}
 		user.setOpenid(otherPayVo.getOpenid());
 		WechatPayInfo wechatPayInfo = wuyeService.requestOtherPay(dto);
 		return BaseResult.successResult(wechatPayInfo);

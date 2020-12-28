@@ -47,7 +47,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " and IF (?2!='', userName like CONCAT('%',?2,'%'), 1=1)"
 			+ " and IF (?3!='', createDate = ?3, 1=1)"
 			+ " and IF (?4!='', userSectId = ?4, 1=1)"
-			+ " and userSectId in ?5 \n#pageable\n",
+			+ " and userSectId in ?5 ",
 			countQuery="select count(*) from thread  where threadStatus = 0 " 
 			+ " and threadCategory = ?1 "
 			+ " and IF (?2!='', userName like CONCAT('%',?2,'%'), 1=1)"
@@ -67,9 +67,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			+ " and threadCategory = ?2 "
 			+ " and IF (?3!='', createDate >= ?3, 1=1)"
 			+ " and IF (?4!='', createDate <= ?4, 1=1)"
-			+ " and userSectId in ?5 "
-			+ " order by createDateTime desc "
-			+ " \n#pageable\n",
+			+ " and userSectId in ?5 ",
 			countQuery="select count(*) from thread  where threadStatus = ?1 " 
 			+ " and threadCategory = ?2 "
 			+ " and IF (?3!='', createDate >= ?3, 1=1)"
@@ -78,8 +76,27 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			,nativeQuery = true)
 	public Page<Thread> getThreadListByCategory(String threadStatus, int threadCategory, String beginDate, String endDate, List<String> sectIds, Pageable pageable);
 	
+	final String column1 = "t.threadId, t.createDateTime, t.userSectId, t.userSectName, t.userCspId, t.userName, "
+			+ "t.attachmentUrl, t.threadContent ";
 	
 	
+	@Query(value="select " + column1 + " from thread t"
+			+ " where threadStatus = 0 " 
+			+ " and threadCategory = ?1 "
+			+ " and IF (?2!='', userName like CONCAT('%',?2,'%'), 1=1)"
+			+ " and IF (?3!='', createDateTime >= ?3, 1=1)"
+			+ " and IF (?4!='', createDateTime <= ?4, 1=1)"
+			+ " and IF (?5!='', userSectId = ?5, 1=1)"
+			+ " and (COALESCE(?6) IS NULL OR (userSectId IN (?6) )) "
+			, countQuery="select count(1) from thread where threadStatus = 0 " 
+			+ " and threadCategory = ?1 "
+			+ " and IF (?2!='', userName like CONCAT('%',?2,'%'), 1=1)"
+			+ " and IF (?3!='', createDateTime >= ?3, 1=1)"
+			+ " and IF (?4!='', createDateTime <= ?4, 1=1)"
+			+ " and IF (?5!='', userSectId = ?5, 1=1)"
+			+ " and (COALESCE(?6) IS NULL OR (userSectId IN (?6) )) "
+			,nativeQuery = true)
+	public Page<Object[]> getThreadList(int threadCategory, String userName, String startDate, String endDate,String sectId, List<String> sectIds, Pageable pageable);
 	
 	
 	

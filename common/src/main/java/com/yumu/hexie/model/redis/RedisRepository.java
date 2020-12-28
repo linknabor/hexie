@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.redis;
 
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -9,9 +10,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.car.OrderCarInfo;
+import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.share.ShareAccessRecord;
 import com.yumu.hexie.model.system.SystemConfig;
 
@@ -31,6 +34,10 @@ public class RedisRepository {
     @Autowired
 	@Qualifier(value = "authRedisTemplate")
 	private RedisTemplate<String, Object> authRedisTemplate;
+    @Autowired
+    private RedisTemplate<String, ProductRule> proRedisTemplate;
+    @Autowired
+    private RedisTemplate<String, CouponCfg> couponRuleRedisTemplate;
     
     /**
      * 获取订单车辆信息 
@@ -44,7 +51,7 @@ public class RedisRepository {
      * @param carInfo
      */
     public void setOrderCarInfo(OrderCarInfo carInfo) {
-    	orderCarInfoRedisTemplate.opsForValue().set(Keys.orderCarInfoKey(carInfo.getUserId()), carInfo);
+    	orderCarInfoRedisTemplate.opsForValue().set(Keys.orderCarInfoKey(carInfo.getUserId()), carInfo, 30, TimeUnit.DAYS);
     }
     
     public SystemConfig getSystemConfig(String key) {
@@ -55,14 +62,14 @@ public class RedisRepository {
     }
 
     public void setHomeCart(String key,HomeCart value){
-        homeCartRedisTemplate.opsForValue().set(key, value);
+        homeCartRedisTemplate.opsForValue().set(key, value, 60, TimeUnit.DAYS);
     }
     public HomeCart getHomeCart(String key) {
         return homeCartRedisTemplate.opsForValue().get(key);
     }
     
     public void setCart(String key, Cart value) {
-        cartRedisTemplate.opsForValue().set(key, value);
+        cartRedisTemplate.opsForValue().set(key, value, 60, TimeUnit.DAYS);
     }
     public Cart getCart(String key) {
         return cartRedisTemplate.opsForValue().get(key);
@@ -94,6 +101,39 @@ public class RedisRepository {
     
     public String getAuthorizerJsTicket(String key) {
     	return (String) authRedisTemplate.opsForValue().get(key);
+    }
+    
+    public void setProdcutRule(String key, ProductRule value) {
+    	
+    	Date start = value.getStartDate();
+    	Date end = value.getEndDate();
+    	long expire = end.getTime() - start.getTime();
+    	proRedisTemplate.opsForValue().set(key, value, expire, TimeUnit.MILLISECONDS);
+    }
+    public ProductRule getProdcutRule(String key) {
+        return proRedisTemplate.opsForValue().get(key);
+    }
+    
+    public CouponCfg getCouponCfg(String key) {
+        return couponRuleRedisTemplate.opsForValue().get(key);
+    }
+    
+    public void setCouponCfg(String key, CouponCfg value) {
+    	
+    	Date start = value.getStartDate();
+    	Date end = value.getEndDate();
+    	long expire = end.getTime() - start.getTime();
+    	couponRuleRedisTemplate.opsForValue().set(key, value, expire, TimeUnit.MILLISECONDS);
+    }
+    
+    public static void main(String[] args) throws InterruptedException {
+		
+    	Date date1 = new Date();
+    	Thread.sleep(5000);
+    	Date date2 = new Date();
+    	
+    	System.out.println(date2.getTime() - date1.getTime());
+    	
     }
 
 //    

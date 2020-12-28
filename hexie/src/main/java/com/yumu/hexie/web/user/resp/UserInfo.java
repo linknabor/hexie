@@ -16,6 +16,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.WuyePayTabs;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
 
 /**
  * <pre>
@@ -26,13 +27,17 @@ import com.yumu.hexie.model.view.WuyePayTabs;
  * @version $Id: UserInfo.java, v 0.1 2016年2月2日 上午11:30:23  Exp $
  */
 public class UserInfo implements Serializable {
+	
     private static final long serialVersionUID = 4808669460780339640L;
+    
     private String realName;
     private String name;
     private String tel;
     
     private boolean isRepairOperator = false;
     private boolean isServiceOperator = false;
+    private boolean isEvoucherOperator = false;
+    private boolean isMerchant = false;
     
     private Double longitude;
     private Double latitude;
@@ -73,6 +78,7 @@ public class UserInfo implements Serializable {
  	private List<BgImage> bgImageList = new ArrayList<>();
  	private List<WuyePayTabs> wuyeTabsList = new ArrayList<>();
  	private String qrCode;
+ 	private String csHotline;	//公众号客服电话
  	
  	private int point;	//用户积分
  	private int cardStatus;	//用户会员卡状态
@@ -100,15 +106,19 @@ public class UserInfo implements Serializable {
 		this.officeTel = officeTel;
 	}
 	public UserInfo(){}
+	
     public UserInfo(User user){
         BeanUtils.copyProperties(user, this);
     }
-
-    public UserInfo(User user,boolean isOperator, boolean isServiceOperator){
+    
+    public UserInfo(User user, OperatorDefinition odDefinition){
         BeanUtils.copyProperties(user, this);
-        this.isRepairOperator = isOperator;
-        this.isServiceOperator = isServiceOperator;
+        this.isRepairOperator = odDefinition.isRepairOperator();
+        this.isServiceOperator = odDefinition.isServiceOperator();
+        this.isEvoucherOperator = odDefinition.isEvoucherOperator();
+        this.isMerchant = odDefinition.isOnsaleTaker() || odDefinition.isRgroupTaker();
     }
+    
     public String getRealName() {
         return realName;
     }
@@ -277,6 +287,13 @@ public class UserInfo implements Serializable {
 	public void setServiceOperator(boolean isServiceOperator) {
 		this.isServiceOperator = isServiceOperator;
 	}
+	
+	public boolean isEvoucherOperator() {
+		return isEvoucherOperator;
+	}
+	public void setEvoucherOperator(boolean isEvoucherOperator) {
+		this.isEvoucherOperator = isEvoucherOperator;
+	}
 	public String getXiaoquName() {
         return xiaoquName;
     }
@@ -354,6 +371,18 @@ public class UserInfo implements Serializable {
 	}
 	public void setCardPayService(boolean cardPayService) {
 		this.cardPayService = cardPayService;
+	}
+	public boolean isMerchant() {
+		return isMerchant;
+	}
+	public void setMerchant(boolean isMerchant) {
+		this.isMerchant = isMerchant;
+	}
+	public String getCsHotline() {
+		return csHotline;
+	}
+	public void setCsHotline(String csHotline) {
+		this.csHotline = csHotline;
 	}
 	
 	

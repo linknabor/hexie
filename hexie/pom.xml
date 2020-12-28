@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<parent>   		
-		<groupId>org.springframework.boot</groupId>
-	    <artifactId>spring-boot-starter-parent</artifactId>
-	    <version>1.5.17.RELEASE</version>
-	    <relativePath/>
+	<parent>
+		<groupId>com.yumu</groupId>
+		<artifactId>hexie-parent</artifactId>
+		<version>2.0</version>
 	</parent>
-	<modelVersion>4.0.0</modelVersion>
 	<artifactId>hexie</artifactId>
+	<version>${spring-boot.version}</version>
 	<name>hexie</name>
-	<description>hexie hexie</description>
-	<url>http://home.e-shequ.com</url>
-
-
+	<url>https://www.e-shequ.com</url>
+	<modelVersion>4.0.0</modelVersion>
+	<description>hexie</description>
 	<packaging>war</packaging>
 
 	<dependencies>
@@ -22,25 +21,35 @@
 		<dependency>
 			<groupId>com.yumu</groupId>
 			<artifactId>hexie-common</artifactId>
-	        <version>1.0</version>
+			<version>2.0</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
-		</dependency>
-		
 	</dependencies>
 
 	<build>
-	    <plugins>
-	        <plugin>
-	            <groupId>org.springframework.boot</groupId>
-	            <artifactId>spring-boot-maven-plugin</artifactId>
-			    <configuration>
-			        <executable>true</executable>
-			    </configuration>
-	        </plugin>
-	    </plugins>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<executable>true</executable>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>com.yumu.hexie.common.config.AppConfig</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+		</plugins>
 	</build>
+
 </project>

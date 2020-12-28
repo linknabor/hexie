@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.integration.daojia.haojiaan.HaoJiaAnReq;
@@ -51,12 +52,14 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
     private ServiceRegionRepository serviceRegionRepository;
 	@Inject
     private ServiceOperatorRepository serviceOperatorRepository;
+	@Autowired
+	private TemplateMsgService templateMsgService;
 
 	@Override
 	@Transactional
 	public Long addNoNeedPayOrder(User user, HaoJiaAnReq haoJiaAnReq,
 			long addressId) {
-		Address address = addressRepository.findOne(addressId);
+		Address address = addressRepository.findById(addressId).get();
 		haoJiaAnReq.setStrMobile(address.getTel());
 		haoJiaAnReq.setStrName(address.getReceiveName());
 		haoJiaAnReq.setStrWorkAddr(address.getRegionStr()+address.getDetailAddress());
@@ -115,7 +118,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
             for (ServiceOperator op : ops) {
             	//循环发送短信模板
             	 log.error("发送短信给" + op.getName()+",userId为"+op.getUserId());
-            	TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,op.getOpenId());//发送模板消息给操作员
+            	 templateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,op.getOpenId());//发送模板消息给操作员
 			}
         }
 //        TemplateMsgService.sendHaoJiaAnAssignMsg(hOrder, user, accessToken,user.getOpenid());//发送模板消息给用户自己
@@ -125,7 +128,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	@Override
 	public YuyueQueryOrder queryYuYueOrder(User user, long orderId) {
 		
-		YuyueOrder yuyueOrder = yuyueOrderRepository.findOne(orderId);
+		YuyueOrder yuyueOrder = yuyueOrderRepository.findById(orderId).get();
 		if (yuyueOrder==null) {
 			return null;
 		}
@@ -154,8 +157,8 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	@Override
 	public List<Long> orderAccessAuthority(long orderId) {
 		log.error("进来了");
-		YuyueOrder yorder = yuyueOrderRepository.findOne(orderId);
-		Address address = addressRepository.findOne(yorder.getAddressId());
+		YuyueOrder yorder = yuyueOrderRepository.findById(orderId).get();
+		Address address = addressRepository.findById(yorder.getAddressId()).get();
 		List<Long> regionIds = new ArrayList<Long>();
         regionIds.add(1l);
         regionIds.add(address.getProvinceId());

@@ -60,7 +60,7 @@ public class RepairController extends BaseController{
     @ResponseBody
     public BaseResult<RepairReqPageVO> queryProject(@ModelAttribute(Constants.USER)User user,@PathVariable long projectId){
         RepairReqPageVO vo = new RepairReqPageVO();
-        vo.setProject(repairProjectRepository.findOne(projectId));
+        vo.setProject(repairProjectRepository.findById(projectId).get());
         /*
          * 1.维修只能修业主绑定的房子，自己添加的小区以外的地址物业服务不到。
          * 2.进入到这个功能的用户应该都是已经绑定过房子的用户。需要去community查询他具体绑定的房屋地址，并在address表对应的记录上添加相应的标识
@@ -102,7 +102,7 @@ public class RepairController extends BaseController{
     //请求支付 POST
     @RequestMapping(value="repair/pay", method = RequestMethod.POST)
     @ResponseBody
-    public BaseResult<JsSign> pay(@ModelAttribute(Constants.USER)User user,@RequestBody RepairPayReq req){
+    public BaseResult<JsSign> pay(@ModelAttribute(Constants.USER)User user,@RequestBody RepairPayReq req) throws Exception{
         return new BaseResult<JsSign>().success(repairService.requestPay(req.getOrderId(), req.getAmount(), user));
     }
 

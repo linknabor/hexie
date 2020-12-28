@@ -33,6 +33,6 @@ public class ToHomeServiceImpl implements ToHomeService {
 
     @Override
     public YuyueRule queryYuyueRuleInfo(long yuyueRuleId) {
-        return yuyueRuleRepository.findOne(yuyueRuleId);
+        return yuyueRuleRepository.findById(yuyueRuleId).get();
     }
 }

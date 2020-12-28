@@ -76,7 +76,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	@Override
 	public HexieMessage getMessage(long messageId) {
 		
-		return hexieMessageRepository.findOne(messageId);
+		return hexieMessageRepository.findById(messageId).get();
 	}
 
 }

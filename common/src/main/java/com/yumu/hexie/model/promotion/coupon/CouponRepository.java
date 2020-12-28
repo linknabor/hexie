@@ -3,11 +3,10 @@ package com.yumu.hexie.model.promotion.coupon;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.yumu.hexie.model.ModelConstant;
 
@@ -44,20 +43,21 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
 	@Query("from Coupon c where c.status = "+ModelConstant.COUPON_STATUS_AVAILABLE+" and c.expiredDate >=?1 and c.expiredDate<= ?2")
 	public List<Coupon> findTimeoutCouponByDate(Date fromDate, Date toDate, Pageable page);
 	
-	@Modifying
-	@Transactional
-	@Query(value = "update coupon set orderId = ?1 where id = ?2 ", nativeQuery = true)
-	public void updateWuyeCouponOrderId(long orderId, long id);
-	
-	@Modifying
-	@Transactional
-	@Query(value = "update coupon set orderId = ?1, status =?2 where id = ?3 and status = ?4 ", nativeQuery = true)
-	public void lockWuyeCoupon(long orderId, int toStatus, long couponId, int fromStatus);
-	
-	@Modifying
-	@Transactional
-	@Query(value = "update coupon status =?2 where id = ?2 and orderId = ?3 and status = ?4 ", nativeQuery = true)
-	public void consumeWuyeCoupon(int toStatus, long couponId, long orderId, int fromStatus);
-	
 	public Coupon findByOrderId(long orderId);
+	
+	String queryCoumn = "id, title, ruleId, createDate, userId, tel, seedType, status, amount, useStartDate, expiredDate, usedDate, couponDesc, agentName, agentNo ";
+	
+	@Query(value = "select " + queryCoumn + "from coupon where status in ( ?1 ) "
+			+ "and IF (?2!='', title like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3!='', seedType = ?3, 1=1) "
+			+ "and IF (?4!='', tel = ?4, 1=1) "
+			+ "and (COALESCE(?5) IS NULL OR (agentId IN (?5) )) "
+			, countQuery = "select count(1) from coupon where status in ( ?1 ) "
+					+ "and IF (?2!='', title like CONCAT('%',?2,'%'), 1=1) "
+					+ "and IF (?3!='', seedType = ?3, 1=1) "
+					+ "and IF (?4!='', tel = ?4, 1=1) "
+					+ "and (COALESCE(?5) IS NULL OR (agentId IN (?5) )) "
+			, nativeQuery = true)
+	public Page<Object[]> findByMultiCondition(List<Integer> status, String title, String seedType, 
+			String tel, List<Long> agentId, Pageable pageable);
 }

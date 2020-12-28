@@ -74,7 +74,7 @@ public class HomeItemServiceImpl implements HomeItemService {
      */
     @Override
     public ServiceItem queryById(long itemId) {
-        return serviceItemRepository.findOne(itemId);
+        return serviceItemRepository.findById(itemId).get();
     }
 
     /** 
@@ -84,7 +84,7 @@ public class HomeItemServiceImpl implements HomeItemService {
      */
     @Override
     public ServiceType queryTypeById(long typeId) {
-        return serviceTypeRepository.findOne(typeId);
+        return serviceTypeRepository.findById(typeId).get();
     }
 
     @Override

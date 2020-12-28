@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -71,6 +72,12 @@ public class CommunityController extends BaseController{
 	@Inject
 	private SystemConfigService systemConfigService;
 	
+	@Autowired
+	private QiniuUtil qiniuUtil;
+	
+	@Autowired
+	private FileService fileService;
+	
 	/*****************[BEGIN]帖子********************/
 	
 	/**
@@ -92,7 +99,7 @@ public class CommunityController extends BaseController{
 		
 		List<Thread>list = new ArrayList<Thread>();
 		
-		Pageable page = new PageRequest(currPage, PAGE_SIZE, sort);
+		Pageable page = PageRequest.of(currPage, PAGE_SIZE, sort);
 		//查看本小区的
 		if ("y".equals(filter)) {
 			if (ModelConstant.THREAD_CATEGORY_SUGGESTION == thread.getThreadCategory()) {
@@ -120,8 +127,8 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 					
 				}
 				
@@ -144,7 +151,7 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					thumbnailLinkList.add(QiniuUtil.getInstance().getThumbnailLink(urlKey, "3", "0"));
+					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
 					
 				}
 				
@@ -173,16 +180,9 @@ public class CommunityController extends BaseController{
 		
 		User user = (User)session.getAttribute(Constants.USER);
 		
-		if(StringUtil.isEmpty(user.getSectId())){
-			
-			return BaseResult.fail("用户没有注册小区。");
-		}
-		
 		if(thread.getThreadContent().length()>200){
-			
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
-		
 		communityService.addThread(user, thread);
 		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
 
@@ -266,8 +266,8 @@ public class CommunityController extends BaseController{
 			for (int i = 0; i < urls.length; i++) {
 				
 				String urlKey = urls[i];
-				imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-				thumbnailLinkList.add(QiniuUtil.getInstance().getThumbnailLink(urlKey, "3", "0"));
+				imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+				thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
 				
 			}
 			
@@ -296,7 +296,7 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < urls.length; j++) {
 					
 					String urlKey = urls[j];
-					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 					
 				}
 				tc.setPreviewLink(previewLinkList);
@@ -333,7 +333,7 @@ public class CommunityController extends BaseController{
 			uploadIds = uploadIds.substring(0, uploadIds.length()-1);	//截掉最后一个逗号
 			String[]uploadIdArr = uploadIds.split(",");
 			
-			String uptoken = QiniuUtil.getInstance().getUpToken();	//获取qiniu上传文件的token
+			String uptoken = qiniuUtil.getUpToken();	//获取qiniu上传文件的token
 			
 			log.error("qiniu token :" + uptoken);
 			
@@ -350,40 +350,26 @@ public class CommunityController extends BaseController{
 			String imgWidth = "";
 			
 			PutExtra extra = new PutExtra();
-			File img = null;
 			User user = userService.getById(ret.getUserId());
-			String accessToken=systemConfigService.queryWXAToken(user.getAppId());
+			String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
 					
 					String uploadId = uploadIdArr[i];
-					int imgcounter = 0;
-					inputStream = null;
-					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId,accessToken);		//下载图片
-						if (inputStream==null) {
-							log.error("获取图片附件失败。");
-						}
-						imgcounter++;
-					}
-					
-					if (inputStream==null) {
-						log.error("多次从腾讯获取图片失败。");
-						return;
-					}
 					String tmpPath = tmpPathRoot+currTime+"_"+ret.getThreadId()+"_"+i;
-					FileService.inputStream2File(inputStream, tmpPath);
-					String key = currDate+"_"+currTime+"_"+ret.getThreadId()+"_"+i;
-					img = new File(tmpPath);
+					File imgFile = new File(tmpPath);
+					fileService.downloadFile(uploadId, accessToken, imgFile);
 					
-					if (img.exists() && img.getTotalSpace()>0) {
+					String key = currDate+"_"+currTime+"_"+ret.getThreadId()+"_"+i;
+					
+					if (imgFile.exists() && imgFile.getTotalSpace()>0) {
 
-						PutRet putRet = IoApi.putFile(uptoken, key, img, extra);
+						PutRet putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 						log.error("ret msg is : " + putRet.getException());
 						log.error("putRet is : " + putRet.toString());
 						
 						while (putRet.getException()!=null) {
-							putRet = IoApi.putFile(uptoken, key, img, extra);
+							putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 							java.lang.Thread.sleep(100);
 						}
 						
@@ -392,12 +378,12 @@ public class CommunityController extends BaseController{
 						Map map = null;
 						while (!isUploaded && counter <3 ) {
 
-							map = QiniuUtil.getInstance().getImgs(domain+key);
+							map = qiniuUtil.getImgs(domain+key);
 							Object error = map.get("error");
 							if (error != null) {
 								log.error((String)error);
 								log.error("start to re-upload ...");
-								putRet = IoApi.putFile(uptoken, key, img, extra);
+								putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 								java.lang.Thread.sleep(100);
 							}else {
 								isUploaded = true;
@@ -429,14 +415,12 @@ public class CommunityController extends BaseController{
 					
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				log.error(e.getMessage());
 			}finally{
 				if (inputStream!=null) {
 					try {
 						inputStream.close();
 					} catch (IOException e) {
-						e.printStackTrace();
 						log.error(e.getMessage());
 					}
 				}
@@ -519,7 +503,7 @@ public class CommunityController extends BaseController{
 			for (int j = 0; j < urls.length; j++) {
 				
 				String urlKey = urls[j];
-				previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+				previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 				
 			}
 			retComment.setPreviewLink(previewLinkList);
@@ -530,7 +514,7 @@ public class CommunityController extends BaseController{
 		
 	}
 	
-		private void moveImgsFromTencent2Qiniu(ThreadComment ret){
+	private void moveImgsFromTencent2Qiniu(ThreadComment ret){
 				
 				//从腾讯下载用户上传的图片。并放到图片服务器上。
 		String uploadIds = ret.getUploadPicId();
@@ -693,8 +677,8 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-					previewLinkList.add(QiniuUtil.getInstance().getPreviewLink(urlKey, "1", "0"));
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 					
 				}
 				
@@ -751,8 +735,8 @@ public class CommunityController extends BaseController{
 				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
 					
 					String urlKey = urls[j];
-					imgLinkList.add(QiniuUtil.getInstance().getInterlaceImgLink(urlKey, "1"));
-					thumbnailLinkList.add(QiniuUtil.getInstance().getThumbnailLink(urlKey, "3", "0"));
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
 					
 				}
 				
@@ -881,7 +865,7 @@ public class CommunityController extends BaseController{
 			uploadIds = uploadIds.substring(0, uploadIds.length()-1);	//截掉最后一个逗号
 			String[]uploadIdArr = uploadIds.split(",");
 			
-			String uptoken = QiniuUtil.getInstance().getUpToken();	//获取qiniu上传文件的token
+			String uptoken = qiniuUtil.getUpToken();	//获取qiniu上传文件的token
 			
 			log.error("qiniu token :" + uptoken);
 			
@@ -898,42 +882,29 @@ public class CommunityController extends BaseController{
 			String imgWidth = "";
 			
 			PutExtra extra = new PutExtra();
-			File img = null;
 			
 			User user = userService.getById(ret.getCommentUserId());
 			String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 			
 			try {
 				for (int i = 0; i < uploadIdArr.length; i++) {
-					
-					String uploadId = uploadIdArr[i];
-					int imgcounter = 0;
-					inputStream = null;
-					while(inputStream==null&&imgcounter<3) {
-						inputStream = FileService.downloadFile(uploadId, accessToken);		//下载图片
-						if (inputStream==null) {
-							log.error("获取图片附件失败。");
-						}
-						imgcounter++;
-					}
-					
-					if (inputStream==null) {
-						log.error("多次从腾讯获取图片失败。");
-						return;
-					}
-					String tmpPath = tmpPathRoot+currTime+"_"+ret.getCommentId()+"_"+i;
-					FileService.inputStream2File(inputStream, tmpPath);
-					String key = currDate+"_"+currTime+"_"+ret.getCommentId()+"_"+i;
-					img = new File(tmpPath);
-					
-					if (img.exists() && img.getTotalSpace()>0) {
 
-						PutRet putRet = IoApi.putFile(uptoken, key, img, extra);
+					String tmpPath = tmpPathRoot+currTime+"_"+ret.getCommentId()+"_"+i;
+					File imgFile = new File(tmpPath);
+					String uploadId = uploadIdArr[i];
+					fileService.downloadFile(uploadId, accessToken, imgFile);
+					
+					String key = currDate+"_"+currTime+"_"+ret.getCommentId()+"_"+i;
+					imgFile = new File(tmpPath);
+					
+					if (imgFile.exists() && imgFile.getTotalSpace()>0) {
+
+						PutRet putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 						log.error("ret msg is : " + putRet.getException());
 						log.error("putRet is : " + putRet.toString());
 						
 						while (putRet.getException()!=null) {
-							putRet = IoApi.putFile(uptoken, key, img, extra);
+							putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 							java.lang.Thread.sleep(100);
 						}
 						
@@ -942,12 +913,12 @@ public class CommunityController extends BaseController{
 						Map map = null;
 						while (!isUploaded && counter <3 ) {
 
-							map = QiniuUtil.getInstance().getImgs(domain+key);
+							map = qiniuUtil.getImgs(domain+key);
 							Object error = map.get("error");
 							if (error != null) {
 								log.error((String)error);
 								log.error("start to re-upload ...");
-								putRet = IoApi.putFile(uptoken, key, img, extra);
+								putRet = IoApi.putFile(uptoken, key, imgFile, extra);
 								java.lang.Thread.sleep(100);
 							}else {
 								isUploaded = true;
@@ -979,14 +950,12 @@ public class CommunityController extends BaseController{
 					
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				log.error(e.getMessage());
 			}finally{
 				if (inputStream!=null) {
 					try {
 						inputStream.close();
 					} catch (IOException e) {
-						e.printStackTrace();
 						log.error(e.getMessage());
 					}
 				}

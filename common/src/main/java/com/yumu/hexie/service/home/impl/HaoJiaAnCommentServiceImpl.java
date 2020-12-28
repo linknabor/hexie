@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
@@ -41,6 +42,8 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	private AddressRepository addressRepository;
 	@Inject
     private ServiceOperatorRepository serviceOperatorRepository;
+	@Autowired
+	private TemplateMsgService templateMsgService;
 	
 	//保存评论或投诉
 	@Override
@@ -64,7 +67,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		if(comment.getCommentType() == ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
 			YuyueOrder yuyueOrder =yuyueOrderRepository.findByOrderNo(comment.getYuyueOrderNo());//投诉的订单
 			log.error("投诉的预约订单Id为："+yuyueOrder.getId());
-			Address address = addressRepository.findOne(yuyueOrder.getAddressId());
+			Address address = addressRepository.findById(yuyueOrder.getAddressId()).get();
 			List<ServiceOperator> ops = null;
 			List<Long> regionIds = new ArrayList<Long>();
 	        regionIds.add(1l);
@@ -81,7 +84,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	            for (ServiceOperator op : ops) {
 	            	//循环发送短信模板
 	            	 log.error("发送短信给" + op.getName()+",userId为"+op.getUserId());
-	            	 TemplateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken,op.getOpenId());//发送模板消息
+	            	 templateMsgService.sendHaoJiaAnCommentMsg(haoJiaAnComment, user, accessToken,op.getOpenId());//发送模板消息
 				}
 	        }
 		}
@@ -117,7 +120,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		log.error("complainStatus = "+complainStatus);
 		log.error("commentId = "+commentId);
 		int count = 0;
-		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.findOne(commentId);
+		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.findById(commentId).get();
 		haoJiaAnComment.setComplainStatus(complainStatus);//投诉状态
 		haoJiaAnComment.setFeedBack(feedBack);//投诉反馈
 		haoJiaAnComment.setComplainTime(System.currentTimeMillis());//处理投诉的时间

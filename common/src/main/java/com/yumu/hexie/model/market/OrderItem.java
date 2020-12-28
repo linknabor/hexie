@@ -7,6 +7,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
@@ -20,18 +21,23 @@ public class OrderItem  extends BaseModel {
 	private Long ruleId;
 	private Long userId;
 	private Integer count = 1;
-	
 
 	private Long productId;
 	private int orderType;
 
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.REFRESH }, optional = true)
     @JoinColumn(name = "orderId")
 	private ServiceOrder serviceOrder;
 
-	private Float price;
-	private Float oriPrice;
-	private Float amount;
+	private Float price;	//售价
+	private Float oriPrice;	//原价
+	
+	private Float postageFee;	//商品邮费单价
+	private int freeShippingNum;	//商品免邮件数
+	
+	private Float amount;	//单类商品总价 = price * count
+	private Float shipFee;	//单类商品邮费 = postageFee * count，如果免邮费就是0
 	
 	//产品冗余信息
 	private Long merchantId;
@@ -39,11 +45,22 @@ public class OrderItem  extends BaseModel {
 	private String productPic;
 	private String productThumbPic;
 	private String ruleName;
+	private Long productCategoryId;
+	
+	private Long agentId;
+	private String agentName;
+	private String agentNo;
+	
+	private Long couponId;
+	private Float couponAmount;
+	
+	@Transient
+	private long totalCount;	//总库存 
 	
 	public OrderItem(){}
 	@Transient
 	public void fillDetail(SalePlan plan,Product product){
-		//ruleId = plan.getId();
+//		ruleId = plan.getId();
 		orderType = plan.getSalePlanType();
 		price = plan.getPrice();
 		amount = plan.getPrice() * count;
@@ -55,6 +72,7 @@ public class OrderItem  extends BaseModel {
 		productName = product.getName();
 		productPic = product.getMainPicture();
 		productThumbPic = product.getSmallPicture();
+		productCategoryId = product.getProductCategoryId();
 	}
 	public Long getProductId() {
 		return productId;
@@ -147,5 +165,66 @@ public class OrderItem  extends BaseModel {
 	public void setOriPrice(Float oriPrice) {
 		this.oriPrice = oriPrice;
 	}
+	public String getAgentName() {
+		return agentName;
+	}
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+	public String getAgentNo() {
+		return agentNo;
+	}
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+	public Float getPostageFee() {
+		return postageFee;
+	}
+	public void setPostageFee(Float postageFee) {
+		this.postageFee = postageFee;
+	}
+	public int getFreeShippingNum() {
+		return freeShippingNum;
+	}
+	public void setFreeShippingNum(int freeShippingNum) {
+		this.freeShippingNum = freeShippingNum;
+	}
+	public Float getShipFee() {
+		return shipFee;
+	}
+	public void setShipFee(Float shipFee) {
+		this.shipFee = shipFee;
+	}
+	public Long getProductCategoryId() {
+		return productCategoryId;
+	}
+	public void setProductCategoryId(Long productCategoryId) {
+		this.productCategoryId = productCategoryId;
+	}
+	public long getTotalCount() {
+		return totalCount;
+	}
+	public void setTotalCount(long totalCount) {
+		this.totalCount = totalCount;
+	}
+	public Long getCouponId() {
+		return couponId;
+	}
+	public void setCouponId(Long couponId) {
+		this.couponId = couponId;
+	}
+	public Float getCouponAmount() {
+		return couponAmount;
+	}
+	public void setCouponAmount(Float couponAmount) {
+		this.couponAmount = couponAmount;
+	}
+	public Long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(Long agentId) {
+		this.agentId = agentId;
+	}
+	
 	
 }

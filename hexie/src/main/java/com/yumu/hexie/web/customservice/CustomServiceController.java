@@ -2,8 +2,6 @@ package com.yumu.hexie.web.customservice;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -17,20 +15,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
-import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.customservice.vo.CustomServiceOrderVO;
+import com.yumu.hexie.web.customservice.vo.OrderQueryVO;
 import com.yumu.hexie.web.customservice.vo.ServiceCommentVO;
+
+import io.swagger.annotations.ApiOperation;
 /**
  * 自定义服务
  * @author david
@@ -51,6 +54,7 @@ public class CustomServiceController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "获取自定义服务列表")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/service", method = RequestMethod.GET)
 	public BaseResult<List<CustomServiceVO>> getService(@ModelAttribute(Constants.USER) User user) throws Exception {
@@ -68,9 +72,10 @@ public class CustomServiceController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "自定义服务创建订单")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order", method = RequestMethod.POST)
-	public BaseResult<CreateOrderResponseVO> createOrder(@ModelAttribute(Constants.USER) User user, @RequestBody CustomServiceOrderVO customServiceOrderVO) throws Exception {
+	public BaseResult<CommonPayResponse> createOrder(@ModelAttribute(Constants.USER) User user, @RequestBody CustomServiceOrderVO customServiceOrderVO) throws Exception {
 		
 		long begin = System.currentTimeMillis();
 		logger.info("customServiceOrderVO : " + customServiceOrderVO);
@@ -82,7 +87,7 @@ public class CustomServiceController extends BaseController {
 		long end = System.currentTimeMillis();
 		logger.info("createOrderController location 1 : " + (end-begin)/1000);
 		
-		CreateOrderResponseVO cvo = customService.createOrder(dto);
+		CommonPayResponse cvo = customService.createOrder(dto);
 		customService.assginOrder(cvo);	//异步分派消息
 		
 		end = System.currentTimeMillis();
@@ -114,10 +119,11 @@ public class CustomServiceController extends BaseController {
 	public BaseResult<String> confirmOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
 		
 		logger.info("confirmOrder, user : " + user);
-		logger.info("confirmOrder orderId : " + orderId);
+		logger.info("confirmOrder, orderId : " + orderId);
 		String operType = "0";
 		customService.confirmOrder(user, orderId, operType);	//用户自己确认operType填0
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -135,7 +141,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("confirmByOper orderId : " + orderId);
 		String operType = "1";
 		customService.confirmOrder(user, orderId, operType);	//维修工确认operType填1
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -203,7 +210,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("acceptOrder user : " + user);
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.acceptOrder(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -220,7 +228,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("reverseOrder, user : " + user);
 		logger.info("acceptOrder orderId : " + orderId);
 		customService.reverseOrder(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -237,7 +246,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("notifyPay, user : " + user);
 		logger.info("notifyPay orderId : " + orderId);
 		customService.notifyPay(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -247,14 +257,15 @@ public class CustomServiceController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
+	@ApiOperation(value = "自定义服务，非一口价支付")
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/order/pay", method = RequestMethod.POST)
-	public BaseResult<CreateOrderResponseVO> orderPay(@ModelAttribute(Constants.USER) User user, 
-			@RequestParam String orderId, @RequestParam String amount) throws Exception {
+	public BaseResult<CommonPayResponse> orderPay(@ModelAttribute(Constants.USER) User user, 
+			@RequestParam String orderId, @RequestParam String amount, @RequestParam(required = false) String couponId) throws Exception {
 		
 		logger.info("orderPay, user : " + user);
-		logger.info("orderPay orderId : " + orderId + ", amout : " + amount);
-		ServiceOrderPrepayVO vo = customService.orderPay(user, orderId, amount);
+		logger.info("orderPay orderId : " + orderId + ", amout : " + amount + ", couponId : " + couponId);
+		ServiceOrderPrepayVO vo = customService.orderPay(user, orderId, amount, couponId);
 		return BaseResult.successResult(vo);
 	}
 	
@@ -285,7 +296,8 @@ public class CustomServiceController extends BaseController {
 			customService.saveCommentImages(user.getAppId(), Long.valueOf(serviceCommentVO.getOrderId()), imgList);	//异步保存上传的图片	
 		}
 		
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -304,7 +316,8 @@ public class CustomServiceController extends BaseController {
 		logger.info("cancelPay orderId : " + orderId);
 		
 		customService.cancelPay(user, orderId);
-		return BaseResult.successResult(Constants.SUCCESS);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+
 	}
 	
 	/**
@@ -320,7 +333,7 @@ public class CustomServiceController extends BaseController {
 		return "success";
 	}
 	
-	@RequestMapping(value = "/cfg", method = {RequestMethod.POST})
+	@RequestMapping(value = "/cfg", method = RequestMethod.POST)
 	public String updateCustomServiceCfg(@RequestBody ServiceCfgDTO serviceCfgDTO) throws Exception {
 		
 		logger.info("cfg : " + serviceCfgDTO);
@@ -328,10 +341,17 @@ public class CustomServiceController extends BaseController {
 		return "SUCCESS";
 	}
 	
-	@RequestMapping(value = "/redisOps", method = {RequestMethod.GET})
-	public Map<String, Long> testRedisOps() {
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/order/queryByFeeType", method = RequestMethod.POST)
+	public BaseResult<ServiceOrderQueryVO> queryOrderBySect(@ModelAttribute(Constants.USER) User user, 
+			@RequestBody OrderQueryVO orderQueryVO) throws Exception{
 		
-		return customService.testRedisOps();
+		logger.info("orderQueryVO : " + orderQueryVO);
+		OrderQueryDTO orderQueryDTO = new OrderQueryDTO();
+		BeanUtils.copyProperties(orderQueryVO, orderQueryDTO);
+		orderQueryDTO.setUser(user);
+		ServiceOrderQueryVO serviceOrderQueryVO = customService.queryOrderByFeeType(orderQueryDTO);
+		return BaseResult.successResult(serviceOrderQueryVO);
 	}
-	
+
 }

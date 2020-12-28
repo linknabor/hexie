@@ -7,7 +7,6 @@ package com.yumu.hexie.service.sales;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
-import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.Address;
 
 /**
@@ -20,7 +19,7 @@ import com.yumu.hexie.model.user.Address;
  */
 public interface CustomOrderService {
     public SalePlan findSalePlan(long ruleId);
-    public void postPaySuccess(PaymentOrder po, ServiceOrder so) ;
+    public void postPaySuccess(ServiceOrder so) ;
     public void postOrderCancel(ServiceOrder order);
     public void postOrderConfirm(ServiceOrder order) ;
     public void validateRule(ServiceOrder order,SalePlan rule, OrderItem item, Address address);

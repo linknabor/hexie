@@ -3,10 +3,10 @@ package com.yumu.hexie.integration.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.config.WechatPropConfig;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
@@ -18,8 +18,8 @@ public class RequestUtil {
 	
 	private Logger logger = LoggerFactory.getLogger(RequestUtil.class);
 
-	@Autowired
-	private WechatPropConfig wechatPropConfig;
+	@Value("${requestUrl}")
+	private String requestUrl;
 	
 	@Autowired
 	private LocationService locationService;
@@ -33,6 +33,8 @@ public class RequestUtil {
 	 */
 	public String getRequestUrl(User user, String regionName) {
 	
+		logger.info("requestUrl : " + requestUrl);
+		
 		//1.先从用户的自动定位取
 		String targetUrl = "";
 		if (!StringUtils.isEmpty(regionName)) {
@@ -49,7 +51,7 @@ public class RequestUtil {
 			//TODO 下面2个静态引用以后改注入形式
 			String userSysCode = SystemConfigServiceImpl.getSysMap().get(user.getAppId());	//获取用户所属的公众号
 			RegionUrl regionUrl = LocationServiceImpl.getCodeUrlMap().get(userSysCode);	//根据公众号 获取请求地址
-			targetUrl = wechatPropConfig.getRequestUrl();
+			targetUrl = requestUrl;
 			if (regionUrl!=null) {
 				String urlLink = regionUrl.getRegionUrl();
 				if (!StringUtils.isEmpty(urlLink)) {
@@ -57,16 +59,11 @@ public class RequestUtil {
 				}
 			}
 		}
+		
+		logger.info("targetUrl : " + targetUrl);
+		
 		return targetUrl;
 		
 	}
 
-	/**
-	 * 获取from_sys
-	 * @return
-	 */
-	public String getSysName() {
-		
-		return wechatPropConfig.getSysName();
-	}
 }

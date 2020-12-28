@@ -15,13 +15,18 @@ public interface ScheduleService {
     //6. 红包超时
     public void executeCouponTimeoutJob();
     //7.优惠券到期提醒
-    public void executeCoupinTimeoutHintJob();
+    public void executeCouponTimeoutHintJob();
     //8.会员定时 订单状态查询  及会员日期判断
     public void executeMemberTimtout();
-    //保洁超时
+    //9.保洁超时
 	void executeBaojieTimeoutJob();
-	//洗衣超时
+	//10.洗衣超时
 	void executeXiyiTimeoutJob();
-    
+    //11.商品规则超时自动下架
+	void executeOnsaleRuleTimeoutJob();
+	//12.核销券超时自动修改状态
+	void executeEvoucherTimeoutJob();
+	//13.刷新缓存中的库存
+	void initStockAndFreeze();
 	
 }

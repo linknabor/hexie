@@ -7,6 +7,7 @@ package com.yumu.hexie.service.o2o;
 import java.util.List;
 
 import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.user.User;
 
 /**
  * <pre>
@@ -23,4 +24,6 @@ public interface OperatorService {
     public List<ServiceOperator> findByIds(List<Long> ids);
 
     public List<ServiceOperator> findByType(int type);
+    
+    OperatorDefinition defineOperator(User user);
 }

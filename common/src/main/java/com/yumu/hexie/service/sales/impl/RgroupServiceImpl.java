@@ -7,6 +7,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
@@ -37,6 +39,8 @@ public class RgroupServiceImpl implements RgroupService {
     private UserNoticeService userNoticeService;
     @Inject
     private BaseOrderService baseOrderService;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     private void cancelValidate(RgroupRule rule) {
         if(rule.getGroupStatus() == ModelConstant.RGROUP_STAUS_FINISH){
@@ -107,7 +111,14 @@ public class RgroupServiceImpl implements RgroupService {
         rule.setGroupStatus(ModelConstant.RGROUP_STAUS_FINISH);
         cacheableService.save(rule);
     }
+	
+	/**
+	 * 前端显示进度和限制库存
+	 * @param result
+	 * @return
+	 */
 	public List<RgroupAreaItem> addProcessStatus(List<RgroupAreaItem> result) {
+		//TODO
         for(RgroupAreaItem item : result){
             RgroupRule rule = findSalePlan(item.getRuleId());
             if(rule!=null) {
@@ -115,15 +126,18 @@ public class RgroupServiceImpl implements RgroupService {
             } else {
                 item.setProcess(0);
             }
+            String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
+    		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
+    		int canSale = Integer.valueOf(stock) - Integer.valueOf(freeze);
+			item.setTotalCount(canSale);
         }
         return result;
     }
+	
 	//FIXME
 	public RgroupRule findSalePlan(long ruleId) {
 		return cacheableService.findRgroupRule(ruleId);
 	}
-	
-	
 
 	@Override
 	public List<RgroupOrder> queryMyRgroupOrders(long userId,List<Integer> status) {

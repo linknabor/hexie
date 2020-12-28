@@ -12,19 +12,31 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductRepository;
+import com.yumu.hexie.model.distribution.OnSaleAreaItem;
+import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
 import com.yumu.hexie.model.localservice.bill.BaojieBill;
 import com.yumu.hexie.model.localservice.bill.BaojieBillRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBillRepository;
+import com.yumu.hexie.model.market.Evoucher;
+import com.yumu.hexie.model.market.EvoucherRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.market.saleplan.OnSaleRule;
+import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.op.ScheduleRecord;
@@ -72,7 +84,6 @@ public class ScheduleServiceImpl implements ScheduleService{
     private BaseOrderService baseOrderService;
 	@Inject
 	private RgroupRuleRepository rgroupRuleRepository;
-
     @Inject
     private YunXiyiBillRepository yunXiyiBillRepository;
     @Inject
@@ -81,33 +92,36 @@ public class ScheduleServiceImpl implements ScheduleService{
     private BaojieBillRepository baojieBillRepository;
     @Inject
     private BaojieService baojieService;
-
     @Inject
     private BizErrorRepository bizErrorRepository;
-    
     @Inject 
     private ScheduleRecordRepository scheduleRecordRepository;
-    
     @Inject
     private CouponService couponService;
-    
     @Inject
     private UserRepository userRepository;
-    
     @Inject
     private SmsService smsService;
-    
 	@Inject
 	private MemberBillRepository memberBillRepository;
-	
 	@Inject
 	private MemberRepository memberRepository;
-	
 	@Inject
 	private CouponServiceImpl couponServiceImpl;
+	@Autowired
+    private OnSaleAreaItemRepository onSaleAreaItemRepository;
+	@Autowired
+	private OnSaleRuleRepository onSaleRuleRepository;
+	@Autowired
+	private ProductRepository productRepository;
+	@Autowired
+	private EvoucherRepository evoucherRepository;
+	@Autowired
+	private RedisTemplate<String, String> redisTemplate;
 	
-	//1. 订单超时
-//    @Scheduled(cron = "50 1/3 * * * ?")
+	
+//	1. 订单超时
+    @Scheduled(cron = "50 1/3 * * * ?")
     @Override
     public void executeOrderTimeoutJob() {
     	executeOrderTimeoutJob(serviceOrderRepository.findTimeoutServiceOrder(System.currentTimeMillis()));
@@ -126,7 +140,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
     
    //4. 团购团超时
-//    @Scheduled(cron = "11 2/5 * * * ?")
+    @Scheduled(cron = "11 2/5 * * * ?")
     @Override
     public void executeRGroupTimeoutJob() {
     	SCHEDULE_LOG.error("--------------------executeGroupTimeoutJob[B][R]-------------------");
@@ -256,30 +270,36 @@ public class ScheduleServiceImpl implements ScheduleService{
     
 	//1. 支付单超时(25分一次，30分钟超时)
     private void executeOrderTimeoutJob(List<ServiceOrder> serviceOrders) {
-    	SCHEDULE_LOG.debug("--------------------executeOrderTimeoutJob-------------------");
+    	SCHEDULE_LOG.info("--------------------executeOrderTimeoutJob-------------------");
     	if(serviceOrders.size() == 0) {
-    		SCHEDULE_LOG.error("**************executeOrderTimeoutJob没有记录");
+    		SCHEDULE_LOG.info("**************executeOrderTimeoutJob没有记录");
     		return;
     	}
     	String ids = "";
     	for(ServiceOrder order : serviceOrders) {
+    		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+				continue;
+			}
     		ids += order.getId()+",";
     	}
     	ScheduleRecord sr = new ScheduleRecord(ModelConstant.SCHEDULE_TYPE_PAY_TIMEOUT,ids);
     	sr = scheduleRecordRepository.save(sr);
     	for(ServiceOrder order : serviceOrders) {
     		try{
-    	    	SCHEDULE_LOG.debug("CancelOrder:" + order.getId());
+    			if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
+    				continue;
+    			}
+    	    	SCHEDULE_LOG.info("CancelOrder:" + order.getId());
     	    	baseOrderService.cancelOrder(order);
     		} catch(Exception e){
-    			SCHEDULE_LOG.error("超时支付单失败orderID"+ order.getId(),e);
+    			SCHEDULE_LOG.info("超时支付单失败orderID"+ order.getId(),e);
     			recordError(e);
     			sr.addErrorCount(""+order.getId());
     		}
     	}
     	sr.setFinishDate(new Date());
     	scheduleRecordRepository.save(sr);
-    	SCHEDULE_LOG.debug("--------------------executeOrderTimeoutJob-------------------");
+    	SCHEDULE_LOG.info("--------------------executeOrderTimeoutJob-------------------");
     }
 	//2. 退款状态查询
     private void executeRefundStatusJob(List<RefundOrder> refundOrder) {
@@ -329,16 +349,20 @@ public class ScheduleServiceImpl implements ScheduleService{
     	}
 	}
 	@Override
-//    @Scheduled(cron = "15 */2 0 * * ?")
+    @Scheduled(cron = "15 */2 * * * ?")
 	public void executeCouponTimeoutJob() {
+		
+		SCHEDULE_LOG.info("--------------------start executeCouponTimeoutJob-------------------");
+		
 		List<Coupon> coupons = couponService.findTop100TimeoutCoupon();
 		for(Coupon coupon : coupons) {
 			try{
 				couponService.timeout(coupon);
 			}catch(Exception e) {
-				SCHEDULE_LOG.error("[TIMEOUT]COUPON_ID:" + coupon.getId(),e);
+				SCHEDULE_LOG.error("exec coupon timeout job error, couponId : " + coupon.getId(), e);
 			}
 		}
+		SCHEDULE_LOG.info("--------------------end executeCouponTimeoutJob-------------------");
 	}
 	
 	/**
@@ -349,7 +373,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 	 */
 	@Override
 //	@Scheduled(cron = "0 0 18 * * ? ")
-	public void executeCoupinTimeoutHintJob() {
+	public void executeCouponTimeoutHintJob() {
 		
 		String msg = "亲爱的邻居，您有amount元的优惠券即将过期，赶紧去“合协社区”看看吧！";
 
@@ -396,7 +420,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 			NumberFormat nf = new DecimalFormat("#");
 			String displayAmt = nf.format(couponAmt);
 			
-			User user = userRepository.findOne(userId);
+			User user = userRepository.findById(userId);
 			
 			if (user == null) {
 				SCHEDULE_LOG.debug(" user does not exist " + userId);
@@ -488,6 +512,58 @@ public class ScheduleServiceImpl implements ScheduleService{
 		}
 		SCHEDULE_LOG.debug("--------------------会员支付定时结束：-------------------");
 	}
+
+	/**
+	 * 特卖超时下架
+	 */
+	@Scheduled(cron = "0 */20 * * * ?")
+	@Override
+	public void executeOnsaleRuleTimeoutJob() {
+		
+		long current = System.currentTimeMillis()/1000;
+		List<OnSaleRule> ruleList = onSaleRuleRepository.findTimeoutRules(current, ModelConstant.RULE_STATUS_ON);
+		for (OnSaleRule onSaleRule : ruleList) {
+			onSaleRuleRepository.updateStatus(ModelConstant.RULE_STATUS_OFF, onSaleRule.getId());
+			List<OnSaleAreaItem> areaList = onSaleAreaItemRepository.findByRuleId(onSaleRule.getId());
+			for (OnSaleAreaItem areaItem : areaList) {
+				onSaleAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_OFF, areaItem.getId());
+			}
+			Product product = productRepository.findById(onSaleRule.getProductId()).get();
+			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
+		}
 	
+	}
+	
+	
+	/**
+	 * 特卖超时下架
+	 */
+	@Scheduled(cron = "0 */20 * * * ?")
+	@Override
+	public void executeEvoucherTimeoutJob() {
+		
+		long current = System.currentTimeMillis()/1000;
+		List<Evoucher> list = evoucherRepository.findTimeoutEvouchers(current, ModelConstant.EVOUCHER_STATUS_NORMAL);
+		for (Evoucher evoucher : list) {
+			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_EXPIRED);
+			evoucherRepository.save(evoucher);
+		}
+	
+	}
+	
+	@Scheduled(cron = "0 */5 * * * ?")
+	@Override
+	public void initStockAndFreeze() {
+		
+		List<Product> proList = productRepository.findByStatusMultiType(ModelConstant.PRODUCT_ONSALE);
+		for (Product product : proList) {
+			String total = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + product.getId());
+			if (StringUtils.isEmpty(total)) {
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+				redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");
+			}
+		}
+		SCHEDULE_LOG.info("refresh stock and freeze finished .");
+	}
 	
 }

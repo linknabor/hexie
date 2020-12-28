@@ -17,7 +17,9 @@ public class HomeServiceConstant {
     public static final int SERVICE_TYPE_REPAIR = 1;//FIXME 必须与数据库值一致
     public static final int SERVICE_TYPE_XIYI = 2;
     public static final int SERVICE_TYPE_BAOJIE = 3;
+    public static final int SERVICE_TYPE_STAFF = 5;	//物业人员
     public static final int SERVICE_TYPE_CUSTOM = 10;	//自定义服务
+    public static final int SERVICE_TYPE_EVOUCHER = 11;	//优惠券核销人员
 
     public static final int SERVICE_ITEM_STATUS_VALID = 1;
 

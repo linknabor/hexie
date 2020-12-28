@@ -1,9 +1,9 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
@@ -11,6 +11,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,6 @@ import org.springframework.util.StringUtils;
 
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipaySystemOauthTokenRequest;
 import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.yumu.hexie.common.util.AppUtil;
@@ -57,45 +57,31 @@ public class UserServiceImpl implements UserService {
 
 	@Inject
 	private UserRepository userRepository;
-
 	@Inject
 	private WechatCoreService wechatCoreService;
-
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
-	
 	@Autowired
 	private WechatCardRepository wechatCardRepository;
-	
 	@Autowired
 	private CardService cardService;
-	
 	@Autowired
 	private SystemConfigService systemConfigService;
-	
 	@Autowired
 	private PointService pointService;
-	
 	@Autowired
 	private CouponStrategyFactory couponStrategyFactory;
-	
 	@Autowired
 	private RedisRepository redisRepository;
-	
+	@Autowired
 	private AlipayClient alipayClient;
 	
-	@PostConstruct
-	public void initAlipay() {
-		
-		alipayClient = new DefaultAlipayClient(ConstantAlipay.ALIPAY_GATEWAY, ConstantAlipay.APPID, 
-				ConstantAlipay.APP_PRIVATE_KEY, ConstantAlipay.DATAFORMAT, ConstantAlipay.CHARSET, 
-				ConstantAlipay.ALIPAY_PUBLIC_KEY, ConstantAlipay.SIGNTYPE); 
-		
-	}
+	@Value("${mainServer}")
+	private Boolean mainServer;
 	
 	@Override
 	public User getById(long uId) {
-		return userRepository.findOne(uId);
+		return userRepository.findById(uId);
 	}
 
 	public List<User> getByOpenId(String openId) {
@@ -137,7 +123,8 @@ public class UserServiceImpl implements UserService {
 			userAccount.setCity(weixinUser.getCity());
 			userAccount.setLanguage(weixinUser.getLanguage());
 			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
-			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + userAccount.getId() + "]"));
+			//这时候新用户还没有生成user，ID是空值,uid取uuid打MD5。
+			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 
 		} else {
 
@@ -209,7 +196,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User saveProfile(long userId, String nickName, int sex) {
 
-		User user = userRepository.findOne(userId);
+		User user = userRepository.findById(userId);
 		user.setNickname(nickName);
 		user.setSex(sex);
 		return userRepository.save(user);
@@ -308,13 +295,10 @@ public class UserServiceImpl implements UserService {
 		logger.info("user session : " + sessionId);
 
 		String key = ModelConstant.KEY_USER_LOGIN + sessionId;
-
-		Object object = redisTemplate.opsForValue().get(key);
-		if (object == null) {
-			redisTemplate.opsForValue().set(key, sessionId, 2, TimeUnit.SECONDS); // 设置3秒过期，3秒内任何请求不予处理
-		} else {
-
-			isDuplicateRequest = true;
+		
+		boolean absent = redisTemplate.opsForValue().setIfAbsent(key, sessionId, 2, TimeUnit.SECONDS);
+		if (!absent) {
+			isDuplicateRequest = true;	//已经存在的情况下
 		}
 		return isDuplicateRequest;
 	}
@@ -403,6 +387,8 @@ public class UserServiceImpl implements UserService {
 		request.setGrantType(ConstantAlipay.AUTHORIZATION_TYPE);
 		AccessTokenOAuth oAuth = new AccessTokenOAuth();
 		try {
+			logger.info("alipayClient: " + alipayClient);
+			logger.info("grantType: " + ConstantAlipay.AUTHORIZATION_TYPE);
 		    AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
 		    oAuth.setOpenid(oauthTokenResponse.getUserId());
 		    oAuth.setAccessToken(oauthTokenResponse.getAccessToken());

@@ -35,7 +35,7 @@ public interface RepairService {
 
     public Long repair(RepairOrderReq req,User user);
     public boolean finish(long orderId,User user);
-    public JsSign requestPay(long orderId, float amount, User user);
+    public JsSign requestPay(long orderId, float amount, User user) throws Exception;
     public void payOffline(long orderId, float amount, User user);
     public void notifyPaySuccess(long orderId,User user);
     public void cancel(RepairCancelReq req,User user);

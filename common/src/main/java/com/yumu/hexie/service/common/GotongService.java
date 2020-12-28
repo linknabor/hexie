@@ -6,6 +6,7 @@ package com.yumu.hexie.service.common;
 
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
+import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -42,5 +43,13 @@ public interface GotongService {
 	void sendServiceNotification(User sendUser, ServiceOrder serviceOrder);
 
 	void sendCustomServiceAssignedMsg(ServiceOrder serviceOrder);
+
+	void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder);
+	
+	void sendResetPasswordMsg(User user, String password);
+
+	void sendCustomerDelivery(User user, ServiceOrder serviceOrder);
+
+	void sendPostingReplyMsg(Thread thread);
 
 }

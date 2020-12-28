@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.market;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,10 +25,12 @@ import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.Address;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
@@ -97,13 +100,17 @@ public class ServiceOrder  extends BaseModel {
 
 	//产品冗余信息
 	private long merchantId;
+	private String merchantName;
 	private String productName;
 	private String productPic;
 	private String productThumbPic;
 	private String groupRuleName;
 	
-	private String gongzhonghao = "上海合协社区";
+	private long agentId;
+	private String agentName;
+	private String agentNo;
 	
+	private String gongzhonghao;
 	
 	/**物流信息**/
 	private int logisticType;//0商户派送 1用户自提 2第三方配送
@@ -138,15 +145,22 @@ public class ServiceOrder  extends BaseModel {
     
     private long subType;	//子类，对于自定义服务列说，有子类
     private String subTypeName;	//子类中文名称
+    
+    private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
 
 	@JsonIgnore
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
     @Fetch(FetchMode.SUBSELECT)
 	private List<OrderItem> items = new ArrayList<OrderItem>();
+	
+	@Transient
+	private List<OrderItem> orderItems = new ArrayList<OrderItem>();
 
 	public ServiceOrder(){}
 	public ServiceOrder(SingleItemOrder sOrder) {
-		orderNo = OrderNoUtil.generateServiceOrderNo();
+		if (!"2".equals(sOrder.getPayType())) {
+			orderNo = OrderNoUtil.generateServiceOrderNo();
+		}
 		this.memo = sOrder.getMemo();
 		this.count = sOrder.getCount();
 		this.orderType = sOrder.getOrderType();
@@ -156,7 +170,9 @@ public class ServiceOrder  extends BaseModel {
 		this.userId = sOrder.getUserId();
 		this.openId = sOrder.getOpenId();
 		this.couponId = sOrder.getCouponId();
-		
+		if (ModelConstant.ORDER_TYPE_PROMOTION == this.orderType) {
+			this.agentId = sOrder.getAgentId();
+		}
 		OrderItem item = new OrderItem();
 		item.setRuleId(sOrder.getRuleId());
 		item.setCount(sOrder.getCount());
@@ -191,9 +207,10 @@ public class ServiceOrder  extends BaseModel {
         items.add(item);
     }
 	
-	
-	public ServiceOrder(CreateOrderReq req,Cart cart,long userId,String openId) {
-		orderNo = OrderNoUtil.generateServiceOrderNo();
+	public ServiceOrder(User user, CreateOrderReq req, Cart cart) {
+		if (!"2".equals(req.getPayType())) {
+			orderNo = OrderNoUtil.generateServiceOrderNo();
+		}
 		this.memo = req.getMemo();
 		this.receiveTimeType = req.getReceiveTimeType();
 		this.serviceAddressId = req.getServiceAddressId();
@@ -201,10 +218,29 @@ public class ServiceOrder  extends BaseModel {
 
 		this.orderType = cart.getOrderType();
 		
-		this.userId = userId;
-		this.openId = openId;
+		this.userId = user.getId();
+		this.openId = user.getOpenid();
 		this.items = cart.getItems();
 	}
+	
+	
+	public ServiceOrder(User user, CreateOrderReq req) {
+		
+		if (!"2".equals(req.getPayType())) {
+			orderNo = OrderNoUtil.generateServiceOrderNo();
+		}
+		this.memo = req.getMemo();
+		this.receiveTimeType = req.getReceiveTimeType();
+		this.serviceAddressId = req.getServiceAddressId();
+		this.couponId = req.getCouponId();
+
+		this.orderType = req.getOrderType();
+		
+		this.userId = user.getId();
+		this.openId = user.getOpenid();
+		this.items = req.getItemList();
+	}
+	
 	@JsonIgnore
 	@Transient
 	public long getCollocationId(){
@@ -289,13 +325,27 @@ public class ServiceOrder  extends BaseModel {
 	}
 	@Transient
 	public void fillAddressInfo(Address address) {
-		setAddress(address.getRegionStr() + address.getDetailAddress());
+		
+		String regionStr = StringUtils.isEmpty(address.getRegionStr())?"":address.getRegionStr();
+		String detailAddress = StringUtils.isEmpty(address.getDetailAddress())?"":address.getDetailAddress();
+		setAddress(regionStr + detailAddress);
+		if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
+			String addr = address.getProvince() + "," + address.getCity() + "," + address.getCounty() + "," + address.getXiaoquName();
+			setAddress(addr);
+		}
 		setTel(address.getTel());
 		setXiaoquId(address.getXiaoquId());
 		setReceiverName(address.getReceiveName());
 		setLat(address.getLatitude());
 		setLng(address.getLongitude());
+		setXiaoquName(address.getXiaoquName());
 
+	}
+	@Transient
+	public void fillAgentInfo(Agent agent) {
+		setAgentId(agent.getId());
+		setAgentName(agent.getName());
+		setAgentNo(agent.getAgentNo());
 	}
 
 	//FIXME
@@ -307,13 +357,17 @@ public class ServiceOrder  extends BaseModel {
 		if(coupon == null) {
 			setCouponId(null);
 			setCouponAmount(null);
+			return;
 		}
 		setCouponId(coupon.getId());
 		setCouponAmount(coupon.getAmount());
-		if(coupon.getAmount() > getPrice()) {
-			setPrice(0.01f);
+		BigDecimal price = BigDecimal.ZERO;
+		if(coupon.getAmount() >= getPrice()) {
+			price = new BigDecimal("0.01");
+			setPrice(price.floatValue());
 		} else {
-			setPrice(getPrice() - coupon.getAmount());
+			price = new BigDecimal(String.valueOf(getPrice())).subtract(new BigDecimal(String.valueOf(coupon.getAmount())));
+			setPrice(price.floatValue());
 		}
 	}
 
@@ -821,6 +875,36 @@ public class ServiceOrder  extends BaseModel {
 	public void setImgUrls(String imgUrls) {
 		this.imgUrls = imgUrls;
 	}
+	public long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+	public String getAgentName() {
+		return agentName;
+	}
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+	public String getAgentNo() {
+		return agentNo;
+	}
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+	public String getMerchantName() {
+		return merchantName;
+	}
+	public void setMerchantName(String merchantName) {
+		this.merchantName = merchantName;
+	}
+	public Long getGroupOrderId() {
+		return groupOrderId;
+	}
+	public void setGroupOrderId(Long groupOrderId) {
+		this.groupOrderId = groupOrderId;
+	}
 	@Transient
 	@JsonIgnore
 	public List<Long> getProductIds(){
@@ -870,7 +954,12 @@ public class ServiceOrder  extends BaseModel {
 	public void setLogisticCode(String logisticCode) {
 		this.logisticCode = logisticCode;
 	}
-	
+	public List<OrderItem> getOrderItems() {
+		return orderItems;
+	}
+	public void setOrderItems(List<OrderItem> orderItems) {
+		this.orderItems = orderItems;
+	}
 	public boolean payable() {
         return ModelConstant.ORDER_STATUS_INIT==getStatus();
     }
@@ -914,6 +1003,10 @@ public class ServiceOrder  extends BaseModel {
 			}
 		}else if (ModelConstant.ORDER_PINGJIA_TYPE_Y == this.pingjiaStatus) {
 			showStatus = "5";
+		}else if (ModelConstant.ORDER_STATUS_PAYED == this.status) {
+			if (ModelConstant.ORDER_PINGJIA_TYPE_N == this.pingjiaStatus) {
+				showStatus = "4";
+			}
 		}
     	return showStatus;
     	

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -20,6 +21,7 @@ import com.yumu.hexie.service.user.UserService;
  * 新用户关注
  * @author Administrator
  */
+@Configuration
 public class CheckUserAddedInterceptor implements HandlerInterceptor {
 	
 	private Logger logger =  LoggerFactory.getLogger(CheckUserAddedInterceptor.class); 
@@ -28,8 +30,7 @@ public class CheckUserAddedInterceptor implements HandlerInterceptor {
 	private UserService userService;
 
 	@Override
-	public boolean preHandle(HttpServletRequest request,
-			HttpServletResponse response, Object handler) throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		if (request.getSession().getAttribute(Constants.USER) == null) {
 			String code = request.getParameter("code");
 			if (StringUtil.isNotEmpty(code)) {

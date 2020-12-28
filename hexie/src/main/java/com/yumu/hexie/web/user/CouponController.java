@@ -3,40 +3,44 @@ package com.yumu.hexie.web.user;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
+import com.yumu.hexie.model.promotion.coupon.CouponView;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.BaseOrderService;
-import com.yumu.hexie.service.sales.SalePlanService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CouponsSummary;
+import com.yumu.hexie.vo.GetValidCouponReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.CouponSeedVO;
 
+import io.swagger.annotations.ApiOperation;
+
 @Controller(value = "couponController")
 public class CouponController extends BaseController{
+	
     @Inject
     private CouponService couponService;
-    @Inject
-    private SalePlanService salePlanService;
     @Inject
     private RedisRepository redisRepository;
     @Inject
@@ -53,11 +57,14 @@ public class CouponController extends BaseController{
 	public BaseResult<CouponsSummary> coupons(@ModelAttribute(Constants.USER)User user) throws Exception {
 		return new BaseResult<CouponsSummary>().success(couponService.findCouponSummary(user.getId()));
 	}
+    
+    @ApiOperation(value = "获取个人已失效的红包")
     @RequestMapping(value = "/invalidCoupons/{page}", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<Coupon>> coupons(@ModelAttribute(Constants.USER)User user,@PathVariable int page) throws Exception {
         return new BaseResult<List<Coupon>>().success(couponService.findInvalidCoupons(user.getId(), page));
     }
+    
     @RequestMapping(value = "/order/coupon/{orderId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Coupon> orderCoupon(@PathVariable Long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
@@ -95,11 +102,27 @@ public class CouponController extends BaseController{
 		}
 		return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(order));
 	}
-    @RequestMapping(value = "/coupon/valid/{salePlanType}/{salePlanId}", method = RequestMethod.GET)
+    
+    @ApiOperation(value = "特卖、团购获取可以使用的红包", notes = "salePlanType --> 特卖3, 团购4,  核销券12")
+    @RequestMapping(value = "/coupon/valid", method = RequestMethod.POST)
    	@ResponseBody
-   	public BaseResult<List<Coupon>> findValidCoupons(@PathVariable int salePlanType,
-   			@PathVariable long salePlanId,@ModelAttribute(Constants.USER)User user) throws Exception {
-   		return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(user.getId(),salePlanService.getService(salePlanType).findSalePlan(salePlanId)));
+   	public BaseResult<List<Coupon>> findValidCoupons(@ModelAttribute(Constants.USER)User user, 
+   			@RequestBody GetValidCouponReq getValidCouponReq) throws Exception {
+   		
+    	List<Coupon> couponList = couponService.findAvaibleCoupon(user.getId(), getValidCouponReq.getItemList(), getValidCouponReq.getSalePlanType());
+    	return new BaseResult<List<Coupon>>().success(couponList);
+   	}
+    
+    @ApiOperation(value = "自定义服务获取可以使用的红包")
+    @RequestMapping(value = "/coupon/valid4service/{serviceId}/{agentNo}", method = RequestMethod.GET)
+   	@ResponseBody
+   	public BaseResult<List<Coupon>> findValidCoupons4Service(@PathVariable long serviceId, @PathVariable String agentNo, 
+   				@ModelAttribute(Constants.USER)User user) throws Exception {
+   	
+    	SalePlan salePlan = new SalePlan();
+    	salePlan.setProductId(serviceId);
+    	List<Coupon> couponList = couponService.findAvaibleCoupon4CustomService(user.getId(), serviceId, agentNo);
+    	return new BaseResult<List<Coupon>>().success(couponList);
    	}
     
     @RequestMapping(value = "/coupon/valid4Cart", method = RequestMethod.GET)
@@ -117,14 +140,26 @@ public class CouponController extends BaseController{
         return new BaseResult<List<Coupon>>().success(couponService.findAvaibleCoupon(user.getId(),cart));
     }
     
-    @RequestMapping(value = "/coupon/comsume", method = RequestMethod.GET)
+    @ApiOperation(value = "获取红包种子列表")
+    @RequestMapping(value = "/coupon/v2/seedList", method = RequestMethod.GET)
     @ResponseBody
-    public String consume(@RequestParam(required = false, name = "trade_water_id") String tradeWaterId) throws Exception {
+    public BaseResult<List<CouponView>> getSeedList(@ModelAttribute(Constants.USER)User user) throws Exception {
 
-    	if (StringUtils.isEmpty(tradeWaterId)) {
-			return "";
-		}
-    	couponService.consume(Long.valueOf(tradeWaterId));
-        return "SUCCESS";
+    	List<CouponView> viewList = couponService.getSeedList(user);
+        return new BaseResult<List<CouponView>>().success(viewList);
     }
+    
+    @ApiOperation(value = "根据种子领取红包")
+    @RequestMapping(value = "/coupon/v2/gain/{seedStr}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Coupon> gainCoupon(HttpSession session, @ModelAttribute(Constants.USER)User user, @PathVariable String seedStr) throws Exception {
+    	
+    	GainCouponDTO dto = couponService.gainCouponFromSeed(user, seedStr);
+    	if (!dto.isSuccess()) {
+			throw new BizValidateException(dto.getErrMsg());
+		}
+    	session.setAttribute(Constants.USER, user);
+		return new BaseResult<Coupon>().success(dto.getCoupon());
+	}
+    
 }

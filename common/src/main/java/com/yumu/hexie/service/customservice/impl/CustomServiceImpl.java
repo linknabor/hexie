@@ -1,11 +1,12 @@
 package com.yumu.hexie.service.customservice.impl;
 
+import java.io.Serializable;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,22 +22,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisLock;
+import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
+import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
 import com.yumu.hexie.integration.customservice.req.OperOrderRequest;
-import com.yumu.hexie.integration.customservice.resp.CreateOrderResponseVO;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
+import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.agent.Agent;
+import com.yumu.hexie.model.agent.AgentRepository;
+import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.promotion.PromotionConstant;
+import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -44,6 +52,8 @@ import com.yumu.hexie.service.common.UploadService;
 import com.yumu.hexie.service.customservice.CustomService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.o2o.OperatorService;
+import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.dto.CheckCouponDTO;
 
 @Service
 public class CustomServiceImpl implements CustomService {
@@ -66,13 +76,16 @@ public class CustomServiceImpl implements CustomService {
 	private OperatorService operatorService;
 	@Autowired
 	private UploadService uploadService;
-	
+	@Autowired
+	private AgentRepository agentRepository;
+	@Autowired
+	private CouponService couponService;
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
 		
-		User currUser = userRepository.findOne(user.getId());
-		List<CustomServiceVO> list = customServiceUtil.getCustomService(currUser).getData();
+		User currUser = userRepository.findById(user.getId());
+		List<CustomServiceVO> list = customServiceUtil.getCustomService(currUser);
 		
 		//考虑把redis操作放在循环外，频繁操作有序列化和网络交互成本 TODO
 //		list.stream().forEach(customServicevo->{
@@ -87,15 +100,54 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Transactional
 	@Override
-	public CreateOrderResponseVO createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
+	public CommonPayResponse createOrder(CustomerServiceOrderDTO customerServiceOrderDTO) throws Exception {
 		
 		long begin = System.currentTimeMillis();
 		
 		//1.调用API创建接口
-		User currUser = userRepository.findOne(customerServiceOrderDTO.getUser().getId());
+		User currUser = userRepository.findById(customerServiceOrderDTO.getUser().getId());
 		customerServiceOrderDTO.setUser(currUser);
-		CreateOrderResponseVO data = customServiceUtil.createOrder(customerServiceOrderDTO).getData();
+		customerServiceOrderDTO.setOrderType(String.valueOf(ModelConstant.ORDER_TYPE_SERVICE));
 		
+		Agent agent = null;
+		if (!StringUtils.isEmpty(customerServiceOrderDTO.getAgentNo())) {
+			agent = agentRepository.findByAgentNo(customerServiceOrderDTO.getAgentNo());
+		}
+		if (agent==null) {
+			agent = new Agent();
+			agent.setAgentNo(customerServiceOrderDTO.getAgentNo());
+			agent.setName(customerServiceOrderDTO.getAgentName());
+			agent.setStatus(1);
+		}
+		
+		String oriAmount = customerServiceOrderDTO.getTranAmt();
+		Coupon coupon = null;
+		if (!StringUtils.isEmpty(customerServiceOrderDTO.getCouponId())) {
+			coupon = couponService.findById(Long.valueOf(customerServiceOrderDTO.getCouponId()));
+			
+			Float amount = Float.valueOf(customerServiceOrderDTO.getTranAmt());
+			Long serviceId = Long.valueOf(customerServiceOrderDTO.getServiceId());
+			Product product = new Product();
+			product.setId(serviceId);
+			product.setService(true);
+			product.setAgentId(agent.getId());
+			CheckCouponDTO check = couponService.checkAvailable4Service(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, amount, coupon, false);
+			if (!check.isValid()) {
+				throw new BizValidateException(check.getErrMsg());
+			}
+			customerServiceOrderDTO.setCouponId(String.valueOf(coupon.getId()));
+			customerServiceOrderDTO.setCouponAmt(String.valueOf(coupon.getAmount()));
+			
+			Float tranAmt = Float.valueOf(customerServiceOrderDTO.getTranAmt());
+			Float couponAmt = coupon.getAmount();
+			if (tranAmt > couponAmt ) {
+				customerServiceOrderDTO.setTranAmt(String.valueOf(tranAmt-couponAmt));
+			} else {
+				customerServiceOrderDTO.setTranAmt("0.01");
+			}
+			
+		}
+		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
 		
@@ -104,7 +156,8 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
 		serviceOrder.setProductId(Long.valueOf(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setUserId(currUser.getId());
-		serviceOrder.setPrice(Float.valueOf(customerServiceOrderDTO.getTranAmt()));
+		serviceOrder.setPrice(Float.valueOf(customerServiceOrderDTO.getTranAmt()));	//使用券之后的金额
+		serviceOrder.setTotalAmount(Float.valueOf(oriAmount));	//原价
 		serviceOrder.setCount(1);
 		serviceOrder.setStatus(ModelConstant.ORDER_STATUS_INIT);
 		serviceOrder.setPingjiaStatus(ModelConstant.ORDER_PINGJIA_TYPE_N);
@@ -120,6 +173,11 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setSubType(Long.valueOf(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
 		
+		if (agent!=null) {
+			serviceOrder.setAgentId(agent.getId());
+			serviceOrder.setAgentName(agent.getName());
+			serviceOrder.setAgentNo(agent.getAgentNo());
+		}
 		String xiaoquId = customerServiceOrderDTO.getSectId();
 		String xiaoquName = customerServiceOrderDTO.getSectName();
 		logger.info("createOrder, xiaoquId : " + xiaoquId);
@@ -139,6 +197,13 @@ public class CustomServiceImpl implements CustomService {
 			serviceOrder.setXiaoquName(xiaoquName);
 		}
 		serviceOrder = serviceOrderRepository.save(serviceOrder);
+		
+		//配置红包，并锁定
+		if (coupon != null) {
+			serviceOrder.configCoupon(coupon);
+//			coupon.lock(serviceOrder.getId());	//服务的券不能锁
+			coupon.setOrderId(serviceOrder.getId());
+		}
 		data.setOrderId(String.valueOf(serviceOrder.getId()));
 		end = System.currentTimeMillis();
 		logger.info("createOrderService location 2 : " + (end - begin)/1000);
@@ -159,7 +224,7 @@ public class CustomServiceImpl implements CustomService {
 		ServiceOrder serviceOrder = null;
 		int count = 0;
 		while (serviceOrder == null && count < 3) {
-			serviceOrder = serviceOrderRepository.findOne(orderId);
+			serviceOrder = serviceOrderRepository.findById(orderId).get();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -188,7 +253,7 @@ public class CustomServiceImpl implements CustomService {
 	 * 非一口价分派订单
 	 */
 	@Override
-	public void assginOrder(CreateOrderResponseVO data) {
+	public void assginOrder(CommonPayResponse data) {
 		
 		long begin = System.currentTimeMillis();
 		
@@ -251,12 +316,12 @@ public class CustomServiceImpl implements CustomService {
 	 */
 	@Override
 	@Transactional
-	public ServiceOrderPrepayVO orderPay(User user, String orderId, String amount) throws Exception {
+	public ServiceOrderPrepayVO orderPay(User user, String orderId, String amount, String couponId) throws Exception {
 
 		long begin = System.currentTimeMillis();
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null) {
 			throw new BizValidateException("未查询到订单，orderId: " + orderId);
 		}
@@ -268,7 +333,7 @@ public class CustomServiceImpl implements CustomService {
 		CustomerServiceOrderDTO dto = new CustomerServiceOrderDTO();
 		dto.setLinkman(serviceOrder.getReceiverName());
 		dto.setLinktel(serviceOrder.getTel());
-		Region region = regionRepository.findOne(serviceOrder.getXiaoquId());
+		Region region = regionRepository.findById(serviceOrder.getXiaoquId()).get();
 		if (region == null) {
 			throw new BizValidateException("未查询到小区, region id : " + serviceOrder.getXiaoquId());
 		}
@@ -280,8 +345,26 @@ public class CustomServiceImpl implements CustomService {
 		dto.setServiceId(String.valueOf(serviceOrder.getProductId()));
 		dto.setTradeWaterId(serviceOrder.getOrderNo());
 		dto.setTranAmt(amount);
+		Coupon coupon = null;
+		if (!StringUtils.isEmpty(couponId)) {
+			coupon = couponService.findById(Long.valueOf(couponId));
+			if (coupon != null) {
+				dto.setCouponId(couponId);
+				dto.setCouponAmt(String.valueOf(coupon.getAmount()));
+				BigDecimal tranAmt = new BigDecimal(amount);
+				BigDecimal couponAmt = new BigDecimal(coupon.getAmount());
+				BigDecimal payAmt = BigDecimal.ZERO;
+				if (tranAmt.compareTo(couponAmt) > 0) {
+					payAmt = tranAmt.subtract(couponAmt);
+				}else {
+					payAmt = new BigDecimal("0.01");
+				}
+				dto.setTranAmt(payAmt.toString());
+			}
+		}
+		
 		dto.setUser(user);
-		CreateOrderResponseVO data = customServiceUtil.createOrder(dto).getData();
+		CommonPayResponse data = customServiceUtil.createOrder(dto);
 		
 		end = System.currentTimeMillis();
 		logger.info("orderPay location 3 : " + (end - begin)/1000);
@@ -289,6 +372,13 @@ public class CustomServiceImpl implements CustomService {
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(data);
 		vo.setOrderId(orderId);
 		serviceOrder.setPrice(Float.valueOf(amount));
+		serviceOrder.setTotalAmount(Float.valueOf(amount));
+
+		if (coupon != null) {
+			serviceOrder.configCoupon(coupon);
+//			coupon.lock(serviceOrder.getId());	//服务的券不能锁
+			coupon.setOrderId(serviceOrder.getId());
+		}
 		serviceOrderRepository.save(serviceOrder);
 		
 		end = System.currentTimeMillis();
@@ -308,9 +398,12 @@ public class CustomServiceImpl implements CustomService {
 	public void confirmOrder(User user, String orderId, String operType) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
+		}
+		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
+			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
 		}
 
 		Date date = new Date();
@@ -320,10 +413,6 @@ public class CustomServiceImpl implements CustomService {
 		operOrderRequest.setTradeWaterId(serviceOrder.getOrderNo());
 		operOrderRequest.setOperType("1");
 		customServiceUtil.operatorOrder(user, operOrderRequest);
-		
-		if (serviceOrder.getUserId()!=user.getId() && serviceOrder.getOperatorUserId() != user.getId()) {
-			throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
-		}
 		
 		serviceOrder.setConfirmDate(date);
 		serviceOrder.setConfirmer(user.getName());
@@ -339,7 +428,7 @@ public class CustomServiceImpl implements CustomService {
 	public ServiceOrder queryOrder(User user, String orderId) {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder!=null) {
 			boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
 			logger.info("isServiceOper : " + isServiceOper);
@@ -369,7 +458,7 @@ public class CustomServiceImpl implements CustomService {
 			throw new BizValidateException("请稍后再试。");
 		}
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
@@ -446,7 +535,7 @@ public class CustomServiceImpl implements CustomService {
 	public void reverseOrder(User user, String orderId) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
@@ -473,35 +562,23 @@ public class CustomServiceImpl implements CustomService {
 	public void notifyPay(User user, String orderId) throws Exception {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
-		serviceOrder.setPayDate(new Date());
+		logger.info("orderId : " + orderId + ", orderStatus : " + serviceOrder.getStatus());
+		Date date = new Date();
+		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
+			//do nothing
+		}else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+			serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
+			serviceOrder.setConfirmDate(date);
+		}
+		serviceOrder.setPayDate(date);
 		serviceOrderRepository.save(serviceOrder);
 		
 	}
 	
-	/**
-	 * 通知入账
-	 * @throws Exception 
-	 */
-	@Override
-	@Transactional
-	public void notifyPayByServplat(String tradeWaterId) {
-		
-		if (StringUtils.isEmpty(tradeWaterId)) {
-			return;
-		}
-		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(tradeWaterId);
-		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
-			return;
-		}
-		serviceOrder.setPayDate(new Date());
-		serviceOrderRepository.save(serviceOrder);
-		
-	}
-
 	/**
 	 * 服务订单评论
 	 */
@@ -512,7 +589,7 @@ public class CustomServiceImpl implements CustomService {
 		Assert.hasText(serviceCommentDTO.getOrderId(), "订单ID不能为空。");
 		Assert.hasText(serviceCommentDTO.getComment(), "平路内容不能为空。");
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(serviceCommentDTO.getOrderId()));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(serviceCommentDTO.getOrderId())).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + serviceCommentDTO.getOrderId());
 		}
@@ -537,7 +614,7 @@ public class CustomServiceImpl implements CustomService {
 		ServiceOrder serviceOrder = null;
 		int count = 0;
 		while (serviceOrder == null && count < 3) {
-			serviceOrder = serviceOrderRepository.findOne(orderId);
+			serviceOrder = serviceOrderRepository.findById(orderId).get();
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -571,14 +648,14 @@ public class CustomServiceImpl implements CustomService {
 		
 		Assert.hasText(orderId, "订单ID不能为空。");
 		
-		ServiceOrder serviceOrder = serviceOrderRepository.findOne(Long.valueOf(orderId));
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder == null || StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderId : " + orderId);
 		}
 		customServiceUtil.cancelPay(user, serviceOrder.getOrderNo());
 		
 		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
-			serviceOrderRepository.delete(serviceOrder.getId());
+			serviceOrderRepository.deleteById(serviceOrder.getId());
 		}
 		
 	}
@@ -644,44 +721,9 @@ public class CustomServiceImpl implements CustomService {
     }
     
     @Override
-    public Map<String, Long> testRedisOps() {
-
-    	Map<String, Long> returnMap = new HashMap<>();
-		String preKey = ModelConstant.KEY_CS_SERVED_SECT;
-		Map<String, String> map = new HashMap<>();
-		for (int i = 0; i < 50; i++) {
-			map.put((preKey + i),  UUID.randomUUID().toString());
-		}
-		long begin = System.currentTimeMillis();
-		redisTemplate.opsForHash().putAll("testRedisHash", map);
-		long end = System.currentTimeMillis();
-		logger.info("hash put time : " + (end - begin));
-		
-		returnMap.put("hash put time", (end - begin));
-		
-		begin = System.currentTimeMillis();
-		redisTemplate.opsForHash().entries("testRedisHash");
-		end = System.currentTimeMillis();
-		logger.info("hash get time : " + (end - begin));
-		
-		returnMap.put("hash get time", (end - begin));
-		
-		for (int i = 0; i < 50; i++) {
-			begin = System.currentTimeMillis();
-			redisTemplate.opsForValue().set("testRedisValue", String.valueOf(i));
-			end = System.currentTimeMillis();
-			logger.info("value set time : " + i + ", " + (end-begin));
-			
-			returnMap.put("value set time " + i, (end-begin));
-			
-			begin = System.currentTimeMillis();
-			redisTemplate.opsForValue().get("testRedisValue");
-			end = System.currentTimeMillis();
-			logger.info("value get time : " + i + ", " + (end-begin));
-			
-			returnMap.put("value get time " + i, (end-begin));
-		}
-		return returnMap;
+    public ServiceOrderQueryVO queryOrderByFeeType(OrderQueryDTO orderQueryDTO) throws Exception {
+    	
+    	return customServiceUtil.queryOrder(orderQueryDTO);
     	
     }
     

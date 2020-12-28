@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +23,16 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.amap.AmapUtil;
 import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddressRepository;
+import com.yumu.hexie.model.distribution.region.City;
+import com.yumu.hexie.model.distribution.region.CityRepository;
+import com.yumu.hexie.model.distribution.region.County;
+import com.yumu.hexie.model.distribution.region.CountyRepository;
+import com.yumu.hexie.model.distribution.region.Province;
+import com.yumu.hexie.model.distribution.region.ProvinceRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.user.Address;
@@ -55,11 +61,19 @@ public class AddressServiceImpl implements AddressService {
     private RegionRepository regionRepository;
     @Autowired
     private RegionService regionService;
+    @Autowired
+    private ProvinceRepository provinceRepository;
+    @Autowired
+    private CityRepository cityRepository;
+    @Autowired
+    private CountyRepository countyRepository;
+    @Value("${mainServer}")
+    private Boolean mainServer;
     
     @PostConstruct
 	public void init() {
 
-    	if (ConstantWeChat.isMainServer()) {	//BK程序不跑下面的队列轮询
+    	if (mainServer) {	//BK程序不跑下面的队列轮询
     		return;
     	}
 		if(map == null){
@@ -83,12 +97,12 @@ public class AddressServiceImpl implements AddressService {
         log.info("添加地址");
         Region xiaoqu;
         Address address = addressReq.getId() == null ||  addressReq.getId()==0 
-                ? new Address() : addressRepository.findOne(addressReq.getId());
+                ? new Address() : addressRepository.findById(addressReq.getId()).get();
         if(StringUtil.isNotEmpty(addressReq.getXiaoquName())) {
             List<Region> xiaoqus = regionRepository.findAllByParentIdAndName(addressReq.getCountyId(),addressReq.getXiaoquName());
             //FIXME 以小区名为准而非小区ID
             if(xiaoqus == null||xiaoqus.size()== 0 ){
-                Region county = regionRepository.findOne(addressReq.getCountyId());
+                Region county = regionRepository.findById(addressReq.getCountyId()).get();
                 xiaoqu = new Region(county.getId(), county.getName(), addressReq.getXiaoquName());
                 xiaoqu.setLatitude(0d);
                 xiaoqu.setLongitude(0d);
@@ -98,9 +112,9 @@ public class AddressServiceImpl implements AddressService {
             }
             BeanUtils.copyProperties(addressReq, address);
             address.setXiaoquId(xiaoqu.getId());
-            Region county = regionRepository.findOne(address.getCountyId());
-            Region city = regionRepository.findOne(county.getParentId());
-            Region province = regionRepository.findOne(city.getParentId());
+            Region county = regionRepository.findById(address.getCountyId()).get();
+            Region city = regionRepository.findById(county.getParentId()).get();
+            Region province = regionRepository.findById(city.getParentId()).get();
             address.setCountyId(county.getId());
             address.setCounty(county.getName());
             address.setCity(city.getName());
@@ -166,12 +180,12 @@ public class AddressServiceImpl implements AddressService {
         }
         
         if(amapAddr!=null && amapAddr.getLocation()!=null){
-            address = addressRepository.findOne(address.getId());
+            address = addressRepository.findById(address.getId()).get();
             address.initAmapInfo(amapAddr);
 
             addressRepository.save(address);
             
-            Region xiaoqu = regionRepository.findOne(address.getXiaoquId());
+            Region xiaoqu = regionRepository.findById(address.getXiaoquId()).get();
             if(xiaoqu != null && Math.abs(xiaoqu.getLatitude()) < 0.1) {
                 xiaoqu.setLongitude(address.getLongitude());
                 xiaoqu.setLatitude(address.getLatitude());
@@ -186,7 +200,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public Address configDefaultAddress(User user, long addressId) {
         log.error("设置用户默认地址[0]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + addressId);
-        Address currentAddr = addressRepository.findOne(addressId);
+        Address currentAddr = addressRepository.findById(addressId).get();
         if(currentAddr == null) {
             return null;
         }
@@ -217,14 +231,14 @@ public class AddressServiceImpl implements AddressService {
         user.setLongitude(currentAddr.getLongitude());
 
         log.error("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + currentAddr.getId());
-        user = userService.save(user);
+        userService.save(user);
         log.error("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + currentAddr.getId());
         
         return currentAddr;
     }
     @Override
     public void deleteAddress(long id, long userId) {
-        Address addr = addressRepository.findOne(id);
+        Address addr = addressRepository.findById(id).get();
         if(addr.isMain()) {
             throw new BizValidateException("无法删除默认地址！");
         }
@@ -254,7 +268,7 @@ public class AddressServiceImpl implements AddressService {
     }
     @Override
     public Address queryAddressById(long id) {
-        return addressRepository.findOne(id);
+        return addressRepository.findById(id).get();
     }
     
     /** 
@@ -303,6 +317,8 @@ public class AddressServiceImpl implements AddressService {
 	@Transactional
 	public void updateDefaultAddress(User user, HexieAddress addr) {
 		
+		log.info("start to set default address, user : " + user.getId() + ", tel : " + user.getTel());
+		
 		boolean result = true;
 		List<Address> list = getAddressByuserIdAndAddress(user.getId(), addr.getCell_addr());
 		for (Address address : list) {
@@ -312,6 +328,7 @@ public class AddressServiceImpl implements AddressService {
 				break;
 			}
 		}
+		log.info("result : " + result);
 		if (result) {
 			List<Address> addressList= getAddressByMain(user.getId(), true);
 			for (Address address : addressList) {
@@ -346,6 +363,7 @@ public class AddressServiceImpl implements AddressService {
 			
 			Address add = new Address();
 			boolean hasAddr = false;
+			log.info("list size : " + list.size());
 			if (list.size() > 0) {
 				add = list.get(0);
 				hasAddr = true;
@@ -395,6 +413,7 @@ public class AddressServiceImpl implements AddressService {
 				}
 
 			}
+			log.info("hasAddr : " + hasAddr);
 			if (hasAddr) {
 				add.setBind(true);
 				add.setMain(true);
@@ -412,5 +431,24 @@ public class AddressServiceImpl implements AddressService {
 		return addressRepository.findByUserIdAndBind(userId, true);
 	}
 
+	@Override
+	public List<Province> queryProvince() {
+		
+		return provinceRepository.findByStatus(0);
+		
+	}
+	
+	@Override
+	public List<City> queryCity(long provinceId){
+		
+		return cityRepository.findByProvinceIdAndStatus(provinceId, 0);
+	}
+	
+	@Override
+	public List<County> queryCounty(long cityId) {
+		
+		return countyRepository.findByCityIdAndStatus(cityId, 0);
+	}
+	
 	
 }

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -122,21 +123,27 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public Long repair(RepairOrderReq req, User user) {
-        RepairProject project = repairProjectRepository.findOne(req.getProjectId());
-        Address address = addressRepository.findOne(req.getAddressId());
+    	
+    	User currUser = userRepository.findById(user.getId());
+        RepairProject project = repairProjectRepository.findById(req.getProjectId()).get();
+        Address address = addressRepository.findById(req.getAddressId()).get();
         
         //查询region 
-        Region region=regionRepository.findOne(address.getXiaoquId());
+        Region region = null;
+        Optional<Region> optional = regionRepository.findById(address.getXiaoquId());
+        if (optional.isPresent()) {
+			region = optional.get();
+		}
         if(region != null && StringUtil.isNotEmpty(region.getSectId())){
-        	user.setSectId(region.getSectId());
+        	currUser.setSectId(region.getSectId());
         }
         
         //校验小区是否在开通为序服务的范围内
-        List<RepairArea> areaList = repairAreaRepository.findBySectId(user.getSectId());
+        List<RepairArea> areaList = repairAreaRepository.findBySectId(currUser.getSectId());
         if (areaList == null || areaList.size() == 0) {
 			throw new BizValidateException("当前地址 [" + address.getRegionStr() + "]尚未开通维修服务，请联系小区所在物业。");
 		}
-        RepairOrder order = new RepairOrder(req, user, project, address);
+        RepairOrder order = new RepairOrder(req, currUser, project, address);
         order = repairOrderRepository.save(order);
         uploadService.updateRepairImg(order);
         repairAssignService.assignOrder(order);
@@ -151,7 +158,7 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public boolean finish(long orderId, User user) {
-        RepairOrder order = repairOrderRepository.findOne(orderId);
+        RepairOrder order = repairOrderRepository.findById(orderId).get();
         if(order.getUserId() != user.getId()){
             return false;
         }
@@ -172,11 +179,12 @@ public class RepairServiceImpl implements RepairService {
      * @param amount
      * @param user
      * @return
+     * @throws Exception 
      * @see com.yumu.hexie.service.repair.RepairService#requestPay(long, int, com.yumu.hexie.model.user.User)
      */
     @Override
-    public JsSign requestPay(long orderId, float amount, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(orderId);
+    public JsSign requestPay(long orderId, float amount, User user) throws Exception {
+        RepairOrder ro = repairOrderRepository.findById(orderId).get();
         ro.setAmount(amount);
         ServiceOrder so = baseOrderService.createRepairOrder(ro, amount);
         return baseOrderService.requestPay(so);
@@ -190,7 +198,7 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public void payOffline(long orderId, float amount, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(orderId);
+        RepairOrder ro = repairOrderRepository.findById(orderId).get();
         ro.payOffline(amount);
         repairOrderRepository.save(ro);
     }
@@ -202,7 +210,7 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public void notifyPaySuccess(long orderId, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(orderId);
+        RepairOrder ro = repairOrderRepository.findById(orderId).get();
         if(ro.getOrderId()!=null&&ro.getOrderId()!=0&&ro.getUserId() == user.getId()){
             baseOrderService.notifyPayed(ro.getOrderId());
         }
@@ -216,7 +224,7 @@ public class RepairServiceImpl implements RepairService {
     @Override
     @Transactional
     public void cancel(RepairCancelReq req, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(req.getOrderId());
+        RepairOrder ro = repairOrderRepository.findById(req.getOrderId()).get();
         if(ro.getUserId() == user.getId()){
             ro.cancel(req.getCancelReasonType(), req.getCancelReason());
             repairOrderRepository.save(ro);
@@ -232,7 +240,7 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public void deleteByUser(long orderId, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(orderId);
+        RepairOrder ro = repairOrderRepository.findById(orderId).get();
         if(ro.getUserId() == user.getId()){
             ro.deleteByUser();
             repairOrderRepository.save(ro);
@@ -240,7 +248,7 @@ public class RepairServiceImpl implements RepairService {
     }
     @Override
     public void deleteByOperator(long orderId, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(orderId);
+        RepairOrder ro = repairOrderRepository.findById(orderId).get();
         if(ro.getStatus() != RepairConstant.STATUS_CANCEL
                 && ro.getStatus() != RepairConstant.STATUS_FININSH
                         && ro.getStatus() != RepairConstant.STATUS_PAYED
@@ -269,7 +277,7 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public void comment(RepairComment comment, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(comment.getRepairId());
+        RepairOrder ro = repairOrderRepository.findById(comment.getRepairId()).get();
         if(ro != null && ro.getUserId() == user.getId()){
             ro.comment(comment);
             ro = repairOrderRepository.save(ro);
@@ -285,7 +293,7 @@ public class RepairServiceImpl implements RepairService {
     @Override
     public List<RepairListItem> queryTop20ByUser(User user) {
         List<RepairListItem> r = new ArrayList<RepairListItem>();
-        List<RepairOrder> orders = repairOrderRepository.queryByUser(user.getId(), new PageRequest(0, 20));;
+        List<RepairOrder> orders = repairOrderRepository.queryByUser(user.getId(), PageRequest.of(0, 20));
         for(RepairOrder order : orders) {
             r.add(new RepairListItem(order));
         }     
@@ -299,7 +307,7 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public RepairOrder queryById(long id) {
-        return repairOrderRepository.findOne(id);
+        return repairOrderRepository.findById(id).get();
     }
 
 
@@ -311,8 +319,9 @@ public class RepairServiceImpl implements RepairService {
     @Override
     @Transactional
     public void accept(long repairOrderId, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(repairOrderId);
-        List<ServiceOperator> ops = serviceOperatorRepository.findByUserId(user.getId());
+        RepairOrder ro = repairOrderRepository.findById(repairOrderId).get();
+//        List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_WEIXIU, user.getId());
+        List<ServiceOperator> ops = serviceOperatorRepository.findByUserIdAndSectIdAndType(user.getId(), ro.getSectId(), ModelConstant.SERVICE_OPER_TYPE_WEIXIU);
         if(ops != null && ops.size() >0) {
             ServiceOperator op = ops.get(0);
             ro.accept(op);
@@ -329,7 +338,7 @@ public class RepairServiceImpl implements RepairService {
      */
     @Override
     public void finishByOperator(long repairOrderId, User user) {
-        RepairOrder ro = repairOrderRepository.findOne(repairOrderId);
+        RepairOrder ro = repairOrderRepository.findById(repairOrderId).get();
         if(ro.getOperatorUserId() == user.getId() && ro.canFinish(false)){
             ro.finish(false);
             repairOrderRepository.save(ro);
@@ -360,7 +369,7 @@ public class RepairServiceImpl implements RepairService {
                 statuses.add(RepairConstant.STATUS_PAYED);
             }
             List<RepairOrder> orders = repairOrderRepository
-                    .queryByOperatorUser(user.getId(),statuses,new PageRequest(0, 20));
+                    .queryByOperatorUser(user.getId(),statuses, PageRequest.of(0, 20));
             for(RepairOrder order : orders) {
                 r.add(new RepairListItem(order));
             }      
@@ -382,7 +391,7 @@ public class RepairServiceImpl implements RepairService {
 		Sort sort = new Sort(Direction.DESC , "id");
 		int currPage=baseRequestDTO.getCurr_page();
 		int pageSize=baseRequestDTO.getPage_size();
-		Pageable pageable = new PageRequest(currPage, pageSize, sort);
+		Pageable pageable = PageRequest.of(currPage, pageSize, sort);
 	    
 	    List<String> sectList=baseRequestDTO.getSectList();
 		String payType=map.get("payType");
@@ -411,7 +420,7 @@ public class RepairServiceImpl implements RepairService {
 		Sort sort = new Sort(Direction.DESC , "id");
 		int currPage=baseRequestDTO.getCurr_page();
 		int pageSize=baseRequestDTO.getPage_size();
-		Pageable pageable = new PageRequest(currPage, pageSize, sort);
+		Pageable pageable = PageRequest.of(currPage, pageSize, sort);
 	    
 	    List<String> sectList=baseRequestDTO.getSectList();
 		String name=map.get("name");
@@ -454,7 +463,7 @@ public class RepairServiceImpl implements RepairService {
 			so.setOpenId(u.getOpenid());
 			so.setCompanyName(vo.getCspName());
 		}else{
-			so=serviceOperatorRepository.findOne(Long.valueOf(id));
+			so=serviceOperatorRepository.findById(Long.valueOf(id)).get();
 			so.setName(name);
 			serviceOperatorSectRepository.deleteByOperatorId(Long.valueOf(id));
 		}
@@ -473,7 +482,7 @@ public class RepairServiceImpl implements RepairService {
 	public Map<String, Object> operatorInfo(BaseRequestDTO<String> baseRequestDTO) {
 		Map<String,Object> map=new HashMap<String, Object>();
 		List<String> sectList=serviceOperatorSectRepository.findByOperatorId(Long.valueOf(baseRequestDTO.getData()));
-		ServiceOperator serviceOperator =serviceOperatorRepository.findOne(Long.valueOf(baseRequestDTO.getData()));
+		ServiceOperator serviceOperator =serviceOperatorRepository.findById(Long.valueOf(baseRequestDTO.getData())).get();
 		map.put("sectList", sectList);
 		map.put("serviceOperator", serviceOperator);
 		return map;
@@ -487,7 +496,7 @@ public class RepairServiceImpl implements RepairService {
 		serviceOperatorSectRepository.deleteByOperatorIdAndSectId(Long.valueOf(operatorId),sectId);
 	    List<String> list=serviceOperatorSectRepository.findByOperatorId(Long.valueOf(operatorId));
 	    if(list.size()==0 || StringUtil.isEmpty(sectId)){
-	    	serviceOperatorRepository.delete(Long.valueOf(operatorId));
+	    	serviceOperatorRepository.deleteById(Long.valueOf(operatorId));
 	    }
 	}
 

@@ -18,6 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.LogisticsService;
+import com.yumu.hexie.service.eshop.PartnerService;
+import com.yumu.hexie.service.msgtemplate.MsgTemplateService;
+import com.yumu.hexie.service.page.PageConfigService;
+import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.web.BaseController;
 
@@ -34,6 +39,16 @@ public class ParamController extends BaseController {
 	
 	@Autowired
 	private ParamService paramService;
+	@Autowired
+	private PageConfigService pageConfigService;
+	@Autowired
+	private MsgTemplateService msgTemplateService;
+	@Autowired
+	private LocationService locationService;
+	@Autowired
+	private LogisticsService logisticsService;
+	@Autowired
+	private PartnerService partnerService;
 	
 	@RequestMapping(value = "/wuye/{oriSys}", method = RequestMethod.GET)
 	public void initWuyeParam(HttpServletResponse response, 
@@ -60,13 +75,35 @@ public class ParamController extends BaseController {
 		response.getWriter().print("ok");
 	}
 	
-	@RequestMapping(value = "/sys", method = RequestMethod.POST)
-	public String updateSysParam(@RequestParam(value = "code") String code) {
+	@RequestMapping(value = "/recache/{type}", method = RequestMethod.GET)
+	public String updateSysParam(@RequestParam(value = "syscode") String syscode, @PathVariable String type) {
 		
-		if (!"hexie".equals(code)) {
+		if (!"hexie".equals(syscode)) {
 			return "";
 		}
-		paramService.updateSysParam();
+		switch (type) {
+		case "sys":
+			paramService.updateSysParam();
+			break;
+		case "page":
+			pageConfigService.updatePageConfig();
+			break;
+		case "msg":
+			msgTemplateService.refreshCache();
+			break;
+		case "location":
+			locationService.refreshCache();
+			break;
+		case "logistics":
+			logisticsService.refreshExpressCom();
+			break;
+		case "partner":
+			partnerService.refreshPartnerCache();
+			break;
+		default:
+			logger.info("no such type : " + type);
+			break;
+		}
 		return "success";
 	}
 	

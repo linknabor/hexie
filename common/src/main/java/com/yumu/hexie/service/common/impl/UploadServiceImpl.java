@@ -5,7 +5,6 @@
 package com.yumu.hexie.service.common.impl;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import com.qiniu.api.io.IoApi;
 import com.qiniu.api.io.PutExtra;
 import com.qiniu.api.io.PutRet;
 import com.yumu.hexie.common.util.DateUtil;
-import com.yumu.hexie.common.util.IOUtils;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.wechat.service.FileService;
@@ -63,6 +61,13 @@ public class UploadServiceImpl implements UploadService {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private QiniuUtil qiniuUtil;
+	
+	@Autowired
+	private FileService fileService;
+	
     /** 
      * @param order
      * @see com.yumu.hexie.service.common.UploadService#updateRepairImg(com.yumu.hexie.model.localservice.repair.RepairOrder)
@@ -70,16 +75,28 @@ public class UploadServiceImpl implements UploadService {
     @Override
     @Async
     public void updateRepairImg(RepairOrder order) {
-        if (order.isImageUploaded()
-                ||( StringUtil.isEmpty(order.getImgUrls()) 
-                && StringUtil.isEmpty(order.getCommentImgUrls()))) {
+    	
+    	log.info("start to move image, isUploaded : " + order.isImageUploaded());
+    	
+    	
+        if (order.isImageUploaded()) {
             return;
         }
-        User user = userService.getById(order.getUserId());
-        String imgUrls = moveImges(user.getAppId(), order.getImgUrls());
-        String commentImgUrls = moveImges(user.getAppId(), order.getCommentImgUrls());
         
-        RepairOrder nOrder = repairOrderRepository.findOne(order.getId());
+        User user = userService.getById(order.getUserId());
+        String imgUrls = "";
+        String commentImgUrls = "";
+        if (!StringUtils.isEmpty(order.getImgUrls())) {
+        	log.info("imgUrls : " + order.getImgUrls());
+        	imgUrls = moveImges(user.getAppId(), order.getImgUrls());
+		}
+        
+        if (!StringUtils.isEmpty(order.getCommentImgUrls())) {
+        	log.info("commentImgUrls : " + order.getCommentImgUrls());
+        	commentImgUrls = moveImges(user.getAppId(), order.getCommentImgUrls());
+		}
+        
+        RepairOrder nOrder = repairOrderRepository.findById(order.getId()).get();
         nOrder.setImgUrls(imgUrls);
         nOrder.setCommentImgUrls(commentImgUrls);
         repairOrderRepository.save(nOrder);
@@ -91,6 +108,7 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public Map<String, String> uploadImages(String appId, List<String> imgUrlList) {
     	
+    	String accessToken = systemConfigService.queryWXAToken(appId);
     	Map<String, String> returnMap = Collections.synchronizedMap(new HashMap<>());
     	if (imgUrlList == null || imgUrlList.isEmpty()) {
     		return returnMap;
@@ -101,7 +119,7 @@ public class UploadServiceImpl implements UploadService {
 				return;
 			}
     		if (imgUrl.indexOf("http") == -1) {
-    			String qiniuUrl = uploadFileToQiniu(downloadFromWechat(appId, imgUrl));
+    			String qiniuUrl = uploadFileToQiniu(downloadFromWechat(accessToken, imgUrl));
     			if(!StringUtils.isEmpty(qiniuUrl)) {
     				returnMap.put(imgUrl, qiniuUrl);
                 } else {
@@ -115,8 +133,16 @@ public class UploadServiceImpl implements UploadService {
     	
     }
     
-
+    /**
+     * 迁移图片
+     * @param appId
+     * @param imgUrls
+     * @return
+     */
     private String moveImges(String appId, String imgUrls) {
+    	
+    	String accessToken = systemConfigService.queryWXAToken(appId);
+    	
         if(StringUtil.isEmpty(imgUrls)) {
             return "";
         }
@@ -127,7 +153,7 @@ public class UploadServiceImpl implements UploadService {
                 continue;
             }
             if (url.indexOf("http")<0) {
-                String qiniuUrl = uploadFileToQiniu(downloadFromWechat(appId, url));
+                String qiniuUrl = uploadFileToQiniu(downloadFromWechat(accessToken, url));
                 if(!StringUtils.isEmpty(qiniuUrl)) {
                     newImgUrls += qiniuUrl;
                 } else {
@@ -147,7 +173,7 @@ public class UploadServiceImpl implements UploadService {
             return "";
         }
         PutExtra extra = new PutExtra();
-        String uptoken = QiniuUtil.getInstance().getUpToken();
+        String uptoken = qiniuUtil.getUpToken();
 
         if (file.exists() && file.getTotalSpace() > 0) {
             PutRet putRet = IoApi.putFile(uptoken, DateUtil.dtFormat(new Date(),"yyyyMMddHHmmssSSS")+(int)(Math.random()*1000), file, extra);
@@ -160,11 +186,15 @@ public class UploadServiceImpl implements UploadService {
         return "";
     }
 
-    //从微信服务器上下载
-    private File downloadFromWechat(String appId, String mediaId) {
-    	String accessToken=systemConfigService.queryWXAToken(appId);
-        InputStream inputStream = null;
-
+    /**
+     * 从微信服务器上下载
+     * @param appId
+     * @param mediaId
+     * @return
+     */
+    @Override
+    public File downloadFromWechat(String accessToken, String mediaId) {
+    	
         String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
         String tmpPathRoot = tmpFileRoot + File.separator + currDate + File.separator;
 
@@ -172,34 +202,20 @@ public class UploadServiceImpl implements UploadService {
         if (!file.exists() || !file.isDirectory()) {
             file.mkdirs();
         }
-        File mediaFile = null;
-        try {
-            int imgcounter = 0;
-            inputStream = null;
-            while (inputStream == null && imgcounter < 3) {
-                inputStream = FileService.downloadFile(mediaId,accessToken); //重试3次
-                if (inputStream == null) {
-                    log.error("获取图片附件失败。" + mediaId);
-                }
-                imgcounter++;
+        
+        String tmpPath = tmpPathRoot + System.currentTimeMillis();
+        File mediaFile = new File(tmpPath);
+        
+        int failCount = 0;
+        while (failCount < 3){
+        	try {
+            	fileService.downloadFile(mediaId, accessToken, mediaFile); //重试3次
+            	break;
+            } catch(Exception e){
+            	log.error(e.getMessage(), e);
+            	log.error("从腾讯下载图片失败: " + e.getMessage());
+            	failCount++;
             }
-
-            if (inputStream == null) {
-                log.error("多次从腾讯获取图片失败。");
-                return null;
-            }
-            String tmpPath = tmpPathRoot + System.currentTimeMillis();
-            FileService.inputStream2File(inputStream, tmpPath);
-            mediaFile = new File(tmpPath);
-
-            if (!mediaFile.exists() || mediaFile.getTotalSpace() <= 0) {
-                mediaFile = null;
-            }
-            log.error("下载图片：" + tmpPath);
-        } catch (Exception e) {
-            log.error("获取图片附件异常。" + mediaId, e);
-        } finally {
-            IOUtils.closeSilently(inputStream);
         }
         return mediaFile;
 

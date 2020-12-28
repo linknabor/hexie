@@ -17,6 +17,7 @@ public class Product extends BaseModel {
 
 	private static final long serialVersionUID = 4808669460780339640L;
 	private long merchantId;
+	private long agentId;
 	private String productNo;
 	private String merchanProductNo;
 	private String  productType;
@@ -66,6 +67,14 @@ public class Product extends BaseModel {
 	private String firstType = "00";//一级类目
 	private String secondType = "00";//二级类目
 	private float postageFee = 0;//快递费
+	
+	private int demo = 0;	//0false 1true;
+	
+	private long productCategoryId;	//分类ID
+	
+	@Transient
+	private boolean isService = false;
+	
 	
 	public long getMerchantId() {
 		return merchantId;
@@ -315,6 +324,30 @@ public class Product extends BaseModel {
 	}
 	public void setPostageFee(float postageFee) {
 		this.postageFee = postageFee;
+	}
+	public long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+	public int getDemo() {
+		return demo;
+	}
+	public void setDemo(int demo) {
+		this.demo = demo;
+	}
+	public long getProductCategoryId() {
+		return productCategoryId;
+	}
+	public void setProductCategoryId(long productCategoryId) {
+		this.productCategoryId = productCategoryId;
+	}
+	public boolean isService() {
+		return isService;
+	}
+	public void setService(boolean isService) {
+		this.isService = isService;
 	}
 	
 }

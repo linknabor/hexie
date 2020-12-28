@@ -1,13 +1,13 @@
 package com.yumu.hexie.service.repair;
 
-import java.util.List;
-
-import com.yumu.hexie.model.localservice.repair.RepairArea;
+import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.repair.vo.QueryRAreaVO;
+import com.yumu.hexie.integration.repair.vo.SaveRAreaVO;
 
 public interface RepairAreaService {
 	
-	public List<RepairArea> getRepairArea(RepairArea repairArea);
-
-	public void saveRepairArea(List<RepairArea> list, boolean isSect);
+	CommonResponse<Object> getRepairArea(QueryRAreaVO vo);
+	
+	void saveRepairArea(SaveRAreaVO SaveRAreaVO);
 	
 }

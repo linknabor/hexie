@@ -26,7 +26,7 @@ public class ModelConstant {
 	public static final int REGION_XIAOQU = 4;
 	
 	//订单类型
-	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）,6维修单，11自定义服务订单
+	//0.团购单 1.单个订单 3.特卖  4.团购 5.到家服务（预约）,6维修单，11自定义服务订单,12核销券
 	public static final int ORDER_TYPE_GROUP = 0;
 	public static final int ORDER_TYPE_GROUP_SINGLE = 1;
 	public static final int ORDER_TYPE_ONSALE = 3;
@@ -34,11 +34,28 @@ public class ModelConstant {
     public static final int ORDER_TYPE_YUYUE = 5;
     public static final int ORDER_TYPE_REPAIR = 6;
     public static final int ORDER_TYPE_SERVICE = 11;
+    public static final int ORDER_TYPE_EVOUCHER = 12;
+    public static final int ORDER_TYPE_PROMOTION = 13;
+    public static final int ORDER_TYPE_SAASSALE = 14;
     
     //serviceOperator类型
     public static final int SERVICE_OPER_TYPE_WEIXIU = 1;	//维修工
     public static final int SERVICE_OPER_TYPE_WAITER = 2;	//店小二
+    public static final int SERVICE_OPER_TYPE_BAOJIE = 3;	//店小二
     public static final int SERVICE_OPER_TYPE_STAFF = 5;	//物业人员
+    public static final int SERVICE_OPER_TYPE_SERVICE = 10;	//自定义服务
+    public static final int SERVICE_OPER_TYPE_EVOUCHER = 11;	//优惠券核销人员
+    public static final int SERVICE_OPER_TYPE_ONSALE_TAKER = 12;	//特卖接单人员
+    public static final int SERVICE_OPER_TYPE_RGROUP_TAKER = 13;	//团购接单人员
+    public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
+    public static final int SERVICE_OPER_TYPE_SAASSALE = 15;	//saas售卖接单提醒
+    
+    //电子优惠券状态
+    public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
+    public static final int EVOUCHER_STATUS_NORMAL = 1;	//正常
+    public static final int EVOUCHER_STATUS_USED = 2;	//已使用
+    public static final int EVOUCHER_STATUS_EXPIRED = 3;	//过期
+    public static final int EVOUCHER_STATUS_INVALID = 4;	//不可用,退款后的状态
 
 	//操作业务类型
 	public static final int OP_TYPE_SERVICE_ORDER = 1;
@@ -136,6 +153,9 @@ public class ModelConstant {
 	public static final int RGROUP_PRODUCT_TYPE_ABTUAN = 4; //AB团
 	public static final int RGROUP_PRODUCT_TYPE_GANCHANGXIAN = 5; //敢试鲜
 	public static final int RGROUP_PRODUCT_TYPE_FEATURED = 100;//精选，仅限于查询
+	
+	public static final int GOODS_TYPE_PRODUCT = 0;	//商品类售卖
+	public static final int GOODS_TYPE_SERVICE = 1;	//服务类
 	
 	public static final int RULE_TYPE_CITY = 0;
 	public static final int RULE_TYPE_NEARBY = 1;
@@ -270,6 +290,7 @@ public class ModelConstant {
 	public static final int NOTICE_TYPE_RGROUP = 3;//团购消息
 	public static final int NOTICE_TYPE_SYS_PUSH = 4;//推送消息
 	public static final int NOTICE_TYPE_YUYUE = 5;//预约消息
+	public static final int NOTICE_TYPE_COUPON = 6;//预约消息
 	
 	public static final int NOTICE_SUB_TYPE_ORDERSUCCESS = 1;
 	public static final int NOTICE_SUB_TYPE_ORDERSENDGOODS = 2;
@@ -279,7 +300,7 @@ public class ModelConstant {
 	public static final int NOTICE_SUB_TYPE_GROUPNOTIFY = 3;
 	
 	
-	/***********现金券************** 1:订单分裂|2:用户注册|3:关注红包|4:活动发布|5:订单分裂模板|6:会员注册   */
+	/***********现金券************** 1:订单分裂（支付成功通过分享产生红包）|2:用户注册|3:关注红包|4:活动发布|5:订单分裂模板(详见1)|6:会员注册|7.订单分裂2（支付成功直接塞红包） 8.订单分裂模板2（(详见7)）  */
 	//种子类型
 	public static final int COUPON_SEED_ORDER_BUY = 1;
 	public static final int COUPON_SEED_USER_REGIST = 2;
@@ -287,6 +308,8 @@ public class ModelConstant {
 	public static final int COUPON_SEED_ACTIVITY = 4;
 	public static final int COUPON_SEED_ORDER_BUY_TEMPLATE = 5;
 	public static final int COUPON_SEED_MEMBER = 6;
+	public static final int COUPON_SEED_ORDER_BUY2 = 7;
+	public static final int COUPON_SEED_ORDER_BUY2_TEMPLATE = 8;
 	
 	//种子状态
 	public static final int COUPON_SEED_STATUS_AVAILABLE = 0;
@@ -312,12 +335,13 @@ public class ModelConstant {
 	
 	public static final String PARA_TYPE_CSP = "2";
 	
-	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";	//底部图标缓存key
-	public static final String KEY_TYPE_BGIMAGE = "bgImage";	//空白背景图
-	public static final String KEY_TYPE_BANNER = "banner";		//页面顶部轮播图
-	public static final String KEY_TYPE_QRCODE = "qrcode";		//公众号二维码
-	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";	//页面配置
-	public static final String KEY_TYPE_WUYEPAY_TABS = "wuyePayTabs";	//物业缴费选项卡
+	public static final String KEY_TYPE_BOTTOM_ICON = "cfg:page:bottomIcon";	//底部图标缓存key
+	public static final String KEY_TYPE_BGIMAGE = "cfg:page:bgImage";	//空白背景图
+	public static final String KEY_TYPE_BANNER = "cfg:page:banner";		//页面顶部轮播图
+	public static final String KEY_TYPE_QRCODE = "cfg:page:qrcode";		//公众号二维码
+	public static final String KEY_TYPE_CSHOTLINE = "cfg:page:csHotline";
+	public static final String KEY_TYPE_PAGECONFIG = "cfg:page:pageConfigView";	//页面配置
+	public static final String KEY_TYPE_WUYEPAY_TABS = "cfg:page:wuyePayTabs";	//物业缴费选项卡
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
 	//微信会员卡领卡渠道
@@ -333,7 +357,7 @@ public class ModelConstant {
 	//队列
 	public static final String KEY_ADD_POINT_QUEUE = "addPointQueue";
 	public static final String KEY_BIND_HOUSE_QUEUE = "bindHouseQueue";
-	public static final String KEY_USER_LOGIN = "userLoginSession_";
+	public static final String KEY_USER_LOGIN = "lock:userLoginSession:";
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
 	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
@@ -354,14 +378,49 @@ public class ModelConstant {
 	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
 	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
 	
-	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";
-	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";
-	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";
-	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";
+	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";	//物业支付到账通知
+	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";	//服务消息推送
+	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";	//服务人员更新
+	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新
+	public static final String KEY_UPDATE_ORDER_STATUS_QUEUE = "queue:orderstatus:update";	//订单状态（服务、特卖、团购）更新
+	public static final String KEY_NOTIFY_DELIVERY_QUEUE = "queue:noitfy:delivery";	//特卖、团购快递发货通知
+	public static final String KEY_NOTIFY_PROMOTION_QUEUE = "queue:noitfy:promotion";	//推广下单通知
+	public static final String KEY_NOTIFY_PARTNER_REFUND_QUEUE = "queue:notify:partnerRefund";	//合伙人退款通知
+	public static final String KEY_NOTIFY_ESHOP_REFUND_QUEUE = "queue:notify:eshopRefund";	//合伙人退款通知
+	public static final String KEY_NOTIFY_WUYE_COUPON_QUEUE = "queue:notify:wuyeCoupon";	//物业红包消费通知
+	
 	public static final String KEY_ORDER_ACCEPTED = "lock:serviceOrder:";
 	
 	public static final String KEY_CUSTOM_SERVICE = "cfg:customservice";
 	public static final String KEY_NOITFY_PAY_DUPLICATION_CHECK = "lock:payNotification:";
 	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
 	public static final String KEY_CS_SERVED_SECT = "cfg:customservice:sect:";
+	
+	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template:";
+	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url:";
+	
+	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam:";
+	
+	public static final int SMS_TYPE_REG = 101;	//用户注册短信
+	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
+	public static final int SMS_TYPE_PROMOTION_PAY = 103;	//发票验证码获取
+	public static final int SMS_TYPE_RESET_PASSWORD = 104;	//发票验证码获取
+	
+	public static final String KEY_PRO_RULE_INFO = "product:rule:";
+	public static final String KEY_PRO_STOCK = "product:stock:";
+	public static final String KEY_PRO_FREEZE = "product:freeze:";
+	
+	public static final String KEY_COUPON_RULE = "coupon:rule:";
+	public static final String KEY_COUPON_TOTAL = "coupon:total:";	//总数
+	public static final String KEY_COUPON_USED = "coupon:used:";	//已使用的
+	public static final String KEY_COUPON_SEED = "coupon:seed:";
+	public static final String KEY_COUPON_GAIN_QUEUE = "queue:coupon:gain";
+	
+	public static final String KEY_USER_COUPON_SEED = "user:gaiedCouponSeed:";	//用户已领过的红包种子
+	
+	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
+	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
+	
+	public static final String KEY_HEXIE_PARTNER = "partner:";	//合伙人
+	
 }		

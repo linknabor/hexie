@@ -6,11 +6,11 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -29,17 +29,19 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
+import com.yumu.hexie.model.view.CsHotline;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
@@ -76,45 +78,43 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/userInfo", method = RequestMethod.GET)
 	@ResponseBody
-    public BaseResult<UserInfo> userInfo(HttpSession session,@ModelAttribute(Constants.USER)User user,
-    		HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public BaseResult<UserInfo> userInfo(HttpServletRequest request, @ModelAttribute(Constants.USER)User user) throws Exception {
 		
 		long beginTime = System.currentTimeMillis();
-		User sessionUser = user;
+		User dbUser = null;
 		try {
-			
+
 			String oriApp = request.getParameter("oriApp");
-			log.info("oriApp : " + oriApp);
 			if (StringUtil.isEmpty(oriApp)) {
 				oriApp = ConstantWeChat.APPID;
 			}
+			log.info("oriApp : " + oriApp);
+			log.info("user in session :" + user);
 			
-			log.info("user in session :" + sessionUser);
-			List<User> userList = userService.getByOpenId(user.getOpenid());
+			List<User> userList = userService.getByOpenId(user.getOpenid());	//数据库访问。尽量避免一登陆就操作。
 			if (userList!=null) {
 				for (User baseduser : userList) {
-					
 					if (baseduser.getId() == user.getId()) {
-						user = baseduser;
+						dbUser = baseduser;
 						break;
-					}else if (StringUtils.isEmpty(baseduser.getId())&&baseduser.getOriUserId() == user.getId() ) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
-						user = baseduser;
+					}else if (baseduser.getOriUserId() == user.getId() && !ConstantWeChat.APPID.equals(baseduser.getAppId())) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
+						dbUser = baseduser;
 						break;
 					}
 				}
 			}
-			user = userService.getById(user.getId());
-			if (user != null) {
-				String userAppId = user.getAppId();	//如果根据session中信息获得的用户并非当前公众号的，比如宝房用户登陆合协公众号，则需要清空session，让他重新登陆
+			if (dbUser != null) {
+				String userAppId = dbUser.getAppId();	//如果根据session中信息获得的用户并非当前公众号的，比如宝房用户登陆合协公众号，则需要清空session，让他重新登陆
 				if (!oriApp.equals(userAppId)) {
-					user = null;
+					dbUser = null;
 				}
 			}
 			
-			log.info("user in db :" + user);
-			if(user != null){
+			log.info("user in db :" + dbUser);
+			if(dbUser != null){
 				
 				long endTime = System.currentTimeMillis();
+<<<<<<< HEAD
 <<<<<<< HEAD
 				log.info("user:" + user.getName() + "location1，耗时：" + ((endTime-beginTime)/1000));
 =======
@@ -151,11 +151,35 @@ public class UserController extends BaseController{
 			    
 =======
 >>>>>>> master
+=======
+				BeanUtils.copyProperties(dbUser, user);
+			    request.getSession().setAttribute(Constants.USER, user);
+		    
+			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
+			    UserInfo userInfo = new UserInfo(user, odDefinition);
+
+			    endTime = System.currentTimeMillis();
+			    log.info("userInfo1，耗时：" + ((endTime-beginTime)));
+
+			    Map<Object, Object> paramMap = paramService.getWuyeParamByUser(user);
+			    userInfo.setCfgParam(paramMap);
+			    
+			    endTime = System.currentTimeMillis();
+			    log.info("userInfo2，耗时：" + ((endTime-beginTime)));
+			    
+			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
+//			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
+//			    log.info("iconList : " + showIconList);
+
+>>>>>>> 8438e8bfa0c4db2c4c0ad919b94d958f5664cff4
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
-			    userInfo.setIconList(showIconList);
+			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
+			    
+			    endTime = System.currentTimeMillis();
+			    log.info("user3，耗时：" + ((endTime-beginTime)));
 			    
 			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
 			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
@@ -170,7 +194,14 @@ public class UserController extends BaseController{
 			    	qrLink = qrCode.getQrLink();
 				}
 			    
+			    CsHotline csHotline = pageConfigService.getCsHotline(user.getAppId());
+			    String hotline = "";
+			    if (csHotline != null) {
+			    	hotline = csHotline.getHotline();
+				}
+			    
 			    userInfo.setQrCode(qrLink);
+			    userInfo.setCsHotline(hotline);
 			    userInfo.setCardStatus(wechatCard.getStatus());
 			    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
 			    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
@@ -178,12 +209,13 @@ public class UserController extends BaseController{
 			    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
 			    		    
 			    endTime = System.currentTimeMillis();
-				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)/1000));
+
+				log.info("user:" + user.getName() + "登陆，耗时：" + ((endTime-beginTime)));
 
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-				log.error("current user id in session is not the same with the id in database. user : " + sessionUser + ", sessionId: " + session.getId());
-				session.setMaxInactiveInterval(1);//将会话过期
+				log.error("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
+				request.getSession().setMaxInactiveInterval(1);//将会话过期
 				Thread.sleep(50);	//延时，因为上面设置了1秒。页面上也设置了延时，所以这里不需要1秒
 				return new BaseResult<UserInfo>().success(null);
 			}
@@ -214,9 +246,8 @@ public class UserController extends BaseController{
 		if(user != null){
 			session.setAttribute(Constants.USER, user);
 			
-			boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,user.getId());
-		    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
-		    UserInfo userInfo = new UserInfo(user,isRepariOper, isServiceOper);
+		    OperatorDefinition odDefinition = operatorService.defineOperator(user);
+		    UserInfo userInfo = new UserInfo(user, odDefinition);
 	        return new BaseResult<UserInfo>().success(userInfo);
 		} else {
             return new BaseResult<UserInfo>().failMsg("用户不存在！");
@@ -225,7 +256,7 @@ public class UserController extends BaseController{
 	
 	@RequestMapping(value = "/login/{code}", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<UserInfo> login(HttpSession session,@PathVariable String code, @RequestBody(required = false) Map<String, String> postData) throws Exception {
+    public BaseResult<UserInfo> login(HttpSession session, @PathVariable String code, @RequestBody(required = false) Map<String, String> postData) throws Exception {
 		
 		long beginTime = System.currentTimeMillis();
 		User userAccount = null;
@@ -245,7 +276,7 @@ public class UserController extends BaseController{
 		    if(userAccount == null) {
 		    	
 		    	if (userService.checkDuplicateLogin(session)) {
-					throw new BizValidateException("正在登陆中，请耐心等待。");
+					throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
 				}
 		    	
 		    	UserWeiXin weixinUser = null;
@@ -257,8 +288,7 @@ public class UserController extends BaseController{
 		    	
 		    	userAccount = userService.updateUserLoginInfo(weixinUser, oriApp);
 		    }
-		    
-			session.setAttribute(Constants.USER, userAccount);
+		    session.setAttribute(Constants.USER, userAccount);
 		}
 		if(userAccount == null) {
 		    return new BaseResult<UserInfo>().failMsg("用户不存在！");
@@ -266,9 +296,8 @@ public class UserController extends BaseController{
 		long endTime = System.currentTimeMillis();
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		
-		boolean isRepariOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_REPAIR,userAccount.getId());
-	    boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,userAccount.getId());
-	    UserInfo userInfo = new UserInfo(userAccount,isRepariOper, isServiceOper);
+		OperatorDefinition odDefinition = operatorService.defineOperator(userAccount);
+	    UserInfo userInfo = new UserInfo(userAccount, odDefinition);
 		return new BaseResult<UserInfo>().success(userInfo);
 
     }
@@ -292,7 +321,10 @@ public class UserController extends BaseController{
 		if (StringUtils.isEmpty(token)) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp);
+		if (yzm.getType() == 0) {
+			yzm.setType(ModelConstant.SMS_TYPE_REG);
+		}
+		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp, yzm.getType());
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
@@ -319,7 +351,7 @@ public class UserController extends BaseController{
 		if (!result) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp);
+		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_INVOICE);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
@@ -334,7 +366,8 @@ public class UserController extends BaseController{
 			user.setSex(editUser.getSex());
 			user.setRealName(editUser.getRealName());
 			user.setName(editUser.getName());
-			session.setAttribute(Constants.USER, userService.save(user));
+			userService.save(user);
+			session.setAttribute(Constants.USER, user);
 
 	        return new BaseResult<UserInfo>().success(new UserInfo(user));
 		} else {
@@ -345,7 +378,8 @@ public class UserController extends BaseController{
 				user.setSex(editUser.getSex());
 				user.setRealName(editUser.getRealName());
 				user.setName(editUser.getName());
-				session.setAttribute(Constants.USER, userService.save(user));
+				userService.save(user);
+				session.setAttribute(Constants.USER, user);
 	            return new BaseResult<UserInfo>().success(new UserInfo(user));
 			}
 		}
@@ -369,9 +403,9 @@ public class UserController extends BaseController{
             if (!StringUtils.isEmpty(req.getMobile())) {
             	 user.setTel(req.getMobile());
 			}
-            User savedUser = userService.simpleRegister(user);
-            session.setAttribute(Constants.USER, savedUser);
-            return new BaseResult<UserInfo>().success(new UserInfo(savedUser));
+            userService.simpleRegister(user);
+            session.setAttribute(Constants.USER, user);
+            return new BaseResult<UserInfo>().success(new UserInfo(user));
 
         }
     }

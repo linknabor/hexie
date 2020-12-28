@@ -21,6 +21,17 @@ public class Discounts implements Serializable {
 	private String isEnableIntegral;
 	@JsonProperty("integral")
 	private String integral;
+
+	/*2020-07 添加 begin*/
+	@JsonProperty("reality_amt")
+	private String realityAmt;	//is_qrcode =1时有，实际支付金额
+	private String image;	//is_qrcode =1时有，图片的BASE64串
+	@JsonProperty("sect_name")
+	private String sectName;
+	@JsonProperty("cycle_arrs")
+	private List<Cycles> cycleList;
+	/*2020-07 添加 end*/
+	
 	
 	public static class DiscountDetail {
 		
@@ -49,6 +60,32 @@ public class Discounts implements Serializable {
 		public void setReductionAmt(String reductionAmt) {
 			this.reductionAmt = reductionAmt;
 		}
+		
+	}
+	
+	public static class Cycles{
+		
+		@JsonProperty("fee_name")
+		private String feeName;
+		@JsonProperty("cycle_date")
+		private String cycleDate;
+		public String getFeeName() {
+			return feeName;
+		}
+		public void setFeeName(String feeName) {
+			this.feeName = feeName;
+		}
+		public String getCycleDate() {
+			return cycleDate;
+		}
+		public void setCycleDate(String cycleDate) {
+			this.cycleDate = cycleDate;
+		}
+		@Override
+		public String toString() {
+			return "Cycles [feeName=" + feeName + ", cycleDate=" + cycleDate + "]";
+		}
+		
 		
 	}
 
@@ -90,6 +127,22 @@ public class Discounts implements Serializable {
 
 	public void setIntegral(String integral) {
 		this.integral = integral;
+	}
+
+	public String getRealityAmt() {
+		return realityAmt;
+	}
+
+	public void setRealityAmt(String realityAmt) {
+		this.realityAmt = realityAmt;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 	
 

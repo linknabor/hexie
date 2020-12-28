@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface RepairAreaRepository extends JpaRepository<RepairArea, Long>{
 	
-	@Query(value = "select * from RepairArea ra where ra.cspId = ?1 and if( ?2 != '', ra.sectId = ?2, 1=1 )", 
+	@Query(value = "select * from RepairArea ra where (COALESCE(?1) IS NULL OR (ra.sectId IN (?1) ))", 
 			nativeQuery = true)
-	public List<RepairArea> findByCspIdAndSectid(String cspId, String sectId);
+	public List<RepairArea> findBySectIds(List<String> sectIds);
 	
 	public List<RepairArea> findBySectId(String sectId);
 	

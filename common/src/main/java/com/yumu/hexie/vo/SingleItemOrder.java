@@ -17,6 +17,9 @@ public class SingleItemOrder implements Serializable {
 	@JsonIgnore
 	private String openId;
 	private Long userId;
+	private String payType;	//1.走公众号原来的支付，2走平台的支付
+	private Long agentId;
+	
 	public long getRuleId() {
 		return ruleId;
 	}
@@ -71,4 +74,24 @@ public class SingleItemOrder implements Serializable {
 	public void setCouponId(Long couponId) {
 		this.couponId = couponId;
 	}
+	public String getPayType() {
+		return payType;
+	}
+	public void setPayType(String payType) {
+		this.payType = payType;
+	}
+	public Long getAgentId() {
+		return agentId;
+	}
+	public void setAgentId(Long agentId) {
+		this.agentId = agentId;
+	}
+	@Override
+	public String toString() {
+		return "SingleItemOrder [ruleId=" + ruleId + ", count=" + count + ", orderType=" + orderType
+				+ ", serviceAddressId=" + serviceAddressId + ", receiveTimeType=" + receiveTimeType + ", memo=" + memo
+				+ ", couponId=" + couponId + ", openId=" + openId + ", userId=" + userId + ", payType=" + payType
+				+ ", agentId=" + agentId + "]";
+	}
+	
 }

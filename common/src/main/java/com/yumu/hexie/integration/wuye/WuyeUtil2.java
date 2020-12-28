@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -14,12 +15,14 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
+import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
 import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
+import com.yumu.hexie.integration.wuye.req.GetCellRequest;
 import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
@@ -28,9 +31,12 @@ import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
+import com.yumu.hexie.integration.wuye.req.WuyeParamRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
+import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
+import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -47,9 +53,10 @@ import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 @Component
 public class WuyeUtil2 {
 	
+	@Value("${sysName}")
+	private String sysName;
 	@Autowired
 	private RestUtil restUtil;
-	
 	@Autowired
 	private RequestUtil requestUtil;
 	
@@ -64,6 +71,8 @@ public class WuyeUtil2 {
 	private static final String QRCODE_PAY_SERVICE_URL = "getServiceSDO.do";	//二维码支付服务信息
 	private static final String QRCODE_URL = "getQRCodeSDO.do";	//二维码支付服务信息
 	private static final String SIGN_IN_OUT_URL = "signInSDO.do";	//二维码支付服务信息
+	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"; //合协社区物业缴费的小区级联
+	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do";
 	
 	/**
 	 * 标准版查询账单
@@ -88,7 +97,7 @@ public class WuyeUtil2 {
 		billStdRequest.setEndDate(endDate);
 		
 		TypeReference<CommonResponse<BillListVO>> typeReference = new TypeReference<CommonResponse<BillListVO>>(){};
-		CommonResponse<BillListVO> hexieResponse = restUtil.exchange(requestUrl, billStdRequest, typeReference);
+		CommonResponse<BillListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, billStdRequest, typeReference);
 		BaseResult<BillListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -119,7 +128,7 @@ public class WuyeUtil2 {
 		billDetailRequest.setAppid(user.getAppId());
 		
 		TypeReference<CommonResponse<PaymentInfo>> typeReference = new TypeReference<CommonResponse<PaymentInfo>>(){};
-		CommonResponse<PaymentInfo> hexieResponse = restUtil.exchange(requestUrl, billDetailRequest, typeReference);
+		CommonResponse<PaymentInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, billDetailRequest, typeReference);
 		BaseResult<PaymentInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -147,7 +156,7 @@ public class WuyeUtil2 {
 		quickPayRequest.setTotalCount(totalCount);
 		
 		TypeReference<CommonResponse<BillListVO>> typeReference = new TypeReference<CommonResponse<BillListVO>>(){};
-		CommonResponse<BillListVO> hexieResponse = restUtil.exchange(requestUrl, quickPayRequest, typeReference);
+		CommonResponse<BillListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, quickPayRequest, typeReference);
 		BaseResult<BillListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -165,7 +174,7 @@ public class WuyeUtil2 {
 		
 		User user = prepayRequestDTO.getUser();
 		String appid = user.getAppId();
-		String fromSys = requestUtil.getSysName();
+		String fromSys = sysName;
 		if (!StringUtils.isEmpty(appid)) {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
@@ -178,7 +187,7 @@ public class WuyeUtil2 {
 		prepayRequest.setAppid(user.getAppId());
 		
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
-		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchange(requestUrl, prepayRequest, typeReference);
+		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -199,7 +208,7 @@ public class WuyeUtil2 {
 		
 		DiscountViewRequest discountViewRequest = new DiscountViewRequest(discountViewRequestDTO);
 		TypeReference<CommonResponse<Discounts>> typeReference = new TypeReference<CommonResponse<Discounts>>(){};
-		CommonResponse<Discounts> hexieResponse = restUtil.exchange(requestUrl, discountViewRequest, typeReference);
+		CommonResponse<Discounts> hexieResponse = restUtil.exchangeOnUri(requestUrl, discountViewRequest, typeReference);
 		BaseResult<Discounts> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -220,7 +229,7 @@ public class WuyeUtil2 {
 		QueryOrderRequest queryOrderRequest = new QueryOrderRequest();
 		queryOrderRequest.setOrderNo(orderNo);
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		CommonResponse<String> hexieResponse = restUtil.exchange(requestUrl, queryOrderRequest, typeReference);
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryOrderRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -242,7 +251,7 @@ public class WuyeUtil2 {
 		paySmsCodeRequest.setMobile(bankCard.getPhoneNo());
 		paySmsCodeRequest.setQuickToken(bankCard.getQuickToken());
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		CommonResponse<String> hexieResponse = restUtil.exchange(requestUrl, paySmsCodeRequest, typeReference);
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, paySmsCodeRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -262,7 +271,7 @@ public class WuyeUtil2 {
 		OtherPayRequest otherPayRequest = new OtherPayRequest(otherPayDTO);
 		
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
-		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchange(requestUrl, otherPayRequest, typeReference);
+		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, otherPayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -284,7 +293,7 @@ public class WuyeUtil2 {
 		qrCodePayServiceRequest.setTel(user.getTel());
 		
 		TypeReference<CommonResponse<QrCodePayService>> typeReference = new TypeReference<CommonResponse<QrCodePayService>>(){};
-		CommonResponse<QrCodePayService> hexieResponse = restUtil.exchange(requestUrl, qrCodePayServiceRequest, typeReference);
+		CommonResponse<QrCodePayService> hexieResponse = restUtil.exchangeOnUri(requestUrl, qrCodePayServiceRequest, typeReference);
 		BaseResult<QrCodePayService> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -306,7 +315,7 @@ public class WuyeUtil2 {
 		qrCodeRequest.setQrCodeId(qrCodeId);
 		
 		TypeReference<CommonResponse<byte[]>> typeReference = new TypeReference<CommonResponse<byte[]>>(){};
-		CommonResponse<byte[]> hexieResponse = restUtil.exchange4Resource(requestUrl, qrCodeRequest, typeReference);
+		CommonResponse<byte[]> hexieResponse = restUtil.exchange4ResourceOnUri(requestUrl, qrCodeRequest, typeReference);
 		BaseResult<byte[]> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
@@ -314,7 +323,7 @@ public class WuyeUtil2 {
 	}
 	
 	/**
-	 * 获取二维码
+	 * 签到签退
 	 * @param user
 	 * @return
 	 * @throws Exception
@@ -328,11 +337,61 @@ public class WuyeUtil2 {
 		BeanUtils.copyProperties(signInOutDTO, signInOutRequest);
 		
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
-		CommonResponse<String> hexieResponse = restUtil.exchange(requestUrl, signInOutRequest, typeReference);
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, signInOutRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		
+	}
+	
+	
+	/**
+	 * 根据ID查询指定类型的合协社区物业信息
+	 * @param user
+	 * @param sect_id
+	 * @param build_id
+	 * @param unit_id
+	 * @param data_type
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<CellListVO> getMngHeXieList(GetCellDTO getCellDTO) throws Exception{
+
+		String requestUrl = requestUtil.getRequestUrl(getCellDTO.getUser(), "");
+		requestUrl += MNG_HEXIE_LIST_URL;
+		
+		GetCellRequest getCellRequest = new GetCellRequest();
+		BeanUtils.copyProperties(getCellDTO, getCellRequest);
+		
+		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
+		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, getCellRequest, typeReference);
+		BaseResult<CellListVO> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 查询参数配置
+	 * @param reqUrl
+	 * @param c
+	 * @return
+	 */
+	public BaseResult<HexieConfig> queryServiceCfg(User user, String infoId, String type, String paraName) throws Exception {
+
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += SYNC_SERVICE_CFG_URL;
+		
+		WuyeParamRequest wuyeParamRequest = new WuyeParamRequest();
+		wuyeParamRequest.setInfoId(infoId);
+		wuyeParamRequest.setType(type);
+		wuyeParamRequest.setParaName(paraName);
+		
+		TypeReference<CommonResponse<HexieConfig>> typeReference = new TypeReference<CommonResponse<HexieConfig>>(){};
+		CommonResponse<HexieConfig> hexieResponse = restUtil.exchangeOnUri(requestUrl, wuyeParamRequest, typeReference);
+		BaseResult<HexieConfig> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
 	}
 	
 	

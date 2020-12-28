@@ -18,6 +18,13 @@ public class DiscountViewRequestDTO implements Serializable {
 	private String payFeeType;	//01管理费，02停车费
 	private String regionName;	//定位地区
 	
+	/*2020-07 添加 begin*/
+	private String isQrcode;
+	private String invoiceTitleType;
+	private String invoiceTitle;
+	private String creditCode;
+	/*2020-07 添加 end*/
+	
 	public String getBillId() {
 		return billId;
 	}
@@ -53,6 +60,37 @@ public class DiscountViewRequestDTO implements Serializable {
 	}
 	public void setUser(User user) {
 		this.user = user;
+	}
+	public String getIsQrcode() {
+		return isQrcode;
+	}
+	public void setIsQrcode(String isQrcode) {
+		this.isQrcode = isQrcode;
+	}
+	public String getInvoiceTitleType() {
+		return invoiceTitleType;
+	}
+	public void setInvoiceTitleType(String invoiceTitleType) {
+		this.invoiceTitleType = invoiceTitleType;
+	}
+	public String getInvoiceTitle() {
+		return invoiceTitle;
+	}
+	public void setInvoiceTitle(String invoiceTitle) {
+		this.invoiceTitle = invoiceTitle;
+	}
+	public String getCreditCode() {
+		return creditCode;
+	}
+	public void setCreditCode(String creditCode) {
+		this.creditCode = creditCode;
+	}
+	@Override
+	public String toString() {
+		return "DiscountViewRequestDTO [user=" + user + ", billId=" + billId + ", stmtId=" + stmtId + ", payType="
+				+ payType + ", payFeeType=" + payFeeType + ", regionName=" + regionName + ", isQrcode=" + isQrcode
+				+ ", invoiceTitleType=" + invoiceTitleType + ", invoiceTitle=" + invoiceTitle + ", creditCode="
+				+ creditCode + "]";
 	}
 	
 	

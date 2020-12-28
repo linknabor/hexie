@@ -43,4 +43,14 @@ public class RgroupController extends BaseController{
 		return BaseResult.successResult(customRgroupService.findSalePlan(ruleId));
     }
 	
+	
+	@RequestMapping(value = "/rgroups/v2/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RgroupAreaItem>> getRgroups(@ModelAttribute(Constants.USER)User user,
+				@PathVariable int page) throws Exception {
+		
+		List<RgroupAreaItem> items = distributionService.queryRgroupsV2(user, page);
+        return new BaseResult<List<RgroupAreaItem>>().success(rgroupService.addProcessStatus(items));
+    }
+	
 }

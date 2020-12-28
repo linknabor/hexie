@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -167,7 +169,7 @@ public class HealthServiceImpl implements HealthService {
 	}
 
 	private void saveThread(User user, Thread thread) {
-		User currUser = userRepository.findOne(user.getId());
+		User currUser = userRepository.findById(user.getId());
 		
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
@@ -245,7 +247,8 @@ public class HealthServiceImpl implements HealthService {
 	private Page<Thread> getThread(BaseRequestDTO<Thread> baseRequestDTO) {
 		
 		Thread thread = baseRequestDTO.getData();
-		Pageable pageable = new PageRequest(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size());
+		Sort sort = new Sort(Direction.DESC, "createDateTime");
+		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size(), sort);
 		Page<Thread> page = threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, thread.getThreadCategory(),
 				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), baseRequestDTO.getSectList(), pageable);
 		return page;
