@@ -144,11 +144,11 @@ public class CouponController extends BaseController{
     @RequestMapping(value = "/coupon/v2/seedList", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<CouponView>> getSeedList(@ModelAttribute(Constants.USER)User user) throws Exception {
-
     	List<CouponView> viewList = couponService.getSeedList(user);
         return new BaseResult<List<CouponView>>().success(viewList);
     }
     
+
     @ApiOperation(value = "根据种子领取红包")
     @RequestMapping(value = "/coupon/v2/gain/{seedStr}", method = RequestMethod.GET)
 	@ResponseBody

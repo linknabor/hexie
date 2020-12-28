@@ -1,14 +1,18 @@
 package com.yumu.hexie.web.repair;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.yumu.hexie.integration.common.CommonResponse;
-import com.yumu.hexie.integration.repair.vo.QueryRAreaVO;
-import com.yumu.hexie.integration.repair.vo.SaveRAreaVO;
+import com.yumu.hexie.integration.wuye.resp.BaseResponse;
+import com.yumu.hexie.integration.wuye.resp.BaseResponseDTO;
+import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
+import com.yumu.hexie.model.localservice.repair.RepairArea;
+import com.yumu.hexie.service.exception.IntegrationBizException;
 import com.yumu.hexie.service.repair.RepairAreaService;
 
 @RestController
@@ -24,9 +28,15 @@ public class RepairAreaController {
 	 * @return
 	 */
 	@RequestMapping(value = "/get", method = RequestMethod.POST)
-	public CommonResponse<Object> getServiceArea(@RequestBody QueryRAreaVO queryRAreaVO) {
+	public BaseResponseDTO<List<RepairArea>> getServiceArea(@RequestBody BaseRequestDTO<RepairArea> baseRequestDTO) {
 		
-		return repairAreaService.getRepairArea(queryRAreaVO);
+		try {
+			RepairArea repairArea = baseRequestDTO.getData();
+			List<RepairArea> list = repairAreaService.getRepairArea(repairArea);
+			return BaseResponse.success(baseRequestDTO.getRequestId(), list);
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}
 	}
 	
 	/**
@@ -35,14 +45,34 @@ public class RepairAreaController {
 	 * @return
 	 */
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public CommonResponse<String> saveRepairArea(@RequestBody SaveRAreaVO saveRAreaVO) {
+	public BaseResponseDTO<List<RepairArea>> saveRepairArea(@RequestBody BaseRequestDTO<List<RepairArea>> baseRequestDTO) {
 		
-		repairAreaService.saveRepairArea(saveRAreaVO);
-		CommonResponse<String> commonResponse = new CommonResponse<>();
-		commonResponse.setResult("00");
-		return commonResponse;
+		try {
+			List<RepairArea> list = baseRequestDTO.getData();
+			repairAreaService.saveRepairArea(list, false);
+			return BaseResponse.success(baseRequestDTO.getRequestId());
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}
 		
 	}
 	
+	/**
+	 * 管理端新增维修区域(小区用)
+	 * @param baseRequestDTO
+	 * @return
+	 */
+	@RequestMapping(value = "/sectSave", method = RequestMethod.POST)
+	public BaseResponseDTO<List<RepairArea>> saveSectRepairArea(@RequestBody BaseRequestDTO<List<RepairArea>> baseRequestDTO) {
+		
+		try {
+			List<RepairArea> list = baseRequestDTO.getData();
+			repairAreaService.saveRepairArea(list, true);
+			return BaseResponse.success(baseRequestDTO.getRequestId());
+		} catch (Exception e) {
+			throw new IntegrationBizException(e.getMessage(), e, baseRequestDTO.getRequestId());
+		}
+		
+	}
 	
 }

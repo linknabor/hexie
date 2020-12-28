@@ -34,8 +34,7 @@ public class RedisConfig {
 	@Value(value = "${redis.database}")
 	private int redisDatabase;
 	
-//	private Duration DEFAULT_REDIS_DURATION = Duration.ofSeconds(1800);	//默认过期时间
-	private Duration PERMERNANT_DURATION = Duration.ofMillis(-1l);
+	private Duration DEFAULT_REDIS_DURATION = Duration.ofSeconds(1800);	//默认过期时间
 
 	@Bean
 	public RedisStandaloneConfiguration redisStandaloneConfiguration() {
@@ -104,20 +103,14 @@ public class RedisConfig {
 		
 	}
     
-    /**
-     * cache现在只用来缓存一些常用系统参数和配置，故过期时间都设置为-1，即永不过期。如果需要对单个KEY作过期时间限制，则自己写个MAP，根据KEY的PREFIX作区分
-     * @param lettuceConnectionFactory
-     * @return
-     */
     @Bean
-    public CacheManager cacheManager(@Qualifier(value="lettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory) {
+    public CacheManager getCacheManager(@Qualifier(value="lettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory) {
     	
     	RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(PERMERNANT_DURATION).disableCachingNullValues();
+                .entryTtl(DEFAULT_REDIS_DURATION).disableCachingNullValues();
     	
     	RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager.builder(lettuceConnectionFactory)
     			.cacheDefaults(config).transactionAware();
-    	
     	return builder.build();
     	
     }
