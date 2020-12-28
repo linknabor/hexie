@@ -11,15 +11,12 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -41,8 +38,6 @@ import com.yumu.hexie.web.BaseController;
 @RestController(value = "pageConfigController")
 public class PageConfigController extends BaseController{
 	
-	private static Logger logger = LoggerFactory.getLogger(PageConfigController.class);
-    
     @Inject
     private PageConfigService pageConfigService;
     
@@ -68,25 +63,4 @@ public class PageConfigController extends BaseController{
     	return pageConfigService.getBgImage(user.getAppId());
     }
     
-	/**
-	 * 更新物业缴费页面选项卡的动态配置
-	 * @param user
-	 * @param houseId
-	 * @param area
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/pageConfig", method = RequestMethod.POST)
-	@ResponseBody
-	public String updatePageConfig(@RequestParam(required = false) String sysCode) throws Exception {
-		
-		if (!"hexie".equals(sysCode)) {
-			return "";
-		}
-		logger.info("will update pageConfig ...");
-		pageConfigService.updatePageConfig();
-		return Constants.PAGE_SUCCESS;
-
-	}
-   
 }
