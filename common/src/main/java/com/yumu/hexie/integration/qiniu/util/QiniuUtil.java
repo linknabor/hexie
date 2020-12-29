@@ -32,7 +32,7 @@ public class QiniuUtil {
 	private RSClient client;
 	private PutPolicy putPolicy;
 	private String upToken;
-	private long tokenExpires = 0l;
+	private long expire;
 	
 	public static final String BUCKET_NAME = "e-shequ";
 	private static final String DEFAULT_WIDTH = "290";	//缩略图的默认长度，iphone4以及5s 一屏为320长度，此处取280
@@ -71,11 +71,11 @@ public class QiniuUtil {
 	 * @return
 	 */
 	public String getUpToken(){
-		if (tokenExpires <= 300l) {	//每次还剩300秒过期的时候，重新初始化token
+		if ((expire - System.currentTimeMillis()/1000) <= 300l) {	//每次还剩300秒过期的时候，重新初始化token
 			synchronized (this) {
 				try {
 					upToken = putPolicy.token(mac);
-					tokenExpires = 3600l;	//每次加1个小时
+					expire = System.currentTimeMillis() / 1000 + 3600l;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
