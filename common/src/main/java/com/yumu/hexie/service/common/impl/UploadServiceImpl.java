@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -73,11 +72,9 @@ public class UploadServiceImpl implements UploadService {
      * @see com.yumu.hexie.service.common.UploadService#updateRepairImg(com.yumu.hexie.model.localservice.repair.RepairOrder)
      */
     @Override
-    @Async
     public void updateRepairImg(RepairOrder order) {
     	
     	log.info("start to move image, isUploaded : " + order.isImageUploaded());
-    	
     	
         if (order.isImageUploaded()) {
             return;

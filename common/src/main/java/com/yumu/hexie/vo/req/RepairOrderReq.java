@@ -65,5 +65,11 @@ public class RepairOrderReq implements Serializable {
     public void setRequireDateStr(String requireDateStr) {
         this.requireDateStr = requireDateStr;
     }
+	@Override
+	public String toString() {
+		return "RepairOrderReq [projectId=" + projectId + ", addressId=" + addressId + ", assignType=" + assignType
+				+ ", memo=" + memo + ", imgUrls=" + imgUrls + ", requireDateStr=" + requireDateStr + ", requireDate="
+				+ requireDate + "]";
+	}
     
 }
