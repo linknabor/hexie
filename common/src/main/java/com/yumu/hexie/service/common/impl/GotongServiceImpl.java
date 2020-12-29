@@ -70,7 +70,15 @@ public class GotongServiceImpl implements GotongService {
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
         ServiceOperator op = serviceOperatorRepository.findById(opId).get();
         User opUser = userRepository.findById(op.getUserId());
+        if (opUser == null) {
+        	LOG.error("operator user is null, will return.");
+			return;
+		}
         User orderUser = userRepository.findById(order.getUserId());
+        if (orderUser == null) {
+        	LOG.error("order user is null, will return.");
+			return;
+		}
         if (StringUtils.isEmpty(opUser.getAppId()) ) {
 			return;
 		}

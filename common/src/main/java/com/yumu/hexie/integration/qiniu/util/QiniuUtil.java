@@ -31,6 +31,7 @@ public class QiniuUtil {
 	private Mac mac;
 	private RSClient client;
 	private PutPolicy putPolicy;
+	private String upToken;
 	private long tokenExpires = 0l;
 	
 	public static final String BUCKET_NAME = "e-shequ";
@@ -70,19 +71,17 @@ public class QiniuUtil {
 	 * @return
 	 */
 	public String getUpToken(){
-		String uptoken = "";
 		if (tokenExpires <= 300l) {	//每次还剩300秒过期的时候，重新初始化token
-			logger.info("token will expire, will update ! ");
 			synchronized (this) {
 				try {
-					uptoken = putPolicy.token(mac);
+					upToken = putPolicy.token(mac);
 					tokenExpires = 3600l;	//每次加1个小时
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
 			}
 		}
-		return uptoken;
+		return upToken;
 	}
 	
 
