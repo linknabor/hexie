@@ -171,11 +171,12 @@ public class UploadServiceImpl implements UploadService {
         }
         PutExtra extra = new PutExtra();
         String uptoken = qiniuUtil.getUpToken();
+        log.info("file:" + file.getName() + ", uptoken : " + uptoken);
 
         if (file.exists() && file.getTotalSpace() > 0) {
             PutRet putRet = IoApi.putFile(uptoken, DateUtil.dtFormat(new Date(),"yyyyMMddHHmmssSSS")+(int)(Math.random()*1000), file, extra);
-            log.error("上传图片：StatusCode" + putRet.getStatusCode()+"[key] "+putRet.getKey()
-                +"[hash] "+putRet.getHash());
+            log.error("上传图片：StatusCode" + putRet.getStatusCode()+", [key] "+putRet.getKey()
+                +", [hash] "+putRet.getHash() + ", [exception]" + putRet.getException() + ", [response] + " + putRet.getResponse());
             if(putRet.getStatusCode() == 200 && !StringUtils.isEmpty(putRet.getKey())) {
                 return domain + putRet.getKey();
             }

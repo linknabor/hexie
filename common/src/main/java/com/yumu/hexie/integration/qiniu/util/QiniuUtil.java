@@ -72,6 +72,7 @@ public class QiniuUtil {
 	public String getUpToken(){
 		String uptoken = "";
 		if (tokenExpires <= 300l) {	//每次还剩300秒过期的时候，重新初始化token
+			logger.info("token will expire, will update ! ");
 			synchronized (this) {
 				try {
 					uptoken = putPolicy.token(mac);
