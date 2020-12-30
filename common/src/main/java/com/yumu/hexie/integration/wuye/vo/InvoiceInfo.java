@@ -9,6 +9,8 @@ public class InvoiceInfo {
 	private String showcom;
 	private String csp_invoice_title;
 	private String pdf;
+	private String person_invoice_title;
+	
 	
 	public String getMobile() {
 		return mobile;
@@ -51,5 +53,13 @@ public class InvoiceInfo {
 	}
 	public void setPdf(String pdf) {
 		this.pdf = pdf;
+	}
+
+	public String getPerson_invoice_title() {
+		return person_invoice_title;
+	}
+
+	public void setPerson_invoice_title(String person_invoice_title) {
+		this.person_invoice_title = person_invoice_title;
 	}
 }
