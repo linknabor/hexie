@@ -11,6 +11,7 @@ public class InvoiceInfo {
 	private String pdf;
 	private String person_invoice_title;
 	
+	
 	public String getMobile() {
 		return mobile;
 	}
