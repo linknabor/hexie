@@ -6,9 +6,9 @@ import com.yumu.hexie.model.user.User;
 
 public interface ParamService {
 
-	void cacheWuyeParam(User user, String infoId, String type);
+	Map<String, String> getWuyeParam(User user);
 	
-	Map<Object, Object> getWuyeParamByUser(User user);
+	Map<String, String> getWuyeParamAsync(User user, String type);
 
 	void updateSysParam();
 }

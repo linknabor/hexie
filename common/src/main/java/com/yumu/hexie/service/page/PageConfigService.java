@@ -1,11 +1,7 @@
 package com.yumu.hexie.service.page;
 
-import java.io.IOException;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.Banner;
 import com.yumu.hexie.model.view.BgImage;
@@ -18,21 +14,21 @@ public interface PageConfigService {
 	
 	List<Banner> queryBannerType(User user, int bannerType);
 
-	String findByTempKey(String key, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
+	String findByTempKey(String key, String appId);
 
-	List<BottomIcon> getBottomIcon(String appId) throws JsonParseException, JsonMappingException, IOException;
+	List<BottomIcon> getBottomIcon(String appId);
 
-	QrCode getQrCode(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
+	QrCode getQrCode(String appId);
 	
-	List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
+	List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId);
 
-	List<BgImage> getBgImage(String appId) throws JsonParseException, JsonMappingException, IOException;
+	List<BgImage> getBgImage(String appId);
 	
-	List<WuyePayTabs> getWuyePayTabs(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
+	List<WuyePayTabs> getWuyePayTabs(String appId);
+	
+	CsHotline getCsHotline(String appId);
 	
 	void updatePageConfig();
-	
-	List<BottomIcon> filterBottomIcon(User user, List<BottomIcon> iconList);
 
-	CsHotline getCsHotline(String appId) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException;
+
 }

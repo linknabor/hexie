@@ -40,6 +40,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
@@ -377,14 +378,18 @@ public class WuyeUtil2 {
 	 * @param c
 	 * @return
 	 */
-	public BaseResult<HexieConfig> queryServiceCfg(User user, String infoId, String type, String paraName) throws Exception {
+	public BaseResult<HexieConfig> queryServiceCfg(User user, String type, String paraName) throws Exception {
 
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += SYNC_SERVICE_CFG_URL;
 		
 		WuyeParamRequest wuyeParamRequest = new WuyeParamRequest();
-		wuyeParamRequest.setInfoId(infoId);
-		wuyeParamRequest.setType(type);
+		if (ModelConstant.PARA_TYPE_CSP.equals(type)) {
+			wuyeParamRequest.setType(type);
+		} else {
+			wuyeParamRequest.setType(type);	//TODO 默认给个值，以后有小区参数再改
+		}
+		wuyeParamRequest.setInfoId(user.getCspId());
 		wuyeParamRequest.setParaName(paraName);
 		
 		TypeReference<CommonResponse<HexieConfig>> typeReference = new TypeReference<CommonResponse<HexieConfig>>(){};
