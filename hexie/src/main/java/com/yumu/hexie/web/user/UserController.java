@@ -123,7 +123,7 @@ public class UserController extends BaseController{
 			    endTime = System.currentTimeMillis();
 			    log.info("userInfo1，耗时：" + ((endTime-beginTime)));
 
-			    Map<Object, Object> paramMap = paramService.getWuyeParamByUser(user);
+			    Map<String, String> paramMap = paramService.getWuyeParam(user);
 			    userInfo.setCfgParam(paramMap);
 			    
 			    endTime = System.currentTimeMillis();

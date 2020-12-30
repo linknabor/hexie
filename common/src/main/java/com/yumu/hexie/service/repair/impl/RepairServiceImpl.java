@@ -116,13 +116,16 @@ public class RepairServiceImpl implements RepairService {
     }
 
     /** 
+     * 维修下单
      * @param req
      * @param user
      * @return
-     * @see com.yumu.hexie.service.repair.RepairService#repair(com.yumu.hexie.vo.req.RepairOrderReq, com.yumu.hexie.model.user.User)
      */
     @Override
+    @Transactional
     public Long repair(RepairOrderReq req, User user) {
+    	
+    	log.info("RepairOrderReq : " + req);
     	
     	User currUser = userRepository.findById(user.getId());
         RepairProject project = repairProjectRepository.findById(req.getProjectId()).get();

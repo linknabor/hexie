@@ -17,10 +17,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.LogisticsService;
 import com.yumu.hexie.service.eshop.PartnerService;
-import com.yumu.hexie.service.msgtemplate.MsgTemplateService;
+import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.ParamService;
@@ -42,7 +43,7 @@ public class ParamController extends BaseController {
 	@Autowired
 	private PageConfigService pageConfigService;
 	@Autowired
-	private MsgTemplateService msgTemplateService;
+	private WechatMsgService msgTemplateService;
 	@Autowired
 	private LocationService locationService;
 	@Autowired
@@ -59,19 +60,15 @@ public class ParamController extends BaseController {
 		if (StringUtils.isEmpty(infoId)) {
 			return;
 		}
-		Runnable runnable = ()->{
-			try {
-				//先休息1分钟，因为平台重新加载参数需要时间
-				Thread.sleep(60*1000);
-			} catch (InterruptedException e) {
-				logger.error(e.getMessage(), e);
-			}
-			User user = new User();
-			user.setOriSys(oriSys);
-			paramService.cacheWuyeParam(user, infoId, type);
-		};
-		Thread t = new Thread(runnable);
-		t.start();
+		
+		if (!ModelConstant.PARA_TYPE_CSP.equals(type)) {
+			return;
+		}
+		User user = new User();
+		user.setOriSys(oriSys);
+		user.setCspId(infoId);
+		
+		paramService.getWuyeParamAsync(user, type);
 		response.getWriter().print("ok");
 	}
 	
@@ -107,4 +104,4 @@ public class ParamController extends BaseController {
 		return "success";
 	}
 	
-}
+	}
