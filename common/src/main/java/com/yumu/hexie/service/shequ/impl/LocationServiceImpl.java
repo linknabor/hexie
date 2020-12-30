@@ -63,6 +63,9 @@ public class LocationServiceImpl implements LocationService {
 			}
 			regionShowList.add(selection);
 		}
+		
+		logger.info("location cache init finished !, regionUrlMap : " + regionUrlMap);
+		logger.info("codeUrlMap : " + codeUrlMap);
 	}
 	
 	@Override
