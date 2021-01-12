@@ -713,6 +713,80 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 		}
 		
 	}
+	
+	/**
+	 * 异步发送到账模板消息(给房屋绑定者推送)
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void sendWuyeNotification4HouseBinderAysc() {
+		
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_HOUSE_BINDER_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				AccountNotification queue = objectMapper.readValue(json, new TypeReference<AccountNotification>(){});
+				
+				logger.info("start to consume wuyeNotificatione4HouseBinde queue : " + queue);
+				
+				boolean isSuccess = false;
+				
+				List<Map<String, String>> wuyeIdList = queue.getWuyeIds();
+				if (wuyeIdList == null || wuyeIdList.isEmpty()) {
+					continue;
+				}
+				List<Map<String, String>> resendList = new ArrayList<>();
+				for (Map<String, String> wuyeIdMap : wuyeIdList) {
+					
+					User user = null;
+					String wuyeId = wuyeIdMap.get("wuyeid");
+					if (StringUtils.isEmpty(wuyeId)) {
+						logger.warn("wuyeId is empty, will skip. ");
+						continue;
+					}
+					List<User> userList = userRepository.findByWuyeId(wuyeId);
+					if (userList!=null && !userList.isEmpty()) {
+						user = userList.get(0);
+					}else {
+						logger.warn("can not find user, wuyeId : " + wuyeId);
+					}
+					if (user!=null) {
+						try {
+							queue.setUser(user);
+							gotongService.sendPayNotification4HouseBinder(queue);
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);	//发送失败的，需要重发
+							resendList.add(wuyeIdMap);
+							
+						}
+					}
+					
+				}
+				if (resendList.isEmpty()) {
+					isSuccess = true;
+				}
+				
+				if (!isSuccess) {
+					queue.setOpenids(resendList);
+					String value = objectMapper.writeValueAsString(queue);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_HOUSE_BINDER_QUEUE, value);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+	
+		
+	}
 
 
 }

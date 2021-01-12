@@ -68,8 +68,12 @@ public class PayNotification implements Serializable {
 		private String payMethod;	//支付方式
 		@JsonProperty("fee_name")
 		private String feeName;	//费项名称
+		@JsonProperty("mch_name")
+		private String mchName;	//收费商户名称
 		private String remark;	//备注
 		private List<Map<String, String>> openids;	//本次支付需要通知的用户id列表
+		private List<Map<String, String>> wuyeIds;	//绑定缴费房屋人的物业ID
+		
 		public User getUser() {
 			return user;
 		}
@@ -118,13 +122,24 @@ public class PayNotification implements Serializable {
 		public void setFeePrice(BigDecimal feePrice) {
 			this.feePrice = feePrice;
 		}
-		
+		public String getMchName() {
+			return mchName;
+		}
+		public void setMchName(String mchName) {
+			this.mchName = mchName;
+		}
+		public List<Map<String, String>> getWuyeIds() {
+			return wuyeIds;
+		}
+		public void setWuyeIds(List<Map<String, String>> wuyeIds) {
+			this.wuyeIds = wuyeIds;
+		}
 		@Override
 		public String toString() {
-			return "AccountNotify [user=" + user + ", tranDate=" + tranDate + ", feePrice=" + feePrice + ", payMethod="
-					+ payMethod + ", feeName=" + feeName + ", remark=" + remark + ", openids=" + openids + "]";
+			return "AccountNotification [user=" + user + ", orderId=" + orderId + ", tranDate=" + tranDate
+					+ ", feePrice=" + feePrice + ", payMethod=" + payMethod + ", feeName=" + feeName + ", mchName="
+					+ mchName + ", remark=" + remark + ", openids=" + openids + ", wuyeIds=" + wuyeIds + "]";
 		}
-			
 		
 	}
 	
