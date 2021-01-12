@@ -379,7 +379,8 @@ public class ModelConstant {
 	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
 	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
 	
-	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";	//物业支付到账通知
+	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";	//物业支付到账通知（给物业工作人员推送）
+	public static final String KEY_NOTIFY_HOUSE_BINDER_QUEUE = "queue:notify:houseBinder";	//物业支付到账通知(给绑定房屋的人推送)
 	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";	//服务消息推送
 	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";	//服务人员更新
 	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新

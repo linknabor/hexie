@@ -20,4 +20,6 @@ public interface NotifyQueueTask {
 
 	void consumeWuyeCouponAsync();
 
+	void sendWuyeNotification4HouseBinderAysc();
+
 }
