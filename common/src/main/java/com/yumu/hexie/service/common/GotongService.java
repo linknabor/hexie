@@ -52,4 +52,6 @@ public interface GotongService {
 
 	void sendPostingReplyMsg(Thread thread);
 
+	void sendPayNotification4HouseBinder(AccountNotification accountNotify);
+
 }

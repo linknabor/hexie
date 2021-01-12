@@ -25,4 +25,7 @@ public interface NotifyService {
 
 	void notifyWuyeCouponConsumeAsync(String orderId, String couponId);
 
+	void sendPayNotification4BinderAsync(AccountNotification accountNotification);
+
+
 }

@@ -72,12 +72,15 @@ public class NotifyServiceImpl implements NotifyService {
 		notifyWuyeCouponConsumeAsync(payNotification.getOrderId(), payNotification.getCouponId());
 		
 		User user = null;
+		if (!StringUtils.isEmpty(payNotification.getWuyeId())) {
 		List<User> userList = userRepository.findByWuyeId(payNotification.getWuyeId());
 		if (userList == null || userList.isEmpty()) {
 			log.info("can not find user, wuyeId : " + payNotification.getWuyeId() + ", tradeWaterId : " + payNotification.getOrderId());
 		}else {
 			user = userList.get(0);
 		}
+		}
+		
 		if (user != null) {
 			//2.添加芝麻积分
 			if (systemConfigService.isCardServiceAvailable(user.getAppId())) {
@@ -106,6 +109,7 @@ public class NotifyServiceImpl implements NotifyService {
 			accountNotify.setOrderId(payNotification.getOrderId());
 			if (accountNotify.getFeePrice() != null) {
 				sendPayNotificationAsync(accountNotify);
+				sendPayNotification4BinderAsync(accountNotify);
 			}
 			
 		}
@@ -124,7 +128,7 @@ public class NotifyServiceImpl implements NotifyService {
 	}
 	
 	/**
-	 * 到账消息推送
+	 * 到账消息推送(给物业配置的工作人推送)
 	 */
 	@Override
 	public void sendPayNotificationAsync(AccountNotification accountNotification) {
@@ -356,4 +360,38 @@ public class NotifyServiceImpl implements NotifyService {
 		
 	}
 	
+	/**
+	 * 到账消息推送(给房屋绑定者推)
+	 */
+	@Override
+	public void sendPayNotification4BinderAsync(AccountNotification accountNotification) {
+		
+		if (accountNotification == null) {
+			log.info("accountNotification is null, will return ! ");
+			return;
+}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(accountNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_HOUSE_BINDER_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+
 }

@@ -328,4 +328,15 @@ public class GotongServiceImpl implements GotongService {
         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
         CustomService.sendCustomerMessage(msg, accessToken);
     }
+    
+    /**
+	 * 交易到账通知(发送给房屋绑定者)
+	 */
+	@Override
+	public void sendPayNotification4HouseBinder(AccountNotification accountNotify) {
+		
+		String accessToken = systemConfigService.queryWXAToken(accountNotify.getUser().getAppId());
+		templateMsgService.sendPayNotification4HouseBinder(accountNotify, accessToken);
+		
+	}
 }
