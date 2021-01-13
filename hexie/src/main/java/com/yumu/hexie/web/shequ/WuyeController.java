@@ -42,6 +42,7 @@ import com.yumu.hexie.integration.wuye.resp.CellVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
+import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -776,6 +777,26 @@ public class WuyeController extends BaseController {
 		wuyeService.signInOut(dto);
 		return BaseResult.successResult("succeeded");
 
+	}
+	
+	/**
+	 * 获取电子凭证
+	 * @param user
+	 * @param trade_water_id
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/eReceipt/{trade_water_id}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<EReceipt> eReceipt(@ModelAttribute(Constants.USER) User user, @PathVariable String trade_water_id) throws Exception {
+		
+		EReceipt eReceipt = wuyeService.getEReceipt(user, trade_water_id);
+		if (eReceipt != null) {
+			return BaseResult.successResult(eReceipt);
+		} else {
+			return BaseResult.successResult(null);
+		}
 	}
 
 
