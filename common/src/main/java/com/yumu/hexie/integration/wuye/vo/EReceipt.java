@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yumu.hexie.common.util.desensitize.annotation.Sensitive;
+import com.yumu.hexie.common.util.desensitize.enums.SensitiveType;
 
 public class EReceipt implements Serializable {
 
@@ -24,6 +26,7 @@ public class EReceipt implements Serializable {
 		
 		private String pay_mng_cell_id;
 		private String pay_cell_addr;
+		@Sensitive(SensitiveType.CHINESE_NAME)
 		private String pay_cust_name;
 		private String sect_name;
 		private String tran_amt;
