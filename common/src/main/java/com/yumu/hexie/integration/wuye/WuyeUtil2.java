@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodePayServiceRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
+import com.yumu.hexie.integration.wuye.req.QueryEReceiptRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
@@ -36,6 +37,7 @@ import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
+import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
@@ -73,7 +75,8 @@ public class WuyeUtil2 {
 	private static final String QRCODE_URL = "getQRCodeSDO.do";	//二维码支付服务信息
 	private static final String SIGN_IN_OUT_URL = "signInSDO.do";	//二维码支付服务信息
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"; //合协社区物业缴费的小区级联
-	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do";
+	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do";	//物业参数
+	private static final String E_RECEIPT_URL = "getEReceiptSDO.do";	//电子凭证
 	
 	/**
 	 * 标准版查询账单
@@ -399,6 +402,28 @@ public class WuyeUtil2 {
 		return baseResult;
 	}
 	
-	
+	/**
+	 * 获取电子凭证
+	 * @param user
+	 * @param stmtId
+	 * @param anotherbillIds
+	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public BaseResult<EReceipt> getEReceipt(User user, String tradeWaterId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += E_RECEIPT_URL;
+		QueryEReceiptRequest request = new QueryEReceiptRequest();
+		request.setOrderNo(tradeWaterId);
+		
+		TypeReference<CommonResponse<EReceipt>> typeReference = new TypeReference<CommonResponse<EReceipt>>(){};
+		CommonResponse<EReceipt> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
+		BaseResult<EReceipt> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
 	
 }

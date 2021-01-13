@@ -13,6 +13,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
+import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -306,5 +307,14 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	void signInOut(SignInOutDTO signInOutDTO) throws Exception;
+
+	/**
+	 * 获取电子凭证
+	 * @param user
+	 * @param tradeWaterId
+	 * @return
+	 * @throws Exception
+	 */
+	EReceipt getEReceipt(User user, String tradeWaterId) throws Exception;
 
 }
