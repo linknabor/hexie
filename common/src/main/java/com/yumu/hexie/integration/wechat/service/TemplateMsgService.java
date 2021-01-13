@@ -328,7 +328,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public void sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
+    public boolean sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
     	
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
@@ -343,7 +343,7 @@ public class TemplateMsgService {
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_MESSAGE) + messageId;
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
-    	sendMsg(msg, accessToken);
+    	return sendMsg(msg, accessToken);
 
 	}
    
@@ -535,7 +535,7 @@ public class TemplateMsgService {
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_PAY_HOUSE_BIND_NOTIFY, accountNotification.getUser().getAppId()));
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_PAY_HOUSE_BINDER_NOTIFY);
-    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()));
+    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()) + accountNotification.getOrderId());
     	msg.setTouser(accountNotification.getUser().getOpenid());
     	sendMsg(msg, accessToken);
 

@@ -229,10 +229,10 @@ public class GotongServiceImpl implements GotongService {
      * 平台公告通知群发
      */
 	@Override
-	public void sendGroupMessage(String openId, String appId, long msgId, String content) {
+	public boolean sendGroupMessage(String openId, String appId, long msgId, String content) {
 		
 		String accessToken = systemConfigService.queryWXAToken(appId);
-		templateMsgService.sendHexieMessage(openId, accessToken, appId, msgId, content);
+		return templateMsgService.sendHexieMessage(openId, accessToken, appId, msgId, content);
 	}
 	
 	/**
