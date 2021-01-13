@@ -47,22 +47,19 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		boolean success = false;
 		boolean successFlag = false;
 		String[] wuyeid = exr.getWuyeId().split(",");
-		if("0".equals(exr.getType())) {	//公众号只发模板消息，短信的在servplat发
-			for (int i = 0; i < wuyeid.length; i++) {
-				List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
-				User user = null;
-				if (userList == null || userList.isEmpty()) {
-					user = new User();
-				}else {
-					user = userList.get(0);
-				}
-				logger.info("will sent wuye message to user : " + user);
-				success = saveHexieMessage(exr, user);
-				if (success) {
-					successFlag = true;	//当前这户，有一个绑定者成功就算成功
-				}
+		for (int i = 0; i < wuyeid.length; i++) {
+			List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
+			User user = null;
+			if (userList == null || userList.isEmpty()) {
+				user = new User();
+			}else {
+				user = userList.get(0);
 			}
-			
+			logger.info("will sent wuye message to user : " + user);
+			success = saveHexieMessage(exr, user);
+			if (success) {
+				successFlag = true;	//当前这户，有一个绑定者成功就算成功
+			}
 		}
 		return successFlag;
 
