@@ -11,6 +11,8 @@ public class QueryEReceiptRequest extends WuyeRequest {
 	
 	@JsonProperty("trade_water_id")
 	private String orderNo;
+	@JsonProperty("sys_source")
+	private String sysSource;
 
 	public String getOrderNo() {
 		return orderNo;
@@ -20,11 +22,19 @@ public class QueryEReceiptRequest extends WuyeRequest {
 		this.orderNo = orderNo;
 	}
 
+	public String getSysSource() {
+		return sysSource;
+	}
+
+	public void setSysSource(String sysSource) {
+		this.sysSource = sysSource;
+	}
+
 	@Override
 	public String toString() {
-		return "PayResultRequest [orderNo=" + orderNo + "]";
+		return "QueryEReceiptRequest [orderNo=" + orderNo + ", sysSource=" + sysSource + "]";
 	}
-	
+
 	
 
 }

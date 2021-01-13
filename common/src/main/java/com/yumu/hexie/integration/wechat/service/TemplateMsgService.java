@@ -535,7 +535,9 @@ public class TemplateMsgService {
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_PAY_HOUSE_BIND_NOTIFY, accountNotification.getUser().getAppId()));
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_PAY_HOUSE_BINDER_NOTIFY);
-    	msg.setUrl(AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId()) + accountNotification.getOrderId());
+    	url = AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId());
+    	url = url.replaceAll("TRADE_WATER_ID", accountNotification.getOrderId()).replaceAll("SYS_SOURCE", accountNotification.getSysSource());
+    	msg.setUrl(url);
     	msg.setTouser(accountNotification.getUser().getOpenid());
     	sendMsg(msg, accessToken);
 
