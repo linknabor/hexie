@@ -80,6 +80,8 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		hexieMessage.setUserId(user.getId());
 		hexieMessage.setDate_time(df.format(new Date()));
 		hexieMessage.setWuyeId(user.getWuyeId());
+		hexieMessageRepository.save(hexieMessage);
+		
 		boolean success = true;
 		if (!StringUtils.isEmpty(user.getWuyeId())) {
 			success = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
@@ -87,7 +89,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 			success = false;
 		}
 		hexieMessage.setSuccess(success);
-		hexieMessage = hexieMessageRepository.save(hexieMessage);
+		hexieMessageRepository.save(hexieMessage);
 		return success;
 	}
 	
