@@ -315,6 +315,6 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception
 	 */
-	EReceipt getEReceipt(User user, String tradeWaterId) throws Exception;
+	EReceipt getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception;
 
 }

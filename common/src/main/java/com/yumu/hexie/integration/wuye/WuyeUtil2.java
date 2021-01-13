@@ -412,13 +412,13 @@ public class WuyeUtil2 {
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
 	 */
-	public BaseResult<EReceipt> getEReceipt(User user, String tradeWaterId) throws Exception {
+	public BaseResult<EReceipt> getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception {
 		
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += E_RECEIPT_URL;
 		QueryEReceiptRequest request = new QueryEReceiptRequest();
 		request.setOrderNo(tradeWaterId);
-		
+		request.setSysSource(sysSource);
 		TypeReference<CommonResponse<EReceipt>> typeReference = new TypeReference<CommonResponse<EReceipt>>(){};
 		CommonResponse<EReceipt> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
 		BaseResult<EReceipt> baseResult = new BaseResult<>();

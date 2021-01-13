@@ -588,9 +588,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public EReceipt getEReceipt(User user, String tradeWaterId) throws Exception {
+	public EReceipt getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception {
 		
-		return wuyeUtil2.getEReceipt(user, tradeWaterId).getData();
+		return wuyeUtil2.getEReceipt(user, tradeWaterId, sysSource).getData();
 	}
 
 	

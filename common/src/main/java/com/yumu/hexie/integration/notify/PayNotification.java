@@ -71,6 +71,8 @@ public class PayNotification implements Serializable {
 		@JsonProperty("mch_name")
 		private String mchName;	//收费商户名称
 		private String remark;	//备注
+		@JsonProperty("sys_source")
+		private String sysSource;	//源系统
 		private List<Map<String, String>> openids;	//本次支付需要通知的用户id列表
 		private List<Map<String, String>> wuyeIds;	//绑定缴费房屋人的物业ID
 		
@@ -134,12 +136,20 @@ public class PayNotification implements Serializable {
 		public void setWuyeIds(List<Map<String, String>> wuyeIds) {
 			this.wuyeIds = wuyeIds;
 		}
+		public String getSysSource() {
+			return sysSource;
+		}
+		public void setSysSource(String sysSource) {
+			this.sysSource = sysSource;
+		}
 		@Override
 		public String toString() {
 			return "AccountNotification [user=" + user + ", orderId=" + orderId + ", tranDate=" + tranDate
 					+ ", feePrice=" + feePrice + ", payMethod=" + payMethod + ", feeName=" + feeName + ", mchName="
-					+ mchName + ", remark=" + remark + ", openids=" + openids + ", wuyeIds=" + wuyeIds + "]";
+					+ mchName + ", remark=" + remark + ", sysSource=" + sysSource + ", openids=" + openids
+					+ ", wuyeIds=" + wuyeIds + "]";
 		}
+			
 		
 	}
 	

@@ -787,11 +787,12 @@ public class WuyeController extends BaseController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/eReceipt/{trade_water_id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/eReceipt/{trade_water_id}/{sys_source}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<EReceipt> eReceipt(@ModelAttribute(Constants.USER) User user, @PathVariable String trade_water_id) throws Exception {
+	public BaseResult<EReceipt> eReceipt(@ModelAttribute(Constants.USER) User user, 
+			@PathVariable String trade_water_id, @PathVariable String sys_source) throws Exception {
 		
-		EReceipt eReceipt = wuyeService.getEReceipt(user, trade_water_id);
+		EReceipt eReceipt = wuyeService.getEReceipt(user, trade_water_id, sys_source);
 		if (eReceipt != null) {
 			return BaseResult.successResult(eReceipt);
 		} else {
