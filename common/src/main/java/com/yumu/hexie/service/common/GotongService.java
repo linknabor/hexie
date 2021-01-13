@@ -36,7 +36,7 @@ public interface GotongService {
 
 	void sendRegiserMsg(User user);
 
-	void sendGroupMessage(String openId, String appId, long msgId, String content);
+	boolean sendGroupMessage(String openId, String appId, long msgId, String content);
 
 	void sendPayNotification(AccountNotification accountNotification);
 	
