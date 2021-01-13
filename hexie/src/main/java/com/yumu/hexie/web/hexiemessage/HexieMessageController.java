@@ -31,9 +31,9 @@ public class HexieMessageController extends BaseController{
 	 * @return
 	 */
 	@RequestMapping(value = "/hexiemessage/send", method = RequestMethod.POST)
-	public String pullWechat(@RequestBody HexieMessage expr) {
-		log.info("sendMessage:--wuyeId:"+expr.getWuyeId()+"---type:"+expr.getType());	//TODO expr中的wuyeId如果拼接过能，可能超长。
-		boolean success = messageService.sendMessage(expr);
+	public String pullWechat(@RequestBody HexieMessage hexieMessage) {
+		log.info("sendMessage:--hexieMessage:"+hexieMessage);	//TODO expr中的wuyeId如果拼接过能，可能超长。
+		boolean success = messageService.sendMessage(hexieMessage);
 		return Boolean.toString(success);
 	}
 	
