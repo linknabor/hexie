@@ -6,9 +6,12 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
@@ -19,6 +22,8 @@ import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
+	
+	private static Logger logger = LoggerFactory.getLogger(HexieMessageServiceImpl.class);
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -51,6 +56,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 				}else {
 					user = userList.get(0);
 				}
+				logger.info("will sent wuye message to user : " + user);
 				success = saveHexieMessage(exr, user);
 				if (success) {
 					successFlag = true;	//当前这户，有一个绑定者成功就算成功
@@ -70,6 +76,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	@Override
 	public boolean saveHexieMessage(HexieMessage exr, User user) {
 		
+		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 		HexieMessage hexieMessage = new HexieMessage();
 		BeanUtils.copyProperties(exr, hexieMessage);
@@ -77,7 +84,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		hexieMessage.setDate_time(df.format(new Date()));
 		hexieMessage.setWuyeId(user.getWuyeId());
 		boolean success = true;
-		if (!com.yumu.hexie.common.util.StringUtil.isEmpty(user.getWuyeId())) {
+		if (!StringUtils.isEmpty(user.getWuyeId())) {
 			success = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
 		}else {
 			success = false;
