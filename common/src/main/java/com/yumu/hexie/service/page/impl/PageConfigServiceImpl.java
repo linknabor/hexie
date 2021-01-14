@@ -70,7 +70,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_PAGECONFIG, key = "#key+'_'+#appId")
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_PAGECONFIG, key = "#key+'_'+#appId", unless = "#result == null")
 	public String findByTempKey(String key, String appId) {
 		
 		PageConfigView pageConfigView = pageConfigViewRepository.findByTempKeyAndAppId(key, appId);
@@ -86,7 +86,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @return
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_BOTTOM_ICON, key = "#appId")
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_BOTTOM_ICON, key = "#appId", unless = "#result == null")
 	public List<BottomIcon> getBottomIcon(String appId) {
 		Sort sort = new Sort(Direction.ASC, "sort");
 		return bottomIconRepository.findByAppId(appId, sort);
@@ -98,7 +98,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_BGIMAGE, key = "#appId")
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_BGIMAGE, key = "#appId", unless = "#result == null")
 	public List<BgImage> getBgImage(String appId) {
 		Sort sort = new Sort(Direction.ASC, "type");
 		return bgImageRepository.findByAppId(appId, sort);
@@ -109,7 +109,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_QRCODE, key = "#appId")
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_QRCODE, key = "#appId", unless = "#result == null")
 	public QrCode getQrCode(String appId) {
 		return qrCodeRepository.findByFromSys(appId);
 	}
@@ -120,7 +120,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_BANNER, key = "#bannerType+'_'+#appId")
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_BANNER, key = "#bannerType+'_'+#appId", unless = "#result == null")
 	public List<Banner> queryByBannerTypeAndAppId(int bannerType, String appId) {
 		Sort sort = new Sort(Direction.ASC, "sortNo");
 		return bannerRepository.findByBannerTypeAndStatusAndRegionTypeAndAppId(bannerType, ModelConstant.BANNER_STATUS_VALID, 
@@ -133,7 +133,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_WUYEPAY_TABS, key = "#appId")
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_WUYEPAY_TABS, key = "#appId", unless = "#result == null")
 	public List<WuyePayTabs> getWuyePayTabs(String appId) {
 		Sort sort = new Sort(Direction.ASC, "sort");
 		return wuyePayTabsRepository.findByAppId(appId, sort);
@@ -145,7 +145,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_CSHOTLINE, key = "#appId")
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_CSHOTLINE, key = "#appId", unless = "#result == null")
 	public CsHotline getCsHotline(String appId) {
 		return csHotlineRepository.findByFromSys(appId);
 	}
@@ -160,6 +160,5 @@ public class PageConfigServiceImpl implements PageConfigService {
 	public void updatePageConfig() {
 
 	}
-
 
 }
