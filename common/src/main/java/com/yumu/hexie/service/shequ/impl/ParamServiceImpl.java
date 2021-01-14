@@ -79,7 +79,7 @@ public class ParamServiceImpl implements ParamService {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
 		}
-		return checkAndGetParam(user);
+		return paramMap;
 	}
 	
 
