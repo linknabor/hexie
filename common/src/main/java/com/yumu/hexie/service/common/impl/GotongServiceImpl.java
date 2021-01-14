@@ -315,7 +315,6 @@ public class GotongServiceImpl implements GotongService {
         
     	User user = userRepository.findById(thread.getUserId());
         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SERVICE_RESV) + thread.getThreadId();
-
         News news = new News(new ArrayList<Article>());
         Article article = new Article();
         article.setTitle("您有新的回复消息");
@@ -339,4 +338,5 @@ public class GotongServiceImpl implements GotongService {
 		templateMsgService.sendPayNotification4HouseBinder(accountNotify, accessToken);
 		
 	}
+
 }

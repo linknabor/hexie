@@ -82,6 +82,5 @@ public class ParamServiceImpl implements ParamService {
 		return paramMap;
 	}
 	
-	
 
 }

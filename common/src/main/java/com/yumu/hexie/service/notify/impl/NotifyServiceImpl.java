@@ -79,6 +79,7 @@ public class NotifyServiceImpl implements NotifyService {
 		}else {
 			user = userList.get(0);
 		}
+
 		}
 		
 		if (user != null) {
@@ -346,6 +347,7 @@ public class NotifyServiceImpl implements NotifyService {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String value = objectMapper.writeValueAsString(map);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_WUYE_COUPON_QUEUE, value);
+
 				isSuccess = true;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
@@ -393,5 +395,4 @@ public class NotifyServiceImpl implements NotifyService {
 		
 	}
 	
-
 }

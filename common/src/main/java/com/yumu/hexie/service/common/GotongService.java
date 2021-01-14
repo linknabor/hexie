@@ -54,4 +54,5 @@ public interface GotongService {
 
 	void sendPayNotification4HouseBinder(AccountNotification accountNotify);
 
+
 }
