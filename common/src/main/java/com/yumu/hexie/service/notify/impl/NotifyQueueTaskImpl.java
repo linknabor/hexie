@@ -788,5 +788,4 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 		
 	}
 
-
 }
