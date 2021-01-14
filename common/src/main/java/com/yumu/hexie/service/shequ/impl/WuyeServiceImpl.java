@@ -33,6 +33,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
+import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -584,6 +585,12 @@ public class WuyeServiceImpl implements WuyeService {
 	public CellListVO querySectHeXieList(GetCellDTO getCellDTO) throws Exception {
 		
 		return wuyeUtil2.getMngHeXieList(getCellDTO).getData();
+	}
+	
+	@Override
+	public EReceipt getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception {
+		
+		return wuyeUtil2.getEReceipt(user, tradeWaterId, sysSource).getData();
 	}
 
 	

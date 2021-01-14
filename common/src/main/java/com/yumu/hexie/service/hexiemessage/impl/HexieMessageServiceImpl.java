@@ -4,11 +4,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.util.TransactionUtil;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
 import com.yumu.hexie.model.user.User;
@@ -18,6 +22,8 @@ import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
+	
+	private static Logger logger = LoggerFactory.getLogger(HexieMessageServiceImpl.class);
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -29,29 +35,33 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	protected SmsService smsService;
 	
 	@Autowired
-	private TransactionUtil<T> transactionUtil;
-	
-	@Autowired
 	private GotongService gotongService;
 	
 	/**
 	 * 公众号群发消息通知功能
 	 */
 	@Override
-	public void sendMessage(HexieMessage exr) {
-
+	@Transactional
+	public boolean sendMessage(HexieMessage exr) {
+		
+		boolean success = false;
+		boolean successFlag = false;
 		String[] wuyeid = exr.getWuyeId().split(",");
-		if("0".equals(exr.getType())) {	//公众号只发模板消息，短信的在servplat发
-			for (int i = 0; i < wuyeid.length; i++) {
-				List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
-				if (userList == null || userList.isEmpty()) {
-					continue;
-				}
-				User user = userList.get(0);
-				transactionUtil.transact(s -> saveHexieMessage(exr, user));
-
+		for (int i = 0; i < wuyeid.length; i++) {
+			List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
+			User user = null;
+			if (userList == null || userList.isEmpty()) {
+				user = new User();
+			}else {
+				user = userList.get(0);
+			}
+			logger.info("will sent wuye message to user : " + user);
+			success = saveHexieMessage(exr, user);
+			if (success) {
+				successFlag = true;	//当前这户，有一个绑定者成功就算成功
 			}
 		}
+		return successFlag;
 
 	}
 	
@@ -60,7 +70,9 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	 * @param exr
 	 * @param user
 	 */
-	private void saveHexieMessage(HexieMessage exr, User user) {
+	@Override
+	public boolean saveHexieMessage(HexieMessage exr, User user) {
+		
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 		HexieMessage hexieMessage = new HexieMessage();
@@ -68,9 +80,17 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		hexieMessage.setUserId(user.getId());
 		hexieMessage.setDate_time(df.format(new Date()));
 		hexieMessage.setWuyeId(user.getWuyeId());
-		hexieMessage = hexieMessageRepository.save(hexieMessage);
+		hexieMessageRepository.save(hexieMessage);
 		
-		gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
+		boolean success = true;
+		if (!StringUtils.isEmpty(user.getWuyeId())) {
+			success = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
+		}else {
+			success = false;
+		}
+		hexieMessage.setSuccess(success);
+		hexieMessageRepository.save(hexieMessage);
+		return success;
 	}
 	
 	@Override

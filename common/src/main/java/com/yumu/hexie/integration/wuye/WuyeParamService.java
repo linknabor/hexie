@@ -27,14 +27,19 @@ public class WuyeParamService {
 	/**
 	 * 缓存物业公司参数到redis中，如果失败重新请求，总共请求3次
 	 */
-	@Cacheable(cacheNames = ModelConstant.KEY_WUYE_PARAM_CFG, key = "#user.cspId")
+	@Cacheable(cacheNames = ModelConstant.KEY_WUYE_PARAM_CFG, key = "#user.cspId", unless = "#result == null")
 	public Map<String, String> cacheWuyeParam(User user, String type) {
 
 		try {
 			BaseResult<HexieConfig> baseResult = wuyeUtil2.queryServiceCfg(user, type, PARAM_NAMES);
 			HexieConfig hexieConfig = baseResult.getData();
-			if (hexieConfig == null) {
+			if (hexieConfig == null ) {
 				logger.error("未查询到参数：" + PARAM_NAMES);
+				return null;
+			}
+			if (hexieConfig.getParamMap().isEmpty()) {
+				logger.error("未查询到参数：" + PARAM_NAMES);
+				return null;
 			}
 			return hexieConfig.getParamMap();
 		} catch (Exception e) {

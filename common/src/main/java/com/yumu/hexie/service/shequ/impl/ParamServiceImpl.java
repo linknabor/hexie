@@ -68,13 +68,19 @@ public class ParamServiceImpl implements ParamService {
 	}
 
 	private Map<String, String> checkAndGetParam(User user) {
+		
+		Map<String, String> paramMap = null;
 		String cspId = user.getCspId();
 		if (StringUtil.isEmpty(cspId) || "0".equals(cspId)) {
-			return new HashMap<String, String>();
+			//do nothing
+		} else {
+			paramMap = wuyeParamService.cacheWuyeParam(user, ModelConstant.PARA_TYPE_CSP);
 		}
-		return wuyeParamService.cacheWuyeParam(user, ModelConstant.PARA_TYPE_CSP);
+		if (paramMap == null) {
+			paramMap = new HashMap<>();
+		}
+		return paramMap;
 	}
-	
 	
 
 }

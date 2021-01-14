@@ -18,6 +18,7 @@ import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO2;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CsOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
@@ -327,7 +328,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public void sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
+    public boolean sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
     	
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
@@ -342,7 +343,7 @@ public class TemplateMsgService {
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_MESSAGE) + messageId;
     	msg.setUrl(AppUtil.addAppOnUrl(url, appId));
     	msg.setTouser(openid);
-    	sendMsg(msg, accessToken);
+    	return sendMsg(msg, accessToken);
 
 	}
    
@@ -512,5 +513,34 @@ public class TemplateMsgService {
         sendMsg(msg, accessToken);
         
     }
+    
+    /**
+     * 支付到账通知(发送给房屋绑定者)
+     * @param openid
+     * @param accessToken
+     * @param appId
+     */
+    public void sendPayNotification4HouseBinder(AccountNotification accountNotification, String accessToken) {
+    	
+    	CommonVO2 vo = new CommonVO2();
+		vo.setFirst(new TemplateItem("您好，您已付款成功。"));
+	  	vo.setKeyword1(new TemplateItem(accountNotification.getTranDate()));
+	  	vo.setKeyword2(new TemplateItem(accountNotification.getMchName()));
+	  	vo.setKeyword3(new TemplateItem(accountNotification.getFeePrice().toString()));
+	  	vo.setKeyword4(new TemplateItem(accountNotification.getOrderId()));
+	  	vo.setKeyword5(new TemplateItem(accountNotification.getPayMethod()));
+	  	vo.setRemark(new TemplateItem("点击查看详情"));
+    	
+	  	TemplateMsg<CommonVO2>msg = new TemplateMsg<CommonVO2>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_PAY_HOUSE_BIND_NOTIFY, accountNotification.getUser().getAppId()));
+    	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_PAY_HOUSE_BINDER_NOTIFY);
+    	url = AppUtil.addAppOnUrl(url, accountNotification.getUser().getAppId());
+    	url = url.replaceAll("TRADE_WATER_ID", accountNotification.getOrderId()).replaceAll("SYS_SOURCE", accountNotification.getSysSource());
+    	msg.setUrl(url);
+    	msg.setTouser(accountNotification.getUser().getOpenid());
+    	sendMsg(msg, accessToken);
+
+	}
 
 }
