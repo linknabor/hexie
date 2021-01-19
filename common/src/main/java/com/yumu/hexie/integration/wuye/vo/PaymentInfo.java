@@ -20,6 +20,7 @@ public class PaymentInfo implements Serializable {
 	private String show_invoice;//是否开票
 	private String invoice_title;//发票抬头（回显使用）
 	private List<PaymentData> fee_data;
+	private List<PaymentCellInfo> pay_cell;
 	private String support_card_pay;	//是否支持绑卡支付
 	private String is_create_qrcode;
 	
@@ -92,6 +93,12 @@ public class PaymentInfo implements Serializable {
 	}
 	public void setIs_create_qrcode(String is_create_qrcode) {
 		this.is_create_qrcode = is_create_qrcode;
+	}
+	public List<PaymentCellInfo> getPay_cell() {
+		return pay_cell;
+	}
+	public void setPay_cell(List<PaymentCellInfo> pay_cell) {
+		this.pay_cell = pay_cell;
 	}
 	
 	
