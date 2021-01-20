@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.message.vo.QueryMsgOperVO;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
@@ -67,6 +69,16 @@ public class HexieMessageController extends BaseController{
 		log.info("authorize, sectIds : " + sectIds);
 		messageService.authorize(user, sectIds, timestamp);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
-	} 
+	}
+	
+	@RequestMapping(value = "/hexiemessage/getMsgOperList", method = RequestMethod.POST)
+	public CommonResponse<Object> getMsgOperList(@RequestBody QueryMsgOperVO queryMsgOperVO) {
+		
+		log.info("getById queryMsgOperVO : " + queryMsgOperVO);
+		return null;
+		
+	}
+	
+	
 	
 }
