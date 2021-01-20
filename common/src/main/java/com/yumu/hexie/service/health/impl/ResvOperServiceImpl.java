@@ -3,6 +3,7 @@ package com.yumu.hexie.service.health.impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +56,7 @@ public class ResvOperServiceImpl implements ResvOperService {
 	
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_SERVE_ROLE, allEntries = true)
 	public void saveResvOper(BaseRequestDTO<ServiceOperator> baseRequestDTO) {
 		
 		ServiceOperator operator = baseRequestDTO.getData();

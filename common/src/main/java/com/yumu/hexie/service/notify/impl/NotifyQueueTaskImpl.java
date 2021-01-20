@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,6 @@ import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -299,7 +299,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
 				List<Operator> operList = queue.getOperatorList();
 				if (operList!=null && !operList.isEmpty()) {
-					serviceOperatorRepository.deleteByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
+					serviceOperatorRepository.deleteByType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
 				}
 				List<Operator> failedList = new ArrayList<>();
 				operList.forEach(operator->{
@@ -323,7 +323,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						serviceOperator.setName(user.getName());
 						serviceOperator.setOpenId(operator.getOpenid());
 						serviceOperator.setTel(operator.getTel());
-						serviceOperator.setType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
+						serviceOperator.setType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
 						serviceOperator.setUserId(user.getId());
 						serviceOperator.setSubTypes(operator.getServiceId());
 						serviceOperatorRepository.save(serviceOperator);
@@ -353,6 +353,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	 */
 	@Override
 	@Async("taskExecutor")
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_SERVE_ROLE, allEntries = true)
 	public void updateServiceCfgAysc() {
 		
 		while(true) {
@@ -408,7 +409,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					}
 
 					if ("delete".equals(operType)) {
-						List <ServiceOperator> opList = serviceOperatorRepository.findByType(HomeServiceConstant.SERVICE_TYPE_CUSTOM);
+						List <ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
 						opList.forEach(oper->{
 							String subTypes = oper.getSubTypes();
 							if (StringUtils.isEmpty(subTypes)) {

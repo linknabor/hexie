@@ -38,6 +38,7 @@ public class UserInfo implements Serializable {
     private boolean isServiceOperator = false;
     private boolean isEvoucherOperator = false;
     private boolean isMerchant = false;
+    private boolean isMsgSender = false;
     
     private Double longitude;
     private Double latitude;
@@ -117,6 +118,7 @@ public class UserInfo implements Serializable {
         this.isServiceOperator = odDefinition.isServiceOperator();
         this.isEvoucherOperator = odDefinition.isEvoucherOperator();
         this.isMerchant = odDefinition.isOnsaleTaker() || odDefinition.isRgroupTaker();
+        this.isMsgSender = odDefinition.isMsgSender();
     }
     
     public String getRealName() {
@@ -383,6 +385,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setCsHotline(String csHotline) {
 		this.csHotline = csHotline;
+	}
+	public boolean isMsgSender() {
+		return isMsgSender;
+	}
+	public void setMsgSender(boolean isMsgSender) {
+		this.isMsgSender = isMsgSender;
 	}
 	
 	
