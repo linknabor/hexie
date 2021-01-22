@@ -6,6 +6,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class OperServiceImpl implements OperService {
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_SERVE_ROLE, key = "#user.id")
 	public void authorize(User user, String sectIds, String timestamp, String type) {
 		
 		Assert.hasText(timestamp, "timestamp is null!");
@@ -112,7 +114,7 @@ public class OperServiceImpl implements OperService {
 	}
 	
 	/**
-	 * 获取消息发送操作员列表
+	 * 获取操作员服务区域列表（平台用）
 	 * @param queryOperVO
 	 * @return
 	 */
@@ -141,12 +143,34 @@ public class OperServiceImpl implements OperService {
 	}
 	
 	/**
+	 * 获取操作员服务区域列表（移动端用）
+	 * @param queryOperVO
+	 * @return
+	 * @throws Exception 
+	 */
+	@Override
+	public List<QueryOperRegionMapper> getRegionListMobile(User user, String type) throws Exception {
+		
+		Assert.hasText(type, "操作人员类型不能为空。");
+		
+		List<ServiceOperator> soList = serviceOperatorRepository.findByTypeAndUserId(Integer.valueOf(type), user.getId());
+		if (soList.isEmpty()) {
+			throw new BizValidateException("can't find operator, userId : " + user.getId() + ", type : " + type);
+		}
+		ServiceOperator so = soList.get(0);
+		List<Object[]> page = serviceOperatorRepository.getServeRegion(so.getId());
+		List<QueryOperRegionMapper> list = ObjectToBeanUtils.objectToBean(page, QueryOperRegionMapper.class);
+		return list;
+	}
+	
+	/**
 	 * 获取消息发送操作员列表
 	 * @param queryOperVO
 	 * @return
 	 */
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_SERVE_ROLE, key = "#queryOperVO.operUserId")
 	public void cancelAuthorize(QueryOperVO queryOperVO) {
 		
 		Assert.hasText(queryOperVO.getOperId(), "操作员ID不能为空。");

@@ -15,6 +15,7 @@ public class QueryOperVO implements Serializable {
 	private String operName;
 	private String operTel;
 	private String operType;
+	private String operUserId;
 	
 	private List<String> sectIds;
 	
@@ -62,10 +63,17 @@ public class QueryOperVO implements Serializable {
 	public void setOperId(String operId) {
 		this.operId = operId;
 	}
+	public String getOperUserId() {
+		return operUserId;
+	}
+	public void setOperUserId(String operUserId) {
+		this.operUserId = operUserId;
+	}
 	@Override
 	public String toString() {
 		return "QueryOperVO [operId=" + operId + ", operName=" + operName + ", operTel=" + operTel + ", operType="
-				+ operType + ", sectIds=" + sectIds + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
+				+ operType + ", operUserId=" + operUserId + ", sectIds=" + sectIds + ", currentPage=" + currentPage
+				+ ", pageSize=" + pageSize + "]";
 	}
 	
 	
