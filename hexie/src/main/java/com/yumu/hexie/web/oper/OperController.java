@@ -1,9 +1,12 @@
 package com.yumu.hexie.web.oper;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.oper.mapper.QueryOperRegionMapper;
 import com.yumu.hexie.integration.oper.vo.QueryOperVO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.oper.OperService;
@@ -83,6 +87,22 @@ public class OperController extends BaseController {
 		CommonResponse<String> commonResponse = new CommonResponse<>();
 		commonResponse.setResult("00");
 		return commonResponse;
+	}
+	
+	/**
+	 * 获取操作员服务区域列表 移动端
+	 * @param user
+	 * @param type
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/oper/region/{type}", method = RequestMethod.GET)
+	public BaseResult<Object> getServeRegionMobile(@ModelAttribute(Constants.USER) User user, @PathVariable String type) throws Exception {
+		
+		log.info("getServeRegionMobile, type : " + type);
+		List<QueryOperRegionMapper> list = operService.getRegionListMobile(user, type);
+		return BaseResult.successResult(list);
 	}
 	
 }
