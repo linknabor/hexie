@@ -42,7 +42,7 @@ public class OperController extends BaseController {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/hexiemessage/authorize", method = RequestMethod.POST)
+	@RequestMapping(value = "/oper/authorize", method = RequestMethod.POST)
 	public BaseResult<String> authorize(@ModelAttribute(Constants.USER) User user,
 			@RequestParam String sectIds, @RequestParam String timestamp, @RequestParam String type) throws Exception {
 
