@@ -52,7 +52,7 @@ public class OperController extends BaseController {
 	}
 	
 	/**
-	 * 获取已授权操作员列表
+	 * 获取操作员列表
 	 * @param queryMsgOperVO
 	 * @return
 	 */
@@ -61,7 +61,28 @@ public class OperController extends BaseController {
 		
 		log.info("getOperList queryMsgOperVO : " + queryOperVO);
 		return operService.getOperList(queryOperVO);
+	}
+	
+	/**
+	 * 获取操作员服务区域列表
+	 * @param queryMsgOperVO
+	 * @return
+	 */
+	@RequestMapping(value = "/servplat/oper/region", method = RequestMethod.POST)
+	public CommonResponse<Object> getServeRegion(@RequestBody QueryOperVO queryOperVO) {
 		
+		log.info("getServeRegion operId : " + queryOperVO.getOperId());
+		return operService.getRegionList(queryOperVO);
+	}
+	
+	@RequestMapping(value = "/servplat/oper/authorize/cancel", method = RequestMethod.POST)
+	public CommonResponse<String> cancelAuthorize(@RequestBody QueryOperVO queryOperVO) throws Exception{
+		
+		log.info("cancelAuthorize : " + queryOperVO);
+		operService.cancelAuthorize(queryOperVO);
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
 	}
 	
 }

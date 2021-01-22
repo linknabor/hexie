@@ -6,7 +6,12 @@ import com.yumu.hexie.model.user.User;
 
 public interface OperService {
 
+	void authorize(User user, String sectIds, String timestamp, String type);
+	
+	void cancelAuthorize(QueryOperVO queryOperVO);
+	
 	CommonResponse<Object> getOperList(QueryOperVO queryOperVO);
 
-	void authorize(User user, String sectIds, String timestamp, String type);
+	CommonResponse<Object> getRegionList(QueryOperVO queryOperVO);
+	
 }
