@@ -34,12 +34,6 @@ public class UserInfo implements Serializable {
     private String name;
     private String tel;
     
-    private boolean isRepairOperator = false;
-    private boolean isServiceOperator = false;
-    private boolean isEvoucherOperator = false;
-    private boolean isMerchant = false;
-    private boolean isMsgSender = false;
-    
     private Double longitude;
     private Double latitude;
     private long currentAddrId;
@@ -87,6 +81,49 @@ public class UserInfo implements Serializable {
  	private boolean coronaPrevention;	//肺炎疫情板块
  	private boolean isDonghu;	//是否东湖版本的公众号
  	private boolean cardPayService;	//公众号是否支持银行卡支付
+ 	private ServeRole serveRole;
+ 	
+ 	
+ 	public static class ServeRole{
+ 		
+ 		private boolean isRepairOperator = false;
+ 	    private boolean isServiceOperator = false;
+ 	    private boolean isEvoucherOperator = false;
+ 	    private boolean isMerchant = false;
+ 	    private boolean isMsgSender = false;
+ 	    
+ 	   public boolean isRepairOperator() {
+ 	        return isRepairOperator;
+ 	    }
+ 	    public void setRepairOperator(boolean isRepairOperator) {
+ 	        this.isRepairOperator = isRepairOperator;
+ 	    }
+ 	    public boolean isServiceOperator() {
+ 			return isServiceOperator;
+ 		}
+ 		public void setServiceOperator(boolean isServiceOperator) {
+ 			this.isServiceOperator = isServiceOperator;
+ 		}
+ 		public boolean isEvoucherOperator() {
+ 			return isEvoucherOperator;
+ 		}
+ 		public void setEvoucherOperator(boolean isEvoucherOperator) {
+ 			this.isEvoucherOperator = isEvoucherOperator;
+ 		}
+ 		public boolean isMerchant() {
+ 			return isMerchant;
+ 		}
+ 		public void setMerchant(boolean isMerchant) {
+ 			this.isMerchant = isMerchant;
+ 		}
+ 		public boolean isMsgSender() {
+ 			return isMsgSender;
+ 		}
+ 		public void setMsgSender(boolean isMsgSender) {
+ 			this.isMsgSender = isMsgSender;
+ 		}
+ 		
+ 	}
  	
 	public String getSectId() {
 		return sectId;
@@ -114,13 +151,14 @@ public class UserInfo implements Serializable {
     
     public UserInfo(User user, OperatorDefinition odDefinition){
         BeanUtils.copyProperties(user, this);
-        this.isRepairOperator = odDefinition.isRepairOperator();
-        this.isServiceOperator = odDefinition.isServiceOperator();
-        this.isEvoucherOperator = odDefinition.isEvoucherOperator();
-        this.isMerchant = odDefinition.isOnsaleTaker() || odDefinition.isRgroupTaker();
-        this.isMsgSender = odDefinition.isMsgSender();
+        ServeRole serveRole = new ServeRole();
+        serveRole.isRepairOperator = odDefinition.isRepairOperator();
+        serveRole.isServiceOperator = odDefinition.isServiceOperator();
+        serveRole.isEvoucherOperator = odDefinition.isEvoucherOperator();
+        serveRole.isMerchant = odDefinition.isOnsaleTaker() || odDefinition.isRgroupTaker();
+        serveRole.isMsgSender = odDefinition.isMsgSender();
+        this.serveRole = serveRole;
     }
-    
     public String getRealName() {
         return realName;
     }
@@ -275,27 +313,6 @@ public class UserInfo implements Serializable {
         this.shareCode = shareCode;
     }
 
-    public boolean isRepairOperator() {
-        return isRepairOperator;
-    }
-
-    public void setRepairOperator(boolean isRepairOperator) {
-        this.isRepairOperator = isRepairOperator;
-    }
-    
-    public boolean isServiceOperator() {
-		return isServiceOperator;
-	}
-	public void setServiceOperator(boolean isServiceOperator) {
-		this.isServiceOperator = isServiceOperator;
-	}
-	
-	public boolean isEvoucherOperator() {
-		return isEvoucherOperator;
-	}
-	public void setEvoucherOperator(boolean isEvoucherOperator) {
-		this.isEvoucherOperator = isEvoucherOperator;
-	}
 	public String getXiaoquName() {
         return xiaoquName;
     }
@@ -374,23 +391,17 @@ public class UserInfo implements Serializable {
 	public void setCardPayService(boolean cardPayService) {
 		this.cardPayService = cardPayService;
 	}
-	public boolean isMerchant() {
-		return isMerchant;
-	}
-	public void setMerchant(boolean isMerchant) {
-		this.isMerchant = isMerchant;
-	}
 	public String getCsHotline() {
 		return csHotline;
 	}
 	public void setCsHotline(String csHotline) {
 		this.csHotline = csHotline;
 	}
-	public boolean isMsgSender() {
-		return isMsgSender;
+	public ServeRole getServeRole() {
+		return serveRole;
 	}
-	public void setMsgSender(boolean isMsgSender) {
-		this.isMsgSender = isMsgSender;
+	public void setServeRole(ServeRole serveRole) {
+		this.serveRole = serveRole;
 	}
 	
 	
