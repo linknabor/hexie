@@ -11,6 +11,7 @@ public class QueryOperVO implements Serializable {
 	 */
 	private static final long serialVersionUID = -9023595509838674370L;
 	
+	private String operId;
 	private String operName;
 	private String operTel;
 	private String operType;
@@ -54,6 +55,17 @@ public class QueryOperVO implements Serializable {
 	}
 	public void setSectIds(List<String> sectIds) {
 		this.sectIds = sectIds;
+	}
+	public String getOperId() {
+		return operId;
+	}
+	public void setOperId(String operId) {
+		this.operId = operId;
+	}
+	@Override
+	public String toString() {
+		return "QueryOperVO [operId=" + operId + ", operName=" + operName + ", operTel=" + operTel + ", operType="
+				+ operType + ", sectIds=" + sectIds + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
 	}
 	
 	

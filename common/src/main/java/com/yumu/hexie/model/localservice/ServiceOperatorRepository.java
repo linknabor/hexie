@@ -175,6 +175,6 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     		+ "where ss.operatorId = ?1 "
     		+ "order by r.sectId ", 
     		nativeQuery = true)
-    public List<Object[]> getServeRegionByOperId(long operId);
+    public List<Object[]> getServeRegion(long operId);
     
 }

@@ -18,6 +18,7 @@ import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.oper.mapper.QueryOperMapper;
+import com.yumu.hexie.integration.oper.mapper.QueryOperRegionMapper;
 import com.yumu.hexie.integration.oper.vo.QueryOperVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -35,6 +36,41 @@ public class OperServiceImpl implements OperService {
 	@Autowired
 	private ServiceOperatorSectRepository serviceOperatorSectRepository;
 
+	@Override
+	@Transactional
+	public void authorize(User user, String sectIds, String timestamp, String type) {
+		
+		Assert.hasText(timestamp, "timestamp is null!");
+		Assert.hasText(type, "type is null!");
+		
+		Long ts = Long.valueOf(timestamp);
+		if (System.currentTimeMillis() - ts > 30*60*1000 ) {
+			throw new BizValidateException("授权码已失效。");
+		}
+		
+		List<ServiceOperator> operList = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER, user.getId());
+		if (!operList.isEmpty()) {
+			throw new BizValidateException("用户已授权，请勿重复扫码。");
+		}
+		
+		ServiceOperator so = new ServiceOperator();
+		so.setName(user.getName());
+		so.setTel(user.getTel());
+		so.setUserId(user.getId());
+		so.setType(Integer.valueOf(type));	//ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER
+		so.setOpenId(user.getOpenid());
+		serviceOperatorRepository.save(so);
+		
+		String[]sectArr = sectIds.split(",");
+		for (String sect : sectArr) {
+			ServiceOperatorSect sos = new ServiceOperatorSect();
+			sos.setOperatorId(so.getId());
+			sos.setSectId(sect);
+			serviceOperatorSectRepository.save(sos);
+		}
+		
+	}
+	
 	/**
 	 * 获取消息发送操作员列表
 	 * @param queryOperVO
@@ -75,39 +111,52 @@ public class OperServiceImpl implements OperService {
 		return commonResponse;
 	}
 	
+	/**
+	 * 获取消息发送操作员列表
+	 * @param queryOperVO
+	 * @return
+	 */
+	@Override
+	public CommonResponse<Object> getRegionList(QueryOperVO queryOperVO) {
+		
+		Assert.hasText(queryOperVO.getOperId(), "操作员ID不能为空。");
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			List<Object[]> page = serviceOperatorRepository.getServeRegion(Long.valueOf(queryOperVO.getOperId()));
+			List<QueryOperRegionMapper> list = ObjectToBeanUtils.objectToBean(page, QueryOperRegionMapper.class);
+			QueryListDTO<List<QueryOperRegionMapper>> responsePage = new QueryListDTO<>();
+			list = list==null?new ArrayList<>():list;
+			responsePage.setContent(list);
+			
+			commonResponse.setData(responsePage);
+			commonResponse.setResult("00");
+			
+		} catch (Exception e) {
+			
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+	}
+	
+	/**
+	 * 获取消息发送操作员列表
+	 * @param queryOperVO
+	 * @return
+	 */
 	@Override
 	@Transactional
-	public void authorize(User user, String sectIds, String timestamp, String type) {
+	public void cancelAuthorize(QueryOperVO queryOperVO) {
 		
-		Assert.hasText(timestamp, "timestamp is null!");
-		Assert.hasText(type, "type is null!");
+		Assert.hasText(queryOperVO.getOperId(), "操作员ID不能为空。");
 		
-		Long ts = Long.valueOf(timestamp);
-		if (System.currentTimeMillis() - ts > 30*60*1000 ) {
-			throw new BizValidateException("授权码已失效。");
+		List<String> list = serviceOperatorSectRepository.findByOperatorId(Long.valueOf(queryOperVO.getOperId()));
+		if (!list.isEmpty()) {
+			serviceOperatorSectRepository.deleteByOperatorId(Long.valueOf(queryOperVO.getOperId()));
 		}
-		
-		List<ServiceOperator> operList = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER, user.getId());
-		if (!operList.isEmpty()) {
-			throw new BizValidateException("用户已授权。");
-		}
-		
-		ServiceOperator so = new ServiceOperator();
-		so.setName(user.getName());
-		so.setTel(user.getTel());
-		so.setUserId(user.getId());
-		so.setType(Integer.valueOf(type));	//ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER
-		so.setOpenId(user.getOpenid());
-		serviceOperatorRepository.save(so);
-		
-		String[]sectArr = sectIds.split(",");
-		for (String sect : sectArr) {
-			ServiceOperatorSect sos = new ServiceOperatorSect();
-			sos.setOperatorId(so.getId());
-			sos.setSectId(sect);
-			serviceOperatorSectRepository.save(sos);
-		}
-		
+		serviceOperatorRepository.deleteById(Long.valueOf(queryOperVO.getOperId()));
 	}
+	
 
 }
