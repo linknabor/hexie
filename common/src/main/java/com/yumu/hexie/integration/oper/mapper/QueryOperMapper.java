@@ -1,11 +1,11 @@
-package com.yumu.hexie.integration.message.mapper;
+package com.yumu.hexie.integration.oper.mapper;
 
 import java.io.Serializable;
 import java.math.BigInteger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class QueryMsgOperMapper implements Serializable {
+public class QueryOperMapper implements Serializable {
 	
 	/**
 	 * 
@@ -21,6 +21,15 @@ public class QueryMsgOperMapper implements Serializable {
 	@JsonProperty("user_id")
 	private BigInteger userId;
 	
+	public QueryOperMapper(BigInteger id, String openId, String name, String tel, String appid, BigInteger userId) {
+		super();
+		this.id = id;
+		this.openId = openId;
+		this.name = name;
+		this.tel = tel;
+		this.appid = appid;
+		this.userId = userId;
+	}
 	public String getName() {
 		return name;
 	}

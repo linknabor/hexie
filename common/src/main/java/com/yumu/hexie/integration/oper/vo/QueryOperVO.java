@@ -1,8 +1,9 @@
-package com.yumu.hexie.integration.message.vo;
+package com.yumu.hexie.integration.oper.vo;
 
 import java.io.Serializable;
+import java.util.List;
 
-public class QueryMsgOperVO implements Serializable {
+public class QueryOperVO implements Serializable {
 
 	
 	/**
@@ -13,6 +14,8 @@ public class QueryMsgOperVO implements Serializable {
 	private String operName;
 	private String operTel;
 	private String operType;
+	
+	private List<String> sectIds;
 	
 	private int currentPage;
 	private int pageSize;
@@ -45,6 +48,12 @@ public class QueryMsgOperVO implements Serializable {
 	}
 	public void setPageSize(int pageSize) {
 		this.pageSize = pageSize;
+	}
+	public List<String> getSectIds() {
+		return sectIds;
+	}
+	public void setSectIds(List<String> sectIds) {
+		this.sectIds = sectIds;
 	}
 	
 	
