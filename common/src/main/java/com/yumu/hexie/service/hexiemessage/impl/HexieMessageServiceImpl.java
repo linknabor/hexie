@@ -11,21 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
-import com.yumu.hexie.model.localservice.ServiceOperator;
-import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
-import com.yumu.hexie.model.localservice.repair.ServiceOperatorSect;
-import com.yumu.hexie.model.localservice.repair.ServiceOperatorSectRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
-import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
@@ -40,11 +33,6 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	protected SmsService smsService;
 	@Autowired
 	private GotongService gotongService;
-	@Autowired
-	private ServiceOperatorRepository serviceOperatorRepository;
-	@Autowired
-	private ServiceOperatorSectRepository serviceOperatorSectRepository;
-	
 	
 	/**
 	 * 公众号群发消息通知功能
@@ -107,34 +95,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		return hexieMessageRepository.findById(messageId).get();
 	}
 	
-	@Override
-	@Transactional
-	public void authorize(User user, String sectIds, String timestamp) {
-		
-		Assert.hasText(timestamp, "timestamp is null!");
-		
-		Long ts = Long.valueOf(timestamp);
-		if (System.currentTimeMillis() - ts > 30*60*1000 ) {
-			throw new BizValidateException("授权码已失效。");
-		}
-		
-		ServiceOperator so = new ServiceOperator();
-		so.setName(user.getName());
-		so.setTel(user.getTel());
-		so.setUserId(user.getId());
-		so.setType(ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER);
-		so.setOpenId(user.getOpenid());
-		serviceOperatorRepository.save(so);
-		
-		String[]sectArr = sectIds.split(",");
-		for (String sect : sectArr) {
-			ServiceOperatorSect sos = new ServiceOperatorSect();
-			sos.setOperatorId(so.getId());
-			sos.setSectId(sect);
-			serviceOperatorSectRepository.save(sos);
-		}
-		
-		
-	}
+	
+	
 
 }

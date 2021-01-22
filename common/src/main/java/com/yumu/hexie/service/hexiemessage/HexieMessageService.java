@@ -11,6 +11,4 @@ public interface HexieMessageService {
 
 	boolean saveHexieMessage(HexieMessage exr, User user);
 
-	void authorize(User user, String sectIds, String timestamp);
-
 }
