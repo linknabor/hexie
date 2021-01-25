@@ -5,14 +5,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
+import com.yumu.hexie.vo.req.MessageReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
@@ -46,6 +50,21 @@ public class HexieMessageController extends BaseController{
 	public BaseResult<HexieMessage> getMessage(@RequestParam(required=false) String messageId) {
 		Assert.hasText(messageId, "消息id不能为空。");
 		return BaseResult.successResult(messageService.getMessage(Long.parseLong(messageId)));
+	}
+	
+	/**
+	 * 移动端发送消息
+	 * @param user
+	 * @param messageReq
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/hexiemessage", method = RequestMethod.POST)
+	public BaseResult<String> addMessage(@ModelAttribute(Constants.USER) User user, @RequestBody MessageReq messageReq) throws Exception {
+		
+		messageService.sendMessageMobile(user, messageReq);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
 	
 }

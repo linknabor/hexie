@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
 import com.yumu.hexie.model.user.User;
@@ -20,6 +22,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
+import com.yumu.hexie.vo.req.MessageReq;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	
@@ -33,6 +36,8 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	protected SmsService smsService;
 	@Autowired
 	private GotongService gotongService;
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
 	
 	/**
 	 * 公众号群发消息通知功能
@@ -53,7 +58,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 				user = userList.get(0);
 			}
 			logger.info("will sent wuye message to user : " + user);
-			success = saveHexieMessage(exr, user);
+			success = saveMessage(exr, user);
 			if (success) {
 				successFlag = true;	//当前这户，有一个绑定者成功就算成功
 			}
@@ -68,7 +73,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	 * @param user
 	 */
 	@Override
-	public boolean saveHexieMessage(HexieMessage exr, User user) {
+	public boolean saveMessage(HexieMessage exr, User user) {
 		
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 		HexieMessage hexieMessage = new HexieMessage();
@@ -95,7 +100,19 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		return hexieMessageRepository.findById(messageId).get();
 	}
 	
-	
+	/**
+	 * 移动端发送消息(队列操作)
+	 * @param user
+	 * @param messageReq
+	 * @throws Exception 
+	 */
+	@Override
+	public void sendMessageMobile(User user, MessageReq messageReq) throws Exception {
+		
+		Assert.hasText(messageReq.getSectId(), "小区ID不能为空。");
+		wuyeUtil2.sendMessage(user, messageReq);	//推送给community异步处理
+	}
+
 	
 
 }

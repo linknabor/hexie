@@ -23,6 +23,7 @@ import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
 import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.GetCellRequest;
+import com.yumu.hexie.integration.wuye.req.MessageRequest;
 import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
@@ -46,6 +47,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.vo.req.MessageReq;
 
 /**
  * 新的WuyeUtil
@@ -77,6 +79,7 @@ public class WuyeUtil2 {
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"; //合协社区物业缴费的小区级联
 	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do";	//物业参数
 	private static final String E_RECEIPT_URL = "getEReceiptSDO.do";	//电子凭证
+	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
 	
 	/**
 	 * 标准版查询账单
@@ -422,6 +425,32 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<EReceipt>> typeReference = new TypeReference<CommonResponse<EReceipt>>(){};
 		CommonResponse<EReceipt> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
 		BaseResult<EReceipt> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 推送消息
+	 * @param user
+	 * @param stmtId
+	 * @param anotherbillIds
+	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public BaseResult<String> sendMessage(User user, MessageReq messageReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += MESSAGE_URL;
+		MessageRequest messageRequest = new MessageRequest();
+		BeanUtils.copyProperties(messageReq, messageRequest);
+		messageRequest.setOperId(user.getTel());
+		messageRequest.setOperName(user.getName());
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}

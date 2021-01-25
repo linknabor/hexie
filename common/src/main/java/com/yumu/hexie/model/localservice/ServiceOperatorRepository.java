@@ -170,7 +170,7 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     		List<String> sectIds, Pageable pageable);
     
     
-    @Query(value = "select r.name, r.sectId from serviceoperatorSect ss "
+    @Query(value = "select r.name, r.sectId, r.xiaoquAddress from serviceoperatorSect ss "
     		+ "join region r on ss.sectId = r.sectId "
     		+ "where ss.operatorId = ?1 "
     		+ "order by r.sectId ", 
