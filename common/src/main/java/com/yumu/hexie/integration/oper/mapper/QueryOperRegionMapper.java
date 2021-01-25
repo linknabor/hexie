@@ -14,10 +14,13 @@ public class QueryOperRegionMapper implements Serializable {
 	private String name;
 	@JsonProperty("sect_id")
 	private String sectId;
+	@JsonProperty("sect_addr")
+	private String xiaoquAddress;
 	
-	public QueryOperRegionMapper(String name, String sectId) {
+	public QueryOperRegionMapper(String name, String sectId, String xiaoquAddress) {
 		this.name = name;
 		this.sectId = sectId;
+		this.xiaoquAddress = xiaoquAddress;
 	}
 	public String getName() {
 		return name;
@@ -30,6 +33,12 @@ public class QueryOperRegionMapper implements Serializable {
 	}
 	public void setSectId(String sectId) {
 		this.sectId = sectId;
+	}
+	public String getXiaoquAddress() {
+		return xiaoquAddress;
+	}
+	public void setXiaoquAddress(String xiaoquAddress) {
+		this.xiaoquAddress = xiaoquAddress;
 	}
 	
 	
