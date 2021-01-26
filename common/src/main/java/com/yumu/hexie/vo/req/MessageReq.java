@@ -23,6 +23,7 @@ public class MessageReq implements Serializable {
 	private int type;	//消息推送方式，0公众号，1短信，2全部
 	private int range = 0;	//发送范围,0指定方位，1全部
 	private String content;	//发送内容
+	private String imgUrls;	//上传图片链接
 	
 	public String getSectId() {
 		return sectId;
@@ -66,11 +67,16 @@ public class MessageReq implements Serializable {
 	public void setType(int type) {
 		this.type = type;
 	}
+	public String getImgUrls() {
+		return imgUrls;
+	}
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
+	}
 	@Override
 	public String toString() {
 		return "MessageReq [sectId=" + sectId + ", buildId=" + buildId + ", unitId=" + unitId + ", cellId=" + cellId
-				+ ", type=" + type + ", range=" + range + ", content=" + content + "]";
+				+ ", type=" + type + ", range=" + range + ", content=" + content + ", imgUrls=" + imgUrls + "]";
 	}
-	
 	
 }

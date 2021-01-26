@@ -1,6 +1,11 @@
 package com.yumu.hexie.service.hexiemessage.impl;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -10,17 +15,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.qiniu.api.io.IoApi;
+import com.qiniu.api.io.PutExtra;
+import com.qiniu.api.io.PutRet;
+import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.vo.Message;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
 import com.yumu.hexie.vo.req.MessageReq;
 @Service
@@ -38,6 +53,13 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	private GotongService gotongService;
 	@Autowired
 	private WuyeUtil2 wuyeUtil2;
+	@Autowired
+	private QiniuUtil qiniuUtil;
+	
+	@Value(value = "${tmpfile.dir}")
+    private String tmpFileRoot;
+	@Value(value = "${qiniu.domain}")
+	private String qiniuDomain;
 	
 	/**
 	 * 公众号群发消息通知功能
@@ -110,9 +132,123 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	public void sendMessageMobile(User user, MessageReq messageReq) throws Exception {
 		
 		Assert.hasText(messageReq.getSectId(), "小区ID不能为空。");
+		
+		//先把文件上传到七牛
+		String base64Image = messageReq.getImgUrls();
+		if (!StringUtils.isEmpty(base64Image)) {
+			
+			String indexStr = ";base64,";
+			int imageLastIndex = base64Image.lastIndexOf(indexStr);
+			String imgStr = base64Image.substring(imageLastIndex+indexStr.length(), base64Image.length());
+			
+			byte[] imageByte = base64img2byte(imgStr);					
+			
+			String key = upload2qiniu(imageByte);
+			messageReq.setImgUrls(qiniuDomain + key);
+		}
 		wuyeUtil2.sendMessage(user, messageReq);	//推送给community异步处理
 	}
 
+	private String upload2qiniu(byte[] imageByte) throws FileNotFoundException, IOException, InterruptedException {
+		String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
+		String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
+		String tmpPathRoot = tmpFileRoot + File.separator + currDate+File.separator;
+		File folder = new File(tmpPathRoot);	//先创建目录
+		if (!folder.exists()||!folder.isDirectory()) {
+			folder.mkdirs();
+		}
+		String tmpPath = tmpPathRoot+currTime+"_msg_0";	//如果有多个图片，那么循环编后面的序号
+		File imgFile = writeByte2File(imageByte, tmpPath);
+		
+		String key = currDate+"_"+currTime+"_msg_0";
+		
+		String uptoken = qiniuUtil.getUpToken();	//获取qiniu上传文件的token
+		PutExtra extra = new PutExtra();
+		
+		int count = 0;
+		PutRet putRet = null;
+		if (imgFile.exists() && imgFile.getTotalSpace()>0) {
+			while (putRet==null || putRet.getException()!=null) {
+				if (count == 3) {
+					break;
+				}
+				putRet = IoApi.putFile(uptoken, key, imgFile, extra);
+				java.lang.Thread.sleep(1000);
+				logger.error("exception msg is : " + putRet.getException());
+				logger.error("putRet is : " + putRet.toString());
+				count++;
+			}
+			
+		}
+		return key;
+	}
+
+	/**
+	 * byte转文件
+	 * @param imageByte
+	 * @param tmpPath
+	 * @return
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private File writeByte2File(byte[] imageByte, String tmpPath) throws FileNotFoundException, IOException {
+		File imgFile = new File(tmpPath);
+		FileOutputStream imageStream = new FileOutputStream(tmpPath);
+		imageStream.write(imageByte);
+		imageStream.flush();
+		imageStream.close();
+		return imgFile;
+	}
+
+	/**
+	 * 图片base64转byte
+	 * @param imgStr
+	 * @return
+	 */
+	private byte[] base64img2byte(String imgStr) {
+		// Base64解码
+		byte[] imageByte = null;
+		try {
+			imageByte = Base64.getDecoder().decode(imgStr);      
+			for (int i = 0; i < imageByte.length; ++i) {      
+				if (imageByte[i] < 0) {// 调整异常数据      
+					imageByte[i] += 256;      
+				}      
+			}      
+		} catch (Exception e) {
+			 logger.error(e.getMessage(), e);
+		}
+		return imageByte;
+	}
+
+	/**
+	 * 根据批次号获取消息内容
+	 */
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_MSG_VIEW_CACHE, key = "#batchNo", unless = "#result == null")
+	public HexieMessage getMessageByBatchNo(String batchNo) {
+
+		HexieMessage hexieMessage = null;
+		List<HexieMessage> list = hexieMessageRepository.findByBatchNo(batchNo);
+		if (!list.isEmpty()) {
+			hexieMessage = list.get(0);
+		}else {
+			try {
+				Message message = wuyeUtil2.getMessage(new User(), batchNo).getData();
+				hexieMessage = new HexieMessage();
+				hexieMessage.setBatchNo(message.getBatchNo());
+				hexieMessage.setContent(message.getContent());
+				hexieMessage.setImgUrls(message.getImgUrls());
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			if (StringUtils.isEmpty(hexieMessage.getBatchNo())) {
+				throw new BizValidateException("没有可看查的消息。");
+			}
+		}
+		return hexieMessage;
+	}
 	
+
 
 }

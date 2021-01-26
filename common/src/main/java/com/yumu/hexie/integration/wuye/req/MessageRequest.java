@@ -27,6 +27,8 @@ public class MessageRequest implements Serializable {
 	private String unitId;
 	@JsonProperty("mng_cell_id")
 	private String cellId;
+	@JsonProperty("batch_no")
+	private String batchNo;
 	
 	private int type;	//消息推送方式，0公众号，1短信，2全部
 	private int range = 0;	//发送范围,0指定方位，1全部
@@ -36,6 +38,8 @@ public class MessageRequest implements Serializable {
 	private String operId;
 	@JsonProperty("oper_name")
 	private String operName;
+	@JsonProperty("img_urls")
+	private String imgUrls;	//上传图片链接，如有多个，逗号分割
 	
 	public String getSectId() {
 		return sectId;
@@ -107,11 +111,23 @@ public class MessageRequest implements Serializable {
 		}
 		this.operName = retStr;
 	}
+	public String getBatchNo() {
+		return batchNo;
+	}
+	public void setBatchNo(String batchNo) {
+		this.batchNo = batchNo;
+	}
+	public String getImgUrls() {
+		return imgUrls;
+	}
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
+	}
 	@Override
 	public String toString() {
 		return "MessageRequest [sectId=" + sectId + ", buildId=" + buildId + ", unitId=" + unitId + ", cellId=" + cellId
-				+ ", type=" + type + ", range=" + range + ", content=" + content + ", operId=" + operId + ", operName="
-				+ operName + "]";
+				+ ", batchNo=" + batchNo + ", type=" + type + ", range=" + range + ", content=" + content + ", operId="
+				+ operId + ", operName=" + operName + ", imgUrls=" + imgUrls + "]";
 	}
 	
 	
