@@ -1,6 +1,8 @@
 package com.yumu.hexie.model.hexiemessage;
 
 import javax.persistence.Entity;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.BaseModel;
 @Entity
 public class HexieMessage extends BaseModel{
@@ -15,6 +17,7 @@ public class HexieMessage extends BaseModel{
 	private String cell_addr;
 	private String date_time;
 	private String content;
+	@JsonProperty("img_urls")
 	private String imgUrls;
 	private boolean success;
 	
