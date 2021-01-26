@@ -426,4 +426,6 @@ public class ModelConstant {
 	
 	public static final String KEY_HEXIE_PARTNER = "partner:";	//合伙人
 	
+	public static final String KEY_MSG_VIEW_CACHE = "msg:cached";
+	
 }		

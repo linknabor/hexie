@@ -10,8 +10,9 @@ public interface HexieMessageService {
 	
 	boolean saveMessage(HexieMessage exr, User user);
 	
-	HexieMessage getMessage(long messageId);
-
 	void sendMessageMobile(User user, MessageReq messageReq) throws Exception;
 
+	HexieMessage getMessage(long messageId);
+	
+	HexieMessage getMessageByBatchNo(String batchNo);
 }

@@ -23,7 +23,7 @@ import com.yumu.hexie.web.BaseResult;
 @RestController
 public class HexieMessageController extends BaseController{
 	
-	private static final Logger log = LoggerFactory.getLogger(HexieMessageController.class);
+	private static final Logger logger = LoggerFactory.getLogger(HexieMessageController.class);
 	
 	@Autowired
 	private HexieMessageService messageService;
@@ -35,7 +35,7 @@ public class HexieMessageController extends BaseController{
 	 */
 	@RequestMapping(value = "/servplat/hexiemessage/send", method = RequestMethod.POST)
 	public String pullWechat(@RequestBody HexieMessage hexieMessage) {
-		log.info("sendMessage:--hexieMessage:"+hexieMessage);	//TODO expr中的wuyeId如果拼接过能，可能超长。
+		logger.info("sendMessage:--hexieMessage:"+hexieMessage);	//TODO expr中的wuyeId如果拼接过能，可能超长。
 		boolean success = messageService.sendMessage(hexieMessage);
 		return Boolean.toString(success);
 	}
@@ -66,5 +66,35 @@ public class HexieMessageController extends BaseController{
 		messageService.sendMessageMobile(user, messageReq);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
+	
+	/**
+	 * 移动端发送消息
+	 * @param user
+	 * @param messageReq
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/testUpload", method = RequestMethod.POST)
+	public BaseResult<String> addMessageTest(@RequestBody MessageReq messageReq) throws Exception {
+		
+		logger.info("messageReq : " + messageReq);
+		messageService.sendMessageMobile(null, messageReq);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+	}
+	
+	/**
+	 * 群发通知查询
+	 * @param messageId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/servplat/hexiemessage/getByBatch", method = RequestMethod.GET)
+	public BaseResult<HexieMessage> getMessageH5(@RequestParam(required=false) String batchNo) {
+		Assert.hasText(batchNo, "短信批号不能为空。");
+		return BaseResult.successResult(messageService.getMessageByBatchNo(batchNo));
+	}
+	
+	
 	
 }

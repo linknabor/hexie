@@ -40,6 +40,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
+import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -80,6 +81,7 @@ public class WuyeUtil2 {
 	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do";	//物业参数
 	private static final String E_RECEIPT_URL = "getEReceiptSDO.do";	//电子凭证
 	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
+	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
 	
 	/**
 	 * 标准版查询账单
@@ -451,6 +453,30 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 推送消息
+	 * @param user
+	 * @param stmtId
+	 * @param anotherbillIds
+	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public BaseResult<Message> getMessage(User user, String batchNo) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_MESSAGE_URL;
+		MessageRequest messageRequest = new MessageRequest();
+		messageRequest.setBatchNo(batchNo);
+		
+		TypeReference<CommonResponse<Message>> typeReference = new TypeReference<CommonResponse<Message>>(){};
+		CommonResponse<Message> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
+		BaseResult<Message> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
