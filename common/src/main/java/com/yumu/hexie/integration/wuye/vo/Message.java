@@ -13,11 +13,11 @@ public class Message implements Serializable {
 
 	@JsonProperty("batch_no")
 	private String batchNo;
-	
 	private String content;
-	
 	@JsonProperty("img_urls")
 	private String imgUrls;
+	@JsonProperty("date_time")
+	private String dateTime;
 
 	public String getBatchNo() {
 		return batchNo;
@@ -41,6 +41,14 @@ public class Message implements Serializable {
 
 	public void setImgUrls(String imgUrls) {
 		this.imgUrls = imgUrls;
+	}
+
+	public String getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(String dateTime) {
+		this.dateTime = dateTime;
 	}
 	
 	

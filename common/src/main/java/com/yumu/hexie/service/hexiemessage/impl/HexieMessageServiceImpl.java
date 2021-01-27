@@ -239,6 +239,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 				hexieMessage.setBatchNo(message.getBatchNo());
 				hexieMessage.setContent(message.getContent());
 				hexieMessage.setImgUrls(message.getImgUrls());
+				hexieMessage.setDate_time(message.getDateTime());
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
