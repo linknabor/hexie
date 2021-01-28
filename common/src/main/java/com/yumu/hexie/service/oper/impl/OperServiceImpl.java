@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
@@ -48,6 +49,9 @@ public class OperServiceImpl implements OperService {
 		Long ts = Long.valueOf(timestamp);
 		if (System.currentTimeMillis() - ts > 30*60*1000 ) {
 			throw new BizValidateException("授权码已失效。");
+		}
+		if (StringUtils.isEmpty(user.getTel())) {
+			throw new BizValidateException("当前用户尚未注册。请先完成会员领卡或手机号注册。");
 		}
 		
 		List<ServiceOperator> operList = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER, user.getId());

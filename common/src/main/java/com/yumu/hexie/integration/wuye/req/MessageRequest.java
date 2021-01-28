@@ -104,7 +104,7 @@ public class MessageRequest implements Serializable {
 		String retStr = "";
 		if (!StringUtils.isEmpty(operName)) {
 			try {
-				retStr = URLEncoder.encode(retStr,"GBK");
+				retStr = URLEncoder.encode(operName,"GBK");
 			} catch (UnsupportedEncodingException e) {
 				logger.error(e.getMessage(), e);
 			}
