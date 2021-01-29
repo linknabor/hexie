@@ -18,6 +18,9 @@ public class Message implements Serializable {
 	private String imgUrls;
 	@JsonProperty("date_time")
 	private String dateTime;
+	@JsonProperty("sect_name")
+	private String sectName;
+	private String count;
 
 	public String getBatchNo() {
 		return batchNo;
@@ -50,7 +53,22 @@ public class Message implements Serializable {
 	public void setDateTime(String dateTime) {
 		this.dateTime = dateTime;
 	}
-	
+
+	public String getSectName() {
+		return sectName;
+	}
+
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
+
+	public String getCount() {
+		return count;
+	}
+
+	public void setCount(String count) {
+		this.count = count;
+	}
 	
 	
 }

@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.wuye;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,7 @@ public class WuyeUtil2 {
 	private static final String E_RECEIPT_URL = "getEReceiptSDO.do";	//电子凭证
 	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
 	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
+	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
 	
 	/**
 	 * 标准版查询账单
@@ -458,14 +460,10 @@ public class WuyeUtil2 {
 	}
 	
 	/**
-	 * 推送消息
+	 * 根据批次号查询已发送的消息
 	 * @param user
-	 * @param stmtId
-	 * @param anotherbillIds
-	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @param batchNo
+	 * @throws Exception 
 	 */
 	public BaseResult<Message> getMessage(User user, String batchNo) throws Exception {
 		
@@ -477,6 +475,26 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<Message>> typeReference = new TypeReference<CommonResponse<Message>>(){};
 		CommonResponse<Message> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
 		BaseResult<Message> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 查询发送历史
+	 * @param user
+	 * @param batchNo
+	 * @throws Exception 
+	 */
+	public BaseResult<List<Message>> getMessageHistory(User user, String sectIds) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_MESSAGE_HISTORY_URL;
+		MessageRequest messageRequest = new MessageRequest();
+		messageRequest.setSectId(sectIds);
+		
+		TypeReference<CommonResponse<List<Message>>> typeReference = new TypeReference<CommonResponse<List<Message>>>(){};
+		CommonResponse<List<Message>> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
+		BaseResult<List<Message>> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}

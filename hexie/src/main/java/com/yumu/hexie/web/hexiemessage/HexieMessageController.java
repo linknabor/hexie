@@ -1,6 +1,8 @@
 package com.yumu.hexie.web.hexiemessage;
 
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
@@ -95,6 +98,17 @@ public class HexieMessageController extends BaseController{
 		return BaseResult.successResult(messageService.getMessageByBatchNo(batchNo));
 	}
 	
+	/**
+	 * 群发通知查询
+	 * @param messageId
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/hexiemessage/history", method = RequestMethod.GET)
+	public BaseResult<List<Message>> getSendHistory(@ModelAttribute(Constants.USER) User user) throws Exception {
+		return BaseResult.successResult(messageService.getSendHistory(user));
+	}
 	
 	
 }

@@ -25,8 +25,10 @@ import com.qiniu.api.io.IoApi;
 import com.qiniu.api.io.PutExtra;
 import com.qiniu.api.io.PutRet;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.integration.oper.mapper.QueryOperRegionMapper;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
@@ -37,6 +39,7 @@ import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.hexiemessage.HexieMessageService;
+import com.yumu.hexie.service.oper.OperService;
 import com.yumu.hexie.vo.req.MessageReq;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
@@ -55,11 +58,15 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	private WuyeUtil2 wuyeUtil2;
 	@Autowired
 	private QiniuUtil qiniuUtil;
+	@Autowired
+	private OperService operService;
+	
 	
 	@Value(value = "${tmpfile.dir}")
     private String tmpFileRoot;
 	@Value(value = "${qiniu.domain}")
 	private String qiniuDomain;
+	
 	
 	/**
 	 * 公众号群发消息通知功能
@@ -248,6 +255,28 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 			}
 		}
 		return hexieMessage;
+	}
+
+	/**
+	 * 获取发送历史
+	 */
+	@Override
+	public BaseResult<List<Message>> getSendHistory(User user) throws Exception {
+
+		List<QueryOperRegionMapper> list = operService.getRegionListMobile(user, String.valueOf(ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER));
+		StringBuffer buffer = new StringBuffer();
+		for (QueryOperRegionMapper queryOperRegionMapper : list) {
+			buffer.append(queryOperRegionMapper.getSectId()).append(",");
+		}
+		String sectIds = "";
+		if (buffer.length()>0) {
+			sectIds = buffer.deleteCharAt(buffer.length() - 1).toString();
+			return wuyeUtil2.getMessageHistory(user, sectIds);
+		} else {
+			BaseResult<List<Message>> baseResult = new BaseResult<>();
+			return baseResult;
+		}
+		
 	}
 	
 
