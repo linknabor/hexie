@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -201,6 +202,7 @@ public class WechatCardServiceImpl implements WechatCardService {
 	 */
 	@Transactional
 	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#preActivateReq.openid")
 	public User activate(PreActivateReq preActivateReq) {
 		
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(preActivateReq.getCardId(), preActivateReq.getOpenid());
