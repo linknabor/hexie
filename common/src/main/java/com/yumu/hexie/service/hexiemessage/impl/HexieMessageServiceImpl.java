@@ -243,6 +243,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 			try {
 				Message message = wuyeUtil2.getMessage(new User(), batchNo).getData();
 				hexieMessage = new HexieMessage();
+				hexieMessage.setSect_name(message.getSectName());
 				hexieMessage.setBatchNo(message.getBatchNo());
 				hexieMessage.setContent(message.getContent());
 				hexieMessage.setImgUrls(message.getImgUrls());
