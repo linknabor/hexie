@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.wuye;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
 import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.GetCellRequest;
+import com.yumu.hexie.integration.wuye.req.MessageRequest;
 import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
@@ -39,6 +41,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
+import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
@@ -46,6 +49,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.vo.req.MessageReq;
 
 /**
  * 新的WuyeUtil
@@ -77,7 +81,11 @@ public class WuyeUtil2 {
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"; //合协社区物业缴费的小区级联
 	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do";	//物业参数
 	private static final String E_RECEIPT_URL = "getEReceiptSDO.do";	//电子凭证
-	
+	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
+	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
+	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
+
+
 	/**
 	 * 标准版查询账单
 	 * @param userId
@@ -422,6 +430,72 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<EReceipt>> typeReference = new TypeReference<CommonResponse<EReceipt>>(){};
 		CommonResponse<EReceipt> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
 		BaseResult<EReceipt> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 推送消息
+	 * @param user
+	 * @param stmtId
+	 * @param anotherbillIds
+	 * @return
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public BaseResult<String> sendMessage(User user, MessageReq messageReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += MESSAGE_URL;
+		MessageRequest messageRequest = new MessageRequest();
+		BeanUtils.copyProperties(messageReq, messageRequest);
+		messageRequest.setOperId(user.getTel());
+		messageRequest.setOperName(user.getName());
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 根据批次号查询已发送的消息
+	 * @param user
+	 * @param batchNo
+	 * @throws Exception 
+	 */
+	public BaseResult<Message> getMessage(User user, String batchNo) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_MESSAGE_URL;
+		MessageRequest messageRequest = new MessageRequest();
+		messageRequest.setBatchNo(batchNo);
+		
+		TypeReference<CommonResponse<Message>> typeReference = new TypeReference<CommonResponse<Message>>(){};
+		CommonResponse<Message> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
+		BaseResult<Message> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 查询发送历史
+	 * @param user
+	 * @param batchNo
+	 * @throws Exception 
+	 */
+	public BaseResult<List<Message>> getMessageHistory(User user, String sectIds) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_MESSAGE_HISTORY_URL;
+		MessageRequest messageRequest = new MessageRequest();
+		messageRequest.setSectId(sectIds);
+		
+		TypeReference<CommonResponse<List<Message>>> typeReference = new TypeReference<CommonResponse<List<Message>>>(){};
+		CommonResponse<List<Message>> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
+		BaseResult<List<Message>> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -435,6 +436,7 @@ public class RepairServiceImpl implements RepairService {
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_SERVE_ROLE, key = "#baseRequestDTO.data.userId" )
 	public int saveRepiorOperator(BaseRequestDTO<ServiceOperatorVo> baseRequestDTO) {
 		ServiceOperatorVo vo=baseRequestDTO.getData();
 		String sectIds =vo.getSectIds();
@@ -461,7 +463,7 @@ public class RepairServiceImpl implements RepairService {
 			so.setLongitude(0.0);
 			so.setName(name);
 			so.setTel(tel);
-			so.setType(1);
+			so.setType(ModelConstant.SERVICE_OPER_TYPE_WEIXIU);
 			so.setUserId(u.getId());
 			so.setOpenId(u.getOpenid());
 			so.setCompanyName(vo.getCspName());

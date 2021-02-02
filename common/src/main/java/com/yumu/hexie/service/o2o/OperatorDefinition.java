@@ -1,12 +1,20 @@
 package com.yumu.hexie.service.o2o;
 
-public class OperatorDefinition {
+import java.io.Serializable;
 
+public class OperatorDefinition implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -168629557912114341L;
+	
 	private boolean isServiceOperator = false;
 	private boolean isRepairOperator = false;
 	private boolean isEvoucherOperator = false;
 	private boolean isOnsaleTaker = false;
 	private boolean isRgroupTaker = false;
+	private boolean isMsgSender = false;
 	
 	public boolean isServiceOperator() {
 		return isServiceOperator;
@@ -38,11 +46,17 @@ public class OperatorDefinition {
 	public void setRgroupTaker(boolean isRgroupTaker) {
 		this.isRgroupTaker = isRgroupTaker;
 	}
+	public boolean isMsgSender() {
+		return isMsgSender;
+	}
+	public void setMsgSender(boolean isMsgSender) {
+		this.isMsgSender = isMsgSender;
+	}
 	@Override
 	public String toString() {
 		return "OperatorDefinition [isServiceOperator=" + isServiceOperator + ", isRepairOperator=" + isRepairOperator
 				+ ", isEvoucherOperator=" + isEvoucherOperator + ", isOnsaleTaker=" + isOnsaleTaker + ", isRgroupTaker="
-				+ isRgroupTaker + "]";
+				+ isRgroupTaker + ", isMsgSender=" + isMsgSender + "]";
 	}
 	
 	

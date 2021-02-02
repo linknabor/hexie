@@ -91,18 +91,7 @@ public class UserController extends BaseController{
 			log.info("oriApp : " + oriApp);
 			log.info("user in session :" + user);
 			
-			List<User> userList = userService.getByOpenId(user.getOpenid());	//数据库访问。尽量避免一登陆就操作。
-			if (userList!=null) {
-				for (User baseduser : userList) {
-					if (baseduser.getId() == user.getId()) {
-						dbUser = baseduser;
-						break;
-					}else if (baseduser.getOriUserId() == user.getId() && !ConstantWeChat.APPID.equals(baseduser.getAppId())) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
-						dbUser = baseduser;
-						break;
-					}
-				}
-			}
+			dbUser = userService.getByOpenIdFromCache(user);
 			if (dbUser != null) {
 				String userAppId = dbUser.getAppId();	//如果根据session中信息获得的用户并非当前公众号的，比如宝房用户登陆合协公众号，则需要清空session，让他重新登陆
 				if (!oriApp.equals(userAppId)) {
@@ -130,9 +119,6 @@ public class UserController extends BaseController{
 			    log.info("userInfo2，耗时：" + ((endTime-beginTime)));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-//			    List<BottomIcon> showIconList = pageConfigService.filterBottomIcon(user, iconList);
-//			    log.info("iconList : " + showIconList);
-
 			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(iconList);
@@ -142,7 +128,7 @@ public class UserController extends BaseController{
 			    endTime = System.currentTimeMillis();
 			    log.info("user3，耗时：" + ((endTime-beginTime)));
 			    
-			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());
+			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());	//TODO 缓存，主要是积分的变动频率。更新积分时需要刷新缓存
 			    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
 					//do nothing
 				}else {

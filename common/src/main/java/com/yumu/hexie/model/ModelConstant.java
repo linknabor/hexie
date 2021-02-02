@@ -49,6 +49,7 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_RGROUP_TAKER = 13;	//团购接单人员
     public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
     public static final int SERVICE_OPER_TYPE_SAASSALE = 15;	//saas售卖接单提醒
+    public static final int SERVICE_OPER_TYPE_MSG_SENDER = 16;	//物业消息发送人员
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
@@ -57,9 +58,6 @@ public class ModelConstant {
     public static final int EVOUCHER_STATUS_EXPIRED = 3;	//过期
     public static final int EVOUCHER_STATUS_INVALID = 4;	//不可用,退款后的状态
 
-	//操作业务类型
-	public static final int OP_TYPE_SERVICE_ORDER = 1;
-	
 	//订单操作类型
 	public static final int ORDER_OP_CREATE = 1;
 	public static final int ORDER_OP_REQPAY = 2;
@@ -420,9 +418,14 @@ public class ModelConstant {
 	
 	public static final String KEY_USER_COUPON_SEED = "user:gaiedCouponSeed:";	//用户已领过的红包种子
 	
+	public static final String KEY_USER_CACHED = "user:cached";
+	public static final String KEY_USER_SERVE_ROLE = "user:servRole";	//用户服务类型
+	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	
 	public static final String KEY_HEXIE_PARTNER = "partner:";	//合伙人
+	
+	public static final String KEY_MSG_VIEW_CACHE = "msg:cached";
 	
 }		

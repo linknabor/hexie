@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
@@ -69,6 +70,7 @@ public class OperatorServiceImpl implements OperatorService {
     }
     
 	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_USER_SERVE_ROLE, key = "#user.id")
 	public OperatorDefinition defineOperator(User user) {
 		
 		OperatorDefinition oDefinition = new OperatorDefinition();
@@ -89,6 +91,9 @@ public class OperatorServiceImpl implements OperatorService {
 			}
 			if (ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == serviceOperator.getType()) {
 				oDefinition.setRgroupTaker(true);
+			}
+			if (ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER == serviceOperator.getType()) {
+				oDefinition.setMsgSender(true);
 			}
 		}
 		return oDefinition;

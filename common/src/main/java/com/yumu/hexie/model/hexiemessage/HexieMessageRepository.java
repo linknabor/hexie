@@ -9,5 +9,6 @@ public interface HexieMessageRepository extends JpaRepository<HexieMessage, Long
 	
 	public List<HexieMessage> findByUserId(long userId);
 
-	List<HexieMessage> findByBatchNoAndSuccess(String batchNo, boolean success);
+	List<HexieMessage> findByBatchNo(String batchNo);
+
 }
