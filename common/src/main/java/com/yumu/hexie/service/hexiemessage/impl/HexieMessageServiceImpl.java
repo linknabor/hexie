@@ -139,6 +139,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	public void sendMessageMobile(User user, MessageReq messageReq) throws Exception {
 		
 		Assert.hasText(messageReq.getSectId(), "小区ID不能为空。");
+		Assert.hasText(messageReq.getContent(), "发送内容不能为空。");
 		
 		//先把文件上传到七牛
 		String base64Image = messageReq.getImgUrls();
