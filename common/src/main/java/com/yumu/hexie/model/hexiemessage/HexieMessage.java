@@ -19,6 +19,7 @@ public class HexieMessage extends BaseModel{
 	private String content;
 	@JsonProperty("img_urls")
 	private String imgUrls;
+
 	private boolean success;
 	
 	public String getContent() {
