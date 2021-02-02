@@ -23,6 +23,4 @@ public interface HexieMessageService {
 	
 	BaseResult<List<Message>> getSendHistory(User user) throws Exception;
 
-	boolean saveHexieMessage(HexieMessage exr, User user);
-
 }
