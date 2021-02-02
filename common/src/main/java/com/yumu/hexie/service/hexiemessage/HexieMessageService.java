@@ -21,4 +21,5 @@ public interface HexieMessageService {
 	HexieMessage getMessageByBatchNo(String batchNo);
 	
 	BaseResult<List<Message>> getSendHistory(User user) throws Exception;
+
 }

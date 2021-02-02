@@ -31,6 +31,7 @@ import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.model.ModelConstant;
+
 import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.hexiemessage.HexieMessageRepository;
 import com.yumu.hexie.model.user.User;
@@ -88,6 +89,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 			}
 			logger.info("will sent wuye message to user : " + user);
 			success = saveMessage(exr, user);
+
 			if (success) {
 				successFlag = true;	//当前这户，有一个绑定者成功就算成功
 			}
