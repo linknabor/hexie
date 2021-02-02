@@ -71,22 +71,6 @@ public class HexieMessageController extends BaseController{
 	}
 	
 	/**
-	 * 移动端发送消息
-	 * @param user
-	 * @param messageReq
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/testUpload", method = RequestMethod.POST)
-	public BaseResult<String> addMessageTest(@RequestBody MessageReq messageReq) throws Exception {
-		
-		logger.info("messageReq : " + messageReq);
-		messageService.sendMessageMobile(null, messageReq);
-		return BaseResult.successResult(Constants.PAGE_SUCCESS);
-	}
-	
-	/**
 	 * 群发通知查询
 	 * @param messageId
 	 * @return
