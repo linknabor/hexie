@@ -1,6 +1,8 @@
 package com.yumu.hexie.model.hexiemessage;
 
 import javax.persistence.Entity;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.BaseModel;
 @Entity
 public class HexieMessage extends BaseModel{
@@ -15,6 +17,8 @@ public class HexieMessage extends BaseModel{
 	private String cell_addr;
 	private String date_time;
 	private String content;
+	@JsonProperty("img_urls")
+	private String imgUrls;
 	private boolean success;
 	
 	public String getContent() {
@@ -77,11 +81,20 @@ public class HexieMessage extends BaseModel{
 	public void setSuccess(boolean success) {
 		this.success = success;
 	}
+	public String getImgUrls() {
+		return imgUrls;
+	}
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
+	}
+  
 	@Override
 	public String toString() {
 		return "HexieMessage [batchNo=" + batchNo + ", userId=" + userId + ", wuyeId=" + wuyeId + ", type=" + type
 				+ ", mng_cell_id=" + mng_cell_id + ", sect_name=" + sect_name + ", cell_addr=" + cell_addr
-				+ ", date_time=" + date_time + ", content=" + content + ", success=" + success + "]";
+				+ ", date_time=" + date_time + ", content=" + content + ", imgUrls=" + imgUrls + ", success=" + success
+				+ "]";
+
 	}
 	
 
