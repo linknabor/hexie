@@ -121,8 +121,15 @@ public class GotongServiceImpl implements GotongService {
     	String accessToken = systemConfigService.queryWXAToken(user.getAppId());
     	if (!StringUtils.isEmpty(cardServiceApps)) {
     		if (cardServiceApps.indexOf(user.getAppId()) > -1) {
+    			
+    			String key = "DEFAULT_SIGN";
+    			key = key + "_" + user.getAppId();
+    			String appName = systemConfigService.getSysConfigByKey(key);
+    			if (StringUtils.isEmpty(appName)) {
+					appName = "合协社区";
+				}
     			Article article = new Article();
-    			article.setTitle("欢迎您的加入！");
+    			article.setTitle(appName + "欢迎您的加入！");
     			article.setPicurl(url);
     			
     			/**/
@@ -133,7 +140,7 @@ public class GotongServiceImpl implements GotongService {
     			news.getArticles().add(article);
     			msg = new NewsMessage(news);
     			msg.setTouser(user.getOpenid());
-    			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+    			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_TEXT);
 			}
     		
 		}
