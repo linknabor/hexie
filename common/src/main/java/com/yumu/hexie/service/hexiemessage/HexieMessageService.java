@@ -8,6 +8,7 @@ import com.yumu.hexie.model.hexiemessage.HexieMessage;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.req.MessageReq;
 
+
 public interface HexieMessageService {
 	
 	boolean sendMessage(HexieMessage exr);
@@ -21,4 +22,5 @@ public interface HexieMessageService {
 	HexieMessage getMessageByBatchNo(String batchNo);
 	
 	BaseResult<List<Message>> getSendHistory(User user) throws Exception;
+
 }

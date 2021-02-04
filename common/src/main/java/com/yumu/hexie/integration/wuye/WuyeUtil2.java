@@ -84,7 +84,8 @@ public class WuyeUtil2 {
 	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
 	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
 	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
-	
+
+
 	/**
 	 * 标准版查询账单
 	 * @param userId
