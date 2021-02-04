@@ -123,9 +123,11 @@ public class GotongServiceImpl implements GotongService {
     		if (cardServiceApps.indexOf(user.getAppId()) > -1) {
     			Article article = new Article();
     			article.setTitle("欢迎您的加入！");
-    			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
     			article.setPicurl(url);
-    			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
+    			
+    			/**/
+//    			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
+//    			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
     			
     			News news = new News(new ArrayList<Article>());
     			news.getArticles().add(article);
