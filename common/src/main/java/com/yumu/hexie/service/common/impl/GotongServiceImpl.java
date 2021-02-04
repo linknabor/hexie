@@ -21,6 +21,8 @@ import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
+import com.yumu.hexie.integration.wechat.entity.customer.Text;
+import com.yumu.hexie.integration.wechat.entity.customer.TextMessage;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
@@ -114,9 +116,10 @@ public class GotongServiceImpl implements GotongService {
     @Override
 	public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO) {
     	
-    	NewsMessage msg = null;
+//    	NewsMessage msg = null;
+    	TextMessage msg = null;
     	User user = subscribeVO.getUser();
-    	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
+//    	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
     	String cardServiceApps = systemConfigService.getSysConfigByKey("CARD_SERVICE_APPS");
     	String accessToken = systemConfigService.queryWXAToken(user.getAppId());
     	if (!StringUtils.isEmpty(cardServiceApps)) {
@@ -128,17 +131,21 @@ public class GotongServiceImpl implements GotongService {
     			if (StringUtils.isEmpty(appName)) {
 					appName = "合协社区";
 				}
-    			Article article = new Article();
-    			article.setTitle(appName + "欢迎您的加入！");
-    			article.setPicurl(url);
+//    			Article article = new Article();
+//    			article.setTitle(appName + "欢迎您的加入！");
+//    			article.setPicurl(url);
     			
     			/**/
 //    			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
 //    			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
     			
-    			News news = new News(new ArrayList<Article>());
-    			news.getArticles().add(article);
-    			msg = new NewsMessage(news);
+//    			News news = new News(new ArrayList<Article>());
+//    			news.getArticles().add(article);
+//    			msg = new NewsMessage(news);
+    			
+    			Text text = new Text();
+    			text.setContent(appName + "欢迎您的加入！");
+    			msg = new TextMessage(text);
     			msg.setTouser(user.getOpenid());
     			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_TEXT);
 			}
