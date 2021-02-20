@@ -7,6 +7,7 @@ package com.yumu.hexie.integration.wechat.service;
  */
 public class MsgCfg {
 	
+	//模板消息
 	public static String TEMPLATE_MSG = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
 
 	public static final String TEMPLATE_TYPE_PAY_SUCCESS = "paySuccessTemplate";
@@ -43,6 +44,9 @@ public class MsgCfg {
 	public static final String URL_DELIVERY_DETAIL = "deliveryDetailUrl";
 	public static final String URL_CUSTOMER_DELIVERY = "customerDeliveryUrl";
 	
-    
+	//订阅消息
+	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";
+	public static final String TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY = "payNotifySubscribeTemplate";
+	
 	
 }
