@@ -64,4 +64,16 @@ public class BillPushDetail implements Serializable {
     public void setCellAddr(String cellAddr) {
         this.cellAddr = cellAddr;
     }
+
+    @Override
+    public String toString() {
+        return "BillPushDetail{" +
+                "sectId='" + sectId + '\'' +
+                ", sectName='" + sectName + '\'' +
+                ", wuyeId='" + wuyeId + '\'' +
+                ", period='" + period + '\'' +
+                ", feePrice='" + feePrice + '\'' +
+                ", cellAddr='" + cellAddr + '\'' +
+                '}';
+    }
 }
