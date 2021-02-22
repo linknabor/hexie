@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -209,12 +210,15 @@ public class GotongServiceImpl implements GotongService {
         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
         CustomService.sendCustomerMessage(msg, accessToken);
     }
-    /** 
-     * @param count
+
+    /**
+     *
+     * @param serviceType
+     * @param title
      * @param billName
      * @param requireTime
      * @param url
-     * @see com.yumu.hexie.service.common.GotongService#sendYuyueBillMsg(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+     * @param remark
      */
     @Async
     @Override
@@ -354,5 +358,14 @@ public class GotongServiceImpl implements GotongService {
 		templateMsgService.sendPayNotification4HouseBinder(accountNotify, accessToken);
 		
 	}
+
+    /**
+     * 平台公告通知群发
+     */
+    @Override
+    public boolean sendBillPush(String openId, String appId, BillPushDetail billPushDetail) {
+        String accessToken = systemConfigService.queryWXAToken(appId);
+        return templateMsgService.sendBillNotificationMessage(openId, accessToken, appId, billPushDetail);
+    }
 
 }
