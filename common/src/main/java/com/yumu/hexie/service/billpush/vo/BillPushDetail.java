@@ -1,12 +1,14 @@
 package com.yumu.hexie.service.billpush.vo;
 
+import java.io.Serializable;
+
 /**
  * 描述:
  *
  * @author jackie
  * @create 2021-02-22 14:25
  */
-public class BillPushDetail {
+public class BillPushDetail implements Serializable {
 
     private String sectId;
     private String sectName;
