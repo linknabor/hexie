@@ -33,6 +33,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
 import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
+import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
@@ -42,7 +43,6 @@ import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
@@ -515,7 +515,7 @@ public class WuyeServiceImpl implements WuyeService {
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(HomeServiceConstant.SERVICE_TYPE_CUSTOM, user.getId());
+		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_SERVICE, user.getId());
 		ServiceOperator serviceOperator = null;
 		List<PayCfg> serviceList = new ArrayList<>();
 		if (ops!=null && !ops.isEmpty()) {
@@ -584,6 +584,12 @@ public class WuyeServiceImpl implements WuyeService {
 	public CellListVO querySectHeXieList(GetCellDTO getCellDTO) throws Exception {
 		
 		return wuyeUtil2.getMngHeXieList(getCellDTO).getData();
+	}
+	
+	@Override
+	public EReceipt getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception {
+		
+		return wuyeUtil2.getEReceipt(user, tradeWaterId, sysSource).getData();
 	}
 
 	

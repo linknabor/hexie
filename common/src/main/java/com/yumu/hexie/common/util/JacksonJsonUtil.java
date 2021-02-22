@@ -54,6 +54,7 @@ public class JacksonJsonUtil {
 		return sw.toString();
 	}
 	
+	@SuppressWarnings("rawtypes")
 	public static List jsonToBeanList(String jsonStr,Class type) throws Exception{  
 		JavaType javaType = getCollectionType(ArrayList.class, type);
 		return getMapperInstance(false).readValue(jsonStr, javaType);
@@ -183,7 +184,8 @@ public class JacksonJsonUtil {
     /** 
      * json string convert to map 
      */  
-    public static <T> Map<String,Object> json2map(String jsonStr)throws Exception{  
+    @SuppressWarnings("unchecked")
+	public static <T> Map<String,Object> json2map(String jsonStr)throws Exception{  
         return getMapperInstance(false).readValue(jsonStr, Map.class);  
     }  
 }

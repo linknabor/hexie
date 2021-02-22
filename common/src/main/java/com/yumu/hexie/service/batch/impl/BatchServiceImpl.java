@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.HouseListVO;
@@ -53,12 +56,57 @@ public class BatchServiceImpl implements BatchService {
 	@Value("${mainServer}")
 	private Boolean mainServer;
 	
+	/*微信参数begin#################################*/
+	@Value("${wechat.appId}")
+	private String wechatAppId;
+	
+	@Value("${wechat.appSecret}")
+	private String wechatAppSecret;
+	
+	@Value("${wechat.componentAppId}")
+	private String wechatComponentAppId;
+	
+	@Value("${wechat.mchId}")
+	private String wechatMchId;
+	
+	@Value("${wechat.mchKey}")
+	private String wechatMchKey;
+	
+	@Value("${wechat.certPath}")
+	private String wechatCertPath;
+	
+	@Value("${wechat.unifiedUrl}")
+	private String wechatUnifiedUrl;
+	
+	@Value("${wechat.notifyUrl}")
+	private String wechatNotifyUrl;
+	/*微信参数end#################################*/
+	
+	/*支付宝参数begin#################################*/
+	@Value("${alipay.appId}")
+	private String alipayAppId;
+	
+	@Value("${alipay.appSecret}")
+	private String alipayAppSecret;
+	
+	@Value("${alipay.gateway}")
+	private String alipayGateway;
+	
+	@Value("${alipay.appPrivateKey}")
+	private String alipayAppPrivateKey;
+	
+	@Value("${alipay.publicKey}")
+	private String alipayPublicKey;
+	/*支付宝参数end#################################*/
+	
 	@PostConstruct
-	public void runBatch() {
+	public void runBatch() throws InterruptedException {
 		
 		if (mainServer) {	//BK程序不跑下面的队列轮询
 			return;
 		}
+		init();
+		
 		wuyeQueueTask.bindHouseByTrade();
 		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
@@ -75,9 +123,31 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.eshopRefundAsync();
 		couponQueueTask.gainCouponAsync();
 		notifyQueueTask.consumeWuyeCouponAsync();
+		notifyQueueTask.sendWuyeNotification4HouseBinderAysc();
 
 		logger.info("异步队列任务启动完成。");
 		
+	}
+	
+	private void init()	{
+		
+		logger.info("start to init constant ...is mainServer : " + mainServer);
+		Constants.MAIN_SERVER = mainServer;
+		
+		ConstantWeChat.APPID = wechatAppId;
+		ConstantWeChat.APPSECRET = wechatAppSecret;
+		ConstantWeChat.MERCHANT_ID = wechatMchId;
+		ConstantWeChat.MERCHANT_KEY = wechatMchKey;
+		ConstantWeChat.KEYSTORE = wechatCertPath;
+		ConstantWeChat.UNIFIEDURL = wechatUnifiedUrl;
+		ConstantWeChat.NOTIFYURL = wechatNotifyUrl;
+		ConstantWeChat.COMPONENT_APPID = wechatComponentAppId;
+		
+		ConstantAlipay.APPID = alipayAppId;
+		ConstantAlipay.SECRET = alipayAppSecret;
+		ConstantAlipay.APP_PRIVATE_KEY = alipayAppPrivateKey;
+		ConstantAlipay.PUBLIC_KEY = alipayPublicKey;
+		ConstantAlipay.GATEWAY = alipayGateway;
 	}
 
 	@Override

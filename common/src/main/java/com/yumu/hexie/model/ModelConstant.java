@@ -49,6 +49,7 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_RGROUP_TAKER = 13;	//团购接单人员
     public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
     public static final int SERVICE_OPER_TYPE_SAASSALE = 15;	//saas售卖接单提醒
+    public static final int SERVICE_OPER_TYPE_MSG_SENDER = 16;	//物业消息发送人员
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
@@ -57,9 +58,6 @@ public class ModelConstant {
     public static final int EVOUCHER_STATUS_EXPIRED = 3;	//过期
     public static final int EVOUCHER_STATUS_INVALID = 4;	//不可用,退款后的状态
 
-	//操作业务类型
-	public static final int OP_TYPE_SERVICE_ORDER = 1;
-	
 	//订单操作类型
 	public static final int ORDER_OP_CREATE = 1;
 	public static final int ORDER_OP_REQPAY = 2;
@@ -335,13 +333,14 @@ public class ModelConstant {
 	
 	public static final String PARA_TYPE_CSP = "2";
 	
-	public static final String KEY_TYPE_BOTTOM_ICON = "bottomIcon";	//底部图标缓存key
-	public static final String KEY_TYPE_BGIMAGE = "bgImage";	//空白背景图
-	public static final String KEY_TYPE_BANNER = "banner";		//页面顶部轮播图
-	public static final String KEY_TYPE_QRCODE = "qrcode";		//公众号二维码
-	public static final String KEY_TYPE_CSHOTLINE = "csHotline";
-	public static final String KEY_TYPE_PAGECONFIG = "pageConfigView";	//页面配置
-	public static final String KEY_TYPE_WUYEPAY_TABS = "wuyePayTabs";	//物业缴费选项卡
+	public static final String KEY_TYPE_BOTTOM_ICON = "cfg:page:bottomIcon";	//底部图标缓存key
+	public static final String KEY_TYPE_BGIMAGE = "cfg:page:bgImage";	//空白背景图
+	public static final String KEY_TYPE_BANNER = "cfg:page:banner";		//页面顶部轮播图
+	public static final String KEY_TYPE_QRCODE = "cfg:page:qrcode";		//公众号二维码
+	public static final String KEY_TYPE_CSHOTLINE = "cfg:page:csHotline";
+	public static final String KEY_TYPE_PAGECONFIG = "cfg:page:pageConfigView";	//页面配置
+	public static final String KEY_TYPE_WUYEPAY_TABS = "cfg:page:wuyePayTabs";	//物业缴费选项卡
+
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
 	//微信会员卡领卡渠道
@@ -378,7 +377,8 @@ public class ModelConstant {
 	public static final int BANK_CARD_TYPE_DEBIT = 1;	//借记卡
 	public static final int BANK_CARD_TYPE_CREDIT = 2;	//贷记卡
 	
-	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";	//物业支付到账通知
+	public static final String KEY_NOTIFY_PAY_QUEUE = "queue:notify:pay";	//物业支付到账通知（给物业工作人员推送）
+	public static final String KEY_NOTIFY_HOUSE_BINDER_QUEUE = "queue:notify:houseBinder";	//物业支付到账通知(给绑定房屋的人推送)
 	public static final String KEY_NOTIFY_SERVICE_QUEUE = "queue:notify:service";	//服务消息推送
 	public static final String KEY_UPDATE_OPERATOR_QUEUE = "queue:operator:update";	//服务人员更新
 	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新
@@ -396,10 +396,10 @@ public class ModelConstant {
 	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
 	public static final String KEY_CS_SERVED_SECT = "cfg:customservice:sect:";
 	
-	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template:";
-	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url:";
+	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template";
+	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url";
 	
-	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam:";
+	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam";
 	
 	public static final int SMS_TYPE_REG = 101;	//用户注册短信
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
@@ -418,9 +418,14 @@ public class ModelConstant {
 	
 	public static final String KEY_USER_COUPON_SEED = "user:gaiedCouponSeed:";	//用户已领过的红包种子
 	
+	public static final String KEY_USER_CACHED = "user:cached";
+	public static final String KEY_USER_SERVE_ROLE = "user:servRole";	//用户服务类型
+	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	
 	public static final String KEY_HEXIE_PARTNER = "partner:";	//合伙人
+	
+	public static final String KEY_MSG_VIEW_CACHE = "msg:cached";
 	
 }		

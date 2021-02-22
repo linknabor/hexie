@@ -13,8 +13,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.DistanceUtil;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.ServiceRegionRepository;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.assign.AssignRecord;
 import com.yumu.hexie.model.localservice.assign.AssignRecordRepository;
@@ -52,7 +52,7 @@ public class BillAssignServiceImpl implements BillAssignService {
     @Override
     public void assignRepairOrder(RepairOrder order) {
         Address address = addressService.queryAddressById(order.getAddressId());
-        List<ServiceOperator> ops = findOperators(HomeServiceConstant.SERVICE_TYPE_REPAIR,address);
+        List<ServiceOperator> ops = findOperators(ModelConstant.SERVICE_OPER_TYPE_WEIXIU,address);
         if(ops == null || ops.size() == 0) {
             return;
         }

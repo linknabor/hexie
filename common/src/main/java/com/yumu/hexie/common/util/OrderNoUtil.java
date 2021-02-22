@@ -1,6 +1,7 @@
 package com.yumu.hexie.common.util;
 
 import java.util.Date;
+import java.util.Random;
 
 public class OrderNoUtil {
 
@@ -45,13 +46,31 @@ public class OrderNoUtil {
         return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") + (int)(1000+(Math.random()*9000));
     }
     
-    
-    public static void main(String[] args) {
+    /**
+	 * 自定义订单编号
+	 * @return
+	 */
+	public static String getOrderNum(){
+		StringBuffer str=new StringBuffer();
+		str.append(DateUtil.dtFormat(new Date(), "yyyyMMddHHmm"));
+		str.append(getRandomStr());
+		return str.toString();
+	}
+	/**
+	 * 生成6位随机数
+	 * @return
+	 */
+	public static String getRandomStr() {
+
+		Random r = new Random();
+		long i = r.nextInt(100000);
+		long number = i + 900000L;
+		return Long.toString(number);
+	}
+	
+	public static void main(String[] args) {
 		
-    	String no = generateServiceNo();
-    	System.out.println(no);
-    	System.out.println(no.length());
-    	Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
-    	System.out.println(groupId);
+		String ordnm = getOrderNum();
+		System.out.println(ordnm.length());
 	}
 }

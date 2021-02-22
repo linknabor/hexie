@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.baidu.vo.RegionVo.RegionSelection;
-import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.region.RegionUrlRepository;
 import com.yumu.hexie.service.shequ.LocationService;
@@ -64,6 +63,9 @@ public class LocationServiceImpl implements LocationService {
 			}
 			regionShowList.add(selection);
 		}
+		
+		logger.info("location cache init finished !, regionUrlMap : " + regionUrlMap);
+		logger.info("codeUrlMap : " + codeUrlMap);
 	}
 	
 	@Override

@@ -46,5 +46,7 @@ public interface UserService {
 	User simpleRegister(User user);
 	AccessTokenOAuth getAccessTokenOAuth(String code, String appid);
 	AccessTokenOAuth getAlipayAuth(String code);
+	//根据openid从数据库中获取缓存
+	User getByOpenIdFromCache(User sessonUser);
 
 }

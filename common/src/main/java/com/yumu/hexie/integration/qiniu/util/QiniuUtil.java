@@ -28,9 +28,11 @@ public class QiniuUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(QiniuUtil.class);
 
-	private Mac mac = null;
-	private String upToken = null;
-	private RSClient client = null;
+	private Mac mac;
+	private RSClient client;
+	private PutPolicy putPolicy;
+	private String upToken;
+	private long expire;
 	
 	public static final String BUCKET_NAME = "e-shequ";
 	private static final String DEFAULT_WIDTH = "290";	//缩略图的默认长度，iphone4以及5s 一屏为320长度，此处取280
@@ -53,21 +55,14 @@ public class QiniuUtil {
 	 * @return
 	 */
 	@PostConstruct
-	private void initToken(){
+	private void init(){
 		
 		if (mainServer) {	//BK程序不跑下面的队列轮询
 			return;
 		}
-		
-        PutPolicy putPolicy = new PutPolicy(BUCKET_NAME);
-        try {
-        	mac = new Mac(accessKey, secretKey);
-        	client = new RSClient(mac);
-        	upToken = putPolicy.token(mac);
-        	
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
+		mac = new Mac(accessKey, secretKey);
+    	client = new RSClient(mac);
+    	putPolicy = new PutPolicy(BUCKET_NAME);
 		
 	}
 	
@@ -76,8 +71,22 @@ public class QiniuUtil {
 	 * @return
 	 */
 	public String getUpToken(){
-		
+		if ((expire - System.currentTimeMillis()/1000) <= 300l) {	//每次还剩300秒过期的时候，重新初始化token
+			synchronized (this) {
+				try {
+					upToken = putPolicy.token(mac);
+					expire = System.currentTimeMillis() / 1000 + 3600l;
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
 		return upToken;
+	}
+	
+
+	public PutPolicy getPutPolicy() {
+		return putPolicy;
 	}
 
 	/**
@@ -85,10 +94,7 @@ public class QiniuUtil {
 	 * @return
 	 */
 	public RSClient getRsClient(){
-		
-			
 		return client;
-		
 	}
 	
 	/**

@@ -61,7 +61,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				BindHouseQueue queue = objectMapper.readValue(json, new TypeReference<BindHouseQueue>(){});
 				
-				logger.info("strat to consume to queue : " + queue);
+				logger.info("strat to consume bindHouseByTrade queue : " + queue);
 				
 				User user = queue.getUser();
 				

@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -87,6 +89,26 @@ public class UserServiceImpl implements UserService {
 	public List<User> getByOpenId(String openId) {
 		return userRepository.findByOpenid(openId);
 	}
+	
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#sessonUser.openid", unless = "#result == null")
+	public User getByOpenIdFromCache(User sessonUser) {
+		
+		User dbUser = null;
+		List<User> userList = userRepository.findByOpenid(sessonUser.getOpenid());
+		if (userList!=null) {
+			for (User baseduser : userList) {
+				if (baseduser.getId() == sessonUser.getId()) {
+					dbUser = baseduser;
+					break;
+				}else if (baseduser.getOriUserId() == sessonUser.getId() && !ConstantWeChat.APPID.equals(baseduser.getAppId())) {	//从其他公众号迁移过来的用户，登陆时session中应该是源系统的userId，所以跟原系统的比较。
+					dbUser = baseduser;
+					break;
+				}
+			}
+		}
+		return dbUser;
+	}
 
 	@Override
 	public UserWeiXin getOrSubscibeUserByCode(String code) {
@@ -105,6 +127,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#weixinUser.openid")
 	public User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp) {
 
 		String openId = weixinUser.getOpenid();
@@ -175,7 +198,7 @@ public class UserServiceImpl implements UserService {
 				wechatCardRepository.updateCardUserInfo(userAccount.getId(), userAccount.getName(), wechatCard.getId());
 			}
 		}
-		userAccount = userRepository.save(userAccount);
+		userRepository.save(userAccount);
 		return userAccount;
 	}
 
@@ -308,6 +331,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public User simpleRegister(User user) {
 
 		/*查看用户是否领卡：如果已领卡，需要自动激活卡片。*/
@@ -354,8 +378,8 @@ public class UserServiceImpl implements UserService {
 		CouponStrategy registerCouponStrategy = couponStrategyFactory.getRegisterStrategy(user);
 		registerCouponStrategy.sendCoupon(user);
 		user.setRegisterDate(System.currentTimeMillis());
-        User savedUser = save(user);
-        return savedUser;
+        save(user);
+        return user;
 		
 	}
 	

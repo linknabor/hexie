@@ -1,62 +1,65 @@
 package com.yumu.hexie.service.repair.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.common.QueryListDTO;
+import com.yumu.hexie.integration.repair.vo.QueryRAreaVO;
+import com.yumu.hexie.integration.repair.vo.SaveRAreaVO;
 import com.yumu.hexie.model.localservice.repair.RepairArea;
 import com.yumu.hexie.model.localservice.repair.RepairAreaRepository;
 import com.yumu.hexie.service.repair.RepairAreaService;
 
 @Service
 public class RepairAreaServiceImpl implements RepairAreaService {
-
+	
+	private static Logger logger = LoggerFactory.getLogger(RepairAreaServiceImpl.class);
+	
 	@Autowired
 	private RepairAreaRepository repairAreaRepository;
 	
 	@Override
-	public List<RepairArea> getRepairArea(RepairArea repairArea) {
+	public CommonResponse<Object> getRepairArea(QueryRAreaVO queryRAreaVO) {
+		
+		logger.info("queryRAreaVO : " + queryRAreaVO);
 
-		return repairAreaRepository.findByCspIdAndSectid(repairArea.getCspId(), repairArea.getSectId());
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			List<RepairArea> areaList = repairAreaRepository.findBySectIds(queryRAreaVO.getSectIds());
+			QueryListDTO<List<RepairArea>> queryListDTO = new QueryListDTO<>();
+			queryListDTO.setContent(areaList);
+			commonResponse.setData(queryListDTO);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			
+			logger.info(e.getMessage(), e);
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		
+		return commonResponse;
 	}	
 
 	@Transactional
 	@Override
-	public void saveRepairArea(List<RepairArea> list, boolean isSect) {
+	public void saveRepairArea(SaveRAreaVO saveRAreaVO) {
 		
-		/*
-		 * 1.物业公司先删除这个物业下所有的小区，然后重新添加
-		 * 2.小区只删除本小区的，然后重新添加
-		 */
-		List<RepairArea> existList = new ArrayList<>();
-		if (!isSect) {
-			String cspId = list.get(0).getCspId();
-			existList = repairAreaRepository.findByCspId(cspId);
-		}else {
-			List<RepairArea> loopList = null;
-			for (RepairArea existArea : list) {
-				loopList = repairAreaRepository.findByCspIdAndSectid(existArea.getCspId(), existArea.getSectId());
-				if (loopList != null) {
-					existList.addAll(loopList);
-				}
-			}
-			
+		logger.info("saveRAreaVO : " + saveRAreaVO);
+		
+		//先删后增
+		List<RepairArea> areaList = repairAreaRepository.findBySectIds(saveRAreaVO.getDelSectIds());
+		for (RepairArea repairArea : areaList) {
+			repairAreaRepository.delete(repairArea);
 		}
-		if (existList != null) {
-			for (RepairArea existArea : existList) {	//这里用主键删除。其实可以直接delete一个list,但是可能多人操作会有锁表
-				repairAreaRepository.deleteById(existArea.getId());
-			}
-		}
-
-		for (RepairArea area : list) {
-			if (StringUtil.isEmpty(area.getSectId())) {
-				continue;
-			}
-			repairAreaRepository.save(area); 
+		
+		for (RepairArea repairArea : saveRAreaVO.getAreaList()) {
+			repairAreaRepository.save(repairArea);
 		}
 		
 	}

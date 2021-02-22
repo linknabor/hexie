@@ -21,6 +21,8 @@ import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
+import com.yumu.hexie.integration.wechat.entity.customer.Text;
+import com.yumu.hexie.integration.wechat.entity.customer.TextMessage;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
@@ -35,6 +37,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.o2o.OperatorService;
 
 /**
@@ -60,6 +63,8 @@ public class GotongServiceImpl implements GotongService {
     private UserRepository userRepository;
     @Autowired
     private TemplateMsgService templateMsgService;
+    @Autowired
+    private WechatMsgService wechatMsgService;
     
     
     @Async
@@ -67,7 +72,15 @@ public class GotongServiceImpl implements GotongService {
     public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
         ServiceOperator op = serviceOperatorRepository.findById(opId).get();
         User opUser = userRepository.findById(op.getUserId());
+        if (opUser == null) {
+        	LOG.error("operator user is null, will return.");
+			return;
+		}
         User orderUser = userRepository.findById(order.getUserId());
+        if (orderUser == null) {
+        	LOG.error("order user is null, will return.");
+			return;
+		}
         if (StringUtils.isEmpty(opUser.getAppId()) ) {
 			return;
 		}
@@ -83,7 +96,7 @@ public class GotongServiceImpl implements GotongService {
     public void sendRepairAssignedMsg(RepairOrder order){
         
     	User user = userRepository.findById(order.getUserId());
-        String url = templateMsgService.getMsgUrl(MsgCfg.URL_WEIXIU_DETAIL) + order.getId();
+        String url = wechatMsgService.getMsgUrl(MsgCfg.URL_WEIXIU_DETAIL) + order.getId();
         News news = new News(new ArrayList<Article>());
         Article article = new Article();
         article.setTitle("您的维修单已被受理");
@@ -103,24 +116,38 @@ public class GotongServiceImpl implements GotongService {
     @Override
 	public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO) {
     	
-    	NewsMessage msg = null;
+//    	NewsMessage msg = null;
+    	TextMessage msg = null;
     	User user = subscribeVO.getUser();
-    	String url = templateMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
+//    	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
     	String cardServiceApps = systemConfigService.getSysConfigByKey("CARD_SERVICE_APPS");
     	String accessToken = systemConfigService.queryWXAToken(user.getAppId());
     	if (!StringUtils.isEmpty(cardServiceApps)) {
     		if (cardServiceApps.indexOf(user.getAppId()) > -1) {
-    			Article article = new Article();
-    			article.setTitle("欢迎您的加入！");
-    			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
-    			article.setPicurl(url);
-    			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
     			
-    			News news = new News(new ArrayList<Article>());
-    			news.getArticles().add(article);
-    			msg = new NewsMessage(news);
+    			String key = "DEFAULT_SIGN";
+    			key = key + "_" + user.getAppId();
+    			String appName = systemConfigService.getSysConfigByKey(key);
+    			if (StringUtils.isEmpty(appName)) {
+					appName = "合协社区";
+				}
+//    			Article article = new Article();
+//    			article.setTitle(appName + "欢迎您的加入！");
+//    			article.setPicurl(url);
+    			
+    			/**/
+//    			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
+//    			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
+    			
+//    			News news = new News(new ArrayList<Article>());
+//    			news.getArticles().add(article);
+//    			msg = new NewsMessage(news);
+    			
+    			Text text = new Text();
+    			text.setContent(appName + "欢迎您的加入！");
+    			msg = new TextMessage(text);
     			msg.setTouser(user.getOpenid());
-    			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+    			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_TEXT);
 			}
     		
 		}
@@ -142,8 +169,8 @@ public class GotongServiceImpl implements GotongService {
          article.setTitle("欢迎您的加入！");
          article.setDescription("您已获得注册红包，点击查看。");
          
-         String picUrl = templateMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
-         String url = templateMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_DETAIL);
+         String picUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
+         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_DETAIL);
          article.setPicurl(picUrl);
          article.setUrl(url);
          News news = new News(new ArrayList<Article>());
@@ -166,7 +193,7 @@ public class GotongServiceImpl implements GotongService {
     	
     	ServiceOperator op = serviceOperatorRepository.findById(opId).get();
     	User user = userRepository.findById(op.getUserId());
-        String url = templateMsgService.getMsgUrl(MsgCfg.URL_XIYI_NOTICE) + bill.getId();
+        String url = wechatMsgService.getMsgUrl(MsgCfg.URL_XIYI_NOTICE) + bill.getId();
         
         News news = new News(new ArrayList<Article>());
         Article article = new Article();
@@ -218,10 +245,10 @@ public class GotongServiceImpl implements GotongService {
      * 平台公告通知群发
      */
 	@Override
-	public void sendGroupMessage(String openId, String appId, long msgId, String content) {
+	public boolean sendGroupMessage(String openId, String appId, long msgId, String content) {
 		
 		String accessToken = systemConfigService.queryWXAToken(appId);
-		templateMsgService.sendHexieMessage(openId, accessToken, appId, msgId, content);
+		return templateMsgService.sendHexieMessage(openId, accessToken, appId, msgId, content);
 	}
 	
 	/**
@@ -254,7 +281,7 @@ public class GotongServiceImpl implements GotongService {
 		LOG.info("发送自定服务接单通知， serviceOrder : " + serviceOrder.getId());
 		
         User user = userRepository.findById(serviceOrder.getUserId());
-        String url = templateMsgService.getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_DETAIL) + serviceOrder.getId();
+        String url = wechatMsgService.getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_DETAIL) + serviceOrder.getId();
         
         News news = new News(new ArrayList<Article>());
         Article article = new Article();
@@ -303,7 +330,7 @@ public class GotongServiceImpl implements GotongService {
     public void sendPostingReplyMsg(Thread thread){
         
     	User user = userRepository.findById(thread.getUserId());
-        String url = templateMsgService.getMsgUrl(MsgCfg.URL_SERVICE_RESV) + thread.getThreadId();
+        String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SERVICE_RESV) + thread.getThreadId();
         News news = new News(new ArrayList<Article>());
         Article article = new Article();
         article.setTitle("您有新的回复消息");
@@ -316,4 +343,16 @@ public class GotongServiceImpl implements GotongService {
         String accessToken = systemConfigService.queryWXAToken(user.getAppId());
         CustomService.sendCustomerMessage(msg, accessToken);
     }
+    
+    /**
+	 * 交易到账通知(发送给房屋绑定者)
+	 */
+	@Override
+	public void sendPayNotification4HouseBinder(AccountNotification accountNotify) {
+		
+		String accessToken = systemConfigService.queryWXAToken(accountNotify.getUser().getAppId());
+		templateMsgService.sendPayNotification4HouseBinder(accountNotify, accessToken);
+		
+	}
+
 }

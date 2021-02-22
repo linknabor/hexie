@@ -12,15 +12,14 @@ public class RepairArea extends BaseModel {
 	 */
 	private static final long serialVersionUID = 8803025677651091075L;
 	
-	private String sectName;
-	private String sectId;
 	private String cspId;
-	
-	public String getSectName() {
-		return sectName;
+	private String sectId;
+	private String sectName;
+	public String getCspId() {
+		return cspId;
 	}
-	public void setSectName(String sectName) {
-		this.sectName = sectName;
+	public void setCspId(String cspId) {
+		this.cspId = cspId;
 	}
 	public String getSectId() {
 		return sectId;
@@ -28,12 +27,13 @@ public class RepairArea extends BaseModel {
 	public void setSectId(String sectId) {
 		this.sectId = sectId;
 	}
-	public String getCspId() {
-		return cspId;
+	public String getSectName() {
+		return sectName;
 	}
-	public void setCspId(String cspId) {
-		this.cspId = cspId;
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
 	}
+	
 	
 	
 }

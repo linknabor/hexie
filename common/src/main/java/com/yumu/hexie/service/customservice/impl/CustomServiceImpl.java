@@ -1,7 +1,5 @@
 package com.yumu.hexie.service.customservice.impl;
 
-import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +38,6 @@ import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
-import com.yumu.hexie.model.localservice.HomeServiceConstant;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.promotion.PromotionConstant;
@@ -430,7 +427,7 @@ public class CustomServiceImpl implements CustomService {
 		Assert.hasText(orderId, "订单ID不能为空。");
 		ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.valueOf(orderId)).get();
 		if (serviceOrder!=null) {
-			boolean isServiceOper = operatorService.isOperator(HomeServiceConstant.SERVICE_TYPE_CUSTOM,user.getId());
+			boolean isServiceOper = operatorService.isOperator(ModelConstant.SERVICE_OPER_TYPE_SERVICE,user.getId());
 			logger.info("isServiceOper : " + isServiceOper);
 			if (serviceOrder.getUserId()!=user.getId() && !isServiceOper) {
 				throw new BizValidateException("当前用户无法查看此订单。orderId : " + orderId + ", userId : " + user.getId());
