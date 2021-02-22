@@ -25,6 +25,7 @@ import com.yumu.hexie.integration.wechat.entity.customer.Text;
 import com.yumu.hexie.integration.wechat.entity.customer.TextMessage;
 import com.yumu.hexie.integration.wechat.service.CustomService;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
+import com.yumu.hexie.integration.wechat.service.SubscribeMsgService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.community.Thread;
@@ -65,6 +66,8 @@ public class GotongServiceImpl implements GotongService {
     private TemplateMsgService templateMsgService;
     @Autowired
     private WechatMsgService wechatMsgService;
+    @Autowired
+    private SubscribeMsgService subscribeMsgService;
     
     
     @Async
@@ -259,6 +262,7 @@ public class GotongServiceImpl implements GotongService {
 		
 		String accessToken = systemConfigService.queryWXAToken(accountNotify.getUser().getAppId());
 		templateMsgService.sendPayNotification(accountNotify, accessToken);
+		subscribeMsgService.sendPayNotification(accountNotify, accessToken);
 		
 	}
 	
