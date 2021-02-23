@@ -16,6 +16,8 @@ public class BillPushDetail implements Serializable {
     private String period;
     private String feePrice;
     private String cellAddr;
+    private String showFirstMsg;
+    private String remark;
 
     public String getSectId() {
         return sectId;
@@ -65,6 +67,22 @@ public class BillPushDetail implements Serializable {
         this.cellAddr = cellAddr;
     }
 
+    public String getShowFirstMsg() {
+        return showFirstMsg;
+    }
+
+    public void setShowFirstMsg(String showFirstMsg) {
+        this.showFirstMsg = showFirstMsg;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
     @Override
     public String toString() {
         return "BillPushDetail{" +
@@ -74,6 +92,8 @@ public class BillPushDetail implements Serializable {
                 ", period='" + period + '\'' +
                 ", feePrice='" + feePrice + '\'' +
                 ", cellAddr='" + cellAddr + '\'' +
+                ", showFirstMsg='" + showFirstMsg + '\'' +
+                ", remark='" + remark + '\'' +
                 '}';
     }
 }
