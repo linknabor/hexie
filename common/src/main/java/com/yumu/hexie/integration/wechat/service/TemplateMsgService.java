@@ -532,13 +532,12 @@ public class TemplateMsgService {
 	public boolean sendBillNotificationMessage(String openid, String accessToken, String appId, BillPushDetail billPushDetail) {
 
 		CommonVO vo = new CommonVO();
-		vo.setFirst(new TemplateItem("尊敬的业主，您有已出账物业账单待缴费"));
+		vo.setFirst(new TemplateItem(billPushDetail.getShowFirstMsg()));
 		vo.setKeyword1(new TemplateItem(billPushDetail.getSectName())); //小区名称
 		vo.setKeyword2(new TemplateItem(billPushDetail.getCellAddr()));	//房屋地址
 		vo.setKeyword3(new TemplateItem(billPushDetail.getPeriod())); //账期
 		vo.setKeyword4(new TemplateItem(billPushDetail.getFeePrice())); //应缴金额
-		String remark = "请您及时缴费，如有疑问请联系物业";
-		vo.setRemark(new TemplateItem(remark)); //备注
+		vo.setRemark(new TemplateItem(billPushDetail.getRemark())); //备注
 
 		TemplateMsg<CommonVO> msg = new TemplateMsg<>();
 		msg.setData(vo);
