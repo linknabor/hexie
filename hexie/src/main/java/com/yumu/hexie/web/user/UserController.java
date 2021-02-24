@@ -114,11 +114,7 @@ public class UserController extends BaseController{
 			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
 			    
 				/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-				List<MsgTemplate> msgTemplateListAll = new ArrayList<>();
-				if (odDefinition.isEvoucherOperator() || odDefinition.isMsgSender() || odDefinition.isOnsaleTaker() || odDefinition.isRepairOperator() ||
-						odDefinition.isRgroupTaker() || odDefinition.isServiceOperator()) {
-					msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
-				}
+				List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 				List<String> templateIds = new ArrayList<>();
 				for (MsgTemplate msgTemplate : msgTemplateListAll) {
 					templateIds.add(msgTemplate.getValue());
@@ -213,11 +209,7 @@ public class UserController extends BaseController{
 			
 		    OperatorDefinition odDefinition = operatorService.defineOperator(user);
 		    /* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-			List<MsgTemplate> msgTemplateListAll = new ArrayList<>();
-			if (odDefinition.isEvoucherOperator() || odDefinition.isMsgSender() || odDefinition.isOnsaleTaker() || odDefinition.isRepairOperator() ||
-					odDefinition.isRgroupTaker() || odDefinition.isServiceOperator()) {
-				msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
-			}
+		    List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 			List<String> templateIds = new ArrayList<>();
 			for (MsgTemplate msgTemplate : msgTemplateListAll) {
 				templateIds.add(msgTemplate.getValue());
@@ -275,11 +267,7 @@ public class UserController extends BaseController{
 		
 		OperatorDefinition odDefinition = operatorService.defineOperator(userAccount);
 		/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-		List<MsgTemplate> msgTemplateListAll = new ArrayList<>();
-		if (odDefinition.isEvoucherOperator() || odDefinition.isMsgSender() || odDefinition.isOnsaleTaker() || odDefinition.isRepairOperator() ||
-				odDefinition.isRgroupTaker() || odDefinition.isServiceOperator()) {
-			msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(userAccount.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
-		}
+		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(userAccount.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 		List<String> templateIds = new ArrayList<>();
 		for (MsgTemplate msgTemplate : msgTemplateListAll) {
 			templateIds.add(msgTemplate.getValue());
