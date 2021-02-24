@@ -10,8 +10,6 @@ public interface MsgTempalateRepository extends JpaRepository<MsgTemplate, Long>
 	
 	MsgTemplate findByValue(String value);
 	
-//	List<MsgTemplate> findByType(int type);
-	
 	List<MsgTemplate> findByAppidAndTypeAndBizType(String appid, int type, int bizType);
 	
 }

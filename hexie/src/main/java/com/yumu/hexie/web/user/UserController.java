@@ -33,7 +33,6 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
-import com.yumu.hexie.model.subscribemsg.UserSubscribeMsg;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
@@ -115,22 +114,15 @@ public class UserController extends BaseController{
 			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
 			    
 				/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-				List<UserSubscribeMsg> subscribeTemplateList = new ArrayList<>();
 				List<MsgTemplate> msgTemplateListAll = new ArrayList<>();
 				if (odDefinition.isEvoucherOperator() || odDefinition.isMsgSender() || odDefinition.isOnsaleTaker() || odDefinition.isRepairOperator() ||
 						odDefinition.isRgroupTaker() || odDefinition.isServiceOperator()) {
-					subscribeTemplateList = userService.getSubscribeTemplate(user, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 					msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 				}
 				List<String> templateIds = new ArrayList<>();
-				List<String> unsubscribeTemplateIds = new ArrayList<>();
 				for (MsgTemplate msgTemplate : msgTemplateListAll) {
 					templateIds.add(msgTemplate.getValue());
 				}
-				for (UserSubscribeMsg userSubscribeMsg : subscribeTemplateList) {
-					unsubscribeTemplateIds.add(userSubscribeMsg.getTemplateId());
-				}
-				templateIds.removeAll(unsubscribeTemplateIds);	//去除已经订阅过的消息模板
 			    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
 			    
 			    UserInfo userInfo = new UserInfo(user, odDefinition, templateIds);
@@ -221,22 +213,15 @@ public class UserController extends BaseController{
 			
 		    OperatorDefinition odDefinition = operatorService.defineOperator(user);
 		    /* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-		    List<UserSubscribeMsg> subscribeTemplateList = new ArrayList<>();
 			List<MsgTemplate> msgTemplateListAll = new ArrayList<>();
 			if (odDefinition.isEvoucherOperator() || odDefinition.isMsgSender() || odDefinition.isOnsaleTaker() || odDefinition.isRepairOperator() ||
 					odDefinition.isRgroupTaker() || odDefinition.isServiceOperator()) {
-				subscribeTemplateList = userService.getSubscribeTemplate(user, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 				msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 			}
 			List<String> templateIds = new ArrayList<>();
-			List<String> unsubscribeTemplateIds = new ArrayList<>();
 			for (MsgTemplate msgTemplate : msgTemplateListAll) {
 				templateIds.add(msgTemplate.getValue());
 			}
-			for (UserSubscribeMsg userSubscribeMsg : subscribeTemplateList) {
-				unsubscribeTemplateIds.add(userSubscribeMsg.getTemplateId());
-			}
-			templateIds.removeAll(unsubscribeTemplateIds);	//去除已经订阅过的消息模板
 		    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
 		    UserInfo userInfo = new UserInfo(user, odDefinition, templateIds);
 		    
@@ -290,22 +275,15 @@ public class UserController extends BaseController{
 		
 		OperatorDefinition odDefinition = operatorService.defineOperator(userAccount);
 		/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-		List<UserSubscribeMsg> subscribeTemplateList = new ArrayList<>();
 		List<MsgTemplate> msgTemplateListAll = new ArrayList<>();
 		if (odDefinition.isEvoucherOperator() || odDefinition.isMsgSender() || odDefinition.isOnsaleTaker() || odDefinition.isRepairOperator() ||
 				odDefinition.isRgroupTaker() || odDefinition.isServiceOperator()) {
-			subscribeTemplateList = userService.getSubscribeTemplate(userAccount, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 			msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(userAccount.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 		}
 		List<String> templateIds = new ArrayList<>();
-		List<String> unsubscribeTemplateIds = new ArrayList<>();
 		for (MsgTemplate msgTemplate : msgTemplateListAll) {
 			templateIds.add(msgTemplate.getValue());
 		}
-		for (UserSubscribeMsg userSubscribeMsg : subscribeTemplateList) {
-			unsubscribeTemplateIds.add(userSubscribeMsg.getTemplateId());
-		}
-		templateIds.removeAll(unsubscribeTemplateIds);	//去除已经订阅过的消息模板
 	    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
 	    UserInfo userInfo = new UserInfo(userAccount, odDefinition, templateIds);
 		return new BaseResult<UserInfo>().success(userInfo);
