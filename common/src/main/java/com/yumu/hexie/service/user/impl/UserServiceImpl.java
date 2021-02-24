@@ -42,6 +42,8 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
+import com.yumu.hexie.model.subscribemsg.UserSubscribeMsg;
+import com.yumu.hexie.model.subscribemsg.UserSubscribeMsgRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -77,6 +79,8 @@ public class UserServiceImpl implements UserService {
 	private RedisRepository redisRepository;
 	@Autowired
 	private AlipayClient alipayClient;
+	@Autowired
+	private UserSubscribeMsgRepository userSubscribeMsgRepository;
 	
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -422,6 +426,15 @@ public class UserServiceImpl implements UserService {
 		return oAuth;
 		
 	}
+	
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_USER_SUBSCRIBE_MSG_TEMPLATE, key = "#user.openid" )
+	public List<UserSubscribeMsg> getSubscribeTemplate(User user, int type) {
+		
+		return userSubscribeMsgRepository.findByOpenidAndBizType(user.getOpenid(), type);
+		
+	}
+
 
 
 }

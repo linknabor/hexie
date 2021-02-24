@@ -6,6 +6,7 @@ import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.subscribemsg.UserSubscribeMsg;
 import com.yumu.hexie.model.user.User;
 
 
@@ -48,5 +49,7 @@ public interface UserService {
 	AccessTokenOAuth getAlipayAuth(String code);
 	//根据openid从数据库中获取缓存
 	User getByOpenIdFromCache(User sessonUser);
+	//获取用户订阅的模板ID列表
+	List<UserSubscribeMsg> getSubscribeTemplate(User user, int type);
 
 }

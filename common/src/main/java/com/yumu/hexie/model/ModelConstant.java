@@ -368,6 +368,7 @@ public class ModelConstant {
 	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
 	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
 	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
+	public static final String KEY_EVENT_SUBSCRIBE_MSG_QUEUE = "queueSubscribeMsg";	//用户在图文等场景内订阅通知的操作 事件队列
 	
 	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
 	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
@@ -398,6 +399,7 @@ public class ModelConstant {
 	
 	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template";
 	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url";
+	public static final String KEY_SUBSCRIBE_MSG_TEMPLATE = "cfg:subscribeMsg:template";	//所有能订阅的消息模板
 	
 	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam";
 	
@@ -420,12 +422,19 @@ public class ModelConstant {
 	
 	public static final String KEY_USER_CACHED = "user:cached";
 	public static final String KEY_USER_SERVE_ROLE = "user:servRole";	//用户服务类型
+	public static final String KEY_USER_SUBSCRIBE_MSG_TEMPLATE = "user:subscribeMsgTemplate";	//用户订阅过的消息模板
 	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	
 	public static final String KEY_HEXIE_PARTNER = "partner:";	//合伙人
-	
 	public static final String KEY_MSG_VIEW_CACHE = "msg:cached";
 	
+	//模板业务类型, 0.普通用户的模板，1工作人员模板
+	public static final int SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_NORMAL = 0;
+	public static final int SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR = 1;	
+	
+	//消息类型，0模板消息，1订阅消息
+	public static final int MSG_TYPE_TEMPLATE = 0;
+	public static final int MSG_TYPE_SUBSCRIBE_MSG = 1;
 }		

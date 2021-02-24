@@ -82,7 +82,7 @@ public class UserInfo implements Serializable {
  	private boolean isDonghu;	//是否东湖版本的公众号
  	private boolean cardPayService;	//公众号是否支持银行卡支付
  	private ServeRole serveRole;
- 	
+ 	private List<String> subscribeTemplateIds;	//未订阅需要弹窗提示的模板列表
  	
  	public static class ServeRole{
  		
@@ -149,7 +149,7 @@ public class UserInfo implements Serializable {
         BeanUtils.copyProperties(user, this);
     }
     
-    public UserInfo(User user, OperatorDefinition odDefinition){
+    public UserInfo(User user, OperatorDefinition odDefinition, List<String> subscribeTemplateIds){
         BeanUtils.copyProperties(user, this);
         ServeRole serveRole = new ServeRole();
         serveRole.isRepairOperator = odDefinition.isRepairOperator();
@@ -158,6 +158,7 @@ public class UserInfo implements Serializable {
         serveRole.isMerchant = odDefinition.isOnsaleTaker() || odDefinition.isRgroupTaker();
         serveRole.isMsgSender = odDefinition.isMsgSender();
         this.serveRole = serveRole;
+        this.subscribeTemplateIds = subscribeTemplateIds;
     }
     public String getRealName() {
         return realName;
@@ -402,6 +403,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setServeRole(ServeRole serveRole) {
 		this.serveRole = serveRole;
+	}
+	public List<String> getSubscribeTemplateIds() {
+		return subscribeTemplateIds;
+	}
+	public void setSubscribeTemplateIds(List<String> subscribeTemplateIds) {
+		this.subscribeTemplateIds = subscribeTemplateIds;
 	}
 	
 	
