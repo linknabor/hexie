@@ -48,6 +48,7 @@ public class MsgCfg {
 	//订阅消息
 	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";
 	public static final String TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY = "payNotifySubscribeTemplate";
+	public static final String TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY = "orderNotifySubscribeTemplate";
 	
 	
 }
