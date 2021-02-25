@@ -48,10 +48,10 @@ public class SubscribeMsgService {
     public void sendPayNotification(AccountNotification accountNotification, String accessToken) {
 
     	ArrivalNotificationVO vo = new ArrivalNotificationVO();
-    	vo.setRemark(new SubscribeItem(accountNotification.getFeeName()));
+    	vo.setRemark(new SubscribeItem(accountNotification.getPayMethod()));
     	vo.setTranDate(new SubscribeItem(accountNotification.getTranDate()));
     	vo.setAmount(new SubscribeItem(accountNotification.getFeePrice().toString()));
-    	vo.setPayMethod(new SubscribeItem(accountNotification.getPayMethod()));
+    	vo.setFeeName(new SubscribeItem(accountNotification.getFeeName()));
     	
     	SubscribeMsg<ArrivalNotificationVO> msg = new SubscribeMsg<>();
     	msg.setData(vo);

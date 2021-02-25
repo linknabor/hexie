@@ -17,7 +17,7 @@ public class ArrivalNotificationVO implements Serializable {
 	private static final long serialVersionUID = 7390087650969060825L;
 
 	@JsonProperty("thing2")
-	private SubscribeItem payMethod;	//支付方式
+	private SubscribeItem feeName;	//支付方式
 	@JsonProperty("time1")
 	private SubscribeItem tranDate;	//交易日期
 	@JsonProperty("amount3")
@@ -25,11 +25,12 @@ public class ArrivalNotificationVO implements Serializable {
 	@JsonProperty("thing4")
 	private SubscribeItem remark;	//备注
 	
-	public SubscribeItem getPayMethod() {
-		return payMethod;
+	
+	public SubscribeItem getFeeName() {
+		return feeName;
 	}
-	public void setPayMethod(SubscribeItem payMethod) {
-		this.payMethod = payMethod;
+	public void setFeeName(SubscribeItem feeName) {
+		this.feeName = feeName;
 	}
 	public SubscribeItem getTranDate() {
 		return tranDate;
@@ -51,7 +52,7 @@ public class ArrivalNotificationVO implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "ArrivalNotification [payMethod=" + payMethod + ", tranDate=" + tranDate + ", amount=" + amount
+		return "ArrivalNotificationVO [feeName=" + feeName + ", tranDate=" + tranDate + ", amount=" + amount
 				+ ", remark=" + remark + "]";
 	}
 	
