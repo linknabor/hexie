@@ -437,4 +437,5 @@ public class ModelConstant {
 	//消息类型，0模板消息，1订阅消息
 	public static final int MSG_TYPE_TEMPLATE = 0;
 	public static final int MSG_TYPE_SUBSCRIBE_MSG = 1;
+
 }		
