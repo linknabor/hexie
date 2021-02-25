@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
+import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class TemplateMsgService {
 		} else {
 			vo.setRemark(new TemplateItem("恭喜您得到超值现金券一枚，查看详情并分享链接即可领取。"));
 		}
-		TemplateMsg<PaySuccessVO> msg = new TemplateMsg<PaySuccessVO>();
+		TemplateMsg<PaySuccessVO> msg = new TemplateMsg<>();
 		msg.setData(vo);
 		
 		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_PAY_SUCCESS, appId));
@@ -123,7 +124,7 @@ public class TemplateMsgService {
 		vo.setRegisterDateTime(new TemplateItem(registerDateTime));
 		vo.setRemark(new TemplateItem("点击详情查看。"));
 		
-		TemplateMsg<RegisterSuccessVO>msg = new TemplateMsg<RegisterSuccessVO>();
+		TemplateMsg<RegisterSuccessVO>msg = new TemplateMsg<>();
 		msg.setData(vo);
 		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_REG_SUCCESS, user.getAppId()));
 		
@@ -155,7 +156,7 @@ public class TemplateMsgService {
 		vo.setPay_time((new TemplateItem(payDateTime)));
 		vo.setRemark(new TemplateItem("点击详情查看"));
 		
-		TemplateMsg<WuyePaySuccessVO>msg = new TemplateMsg<WuyePaySuccessVO>();
+		TemplateMsg<WuyePaySuccessVO>msg = new TemplateMsg<>();
 		msg.setData(vo);
 		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_WUYEPAY_SUCCESS, user.getAppId()));
 		String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_REG_SUCCESS);
@@ -168,8 +169,10 @@ public class TemplateMsgService {
 
 	/**
 	 * 发送维修单信息给维修工
-	 * @param seed
 	 * @param ro
+	 * @param op
+	 * @param accessToken
+	 * @param appId
 	 */
     public void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op, String accessToken, String appId) {
     	
@@ -184,7 +187,7 @@ public class TemplateMsgService {
     	vo.setCustAddr(new TemplateItem(ro.getAddress()));
     	vo.setRemark(new TemplateItem("有新的维修单"+ro.getXiaoquName()+"快来抢单吧"));
   
-    	TemplateMsg<RepairOrderVO>msg = new TemplateMsg<RepairOrderVO>();
+    	TemplateMsg<RepairOrderVO>msg = new TemplateMsg<>();
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_REPAIR_ASSIGN,appId));
     	String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_WEIXIU_NOTICE);
@@ -218,7 +221,7 @@ public class TemplateMsgService {
 		}else {
 			vo.setRemark(new TemplateItem(remark));
 		}
-        TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<YuyueOrderVO>();
+        TemplateMsg<YuyueOrderVO>msg = new TemplateMsg<>();
         msg.setData(vo);
         msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_YUYUE_ASSGIN, appId));
         if (StringUtils.isEmpty(url)) {
@@ -249,7 +252,7 @@ public class TemplateMsgService {
     	log.error("预约服务的userId="+user.getId()+"");
     	log.error("预约服务的user="+user+""); 	
     	
-    	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<HaoJiaAnOrderVO>();
+    	TemplateMsg<HaoJiaAnOrderVO> msg = new TemplateMsg<>();
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_YUYUE_ASSGIN, user.getAppId()));
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_YUYUE_NOTICE) + hOrder.getyOrderId();
@@ -275,11 +278,11 @@ public class TemplateMsgService {
     	vo.setUserName(new TemplateItem(comment.getCommentUserName()));//用户姓名
     	vo.setUserTel(new TemplateItem(comment.getCommentUserTel()));//用户电话
     	vo.setReason(new TemplateItem(comment.getCommentContent()));//投诉事由
-    	vo.setOrderNo(new TemplateItem(comment.getYuyueOrderNo()));;//订单编号
+    	vo.setOrderNo(new TemplateItem(comment.getYuyueOrderNo()));//订单编号
     	vo.setMemo(new TemplateItem("用户对您的服务有投诉，请尽快联系用户处理。"));//备注（固定内容）
     	log.error("投诉的userId="+user.getId()+"");
     	log.error("投诉的user="+user+""); 
-    	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<HaoJiaAnCommentVO>();
+    	TemplateMsg<HaoJiaAnCommentVO> msg = new TemplateMsg<>();
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_COMPLAIN, user.getAppId()));
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_COMPLAIN_DETAIL) + comment.getId();
@@ -312,7 +315,7 @@ public class TemplateMsgService {
     	  	vo.setRemark(new TemplateItem("请及时到物业领取。"));
     	}
 	  	
-	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
+	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<>();
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SERVICE, appId));
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_EXPRESS) + userId;
@@ -337,7 +340,7 @@ public class TemplateMsgService {
 	  	vo.setRecvDate(new TemplateItem(recvDate));
 	  	vo.setRemark(new TemplateItem("请点击查看"));
 	  	
-	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<WuyeServiceVO>();
+	  	TemplateMsg<WuyeServiceVO>msg = new TemplateMsg<>();
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_MESSAGE, appId));
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_MESSAGE) + messageId;
@@ -346,14 +349,13 @@ public class TemplateMsgService {
     	return sendMsg(msg, accessToken);
 
 	}
-   
-    /**
-     * 支付到账通知
-     * @param openid
-     * @param accessToken
-     * @param appId
-     */
-    public void sendPayNotification(AccountNotification accountNotification, String accessToken) {
+
+	/**
+	 * 支付到账通知
+	 * @param accountNotification
+	 * @param accessToken
+	 */
+	public void sendPayNotification(AccountNotification accountNotification, String accessToken) {
     	
     	PayNotifyMsgVO vo = new PayNotifyMsgVO();
 		vo.setTitle(new TemplateItem("您好，您有一笔订单收款成功。此信息仅供参考，请最终以商户端实际到账结果为准。"));
@@ -363,7 +365,7 @@ public class TemplateMsgService {
 	  	vo.setTranType(new TemplateItem(accountNotification.getFeeName()));
 	  	vo.setRemark(new TemplateItem(accountNotification.getRemark()));
     	
-	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<PayNotifyMsgVO>();
+	  	TemplateMsg<PayNotifyMsgVO>msg = new TemplateMsg<>();
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_PAY_NOTIFY, accountNotification.getUser().getAppId()));
 //    	String url = getMsgUrl(MsgCfg.URL_PAY_NOTIFY);
@@ -373,21 +375,16 @@ public class TemplateMsgService {
 
 	}
 
-    /**
-     * 预约服务模板
-     * @param openId
-     * @param title
-     * @param billName
-     * @param requireTime
-     * @param url
-     * @param accessToken
-     * @param appId
-     */
+	/**
+	 * 预约服务模板
+	 * @param sendUser
+	 * @param serviceOrder
+	 * @param accessToken
+	 */
     public void sendServiceNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
 
         //更改为使用模版消息发送
-    	User user = sendUser;
-    	CsOrderVO vo = new CsOrderVO();
+		CsOrderVO vo = new CsOrderVO();
     	String title = "您有一个新的服务订单，请及时处理。";
     	vo.setTitle(new TemplateItem(title));
     	vo.setOrderId(new TemplateItem(String.valueOf(serviceOrder.getId())));
@@ -397,34 +394,29 @@ public class TemplateMsgService {
     	vo.setCustomerTel(new TemplateItem(serviceOrder.getTel()));
     	vo.setRemark(new TemplateItem(serviceOrder.getAddress()));
     	
-        TemplateMsg<CsOrderVO>msg = new TemplateMsg<CsOrderVO>();
+        TemplateMsg<CsOrderVO>msg = new TemplateMsg<>();
         msg.setData(vo);
-        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN, user.getAppId()));
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_CUSTOM_SERVICE_ASSGIN, sendUser.getAppId()));
         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_ASSIGN);
         if (!StringUtils.isEmpty(url)) {
 			url = url + serviceOrder.getId();
-			url = AppUtil.addAppOnUrl(url, user.getAppId());
+			url = AppUtil.addAppOnUrl(url, sendUser.getAppId());
 		}
         msg.setUrl(url);
-        msg.setTouser(user.getOpenid());
+        msg.setTouser(sendUser.getOpenid());
         sendMsg(msg, accessToken);
         
     }
-    
-    /**
-     * 发货提醒
-     * @param openId
-     * @param title
-     * @param billName
-     * @param requireTime
-     * @param url
-     * @param accessToken
-     * @param appId
-     */
-    public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
 
-    	User user = sendUser;
-    	String title = "您有一个新的订单，请及时处理。";
+	/**
+	 * 发货提醒
+	 * @param sendUser
+	 * @param serviceOrder
+	 * @param accessToken
+	 */
+	public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder, String accessToken) {
+
+		String title = "您有一个新的订单，请及时处理。";
     	String orderDate = DateUtil.dtFormat(new Date(serviceOrder.getCreateDate()));
     	String customerName = serviceOrder.getReceiverName();
 
@@ -439,14 +431,14 @@ public class TemplateMsgService {
     	
         TemplateMsg<CommonVO>msg = new TemplateMsg<>();
         msg.setData(vo);
-        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_DELIVERY_MESSAGE, user.getAppId()));	
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_DELIVERY_MESSAGE, sendUser.getAppId()));
         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_DELIVERY_DETAIL);
         if (!StringUtils.isEmpty(url)) {
 			url = url + serviceOrder.getId();
-			url = AppUtil.addAppOnUrl(url, user.getAppId());
+			url = AppUtil.addAppOnUrl(url, sendUser.getAppId());
 		}
         msg.setUrl(url);
-        msg.setTouser(user.getOpenid());
+        msg.setTouser(sendUser.getOpenid());
         sendMsg(msg, accessToken);
         
     }
@@ -469,28 +461,23 @@ public class TemplateMsgService {
     	vo.setResetTime(new TemplateItem(resetTime));
     	vo.setRemark(new TemplateItem("请用PC浏览器访问b.e-shequ.cn，进入您的运营系统"));
     	
-    	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<ResetPasswordVO>();
+    	TemplateMsg<ResetPasswordVO>msg = new TemplateMsg<>();
         msg.setData(vo);
         msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_RESET_PASSWORD, user.getAppId()));
         msg.setTouser(user.getOpenid());
         sendMsg(msg, accessToken);
     	
     }
-    
-    /**
-     * 用户订单发货提醒
-     * @param openId
-     * @param title
-     * @param billName
-     * @param requireTime
-     * @param url
-     * @param accessToken
-     * @param appId
-     */
-    public void sendCustomerDeliveryMessage(User sendUser, ServiceOrder serviceOrder, String accessToken) {
 
-    	User user = sendUser;
-    	String title = "您购买的订单已经发货啦，正快马加鞭向您飞奔而去。";
+	/**
+	 * 用户订单发货提醒
+	 * @param sendUser
+	 * @param serviceOrder
+	 * @param accessToken
+	 */
+	public void sendCustomerDeliveryMessage(User sendUser, ServiceOrder serviceOrder, String accessToken) {
+
+		String title = "您购买的订单已经发货啦，正快马加鞭向您飞奔而去。";
 
     	CommonVO vo = new CommonVO();
     	vo.setFirst(new TemplateItem(title));
@@ -502,25 +489,24 @@ public class TemplateMsgService {
     	
         TemplateMsg<CommonVO>msg = new TemplateMsg<>();
         msg.setData(vo);
-        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_CUSTOMER_DELIVERY, user.getAppId()));	
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_CUSTOMER_DELIVERY, sendUser.getAppId()));
         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_CUSTOMER_DELIVERY);
         if (!StringUtils.isEmpty(url)) {
 			url = url + serviceOrder.getId();
-			url = AppUtil.addAppOnUrl(url, user.getAppId());
+			url = AppUtil.addAppOnUrl(url, sendUser.getAppId());
 		}
         msg.setUrl(url);
-        msg.setTouser(user.getOpenid());
+        msg.setTouser(sendUser.getOpenid());
         sendMsg(msg, accessToken);
         
     }
-    
-    /**
-     * 支付到账通知(发送给房屋绑定者)
-     * @param openid
-     * @param accessToken
-     * @param appId
-     */
-    public void sendPayNotification4HouseBinder(AccountNotification accountNotification, String accessToken) {
+
+	/**
+	 * 支付到账通知(发送给房屋绑定者)
+	 * @param accountNotification
+	 * @param accessToken
+	 */
+	public void sendPayNotification4HouseBinder(AccountNotification accountNotification, String accessToken) {
     	
     	CommonVO2 vo = new CommonVO2();
 		vo.setFirst(new TemplateItem("您好，您已付款成功。"));
@@ -531,7 +517,7 @@ public class TemplateMsgService {
 	  	vo.setKeyword5(new TemplateItem(accountNotification.getPayMethod()));
 	  	vo.setRemark(new TemplateItem("点击查看详情"));
     	
-	  	TemplateMsg<CommonVO2>msg = new TemplateMsg<CommonVO2>();
+	  	TemplateMsg<CommonVO2>msg = new TemplateMsg<>();
     	msg.setData(vo);
     	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_PAY_HOUSE_BIND_NOTIFY, accountNotification.getUser().getAppId()));
     	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_PAY_HOUSE_BINDER_NOTIFY);
@@ -540,6 +526,29 @@ public class TemplateMsgService {
     	msg.setUrl(url);
     	msg.setTouser(accountNotification.getUser().getOpenid());
     	sendMsg(msg, accessToken);
+
+	}
+
+	public boolean sendBillNotificationMessage(String openid, String accessToken, String appId, BillPushDetail billPushDetail) {
+
+		CommonVO vo = new CommonVO();
+		vo.setFirst(new TemplateItem(billPushDetail.getShowFirstMsg()));
+		vo.setKeyword1(new TemplateItem(billPushDetail.getSectName())); //小区名称
+		vo.setKeyword2(new TemplateItem(billPushDetail.getCellAddr()));	//房屋地址
+		vo.setKeyword3(new TemplateItem(billPushDetail.getPeriod())); //账期
+		vo.setKeyword4(new TemplateItem(billPushDetail.getFeePrice())); //应缴金额
+		vo.setRemark(new TemplateItem(billPushDetail.getRemark())); //备注
+
+		TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_BILL_PUSH, appId));
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_WUYE_PAY);
+		if (!StringUtils.isEmpty(url)) {
+			url = AppUtil.addAppOnUrl(url, appId);
+		}
+		msg.setUrl(url);
+		msg.setTouser(openid);
+		return sendMsg(msg, accessToken);
 
 	}
 
