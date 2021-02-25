@@ -79,7 +79,14 @@ public class SubscribeMsgService {
     	vo.setOrderType(new SubscribeItem(serviceOrder.getSubTypeName()));
     	String customerName = serviceOrder.getReceiverName();
     	vo.setReceiver(new SubscribeItem(customerName + "," + serviceOrder.getTel()));
-    	vo.setRecvAddr(new SubscribeItem(serviceOrder.getAddress()));
+    	
+    	String address = serviceOrder.getAddress();
+    	if (!StringUtils.isEmpty(address)) {
+    		address = address.substring(address.length()-18, address.length());
+        	address = "……"+address;
+		}
+    	
+    	vo.setRecvAddr(new SubscribeItem(address));
     	vo.setCreateDate(new SubscribeItem(serviceOrder.getCreateDateStr()));
     	
     	SubscribeMsg<OrderNotificationVO> msg = new SubscribeMsg<>();
@@ -108,8 +115,14 @@ public class SubscribeMsgService {
     	//更改为使用模版消息发送
     	OrderNotificationVO vo = new OrderNotificationVO();
     	vo.setReceiver(new SubscribeItem(ro.getReceiverName()+"," + ro.getTel()));
-    	vo.setRecvAddr(new SubscribeItem(ro.getAddress()));
-    	vo.setOrderType(new SubscribeItem("有新的维修单"+ro.getXiaoquName()+"快来抢单吧"));
+    	
+    	String address = ro.getAddress();
+    	if (!StringUtils.isEmpty(address)) {
+    		address = address.substring(address.length()-18, address.length());
+        	address = "……"+address;
+		}
+    	vo.setRecvAddr(new SubscribeItem(address));
+    	vo.setOrderType(new SubscribeItem("维修单"));
     	vo.setCreateDate(new SubscribeItem(DateUtil.dtFormat(ro.getCreateDate(), DateUtil.dttmSimple)));
   
     	SubscribeMsg<OrderNotificationVO>msg = new SubscribeMsg<>();
