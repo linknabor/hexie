@@ -99,10 +99,9 @@ public class GotongServiceImpl implements GotongService {
         
         String templateId = wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY, opUser.getAppId());
         UserSubscribeMsg userSubscribeMsg = userSubscribeMsgRepository.findByOpenidAndTemplateId(opUser.getOpenid(), templateId);
+        templateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
         if (userSubscribeMsg != null) {
         	subscribeMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
-		} else {
-			templateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
 		}
         
     }
@@ -280,10 +279,9 @@ public class GotongServiceImpl implements GotongService {
 		
 		String templateId = wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY, accountNotify.getUser().getAppId());
 		UserSubscribeMsg userSubscribeMsg = userSubscribeMsgRepository.findByOpenidAndTemplateId(accountNotify.getUser().getOpenid(), templateId);
+		templateMsgService.sendPayNotification(accountNotify, accessToken);
 		if (userSubscribeMsg != null) {
 			subscribeMsgService.sendPayNotification(accountNotify, accessToken);
-		} else {
-			templateMsgService.sendPayNotification(accountNotify, accessToken);
 		}
 		
 	}
@@ -299,10 +297,9 @@ public class GotongServiceImpl implements GotongService {
 		
 		String templateId = wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY, sendUser.getAppId());
 		UserSubscribeMsg userSubscribeMsg = userSubscribeMsgRepository.findByOpenidAndTemplateId(sendUser.getOpenid(), templateId);
+		templateMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
 		if (userSubscribeMsg != null) {
 			subscribeMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
-		} else {
-			templateMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
 		}
 	}
 	
