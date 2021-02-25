@@ -35,6 +35,8 @@ import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.subscribemsg.UserSubscribeMsg;
+import com.yumu.hexie.model.subscribemsg.UserSubscribeMsgRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -69,6 +71,8 @@ public class GotongServiceImpl implements GotongService {
     private WechatMsgService wechatMsgService;
     @Autowired
     private SubscribeMsgService subscribeMsgService;
+    @Autowired
+    private UserSubscribeMsgRepository userSubscribeMsgRepository;
     
     
     @Async
@@ -92,8 +96,15 @@ public class GotongServiceImpl implements GotongService {
 			return;
 		}
         String accessToken = systemConfigService.queryWXAToken(opUser.getAppId());
-        templateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
-        subscribeMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
+        
+        String templateId = wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY, opUser.getAppId());
+        UserSubscribeMsg userSubscribeMsg = userSubscribeMsgRepository.findByOpenidAndTemplateId(opUser.getOpenid(), templateId);
+        if (userSubscribeMsg != null && userSubscribeMsg.getStatus() == 1) {
+        	subscribeMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
+		} else {
+			templateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
+		}
+        
     }
     
     @Async
@@ -266,8 +277,14 @@ public class GotongServiceImpl implements GotongService {
 	public void sendPayNotification(AccountNotification accountNotify) {
 		
 		String accessToken = systemConfigService.queryWXAToken(accountNotify.getUser().getAppId());
-		templateMsgService.sendPayNotification(accountNotify, accessToken);
-		subscribeMsgService.sendPayNotification(accountNotify, accessToken);
+		
+		String templateId = wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY, accountNotify.getUser().getAppId());
+		UserSubscribeMsg userSubscribeMsg = userSubscribeMsgRepository.findByOpenidAndTemplateId(accountNotify.getUser().getOpenid(), templateId);
+		if (userSubscribeMsg != null && userSubscribeMsg.getStatus() == 1) {
+			subscribeMsgService.sendPayNotification(accountNotify, accessToken);
+		} else {
+			templateMsgService.sendPayNotification(accountNotify, accessToken);
+		}
 		
 	}
 	
@@ -279,9 +296,14 @@ public class GotongServiceImpl implements GotongService {
 
 		LOG.info("发送自定义服务通知！ sendUser : " + sendUser);
 		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
-		templateMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
-		subscribeMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
 		
+		String templateId = wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY, sendUser.getAppId());
+		UserSubscribeMsg userSubscribeMsg = userSubscribeMsgRepository.findByOpenidAndTemplateId(sendUser.getOpenid(), templateId);
+		if (userSubscribeMsg != null && userSubscribeMsg.getStatus() == 1) {
+			subscribeMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
+		} else {
+			templateMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
+		}
 	}
 	
 	
