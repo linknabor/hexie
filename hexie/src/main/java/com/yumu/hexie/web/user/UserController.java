@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.user;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
+import com.yumu.hexie.model.msgtemplate.MsgTemplate;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
@@ -41,6 +43,7 @@ import com.yumu.hexie.service.card.WechatCardService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
@@ -72,6 +75,8 @@ public class UserController extends BaseController{
     private WechatCardService wechatCardService;
     @Autowired
     private SystemConfigService systemConfigService;
+    @Autowired
+    private WechatMsgService wechatMsgService;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -107,7 +112,16 @@ public class UserController extends BaseController{
 			    request.getSession().setAttribute(Constants.USER, user);
 		    
 			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
-			    UserInfo userInfo = new UserInfo(user, odDefinition);
+			    
+				/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
+				List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
+				List<String> templateIds = new ArrayList<>();
+				for (MsgTemplate msgTemplate : msgTemplateListAll) {
+					templateIds.add(msgTemplate.getValue());
+				}
+			    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
+			    
+			    UserInfo userInfo = new UserInfo(user, odDefinition, templateIds);
 
 			    endTime = System.currentTimeMillis();
 			    log.info("userInfo1，耗时：" + ((endTime-beginTime)));
@@ -194,7 +208,15 @@ public class UserController extends BaseController{
 			session.setAttribute(Constants.USER, user);
 			
 		    OperatorDefinition odDefinition = operatorService.defineOperator(user);
-		    UserInfo userInfo = new UserInfo(user, odDefinition);
+		    /* 2021-02-23 工作人远弹出消息订阅的窗口 start */
+		    List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
+			List<String> templateIds = new ArrayList<>();
+			for (MsgTemplate msgTemplate : msgTemplateListAll) {
+				templateIds.add(msgTemplate.getValue());
+			}
+		    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
+		    UserInfo userInfo = new UserInfo(user, odDefinition, templateIds);
+		    
 	        return new BaseResult<UserInfo>().success(userInfo);
 		} else {
             return new BaseResult<UserInfo>().failMsg("用户不存在！");
@@ -244,7 +266,14 @@ public class UserController extends BaseController{
 		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
 		
 		OperatorDefinition odDefinition = operatorService.defineOperator(userAccount);
-	    UserInfo userInfo = new UserInfo(userAccount, odDefinition);
+		/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
+		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(userAccount.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
+		List<String> templateIds = new ArrayList<>();
+		for (MsgTemplate msgTemplate : msgTemplateListAll) {
+			templateIds.add(msgTemplate.getValue());
+		}
+	    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
+	    UserInfo userInfo = new UserInfo(userAccount, odDefinition, templateIds);
 		return new BaseResult<UserInfo>().success(userInfo);
 
     }

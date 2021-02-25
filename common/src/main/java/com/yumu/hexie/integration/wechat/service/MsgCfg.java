@@ -46,5 +46,9 @@ public class MsgCfg {
 	public static final String URL_CUSTOMER_DELIVERY = "customerDeliveryUrl";
 	public static final String URL_WUYE_PAY = "wuyePayUrl"; //物业缴费页面
 	
+	//订阅消息
+	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";
+	public static final String TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY = "payNotifySubscribeTemplate";
+	public static final String TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY = "orderNotifySubscribeTemplate";
 	
 }
