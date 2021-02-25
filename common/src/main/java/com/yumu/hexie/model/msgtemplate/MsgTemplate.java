@@ -16,6 +16,9 @@ public class MsgTemplate extends BaseModel {
 	private String appid;
 	private String value;
 	private int status;	//0禁用，1可用
+	private int type;	//0模板消息用的模板，1订阅消息用的模板
+	private int bizType;//0普通用户用的模板，1工作人员用模板
+	private int subscribeType;	//订阅类型，2为一次性订阅，3为长期订阅
 	private String remark;	//备注
 	
 	public String getName() {
@@ -48,7 +51,24 @@ public class MsgTemplate extends BaseModel {
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
-	
+	public int getType() {
+		return type;
+	}
+	public void setType(int type) {
+		this.type = type;
+	}
+	public int getBizType() {
+		return bizType;
+	}
+	public void setBizType(int bizType) {
+		this.bizType = bizType;
+	}
+	public int getSubscribeType() {
+		return subscribeType;
+	}
+	public void setSubscribeType(int subscribeType) {
+		this.subscribeType = subscribeType;
+	}
 	
 	
 	

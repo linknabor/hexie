@@ -7,6 +7,7 @@ package com.yumu.hexie.integration.wechat.service;
  */
 public class MsgCfg {
 	
+	//模板消息
 	public static String TEMPLATE_MSG = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
 
 	public static final String TEMPLATE_TYPE_PAY_SUCCESS = "paySuccessTemplate";
@@ -23,7 +24,8 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_RESET_PASSWORD = "resetPasswordTemplate";
 	public static final String TEMPLATE_TYPE_DELIVERY_MESSAGE = "deliveryMessageTemplate";	//商家订单发货提醒
 	public static final String TEMPLATE_TYPE_CUSTOMER_DELIVERY = "customerDeliveryTemplate";	//买家发货提醒
-	
+	public static final String TEMPLATE_TYPE_BILL_PUSH = "billPushTemplate"; //物业账单通知
+
 	public static final String URL_SUCCESS = "successUrl";
 	public static final String URL_REG_SUCCESS = "regSuccessUrl";
 	public static final String URL_YUYUE_NOTICE = "yuyueNotice";
@@ -42,7 +44,11 @@ public class MsgCfg {
 	public static final String URL_CUSTOM_SERVICE_DETAIL = "customServiceDetail";
 	public static final String URL_DELIVERY_DETAIL = "deliveryDetailUrl";
 	public static final String URL_CUSTOMER_DELIVERY = "customerDeliveryUrl";
+	public static final String URL_WUYE_PAY = "wuyePayUrl"; //物业缴费页面
 	
-    
+	//订阅消息
+	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";
+	public static final String TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY = "payNotifySubscribeTemplate";
+	public static final String TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY = "orderNotifySubscribeTemplate";
 	
 }

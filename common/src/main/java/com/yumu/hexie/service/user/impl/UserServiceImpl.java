@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 	private RedisRepository redisRepository;
 	@Autowired
 	private AlipayClient alipayClient;
-	
+		
 	@Value("${mainServer}")
 	private Boolean mainServer;
 	
