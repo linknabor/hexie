@@ -103,6 +103,8 @@ public class SubscribeMsgService {
 	 */
     public void sendRepairAssignMsg(RepairOrder ro, ServiceOperator op, String accessToken, String appId) {
     	
+    	logger.info("发送维修单分配订阅消息#########" + ", order id: " + ro.getId() + "operator id : " + op.getId());
+    	
     	//更改为使用模版消息发送
     	OrderNotificationVO vo = new OrderNotificationVO();
     	vo.setReceiver(new SubscribeItem(ro.getReceiverName()+"," + ro.getTel()));
