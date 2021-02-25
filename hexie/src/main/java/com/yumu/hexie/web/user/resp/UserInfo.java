@@ -83,8 +83,8 @@ public class UserInfo implements Serializable {
  	private boolean cardPayService;	//公众号是否支持银行卡支付
  	private ServeRole serveRole;
  	private List<String> subscribeTemplateIds;	//未订阅需要弹窗提示的模板列表
- 	
- 	public static class ServeRole{
+
+ 	 	public static class ServeRole{
  		
  		private boolean isRepairOperator = false;
  	    private boolean isServiceOperator = false;
