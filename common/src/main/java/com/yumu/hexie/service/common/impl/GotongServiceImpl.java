@@ -92,6 +92,7 @@ public class GotongServiceImpl implements GotongService {
 		}
         String accessToken = systemConfigService.queryWXAToken(opUser.getAppId());
         templateMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
+        subscribeMsgService.sendRepairAssignMsg(order, op, accessToken, opUser.getAppId());
     }
     
     @Async
@@ -275,6 +276,8 @@ public class GotongServiceImpl implements GotongService {
 		LOG.info("发送自定义服务通知！ sendUser : " + sendUser);
 		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
 		templateMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
+		subscribeMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
+		
 	}
 	
 	
