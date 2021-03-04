@@ -325,7 +325,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						serviceOperator.setTel(operator.getTel());
 						serviceOperator.setType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
 						serviceOperator.setUserId(user.getId());
-						serviceOperator.setSubTypes(operator.getServiceId());
+						serviceOperator.setSubType(operator.getServiceId());
 						serviceOperatorRepository.save(serviceOperator);
 					} catch (Exception e) {
 						logger.error("save serviceOperator failed ! oper : " + operator);
@@ -411,7 +411,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if ("delete".equals(operType)) {
 						List <ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
 						opList.forEach(oper->{
-							String subTypes = oper.getSubTypes();
+							String subTypes = oper.getSubType();
 							if (StringUtils.isEmpty(subTypes)) {
 								return;
 							}
@@ -425,7 +425,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								bf.append(subType).append(",");
 							}
 							String subs = bf.substring(0, bf.length()-1);
-							oper.setSubTypes(subs);
+							oper.setSubType(subs);
 							serviceOperatorRepository.save(oper);
 							
 						});
