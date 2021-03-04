@@ -127,11 +127,10 @@ public class WuyeServiceImpl implements WuyeService {
 				user.setSectId("0");
 				user.setCspId("0");
 				user.setOfficeTel("");
-				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", user.getId());
 			}else {
 				user.setTotalBind(totalBind);
-				userRepository.updateUserTotalBind(totalBind, user.getId());
 			}
+			userRepository.save(user);
 			
 		} else {
 			throw new BizValidateException("解绑房屋失败。");
@@ -322,9 +321,7 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setSectId(u.getSect_id());	
 		user.setCspId(u.getCsp_id());
 		user.setOfficeTel(u.getOffice_tel());
-		userRepository.updateUserByHouse(user.getXiaoquId(), user.getXiaoquName(), 
-				user.getTotalBind(), user.getProvince(), user.getCity(), user.getCountry(), 
-				user.getSectId(), user.getCspId(), user.getOfficeTel(), user.getId());
+		userRepository.save(user);
 		
 	}
 
