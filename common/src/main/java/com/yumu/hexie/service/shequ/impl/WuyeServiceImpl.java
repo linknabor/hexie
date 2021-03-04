@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -102,6 +103,7 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public boolean deleteHouse(User user, String houseId) {
 		
 		BaseResult<String> result = WuyeUtil.deleteHouse(user, houseId);
@@ -293,6 +295,7 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public void setDefaultAddress(User user, HexieUser u) {
 
 		HexieAddress hexieAddress = new HexieAddress();
