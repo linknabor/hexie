@@ -11,6 +11,7 @@ import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 
 /**
  * <pre>
@@ -54,5 +55,6 @@ public interface GotongService {
 
 	void sendPayNotification4HouseBinder(AccountNotification accountNotify);
 
+	boolean sendBillPush(String openId, String appId, BillPushDetail billPushDetail);
 
 }
