@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
@@ -19,6 +18,7 @@ import com.yumu.hexie.integration.oper.mapper.QueryOperRegionMapper;
 import com.yumu.hexie.integration.oper.vo.QueryOperVO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.oper.OperService;
+import com.yumu.hexie.vo.OperAuthorization;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
@@ -48,10 +48,10 @@ public class OperController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/oper/authorize", method = RequestMethod.POST)
 	public BaseResult<String> authorize(@ModelAttribute(Constants.USER) User user,
-			@RequestParam String sectIds, @RequestParam String timestamp, @RequestParam String type) throws Exception {
+			@RequestBody OperAuthorization oa) throws Exception {
 
-		log.info("authorize, sectIds : " + sectIds);
-		operService.authorize(user, sectIds, timestamp, type);
+		log.info("OperAuthorization : " + oa);
+		operService.authorize(user, oa);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
 	
@@ -79,6 +79,12 @@ public class OperController extends BaseController {
 		return operService.getRegionList(queryOperVO);
 	}
 	
+	/**
+	 * 取消操作员授权
+	 * @param queryOperVO
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/servplat/oper/authorize/cancel", method = RequestMethod.POST)
 	public CommonResponse<String> cancelAuthorize(@RequestBody QueryOperVO queryOperVO) throws Exception{
 		
