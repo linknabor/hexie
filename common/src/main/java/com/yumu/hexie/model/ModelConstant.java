@@ -50,6 +50,8 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
     public static final int SERVICE_OPER_TYPE_SAASSALE = 15;	//saas售卖接单提醒
     public static final int SERVICE_OPER_TYPE_MSG_SENDER = 16;	//物业消息发送人员
+    public static final int SERVICE_OPER_TYPE_WUYE_FEE_STAFF = 17;
+    public static final int SERVICE_OPER_TYPE_OTHER_FEE_STAFF = 18;
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化

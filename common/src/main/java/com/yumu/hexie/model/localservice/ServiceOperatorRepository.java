@@ -173,8 +173,9 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Query(value = "select r.name, r.sectId, r.xiaoquAddress from serviceoperatorSect ss "
     		+ "join region r on ss.sectId = r.sectId "
     		+ "where ss.operatorId = ?1 "
+    		+ "and (COALESCE(?2) IS NULL OR (r.sectId IN (?2) )) "
     		+ "order by r.sectId ", 
     		nativeQuery = true)
-    public List<Object[]> getServeRegion(long operId);
+    public List<Object[]> getServeRegion(long operId, List<String> sectIds);
     
 }

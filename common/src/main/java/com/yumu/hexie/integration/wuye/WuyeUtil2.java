@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -57,7 +57,7 @@ import com.yumu.hexie.vo.req.MessageReq;
  * @author david
  *
  */
-@Component
+@Service
 public class WuyeUtil2 {
 	
 	@Value("${sysName}")
