@@ -591,6 +591,12 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.getEReceipt(user, tradeWaterId, sysSource).getData();
 	}
+	
+	@Override
+	public CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception {
+		
+		return wuyeUtil2.queryCellAddr(user, sectId, cellAddr).getData();
+	}
 
 	
 }
