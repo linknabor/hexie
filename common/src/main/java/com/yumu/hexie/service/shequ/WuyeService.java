@@ -317,4 +317,14 @@ public interface WuyeService {
 	 */
 	EReceipt getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception;
 
+	/**
+	 * 绑定房屋物业单元模糊搜索
+	 * @param user
+	 * @param sectId
+	 * @param cellAddr
+	 * @return
+	 * @throws Exception
+	 */
+	CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception;
+
 }
