@@ -367,7 +367,7 @@ public class GotongServiceImpl implements GotongService {
      * 平台公告通知群发
      */
     @Override
-    public boolean sendBillPush(String openId, String appId, BillPushDetail billPushDetail) {
+    public String sendBillPush(String openId, String appId, BillPushDetail billPushDetail) {
         String accessToken = systemConfigService.queryWXAToken(appId);
         return templateMsgService.sendBillNotificationMessage(openId, accessToken, appId, billPushDetail);
     }

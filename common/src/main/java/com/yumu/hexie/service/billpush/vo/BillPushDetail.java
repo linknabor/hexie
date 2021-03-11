@@ -17,6 +17,7 @@ public class BillPushDetail implements Serializable {
     private String feePrice;
     private String cellAddr;
     private String showFirstMsg;
+    private String appid;
     private String remark;
 
     public String getSectId() {
@@ -75,6 +76,14 @@ public class BillPushDetail implements Serializable {
         this.showFirstMsg = showFirstMsg;
     }
 
+    public String getAppid() {
+        return appid;
+    }
+
+    public void setAppid(String appid) {
+        this.appid = appid;
+    }
+
     public String getRemark() {
         return remark;
     }
@@ -93,6 +102,7 @@ public class BillPushDetail implements Serializable {
                 ", feePrice='" + feePrice + '\'' +
                 ", cellAddr='" + cellAddr + '\'' +
                 ", showFirstMsg='" + showFirstMsg + '\'' +
+                ", appid='" + appid + '\'' +
                 ", remark='" + remark + '\'' +
                 '}';
     }

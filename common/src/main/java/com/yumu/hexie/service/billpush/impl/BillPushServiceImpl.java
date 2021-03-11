@@ -29,23 +29,15 @@ public class BillPushServiceImpl implements BillPushService {
     private GotongService gotongService;
 
     @Override
-    public boolean sendMessage(BillPushDetail billPushDetail) {
-        boolean success = false;
-        boolean successFlag = false;
-
-        List<User> userList = userRepository.findByWuyeId(billPushDetail.getWuyeId());
+    public String sendMessage(BillPushDetail billPushDetail) {
+        List<User> userList = userRepository.findByWuyeIdAndAppId(billPushDetail.getWuyeId(), billPushDetail.getAppid());
         User user;
         if (userList == null || userList.isEmpty()) {
-            user = new User();
+            return "未找到用户";
         }else {
             user = userList.get(0);
         }
         logger.info("will sent wuye message to user : " + user);
-        success = gotongService.sendBillPush(user.getOpenid(), user.getAppId(), billPushDetail);
-
-        if (success) {
-            successFlag = true;	//当前这户，有一个绑定者成功就算成功
-        }
-        return successFlag;
+        return gotongService.sendBillPush(user.getOpenid(), user.getAppId(), billPushDetail);
     }
 }

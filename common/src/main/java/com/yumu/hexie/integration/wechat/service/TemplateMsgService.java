@@ -529,7 +529,7 @@ public class TemplateMsgService {
 
 	}
 
-	public boolean sendBillNotificationMessage(String openid, String accessToken, String appId, BillPushDetail billPushDetail) {
+	public String sendBillNotificationMessage(String openid, String accessToken, String appId, BillPushDetail billPushDetail) {
 
 		CommonVO vo = new CommonVO();
 		vo.setFirst(new TemplateItem(billPushDetail.getShowFirstMsg()));
@@ -548,7 +548,12 @@ public class TemplateMsgService {
 		}
 		msg.setUrl(url);
 		msg.setTouser(openid);
-		return sendMsg(msg, accessToken);
+		boolean flag = sendMsg(msg, accessToken);
+		String stat = "success";
+		if(!flag) {
+			stat =  "发送模板消息失败";
+		}
+		return stat;
 
 	}
 

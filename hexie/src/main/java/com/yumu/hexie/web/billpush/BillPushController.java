@@ -34,7 +34,6 @@ public class BillPushController extends BaseController {
     @RequestMapping(value = "/servplat/billpush/send", method = RequestMethod.POST)
     public String pullWechat(@RequestBody BillPushDetail billPushDetail) {
         logger.info("billpush:--billPushDetail:" + billPushDetail);
-        boolean success = billPushService.sendMessage(billPushDetail);
-        return Boolean.toString(success);
+        return billPushService.sendMessage(billPushDetail);
     }
 }
