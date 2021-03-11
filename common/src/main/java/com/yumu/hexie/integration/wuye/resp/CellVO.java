@@ -7,6 +7,7 @@ public class CellVO {
 	private String id;
 	private String name;
 	private String version;
+	private String tel;
 	private Map<String, String> params;
 	
 	public String getId() {
@@ -32,6 +33,12 @@ public class CellVO {
 	}
 	public void setParams(Map<String, String> params) {
 		this.params = params;
+	}
+	public String getTel() {
+		return tel;
+	}
+	public void setTel(String tel) {
+		this.tel = tel;
 	}
 	
 }
