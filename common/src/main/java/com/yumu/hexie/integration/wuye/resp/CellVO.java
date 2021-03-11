@@ -1,6 +1,11 @@
 package com.yumu.hexie.integration.wuye.resp;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import org.assertj.core.util.Arrays;
+import org.springframework.util.StringUtils;
 
 public class CellVO {
 
@@ -8,6 +13,7 @@ public class CellVO {
 	private String name;
 	private String version;
 	private String tel;
+	private List<Object> telList;
 	private Map<String, String> params;
 	
 	public String getId() {
@@ -39,6 +45,17 @@ public class CellVO {
 	}
 	public void setTel(String tel) {
 		this.tel = tel;
+		if (!StringUtils.isEmpty(tel) && tel.contains("/")) {
+			String[]telArr = tel.split("/");
+			this.telList = Arrays.asList(telArr);
+		} else {
+			this.telList = new ArrayList<>(1);
+			this.telList.add(this.tel);
+		}
 	}
+	public List<Object> getTelList() {
+		return telList;
+	}
+	
 	
 }
