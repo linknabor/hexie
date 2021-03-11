@@ -35,8 +35,6 @@ import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
-import com.yumu.hexie.model.subscribemsg.UserSubscribeMsg;
-import com.yumu.hexie.model.subscribemsg.UserSubscribeMsgRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -397,7 +395,7 @@ public class GotongServiceImpl implements GotongService {
      * 平台公告通知群发
      */
     @Override
-    public boolean sendBillPush(String openId, String appId, BillPushDetail billPushDetail) {
+    public String sendBillPush(String openId, String appId, BillPushDetail billPushDetail) {
         String accessToken = systemConfigService.queryWXAToken(appId);
         return templateMsgService.sendBillNotificationMessage(openId, accessToken, appId, billPushDetail);
     }

@@ -41,6 +41,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	public List<User> findBySectId(String sectId);
 
+	public List<User> findByWuyeIdAndAppId(String wuyeId, String appId);
+
 	/**
 	 * 根据增量更新。更新语句的where 条件必须带上原积分值，这样可以解决多次调用带来的幂等性问题。
 	 * @param userId
