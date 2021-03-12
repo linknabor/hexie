@@ -800,5 +800,25 @@ public class WuyeController extends BaseController {
 		}
 	}
 
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param user
+	 * @param sect_name
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getLikeCellAddr", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<CellListVO> getLikeCellAddr(@ModelAttribute(Constants.USER) User user,
+			@RequestParam String sectId, @RequestParam String cellAddr) throws Exception {
+
+		CellListVO cellMng = wuyeService.getCellList(user, sectId, cellAddr);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
+	}
 
 }

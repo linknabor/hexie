@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -30,6 +30,7 @@ import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodePayServiceRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
+import com.yumu.hexie.integration.wuye.req.QueryCellRequest;
 import com.yumu.hexie.integration.wuye.req.QueryEReceiptRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
@@ -57,7 +58,7 @@ import com.yumu.hexie.vo.req.MessageReq;
  * @author david
  *
  */
-@Component
+@Service
 public class WuyeUtil2 {
 	
 	@Value("${sysName}")
@@ -84,6 +85,7 @@ public class WuyeUtil2 {
 	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
 	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
 	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
+	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
 
 	/**
 	 * 标准版查询账单
@@ -495,6 +497,27 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<List<Message>>> typeReference = new TypeReference<CommonResponse<List<Message>>>(){};
 		CommonResponse<List<Message>> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
 		BaseResult<List<Message>> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/* * 查询发送历史
+	 * @param user
+	 * @param batchNo
+	 * @throws Exception 
+	 */
+	public BaseResult<CellListVO> queryCellAddr(User user, String sectId, String cellAddr) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_CELL_ADDR_URL;
+		QueryCellRequest queryCellRequest = new QueryCellRequest();
+		queryCellRequest.setSectId(sectId);
+		queryCellRequest.setCellAddr(cellAddr);
+		queryCellRequest.setUserId(user.getWuyeId());
+		
+		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
+		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryCellRequest, typeReference);
+		BaseResult<CellListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
