@@ -1,6 +1,11 @@
 package com.yumu.hexie.integration.wuye.req;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import org.springframework.util.StringUtils;
+
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -28,6 +33,13 @@ public class QueryCellRequest extends WuyeRequest implements Serializable {
 		return cellAddr;
 	}
 	public void setCellAddr(String cellAddr) {
+		if (!StringUtils.isEmpty(cellAddr)) {
+			try {
+				cellAddr = URLEncoder.encode(cellAddr,"GBK");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
 		this.cellAddr = cellAddr;
 	}
 	public String getUserId() {
