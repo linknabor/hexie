@@ -287,7 +287,7 @@ public class WuyeServiceImpl implements WuyeService {
 			throw new BizValidateException("账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
+			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
 		}
 		if("02".equals(r.getResult())) {
 			throw new BizValidateException("房屋不存在！");
@@ -367,7 +367,7 @@ public class WuyeServiceImpl implements WuyeService {
 			throw new BizValidateException("账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
+			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
 		}
 		if("02".equals(r.getResult())) {
 			throw new BizValidateException("房屋不存在！");
