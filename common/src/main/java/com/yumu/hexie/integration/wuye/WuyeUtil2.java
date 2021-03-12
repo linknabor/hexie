@@ -501,8 +501,7 @@ public class WuyeUtil2 {
 		return baseResult;
 	}
 	
-	/**
-	 * 查询发送历史
+	/* * 查询发送历史
 	 * @param user
 	 * @param batchNo
 	 * @throws Exception 
