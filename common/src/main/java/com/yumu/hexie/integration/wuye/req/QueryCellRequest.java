@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 
 import org.springframework.util.StringUtils;
 
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class QueryCellRequest extends WuyeRequest implements Serializable {
