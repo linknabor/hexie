@@ -48,5 +48,17 @@ public interface UserService {
 	AccessTokenOAuth getAlipayAuth(String code);
 	//根据openid从数据库中获取缓存
 	User getByOpenIdFromCache(User sessonUser);
+	
+	/**
+	 * 用户关注事件
+	 * @param user
+	 */
+	boolean eventSubscribe(User user);
+	
+	/**
+	 * 用户取关事件
+	 * @param user
+	 */
+	boolean eventUnsubscribe(User user);
 
 }
