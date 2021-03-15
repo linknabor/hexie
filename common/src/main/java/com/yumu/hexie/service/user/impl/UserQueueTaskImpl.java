@@ -54,7 +54,7 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
-				logger.info("strat to consume user subscribe event queue : " + map);
+				logger.info("start to consume user subscribe event queue : " + map);
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
@@ -63,6 +63,15 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				if (createTimeStr.length() == 10) {
 					createDate *= 1000;
 				}
+				
+				if (createDate - System.currentTimeMillis() > 30*60) {	
+					/*
+					 * 半小时仍旧没有处理掉的关注事件，直接出队。通常情况用户先关注，访问页面后再产生user,所以没有user的情况下，事件是消耗不掉的
+					 */
+					logger.info("user subscribe timeout, will skip ! openid: " + openid);
+					continue;
+				}
+				
 				User user = new User();
 				user.setOpenid(openid);
 				user.setAppId(appId);
@@ -71,12 +80,12 @@ public class UserQueueTaskImpl implements UserQueueTask {
 
 				boolean isSuccess = false;
 				try {
-					userService.eventSubscribe(user);
-					isSuccess = true;
+					isSuccess = userService.eventSubscribe(user);
+					logger.info("user subscribe succeeded !");
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+					isSuccess = false;
 				}
-
 				if (!isSuccess) {
 					logger.info("user subscribe event consume failed !, repush into the queue. json : " + json);
 					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SUBSCRIBE_UPDATE_QUEUE, json);
@@ -110,7 +119,7 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
-				logger.info("strat to consume user unsubscribe event queue : " + map);
+				logger.info("start to consume user unsubscribe event queue : " + map);
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
@@ -127,10 +136,10 @@ public class UserQueueTaskImpl implements UserQueueTask {
 
 				boolean isSuccess = false;
 				try {
-					userService.eventUnsubscribe(user);
-					isSuccess = true;
+					isSuccess = userService.eventUnsubscribe(user);
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+					isSuccess = false;
 				}
 
 				if (!isSuccess) {
