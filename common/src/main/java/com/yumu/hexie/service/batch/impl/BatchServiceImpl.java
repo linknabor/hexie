@@ -30,6 +30,7 @@ import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.subscribemsg.WechatSubscribeMsgQueueTask;
 import com.yumu.hexie.service.user.CouponQueueTask;
+import com.yumu.hexie.service.user.UserQueueTask;
 
 @Service
 public class BatchServiceImpl implements BatchService {
@@ -56,6 +57,9 @@ public class BatchServiceImpl implements BatchService {
 	
 	@Autowired
 	private WechatSubscribeMsgQueueTask wechatSubscribeMsgQueueTask;
+	
+	@Autowired
+	private UserQueueTask userQueueTask;
 	
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -129,6 +133,8 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.consumeWuyeCouponAsync();
 		notifyQueueTask.sendWuyeNotification4HouseBinderAysc();
 		wechatSubscribeMsgQueueTask.eventSubscribeMsg();
+		userQueueTask.eventSubscribe();
+		userQueueTask.eventUnsubscribe();
 
 		logger.info("异步队列任务启动完成。");
 		
