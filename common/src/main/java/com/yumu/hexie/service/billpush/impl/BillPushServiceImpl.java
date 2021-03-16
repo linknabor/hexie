@@ -33,7 +33,7 @@ public class BillPushServiceImpl implements BillPushService {
         List<User> userList = userRepository.findByWuyeIdAndAppId(billPushDetail.getWuyeId(), billPushDetail.getAppid());
         User user;
         if (userList == null || userList.isEmpty()) {
-            return "未找到用户";
+            return "用户未注册";
         }else {
             user = userList.get(0);
         }

@@ -73,6 +73,23 @@ public class TemplateMsgService {
 		}
 		return false;
 	}
+
+	private WechatResponse sendMsgBill(TemplateMsg<?> msg, String accessToken) {
+
+		String requestUrl = MsgCfg.TEMPLATE_MSG;
+		if(StringUtil.isNotEmpty(accessToken)){
+			requestUrl = requestUrl.replace("ACCESS_TOKEN", accessToken);
+		}
+		WechatResponse wechatResponse = new WechatResponse();
+		TypeReference<WechatResponse> typeReference = new TypeReference<WechatResponse>() {};
+		try {
+			wechatResponse = restUtil.exchangeOnBody(requestUrl, msg, typeReference);
+		} catch (Exception e) {
+			log.error("发送模板消息失败: " +e.getMessage());
+			log.error(e.getMessage(), e);
+		}
+		return wechatResponse;
+	}
 	
 	
     /**
@@ -548,10 +565,17 @@ public class TemplateMsgService {
 		}
 		msg.setUrl(url);
 		msg.setTouser(openid);
-		boolean flag = sendMsg(msg, accessToken);
+		WechatResponse wechatResponse = sendMsgBill(msg, accessToken);
 		String stat = "success";
-		if(!flag) {
-			stat =  "发送模板消息失败";
+		int code = wechatResponse.getErrcode();
+		if(code != 0) {
+			if(code == 43004) {
+				stat =  "用户未订阅";
+			}else if(code == 40036 || code == 40037) {
+				stat =  "模板ID不合法";
+			} else {
+				stat =  code + ":" + wechatResponse.getErrmsg();
+			}
 		}
 		return stat;
 
