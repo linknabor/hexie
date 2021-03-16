@@ -287,7 +287,10 @@ public class WuyeServiceImpl implements WuyeService {
 			throw new BizValidateException("账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
+			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+		}
+		if("02".equals(r.getResult())) {
+			throw new BizValidateException("房屋不存在！");
 		}
 		return r.getData();
 	}
@@ -362,6 +365,12 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		if("01".equals(r.getResult())) {
 			throw new BizValidateException("账户不存在！");
+		}
+		if("06".equals(r.getResult())) {
+			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+		}
+		if("02".equals(r.getResult())) {
+			throw new BizValidateException("房屋不存在！");
 		}
 		return r.getData();
 	}
@@ -590,6 +599,12 @@ public class WuyeServiceImpl implements WuyeService {
 	public EReceipt getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception {
 		
 		return wuyeUtil2.getEReceipt(user, tradeWaterId, sysSource).getData();
+	}
+	
+	@Override
+	public CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception {
+		
+		return wuyeUtil2.queryCellAddr(user, sectId, cellAddr).getData();
 	}
 
 	
