@@ -394,7 +394,7 @@ public class GotongServiceImpl implements GotongService {
 	}
 
     /**
-     * 平台公告通知群发
+     * 账单推送通知
      */
     @Override
     public String sendBillPush(String openId, String appId, BillPushDetail billPushDetail) {

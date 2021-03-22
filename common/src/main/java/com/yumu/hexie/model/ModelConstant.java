@@ -371,8 +371,6 @@ public class ModelConstant {
 	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
 	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
 	public static final String KEY_EVENT_SUBSCRIBE_MSG_QUEUE = "queueSubscribeMsg";	//用户在图文等场景内订阅通知的操作 事件队列
-	public static final String KEY_EVENT_SUBSCRIBE_UPDATE_QUEUE = "queueEventUpdateSubscribe";	//关注事件消息队列，更新用户信息用
-	public static final String KEY_EVENT_UNSUBSCRIBE_QUEUE = "queueEventUnsubscribe";	//取消关注事件消息队列
 	
 	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
 	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
@@ -441,9 +439,5 @@ public class ModelConstant {
 	//消息类型，0模板消息，1订阅消息
 	public static final int MSG_TYPE_TEMPLATE = 0;
 	public static final int MSG_TYPE_SUBSCRIBE_MSG = 1;
-
-	//微信用户关注状态
-	public static final int WECHAT_USER_SUBSCRIBED = 1;
-	public static final int WECHAT_USER_UNSUBSCRIBED = 0;
 
 }		

@@ -33,6 +33,7 @@ import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
 import com.yumu.hexie.integration.wuye.req.QueryCellRequest;
 import com.yumu.hexie.integration.wuye.req.QueryEReceiptRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
+import com.yumu.hexie.integration.wuye.req.QuerySectRequet;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeParamRequest;
@@ -86,6 +87,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
 	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
 	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
+	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 
 	/**
 	 * 标准版查询账单
@@ -502,10 +504,12 @@ public class WuyeUtil2 {
 	}
 	
 	/**
-	 * 查询发送历史
+	 * 根据小区ID查询小区楼栋明细
 	 * @param user
-	 * @param batchNo
-	 * @throws Exception 
+	 * @param sectId
+	 * @param cellAddr
+	 * @return
+	 * @throws Exception
 	 */
 	public BaseResult<CellListVO> queryCellAddr(User user, String sectId, String cellAddr) throws Exception {
 		
@@ -518,6 +522,29 @@ public class WuyeUtil2 {
 		
 		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
 		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryCellRequest, typeReference);
+		BaseResult<CellListVO> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param sect_name
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<CellListVO> getVagueSectByName(User user, String sectName, String regionName) throws Exception{
+		
+		String requestUrl = requestUtil.getRequestUrl(user, regionName);
+		requestUrl += SECT_VAGUE_LIST_URL;
+		
+		QuerySectRequet querySectRequet = new QuerySectRequet();
+		querySectRequet.setSectName(sectName);
+		querySectRequet.setOpenid(user.getOpenid());
+		querySectRequet.setAppid(user.getAppId());
+		
+		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
+		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, querySectRequet, typeReference);
 		BaseResult<CellListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
