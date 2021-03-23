@@ -261,16 +261,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(User user, String sect_name, String region_name) {
+	public CellListVO getVagueSectByName(User user, String sectName, String regionName) throws Exception {
 		
-		try {
-			String targetUrl = getRegionUrl(region_name);
-			return WuyeUtil.getVagueSectByName(user, sect_name, targetUrl).getData();
-      
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return null;
+		return wuyeUtil2.getVagueSectByName(user, sectName, regionName).getData();
 	}
 
 	@Override

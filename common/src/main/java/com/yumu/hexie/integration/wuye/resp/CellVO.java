@@ -13,6 +13,8 @@ public class CellVO {
 	private String name;
 	private String version;
 	private String tel;
+	private String qrCodeOper;	//是否为二维码收费工作人员, 0否1是
+
 	private List<Object> telList;
 	private Map<String, String> params;
 	
@@ -55,6 +57,12 @@ public class CellVO {
 	}
 	public List<Object> getTelList() {
 		return telList;
+	}
+	public String getQrCodeOper() {
+		return qrCodeOper;
+	}
+	public void setQrCodeOper(String qrCodeOper) {
+		this.qrCodeOper = qrCodeOper;
 	}
 	
 	

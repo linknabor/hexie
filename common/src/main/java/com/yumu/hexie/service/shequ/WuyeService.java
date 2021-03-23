@@ -187,8 +187,9 @@ public interface WuyeService {
 	 * @param user
 	 * @param sect_name
 	 * @return
+	 * @throws Exception 
 	 */
-	CellListVO getVagueSectByName(User user, String sect_name, String region_name);
+	CellListVO getVagueSectByName(User user, String sectName, String regionName) throws Exception;
 
 	/**
 	 * 设置默认地址
