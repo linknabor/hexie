@@ -52,7 +52,7 @@ public class WuyeUtil {
 	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s";
 	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"+ "?sect_id=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
-	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do"+ "?sect_name=%s";//合协社区物业缴费的小区级联 模糊查询小区
+	
 	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do?info_id=%s&type=%s&para_name=%s";
 	private static final String BILL_LIST_DATE = "getBillStartDateSDO.do?user_id=%s&mng_cell_id=%s";//获取无账单日期
 	private static final String PAY_WATER_URL = "getMngCellByTradeIdSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录涉及的房屋
@@ -295,24 +295,6 @@ public class WuyeUtil {
 	public static BaseResult<String> getPayWaterToCell(User user, String trade_water_id) {
 		String url = getRequestUri(user) + String.format(PAY_WATER_URL, user.getWuyeId(), trade_water_id);
 		return (BaseResult<String>)httpGet(url, String.class);
-	}
-	
-	/**
-	 * 根据名称模糊查询合协社区小区列表
-	 * @param sect_name
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings("unchecked")
-	public static BaseResult<CellListVO> getVagueSectByName(User user, String sect_name, String regionurl) throws Exception{
-		
-		if (StringUtils.isEmpty(regionurl)) {
-			regionurl = getRequestUri(user);
-		}
-		sect_name = URLEncoder.encode(sect_name,"GBK");
-		String url = regionurl + String.format(SECT_VAGUE_LIST_URL, sect_name);
-		log.info("【url】:"+url);
-		return (BaseResult<CellListVO>)httpGet(url,CellListVO.class);
 	}
 	
     /**
