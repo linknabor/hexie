@@ -366,13 +366,18 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
 	
+	/*下面这些的value值不要改，是另一个系统推送过来的，要改两边都要改 start */
 	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
 	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
 	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
 	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
 	public static final String KEY_EVENT_SUBSCRIBE_MSG_QUEUE = "queueSubscribeMsg";	//用户在图文等场景内订阅通知的操作 事件队列
 	public static final String KEY_EVENT_SUBSCRIBE_UPDATE_QUEUE = "queueEventUpdateSubscribe";	//关注事件消息队列，更新用户信息用
-	public static final String KEY_EVENT_UNSUBSCRIBE_QUEUE = "queueEventUnsubscribe";	//取消关注事件消息队列
+	public static final String KEY_EVENT_UNSUBSCRIBE_QUEUE = "queueEventUnsubscribe";	//取消关注事件消息队列 tpauth -> hexie
+	/*下面这些的value值不要改，是另一个系统推送过来的，要改两边都要改 end */
+	
+	public static final String KEY_UNSUBSCRIBE_NOTIFY_QUEUE = "queue:notify:unsubscribe";	//取消关注通知，hexie -> community
+	public static final String KEY_UNSUBSCRIBE_NOTIFY_CHECK = "lock:unsubscribeNotification:";	//防重
 	
 	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
 	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
