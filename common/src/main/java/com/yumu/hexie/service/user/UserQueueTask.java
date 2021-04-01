@@ -5,4 +5,6 @@ public interface UserQueueTask {
 	void eventSubscribe();
 	
 	void eventUnsubscribe();
+	
+	void unsubscribeNotify();
 }

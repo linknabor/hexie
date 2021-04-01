@@ -84,7 +84,7 @@ public class UserQueueTaskImpl implements UserQueueTask {
 					logger.info("user subscribe succeeded !");
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
-					isSuccess = false;
+//					isSuccess = false;
 				}
 				if (!isSuccess) {
 					logger.info("user subscribe event consume failed !, repush into the queue. json : " + json);
@@ -137,9 +137,15 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				boolean isSuccess = false;
 				try {
 					isSuccess = userService.eventUnsubscribe(user);
+					String lockKey = ModelConstant.KEY_UNSUBSCRIBE_NOTIFY_CHECK + openid + "_" + createTimeStr;
+					boolean succuss = stringRedisTemplate.opsForValue().setIfAbsent(lockKey, json, 1, TimeUnit.HOURS);
+					if (succuss) {
+						//通知community
+						stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_UNSUBSCRIBE_NOTIFY_QUEUE, json);
+					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
-					isSuccess = false;
+//					isSuccess = false;
 				}
 
 				if (!isSuccess) {
@@ -152,6 +158,57 @@ public class UserQueueTaskImpl implements UserQueueTask {
 			}
 		}
 
+	}
+
+	@SuppressWarnings("unchecked")
+	@Async("taskExecutor")
+	@Override
+	public void unsubscribeNotify() {
+
+		while (true) {
+			try {
+
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String json = (String) stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_UNSUBSCRIBE_NOTIFY_QUEUE,
+						10, TimeUnit.SECONDS);
+
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				Map<String, String> map = objectMapper.readValue(json, Map.class);
+				logger.info("start to consume unsubscribe notify queue : " + map);
+
+				String appId = map.get("appId");
+				String openid = map.get("openid");
+
+				User user = new User();
+				user.setOpenid(openid);
+				user.setAppId(appId);
+				user.setSubscribe(ModelConstant.WECHAT_USER_UNSUBSCRIBED);
+				
+				boolean isSuccess = false;
+				try {
+					isSuccess = userService.eventUnsubscribe(user);
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+					isSuccess = false;
+				}
+
+				if (!isSuccess) {
+					logger.info("unsubscribe notify queue consume failed !, repush into the queue. json : " + json);
+					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_UNSUBSCRIBE_NOTIFY_QUEUE, json);
+				}
+
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
 	}
 	
 }
