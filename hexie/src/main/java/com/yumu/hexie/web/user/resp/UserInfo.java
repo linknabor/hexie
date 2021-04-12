@@ -33,7 +33,7 @@ public class UserInfo implements Serializable {
     private String realName;
     private String name;
     private String tel;
-    
+    private String appId;
     private Double longitude;
     private Double latitude;
     private long currentAddrId;
@@ -124,8 +124,16 @@ public class UserInfo implements Serializable {
  		}
  		
  	}
- 	
-	public String getSectId() {
+
+    public String getAppId() {
+        return appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
+    public String getSectId() {
 		return sectId;
 	}
 	public void setSectId(String sectId) {
