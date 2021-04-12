@@ -128,6 +128,15 @@ public class UserQueueTaskImpl implements UserQueueTask {
 				if (createTimeStr.length() == 10) {
 					createDate *= 1000;
 				}
+				
+				if ((System.currentTimeMillis() - createDate) > 30*60*1000) {	
+					/*
+					 * 半小时仍旧没有处理掉的关注事件，直接出队。通常情况用户先关注，访问页面后再产生user,所以没有user的情况下，事件是消耗不掉的
+					 */
+					logger.info("user unsubscribe timeout, will skip ! openid: " + openid);
+					continue;
+				}
+				
 				User user = new User();
 				user.setOpenid(openid);
 				user.setAppId(appId);
