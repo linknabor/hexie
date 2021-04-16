@@ -600,5 +600,11 @@ public class WuyeServiceImpl implements WuyeService {
 		return wuyeUtil2.queryCellAddr(user, sectId, cellAddr).getData();
 	}
 
-	
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	public void cleanUserSession(User user) {
+
+	}
+
+
 }

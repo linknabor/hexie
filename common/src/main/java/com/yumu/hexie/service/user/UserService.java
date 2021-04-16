@@ -49,4 +49,6 @@ public interface UserService {
 	//根据openid从数据库中获取缓存
 	User getByOpenIdFromCache(User sessonUser);
 
+	User findwuyeId(String wuyeId);
+
 }

@@ -821,4 +821,16 @@ public class WuyeController extends BaseController {
 		}
 	}
 
+	@RequestMapping(value = "/cleanUser", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> cleanUser(@RequestParam String wuyeId) {
+		User user = userService.findwuyeId(wuyeId);
+		if(user !=null && !StringUtils.isEmpty(user.getOpenid())) {
+			wuyeService.cleanUserSession(user);
+		}
+		return BaseResult.successResult("true");
+	}
+
+
+
 }
