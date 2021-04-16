@@ -823,14 +823,12 @@ public class WuyeController extends BaseController {
 
 	@RequestMapping(value = "/cleanUser", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<String> cleanUser(@RequestParam String wuyeId) {
+	public BaseResult<String> cleanUser(@RequestParam String wuyeId, HexieUser hexieUser) {
 		User user = userService.findwuyeId(wuyeId);
-		if(user !=null && !StringUtils.isEmpty(user.getOpenid())) {
-			wuyeService.cleanUserSession(user);
+		if(user !=null && hexieUser != null) {
+			wuyeService.setDefaultAddress(user, hexieUser);
 		}
 		return BaseResult.successResult("true");
 	}
-
-
 
 }

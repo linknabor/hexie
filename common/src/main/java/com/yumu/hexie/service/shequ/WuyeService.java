@@ -327,6 +327,4 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception;
-
-	void cleanUserSession(User user);
 }
