@@ -827,8 +827,10 @@ public class WuyeController extends BaseController {
 		User user = userService.findwuyeId(wuyeId);
 		if(user !=null && hexieUser != null) {
 			wuyeService.setDefaultAddress(user, hexieUser);
+
 		}
 		return BaseResult.successResult("true");
 	}
+
 
 }
