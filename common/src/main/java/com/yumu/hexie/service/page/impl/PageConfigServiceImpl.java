@@ -21,6 +21,8 @@ import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.BottomIconRepository;
 import com.yumu.hexie.model.view.CsHotline;
 import com.yumu.hexie.model.view.CsHotlineRepository;
+import com.yumu.hexie.model.view.Menu;
+import com.yumu.hexie.model.view.MenuRepository;
 import com.yumu.hexie.model.view.PageConfigView;
 import com.yumu.hexie.model.view.PageConfigViewRepository;
 import com.yumu.hexie.model.view.QrCode;
@@ -46,6 +48,8 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private BgImageRepository bgImageRepository;
 	@Autowired
 	private WuyePayTabsRepository wuyePayTabsRepository;
+	@Autowired
+	private MenuRepository menuRepository;
 	
 	/**
 	 * 根据banner类型动态获取
@@ -149,6 +153,27 @@ public class PageConfigServiceImpl implements PageConfigService {
 	public CsHotline getCsHotline(String appId) {
 		return csHotlineRepository.findByFromSys(appId);
 	}
+	
+	/**
+	 * 动态获取公众号菜单
+	 * @param appId
+	 */
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_APP, key = "#appId", unless = "#result == null")
+	public List<Menu> getMenuByAppid(String appId) {
+		return menuRepository.findByAppid(appId);
+	}
+	
+	/**
+	 * 动态获取公众号菜单
+	 * @param appId
+	 */
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_CSP, key = "#cspId", unless = "#result == null")
+	public List<Menu> getMenuByCspId(String cspId) {
+		return menuRepository.findByCspId(cspId);
+	}
+
 
 	/**
 	 * 清楚所有页面配置参数缓存
