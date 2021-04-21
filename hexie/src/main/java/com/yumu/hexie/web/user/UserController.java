@@ -141,10 +141,12 @@ public class UserController extends BaseController{
 			    userInfo.setWuyeTabsList(tabsList);
 			    
 			    List<Menu> menuList = new ArrayList<>();
-			    if (StringUtils.isEmpty(user.getCspId()) || "0".equals(user.getCspId())) {
-			    	menuList = pageConfigService.getMenuByAppid(user.getAppId());
-				} else {
-					menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			    List<Menu> defMenuList = pageConfigService.getMenuByAppid(user.getAppId());
+			    if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
+			    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
+				}
+			    if (menuList.isEmpty()) {
+					menuList = defMenuList;
 				}
 			    userInfo.setMenuList(menuList);
 			    
