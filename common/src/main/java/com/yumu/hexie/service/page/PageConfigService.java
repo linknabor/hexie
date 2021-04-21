@@ -7,6 +7,7 @@ import com.yumu.hexie.model.view.Banner;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.CsHotline;
+import com.yumu.hexie.model.view.Menu;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 
@@ -29,6 +30,10 @@ public interface PageConfigService {
 	CsHotline getCsHotline(String appId);
 	
 	void updatePageConfig();
+
+	List<Menu> getMenuByAppid(String appId);
+
+	List<Menu> getMenuByCspId(String cspId);
 
 
 }

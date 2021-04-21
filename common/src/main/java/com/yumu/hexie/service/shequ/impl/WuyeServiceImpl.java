@@ -600,5 +600,4 @@ public class WuyeServiceImpl implements WuyeService {
 		return wuyeUtil2.queryCellAddr(user, sectId, cellAddr).getData();
 	}
 
-	
 }

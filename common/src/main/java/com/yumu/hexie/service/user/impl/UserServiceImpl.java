@@ -111,6 +111,16 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	public User findwuyeId(String wuyeId) {
+		List<User> users = userRepository.findByWuyeId(wuyeId);
+		User user = new User();
+		if(users.size() > 0) {
+			user = users.get(0);
+		}
+		return user;
+	}
+
+	@Override
 	public UserWeiXin getOrSubscibeUserByCode(String code) {
 		return getTpSubscibeUserByCode(code, null);
 	}

@@ -89,6 +89,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 
+
 	/**
 	 * 标准版查询账单
 	 * @param userId
@@ -549,5 +550,6 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
+
 	
 }

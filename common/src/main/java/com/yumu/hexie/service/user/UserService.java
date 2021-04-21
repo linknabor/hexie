@@ -61,4 +61,6 @@ public interface UserService {
 	 */
 	boolean eventUnsubscribe(User user);
 
+	User findwuyeId(String wuyeId);
+
 }

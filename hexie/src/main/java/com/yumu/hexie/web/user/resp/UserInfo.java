@@ -15,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
+import com.yumu.hexie.model.view.Menu;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.o2o.OperatorDefinition;
 
@@ -83,8 +84,9 @@ public class UserInfo implements Serializable {
  	private boolean cardPayService;	//公众号是否支持银行卡支付
  	private ServeRole serveRole;
  	private List<String> subscribeTemplateIds;	//未订阅需要弹窗提示的模板列表
+ 	private List<Menu> menuList;
 
- 	 	public static class ServeRole{
+ 	public static class ServeRole{
  		
  		private boolean isRepairOperator = false;
  	    private boolean isServiceOperator = false;
@@ -417,6 +419,12 @@ public class UserInfo implements Serializable {
 	}
 	public void setSubscribeTemplateIds(List<String> subscribeTemplateIds) {
 		this.subscribeTemplateIds = subscribeTemplateIds;
+	}
+	public List<Menu> getMenuList() {
+		return menuList;
+	}
+	public void setMenuList(List<Menu> menuList) {
+		this.menuList = menuList;
 	}
 	
 	
