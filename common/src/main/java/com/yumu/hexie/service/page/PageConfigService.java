@@ -35,5 +35,7 @@ public interface PageConfigService {
 
 	List<Menu> getMenuByCspId(String cspId);
 
+	List<Menu> getMenuByDefault(String def);
+
 
 }

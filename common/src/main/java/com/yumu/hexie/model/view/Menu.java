@@ -17,13 +17,14 @@ public class Menu extends BaseModel {
 	private String image;
 	private String name;
 	private String url;
-	private String status;
+	private int status;
 	private String sort;
 	private String type;
 	private String oriId;
 	private String sectId;
 	private String cspId;
 	private String appid;
+	private Boolean def;	//是否默认
 	
 	public String getCode() {
 		return code;
@@ -55,10 +56,10 @@ public class Menu extends BaseModel {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 	public String getSort() {
@@ -96,6 +97,12 @@ public class Menu extends BaseModel {
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+	}
+	public Boolean isDef() {
+		return def;
+	}
+	public void setDef(Boolean def) {
+		this.def = def;
 	}
 	
 	

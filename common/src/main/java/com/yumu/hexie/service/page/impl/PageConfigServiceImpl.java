@@ -161,7 +161,9 @@ public class PageConfigServiceImpl implements PageConfigService {
 	@Override
 	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_APP, key = "#appId", unless = "#result == null")
 	public List<Menu> getMenuByAppid(String appId) {
-		return menuRepository.findByAppid(appId);
+		
+		Sort sort = new Sort(Direction.ASC, "sort");
+		return menuRepository.findByAppid(appId, sort);
 	}
 	
 	/**
@@ -171,7 +173,17 @@ public class PageConfigServiceImpl implements PageConfigService {
 	@Override
 	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_CSP, key = "#cspId", unless = "#result == null")
 	public List<Menu> getMenuByCspId(String cspId) {
-		return menuRepository.findByCspId(cspId);
+		
+		Sort sort = new Sort(Direction.ASC, "sort");
+		return menuRepository.findByCspId(cspId, sort);
+	}
+	
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_DEFAULT, key = "#def", unless = "#result == null")
+	public List<Menu> getMenuByDefault(String def) {
+		
+		Sort sort = new Sort(Direction.ASC, "sort");
+		return menuRepository.findByDef(1, sort);
 	}
 
 
