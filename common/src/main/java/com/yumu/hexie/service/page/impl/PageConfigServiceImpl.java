@@ -183,7 +183,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	public List<Menu> getMenuByDefault(String def) {
 		
 		Sort sort = new Sort(Direction.ASC, "sort");
-		return menuRepository.findByDef(1, sort);
+		return menuRepository.findByDef(Boolean.TRUE, sort);
 	}
 
 
