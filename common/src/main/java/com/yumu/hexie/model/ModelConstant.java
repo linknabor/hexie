@@ -280,7 +280,16 @@ public class ModelConstant {
     public static final int SCHEDULE_TYPE_XIYI_TIMEOUT = 6;
     public static final int SCHEDULE_TYPE_BAOJIE_TIMEOUT = 7;
 	
-
+    //资讯类型  0.物业公告, 1.业委会公告, 2.居委会公告, 3.便民信息, 9.系统资讯-全局，10系统资讯-公众号级, 11圈子, 12通知消息推送
+    public static final int NOTICE_TYPE2_WUYE = 0;	//物业公告
+    public static final int NOTICE_TYPE2_YEWEI = 1;	//业委会公告
+    public static final int NOTICE_TYPE2_JUWEI = 2;	//居委会公告
+    public static final int NOTICE_TYPE2_BIANMIN = 3;
+    public static final int NOTICE_TYPE2_ALL = 9;
+    public static final int NOTICE_TYPE2_APP = 10;
+    public static final int NOTICE_TYPE2_MOMENTS = 11;
+    public static final int NOTICE_TYPE2_NOTIFICATIONS = 12;
+	
 	
 	//通知类型
 	public static final int NOTICE_TYPE_ORDER = 1;//订单通知

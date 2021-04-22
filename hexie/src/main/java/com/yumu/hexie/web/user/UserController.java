@@ -143,11 +143,14 @@ public class UserController extends BaseController{
 			    List<Menu> menuList = new ArrayList<>();
 			    if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
 			    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			    	if (menuList.isEmpty()) {
+			    		menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//表示绑定了房屋的默认菜单
+					}
 				}else {
 					menuList = pageConfigService.getMenuByAppid(user.getAppId());
 				}
 			    if (menuList.isEmpty()) {
-			    	menuList = pageConfigService.getMenuByDefault("def");
+			    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单
 				}
 			    
 			    userInfo.setMenuList(menuList);
