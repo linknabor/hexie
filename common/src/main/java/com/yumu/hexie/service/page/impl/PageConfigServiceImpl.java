@@ -179,11 +179,11 @@ public class PageConfigServiceImpl implements PageConfigService {
 	}
 	
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_DEFAULT, key = "#def", unless = "#result == null")
-	public List<Menu> getMenuByDefault(String def) {
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_DEFAULT, key = "#defaultType", unless = "#result == null")
+	public List<Menu> getMenuByDefaultTypeLessThan(int defaultType) {
 		
 		Sort sort = new Sort(Direction.ASC, "sort");
-		return menuRepository.findByDef(Boolean.TRUE, sort);
+		return menuRepository.findByDefaultTypeLessThan(defaultType, sort);
 	}
 
 

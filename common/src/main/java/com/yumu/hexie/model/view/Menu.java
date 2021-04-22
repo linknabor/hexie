@@ -24,7 +24,7 @@ public class Menu extends BaseModel {
 	private String sectId;
 	private String cspId;
 	private String appid;
-	private Boolean def;	//是否默认
+	private int defaultType;	//0是最基础的3个，1是额外的5个
 	
 	public String getCode() {
 		return code;
@@ -98,11 +98,11 @@ public class Menu extends BaseModel {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
-	public Boolean isDef() {
-		return def;
+	public int getDefaultType() {
+		return defaultType;
 	}
-	public void setDef(Boolean def) {
-		this.def = def;
+	public void setDefaultType(int defaultType) {
+		this.defaultType = defaultType;
 	}
 	
 	
