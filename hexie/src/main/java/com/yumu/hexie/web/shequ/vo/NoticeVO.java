@@ -40,6 +40,7 @@ public class NoticeVO implements Serializable {
 	private List<String> thumbnailImgList;	//缩略图
 	
 	private String noticeDate;	//转化过的时间
+	private String url;	//跳转链接
 	
 	@JsonIgnore
 	private QiniuUtil qiniuUtil;
@@ -234,6 +235,14 @@ public class NoticeVO implements Serializable {
 		}
 		this.noticeDate = noticeDate;
 	}
-	
 
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	
+	
 }
