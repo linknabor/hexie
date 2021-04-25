@@ -37,6 +37,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.CsHotline;
+import com.yumu.hexie.model.view.Menu;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.card.WechatCardService;
@@ -138,6 +139,21 @@ public class UserController extends BaseController{
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
 			    userInfo.setWuyeTabsList(tabsList);
+			    
+			    List<Menu> menuList = new ArrayList<>();
+			    if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
+			    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			    	if (menuList.isEmpty()) {
+			    		menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//表示绑定了房屋的默认菜单
+					}
+				}else {
+					menuList = pageConfigService.getMenuByAppid(user.getAppId());
+				}
+			    if (menuList.isEmpty()) {
+			    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单
+				}
+			    
+			    userInfo.setMenuList(menuList);
 			    
 			    endTime = System.currentTimeMillis();
 			    log.info("user3，耗时：" + ((endTime-beginTime)));
