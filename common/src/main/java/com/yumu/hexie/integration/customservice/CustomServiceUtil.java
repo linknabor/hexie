@@ -3,7 +3,7 @@ package com.yumu.hexie.integration.customservice;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.yumu.hexie.integration.common.CommonPayRequest;
@@ -20,7 +20,7 @@ import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
 import com.yumu.hexie.model.user.User;
 
-@Component
+@Service
 public class CustomServiceUtil {
 
 	@Autowired

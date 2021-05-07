@@ -60,6 +60,8 @@ public class User extends BaseModel{
 	private String headimgurl;
 	/** 用户关注时间，为时间戳。如果用户曾多次关注，则取最后关注时间 */
 	private Date subscribe_time;
+	private Date unsubscribeDate;	//取关时间
+	
 	private long registerDate;//注册时间
 	private String identityCard;
 	private int zhima;
@@ -444,6 +446,14 @@ public class User extends BaseModel{
 	public void setPoint(int point) {
 		this.point = point;
 	}
+	
+	public Date getUnsubscribeDate() {
+		return unsubscribeDate;
+	}
+
+	public void setUnsubscribeDate(Date unsubscribeDate) {
+		this.unsubscribeDate = unsubscribeDate;
+	}
 
 	@Override
 	public String toString() {
@@ -453,13 +463,13 @@ public class User extends BaseModel{
 				+ ", currentAddrId=" + currentAddrId + ", wuyeId=" + wuyeId + ", openid=" + openid + ", memo=" + memo
 				+ ", subscribe=" + subscribe + ", status=" + status + ", nickname=" + nickname + ", sex=" + sex
 				+ ", age=" + age + ", city=" + city + ", country=" + country + ", province=" + province + ", language="
-				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", registerDate="
-				+ registerDate + ", identityCard=" + identityCard + ", zhima=" + zhima + ", lvdou=" + lvdou
-				+ ", couponCount=" + couponCount + ", shareCode=" + shareCode + ", newRegiste=" + newRegiste
-				+ ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId + ", totalBind=" + totalBind
-				+ ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId + ", point=" + point + "]";
+				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", unsubscribeDate="
+				+ unsubscribeDate + ", registerDate=" + registerDate + ", identityCard=" + identityCard + ", zhima="
+				+ zhima + ", lvdou=" + lvdou + ", couponCount=" + couponCount + ", shareCode=" + shareCode
+				+ ", newRegiste=" + newRegiste + ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId
+				+ ", totalBind=" + totalBind + ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId
+				+ ", point=" + point + "]";
 	}
 
-	
 		
 }

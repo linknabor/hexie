@@ -6,12 +6,13 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.oper.mapper.QueryOperRegionMapper;
 import com.yumu.hexie.integration.oper.vo.QueryOperVO;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.vo.OperAuthorization;
 
 public interface OperService {
 
-	void authorize(User user, String sectIds, String timestamp, String type);
+	void authorize(User user, OperAuthorization oa) throws Exception;
 	
-	void cancelAuthorize(QueryOperVO queryOperVO);
+	void cancelAuthorize(QueryOperVO queryOperVO) throws Exception;
 	
 	CommonResponse<Object> getOperList(QueryOperVO queryOperVO);
 

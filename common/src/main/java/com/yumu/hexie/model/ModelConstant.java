@@ -50,6 +50,8 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
     public static final int SERVICE_OPER_TYPE_SAASSALE = 15;	//saas售卖接单提醒
     public static final int SERVICE_OPER_TYPE_MSG_SENDER = 16;	//物业消息发送人员
+    public static final int SERVICE_OPER_TYPE_WUYE_FEE_STAFF = 17;
+    public static final int SERVICE_OPER_TYPE_OTHER_FEE_STAFF = 18;
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
@@ -280,7 +282,16 @@ public class ModelConstant {
     public static final int SCHEDULE_TYPE_XIYI_TIMEOUT = 6;
     public static final int SCHEDULE_TYPE_BAOJIE_TIMEOUT = 7;
 	
-
+    //资讯类型  0.物业公告, 1.业委会公告, 2.居委会公告, 3.便民信息, 9.系统资讯-全局，10系统资讯-公众号级, 11圈子, 12通知消息推送
+    public static final int NOTICE_TYPE2_WUYE = 0;	//物业公告
+    public static final int NOTICE_TYPE2_YEWEI = 1;	//业委会公告
+    public static final int NOTICE_TYPE2_JUWEI = 2;	//居委会公告
+    public static final int NOTICE_TYPE2_BIANMIN = 3;
+    public static final int NOTICE_TYPE2_ALL = 9;
+    public static final int NOTICE_TYPE2_APP = 10;
+    public static final int NOTICE_TYPE2_MOMENTS = 11;
+    public static final int NOTICE_TYPE2_NOTIFICATIONS = 12;
+	
 	
 	//通知类型
 	public static final int NOTICE_TYPE_ORDER = 1;//订单通知
@@ -340,6 +351,9 @@ public class ModelConstant {
 	public static final String KEY_TYPE_CSHOTLINE = "cfg:page:csHotline";
 	public static final String KEY_TYPE_PAGECONFIG = "cfg:page:pageConfigView";	//页面配置
 	public static final String KEY_TYPE_WUYEPAY_TABS = "cfg:page:wuyePayTabs";	//物业缴费选项卡
+	public static final String KEY_TYPE_MENU_APP = "cfg:page:menu:app";	//公众号菜单
+	public static final String KEY_TYPE_MENU_CSP = "cfg:page:menu:csp";	//公众号菜单
+	public static final String KEY_TYPE_MENU_DEFAULT = "cfg:page:menu:default";	//公众号菜单
 
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
@@ -364,10 +378,18 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
 	
+	/*下面这些的value值不要改，是另一个系统推送过来的，要改两边都要改 start */
 	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
 	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
 	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
 	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
+	public static final String KEY_EVENT_SUBSCRIBE_MSG_QUEUE = "queueSubscribeMsg";	//用户在图文等场景内订阅通知的操作 事件队列
+	public static final String KEY_EVENT_SUBSCRIBE_UPDATE_QUEUE = "queueEventUpdateSubscribe";	//关注事件消息队列，更新用户信息用
+	public static final String KEY_EVENT_UNSUBSCRIBE_QUEUE = "queueEventUnsubscribe";	//取消关注事件消息队列 tpauth -> hexie
+	/*下面这些的value值不要改，是另一个系统推送过来的，要改两边都要改 end */
+	
+	public static final String KEY_UNSUBSCRIBE_NOTIFY_QUEUE = "queue:notify:unsubscribe";	//取消关注通知，hexie -> community
+	public static final String KEY_UNSUBSCRIBE_NOTIFY_CHECK = "lock:unsubscribeNotification:";	//防重
 	
 	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
 	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
@@ -398,6 +420,7 @@ public class ModelConstant {
 	
 	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template";
 	public static final String KEY_MSG_TEMPLATE_URL = "cfg:msgtemplate:url";
+	public static final String KEY_SUBSCRIBE_MSG_TEMPLATE = "cfg:subscribeMsg:template";	//所有能订阅的消息模板
 	
 	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam";
 	
@@ -420,12 +443,24 @@ public class ModelConstant {
 	
 	public static final String KEY_USER_CACHED = "user:cached";
 	public static final String KEY_USER_SERVE_ROLE = "user:servRole";	//用户服务类型
+	public static final String KEY_USER_SUBSCRIBE_MSG_TEMPLATE = "user:subscribeMsgTemplate";	//用户订阅过的消息模板
 	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	
 	public static final String KEY_HEXIE_PARTNER = "partner:";	//合伙人
-	
 	public static final String KEY_MSG_VIEW_CACHE = "msg:cached";
 	
+	//模板业务类型, 0.普通用户的模板，1工作人员模板
+	public static final int SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_NORMAL = 0;
+	public static final int SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR = 1;	
+	
+	//消息类型，0模板消息，1订阅消息
+	public static final int MSG_TYPE_TEMPLATE = 0;
+	public static final int MSG_TYPE_SUBSCRIBE_MSG = 1;
+
+	//微信用户关注状态
+	public static final int WECHAT_USER_SUBSCRIBED = 1;
+	public static final int WECHAT_USER_UNSUBSCRIBED = 0;
+
 }		

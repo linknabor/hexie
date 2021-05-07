@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 	private RedisRepository redisRepository;
 	@Autowired
 	private AlipayClient alipayClient;
-	
+		
 	@Value("${mainServer}")
 	private Boolean mainServer;
 	
@@ -108,6 +108,16 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		return dbUser;
+	}
+
+	@Override
+	public User findwuyeId(String wuyeId) {
+		List<User> users = userRepository.findByWuyeId(wuyeId);
+		User user = new User();
+		if(users.size() > 0) {
+			user = users.get(0);
+		}
+		return user;
 	}
 
 	@Override
@@ -420,6 +430,42 @@ public class UserServiceImpl implements UserService {
 			throw new BizValidateException(e.getMessage(), e);
 		}
 		return oAuth;
+		
+	}
+
+	@Override
+	@Transactional
+	public boolean eventSubscribe(User user) {
+		
+		boolean updated = false;
+		List<User> userList = userRepository.findByOpenid(user.getOpenid());
+		if (userList!=null && !userList.isEmpty()) {
+			updated = true;
+		}
+		for (User dbuser : userList) {
+			dbuser.setSubscribe(user.getSubscribe());
+			dbuser.setSubscribe_time(user.getSubscribe_time());
+			userRepository.save(dbuser);
+		}
+		return updated;
+		
+	}
+
+	@Override
+	@Transactional
+	public boolean eventUnsubscribe(User user) {
+		
+		boolean updated = false;
+		List<User> userList = userRepository.findByOpenid(user.getOpenid());
+		if (userList!=null && !userList.isEmpty()) {
+			updated = true;
+		}
+		for (User dbuser : userList) {
+			dbuser.setSubscribe(user.getSubscribe());
+			dbuser.setUnsubscribeDate(user.getUnsubscribeDate());
+			userRepository.save(dbuser);
+		}
+		return updated;
 		
 	}
 

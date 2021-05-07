@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -102,6 +103,7 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public boolean deleteHouse(User user, String houseId) {
 		
 		BaseResult<String> result = WuyeUtil.deleteHouse(user, houseId);
@@ -125,11 +127,10 @@ public class WuyeServiceImpl implements WuyeService {
 				user.setSectId("0");
 				user.setCspId("0");
 				user.setOfficeTel("");
-				userRepository.updateUserByHouse(0l, "", totalBind, "", "", "", "0", "0", "", user.getId());
 			}else {
 				user.setTotalBind(totalBind);
-				userRepository.updateUserTotalBind(totalBind, user.getId());
 			}
+			userRepository.save(user);
 			
 		} else {
 			throw new BizValidateException("解绑房屋失败。");
@@ -260,16 +261,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(User user, String sect_name, String region_name) {
+	public CellListVO getVagueSectByName(User user, String sectName, String regionName) throws Exception {
 		
-		try {
-			String targetUrl = getRegionUrl(region_name);
-			return WuyeUtil.getVagueSectByName(user, sect_name, targetUrl).getData();
-      
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return null;
+		return wuyeUtil2.getVagueSectByName(user, sectName, regionName).getData();
 	}
 
 	@Override
@@ -286,13 +280,17 @@ public class WuyeServiceImpl implements WuyeService {
 			throw new BizValidateException("账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("建筑面积允许误差在±1平方米以内！");
+			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+		}
+		if("02".equals(r.getResult())) {
+			throw new BizValidateException("房屋不存在！");
 		}
 		return r.getData();
 	}
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public void setDefaultAddress(User user, HexieUser u) {
 
 		HexieAddress hexieAddress = new HexieAddress();
@@ -319,9 +317,7 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setSectId(u.getSect_id());	
 		user.setCspId(u.getCsp_id());
 		user.setOfficeTel(u.getOffice_tel());
-		userRepository.updateUserByHouse(user.getXiaoquId(), user.getXiaoquName(), 
-				user.getTotalBind(), user.getProvince(), user.getCity(), user.getCountry(), 
-				user.getSectId(), user.getCspId(), user.getOfficeTel(), user.getId());
+		userRepository.save(user);
 		
 	}
 
@@ -362,6 +358,12 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		if("01".equals(r.getResult())) {
 			throw new BizValidateException("账户不存在！");
+		}
+		if("06".equals(r.getResult())) {
+			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+		}
+		if("02".equals(r.getResult())) {
+			throw new BizValidateException("房屋不存在！");
 		}
 		return r.getData();
 	}
@@ -522,7 +524,7 @@ public class WuyeServiceImpl implements WuyeService {
 			log.info("ops count : " + ops.size());
 			serviceOperator = ops.get(0);
 			if (serviceOperator != null) {
-				String subTypes = serviceOperator.getSubTypes();
+				String subTypes = serviceOperator.getSubType();
 				log.info("subTypes : " + subTypes);
 				if (!StringUtils.isEmpty(subTypes)) {
 					Object[]sTypes = subTypes.split(",");
@@ -591,6 +593,11 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.getEReceipt(user, tradeWaterId, sysSource).getData();
 	}
-
 	
+	@Override
+	public CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception {
+		
+		return wuyeUtil2.queryCellAddr(user, sectId, cellAddr).getData();
+	}
+
 }

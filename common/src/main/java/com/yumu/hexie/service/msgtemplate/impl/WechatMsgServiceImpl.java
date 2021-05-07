@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.msgtemplate.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -44,6 +46,16 @@ public class WechatMsgServiceImpl implements WechatMsgService {
     	return templateId;
     	
     }
+	
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_MSG_TEMPLATE, key = "#templateId")
+    public MsgTemplate getTemplateByTemplateId(String templateId) {
+    	
+    	Assert.hasText(templateId, "模板id不能为空。");
+    	MsgTemplate msgTemplate = msgTempalateRepository.findByValue(templateId);
+    	return msgTemplate;
+    	
+    }
     
     /**
      * 不同公众号用不同模板消息
@@ -60,6 +72,18 @@ public class WechatMsgServiceImpl implements WechatMsgService {
     		url = msgTemplateUrl.getValue();
 		}
     	return url;
+    	
+    }
+	
+	/**
+     * 不同公众号用不同模板消息
+     */
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_SUBSCRIBE_MSG_TEMPLATE, key = "#appId+'_'+#type+'_'+#bizType")
+    public List<MsgTemplate> getSubscribeMsgTemplate(String appId, int type, int bizType) {
+    	
+    	Assert.hasText(appId, "appId不能为空。");
+    	return msgTempalateRepository.findByAppidAndTypeAndBizType(appId, type, bizType);
     	
     }
 	

@@ -55,6 +55,6 @@ public interface GotongService {
 
 	void sendPayNotification4HouseBinder(AccountNotification accountNotify);
 
-	boolean sendBillPush(String openId, String appId, BillPushDetail billPushDetail);
+	String sendBillPush(String openId, String appId, BillPushDetail billPushDetail);
 
 }

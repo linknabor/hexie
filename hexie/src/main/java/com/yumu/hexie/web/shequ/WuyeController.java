@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -798,6 +799,61 @@ public class WuyeController extends BaseController {
 		} else {
 			return BaseResult.successResult(null);
 		}
+	}
+
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param user
+	 * @param sect_name
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getLikeCellAddr", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<CellListVO> getLikeCellAddr(@ModelAttribute(Constants.USER) User user,
+			@RequestParam String sectId, @RequestParam String cellAddr) throws Exception {
+
+		CellListVO cellMng = wuyeService.getCellList(user, sectId, cellAddr);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
+	}
+
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param sectId
+	 * @param cellAddr
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getLikeCellAddr2", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<CellListVO> getLikeCellAddr(@RequestParam String sectId, @RequestParam String cellAddr, String appId) throws Exception {
+		User user = new User();
+		user.setAppId(appId);
+		CellListVO cellMng = wuyeService.getCellList(user, sectId, cellAddr);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
+	}
+
+	@RequestMapping(value = "/cleanUser", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> cleanUser(@RequestParam String wuyeId, @Valid HexieUser hexieUser) {
+		User user = userService.findwuyeId(wuyeId);
+		log.error("user:" + user.toString());
+		log.error("hexieUser:" + hexieUser.toString());
+		if(user !=null && hexieUser != null) {
+			wuyeService.setDefaultAddress(user, hexieUser);
+
+		}
+		return BaseResult.successResult("true");
 	}
 
 

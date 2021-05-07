@@ -73,12 +73,12 @@ public class NotifyServiceImpl implements NotifyService {
 		
 		User user = null;
 		if (!StringUtils.isEmpty(payNotification.getWuyeId())) {
-			List<User> userList = userRepository.findByWuyeId(payNotification.getWuyeId());
-			if (userList == null || userList.isEmpty()) {
-				log.info("can not find user, wuyeId : " + payNotification.getWuyeId() + ", tradeWaterId : " + payNotification.getOrderId());
-			}else {
-				user = userList.get(0);
-			}
+		List<User> userList = userRepository.findByWuyeId(payNotification.getWuyeId());
+		if (userList == null || userList.isEmpty()) {
+			log.info("can not find user, wuyeId : " + payNotification.getWuyeId() + ", tradeWaterId : " + payNotification.getOrderId());
+		}else {
+			user = userList.get(0);
+		}
 
 		}
 		
@@ -371,7 +371,7 @@ public class NotifyServiceImpl implements NotifyService {
 		if (accountNotification == null) {
 			log.info("accountNotification is null, will return ! ");
 			return;
-		}
+}
 		
 		int retryTimes = 0;
 		boolean isSuccess = false;
@@ -394,5 +394,5 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		
 	}
-
+	
 }

@@ -63,7 +63,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private BaseOrderService baseOrderService;
 	@Autowired
 	private CouponService couponService;
-
+	
 	
 	/**
 	 * 异步发送到账模板消息
@@ -325,7 +325,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						serviceOperator.setTel(operator.getTel());
 						serviceOperator.setType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
 						serviceOperator.setUserId(user.getId());
-						serviceOperator.setSubTypes(operator.getServiceId());
+						serviceOperator.setSubType(operator.getServiceId());
 						serviceOperatorRepository.save(serviceOperator);
 					} catch (Exception e) {
 						logger.error("save serviceOperator failed ! oper : " + operator);
@@ -411,7 +411,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if ("delete".equals(operType)) {
 						List <ServiceOperator> opList = serviceOperatorRepository.findByType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
 						opList.forEach(oper->{
-							String subTypes = oper.getSubTypes();
+							String subTypes = oper.getSubType();
 							if (StringUtils.isEmpty(subTypes)) {
 								return;
 							}
@@ -425,7 +425,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								bf.append(subType).append(",");
 							}
 							String subs = bf.substring(0, bf.length()-1);
-							oper.setSubTypes(subs);
+							oper.setSubType(subs);
 							serviceOperatorRepository.save(oper);
 							
 						});
@@ -721,14 +721,14 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	@Override
 	@Async("taskExecutor")
 	public void sendWuyeNotification4HouseBinderAysc() {
-		
+
 		while(true) {
 			try {
 				if (!maintenanceService.isQueueSwitchOn()) {
 					logger.info("queue switch off ! ");
 					Thread.sleep(60000);
 					continue;
-				}
+}
 				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_HOUSE_BINDER_QUEUE, 30, TimeUnit.SECONDS);
 				if (StringUtils.isEmpty(json)) {
 					continue;

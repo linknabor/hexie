@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -30,8 +30,10 @@ import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodePayServiceRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
+import com.yumu.hexie.integration.wuye.req.QueryCellRequest;
 import com.yumu.hexie.integration.wuye.req.QueryEReceiptRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
+import com.yumu.hexie.integration.wuye.req.QuerySectRequet;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeParamRequest;
@@ -57,7 +59,7 @@ import com.yumu.hexie.vo.req.MessageReq;
  * @author david
  *
  */
-@Component
+@Service
 public class WuyeUtil2 {
 	
 	@Value("${sysName}")
@@ -84,8 +86,10 @@ public class WuyeUtil2 {
 	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
 	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
 	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
+	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
+	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 
-	
+
 	/**
 	 * 标准版查询账单
 	 * @param userId
@@ -499,5 +503,53 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
+	
+	/**
+	 * 根据小区ID查询小区楼栋明细
+	 * @param user
+	 * @param sectId
+	 * @param cellAddr
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<CellListVO> queryCellAddr(User user, String sectId, String cellAddr) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_CELL_ADDR_URL;
+		QueryCellRequest queryCellRequest = new QueryCellRequest();
+		queryCellRequest.setSectId(sectId);
+		queryCellRequest.setCellAddr(cellAddr);
+		queryCellRequest.setUserId(user.getWuyeId());
+		
+		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
+		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryCellRequest, typeReference);
+		BaseResult<CellListVO> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param sect_name
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<CellListVO> getVagueSectByName(User user, String sectName, String regionName) throws Exception{
+		
+		String requestUrl = requestUtil.getRequestUrl(user, regionName);
+		requestUrl += SECT_VAGUE_LIST_URL;
+		
+		QuerySectRequet querySectRequet = new QuerySectRequet();
+		querySectRequet.setSectName(sectName);
+		querySectRequet.setOpenid(user.getOpenid());
+		querySectRequet.setAppid(user.getAppId());
+		
+		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
+		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, querySectRequet, typeReference);
+		BaseResult<CellListVO> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+
 	
 }

@@ -127,12 +127,13 @@ public class WechatCardServiceImpl implements WechatCardService {
 	@Override
 	public void eventSubscribe(EventSubscribeDTO eventSubscribeDTO) {
 
-		User user = eventSubscribeDTO.getUser();
+		/*关注领卡暂时取消。用户直接在功能内领卡 20210204 start */
+	/*	User user = eventSubscribeDTO.getUser();
 		WechatCardCatagory wechatCardCatagory = getWechatCardCatagoryByCardTypeAndAppId(ModelConstant.WECHAT_CARD_TYPE_MEMBER, user.getAppId());
 		if (wechatCardCatagory == null) {
 			throw new BizValidateException("未配置微信会员卡券。");
 		}
-		/*1.记录卡券倒数据库*/
+		1.记录卡券倒数据库
 		WechatCard wechatCard = wechatCardRepository.findByCardIdAndUserOpenId(wechatCardCatagory.getCardId(), user.getOpenid());
 		if (wechatCard == null) {
 			wechatCard = new WechatCard();
@@ -143,10 +144,10 @@ public class WechatCardServiceImpl implements WechatCardService {
 			wechatCard.setUserOpenId(user.getOpenid());
 			wechatCard.setStatus(ModelConstant.CARD_STATUS_NONE);
 			wechatCardRepository.save(wechatCard);
-		}
+		}*/
 		
 		/*2.发送消息给用户*/
-		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+/*		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 		ActivateUrlReq activateUrlReq = new ActivateUrlReq();
 		activateUrlReq.setCardId(wechatCardCatagory.getCardId());
 		activateUrlReq.setOuterStr(ModelConstant.CARD_GET_SUBSCRIBE);
@@ -154,9 +155,12 @@ public class WechatCardServiceImpl implements WechatCardService {
 		logger.info("activateUrlResp : " + activateUrlResp);
 		if (!"0".equals(activateUrlResp.getErrcode())) {
 			throw new BizValidateException("获取开卡组件失败 : " + activateUrlResp.getErrmsg());
-		}
-		eventSubscribeDTO.setCardId(wechatCardCatagory.getCardId());
-		eventSubscribeDTO.setGetCardUrl(activateUrlResp.getUrl());
+		}*/
+		
+//		eventSubscribeDTO.setCardId(wechatCardCatagory.getCardId());
+//		eventSubscribeDTO.setGetCardUrl(activateUrlResp.getUrl());
+		
+		/*关注领卡暂时取消。用户直接在功能内领卡 20210204 end */
 		boolean isSuccess = gotongService.sendSubscribeMsg(eventSubscribeDTO);
 		if (!isSuccess) {
 			throw new BizValidateException("发送卡券客服消息失败。");
