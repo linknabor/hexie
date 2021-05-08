@@ -85,9 +85,14 @@ public class MessageServiceImpl implements MessageService {
 		Sort sort = Sort.by(Direction.DESC, "top", "createDate");
 		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size(), sort);
 		Message message = baseRequestDTO.getData();
-		Page<Message> page = messageRepository.queryMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(), 
-				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), sectList, pageable);
-		
+		Page<Message> page;
+		if("9".equals(message.getMsgType())) {
+			page = messageRepository.querySysMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(),
+					baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), message.getMsgType(), pageable);
+		} else {
+			page = messageRepository.queryMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(),
+					baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), sectList, pageable);
+		}
 		return page;
 	
 	}
