@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.model.community.*;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,10 +20,6 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.community.Message;
-import com.yumu.hexie.model.community.MessageRepository;
-import com.yumu.hexie.model.community.MessageSect;
-import com.yumu.hexie.model.community.MessageSectRepository;
 import com.yumu.hexie.model.user.Feedback;
 import com.yumu.hexie.model.user.FeedbackRepository;
 import com.yumu.hexie.model.user.User;
@@ -44,6 +42,10 @@ public class MessageServiceImpl implements MessageService {
 	private SystemConfigService systemConfigService;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private NoticeRepository noticeRepository;
+	@Autowired
+	private NoticeSectRepository noticeSectRepository;
 	
 	@Override
 	public List<Message> queryMessages(int type, long provinceId, long cityId,
@@ -110,6 +112,20 @@ public class MessageServiceImpl implements MessageService {
 			messageSect.setMessageId(message.getId());
 			messageSect.setSectId(Long.valueOf(sectId));
 			messageSectRepository.save(messageSect);
+		}
+
+		//在notice添加一条记录
+		Notice notice = new Notice();
+		BeanUtils.copyProperties(message, notice);
+		notice.setNoticeType(message.getMsgType());
+		notice.setOutsideKey(message.getId());
+		notice = noticeRepository.save(notice);
+
+		for (String sectId : sectIds) {
+			NoticeSect noticeSect = new NoticeSect();
+			noticeSect.setNoticeId(notice.getId());
+			noticeSect.setSectId(Long.valueOf(sectId));
+			noticeSectRepository.save(noticeSect);
 		}
 	}
 
