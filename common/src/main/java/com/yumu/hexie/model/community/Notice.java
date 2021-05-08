@@ -24,6 +24,7 @@ public class Notice extends BaseModel {
 	private String appid;	//平台ID，如果appid是0，表示所有公众号可见
 	private String creator;	//发布人
 	private String url;	//跳转链接
+	private long outsideKey; //外部主键 可能是message表
 	
 	public int getNoticeType() {
 		return noticeType;
@@ -97,7 +98,11 @@ public class Notice extends BaseModel {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
-	
-	
+	public long getOutsideKey() {
+		return outsideKey;
+	}
+
+	public void setOutsideKey(long outsideKey) {
+		this.outsideKey = outsideKey;
+	}
 }

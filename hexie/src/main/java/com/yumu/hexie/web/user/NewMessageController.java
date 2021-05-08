@@ -41,7 +41,7 @@ public class NewMessageController extends BaseController {
 	public BaseResponseDTO<?> messages(@RequestBody BaseRequestDTO<Message> baseRequestDTO)
 			throws Exception {
 
-		Page<Message> page = null;
+		Page<Message> page;
 		try {
 			page = messageService.queryMessages(baseRequestDTO);
 		} catch (Exception e) {
@@ -65,11 +65,10 @@ public class NewMessageController extends BaseController {
 		}
 		return BaseResponse.success(baseRequestDTO.getRequestId());
 	}
-	
+
 	/**
 	 * 管理端信息详情
-	 * @param user
-	 * @param messageId
+	 * @param baseRequestDTO
 	 * @return
 	 * @throws Exception
 	 */

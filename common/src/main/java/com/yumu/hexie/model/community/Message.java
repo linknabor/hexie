@@ -23,6 +23,7 @@ public class Message extends BaseModel{
 	private String image;	//资讯图片
 	private String smallImage;	//缩略图
 	private String appid;	//平台ID
+	private String url;     //跳转地址
 
 	public int getMsgType() {
 		return msgType;
@@ -127,6 +128,12 @@ public class Message extends BaseModel{
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
-	
-	
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
 }
