@@ -129,6 +129,11 @@ public class MessageServiceImpl implements MessageService {
 		BeanUtils.copyProperties(message, notice);
 		notice.setNoticeType(message.getMsgType());
 		notice.setOutsideKey(message.getId());
+		Notice n = noticeRepository.findByOutsideKey(message.getId());
+		if(n != null) {
+			notice.setId(n.getId());
+		}
+
 		//这里特殊处理，如果conntext有内容，则转换成链接形式存在在notice表的url字段
 
 		if(!ObjectUtils.isEmpty(message.getContent())) {
@@ -136,6 +141,11 @@ public class MessageServiceImpl implements MessageService {
 			notice.setUrl(url);
 		}
 		notice = noticeRepository.save(notice);
+
+		List<NoticeSect> noticeSects = noticeSectRepository.findByNoticeId(message.getId());
+		for (NoticeSect noticeSect : noticeSects) {
+			noticeSectRepository.delete(noticeSect);
+		}
 
 		for (String sectId : sectIds) {
 			NoticeSect noticeSect = new NoticeSect();

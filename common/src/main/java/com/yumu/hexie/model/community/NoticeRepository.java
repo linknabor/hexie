@@ -22,4 +22,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
 			nativeQuery = true)
 	public List<Notice>getNoticeList(String appid, String sectId, Pageable pageable);
 
+	public Notice findByOutsideKey(Long outsidKey);
 }
