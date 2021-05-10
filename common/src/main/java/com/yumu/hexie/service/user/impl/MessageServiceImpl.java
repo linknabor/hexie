@@ -9,6 +9,7 @@ import com.yumu.hexie.model.community.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +48,10 @@ public class MessageServiceImpl implements MessageService {
 	private NoticeRepository noticeRepository;
 	@Autowired
 	private NoticeSectRepository noticeSectRepository;
-	
+
+	@Value(value = "${messageUrl}")
+	private Boolean messageUrl;
+
 	@Override
 	public List<Message> queryMessages(int type, long provinceId, long cityId,
 			long countyId, long xiaoquId,int page, int pageSize) {
@@ -128,7 +132,7 @@ public class MessageServiceImpl implements MessageService {
 		//这里特殊处理，如果conntext有内容，则转换成链接形式存在在notice表的url字段
 
 		if(!ObjectUtils.isEmpty(message.getContent())) {
-			String url = "https://www.e-shequ.cn/weixin/wuye/index.html?oriApp=wxcfa72801fc101382" + message.getAppid() + "#/message?messageId="+ message.getId();
+			String url = messageUrl + "?oriApp=" + message.getAppid() + "#/message?messageId="+ message.getId();
 			notice.setUrl(url);
 		}
 		notice = noticeRepository.save(notice);
