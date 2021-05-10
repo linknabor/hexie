@@ -50,7 +50,7 @@ public class MessageServiceImpl implements MessageService {
 	private NoticeSectRepository noticeSectRepository;
 
 	@Value(value = "${messageUrl}")
-	private Boolean messageUrl;
+	private String messageUrl;
 
 	@Override
 	public List<Message> queryMessages(int type, long provinceId, long cityId,
