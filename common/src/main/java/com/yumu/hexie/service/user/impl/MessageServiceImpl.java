@@ -142,7 +142,7 @@ public class MessageServiceImpl implements MessageService {
 		}
 		notice = noticeRepository.save(notice);
 
-		List<NoticeSect> noticeSects = noticeSectRepository.findByNoticeId(message.getId());
+		List<NoticeSect> noticeSects = noticeSectRepository.findByNoticeId(notice.getId());
 		for (NoticeSect noticeSect : noticeSects) {
 			noticeSectRepository.delete(noticeSect);
 		}
