@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
@@ -115,7 +116,7 @@ public class MessageServiceImpl implements MessageService {
 		for (String sectId : sectIds) {
 			MessageSect messageSect = new MessageSect();
 			messageSect.setMessageId(message.getId());
-			messageSect.setSectId(Long.valueOf(sectId));
+			messageSect.setSectId(Long.parseLong(sectId));
 			messageSectRepository.save(messageSect);
 		}
 
@@ -124,12 +125,18 @@ public class MessageServiceImpl implements MessageService {
 		BeanUtils.copyProperties(message, notice);
 		notice.setNoticeType(message.getMsgType());
 		notice.setOutsideKey(message.getId());
+		//这里特殊处理，如果conntext有内容，则转换成链接形式存在在notice表的url字段
+
+		if(!ObjectUtils.isEmpty(message)) {
+			String url = "https://www.e-shequ.cn/weixin/wuye/index.html?oriApp=wxcfa72801fc101382" + message.getAppid() + "#/message?messageId="+ message.getId();
+			notice.setUrl(url);
+		}
 		notice = noticeRepository.save(notice);
 
 		for (String sectId : sectIds) {
 			NoticeSect noticeSect = new NoticeSect();
 			noticeSect.setNoticeId(notice.getId());
-			noticeSect.setSectId(Long.valueOf(sectId));
+			noticeSect.setSectId(Long.parseLong(sectId));
 			noticeSectRepository.save(noticeSect);
 		}
 	}
