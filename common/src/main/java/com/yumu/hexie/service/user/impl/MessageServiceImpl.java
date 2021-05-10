@@ -127,7 +127,7 @@ public class MessageServiceImpl implements MessageService {
 		notice.setOutsideKey(message.getId());
 		//这里特殊处理，如果conntext有内容，则转换成链接形式存在在notice表的url字段
 
-		if(!ObjectUtils.isEmpty(message)) {
+		if(!ObjectUtils.isEmpty(message.getContent())) {
 			String url = "https://www.e-shequ.cn/weixin/wuye/index.html?oriApp=wxcfa72801fc101382" + message.getAppid() + "#/message?messageId="+ message.getId();
 			notice.setUrl(url);
 		}
