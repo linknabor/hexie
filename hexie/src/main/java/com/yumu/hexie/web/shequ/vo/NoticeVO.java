@@ -81,10 +81,10 @@ public class NoticeVO implements Serializable {
 
 		switch (noticeType) {
 		case ModelConstant.NOTICE_TYPE2_ALL:
-			this.creator = "系统通知";
+			this.creator = "系统消息";
 			break;
 		case ModelConstant.NOTICE_TYPE2_APP:
-			this.creator = "系统通知";
+			this.creator = "系统消息";
 			break;
 		case ModelConstant.NOTICE_TYPE2_WUYE:
 			this.creator = "物业公告";
@@ -102,7 +102,7 @@ public class NoticeVO implements Serializable {
 			this.creator = "社区圈";
 			break;
 		default:
-			this.creator = "系统通知";
+			this.creator = "系统消息";
 			break;
 		}
 		
