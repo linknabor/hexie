@@ -35,7 +35,18 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 			nativeQuery = true)
 	public Page<Message> queryMessageMutipleCons(int status, long id, String title, 
 			String startDate, String endDate, List<String> sectIds, Pageable pageable);
-	
+
+	@Query(value = "select distinct * from message "
+			+ "where status = ?1 and if( ?2 != '', id = ?2, 1=1 )"
+			+ "and if( ?3 != '', title like CONCAT('%',?3,'%') , 1=1 ) and if( ?4 != '', publishDate >= ?4, 1=1 ) "
+			+ "and if ( ?5 != '', publishDate <= ?5, 1=1) and msgType = ?6 ",
+			countQuery = "select count(*) from message "
+					+ "where status = ?1 and if( ?2 != '', id = ?2, 1=1 ) "
+					+ "and if( ?3 != '', title like %?3%, 1=1 ) and if( ?4 != '', publishDate >= ?4, 1=1 ) "
+					+ "and if ( ?5 != '', publishDate <= ?5, 1=1) and msgType = ?6",
+			nativeQuery = true)
+	Page<Message> querySysMessageMutipleCons(int status, long id, String title,
+							   String startDate, String endDate, int msgType, Pageable pageable);
 	/**
 	 * 查询全平台的资讯,msgType=9的
 	 * @param msgType
