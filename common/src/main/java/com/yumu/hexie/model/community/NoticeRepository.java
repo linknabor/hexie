@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
 	@Query(value = "select DISTINCT n.* from ( "
-			+ "select n.* from notice n where n.status = ?1 and n.appid = '' or n.appid is null "
+			+ "select n.* from notice n where n.status = ?1 and n.noticeType = '9' "
 			+ "union all "
 			+ "select n.* from notice n where n.status = ?1 and n.appid = ?2 "
 			+ "union all "
