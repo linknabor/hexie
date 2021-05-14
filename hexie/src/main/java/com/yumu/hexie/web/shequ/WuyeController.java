@@ -352,7 +352,6 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
-		WechatPayInfo result = new WechatPayInfo();
 		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
@@ -363,7 +362,7 @@ public class WuyeController extends BaseController {
 		user.setOpenid(prepayReqVo.getOpenid());
 		
 		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
-		result = wuyeService.getPrePayInfo(dto);
+		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 

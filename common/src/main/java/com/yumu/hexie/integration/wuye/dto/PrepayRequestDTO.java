@@ -55,6 +55,7 @@ public class PrepayRequestDTO implements Serializable {
 	//是否二维码支付
 	private String isQrcode;
 	private String appid;
+	private String payee_openid; //收款人的openid
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -223,6 +224,14 @@ public class PrepayRequestDTO implements Serializable {
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+	}
+
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
 	}
 
 	@Override

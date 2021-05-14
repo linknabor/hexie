@@ -76,6 +76,7 @@ public class PrepayRequest extends WuyeRequest {
 	private String reduceAmt;
 	private String openid;
 	private String appid;
+	private String payee_openid; //收款人的openid
 	
 	//开票参数
 	private String mobile;
@@ -280,6 +281,15 @@ public class PrepayRequest extends WuyeRequest {
 	public void setIsQrcode(String isQrcode) {
 		this.isQrcode = isQrcode;
 	}
+
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
+	}
+
 	@Override
 	public String toString() {
 		return "PrepayRequest [wuyeId=" + wuyeId + ", fromSys=" + fromSys + ", couponUnit=" + couponUnit

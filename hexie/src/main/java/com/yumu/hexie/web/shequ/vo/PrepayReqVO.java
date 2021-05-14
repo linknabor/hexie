@@ -55,6 +55,7 @@ public class PrepayReqVO implements Serializable {
 	private String isQrcode;	//是否二维码支付
 	private String openid;
 	private String appid;	//alibaba appid
+	private String payee_openid; //收款人的openid
 	
 	public String getBillId() {
 		return billId;
@@ -220,6 +221,15 @@ public class PrepayReqVO implements Serializable {
 		this.openid = openid;
 
 	}
+
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
+	}
+
 	@Override
 	public String toString() {
 		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
