@@ -292,16 +292,35 @@ public class PrepayRequest extends WuyeRequest {
 
 	@Override
 	public String toString() {
-		return "PrepayRequest [wuyeId=" + wuyeId + ", fromSys=" + fromSys + ", couponUnit=" + couponUnit
-				+ ", couponNum=" + couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", openid="
-				+ openid + ", appid=" + appid + ", mobile=" + mobile + ", invoiceTitle=" + invoiceTitle
-				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", billId=" + billId
-				+ ", stmtId=" + stmtId + ", payType=" + payType + ", customerName=" + customerName + ", certType="
-				+ certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken="
-				+ quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo + ", ruleType=" + ruleType
-				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + "]";
-
+		return "PrepayRequest{" +
+				"wuyeId='" + wuyeId + '\'' +
+				", fromSys='" + fromSys + '\'' +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", openid='" + openid + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", mobile='" + mobile + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				'}';
 	}
-	
-	
 }

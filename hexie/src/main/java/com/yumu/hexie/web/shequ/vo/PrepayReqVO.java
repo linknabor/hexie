@@ -232,16 +232,35 @@ public class PrepayReqVO implements Serializable {
 
 	@Override
 	public String toString() {
-		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
-				+ couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitleType="
-				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", regionName="
-				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
-				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
-				+ ", veriCode=" + veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo
-				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType
-				+ ", isQrcode=" + isQrcode + ", openid=" + openid + ", appid="
-				+ appid + "]";
-
+		return "PrepayReqVO{" +
+				"billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", regionName='" + regionName + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", remember='" + remember + '\'' +
+				", cardId='" + cardId + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", openid='" + openid + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				'}';
 	}
-	
 }

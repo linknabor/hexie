@@ -236,17 +236,36 @@ public class PrepayRequestDTO implements Serializable {
 
 	@Override
 	public String toString() {
-		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
-				+ ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitle=" + invoiceTitle
-				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", regionUrl=" + regionUrl
-				+ ", regionName=" + regionName + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType
-				+ ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo="
-				+ acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode
-				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
-				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
-				+ ", appid=" + appid + "]";
-
+		return "PrepayRequestDTO{" +
+				"user=" + user +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", regionUrl='" + regionUrl + '\'' +
+				", regionName='" + regionName + '\'' +
+				", billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", remember='" + remember + '\'' +
+				", cardId='" + cardId + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				'}';
 	}
-	
-	
 }

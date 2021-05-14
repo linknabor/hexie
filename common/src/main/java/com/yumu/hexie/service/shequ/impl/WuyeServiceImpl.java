@@ -219,8 +219,7 @@ public class WuyeServiceImpl implements WuyeService {
 				prepayRequestDTO.setPhoneNo(selBankCard.getPhoneNo());
 			}
 		}
-		WechatPayInfo wechatPayInfo = wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
-		return wechatPayInfo;
+		return wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
 	}
 	
 	@Override
