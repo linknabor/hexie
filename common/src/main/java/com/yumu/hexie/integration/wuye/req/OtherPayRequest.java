@@ -28,6 +28,7 @@ public class OtherPayRequest extends WuyeRequest {
 	private String qrCodeId;
 	@JsonProperty("mng_cell_id")
 	private String mngCellId;
+	private String payee_openid;
 	
 	public OtherPayRequest(OtherPayDTO otherPayDTO) {
 		BeanUtils.copyProperties(otherPayDTO, this);
@@ -85,6 +86,14 @@ public class OtherPayRequest extends WuyeRequest {
 
 	public void setMngCellId(String mngCellId) {
 		this.mngCellId = mngCellId;
+	}
+
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
 	}
 
 	@Override

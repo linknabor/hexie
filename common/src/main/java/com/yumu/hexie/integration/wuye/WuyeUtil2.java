@@ -92,14 +92,13 @@ public class WuyeUtil2 {
 
 	/**
 	 * 标准版查询账单
-	 * @param userId
+	 * @param user
 	 * @param startDate
 	 * @param endDate
-	 * @param house_id
-	 * @param sect_id
-	 * @param regionurl
+	 * @param houseId
+	 * @param regionName
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public BaseResult<BillListVO> queryBillList(User user, String startDate, String endDate, String houseId, String regionName) throws Exception {
 		
@@ -186,8 +185,6 @@ public class WuyeUtil2 {
 	 * @throws Exception
 	 */
 	public BaseResult<WechatPayInfo> getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
-
-		
 		User user = prepayRequestDTO.getUser();
 		String appid = user.getAppId();
 		String fromSys = sysName;
@@ -201,7 +198,8 @@ public class WuyeUtil2 {
 		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
 		prepayRequest.setFromSys(fromSys);
 		prepayRequest.setAppid(user.getAppId());
-		
+		prepayRequest.setPayee_openid(prepayRequestDTO.getPayee_openid());
+
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
@@ -212,7 +210,7 @@ public class WuyeUtil2 {
 
 	/**
 	 * 获取优惠支付明细
-	 * @param prepayRequestDTO
+	 * @param discountViewRequestDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -230,10 +228,11 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
-	
+
 	/**
 	 * 获取优惠支付明细
-	 * @param prepayRequestDTO
+	 * @param user
+	 * @param orderNo
 	 * @return
 	 * @throws Exception
 	 */
@@ -251,10 +250,11 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
-	
+
 	/**
 	 * 获取优惠支付明细
-	 * @param prepayRequestDTO
+	 * @param user
+	 * @param bankCard
 	 * @return
 	 * @throws Exception
 	 */
@@ -340,7 +340,7 @@ public class WuyeUtil2 {
 	
 	/**
 	 * 签到签退
-	 * @param user
+	 * @param signInOutDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -363,11 +363,7 @@ public class WuyeUtil2 {
 	
 	/**
 	 * 根据ID查询指定类型的合协社区物业信息
-	 * @param user
-	 * @param sect_id
-	 * @param build_id
-	 * @param unit_id
-	 * @param data_type
+	 * @param getCellDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -386,12 +382,14 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
-	
+
 	/**
 	 * 查询参数配置
-	 * @param reqUrl
-	 * @param c
+	 * @param user
+	 * @param type
+	 * @param paraName
 	 * @return
+	 * @throws Exception
 	 */
 	public BaseResult<HexieConfig> queryServiceCfg(User user, String type, String paraName) throws Exception {
 
@@ -413,16 +411,14 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 获取电子凭证
 	 * @param user
-	 * @param stmtId
-	 * @param anotherbillIds
+	 * @param tradeWaterId
+	 * @param sysSource
 	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws Exception
 	 */
 	public BaseResult<EReceipt> getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception {
 		
@@ -437,16 +433,13 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 推送消息
 	 * @param user
-	 * @param stmtId
-	 * @param anotherbillIds
+	 * @param messageReq
 	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws Exception
 	 */
 	public BaseResult<String> sendMessage(User user, MessageReq messageReq) throws Exception {
 		
@@ -483,12 +476,13 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 查询发送历史
 	 * @param user
-	 * @param batchNo
-	 * @throws Exception 
+	 * @param sectIds
+	 * @return
+	 * @throws Exception
 	 */
 	public BaseResult<List<Message>> getMessageHistory(User user, String sectIds) throws Exception {
 		
@@ -527,10 +521,12 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 根据名称模糊查询合协社区小区列表
-	 * @param sect_name
+	 * @param user
+	 * @param sectName
+	 * @param regionName
 	 * @return
 	 * @throws Exception
 	 */
