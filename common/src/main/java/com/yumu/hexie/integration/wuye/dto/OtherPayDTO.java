@@ -11,6 +11,7 @@ public class OtherPayDTO {
 	private String remark;
 	private String qrCodeId;
 	private String mngCellId;
+	private String payee_openid;
 	
 	public User getUser() {
 		return user;
@@ -54,6 +55,15 @@ public class OtherPayDTO {
 	public void setMngCellId(String mngCellId) {
 		this.mngCellId = mngCellId;
 	}
+
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
+	}
+
 	@Override
 	public String toString() {
 		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
