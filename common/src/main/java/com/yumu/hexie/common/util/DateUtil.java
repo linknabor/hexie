@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
+import org.springframework.util.StringUtils;
+
 public class DateUtil {
     public static final String dSimple    = "yyyy-MM-dd";
     public static final String dttmSimple = "yyyy-MM-dd HH:mm:ss";
@@ -270,6 +272,22 @@ public class DateUtil {
             result = result.substring(0, result.length() - 1);
         return result;
  
+    }
+    
+    /**
+     * yyyyMMdd HHmmss 转换成 yyyy-MM-dd HH:mm:ss
+     * @param createDate yyyyMMdd
+     * @param createTime HHmmss
+     * @return
+     */
+    public static String formatFromDB (String createDate, String createTime) {
+    	
+    	String dateStr = "";
+		if (!StringUtils.isEmpty(createDate) && !StringUtils.isEmpty(createTime)) {
+	    	Date date = DateUtil.parse(createDate + " " + createTime, "yyyyMMdd HHmmss");
+	    	dateStr = DateUtil.dtFormat(date, DateUtil.dttmSimple);
+		}
+		return dateStr;
     }
     
     public static void main(String[] args) {
