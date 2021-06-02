@@ -152,7 +152,7 @@ public class CommunityController extends BaseController{
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
 		communityService.addThread(user, thread);
-		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
+		//moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
 		return BaseResult.successResult("success");
 	}
 	
@@ -196,7 +196,7 @@ public class CommunityController extends BaseController{
 		/*
 		 * 如果上传文件路径为空，则先更新上传文件路径
 		 */
-		moveImgsFromTencent2Qiniu(ret);
+		//moveImgsFromTencent2Qiniu(ret);
 			
 		String attachmentUrl = ret.getAttachmentUrl();
 		if (!StringUtil.isEmpty(attachmentUrl)) {
@@ -223,10 +223,13 @@ public class CommunityController extends BaseController{
 			String tcAttachmentUrl = tc.getAttachmentUrl();
 			if (!StringUtil.isEmpty(tcAttachmentUrl)) {
 				String[] urls = tcAttachmentUrl.split(",");
-				List<String> previewLinkList = new ArrayList<String>();
+				List<String> imgLinkList = new ArrayList<>();
+				List<String> previewLinkList = new ArrayList<>();
 				for (String urlKey : urls) {
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
 					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 				}
+				tc.setImgUrlLink(imgLinkList);
 				tc.setPreviewLink(previewLinkList);
 			}
 		}
@@ -271,7 +274,7 @@ public class CommunityController extends BaseController{
 
 		ThreadComment retComment = communityService.addComment(user, comment);	//添加评论
 
-		moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
+		//moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
 
 		String tcAttachmentUrl = retComment.getAttachmentUrl();
 		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
