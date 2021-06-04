@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.qiniu.api.io.IoApi;
@@ -20,6 +21,7 @@ import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.workorder.WorkOrderUtil;
+import com.yumu.hexie.integration.workorder.resp.OrderDetailVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrdersVO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -73,6 +75,25 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 			throw new BizValidateException(commonResponse.getErrMsg());
 		}
 		return commonResponse.getData(); 
+	}
+	
+	/**
+	 * 查询工单明细
+	 * @param user
+	 * @param orderId
+	 * @throws Exception
+	 */
+	@Override
+	public OrderDetailVO getOrderDetail(User user, String orderId) throws Exception{
+		
+		logger.info("queryWorkOrderDetail, orderId : " + orderId);
+		
+		Assert.hasText(orderId, "工单ID不能为空");
+		CommonResponse<OrderDetailVO> commonResponse = workOrderUtil.getOrderDetail(user, orderId);
+		if (!"00".equals(commonResponse.getResult())) {
+			throw new BizValidateException(commonResponse.getErrMsg());
+		}
+		return commonResponse.getData();
 	}
 	
 	/**

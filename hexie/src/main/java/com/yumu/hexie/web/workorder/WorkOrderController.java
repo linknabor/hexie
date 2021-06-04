@@ -2,11 +2,13 @@ package com.yumu.hexie.web.workorder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.integration.workorder.resp.OrderDetailVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrdersVO;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
@@ -71,4 +73,20 @@ public class WorkOrderController extends BaseController {
     	WorkOrdersVO vo = workOrderService.queryWorkOrder(user);
         return new BaseResult<WorkOrdersVO>().success(vo);
     }
+    
+    /**
+	 * 查询工单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/orderDetail/{orderId}", method = RequestMethod.GET)
+	public BaseResult<OrderDetailVO> orderDetail(@ModelAttribute(name = Constants.USER) User user, 
+			@PathVariable String orderId) throws Exception {
+		
+		OrderDetailVO vo = workOrderService.getOrderDetail(user, orderId);
+		return BaseResult.successResult(vo);
+	}
 }
