@@ -139,21 +139,20 @@ public class CommunityController extends BaseController{
 
 	/**
 	 * 物业端调用 获取业主意见列表
-	 * @param user
 	 * @param currPage
 	 * @param category
+	 * @param sectId
 	 * @return
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/thread/getOutSidThreadList/{currPage}/{category}", method = RequestMethod.POST)
+	@RequestMapping(value = "/thread/getOutSidThreadList/{currPage}/{category}/{sectId}", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<List<Thread>> getOutSidThreadList(@ModelAttribute(Constants.USER)User user,
-												  @PathVariable int currPage, @PathVariable int category ) throws Exception {
+	public BaseResult<List<Thread>> getOutSidThreadList(@PathVariable int currPage, @PathVariable int category, @PathVariable String sectId ) throws Exception {
 		//filter 等于 y表示需要根据用户所在小区进行过滤
 		Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
 		Pageable page = PageRequest.of(currPage, PAGE_SIZE, sort);
-		List<Thread> list = communityService.getThreadListByCategory(null, category, user.getSectId(), page);
+		List<Thread> list = communityService.getThreadListByCategory(null, category, sectId, page);
 
 		for (Thread td : list) {
 			String attachmentUrl = td.getAttachmentUrl();
