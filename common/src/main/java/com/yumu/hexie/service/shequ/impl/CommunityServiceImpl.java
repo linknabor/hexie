@@ -78,8 +78,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByCategory(long userId, int category, String userSectId, Pageable page) {
-
+	public List<Thread> getThreadListByCategory(Long userId, int category, String userSectId, Pageable page) {
 		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, userId, page);
 	}
 
@@ -159,10 +158,11 @@ public class CommunityServiceImpl implements CommunityService {
 		comment.setCommentDateTime(System.currentTimeMillis());
 		comment.setCommentDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
 		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
-		comment.setCommentUserHead(user.getHeadimgurl());
-		comment.setCommentUserId(user.getId());
-		comment.setCommentUserName(user.getNickname());
-		
+		if(user != null) {
+			comment.setCommentUserHead(user.getHeadimgurl());
+			comment.setCommentUserId(user.getId());
+			comment.setCommentUserName(user.getNickname());
+		}
 		threadCommentRepository.save(comment);
 		return comment;
 		
