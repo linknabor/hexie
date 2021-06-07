@@ -19,6 +19,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.notify.CommonNotificationResponse;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.web.BaseController;
@@ -76,6 +77,20 @@ public class NotifyController extends BaseController {
 		
 		log.info("notifyRefund :" + map);
 		notifyService.notifyEshopRefund(map.get("trade_water_id"));
+		return "SUCCESS";
+	}
+	
+	/**
+	 * 工单消息通知
+	 * @param workOrderNotification
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/workorder/notication", method = RequestMethod.POST )
+	public String notifyRefund(@RequestBody WorkOrderNotification workOrderNotification) throws Exception {
+		
+		log.info("workOrderNotification :" + workOrderNotification);
+		notifyService.notifyWorkOrderMsgAsync(workOrderNotification);
 		return "SUCCESS";
 	}
 	

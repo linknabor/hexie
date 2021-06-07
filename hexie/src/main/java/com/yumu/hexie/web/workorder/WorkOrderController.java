@@ -89,4 +89,21 @@ public class WorkOrderController extends BaseController {
 		OrderDetailVO vo = workOrderService.getOrderDetail(user, orderId);
 		return BaseResult.successResult(vo);
 	}
+	
+	/**
+	 * 撤消工单
+	 * @param user
+	 * @param orderId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/reverse/{orderId}", method = RequestMethod.GET)
+	public BaseResult<String> reverse(@ModelAttribute(name = Constants.USER) User user, 
+			@PathVariable String orderId, String reason) throws Exception {
+		
+		workOrderService.reverseOrder(user, orderId, reason);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+	}
+	
 }

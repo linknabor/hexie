@@ -11,6 +11,7 @@ import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.workorder.req.QueryOrderRequest;
 import com.yumu.hexie.integration.workorder.req.QueryUserOrderRequest;
+import com.yumu.hexie.integration.workorder.req.ReverseOrderRequest;
 import com.yumu.hexie.integration.workorder.req.SaveWorkOrderRequest;
 import com.yumu.hexie.integration.workorder.resp.OrderDetailVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrdersVO;
@@ -30,7 +31,8 @@ public class WorkOrderUtil {
 	private static final String ORDER_DETAIL_URL = "workorder/getOrderDetailSDO.do";
 	private static final String ADD_WORKORDER_URL = "workorder/addOrderSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String QUERY_WORKORDER_URL = "workorder/queryOrderSDO.do";//查询工单列表
-
+	private static final String REVERSE_WORKORDER_URL = "workorder/reverseOrderSDO.do";//工单撤消
+	
 	/**
 	 * 标准版查询账单
 	 * @param workOrderReq
@@ -93,6 +95,22 @@ public class WorkOrderUtil {
 
 		TypeReference<CommonResponse<OrderDetailVO>> typeReference = new TypeReference<CommonResponse<OrderDetailVO>>(){};
 		CommonResponse<OrderDetailVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
+		return hexieResponse;
+		
+	}
+	
+	public CommonResponse<String> reverseOrder(User user, String orderId, String reason) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, null);
+		requestUrl += REVERSE_WORKORDER_URL;
+		
+		ReverseOrderRequest request = new ReverseOrderRequest();
+		request.setOrderId(orderId);
+		request.setReason(reason);
+		request.setOperOpenid(user.getOpenid());
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnBody(requestUrl, request, typeReference);
 		return hexieResponse;
 		
 	}

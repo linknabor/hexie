@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
@@ -39,6 +40,7 @@ import com.yumu.hexie.model.subscribemsg.UserSubscribeMsg;
 import com.yumu.hexie.model.subscribemsg.UserSubscribeMsgRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
@@ -401,5 +403,51 @@ public class GotongServiceImpl implements GotongService {
         String accessToken = systemConfigService.queryWXAToken(appId);
         return templateMsgService.sendBillNotificationMessage(openId, accessToken, appId, billPushDetail);
     }
+    
+    /**
+	 * 工单消息通知
+	 */
+	@Override
+	public boolean sendWorkOrderNotification(WorkOrderNotification workOrderNotification) {
+		
+		boolean success = true;
+		String agentId = workOrderNotification.getAgentId();
+		String corpid = workOrderNotification.getCorpid();
+		if (StringUtils.isEmpty(agentId) && StringUtils.isEmpty(corpid)) {	
+			//模板消息
+			String url = wechatMsgService.getMsgUrl(MsgCfg.URL_WORK_ORDER_DETAIL) + workOrderNotification.getOrderId();
+	        
+	        News news = new News(new ArrayList<Article>());
+	        Article article = new Article();
+	        String title = "";
+	        String description = "点击查看详情";
+	        if ("05".equals(workOrderNotification.getOperation())) {
+	        	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
+			} else if ("06".equals(workOrderNotification.getOperation())) {
+				title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
+			}
+	        article.setTitle(title);
+	        article.setDescription(description);
+	        article.setUrl(url);
+	        news.getArticles().add(article);
+	        NewsMessage msg = new NewsMessage(news);
+	        
+	        List<Operator> operList = workOrderNotification.getOperatorList();
+	        if (operList == null || operList.isEmpty()) {
+	        	LOG.info("workorder oper is empty, will return .");
+				return success;
+			}
+	        Operator operator = operList.get(0);
+	        msg.setTouser(operator.getOpenid());
+	        msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+	        String accessToken = systemConfigService.queryWXAToken(operator.getAppid());
+	        CustomService.sendCustomerMessage(msg, accessToken);
+		} else {	
+			//需要发送企业微信消息的
+			
+		}
+		return success;
+		
+	}
 
 }

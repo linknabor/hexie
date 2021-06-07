@@ -407,6 +407,7 @@ public class ModelConstant {
 	public static final String KEY_CUSTOM_SERVICE = "cfg:customservice";
 	public static final String KEY_NOITFY_PAY_DUPLICATION_CHECK = "lock:payNotification:";
 	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
+	public static final String KEY_NOTIFY_WORK_ORDER_DUPLICATION_CHECK = "lock:workOrder:";
 	public static final String KEY_CS_SERVED_SECT = "cfg:customservice:sect:";
 	
 	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template";
@@ -450,4 +451,5 @@ public class ModelConstant {
 	public static final int MSG_TYPE_TEMPLATE = 0;
 	public static final int MSG_TYPE_SUBSCRIBE_MSG = 1;
 
+	public static final String KEY_WORKORER_MSG_QUEUE = "queue:workorder:msg";
 }		

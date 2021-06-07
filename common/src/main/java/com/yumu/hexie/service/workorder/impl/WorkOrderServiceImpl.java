@@ -97,6 +97,25 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 	}
 	
 	/**
+	 * 撤消工单
+	 * @param user
+	 * @param orderId
+	 * @throws Exception
+	 */
+	@Override
+	public void reverseOrder(User user, String orderId, String reason) throws Exception{
+		
+		Assert.hasText(orderId, "工单ID不能为空");
+		Assert.hasText(reason, "驳回原因不能为空");
+		
+		CommonResponse<String> commonResponse = workOrderUtil.reverseOrder(user, orderId, reason);
+		if (!"00".equals(commonResponse.getResult())) {
+			throw new BizValidateException(commonResponse.getErrMsg());
+		}
+		
+	}
+	
+	/**
 	 * 上传文件到qiniu
 	 * @param fileList
 	 * @return

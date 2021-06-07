@@ -13,4 +13,6 @@ public interface WorkOrderService {
 
 	OrderDetailVO getOrderDetail(User user, String orderId) throws Exception;
 
+	void reverseOrder(User user, String orderId, String reason) throws Exception;
+
 }

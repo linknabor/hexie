@@ -26,6 +26,7 @@ import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -786,6 +787,51 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 			}
 		}
 	
+		
+	}
+	
+	/**
+	 * 给移动端的物业员工推送工单消息
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void sendWorkOrderMsgNotificationAsyc() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String orderStr = redisTemplate.opsForList().leftPop(ModelConstant.KEY_WORKORER_MSG_QUEUE, 10, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(orderStr)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				WorkOrderNotification won = objectMapper.readValue(orderStr, new TypeReference<WorkOrderNotification>(){});
+				logger.info("start to consume workorder queue : " + won);
+				
+				//保存需要发送的消息
+//				userNotificationService.saveWorkOrderNotification(won);	TODO 是否需要保存？
+				
+				boolean isSuccess = false;
+				try {
+					logger.info("send workorder msg async, workorder : " + won);
+					isSuccess = gotongService.sendWorkOrderNotification(won);
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
+				
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_WORKORER_MSG_QUEUE, orderStr);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
 		
 	}
 
