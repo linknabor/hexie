@@ -395,7 +395,7 @@ public class CommunityController extends BaseController{
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/thread/addOutSidComment", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<Thread> addOutSidComment(@Valid ThreadComment comment) throws Exception{
+	public BaseResult<Thread> addOutSidComment(@RequestBody ThreadComment comment) throws Exception{
 
 		//更新帖子回复数量及最后评论时间
 		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
