@@ -1,6 +1,12 @@
 package com.yumu.hexie.integration.wuye.req;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * 描述:
@@ -9,6 +15,9 @@ import java.io.Serializable;
  * @create 2021-06-07 16:07
  */
 public class OpinionRequest implements Serializable {
+
+    private Logger logger = LoggerFactory.getLogger(OpinionRequest.class);
+
     private String opinionDate;
     private String threadId;
     private String sectName;
@@ -41,6 +50,13 @@ public class OpinionRequest implements Serializable {
     }
 
     public void setSectName(String sectName) {
+        if (!StringUtils.isEmpty(sectName)) {
+            try {
+                sectName = URLEncoder.encode(sectName, "GBK");
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
         this.sectName = sectName;
     }
 
@@ -49,6 +65,13 @@ public class OpinionRequest implements Serializable {
     }
 
     public void setCellAddr(String cellAddr) {
+        if (!StringUtils.isEmpty(cellAddr)) {
+            try {
+                cellAddr = URLEncoder.encode(cellAddr, "GBK");
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
         this.cellAddr = cellAddr;
     }
 
