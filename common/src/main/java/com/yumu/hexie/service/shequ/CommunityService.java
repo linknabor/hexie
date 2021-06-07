@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -195,4 +196,6 @@ public interface CommunityService {
 	public ThreadComment getThreadCommentByTreadId(long threadCommentId);
 	
 	public void updateThreadComment(ThreadComment thread);
+
+	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception;
 }

@@ -11,8 +11,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
 
+import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +76,10 @@ public class CommunityController extends BaseController{
 	
 	@Autowired
 	private FileService fileService;
-	
+
+	@Autowired
+	private TemplateMsgService templateMsgService;
+
 	/*****************[BEGIN]帖子********************/
 	
 	/**
@@ -202,6 +206,20 @@ public class CommunityController extends BaseController{
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
 		communityService.addThread(user, thread);
+		try {
+			OpinionRequest opinionRequest = new OpinionRequest();
+			opinionRequest.setContent(thread.getThreadContent());
+			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setSectName(thread.getUserSectName());
+			opinionRequest.setCellAddr(thread.getUserAddress());
+			opinionRequest.setSectId(thread.getUserSectId());
+			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(thread.getCreateDate(), thread.getCreateTime()));
+			Boolean flag = communityService.sendNotification(user, opinionRequest);
+			log.debug("flag : " + flag);
+		} catch (Exception e) {
+			log.error("sendNotification : " , e);
+		}
+
 		//moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
 		return BaseResult.successResult("success");
 	}
@@ -383,12 +401,27 @@ public class CommunityController extends BaseController{
 		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
 			String[]urls = tcAttachmentUrl.split(",");
 			List<String> previewLinkList = new ArrayList<String>();
-			for (int j = 0; j < urls.length; j++) {
-				String urlKey = urls[j];
+			for (String urlKey : urls) {
 				previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
 			}
 			retComment.setPreviewLink(previewLinkList);
 		}
+
+		try {
+			OpinionRequest opinionRequest = new OpinionRequest();
+			opinionRequest.setContent(retComment.getCommentContent());
+			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setSectName(thread.getUserSectName());
+			opinionRequest.setCellAddr(thread.getUserAddress());
+			opinionRequest.setSectId(thread.getUserSectId());
+			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(retComment.getCommentDate(), retComment.getCommentTime()));
+			Boolean flag = communityService.sendNotification(user, opinionRequest);
+			log.debug("flag : " + flag);
+		} catch (Exception e) {
+			log.error("sendNotification : " , e);
+		}
+
+
 		return BaseResult.successResult(retComment);
 	}
 
@@ -419,6 +452,26 @@ public class CommunityController extends BaseController{
 			}
 			retComment.setPreviewLink(previewLinkList);
 		}
+
+		//通知业主
+		try {
+			User user = userService.getById(thread.getUserId());
+			OpinionRequest opinionRequest = new OpinionRequest();
+			opinionRequest.setContent(retComment.getCommentContent());
+			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setSectName(thread.getUserSectName());
+			opinionRequest.setCellAddr(thread.getUserAddress());
+			opinionRequest.setOpenId(user.getOpenid());
+			opinionRequest.setAppId(user.getAppId());
+			opinionRequest.setThreadContent(thread.getThreadContent());
+			opinionRequest.setCommMan(comment.getCommentUserName());
+			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(retComment.getCommentDate(), retComment.getCommentTime()));
+			String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+			templateMsgService.sendOpinionNotificationMessage(opinionRequest, accessToken);
+		} catch (Exception e) {
+			log.error("/thread/addOutSidComment sendOpinionNotificationMessage :" , e);
+		}
+
 		return BaseResult.successResult(retComment);
 	}
 

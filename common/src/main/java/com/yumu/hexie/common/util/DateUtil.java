@@ -1,5 +1,7 @@
 package com.yumu.hexie.common.util;
 
+import org.springframework.util.StringUtils;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -271,14 +273,22 @@ public class DateUtil {
         return result;
  
     }
-    
-    public static void main(String[] args) {
 
-    	String sdate = "2020-09-11 23:59:59";
-    	Date date = parse(sdate, dttmSimple);
-    	System.out.println(date);
-    	Date now = new Date();
-    	System.out.println(now);
-    	System.out.println(now.before(date));
-	}
+    /**
+     * 把yyyyMMdd格式日期字符串格式化成YYYY-MM-DD格式,把kkmmss格式时间字符串格式化成kk:mm:ss格式,中间加空格后拼接
+     * @param date yyyyMMdd格式日期字符串
+     * @param time kkmmss格式时间字符串
+     * @return
+     */
+    public static String formatDateTimeFromDB(String date, String time) {
+        if( StringUtils.isEmpty(date) || date.length() < 8 )
+            date = "        ";
+        if( StringUtils.isEmpty(time) || time.length() < 6 )
+            time = "      ";
+        StringBuilder buf = new StringBuilder(date);
+        buf.insert(6, '-').insert(4, '-');
+        StringBuilder buf1 = new StringBuilder(time);
+        buf1.insert(2, ':').insert(5, ':');
+        return buf.toString() + " " + buf1.toString();
+    }
 }

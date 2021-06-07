@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -56,6 +58,9 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Autowired
 	private SystemConfigService systemConfigService;
+
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
 
 	@Override
 	public List<Thread> getThreadList(String userSectId, Pageable page) {
@@ -311,5 +316,10 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		threadCommentRepository.save(thread);
 	}
-	
+
+	@Override
+	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception{
+		return wuyeUtil2.sendMinNotification(user, opinionRequest).getData();
+	}
+
 }
