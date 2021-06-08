@@ -97,21 +97,21 @@ public class CommunityServiceImpl implements CommunityService {
 	public Thread addThread(User user, Thread thread) {
 		
 		User currUser = userRepository.findById(user.getId());
-		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
-		Address currAdddr = new Address();
-		for (Address address : addrList) {
-			if (address.getXiaoquName().equals(user.getXiaoquName())) {
-				currAdddr = address;
-				break;
-			}
-		}
+//		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+//		Address currAdddr = new Address();
+//		for (Address address : addrList) {
+//			if (address.getXiaoquName().equals(user.getXiaoquName())) {
+//				currAdddr = address;
+//				break;
+//			}
+//		}
 		if (!systemConfigService.isDonghu(user.getAppId())) {	//东湖还具体分为意见、公共部位报修等，页面直接传上来。
 			thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SUGGESTION);
 		}
 
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
-		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
+		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHmmss"));
 		thread.setThreadStatus(ModelConstant.THREAD_STATUS_NORMAL);
 		thread.setUserHead(currUser.getHeadimgurl());
 		thread.setUserId(currUser.getId());
@@ -119,7 +119,7 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserSectId(currUser.getSectId());
 		thread.setUserSectName(currUser.getXiaoquName());
 		thread.setUserCspId(currUser.getCspId());
-		//thread.setUserAddress(currAdddr.getDetailAddress());
+//		thread.setUserAddress(currAdddr.getDetailAddress());
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
