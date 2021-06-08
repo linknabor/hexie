@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.Date;
 
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -594,7 +595,7 @@ public class TemplateMsgService {
 	 * @param opinionRequest
 	 * @param accessToken
 	 */
-	public void sendOpinionNotificationMessage(OpinionRequest opinionRequest, String accessToken) {
+	public void sendOpinionNotificationMessage(OpinionRequestTemp opinionRequest, String accessToken) {
 
 		CommonVO2 vo = new CommonVO2();
 		vo.setFirst(new TemplateItem("您好，你的意见建议已有反馈。"));

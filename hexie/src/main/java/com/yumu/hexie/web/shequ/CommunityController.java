@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -456,7 +457,7 @@ public class CommunityController extends BaseController{
 		//通知业主
 		try {
 			User user = userService.getById(thread.getUserId());
-			OpinionRequest opinionRequest = new OpinionRequest();
+			OpinionRequestTemp opinionRequest = new OpinionRequestTemp();
 			opinionRequest.setContent(retComment.getCommentContent());
 			opinionRequest.setThreadId(thread.getThreadId()+"");
 			opinionRequest.setSectName(thread.getUserSectName());
