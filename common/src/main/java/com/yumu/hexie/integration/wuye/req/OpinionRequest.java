@@ -80,6 +80,13 @@ public class OpinionRequest implements Serializable {
     }
 
     public void setContent(String content) {
+        if (!StringUtils.isEmpty(content)) {
+            try {
+                content = URLEncoder.encode(content, "GBK");
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
         this.content = content;
     }
 
@@ -96,6 +103,13 @@ public class OpinionRequest implements Serializable {
     }
 
     public void setThreadContent(String threadContent) {
+        if (!StringUtils.isEmpty(threadContent)) {
+            try {
+                threadContent = URLEncoder.encode(threadContent, "GBK");
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
         this.threadContent = threadContent;
     }
 
