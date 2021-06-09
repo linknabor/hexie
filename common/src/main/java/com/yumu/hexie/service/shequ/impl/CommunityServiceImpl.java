@@ -162,7 +162,7 @@ public class CommunityServiceImpl implements CommunityService {
 	
 		comment.setCommentDateTime(System.currentTimeMillis());
 		comment.setCommentDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
-		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
+		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHmmss"));
 		if(user != null) {
 			comment.setCommentUserHead(user.getHeadimgurl());
 			comment.setCommentUserId(user.getId());
