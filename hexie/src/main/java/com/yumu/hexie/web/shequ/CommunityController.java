@@ -415,6 +415,7 @@ public class CommunityController extends BaseController{
 			opinionRequest.setSectName(thread.getUserSectName());
 			opinionRequest.setCellAddr(thread.getUserAddress());
 			opinionRequest.setSectId(thread.getUserSectId());
+			opinionRequest.setThreadContent(thread.getThreadContent());
 			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(retComment.getCommentDate(), retComment.getCommentTime()));
 			Boolean flag = communityService.sendNotification(user, opinionRequest);
 			log.debug("flag : " + flag);
