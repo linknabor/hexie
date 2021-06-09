@@ -209,11 +209,12 @@ public class CommunityController extends BaseController{
 		communityService.addThread(user, thread);
 		try {
 			OpinionRequest opinionRequest = new OpinionRequest();
-			opinionRequest.setContent(thread.getThreadContent());
+			opinionRequest.setContent("");
 			opinionRequest.setThreadId(thread.getThreadId()+"");
 			opinionRequest.setSectName(thread.getUserSectName());
 			opinionRequest.setCellAddr(thread.getUserAddress());
 			opinionRequest.setSectId(thread.getUserSectId());
+			opinionRequest.setThreadContent(thread.getThreadContent());
 			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(thread.getCreateDate(), thread.getCreateTime()));
 			Boolean flag = communityService.sendNotification(user, opinionRequest);
 			log.debug("flag : " + flag);
@@ -415,6 +416,7 @@ public class CommunityController extends BaseController{
 			opinionRequest.setSectName(thread.getUserSectName());
 			opinionRequest.setCellAddr(thread.getUserAddress());
 			opinionRequest.setSectId(thread.getUserSectId());
+			opinionRequest.setThreadContent(thread.getThreadContent());
 			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(retComment.getCommentDate(), retComment.getCommentTime()));
 			Boolean flag = communityService.sendNotification(user, opinionRequest);
 			log.debug("flag : " + flag);
