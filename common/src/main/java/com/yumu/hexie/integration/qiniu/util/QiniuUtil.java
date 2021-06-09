@@ -107,7 +107,7 @@ public class QiniuUtil {
 		
 		String retLink = origLink;
 		if ("1".equals(interlace)) {
-			retLink+="/interlace/1";
+			retLink+="?interlace/1";
 		}
 		return retLink;
 	}

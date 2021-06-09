@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -546,6 +548,14 @@ public class TemplateMsgService {
 
 	}
 
+	/**
+	 * 欠费账单推送
+	 * @param openid
+	 * @param accessToken
+	 * @param appId
+	 * @param billPushDetail
+	 * @return
+	 */
 	public String sendBillNotificationMessage(String openid, String accessToken, String appId, BillPushDetail billPushDetail) {
 
 		CommonVO vo = new CommonVO();
@@ -578,6 +588,32 @@ public class TemplateMsgService {
 			}
 		}
 		return stat;
+	}
+
+	/**
+	 * 业主意见回复
+	 * @param opinionRequest
+	 * @param accessToken
+	 */
+	public void sendOpinionNotificationMessage(OpinionRequestTemp opinionRequest, String accessToken) {
+
+		CommonVO2 vo = new CommonVO2();
+		vo.setFirst(new TemplateItem("您好，你的意见建议已有反馈。"));
+		vo.setKeyword1(new TemplateItem(opinionRequest.getThreadContent()));
+		vo.setKeyword2(new TemplateItem(opinionRequest.getOpinionDate()));
+		vo.setKeyword3(new TemplateItem(opinionRequest.getContent()));
+		vo.setKeyword4(new TemplateItem(opinionRequest.getCommMan()));
+		vo.setRemark(new TemplateItem("谢谢您宝贵的意见和建议"));
+
+		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_OPINION_NOTIFY, opinionRequest.getAppId()));
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE);
+		url = AppUtil.addAppOnUrl(url, opinionRequest.getAppId());
+		url = url.replaceAll("THREAD_ID", opinionRequest.getThreadId());
+		msg.setUrl(url);
+		msg.setTouser(opinionRequest.getOpenId());
+		sendMsg(msg, accessToken);
 
 	}
 

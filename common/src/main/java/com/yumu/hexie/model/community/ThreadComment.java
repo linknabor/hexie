@@ -52,6 +52,10 @@ public class ThreadComment implements Serializable {
 	
 	@Transient
 	private List<String> previewLink;	//发布首页预览图
+
+	@Transient
+	private List<String> imgUrlLink;	//上传图片的原图链接
+
 	
 	public String getAttachmentUrl() {
 		return attachmentUrl;
@@ -174,7 +178,13 @@ public class ThreadComment implements Serializable {
 	}
 	public void setPreviewLink(List<String> previewLink) {
 		this.previewLink = previewLink;
-	}	
-   
-	
+	}
+
+	public List<String> getImgUrlLink() {
+		return imgUrlLink;
+	}
+
+	public void setImgUrlLink(List<String> imgUrlLink) {
+		this.imgUrlLink = imgUrlLink;
+	}
 }

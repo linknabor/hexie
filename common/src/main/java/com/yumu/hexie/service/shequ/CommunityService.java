@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -45,9 +46,8 @@ public interface CommunityService {
 	 * @param sort	排序
 	 * @return
 	 */
-	public List<Thread> getThreadListByCategory(long userId, int category, String userSectId, Pageable page);
+	public List<Thread> getThreadListByCategory(Long userId, int category, String userSectId, Pageable page);
 
-	
 	/**
 	 * 1 A)根据分类获取帖子列表，查看所有小区的
 	 * @param category
@@ -88,7 +88,7 @@ public interface CommunityService {
 	 * @return 
 	 */
 	public ThreadComment addComment(User user, ThreadComment threadComment);
-	
+
 	/**
 	 * 6.根据帖子ID获取具体的帖子信息
 	 * @param user
@@ -196,4 +196,6 @@ public interface CommunityService {
 	public ThreadComment getThreadCommentByTreadId(long threadCommentId);
 	
 	public void updateThreadComment(ThreadComment thread);
+
+	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception;
 }

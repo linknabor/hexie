@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,6 +59,9 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private SystemConfigService systemConfigService;
 
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
+
 	@Override
 	public List<Thread> getThreadList(String userSectId, Pageable page) {
 		
@@ -78,8 +83,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<Thread> getThreadListByCategory(long userId, int category, String userSectId, Pageable page) {
-
+	public List<Thread> getThreadListByCategory(Long userId, int category, String userSectId, Pageable page) {
 		return threadRepository.getThreadListByCategory(ModelConstant.THREAD_STATUS_NORMAL, userSectId, category, userId, page);
 	}
 
@@ -93,21 +97,21 @@ public class CommunityServiceImpl implements CommunityService {
 	public Thread addThread(User user, Thread thread) {
 		
 		User currUser = userRepository.findById(user.getId());
-		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
-		Address currAdddr = new Address();
-		for (Address address : addrList) {
-			if (address.getXiaoquName().equals(user.getXiaoquName())) {
-				currAdddr = address;
-				break;
-			}
-		}
+//		List<Address> addrList = addressRepository.findAllByUserId(currUser.getId());
+//		Address currAdddr = new Address();
+//		for (Address address : addrList) {
+//			if (address.getXiaoquName().equals(user.getXiaoquName())) {
+//				currAdddr = address;
+//				break;
+//			}
+//		}
 		if (!systemConfigService.isDonghu(user.getAppId())) {	//东湖还具体分为意见、公共部位报修等，页面直接传上来。
 			thread.setThreadCategory(ModelConstant.THREAD_CATEGORY_SUGGESTION);
 		}
 
 		thread.setCreateDateTime(System.currentTimeMillis());
 		thread.setCreateDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
-		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
+		thread.setCreateTime(DateUtil.dtFormat(new Date().getTime(), "HHmmss"));
 		thread.setThreadStatus(ModelConstant.THREAD_STATUS_NORMAL);
 		thread.setUserHead(currUser.getHeadimgurl());
 		thread.setUserId(currUser.getId());
@@ -115,7 +119,7 @@ public class CommunityServiceImpl implements CommunityService {
 		thread.setUserSectId(currUser.getSectId());
 		thread.setUserSectName(currUser.getXiaoquName());
 		thread.setUserCspId(currUser.getCspId());
-		thread.setUserAddress(currAdddr.getDetailAddress());
+//		thread.setUserAddress(currAdddr.getDetailAddress());
 		thread.setUserMobile(currUser.getTel());
 		thread.setAppid(currUser.getAppId());
 		thread.setStickPriority(0);	//默认优先级0，为最低
@@ -158,11 +162,12 @@ public class CommunityServiceImpl implements CommunityService {
 	
 		comment.setCommentDateTime(System.currentTimeMillis());
 		comment.setCommentDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
-		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
-		comment.setCommentUserHead(user.getHeadimgurl());
-		comment.setCommentUserId(user.getId());
-		comment.setCommentUserName(user.getNickname());
-		
+		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHmmss"));
+		if(user != null) {
+			comment.setCommentUserHead(user.getHeadimgurl());
+			comment.setCommentUserId(user.getId());
+			comment.setCommentUserName(user.getNickname());
+		}
 		threadCommentRepository.save(comment);
 		return comment;
 		
@@ -311,5 +316,10 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		threadCommentRepository.save(thread);
 	}
-	
+
+	@Override
+	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception{
+		return wuyeUtil2.sendMinNotification(user, opinionRequest).getData();
+	}
+
 }
