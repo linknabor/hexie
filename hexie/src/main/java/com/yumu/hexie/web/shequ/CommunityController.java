@@ -12,6 +12,10 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import com.qiniu.api.io.IoApi;
 import com.qiniu.api.io.PutExtra;
@@ -48,6 +47,7 @@ import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller(value = "communityController")
 public class CommunityController extends BaseController{
@@ -77,12 +77,14 @@ public class CommunityController extends BaseController{
 	
 	@Autowired
 	private FileService fileService;
-	
+
+	@Autowired
+	private TemplateMsgService templateMsgService;
+
 	/*****************[BEGIN]帖子********************/
 	
 	/**
 	 * 首页获取帖子列表
-	 * @param session
 	 * @return
 	 * @throws Exception
 	 */
@@ -91,13 +93,10 @@ public class CommunityController extends BaseController{
 	@ResponseBody
 	public BaseResult<List<Thread>> getThreadList(@ModelAttribute(Constants.USER)User user, @RequestBody Thread thread, 
 				@PathVariable String filter,  @PathVariable int currPage ) throws Exception {
-		
 		//filter 等于 y表示需要根据用户所在小区进行过滤
 		log.info("filter is : " + filter);
-		
 		Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
-		
-		List<Thread>list = new ArrayList<Thread>();
+		List<Thread> list;
 		
 		Pageable page = PageRequest.of(currPage, PAGE_SIZE, sort);
 		//查看本小区的
@@ -107,63 +106,89 @@ public class CommunityController extends BaseController{
 			}else {
 				list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), user.getSectId(), page);
 			}
-			
-		}else {
+		} else {
 			list = communityService.getThreadListByCategory(user.getId(), thread.getThreadCategory(), page);
 		}
-		
-		for (int i = 0; i < list.size(); i++) {
-			
-			Thread td = list.get(i);
+
+		for (Thread td : list) {
 			String attachmentUrl = td.getAttachmentUrl();
-			
 			if (!StringUtil.isEmpty(attachmentUrl)) {
-				
-				String[]urls = attachmentUrl.split(",");
-				
-				List<String>imgLinkList = new ArrayList<String>();
-				List<String>previewLinkList = new ArrayList<String>();
-				
-				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
-					
+				String[] urls = attachmentUrl.split(",");
+				List<String> imgLinkList = new ArrayList<>();
+				List<String> previewLinkList = new ArrayList<>();
+				for (int j = 0; j < (Math.min(urls.length, 3)); j++) {
 					String urlKey = urls[j];
 					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
 					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
-					
 				}
-				
 				td.setImgUrlLink(imgLinkList);
 				td.setPreviewLink(previewLinkList);
 			}
-			
 		}
-		
-		for (int i = 0; i < list.size(); i++) {
-			
-			Thread td = list.get(i);
+
+		for (Thread td : list) {
 			String attachmentUrl = td.getAttachmentUrl();
 			if (!StringUtil.isEmpty(attachmentUrl)) {
-				
-				String[]urls = attachmentUrl.split(",");
-				
-				List<String>thumbnailLinkList = new ArrayList<String>();
-				
-				for (int j = 0; j < (urls.length>3?3:urls.length); j++) {
-					
+				String[] urls = attachmentUrl.split(",");
+				List<String> thumbnailLinkList = new ArrayList<>();
+				for (int j = 0; j < (Math.min(urls.length, 3)); j++) {
 					String urlKey = urls[j];
 					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
-					
 				}
-				
 				td.setThumbnailLink(thumbnailLinkList);
 			}
-			
 		}
-		
-		
-		log.debug("list is : " + list);		
+		log.debug("list is : " + list);
 		return BaseResult.successResult(list);
-		
+	}
+
+	/**
+	 * 物业端调用 获取业主意见列表
+	 * @param currPage
+	 * @param category
+	 * @param sectId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/thread/getOutSidThreadList/{currPage}/{category}/{sectId}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<List<Thread>> getOutSidThreadList(@PathVariable int currPage, @PathVariable int category, @PathVariable String sectId ) throws Exception {
+		//filter 等于 y表示需要根据用户所在小区进行过滤
+		Sort sort = new Sort(Direction.DESC , "stickPriority", "createDate", "createTime");
+		Pageable page = PageRequest.of(currPage, PAGE_SIZE, sort);
+		List<Thread> list = communityService.getThreadListByCategory(null, category, sectId, page);
+
+		for (Thread td : list) {
+			String attachmentUrl = td.getAttachmentUrl();
+			if (!StringUtil.isEmpty(attachmentUrl)) {
+				String[] urls = attachmentUrl.split(",");
+				List<String> imgLinkList = new ArrayList<>();
+				List<String> previewLinkList = new ArrayList<>();
+				for (int j = 0; j < (Math.min(urls.length, 3)); j++) {
+					String urlKey = urls[j];
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
+				}
+				td.setImgUrlLink(imgLinkList);
+				td.setPreviewLink(previewLinkList);
+			}
+		}
+
+		for (Thread td : list) {
+			String attachmentUrl = td.getAttachmentUrl();
+			if (!StringUtil.isEmpty(attachmentUrl)) {
+				String[] urls = attachmentUrl.split(",");
+				List<String> thumbnailLinkList = new ArrayList<>();
+				for (int j = 0; j < (Math.min(urls.length, 3)); j++) {
+					String urlKey = urls[j];
+					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
+				}
+				td.setThumbnailLink(thumbnailLinkList);
+			}
+		}
+		log.debug("list is : " + list);
+		return BaseResult.successResult(list);
 	}
 	
 	/**
@@ -177,62 +202,51 @@ public class CommunityController extends BaseController{
 	@RequestMapping(value = "/thread/addThread", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<String> addThread(HttpSession session, @RequestBody Thread thread) throws Exception{
-		
 		User user = (User)session.getAttribute(Constants.USER);
-		
 		if(thread.getThreadContent().length()>200){
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
 		communityService.addThread(user, thread);
-		moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
+		try {
+			OpinionRequest opinionRequest = new OpinionRequest();
+			opinionRequest.setContent(thread.getThreadContent());
+			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setSectName(thread.getUserSectName());
+			opinionRequest.setCellAddr(thread.getUserAddress());
+			opinionRequest.setSectId(thread.getUserSectId());
+			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(thread.getCreateDate(), thread.getCreateTime()));
+			Boolean flag = communityService.sendNotification(user, opinionRequest);
+			log.debug("flag : " + flag);
+		} catch (Exception e) {
+			log.error("sendNotification : " , e);
+		}
 
+		//moveImgsFromTencent2Qiniu(thread);	//更新图片的路径
 		return BaseResult.successResult("success");
-		
-		
 	}
 	
 	/**
 	 * 删除帖子
 	 * @param session
-	 * @param threadId
+	 * @param thread
 	 * @return
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/thread/deleteThread", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<?> deleteThread(HttpSession session, @RequestBody Thread thread) throws Exception{
-		
 		User user = (User)session.getAttribute(Constants.USER);
-		
 		if (StringUtil.isEmpty(thread.getThreadId())) {
 			return BaseResult.fail("缺少帖子ID");
 		}
-		
 		communityService.deleteThread(user, thread.getThreadId());
 		return BaseResult.successResult("succeeded");
-		
-	}
-	
-	/**
-	 * 更新帖子 TODO	可能不提供编辑功能
-	 * @param session
-	 * @param thread
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "/thread/updateThread", method = RequestMethod.POST)
-	public BaseResult<?> updateThread(HttpSession session, @RequestBody Thread thread) throws Exception{
-		
-//		User user = (User)session.getAttribute(Constants.USER);
-		communityService.updateThread(thread);
-		return BaseResult.successResult("");
-		
 	}
 	
 	/**
 	 * 查看帖子详细
 	 * @param session
-	 * @param threadId
+	 * @param thread
 	 * @return
 	 * @throws Exception
 	 */
@@ -240,10 +254,8 @@ public class CommunityController extends BaseController{
 	@RequestMapping(value = "/thread/getThreadByThreadId", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<Thread> getThreadByThreadId(HttpSession session, @RequestBody Thread thread) throws Exception{
-		
 		User user = (User)session.getAttribute(Constants.USER);
-		
-		Long threadId = thread.getThreadId();
+		long threadId = thread.getThreadId();
 		if (StringUtil.isEmpty(threadId)) {
 			return BaseResult.fail("未选中帖子");
 		}
@@ -253,57 +265,43 @@ public class CommunityController extends BaseController{
 		/*
 		 * 如果上传文件路径为空，则先更新上传文件路径
 		 */
-		moveImgsFromTencent2Qiniu(ret);
+		//moveImgsFromTencent2Qiniu(ret);
 			
 		String attachmentUrl = ret.getAttachmentUrl();
 		if (!StringUtil.isEmpty(attachmentUrl)) {
-			
 			String[]urls = attachmentUrl.split(",");
-			
-			List<String>imgLinkList = new ArrayList<String>();
-			List<String>thumbnailLinkList = new ArrayList<String>();
-			
-			for (int i = 0; i < urls.length; i++) {
-				
-				String urlKey = urls[i];
+			List<String>imgLinkList = new ArrayList<>();
+			List<String>thumbnailLinkList = new ArrayList<>();
+			for (String urlKey : urls) {
 				imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
 				thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
-				
 			}
-			
 			ret.setImgUrlLink(imgLinkList);
 			ret.setThumbnailLink(thumbnailLinkList);
 		}
 		
-		List<ThreadComment>list = communityService.getCommentListByThreadId(threadId);
+		List<ThreadComment> list = communityService.getCommentListByThreadId(threadId);
+		for (ThreadComment tc : list) {
 
-		for (int i = 0; i < list.size(); i++) {
-			
-			ThreadComment tc = list.get(i);
-			if (tc.getCommentUserId()==user.getId()) {
+			if (tc.getCommentUserId() == user.getId()) {
 				tc.setIsCommentOwner("true");
-			}else {
+			} else {
 				tc.setIsCommentOwner("false");
 			}
-			
+
 			String tcAttachmentUrl = tc.getAttachmentUrl();
 			if (!StringUtil.isEmpty(tcAttachmentUrl)) {
-				
-				String[]urls = tcAttachmentUrl.split(",");
-				
-				List<String> previewLinkList = new ArrayList<String>();
-				
-				for (int j = 0; j < urls.length; j++) {
-					
-					String urlKey = urls[j];
+				String[] urls = tcAttachmentUrl.split(",");
+				List<String> imgLinkList = new ArrayList<>();
+				List<String> previewLinkList = new ArrayList<>();
+				for (String urlKey : urls) {
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
 					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
-					
 				}
+				tc.setImgUrlLink(imgLinkList);
 				tc.setPreviewLink(previewLinkList);
 			}
-			
 		}
-		
 		ret.setComments(list);
 		
 		if (ret.getUserId()==user.getId()) {
@@ -317,11 +315,255 @@ public class CommunityController extends BaseController{
 		return BaseResult.successResult(ret);
 		
 	}
-	
+
+	/**
+	 * 查看帖子详细(物业端调用)
+	 * @param threadId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/thread/getOutSidThreadByThreadId/{threadId}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Thread> getOutSidThreadByThreadId(@PathVariable String threadId) throws Exception{
+		if (StringUtil.isEmpty(threadId)) {
+			return BaseResult.fail("未选中帖子");
+		}
+
+		Thread ret = communityService.getThreadByTreadId(Long.parseLong(threadId));
+
+		String attachmentUrl = ret.getAttachmentUrl();
+		if (!StringUtil.isEmpty(attachmentUrl)) {
+			String[]urls = attachmentUrl.split(",");
+			List<String>imgLinkList = new ArrayList<>();
+			List<String>thumbnailLinkList = new ArrayList<>();
+			for (String urlKey : urls) {
+				imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+				thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
+			}
+			ret.setImgUrlLink(imgLinkList);
+			ret.setThumbnailLink(thumbnailLinkList);
+		}
+
+		List<ThreadComment> list = communityService.getCommentListByThreadId(Long.parseLong(threadId));
+		for (ThreadComment tc : list) {
+
+			tc.setIsCommentOwner("false");
+			String tcAttachmentUrl = tc.getAttachmentUrl();
+			if (!StringUtil.isEmpty(tcAttachmentUrl)) {
+				String[] urls = tcAttachmentUrl.split(",");
+				List<String> imgLinkList = new ArrayList<>();
+				List<String> previewLinkList = new ArrayList<>();
+				for (String urlKey : urls) {
+					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
+					previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
+				}
+				tc.setImgUrlLink(imgLinkList);
+				tc.setPreviewLink(previewLinkList);
+			}
+		}
+		ret.setComments(list);
+		ret.setIsThreadOwner("false");
+		ret.setHasUnreadComment("false");
+		communityService.updateThread(ret);
+		return BaseResult.successResult(ret);
+	}
+
+	/**
+	 * 添加评论
+	 * @param session
+	 * @param comment
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/thread/addComment", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Thread> addComment(HttpSession session, @RequestBody ThreadComment comment) throws Exception{
+
+		User user = (User)session.getAttribute(Constants.USER);
+
+		//更新帖子回复数量及最后评论时间
+		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
+		thread.setCommentsCount(thread.getCommentsCount()+1);
+		thread.setLastCommentTime(System.currentTimeMillis());
+		thread.setHasUnreadComment("true");	//是否有未读评论
+		communityService.updateThread(thread);
+
+		comment.setToUserId(thread.getUserId());
+		comment.setToUserName(thread.getUserName());
+		comment.setToUserReaded("false");
+
+		ThreadComment retComment = communityService.addComment(user, comment);	//添加评论
+
+		//moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
+
+		String tcAttachmentUrl = retComment.getAttachmentUrl();
+		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
+			String[]urls = tcAttachmentUrl.split(",");
+			List<String> previewLinkList = new ArrayList<String>();
+			for (String urlKey : urls) {
+				previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
+			}
+			retComment.setPreviewLink(previewLinkList);
+		}
+
+		try {
+			OpinionRequest opinionRequest = new OpinionRequest();
+			opinionRequest.setContent(retComment.getCommentContent());
+			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setSectName(thread.getUserSectName());
+			opinionRequest.setCellAddr(thread.getUserAddress());
+			opinionRequest.setSectId(thread.getUserSectId());
+			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(retComment.getCommentDate(), retComment.getCommentTime()));
+			Boolean flag = communityService.sendNotification(user, opinionRequest);
+			log.debug("flag : " + flag);
+		} catch (Exception e) {
+			log.error("sendNotification : " , e);
+		}
+
+
+		return BaseResult.successResult(retComment);
+	}
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/thread/addOutSidComment", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Thread> addOutSidComment(@RequestBody ThreadComment comment) throws Exception{
+
+		//更新帖子回复数量及最后评论时间
+		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
+		thread.setCommentsCount(thread.getCommentsCount()+1);
+		thread.setLastCommentTime(System.currentTimeMillis());
+		thread.setHasUnreadComment("true");	//是否有未读评论
+		communityService.updateThread(thread);
+
+		comment.setToUserId(thread.getUserId());
+		comment.setToUserName(thread.getUserName());
+		comment.setToUserReaded("false");
+
+		ThreadComment retComment = communityService.addComment(null, comment);	//添加评论
+
+		String tcAttachmentUrl = retComment.getAttachmentUrl();
+		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
+			String[]urls = tcAttachmentUrl.split(",");
+			List<String> previewLinkList = new ArrayList<>();
+			for (String urlKey : urls) {
+				previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
+			}
+			retComment.setPreviewLink(previewLinkList);
+		}
+
+		//通知业主
+		try {
+			User user = userService.getById(thread.getUserId());
+			OpinionRequestTemp opinionRequest = new OpinionRequestTemp();
+			opinionRequest.setContent(retComment.getCommentContent());
+			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setSectName(thread.getUserSectName());
+			opinionRequest.setCellAddr(thread.getUserAddress());
+			opinionRequest.setOpenId(user.getOpenid());
+			opinionRequest.setAppId(user.getAppId());
+			opinionRequest.setThreadContent(thread.getThreadContent());
+			opinionRequest.setCommMan(comment.getCommentUserName());
+			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(retComment.getCommentDate(), retComment.getCommentTime()));
+			String accessToken = systemConfigService.queryWXAToken(user.getAppId());
+			templateMsgService.sendOpinionNotificationMessage(opinionRequest, accessToken);
+		} catch (Exception e) {
+			log.error("/thread/addOutSidComment sendOpinionNotificationMessage :" , e);
+		}
+
+		return BaseResult.successResult(retComment);
+	}
+
+	/**
+	 * 删除评论
+	 * @param session
+	 * @param comment
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(value = "/thread/deleteComment", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult deleteComment(HttpSession session, @RequestBody ThreadComment comment) throws Exception{
+		User user = (User)session.getAttribute(Constants.USER);
+		communityService.deleteComment(user, comment.getCommentId());	//添加评论
+
+		//更新帖子回复数量
+		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
+		thread.setCommentsCount(thread.getCommentsCount()-1);
+		communityService.updateThread(thread);
+		return BaseResult.successResult("succeeded");
+	}
+
+	/**
+	 * 上传图片到七牛
+	 * @param multiFile
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/thread/upload", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> tradeList(@RequestParam(value = "picture", required = false) MultipartFile multiFile) throws Exception {
+		String imgUrl = "";
+		log.error(multiFile.getOriginalFilename());
+		String fileName = multiFile.getOriginalFilename();
+		if(StringUtils.isNoneBlank(fileName)) {
+			String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
+			String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
+			String kzm = fileName.substring(fileName.lastIndexOf("."));
+			String key = currDate + "_" + currTime + "_" + kzm;
+
+			log.error("key:" + key);
+			log.error("kzm:" + kzm);
+
+			String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
+			PutExtra extra = new PutExtra();
+			PutRet putRet = IoApi.Put(uptoken, key, multiFile.getInputStream(), extra);
+			log.error("exception:" + putRet.getException());
+			log.error("response:" + putRet.getResponse());
+			if (putRet.getException() == null) {
+				imgUrl = domain + key;
+			}
+		}
+		return BaseResult.successResult(imgUrl);
+	}
+
+
+
+	/***********************************以下是老函数，可能用不上，后续有需要在删除*****************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/**
+	 * 更新帖子 TODO	可能不提供编辑功能
+	 * @param session
+	 * @param thread
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/thread/updateThread", method = RequestMethod.POST)
+	public BaseResult<?> updateThread(HttpSession session, @RequestBody Thread thread) throws Exception{
+		communityService.updateThread(thread);
+		return BaseResult.successResult("");
+	}
+
 	/**
 	 * 上传图片到七牛服务器
 	 * @param ret
-	 * @param inputStream
 	 * @param uploadIds
 	 */
 	@SuppressWarnings("rawtypes")
@@ -464,55 +706,7 @@ public class CommunityController extends BaseController{
 		
 	}
 	
-	/**
-	 * 添加评论
-	 * @param session
-	 * @param threadId
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/thread/addComment", method = RequestMethod.POST)
-	@ResponseBody
-	public BaseResult<Thread> addComment(HttpSession session, @RequestBody ThreadComment comment) throws Exception{
-		
-		User user = (User)session.getAttribute(Constants.USER);
-		
-		//更新帖子回复数量及最后评论时间
-		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
-		thread.setCommentsCount(thread.getCommentsCount()+1);
-		thread.setLastCommentTime(System.currentTimeMillis());
-		thread.setHasUnreadComment("true");	//是否有未读评论
-		communityService.updateThread(thread);
-		
-		comment.setToUserId(thread.getUserId());
-		comment.setToUserName(thread.getUserName());
-		comment.setToUserReaded("false");
-		
-		ThreadComment retComment = communityService.addComment(user, comment);	//添加评论
-		
-        moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
-		
-		String tcAttachmentUrl = retComment.getAttachmentUrl();
-		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
-			
-			String[]urls = tcAttachmentUrl.split(",");
-			
-			List<String> previewLinkList = new ArrayList<String>();
-			
-			for (int j = 0; j < urls.length; j++) {
-				
-				String urlKey = urls[j];
-				previewLinkList.add(qiniuUtil.getPreviewLink(urlKey, "1", "0"));
-				
-			}
-			retComment.setPreviewLink(previewLinkList);
-		}
-		
-		
-		return BaseResult.successResult(retComment);
-		
-	}
+
 	
 	private void moveImgsFromTencent2Qiniu(ThreadComment ret){
 				
@@ -542,70 +736,7 @@ public class CommunityController extends BaseController{
 			
 		}
 	
-	/**
-	 * 删除评论
-	 * @param session
-	 * @param threadId
-	 * @return
-	 * @throws Exception
-	 */
-	@SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/thread/deleteComment", method = RequestMethod.POST)
-	@ResponseBody
-	public BaseResult deleteComment(HttpSession session, @RequestBody ThreadComment comment) throws Exception{
-		
-		User user = (User)session.getAttribute(Constants.USER);
-		communityService.deleteComment(user, comment.getCommentId());	//添加评论
-		
-		//更新帖子回复数量
-		Thread thread = communityService.getThreadByTreadId(comment.getThreadId());
-		thread.setCommentsCount(thread.getCommentsCount()-1);
-		communityService.updateThread(thread);
-		
-		return BaseResult.successResult("succeeded");
-		
-	}
-	
-	/**
-	 * 刷新页面图片
-	 * @param session
-	 * @return
-	 *//*
-	@SuppressWarnings("rawtypes")
-	@RequestMapping(value = "/thread/getImgDetail/{threadId}/{index}", method = RequestMethod.GET)
-	@ResponseBody
-	public BaseResult getImgDetail(HttpSession session, @PathVariable long threadId, @PathVariable int index){
-		
-		User user = (User)session.getAttribute(Constants.USER);
-		
-		Long sect_id = null;
-		try {
-			sect_id = user.getXiaoquId();
-		} catch (Exception e) {
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		if(sect_id == null){
-			
-			return BaseResult.successResult(new ArrayList<Thread>());
-		}
-		
-		Thread ret = communityService.getThreadByTreadId(threadId);
-		String attachmentUrl = ret.getAttachmentUrl();
-		String imgHeight = ret.getImgHeight();
-		String imgWidth = ret.getImgWidth();
-		String[]imgUrls = attachmentUrl.split(",");
-		String[]heights = imgHeight.split(",");
-		String[]widths = imgWidth.split(",");
-		
-		Map<String,String>map = new HashMap<String, String>();
-		map.put("imgUrl", imgUrls[index]);
-		map.put("height", heights[index]);
-		map.put("width", widths[index]);
-		return BaseResult.successResult(map);
-	
-	}*/
+
 	
 	/**
 	 * 刷新页面图片
@@ -646,10 +777,10 @@ public class CommunityController extends BaseController{
 		return BaseResult.successResult(map);
 	
 	}
-	
+
 	/**
 	 * 首页获取帖子列表
-	 * @param session
+	 * @param user
 	 * @return
 	 * @throws Exception
 	 */
@@ -849,11 +980,10 @@ public class CommunityController extends BaseController{
 		return BaseResult.successResult("succeeded");
 		
 	}
-	
+
 	/**
 	 * 上传图片到七牛服务器
 	 * @param ret
-	 * @param inputStream
 	 * @param uploadIds
 	 */
 	@SuppressWarnings("rawtypes")
