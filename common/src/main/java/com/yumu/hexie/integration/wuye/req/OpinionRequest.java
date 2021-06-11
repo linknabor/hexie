@@ -20,6 +20,7 @@ public class OpinionRequest implements Serializable {
 
     private String opinionDate;
     private String threadId;
+    private String replyId; //回复ID
     private String sectName;
     private String cellAddr;
     private String content;
@@ -43,6 +44,14 @@ public class OpinionRequest implements Serializable {
 
     public void setThreadId(String threadId) {
         this.threadId = threadId;
+    }
+
+    public String getReplyId() {
+        return replyId;
+    }
+
+    public void setReplyId(String replyId) {
+        this.replyId = replyId;
     }
 
     public String getSectName() {

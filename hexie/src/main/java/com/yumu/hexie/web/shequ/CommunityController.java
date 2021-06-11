@@ -211,6 +211,7 @@ public class CommunityController extends BaseController{
 			OpinionRequest opinionRequest = new OpinionRequest();
 			opinionRequest.setContent("");
 			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setReplyId("");
 			opinionRequest.setSectName(thread.getUserSectName());
 			opinionRequest.setCellAddr(thread.getUserAddress());
 			opinionRequest.setSectId(thread.getUserSectId());
@@ -413,6 +414,7 @@ public class CommunityController extends BaseController{
 			OpinionRequest opinionRequest = new OpinionRequest();
 			opinionRequest.setContent(retComment.getCommentContent());
 			opinionRequest.setThreadId(thread.getThreadId()+"");
+			opinionRequest.setReplyId(retComment.getCommentId()+"");
 			opinionRequest.setSectName(thread.getUserSectName());
 			opinionRequest.setCellAddr(thread.getUserAddress());
 			opinionRequest.setSectId(thread.getUserSectId());
