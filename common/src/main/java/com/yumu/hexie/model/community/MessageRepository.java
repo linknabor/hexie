@@ -54,7 +54,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 	 * @return
 	 */
 	@Query(value="select m.id,'' as content,m.createDate,m.msgType,m.title,m.summary,m.fromSite,m.regionType,m.regionId,m.publishDate,"
-			+ "m.status,m.top,m.image,m.smallImage, m.appid from message m where m.status = 0 and m.msgType = 9 ",
+			+ "m.status,m.top,m.image,m.smallImage, m.appid, m.url from message m where m.status = 0 and m.msgType = 9 ",
 			nativeQuery = true)
 	public List<Message> queryMessagesByStatusAndMsgType(Pageable pageable);
 	
