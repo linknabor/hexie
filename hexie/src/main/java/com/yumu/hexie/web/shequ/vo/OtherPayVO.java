@@ -25,6 +25,7 @@ public class OtherPayVO implements Serializable {
 	private String mngCellId;
 	@JsonProperty("real_appid")
 	private String realAppid;
+	private String payee_openid;
 	@JsonProperty("order_id")
 	private String orderId;
 	@JsonProperty("order_detail")
@@ -84,6 +85,15 @@ public class OtherPayVO implements Serializable {
 	public void setRealAppid(String realAppid) {
 		this.realAppid = realAppid;
 	}
+
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
+	}
+
 	public String getOrderId() {
 		return orderId;
 	}

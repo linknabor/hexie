@@ -50,6 +50,8 @@ public class ModelConstant {
     public static final int SERVICE_OPER_TYPE_PROMOTION = 14;	//推广接单提醒
     public static final int SERVICE_OPER_TYPE_SAASSALE = 15;	//saas售卖接单提醒
     public static final int SERVICE_OPER_TYPE_MSG_SENDER = 16;	//物业消息发送人员
+    public static final int SERVICE_OPER_TYPE_WUYE_FEE_STAFF = 17;
+    public static final int SERVICE_OPER_TYPE_OTHER_FEE_STAFF = 18;
     
     //电子优惠券状态
     public static final int EVOUCHER_STATUS_INIT = 0;	//初始化
@@ -376,11 +378,18 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
 	
+	/*下面这些的value值不要改，是另一个系统推送过来的，要改两边都要改 start */
 	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
 	public static final String KEY_EVENT_SUBSCRIBE_QUEUE = "queueEventSubscribe";	//关注事件队列
 	public static final String KEY_EVENT_GETCARD_QUEUE = "queueEventUserGetCard";	//领卡事件消息队列
 	public static final String KEY_EVENT_UPDATECARD_QUEUE = "queueEventUpdateCard";//更新卡事件消息队列
 	public static final String KEY_EVENT_SUBSCRIBE_MSG_QUEUE = "queueSubscribeMsg";	//用户在图文等场景内订阅通知的操作 事件队列
+	public static final String KEY_EVENT_SUBSCRIBE_UPDATE_QUEUE = "queueEventUpdateSubscribe";	//关注事件消息队列，更新用户信息用
+	public static final String KEY_EVENT_UNSUBSCRIBE_QUEUE = "queueEventUnsubscribe";	//取消关注事件消息队列 tpauth -> hexie
+	/*下面这些的value值不要改，是另一个系统推送过来的，要改两边都要改 end */
+	
+	public static final String KEY_UNSUBSCRIBE_NOTIFY_QUEUE = "queue:notify:unsubscribe";	//取消关注通知，hexie -> community
+	public static final String KEY_UNSUBSCRIBE_NOTIFY_CHECK = "lock:unsubscribeNotification:";	//防重
 	
 	public static final String KEY_WUYE_REFUND_ORDER = "wuyeRefundOrder_";	// 物业退款交易ID 
 	public static final String KEY_WUYE_REFUND_QUEUE = "queueWuyeRefund";
@@ -450,6 +459,10 @@ public class ModelConstant {
 	//消息类型，0模板消息，1订阅消息
 	public static final int MSG_TYPE_TEMPLATE = 0;
 	public static final int MSG_TYPE_SUBSCRIBE_MSG = 1;
+
+	//微信用户关注状态
+	public static final int WECHAT_USER_SUBSCRIBED = 1;
+	public static final int WECHAT_USER_UNSUBSCRIBED = 0;
 
 	public static final String KEY_WORKORER_MSG_QUEUE = "queue:workorder:msg";
 }		

@@ -55,6 +55,7 @@ public class PrepayRequestDTO implements Serializable {
 	//是否二维码支付
 	private String isQrcode;
 	private String appid;
+	private String payee_openid; //收款人的openid
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -225,19 +226,46 @@ public class PrepayRequestDTO implements Serializable {
 		this.appid = appid;
 	}
 
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
+	}
+
 	@Override
 	public String toString() {
-		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
-				+ ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitle=" + invoiceTitle
-				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", regionUrl=" + regionUrl
-				+ ", regionName=" + regionName + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType
-				+ ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo="
-				+ acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode
-				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
-				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
-				+ ", appid=" + appid + "]";
-
+		return "PrepayRequestDTO{" +
+				"user=" + user +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", regionUrl='" + regionUrl + '\'' +
+				", regionName='" + regionName + '\'' +
+				", billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", remember='" + remember + '\'' +
+				", cardId='" + cardId + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				'}';
 	}
-	
-	
 }

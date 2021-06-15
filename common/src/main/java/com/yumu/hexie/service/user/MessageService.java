@@ -12,24 +12,24 @@ import com.yumu.hexie.model.user.User;
 
 public interface MessageService {
 
-	public List<Message> queryMessages(int type, long provinceId,long cityId,
-			long countyId,long xiaoquId,int page, int pageSize);
+	List<Message> queryMessages(int type, long provinceId, long cityId,
+								long countyId, long xiaoquId, int page, int pageSize);
 	
-	public List<Message> queryMessages(int page, int pageSize);
+	List<Message> queryMessages(int page, int pageSize);
 	
-	public List<Message> queryMessagesByUserAndType(User user, int msgType, int page, int pageSize);
+	List<Message> queryMessagesByUserAndType(User user, int msgType, int page, int pageSize);
 	
-	public Message findOne(long messageId);
+	Message findOne(long messageId);
 	
-	public Feedback reply(long userId,String userName,String userHeader,long messageId,String content);
+	Feedback reply(long userId, String userName, String userHeader, long messageId, String content);
 	
-	public List<Feedback> queryReplays(long messageId,int page, int pageSize);
+	List<Feedback> queryReplays(long messageId, int page, int pageSize);
 	
-	public Page<Message> queryMessages(BaseRequestDTO<Message> baseRequestDTO);
+	Page<Message> queryMessages(BaseRequestDTO<Message> baseRequestDTO);
 	
-	public void saveMessage(BaseRequestDTO<Message> baseRequestDTO);
+	void saveMessage(BaseRequestDTO<Message> baseRequestDTO);
 	
-	public List<MessageSect> queryMessageSectList(Long messageId);
+	List<MessageSect> queryMessageSectList(Long messageId);
 
 	Message queryConvenienceInfo(User user, int msgType);
 

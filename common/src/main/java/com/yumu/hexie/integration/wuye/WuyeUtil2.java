@@ -1,8 +1,11 @@
 package com.yumu.hexie.integration.wuye;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.yumu.hexie.integration.wuye.req.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,23 +23,6 @@ import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
-import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
-import com.yumu.hexie.integration.wuye.req.BillStdRequest;
-import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
-import com.yumu.hexie.integration.wuye.req.GetCellRequest;
-import com.yumu.hexie.integration.wuye.req.MessageRequest;
-import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
-import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
-import com.yumu.hexie.integration.wuye.req.PrepayRequest;
-import com.yumu.hexie.integration.wuye.req.QrCodePayServiceRequest;
-import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
-import com.yumu.hexie.integration.wuye.req.QueryCellRequest;
-import com.yumu.hexie.integration.wuye.req.QueryEReceiptRequest;
-import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
-import com.yumu.hexie.integration.wuye.req.QuerySectRequet;
-import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
-import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
-import com.yumu.hexie.integration.wuye.req.WuyeParamRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -86,20 +72,20 @@ public class WuyeUtil2 {
 	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
 	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
 	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
+	private static final String SEND_NOTIFICATION_URL = "msg/sendNotificationSDO.do";//业主意见回复消息推送
 	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 
 
 	/**
 	 * 标准版查询账单
-	 * @param userId
+	 * @param user
 	 * @param startDate
 	 * @param endDate
-	 * @param house_id
-	 * @param sect_id
-	 * @param regionurl
+	 * @param houseId
+	 * @param regionName
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public BaseResult<BillListVO> queryBillList(User user, String startDate, String endDate, String houseId, String regionName) throws Exception {
 		
@@ -186,8 +172,6 @@ public class WuyeUtil2 {
 	 * @throws Exception
 	 */
 	public BaseResult<WechatPayInfo> getPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
-
-		
 		User user = prepayRequestDTO.getUser();
 		String appid = user.getAppId();
 		String fromSys = sysName;
@@ -201,7 +185,8 @@ public class WuyeUtil2 {
 		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
 		prepayRequest.setFromSys(fromSys);
 		prepayRequest.setAppid(user.getAppId());
-		
+		prepayRequest.setPayee_openid(prepayRequestDTO.getPayee_openid());
+
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
@@ -212,7 +197,7 @@ public class WuyeUtil2 {
 
 	/**
 	 * 获取优惠支付明细
-	 * @param prepayRequestDTO
+	 * @param discountViewRequestDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -230,10 +215,11 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
-	
+
 	/**
 	 * 获取优惠支付明细
-	 * @param prepayRequestDTO
+	 * @param user
+	 * @param orderNo
 	 * @return
 	 * @throws Exception
 	 */
@@ -251,10 +237,11 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
-	
+
 	/**
 	 * 获取优惠支付明细
-	 * @param prepayRequestDTO
+	 * @param user
+	 * @param bankCard
 	 * @return
 	 * @throws Exception
 	 */
@@ -340,7 +327,7 @@ public class WuyeUtil2 {
 	
 	/**
 	 * 签到签退
-	 * @param user
+	 * @param signInOutDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -363,11 +350,7 @@ public class WuyeUtil2 {
 	
 	/**
 	 * 根据ID查询指定类型的合协社区物业信息
-	 * @param user
-	 * @param sect_id
-	 * @param build_id
-	 * @param unit_id
-	 * @param data_type
+	 * @param getCellDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -386,12 +369,14 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
-	
+
 	/**
 	 * 查询参数配置
-	 * @param reqUrl
-	 * @param c
+	 * @param user
+	 * @param type
+	 * @param paraName
 	 * @return
+	 * @throws Exception
 	 */
 	public BaseResult<HexieConfig> queryServiceCfg(User user, String type, String paraName) throws Exception {
 
@@ -413,16 +398,14 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 获取电子凭证
 	 * @param user
-	 * @param stmtId
-	 * @param anotherbillIds
+	 * @param tradeWaterId
+	 * @param sysSource
 	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws Exception
 	 */
 	public BaseResult<EReceipt> getEReceipt(User user, String tradeWaterId, String sysSource) throws Exception {
 		
@@ -437,16 +420,13 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 推送消息
 	 * @param user
-	 * @param stmtId
-	 * @param anotherbillIds
+	 * @param messageReq
 	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws Exception
 	 */
 	public BaseResult<String> sendMessage(User user, MessageReq messageReq) throws Exception {
 		
@@ -483,12 +463,13 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 查询发送历史
 	 * @param user
-	 * @param batchNo
-	 * @throws Exception 
+	 * @param sectIds
+	 * @return
+	 * @throws Exception
 	 */
 	public BaseResult<List<Message>> getMessageHistory(User user, String sectIds) throws Exception {
 		
@@ -527,10 +508,12 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
 	/**
 	 * 根据名称模糊查询合协社区小区列表
-	 * @param sect_name
+	 * @param user
+	 * @param sectName
+	 * @param regionName
 	 * @return
 	 * @throws Exception
 	 */
@@ -547,6 +530,24 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
 		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, querySectRequet, typeReference);
 		BaseResult<CellListVO> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+
+	/**
+	 * 回复消息推送
+	 * @param user
+	 * @param opinionRequest
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<Boolean> sendMinNotification(User user, OpinionRequest opinionRequest) throws Exception{
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += SEND_NOTIFICATION_URL;
+
+		TypeReference<CommonResponse<Boolean>> typeReference = new TypeReference<CommonResponse<Boolean>>(){};
+		CommonResponse<Boolean> hexieResponse = restUtil.exchangeOnUri(requestUrl, opinionRequest, typeReference);
+		BaseResult<Boolean> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}

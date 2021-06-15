@@ -352,7 +352,6 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
-		WechatPayInfo result = new WechatPayInfo();
 		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
@@ -363,7 +362,7 @@ public class WuyeController extends BaseController {
 		user.setOpenid(prepayReqVo.getOpenid());
 		
 		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
-		result = wuyeService.getPrePayInfo(dto);
+		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 
@@ -814,6 +813,27 @@ public class WuyeController extends BaseController {
 	public BaseResult<CellListVO> getLikeCellAddr(@ModelAttribute(Constants.USER) User user,
 			@RequestParam String sectId, @RequestParam String cellAddr) throws Exception {
 
+		CellListVO cellMng = wuyeService.getCellList(user, sectId, cellAddr);
+		if (cellMng != null) {
+			return BaseResult.successResult(cellMng);
+		} else {
+			return BaseResult.successResult(new ArrayList<CellVO>());
+		}
+	}
+
+	/**
+	 * 根据名称模糊查询合协社区小区列表
+	 * @param sectId
+	 * @param cellAddr
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getLikeCellAddr2", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<CellListVO> getLikeCellAddr(@RequestParam String sectId, @RequestParam String cellAddr, String appId) throws Exception {
+		User user = new User();
+		user.setAppId(appId);
 		CellListVO cellMng = wuyeService.getCellList(user, sectId, cellAddr);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);

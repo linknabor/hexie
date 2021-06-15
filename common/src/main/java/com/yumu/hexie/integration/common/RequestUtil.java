@@ -51,6 +51,7 @@ public class RequestUtil {
 			//TODO 下面2个静态引用以后改注入形式
 			String userSysCode = SystemConfigServiceImpl.getSysMap().get(user.getAppId());	//获取用户所属的公众号
 			RegionUrl regionUrl = LocationServiceImpl.getCodeUrlMap().get(userSysCode);	//根据公众号 获取请求地址
+			logger.info("user : " + user.getId() + ", userSysCode : " + userSysCode + ", regionUrl : " + regionUrl);
 			targetUrl = requestUrl;
 			if (regionUrl!=null) {
 				String urlLink = regionUrl.getRegionUrl();

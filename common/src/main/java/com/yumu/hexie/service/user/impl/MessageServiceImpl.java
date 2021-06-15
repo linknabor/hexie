@@ -5,8 +5,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.model.community.*;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,14 +17,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.wuye.vo.BaseRequestDTO;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.community.Message;
-import com.yumu.hexie.model.community.MessageRepository;
-import com.yumu.hexie.model.community.MessageSect;
-import com.yumu.hexie.model.community.MessageSectRepository;
 import com.yumu.hexie.model.user.Feedback;
 import com.yumu.hexie.model.user.FeedbackRepository;
 import com.yumu.hexie.model.user.User;
@@ -44,7 +44,14 @@ public class MessageServiceImpl implements MessageService {
 	private SystemConfigService systemConfigService;
 	@Autowired
 	private UserRepository userRepository;
-	
+	@Autowired
+	private NoticeRepository noticeRepository;
+	@Autowired
+	private NoticeSectRepository noticeSectRepository;
+
+	@Value(value = "${messageUrl}")
+	private String messageUrl;
+
 	@Override
 	public List<Message> queryMessages(int type, long provinceId, long cityId,
 			long countyId, long xiaoquId,int page, int pageSize) {
@@ -83,9 +90,14 @@ public class MessageServiceImpl implements MessageService {
 		Sort sort = Sort.by(Direction.DESC, "top", "createDate");
 		Pageable pageable = PageRequest.of(baseRequestDTO.getCurr_page(), baseRequestDTO.getPage_size(), sort);
 		Message message = baseRequestDTO.getData();
-		Page<Message> page = messageRepository.queryMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(), 
-				baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), sectList, pageable);
-		
+		Page<Message> page;
+		if(message.getMsgType() == 9) {
+			page = messageRepository.querySysMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(),
+					baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), message.getMsgType(), pageable);
+		} else {
+			page = messageRepository.queryMessageMutipleCons(ModelConstant.MESSAGE_STATUS_VALID, message.getId(), message.getTitle(),
+					baseRequestDTO.getBeginDate(), baseRequestDTO.getEndDate(), sectList, pageable);
+		}
 		return page;
 	
 	}
@@ -108,8 +120,38 @@ public class MessageServiceImpl implements MessageService {
 		for (String sectId : sectIds) {
 			MessageSect messageSect = new MessageSect();
 			messageSect.setMessageId(message.getId());
-			messageSect.setSectId(Long.valueOf(sectId));
+			messageSect.setSectId(Long.parseLong(sectId));
 			messageSectRepository.save(messageSect);
+		}
+
+		//在notice添加一条记录
+		Notice notice = new Notice();
+		BeanUtils.copyProperties(message, notice);
+		notice.setNoticeType(message.getMsgType());
+		notice.setOutsideKey(message.getId());
+		Notice n = noticeRepository.findByOutsideKey(message.getId());
+		if(n != null) {
+			notice.setId(n.getId());
+		}
+
+		//这里特殊处理，如果conntext有内容，则转换成链接形式存在在notice表的url字段
+
+		if(!ObjectUtils.isEmpty(message.getContent())) {
+			String url = messageUrl + "?oriApp=" + message.getAppid() + "#/message?messageId="+ message.getId();
+			notice.setUrl(url);
+		}
+		notice = noticeRepository.save(notice);
+
+		List<NoticeSect> noticeSects = noticeSectRepository.findByNoticeId(notice.getId());
+		for (NoticeSect noticeSect : noticeSects) {
+			noticeSectRepository.delete(noticeSect);
+		}
+
+		for (String sectId : sectIds) {
+			NoticeSect noticeSect = new NoticeSect();
+			noticeSect.setNoticeId(notice.getId());
+			noticeSect.setSectId(Long.parseLong(sectId));
+			noticeSectRepository.save(noticeSect);
 		}
 	}
 
