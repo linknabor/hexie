@@ -292,6 +292,7 @@ public class DateUtil {
         StringBuilder buf1 = new StringBuilder(time);
         buf1.insert(2, ':').insert(5, ':');
         return buf.toString() + " " + buf1.toString();
+    }
     /**
      * yyyyMMdd HHmmss 转换成 yyyy-MM-dd HH:mm:ss
      * @param createDate yyyyMMdd
