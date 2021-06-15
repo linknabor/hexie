@@ -659,8 +659,8 @@ public class TemplateMsgService {
     	
     	TemplateMsg<CommonVO> msg = new TemplateMsg<>();
     	msg.setData(vo);
-    	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY, operator.getAppid()));
-    	String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_WEIXIU_NOTICE);
+    	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_WORKORDER_NOTIFY, operator.getAppid()));
+    	String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_WORK_ORDER_DETAIL);
     	String url = msgUrl + workOrderNotification.getOrderId();
     	msg.setUrl(AppUtil.addAppOnUrl(url, operator.getAppid()));
 		msg.setTouser(operator.getOpenid());
