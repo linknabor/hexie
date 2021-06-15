@@ -411,41 +411,16 @@ public class GotongServiceImpl implements GotongService {
 	public boolean sendWorkOrderNotification(WorkOrderNotification workOrderNotification) {
 		
 		boolean success = true;
-		String agentId = workOrderNotification.getAgentId();
-		String corpid = workOrderNotification.getCorpid();
-		if (StringUtils.isEmpty(agentId) && StringUtils.isEmpty(corpid)) {	
-			//模板消息
-			String url = wechatMsgService.getMsgUrl(MsgCfg.URL_WORK_ORDER_DETAIL) + workOrderNotification.getOrderId();
-	        
-	        News news = new News(new ArrayList<Article>());
-	        Article article = new Article();
-	        String title = "";
-	        String description = "点击查看详情";
-	        if ("05".equals(workOrderNotification.getOperation())) {
-	        	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
-			} else if ("06".equals(workOrderNotification.getOperation())) {
-				title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
-			}
-	        article.setTitle(title);
-	        article.setDescription(description);
-	        article.setUrl(url);
-	        news.getArticles().add(article);
-	        NewsMessage msg = new NewsMessage(news);
-	        
-	        List<Operator> operList = workOrderNotification.getOperatorList();
-	        if (operList == null || operList.isEmpty()) {
-	        	LOG.info("workorder oper is empty, will return .");
-				return success;
-			}
-	        Operator operator = operList.get(0);
-	        msg.setTouser(operator.getOpenid());
-	        msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-	        String accessToken = systemConfigService.queryWXAToken(operator.getAppid());
-	        CustomService.sendCustomerMessage(msg, accessToken);
-		} else {	
-			//需要发送企业微信消息的
-			
+		//模板消息
+		List<Operator> operList = workOrderNotification.getOperatorList();
+		if (operList == null || operList.isEmpty()) {
+			LOG.info("workorder oper is empty, will return .");
+			return true;
 		}
+		Operator operator = operList.get(0);
+        
+		String accessToken = systemConfigService.queryWXAToken(operator.getAppid());
+		templateMsgService.sendWorkOrderMsg(workOrderNotification, accessToken);
 		return success;
 		
 	}

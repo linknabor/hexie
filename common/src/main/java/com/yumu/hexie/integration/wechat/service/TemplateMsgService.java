@@ -3,6 +3,7 @@ package com.yumu.hexie.integration.wechat.service;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.integration.notify.Operator;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
@@ -580,5 +583,53 @@ public class TemplateMsgService {
 		return stat;
 
 	}
+	
+	/**
+	 * 发送维修单信息给维修工
+	 * @param seed
+	 * @param ro
+	 */
+    public void sendWorkOrderMsg(WorkOrderNotification workOrderNotification, String accessToken) {
+    	
+    	log.info("发送工单模板消息#########" + ", order id: " + workOrderNotification.getOrderId());
+    	
+    	//更改为使用模版消息发送
+		List<Operator> operList = workOrderNotification.getOperatorList();
+		if (operList == null || operList.isEmpty()) {
+			log.info("workorder oper is empty, will return .");
+			return;
+		}
+		Operator operator = operList.get(0);
+		
+		String title = "";
+		if ("05".equals(workOrderNotification.getOperation())) {
+	    	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
+		} else if ("06".equals(workOrderNotification.getOperation())) {
+			title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
+		}
+		
+		String content = workOrderNotification.getContent();
+    	if (!StringUtils.isEmpty(content)) {
+    		content = content.substring(content.length()-18, content.length());
+    		content = "……"+content;
+		}
+    	
+    	CommonVO vo = new CommonVO();
+    	vo.setFirst(new TemplateItem(title));
+    	vo.setKeyword1(new TemplateItem(workOrderNotification.getOrderId()));
+    	vo.setKeyword2(new TemplateItem(content));
+    	vo.setKeyword3(new TemplateItem(workOrderNotification.getOrderStatus()));
+    	vo.setKeyword4(new TemplateItem(workOrderNotification.getAcceptor()));
+    	
+    	TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY, operator.getAppid()));
+    	String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_WEIXIU_NOTICE);
+    	String url = msgUrl + workOrderNotification.getOrderId();
+    	msg.setUrl(AppUtil.addAppOnUrl(url, operator.getAppid()));
+		msg.setTouser(operator.getOpenid());
+    	sendMsg(msg, accessToken);
+    	
+    }
 
 }
