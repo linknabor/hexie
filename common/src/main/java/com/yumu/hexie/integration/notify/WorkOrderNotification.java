@@ -21,7 +21,6 @@ public class WorkOrderNotification implements Serializable {
 	private String distType;	//订单区域类型
 	private String reason;	//驳回原因
 	private String acceptor;
-	private String appid;
 	
 	private String operation;	//01创建 03受理05接单07完工
 	private List<Operator> operatorList;

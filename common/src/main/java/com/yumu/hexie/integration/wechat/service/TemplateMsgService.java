@@ -5,7 +5,6 @@ import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
-import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
