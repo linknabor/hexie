@@ -403,7 +403,9 @@ public class NotifyServiceImpl implements NotifyService {
 	public void notifyWorkOrderMsgAsync(WorkOrderNotification workOrderNotification) {
 		
 		String orderId = workOrderNotification.getOrderId();
-		String key = ModelConstant.KEY_NOTIFY_WORK_ORDER_DUPLICATION_CHECK + orderId;
+		String timestamp = workOrderNotification.getTimestamp();
+		String checkKey = orderId + "_" + timestamp;
+		String key = ModelConstant.KEY_NOTIFY_WORK_ORDER_DUPLICATION_CHECK + checkKey;
 		Long result = RedisLock.lock(key, redisTemplate, 3600l);
 		if (0 == result) {
 			log.info("orderId : " + orderId + ", already notified, will skip ! ");

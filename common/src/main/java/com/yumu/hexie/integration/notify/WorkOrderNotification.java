@@ -28,6 +28,8 @@ public class WorkOrderNotification implements Serializable {
 	private String corpid;
 	private String agentId;
 	
+	private String timestamp;
+	
 	public String getOrderId() {
 		return orderId;
 	}
@@ -118,13 +120,19 @@ public class WorkOrderNotification implements Serializable {
 	public void setAcceptor(String acceptor) {
 		this.acceptor = acceptor;
 	}
+	public String getTimestamp() {
+		return timestamp;
+	}
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
 	@Override
 	public String toString() {
 		return "WorkOrderNotification [orderId=" + orderId + ", orderType=" + orderType + ", orderStatus=" + orderStatus
 				+ ", operateDate=" + operateDate + ", sectName=" + sectName + ", content=" + content + ", serveAddress="
 				+ serveAddress + ", orderSource=" + orderSource + ", distType=" + distType + ", reason=" + reason
 				+ ", acceptor=" + acceptor + ", operation=" + operation + ", operatorList=" + operatorList + ", corpid="
-				+ corpid + ", agentId=" + agentId + "]";
+				+ corpid + ", agentId=" + agentId + ", timestamp=" + timestamp + "]";
 	}
 	
 	
