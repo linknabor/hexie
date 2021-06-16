@@ -641,8 +641,9 @@ public class TemplateMsgService {
 	    	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
 		} else if ("06".equals(workOrderNotification.getOperation())) {
 			title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
+		} else if ("07".equals(workOrderNotification.getOrderType())) {
+			title = "您的"+workOrderNotification.getOrderType()+"工单已完工";
 		}
-		
 		String content = workOrderNotification.getContent();
     	if (!StringUtils.isEmpty(content)) {
     		content = content.substring(content.length()-18, content.length());

@@ -27,7 +27,7 @@ public class TaskPoolConfig {
          * 计算可得 queueCapacity = 20/0.5*1 = 40。意思是队列里的线程可以等待1s，超过了的需要新开线程来执行切记不能设置为Integer.MAX_VALUE，这样队列会很大，线程数只会保持在corePoolSize大小，当任务陡增时，不能新开线程来执行，响应时间会随之陡增。
          * 假设响应时间为1秒，则
          */
-        executor.setQueueCapacity(40);
+        executor.setQueueCapacity(25);
         executor.setKeepAliveSeconds(60);
         executor.setThreadNamePrefix("taskExecutor-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
