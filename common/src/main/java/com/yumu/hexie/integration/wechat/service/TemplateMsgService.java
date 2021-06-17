@@ -645,9 +645,11 @@ public class TemplateMsgService {
 			title = "您的"+workOrderNotification.getOrderType()+"工单已完工";
 		}
 		String content = workOrderNotification.getContent();
-    	if (!StringUtils.isEmpty(content)) {
-    		content = content.substring(content.length()-18, content.length());
-    		content = "……"+content;
+    	if(!StringUtils.isEmpty(content)) {
+			if(content.length() > 120) {
+				content = content.substring(0, 110);
+				content += "...";
+			}
 		}
     	
     	CommonVO vo = new CommonVO();
