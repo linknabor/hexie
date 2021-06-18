@@ -107,5 +107,4 @@ public class OtherPayVO implements Serializable {
 				+ ", realAppid=" + realAppid + ", orderId=" + orderId + "]";
 	}
 	
-	
 }
