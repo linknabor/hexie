@@ -2,17 +2,19 @@ package com.yumu.hexie.integration.workorder.resp;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 
 public class OrderDetail implements Serializable {
 
 //	private static final String IMG_PREVIEW_URL = "https://images.weserv.nl/?url=";
-	private static final String IMG_PREVIEW_URL = "";
 	/**
 	 * 
 	 */
@@ -92,6 +94,28 @@ public class OrderDetail implements Serializable {
 	private String payMethod;
 	@JsonProperty("pay_method_cn")
 	private String payMethodCn;
+	
+	@JsonIgnore
+	private QiniuUtil qiniuUtil;
+	private List<String> imgList;			//实际图
+	private List<String> previewImgList;	//预览图
+	private List<String> thumbnailImgList;	//缩略图
+	
+	public void initImages(QiniuUtil qiniuUtil) {
+		this.qiniuUtil = qiniuUtil;
+		if (!StringUtils.isEmpty(imageUrls)) {
+			String[]imgArr = imageUrls.split(",");
+			imgList = Arrays.asList(imgArr);
+			List<String> thumbnailList = new ArrayList<>(imgList.size());
+			List<String> previewList = new ArrayList<>(imgList.size());
+			imgList.forEach(img->{
+				thumbnailList.add(qiniuUtil.getThumbnailLink(img, "3", "0"));
+				previewList.add(qiniuUtil.getPreviewLink(img, "1", "0"));
+			});
+			setThumbnailImgList(thumbnailList);
+			setPreviewImgList(previewList);
+		}
+	}
 	
 	public String getOrderId() {
 		return orderId;
@@ -291,21 +315,32 @@ public class OrderDetail implements Serializable {
 	public void setAcceptorContact(String acceptorContact) {
 		this.acceptorContact = acceptorContact;
 	}
-	
-	public List<String> getImages() {
-		List<String> imageList = new ArrayList<>();
-		if (!StringUtils.isEmpty(imageUrls)) {
-			String[]imgArr = imageUrls.split(",");
-			for (String img : imgArr) {
-				if (!StringUtils.isEmpty(img)) {
-					img = IMG_PREVIEW_URL.concat(img);
-					imageList.add(img);
-				}
-			}
-		}
-		return imageList;
+	public List<String> getThumbnailImgList() {
+		return thumbnailImgList;
 	}
-	
+
+	public void setThumbnailImgList(List<String> thumbnailImgList) {
+		if (thumbnailImgList==null || thumbnailImgList.isEmpty()) {
+			return;
+		}
+		this.thumbnailImgList = thumbnailImgList;
+	}
+	public List<String> getPreviewImgList() {
+		return previewImgList;
+	}
+
+	public void setPreviewImgList(List<String> previewImgList) {
+		if (previewImgList==null || previewImgList.isEmpty()) {
+			return;
+		}
+		this.previewImgList = previewImgList;
+	}
+	public List<String> getImgList() {
+		return imgList;
+	}
+	public void setImgList(List<String> imgList) {
+		this.imgList = imgList;
+	}
 	public String getCreateDateStr() {
 		
 		return DateUtil.formatFromDB(createDate, createTime);

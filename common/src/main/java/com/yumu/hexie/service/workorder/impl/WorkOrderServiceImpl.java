@@ -93,7 +93,9 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 		if (!"00".equals(commonResponse.getResult())) {
 			throw new BizValidateException(commonResponse.getErrMsg());
 		}
-		return commonResponse.getData();
+		OrderDetailVO vo = commonResponse.getData();
+		vo.getOrderDetail().initImages(qiniuUtil);	//初始化预览图
+		return vo;
 	}
 	
 	/**
