@@ -14,7 +14,7 @@ public class OtherPayDTO {
 	private String payee_openid;
 	private String orderId;
 	private String orderDetail;
-
+	
 	public User getUser() {
 		return user;
 	}
