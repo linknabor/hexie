@@ -648,9 +648,12 @@ public class TemplateMsgService {
 		} else if ("02".equals(workOrderNotification.getOperation())) {
 			title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
 			operName = workOrderNotification.getRejector();
-		} else if ("07".equals(workOrderNotification.getOrderType())) {
+		} else if ("07".equals(workOrderNotification.getOperation())) {
 			title = "您的"+workOrderNotification.getOrderType()+"工单已完工";
-			operName = workOrderNotification.getAcceptor();
+			operName = workOrderNotification.getFinisher();
+		} else {
+			log.info("unknow operation : " + workOrderNotification.getOperation() + ", will return .");
+			return;
 		}
 		String content = workOrderNotification.getContent();
     	if(!StringUtils.isEmpty(content)) {
