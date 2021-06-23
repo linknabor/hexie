@@ -309,13 +309,5 @@ public class DateUtil {
 		return dateStr;
     }
     
-    public static void main(String[] args) {
-
-    	String sdate = "2020-09-11 23:59:59";
-    	Date date = parse(sdate, dttmSimple);
-    	System.out.println(date);
-    	Date now = new Date();
-    	System.out.println(now);
-    	System.out.println(now.before(date));
-	}
+    
 }

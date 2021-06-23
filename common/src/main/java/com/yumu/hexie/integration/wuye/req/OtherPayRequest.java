@@ -33,7 +33,7 @@ public class OtherPayRequest extends WuyeRequest {
 	private String orderId;
 	@JsonProperty("order_detail")
 	private String orderDetail;
-	
+
 	public OtherPayRequest(OtherPayDTO otherPayDTO) {
 		BeanUtils.copyProperties(otherPayDTO, this);
 		this.openid =  otherPayDTO.getUser().getOpenid();
@@ -94,6 +94,14 @@ public class OtherPayRequest extends WuyeRequest {
 	}
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+
+	public String getPayee_openid() {
+		return payee_openid;
+	}
+
+	public void setPayee_openid(String payee_openid) {
+		this.payee_openid = payee_openid;
 	}
 
 	public String getPayee_openid() {
