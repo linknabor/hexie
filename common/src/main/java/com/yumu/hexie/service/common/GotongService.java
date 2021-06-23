@@ -5,6 +5,7 @@
 package com.yumu.hexie.service.common;
 
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
@@ -56,5 +57,7 @@ public interface GotongService {
 	void sendPayNotification4HouseBinder(AccountNotification accountNotify);
 
 	String sendBillPush(String openId, String appId, BillPushDetail billPushDetail);
+
+	boolean sendWorkOrderNotification(WorkOrderNotification workOrderNotification);
 
 }

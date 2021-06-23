@@ -22,4 +22,6 @@ public interface NotifyQueueTask {
 
 	void sendWuyeNotification4HouseBinderAysc();
 
+	void sendWorkOrderMsgNotificationAsyc();
+
 }

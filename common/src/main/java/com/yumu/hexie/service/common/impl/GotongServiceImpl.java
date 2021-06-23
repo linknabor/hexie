@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
@@ -39,6 +40,7 @@ import com.yumu.hexie.model.subscribemsg.UserSubscribeMsg;
 import com.yumu.hexie.model.subscribemsg.UserSubscribeMsgRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
@@ -401,5 +403,26 @@ public class GotongServiceImpl implements GotongService {
         String accessToken = systemConfigService.queryWXAToken(appId);
         return templateMsgService.sendBillNotificationMessage(openId, accessToken, appId, billPushDetail);
     }
+    
+    /**
+	 * 工单消息通知
+	 */
+	@Override
+	public boolean sendWorkOrderNotification(WorkOrderNotification workOrderNotification) {
+		
+		boolean success = true;
+		//模板消息
+		List<Operator> operList = workOrderNotification.getOperatorList();
+		if (operList == null || operList.isEmpty()) {
+			LOG.info("workorder oper is empty, will return .");
+			return true;
+		}
+		Operator operator = operList.get(0);
+        
+		String accessToken = systemConfigService.queryWXAToken(operator.getAppid());
+		templateMsgService.sendWorkOrderMsg(workOrderNotification, accessToken);
+		return success;
+		
+	}
 
 }

@@ -34,7 +34,7 @@ public class ServiceOperator  extends BaseModel {
     private double longitude;
     private double latitude;
     
-    private String subTypes;
+    private String subType;	//分项。自定义服务用来表示哪个服务;或收费人员用来表示收费项目，其他收入的feeId。
     
     private Long agentId;	//操作员来自哪个代理商
     private Long merchantId;	//操作员来自哪个商户
@@ -99,12 +99,6 @@ public class ServiceOperator  extends BaseModel {
     public void setType(int type) {
         this.type = type;
     }
-	public String getSubTypes() {
-		return subTypes;
-	}
-	public void setSubTypes(String subTypes) {
-		this.subTypes = subTypes;
-	}
 	public Long getAgentId() {
 		return agentId;
 	}
@@ -117,11 +111,17 @@ public class ServiceOperator  extends BaseModel {
 	public void setMerchantId(Long merchantId) {
 		this.merchantId = merchantId;
 	}
+	public String getSubType() {
+		return subType;
+	}
+	public void setSubType(String subType) {
+		this.subType = subType;
+	}
 	@Override
 	public String toString() {
 		return "ServiceOperator [type=" + type + ", companyName=" + companyName + ", name=" + name + ", tel=" + tel
 				+ ", openId=" + openId + ", userId=" + userId + ", regionId=" + regionId + ", fromWuye=" + fromWuye
-				+ ", longitude=" + longitude + ", latitude=" + latitude + ", subTypes=" + subTypes + ", agentId="
+				+ ", longitude=" + longitude + ", latitude=" + latitude + ", subType=" + subType + ", agentId="
 				+ agentId + ", merchantId=" + merchantId + "]";
 	}
 	

@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
+import org.springframework.util.StringUtils;
+
 public class DateUtil {
     public static final String dSimple    = "yyyy-MM-dd";
     public static final String dttmSimple = "yyyy-MM-dd HH:mm:ss";
@@ -273,7 +275,7 @@ public class DateUtil {
         return result;
  
     }
-
+    
     /**
      * 把yyyyMMdd格式日期字符串格式化成YYYY-MM-DD格式,把kkmmss格式时间字符串格式化成kk:mm:ss格式,中间加空格后拼接
      * @param date yyyyMMdd格式日期字符串
@@ -291,4 +293,21 @@ public class DateUtil {
         buf1.insert(2, ':').insert(5, ':');
         return buf.toString() + " " + buf1.toString();
     }
+    /**
+     * yyyyMMdd HHmmss 转换成 yyyy-MM-dd HH:mm:ss
+     * @param createDate yyyyMMdd
+     * @param createTime HHmmss
+     * @return
+     */
+    public static String formatFromDB (String createDate, String createTime) {
+    	
+    	String dateStr = "";
+		if (!StringUtils.isEmpty(createDate) && !StringUtils.isEmpty(createTime)) {
+	    	Date date = DateUtil.parse(createDate + " " + createTime, "yyyyMMdd HHmmss");
+	    	dateStr = DateUtil.dtFormat(date, DateUtil.dttmSimple);
+		}
+		return dateStr;
+    }
+    
+    
 }

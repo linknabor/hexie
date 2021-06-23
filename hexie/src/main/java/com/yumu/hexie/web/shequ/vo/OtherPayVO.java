@@ -26,6 +26,10 @@ public class OtherPayVO implements Serializable {
 	@JsonProperty("real_appid")
 	private String realAppid;
 	private String payee_openid;
+	@JsonProperty("order_id")
+	private String orderId;
+	@JsonProperty("order_detail")
+	private String orderDetail;
 	
 	public String getMoney() {
 		return money;
@@ -90,12 +94,18 @@ public class OtherPayVO implements Serializable {
 		this.payee_openid = payee_openid;
 	}
 
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
 	@Override
 	public String toString() {
 		return "OtherPayVO [money=" + money + ", sectId=" + sectId + ", feeId=" + feeId + ", openid=" + openid
 				+ ", remark=" + remark + ", appid=" + appid + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId
-				+ ", realAppid=" + realAppid + "]";
+				+ ", realAppid=" + realAppid + ", orderId=" + orderId + "]";
 	}
-	
 	
 }

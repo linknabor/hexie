@@ -12,7 +12,9 @@ public class OtherPayDTO {
 	private String qrCodeId;
 	private String mngCellId;
 	private String payee_openid;
-	
+	private String orderId;
+	private String orderDetail;
+
 	public User getUser() {
 		return user;
 	}
@@ -64,11 +66,24 @@ public class OtherPayDTO {
 		this.payee_openid = payee_openid;
 	}
 
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+	public String getOrderDetail() {
+		return orderDetail;
+	}
+	public void setOrderDetail(String orderDetail) {
+		this.orderDetail = orderDetail;
+	}
+
 	@Override
 	public String toString() {
 		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
-				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + "]";
+				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + ", orderId=" + orderId
+				+ ", orderDetail=" + orderDetail + "]";
 	}
-	
 	
 }

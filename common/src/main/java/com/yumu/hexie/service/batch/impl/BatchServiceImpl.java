@@ -129,6 +129,9 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.consumeWuyeCouponAsync();
 		notifyQueueTask.sendWuyeNotification4HouseBinderAysc();
 		wechatSubscribeMsgQueueTask.eventSubscribeMsg();
+//		userQueueTask.eventSubscribe();
+//		userQueueTask.eventUnsubscribe();
+		notifyQueueTask.sendWorkOrderMsgNotificationAsyc();
 
 		logger.info("异步队列任务启动完成。");
 		

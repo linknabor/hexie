@@ -3,8 +3,8 @@ package com.yumu.hexie.integration.wechat.service;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.List;
 
-import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
@@ -18,6 +18,8 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.integration.notify.Operator;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
@@ -616,5 +618,64 @@ public class TemplateMsgService {
 		sendMsg(msg, accessToken);
 
 	}
+	
+	/**
+	 * 发送维修单信息给维修工
+	 * @param seed
+	 * @param ro
+	 */
+    public void sendWorkOrderMsg(WorkOrderNotification workOrderNotification, String accessToken) {
+    	
+    	log.info("发送工单模板消息#########" + ", order id: " + workOrderNotification.getOrderId());
+    	
+    	//更改为使用模版消息发送
+		List<Operator> operList = workOrderNotification.getOperatorList();
+		if (operList == null || operList.isEmpty()) {
+			log.info("workorder owner info is empty, will return .");
+			return;
+		}
+		Operator operator = operList.get(0);
+		if (StringUtils.isEmpty(operator.getOpenid())) {
+			log.info("workorder owner openid is empty, will return .");
+			return;
+		}
+		
+		String title = "";
+		String operName = "";
+		if ("05".equals(workOrderNotification.getOperation())) {
+	    	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
+	    	operName = workOrderNotification.getAcceptor();
+		} else if ("02".equals(workOrderNotification.getOperation())) {
+			title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
+			operName = workOrderNotification.getRejector();
+		} else if ("07".equals(workOrderNotification.getOrderType())) {
+			title = "您的"+workOrderNotification.getOrderType()+"工单已完工";
+			operName = workOrderNotification.getAcceptor();
+		}
+		String content = workOrderNotification.getContent();
+    	if(!StringUtils.isEmpty(content)) {
+			if(content.length() > 120) {
+				content = content.substring(0, 110);
+				content += "...";
+			}
+		}
+    	
+    	CommonVO vo = new CommonVO();
+    	vo.setFirst(new TemplateItem(title));
+    	vo.setKeyword1(new TemplateItem(workOrderNotification.getOrderId()));
+    	vo.setKeyword2(new TemplateItem(content));
+    	vo.setKeyword3(new TemplateItem(workOrderNotification.getOrderStatus()));
+    	vo.setKeyword4(new TemplateItem(operName));
+    	
+    	TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+    	msg.setData(vo);
+    	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_WORKORDER_NOTIFY, operator.getAppid()));
+    	String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_WORK_ORDER_DETAIL);
+    	String url = msgUrl + workOrderNotification.getOrderId();
+    	msg.setUrl(AppUtil.addAppOnUrl(url, operator.getAppid()));
+		msg.setTouser(operator.getOpenid());
+    	sendMsg(msg, accessToken);
+    	
+    }
 
 }

@@ -26,6 +26,7 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_CUSTOMER_DELIVERY = "customerDeliveryTemplate";	//买家发货提醒
 	public static final String TEMPLATE_TYPE_BILL_PUSH = "billPushTemplate"; //物业账单通知
 	public static final String TEMPLATE_TYPE_OPINION_NOTIFY = "sendOpinionNotificationMessageTemplate";
+	public static final String TEMPLATE_TYPE_WORKORDER_NOTIFY = "workOrderNotificationTemplate";
 
 	public static final String URL_SUCCESS = "successUrl";
 	public static final String URL_REG_SUCCESS = "regSuccessUrl";
@@ -47,7 +48,8 @@ public class MsgCfg {
 	public static final String URL_CUSTOMER_DELIVERY = "customerDeliveryUrl";
 	public static final String URL_WUYE_PAY = "wuyePayUrl"; //物业缴费页面
 	public static final String URL_OPINION_NOTICE = "sendOpinionUrl";
-
+	public static final String URL_WORK_ORDER_DETAIL = "workOrderDetail";	//工单明细页面
+	
 	//订阅消息
 	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";
 	public static final String TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY = "payNotifySubscribeTemplate";

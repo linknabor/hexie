@@ -19,6 +19,7 @@ import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
@@ -381,6 +382,51 @@ public class NotifyServiceImpl implements NotifyService {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String value = objectMapper.writeValueAsString(accountNotification);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_HOUSE_BINDER_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * 工单消息队列
+	 */
+	@Override
+	public void notifyWorkOrderMsgAsync(WorkOrderNotification workOrderNotification) {
+		
+		String orderId = workOrderNotification.getOrderId();
+		String timestamp = workOrderNotification.getTimestamp();
+		String checkKey = orderId + "_" + timestamp;
+		String key = ModelConstant.KEY_NOTIFY_WORK_ORDER_DUPLICATION_CHECK + checkKey;
+		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		if (0 == result) {
+			log.info("orderId : " + orderId + ", already notified, will skip ! ");
+			return;
+		}
+		
+		if (StringUtils.isEmpty(workOrderNotification.getOrderId())) {
+			log.info("notifyWorkOrderMsgAsync: orderid is empty, will return ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(workOrderNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_WORKORER_MSG_QUEUE, value);
+
 				isSuccess = true;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

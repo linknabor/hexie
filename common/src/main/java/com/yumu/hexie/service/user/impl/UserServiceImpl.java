@@ -433,5 +433,41 @@ public class UserServiceImpl implements UserService {
 		
 	}
 
+	@Override
+	@Transactional
+	public boolean eventSubscribe(User user) {
+		
+		boolean updated = false;
+		List<User> userList = userRepository.findByOpenid(user.getOpenid());
+		if (userList!=null && !userList.isEmpty()) {
+			updated = true;
+		}
+		for (User dbuser : userList) {
+			dbuser.setSubscribe(user.getSubscribe());
+			dbuser.setSubscribe_time(user.getSubscribe_time());
+			userRepository.save(dbuser);
+		}
+		return updated;
+		
+	}
+
+	@Override
+	@Transactional
+	public boolean eventUnsubscribe(User user) {
+		
+		boolean updated = false;
+		List<User> userList = userRepository.findByOpenid(user.getOpenid());
+		if (userList!=null && !userList.isEmpty()) {
+			updated = true;
+		}
+		for (User dbuser : userList) {
+			dbuser.setSubscribe(user.getSubscribe());
+			dbuser.setUnsubscribeDate(user.getUnsubscribeDate());
+			userRepository.save(dbuser);
+		}
+		return updated;
+		
+	}
+
 
 }
