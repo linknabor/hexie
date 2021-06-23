@@ -100,6 +100,7 @@ public class OtherPayVO implements Serializable {
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
+
 	@Override
 	public String toString() {
 		return "OtherPayVO [money=" + money + ", sectId=" + sectId + ", feeId=" + feeId + ", openid=" + openid

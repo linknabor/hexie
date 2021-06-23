@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.model.community.Notice;
@@ -34,4 +33,5 @@ public class NoticeController extends BaseController {
 		noticeList.forEach(notice->noticeVoList.add(new NoticeVO(notice, qiniuUtil)));
 		return BaseResult.successResult(noticeVoList);
 	}
+
 }

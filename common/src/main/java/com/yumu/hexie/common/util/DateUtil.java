@@ -300,22 +300,14 @@ public class DateUtil {
      * @return
      */
     public static String formatFromDB (String createDate, String createTime) {
-    	
+
     	String dateStr = "";
 		if (!StringUtils.isEmpty(createDate) && !StringUtils.isEmpty(createTime)) {
 	    	Date date = DateUtil.parse(createDate + " " + createTime, "yyyyMMdd HHmmss");
 	    	dateStr = DateUtil.dtFormat(date, DateUtil.dttmSimple);
-		}
-		return dateStr;
-    }
-    
-    public static void main(String[] args) {
-
-    	String sdate = "2020-09-11 23:59:59";
-    	Date date = parse(sdate, dttmSimple);
-    	System.out.println(date);
-    	Date now = new Date();
-    	System.out.println(now);
-    	System.out.println(now.before(date));
 	}
+		return dateStr;
+}
+    
+    
 }

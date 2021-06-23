@@ -78,6 +78,7 @@ public class OtherPayDTO {
 	public void setOrderDetail(String orderDetail) {
 		this.orderDetail = orderDetail;
 	}
+
 	@Override
 	public String toString() {
 		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
