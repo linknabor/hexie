@@ -645,7 +645,7 @@ public class TemplateMsgService {
 		if ("05".equals(workOrderNotification.getOperation())) {
 	    	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
 	    	operName = workOrderNotification.getAcceptor();
-		} else if ("06".equals(workOrderNotification.getOperation())) {
+		} else if ("02".equals(workOrderNotification.getOperation())) {
 			title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
 			operName = workOrderNotification.getRejector();
 		} else if ("07".equals(workOrderNotification.getOrderType())) {
