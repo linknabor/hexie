@@ -641,12 +641,16 @@ public class TemplateMsgService {
 		}
 		
 		String title = "";
+		String operName = "";
 		if ("05".equals(workOrderNotification.getOperation())) {
 	    	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
+	    	operName = workOrderNotification.getAcceptor();
 		} else if ("06".equals(workOrderNotification.getOperation())) {
 			title = "您的"+workOrderNotification.getOrderType()+"工单已被驳回";
+			operName = workOrderNotification.getRejector();
 		} else if ("07".equals(workOrderNotification.getOrderType())) {
 			title = "您的"+workOrderNotification.getOrderType()+"工单已完工";
+			operName = workOrderNotification.getAcceptor();
 		}
 		String content = workOrderNotification.getContent();
     	if(!StringUtils.isEmpty(content)) {
@@ -661,7 +665,7 @@ public class TemplateMsgService {
     	vo.setKeyword1(new TemplateItem(workOrderNotification.getOrderId()));
     	vo.setKeyword2(new TemplateItem(content));
     	vo.setKeyword3(new TemplateItem(workOrderNotification.getOrderStatus()));
-    	vo.setKeyword4(new TemplateItem(workOrderNotification.getAcceptor()));
+    	vo.setKeyword4(new TemplateItem(operName));
     	
     	TemplateMsg<CommonVO> msg = new TemplateMsg<>();
     	msg.setData(vo);

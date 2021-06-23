@@ -21,6 +21,7 @@ public class WorkOrderNotification implements Serializable {
 	private String distType;	//订单区域类型
 	private String reason;	//驳回原因
 	private String acceptor;
+	private String rejector;	//拒绝人
 	
 	private String operation;	//01创建 03受理05接单07完工
 	private List<Operator> operatorList;
@@ -126,13 +127,19 @@ public class WorkOrderNotification implements Serializable {
 	public void setTimestamp(String timestamp) {
 		this.timestamp = timestamp;
 	}
+	public String getRejector() {
+		return rejector;
+	}
+	public void setRejector(String rejector) {
+		this.rejector = rejector;
+	}
 	@Override
 	public String toString() {
 		return "WorkOrderNotification [orderId=" + orderId + ", orderType=" + orderType + ", orderStatus=" + orderStatus
 				+ ", operateDate=" + operateDate + ", sectName=" + sectName + ", content=" + content + ", serveAddress="
 				+ serveAddress + ", orderSource=" + orderSource + ", distType=" + distType + ", reason=" + reason
-				+ ", acceptor=" + acceptor + ", operation=" + operation + ", operatorList=" + operatorList + ", corpid="
-				+ corpid + ", agentId=" + agentId + ", timestamp=" + timestamp + "]";
+				+ ", acceptor=" + acceptor + ", rejector=" + rejector + ", operation=" + operation + ", operatorList="
+				+ operatorList + ", corpid=" + corpid + ", agentId=" + agentId + ", timestamp=" + timestamp + "]";
 	}
 	
 	
