@@ -631,10 +631,14 @@ public class TemplateMsgService {
     	//更改为使用模版消息发送
 		List<Operator> operList = workOrderNotification.getOperatorList();
 		if (operList == null || operList.isEmpty()) {
-			log.info("workorder oper is empty, will return .");
+			log.info("workorder owner info is empty, will return .");
 			return;
 		}
 		Operator operator = operList.get(0);
+		if (StringUtils.isEmpty(operator.getOpenid())) {
+			log.info("workorder owner openid is empty, will return .");
+			return;
+		}
 		
 		String title = "";
 		if ("05".equals(workOrderNotification.getOperation())) {
