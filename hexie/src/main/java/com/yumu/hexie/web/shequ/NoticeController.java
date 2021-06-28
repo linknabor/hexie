@@ -2,9 +2,11 @@ package com.yumu.hexie.web.shequ;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.model.community.Notice;
@@ -34,4 +36,15 @@ public class NoticeController extends BaseController {
 		return BaseResult.successResult(noticeVoList);
 	}
 
+	@RequestMapping(value = "/addOutSidNotice", produces = "text/html;charset=UTF-8", method = RequestMethod.POST)
+	public BaseResult<String> addOutSidNotice(@RequestParam Map<String, String> params) {
+		String id = noticeService.addOutSidNotice(params);
+		return BaseResult.successResult(id);
+	}
+
+	@RequestMapping(value = "/delOutSidNotice", method = RequestMethod.POST)
+	public BaseResult<String> delOutSidNotice(@RequestParam(required = false) String noticeId) {
+		noticeService.delOutSidNotice(Long.parseLong(noticeId));
+		return BaseResult.successResult("ok");
+	}
 }
