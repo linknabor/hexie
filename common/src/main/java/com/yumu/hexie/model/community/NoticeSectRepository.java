@@ -7,4 +7,6 @@ import java.util.List;
 public interface NoticeSectRepository extends JpaRepository<NoticeSect, Long> {
 
     public List<NoticeSect> findByNoticeId(Long noticeId);
+
+    void deleteByNoticeId(long noticeId);
 }
