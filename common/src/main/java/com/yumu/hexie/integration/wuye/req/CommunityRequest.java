@@ -8,21 +8,21 @@ package com.yumu.hexie.integration.wuye.req;
  */
 public class CommunityRequest extends WuyeRequest{
 
-    private String noticeType;
+    private int noticeType;
     private String title;
     private String summary;
     private String content;
     private String image;
     private String appid;
     private String publishDate;
-    private String outsideKey;
+    private long outsideKey;
     private String sectIds;
 
-    public String getNoticeType() {
+    public int getNoticeType() {
         return noticeType;
     }
 
-    public void setNoticeType(String noticeType) {
+    public void setNoticeType(int noticeType) {
         this.noticeType = noticeType;
     }
 
@@ -74,11 +74,11 @@ public class CommunityRequest extends WuyeRequest{
         this.publishDate = publishDate;
     }
 
-    public String getOutsideKey() {
+    public long getOutsideKey() {
         return outsideKey;
     }
 
-    public void setOutsideKey(String outsideKey) {
+    public void setOutsideKey(long outsideKey) {
         this.outsideKey = outsideKey;
     }
 
