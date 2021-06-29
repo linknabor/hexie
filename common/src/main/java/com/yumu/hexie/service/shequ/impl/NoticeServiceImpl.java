@@ -5,7 +5,6 @@ import java.util.List;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.community.*;
-import com.yumu.hexie.service.notify.impl.NotifyQueueTaskImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
