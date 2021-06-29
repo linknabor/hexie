@@ -42,7 +42,7 @@ public class NoticeController extends BaseController {
 
 	@RequestMapping(value = "/addOutSidNotice", method = RequestMethod.POST)
 	public BaseResult<String> addOutSidNotice(@RequestBody CommunityRequest request) {
-		log.debug("request :" + request);
+		log.error("CommunityRequest :" + request.toString());
 		String id = noticeService.addOutSidNotice(request);
 		return BaseResult.successResult(id);
 	}

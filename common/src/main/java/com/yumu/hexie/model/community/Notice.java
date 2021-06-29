@@ -105,4 +105,23 @@ public class Notice extends BaseModel {
 	public void setOutsideKey(long outsideKey) {
 		this.outsideKey = outsideKey;
 	}
+
+	@Override
+	public String toString() {
+		return "Notice{" +
+				"noticeType=" + noticeType +
+				", title='" + title + '\'' +
+				", summary='" + summary + '\'' +
+				", content='" + content + '\'' +
+				", publishDate='" + publishDate + '\'' +
+				", status=" + status +
+				", top=" + top +
+				", image='" + image + '\'' +
+				", smallImage='" + smallImage + '\'' +
+				", appid='" + appid + '\'' +
+				", creator='" + creator + '\'' +
+				", url='" + url + '\'' +
+				", outsideKey=" + outsideKey +
+				'}';
+	}
 }
