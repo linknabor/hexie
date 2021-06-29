@@ -25,6 +25,7 @@ public class Notice extends BaseModel {
 	private String creator;	//发布人
 	private String url;	//跳转链接
 	private long outsideKey; //外部主键 可能是message表
+	private String openid;
 	
 	public int getNoticeType() {
 		return noticeType;
@@ -104,6 +105,14 @@ public class Notice extends BaseModel {
 
 	public void setOutsideKey(long outsideKey) {
 		this.outsideKey = outsideKey;
+	}
+
+	public String getOpenid() {
+		return openid;
+	}
+
+	public void setOpenid(String openid) {
+		this.openid = openid;
 	}
 
 	@Override

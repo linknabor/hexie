@@ -17,6 +17,7 @@ public class CommunityRequest extends WuyeRequest{
     private String publishDate;
     private long outsideKey;
     private String sectIds;
+    private String openid;
 
     public int getNoticeType() {
         return noticeType;
@@ -88,6 +89,14 @@ public class CommunityRequest extends WuyeRequest{
 
     public void setSectIds(String sectIds) {
         this.sectIds = sectIds;
+    }
+
+    public String getOpenid() {
+        return openid;
+    }
+
+    public void setOpenid(String openid) {
+        this.openid = openid;
     }
 
     @Override

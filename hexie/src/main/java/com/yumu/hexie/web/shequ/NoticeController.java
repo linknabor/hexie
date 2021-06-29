@@ -2,7 +2,6 @@ package com.yumu.hexie.web.shequ;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import org.slf4j.Logger;
@@ -47,8 +46,8 @@ public class NoticeController extends BaseController {
 		return BaseResult.successResult(id);
 	}
 
-	@RequestMapping(value = "/delOutSidNotice", method = RequestMethod.POST)
-	public BaseResult<String> delOutSidNotice(@RequestParam(required = false) String noticeId) {
+	@RequestMapping(value = "/delOutSidNotice/{noticeId}", method = RequestMethod.GET)
+	public BaseResult<String> delOutSidNotice(@PathVariable String noticeId) {
 		noticeService.delOutSidNotice(Long.parseLong(noticeId));
 		return BaseResult.successResult("ok");
 	}

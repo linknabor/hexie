@@ -14,4 +14,6 @@ public interface NoticeService {
 	String addOutSidNotice(CommunityRequest request);
 
 	void delOutSidNotice(long noticeId);
+
+
 }

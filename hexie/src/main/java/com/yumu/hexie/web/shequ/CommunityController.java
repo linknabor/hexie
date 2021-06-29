@@ -3,6 +3,7 @@ package com.yumu.hexie.web.shequ;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,8 +14,10 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
+import com.yumu.hexie.service.shequ.NoticeService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +83,8 @@ public class CommunityController extends BaseController{
 
 	@Autowired
 	private TemplateMsgService templateMsgService;
-
+	@Autowired
+	private NoticeService noticeService;
 	/*****************[BEGIN]帖子********************/
 	
 	/**
@@ -398,8 +402,6 @@ public class CommunityController extends BaseController{
 
 		ThreadComment retComment = communityService.addComment(user, comment);	//添加评论
 
-		//moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
-
 		String tcAttachmentUrl = retComment.getAttachmentUrl();
 		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
 			String[]urls = tcAttachmentUrl.split(",");
@@ -458,9 +460,26 @@ public class CommunityController extends BaseController{
 			retComment.setPreviewLink(previewLinkList);
 		}
 
-		//通知业主
 		try {
 			User user = userService.getById(thread.getUserId());
+
+			//添加到消息中心
+			CommunityRequest request = new CommunityRequest();
+			request.setTitle("意见回复提醒");
+			StringBuilder sb = new StringBuilder();
+			sb.append("意见标题:").append(thread.getThreadContent()).append("\n");
+			sb.append("回复内容:").append(retComment.getCommentContent()).append("\n");
+			sb.append("地址:").append(thread.getUserAddress());
+			request.setContent(sb.toString());
+			request.setSummary(sb.toString());
+			request.setAppid(user.getAppId());
+			request.setOpenid(user.getOpenid());
+			request.setNoticeType(12);
+			SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
+			request.setPublishDate(df1.format(new Date()));
+			noticeService.addOutSidNotice(request);
+
+			//通知业主
 			OpinionRequestTemp opinionRequest = new OpinionRequestTemp();
 			opinionRequest.setContent(retComment.getCommentContent());
 			opinionRequest.setThreadId(thread.getThreadId()+"");

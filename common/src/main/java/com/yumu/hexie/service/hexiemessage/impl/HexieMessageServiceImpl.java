@@ -11,6 +11,8 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
+import com.yumu.hexie.service.shequ.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -61,6 +63,9 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	private QiniuUtil qiniuUtil;
 	@Autowired
 	private OperService operService;
+
+	@Autowired
+	private NoticeService noticeService;
 	
 	
 	@Value(value = "${tmpfile.dir}")
@@ -75,27 +80,25 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	@Override
 	@Transactional
 	public boolean sendMessage(HexieMessage exr) {
-		
-		boolean success = false;
+		boolean success;
 		boolean successFlag = false;
 		String[] wuyeid = exr.getWuyeId().split(",");
-		for (int i = 0; i < wuyeid.length; i++) {
-			List<User> userList = userRepository.findByWuyeId(wuyeid[i]);
-			User user = null;
+		for (String s : wuyeid) {
+			List<User> userList = userRepository.findByWuyeId(s);
+			User user;
 			if (userList == null || userList.isEmpty()) {
 				user = new User();
-			}else {
+			} else {
 				user = userList.get(0);
 			}
 			logger.info("will sent wuye message to user : " + user);
 			success = saveMessage(exr, user);
 
 			if (success) {
-				successFlag = true;	//当前这户，有一个绑定者成功就算成功
+				successFlag = true;    //当前这户，有一个绑定者成功就算成功
 			}
 		}
 		return successFlag;
-
 	}
 	
 	/**
@@ -112,8 +115,22 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		hexieMessage.setUserId(user.getId());
 		hexieMessage.setDate_time(df.format(new Date()));
 		hexieMessage.setWuyeId(user.getWuyeId());
-		hexieMessageRepository.save(hexieMessage);
-		
+		HexieMessage uMessage = hexieMessageRepository.save(hexieMessage);
+
+		//添加消息到消息中心
+		CommunityRequest request = new CommunityRequest();
+		request.setContent(exr.getContent());
+		request.setTitle(exr.getContent());
+		request.setSummary(exr.getContent());
+		request.setImage(exr.getImgUrls());
+		request.setAppid(user.getAppId());
+		request.setOpenid(user.getOpenid());
+		request.setNoticeType(12);
+		SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
+		request.setPublishDate(df1.format(new Date()));
+		request.setOutsideKey(uMessage.getId());
+		noticeService.addOutSidNotice(request);
+
 		boolean success = true;
 		if (!StringUtils.isEmpty(user.getWuyeId())) {
 			success = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
