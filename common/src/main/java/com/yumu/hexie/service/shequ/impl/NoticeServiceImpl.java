@@ -4,8 +4,10 @@ import java.beans.Transient;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.community.*;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,8 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.shequ.NoticeService;
+
+import javax.transaction.Transactional;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {
@@ -42,33 +46,29 @@ public class NoticeServiceImpl implements NoticeService {
 	}
 
 	@Override
-	@Transient
-	public String addOutSidNotice(Map<String, String> map) {
+	@Transactional
+	public String addOutSidNotice(CommunityRequest request) {
 		Notice notice = new Notice();
-		notice.setNoticeType(Integer.parseInt(map.get("noticeType")));
-		notice.setTitle(map.get("title"));
-		notice.setSummary(map.get("summary"));
-		notice.setContent(map.get("content"));
-		notice.setImage(map.get("image"));
-		notice.setAppid(map.get("appid"));
-		notice.setOutsideKey(Long.parseLong(map.get("outsideKey")));
-		notice.setPublishDate(map.get("publishDate"));
+		BeanUtils.copyProperties(request, notice);
 		Notice n = noticeRepository.save(notice);
 
-		String sectIds = map.get("sectIds");
-		String[] ids = sectIds.split(",");
-		for(String key: ids) {
-			NoticeSect noticeSect = new NoticeSect();
-			noticeSect.setNoticeId(n.getId());
-			noticeSect.setSectId(Long.parseLong(key));
-			noticeSectRepository.save(noticeSect);
+		String sectIds = request.getSectIds();
+		if(!StringUtils.isEmpty(sectIds)) {
+			String[] ids = sectIds.split(",");
+			for(String key: ids) {
+				NoticeSect noticeSect = new NoticeSect();
+				noticeSect.setNoticeId(n.getId());
+				noticeSect.setSectId(Long.parseLong(key));
+				noticeSectRepository.save(noticeSect);
+			}
 		}
 		return String.valueOf(n.getId());
 	}
 
 	@Override
-	@Transient
+	@Transactional
 	public void delOutSidNotice(long noticeId) {
+		Assert.hasText(String.valueOf(noticeId), "信息ID不能为空");
 		noticeRepository.deleteById(noticeId);
 		noticeSectRepository.deleteByNoticeId(noticeId);
 	}

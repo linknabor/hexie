@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +40,10 @@ public class NoticeController extends BaseController {
 		return BaseResult.successResult(noticeVoList);
 	}
 
-	@RequestMapping(value = "/addOutSidNotice", produces = "text/html;charset=UTF-8", method = RequestMethod.POST)
-	public BaseResult<String> addOutSidNotice(@RequestBody Map<String, String> params) {
-		log.debug("params :" + params);
-		String id = noticeService.addOutSidNotice(params);
+	@RequestMapping(value = "/addOutSidNotice", method = RequestMethod.POST)
+	public BaseResult<String> addOutSidNotice(@RequestBody CommunityRequest request) {
+		log.debug("request :" + request);
+		String id = noticeService.addOutSidNotice(request);
 		return BaseResult.successResult(id);
 	}
 
