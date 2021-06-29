@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.yumu.hexie.service.shequ.impl;
 
 import java.util.Date;
@@ -27,8 +24,6 @@ import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.community.ThreadCommentRepository;
 import com.yumu.hexie.model.community.ThreadRepository;
-import com.yumu.hexie.model.user.Address;
-import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -52,9 +47,6 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Autowired
 	private UserRepository userRepository;
-	
-	@Autowired
-	private AddressRepository addressRepository;
 	
 	@Autowired
 	private SystemConfigService systemConfigService;

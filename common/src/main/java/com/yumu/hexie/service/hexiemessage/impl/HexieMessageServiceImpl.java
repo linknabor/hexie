@@ -11,7 +11,9 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
+import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.shequ.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +68,8 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 
 	@Autowired
 	private NoticeService noticeService;
-	
+	@Autowired
+	private WechatMsgService wechatMsgService;
 	
 	@Value(value = "${tmpfile.dir}")
     private String tmpFileRoot;
@@ -125,13 +128,17 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		request.setImage(exr.getImgUrls());
 		request.setAppid(user.getAppId());
 		request.setOpenid(user.getOpenid());
-		request.setNoticeType(12);
+		request.setNoticeType(ModelConstant.NOTICE_TYPE2_NOTIFICATIONS);
 		SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
 		request.setPublishDate(df1.format(new Date()));
 		request.setOutsideKey(uMessage.getId());
+
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_MESSAGE) + hexieMessage.getId();
+		request.setUrl(url);
+
 		noticeService.addOutSidNotice(request);
 
-		boolean success = true;
+		boolean success;
 		if (!StringUtils.isEmpty(user.getWuyeId())) {
 			success = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
 		}else {

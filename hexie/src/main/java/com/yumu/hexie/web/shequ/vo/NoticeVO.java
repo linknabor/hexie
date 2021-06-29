@@ -101,6 +101,21 @@ public class NoticeVO implements Serializable {
 		case ModelConstant.NOTICE_TYPE2_MOMENTS:
 			this.creator = "社区圈";
 			break;
+		case ModelConstant.NOTICE_TYPE2_NOTIFICATIONS:
+			this.creator = "群发通知";
+			break;
+		case ModelConstant.NOTICE_TYPE2_BIll:
+			this.creator = "账单推送";
+			break;
+		case ModelConstant.NOTICE_TYPE2_ARREARS_BILL:
+			this.creator = "欠费提醒";
+			break;
+		case ModelConstant.NOTICE_TYPE2_THREAD:
+			this.creator = "意见回复提醒";
+			break;
+		case ModelConstant.NOTICE_TYPE2_ORDER:
+			this.creator = "工单进度提醒";
+			break;
 		default:
 			this.creator = "系统消息";
 			break;

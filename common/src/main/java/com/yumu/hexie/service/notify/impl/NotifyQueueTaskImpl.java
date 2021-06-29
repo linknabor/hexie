@@ -1,12 +1,14 @@
 package com.yumu.hexie.service.notify.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import com.yumu.hexie.common.util.AppUtil;
+import com.yumu.hexie.integration.wechat.service.MsgCfg;
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
+import com.yumu.hexie.service.msgtemplate.WechatMsgService;
+import com.yumu.hexie.service.shequ.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,8 +66,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private BaseOrderService baseOrderService;
 	@Autowired
 	private CouponService couponService;
-	
-	
+	@Autowired
+	private WechatMsgService wechatMsgService;
+	@Autowired
+	private NoticeService noticeService;
 	/**
 	 * 异步发送到账模板消息
 	 */
@@ -813,8 +817,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.info("start to consume workorder queue : " + won);
 				
 				//保存需要发送的消息
-//				userNotificationService.saveWorkOrderNotification(won);	TODO 是否需要保存？
-				
+//				userNotificationService.saveWorkOrderNotification(won);	//TODO 是否需要保存？
+
+				//添加消息到消息中心
+				saveNotice(won);
+
 				boolean isSuccess = false;
 				try {
 					logger.info("send workorder msg async, workorder : " + won);
@@ -832,7 +839,59 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.error(e.getMessage(), e);
 			}
 		}
-		
+	}
+
+	private void saveNotice(WorkOrderNotification won) {
+		String title = "";
+		String operName = "";
+		if ("05".equals(won.getOperation())) {
+			title = "您的"+won.getOrderType()+"工单已被受理";
+			operName = won.getAcceptor();
+		} else if ("02".equals(won.getOperation())) {
+			title = "您的"+won.getOrderType()+"工单已被驳回";
+			operName = won.getRejector();
+		} else if ("07".equals(won.getOperation())) {
+			title = "您的"+won.getOrderType()+"工单已完工";
+			operName = won.getFinisher();
+		}
+
+		String content = won.getContent();
+		if(!StringUtils.isEmpty(content)) {
+			if(content.length() > 120) {
+				content = content.substring(0, 110);
+				content += "...";
+			}
+		}
+
+		if(!StringUtils.isEmpty(title)) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(title).append("\n")
+					.append("工单编号:").append(won.getOrderId()).append("\n")
+					.append("工单内容:").append(content).append("\n")
+					.append("工单状态:").append(won.getOrderStatus()).append("\n")
+					.append("工单处理人:").append(operName);
+
+			List<com.yumu.hexie.integration.notify.Operator> operList = won.getOperatorList();
+			if(operList != null && !operList.isEmpty()) {
+				com.yumu.hexie.integration.notify.Operator operator = operList.get(0);
+				if (!StringUtils.isEmpty(operator.getOpenid())) {
+					CommunityRequest request = new CommunityRequest();
+					request.setTitle(sb.toString());
+					request.setContent(sb.toString());
+					request.setSummary(sb.toString());
+					request.setAppid(operator.getAppid());
+					request.setOpenid(operator.getOpenid());
+					request.setNoticeType(ModelConstant.NOTICE_TYPE2_NOTIFICATIONS);
+					SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
+					request.setPublishDate(df1.format(new Date()));
+					request.setOutsideKey(Long.parseLong(won.getOrderId()));
+					String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_WORK_ORDER_DETAIL) + won.getOrderId();
+					String url = AppUtil.addAppOnUrl(msgUrl, operator.getAppid());
+					request.setUrl(url);
+					noticeService.addOutSidNotice(request);
+				}
+			}
+		}
 	}
 
 }

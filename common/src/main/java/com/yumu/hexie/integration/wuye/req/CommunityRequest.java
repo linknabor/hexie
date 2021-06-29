@@ -18,6 +18,7 @@ public class CommunityRequest extends WuyeRequest{
     private long outsideKey;
     private String sectIds;
     private String openid;
+    private String url;
 
     public int getNoticeType() {
         return noticeType;
@@ -99,18 +100,28 @@ public class CommunityRequest extends WuyeRequest{
         this.openid = openid;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         return "CommunityRequest{" +
-                "noticeType='" + noticeType + '\'' +
+                "noticeType=" + noticeType +
                 ", title='" + title + '\'' +
                 ", summary='" + summary + '\'' +
                 ", content='" + content + '\'' +
                 ", image='" + image + '\'' +
                 ", appid='" + appid + '\'' +
                 ", publishDate='" + publishDate + '\'' +
-                ", outsideKey='" + outsideKey + '\'' +
+                ", outsideKey=" + outsideKey +
                 ", sectIds='" + sectIds + '\'' +
+                ", openid='" + openid + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

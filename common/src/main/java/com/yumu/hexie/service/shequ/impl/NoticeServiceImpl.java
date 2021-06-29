@@ -5,6 +5,9 @@ import java.util.List;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.community.*;
+import com.yumu.hexie.service.notify.impl.NotifyQueueTaskImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +25,9 @@ import javax.transaction.Transactional;
 
 @Service
 public class NoticeServiceImpl implements NoticeService {
-	
+
+	private static Logger logger = LoggerFactory.getLogger(NoticeServiceImpl.class);
+
 	private final static int PAGE_SIZE = 10;
 
 	@Autowired
@@ -47,6 +52,7 @@ public class NoticeServiceImpl implements NoticeService {
 	@Transactional
 	public String addOutSidNotice(CommunityRequest request) {
 		Notice notice = new Notice();
+		logger.info("addOutSidNotice :" + request);
 		BeanUtils.copyProperties(request, notice);
 		Notice n = noticeRepository.save(notice);
 
