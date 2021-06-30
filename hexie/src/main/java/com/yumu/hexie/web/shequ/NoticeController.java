@@ -40,7 +40,7 @@ public class NoticeController extends BaseController {
 
 		for(NoticeVO vo : noticeVoList) {
 			List<String> list = new ArrayList<>();
-			String[] msgs = vo.getTitle().split("|");
+			String[] msgs = vo.getTitle().split("\\|");
 			Collections.addAll(list, msgs);
 			vo.setShowMsg(list);
 		}

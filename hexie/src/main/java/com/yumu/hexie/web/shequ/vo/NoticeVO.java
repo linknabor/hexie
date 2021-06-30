@@ -267,4 +267,29 @@ public class NoticeVO implements Serializable {
 	public void setShowMsg(List<String> showMsg) {
 		this.showMsg = showMsg;
 	}
+
+	@Override
+	public String toString() {
+		return "NoticeVO{" +
+				"id=" + id +
+				", createDate=" + createDate +
+				", noticeType=" + noticeType +
+				", title='" + title + '\'' +
+				", summary='" + summary + '\'' +
+				", content='" + content + '\'' +
+				", publishDate='" + publishDate + '\'' +
+				", status=" + status +
+				", top=" + top +
+				", image='" + image + '\'' +
+				", appid='" + appid + '\'' +
+				", creator='" + creator + '\'' +
+				", imgList=" + imgList +
+				", previewImgList=" + previewImgList +
+				", thumbnailImgList=" + thumbnailImgList +
+				", noticeDate='" + noticeDate + '\'' +
+				", url='" + url + '\'' +
+				", showMsg=" + showMsg +
+				", qiniuUtil=" + qiniuUtil +
+				'}';
+	}
 }
