@@ -29,6 +29,7 @@ public class OpinionRequest implements Serializable {
     private String appId;
     private String openId;
     private String sectId;
+    private String userOpenid;
 
     public String getOpinionDate() {
         return opinionDate;
@@ -144,5 +145,13 @@ public class OpinionRequest implements Serializable {
 
     public void setSectId(String sectId) {
         this.sectId = sectId;
+    }
+
+    public String getUserOpenid() {
+        return userOpenid;
+    }
+
+    public void setUserOpenid(String userOpenid) {
+        this.userOpenid = userOpenid;
     }
 }

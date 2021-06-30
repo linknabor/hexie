@@ -102,7 +102,7 @@ public class NoticeVO implements Serializable {
 			this.creator = "社区圈";
 			break;
 		case ModelConstant.NOTICE_TYPE2_NOTIFICATIONS:
-			this.creator = "群发通知";
+			this.creator = "小区通知";
 			break;
 		case ModelConstant.NOTICE_TYPE2_BIll:
 			this.creator = "账单推送";
