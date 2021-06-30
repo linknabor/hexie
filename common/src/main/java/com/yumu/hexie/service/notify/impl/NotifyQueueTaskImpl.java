@@ -866,10 +866,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 		if(!StringUtils.isEmpty(title)) {
 			StringBuilder sb = new StringBuilder();
 			sb.append(title).append("|")
-					.append("工单编号:").append(won.getOrderId()).append("|")
-					.append("工单内容:").append(content).append("|")
-					.append("工单状态:").append(won.getOrderStatus()).append("|")
-					.append("工单处理人:").append(operName);
+					.append("工单编号：").append(won.getOrderId()).append("|")
+					.append("工单内容：").append(content).append("|")
+					.append("工单状态：").append(won.getOrderStatus()).append("|")
+					.append("工单处理人：").append(operName);
 
 			List<com.yumu.hexie.integration.notify.Operator> operList = won.getOperatorList();
 			if(operList != null && !operList.isEmpty()) {
@@ -881,7 +881,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					request.setSummary(sb.toString());
 					request.setAppid(operator.getAppid());
 					request.setOpenid(operator.getOpenid());
-					request.setNoticeType(ModelConstant.NOTICE_TYPE2_NOTIFICATIONS);
+					request.setNoticeType(ModelConstant.NOTICE_TYPE2_ORDER);
 					SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
 					request.setPublishDate(df1.format(new Date()));
 					request.setOutsideKey(Long.parseLong(won.getOrderId()));
