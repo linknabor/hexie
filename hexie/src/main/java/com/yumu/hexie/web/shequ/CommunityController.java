@@ -3,6 +3,7 @@ package com.yumu.hexie.web.shequ;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,9 +13,14 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.common.util.AppUtil;
+import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
+import com.yumu.hexie.service.msgtemplate.WechatMsgService;
+import com.yumu.hexie.service.shequ.NoticeService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +86,10 @@ public class CommunityController extends BaseController{
 
 	@Autowired
 	private TemplateMsgService templateMsgService;
-
+	@Autowired
+	private NoticeService noticeService;
+	@Autowired
+	private WechatMsgService wechatMsgService;
 	/*****************[BEGIN]帖子********************/
 	
 	/**
@@ -216,6 +225,7 @@ public class CommunityController extends BaseController{
 			opinionRequest.setCellAddr(thread.getUserAddress());
 			opinionRequest.setSectId(thread.getUserSectId());
 			opinionRequest.setThreadContent(thread.getThreadContent());
+			opinionRequest.setUserOpenid(user.getOpenid());
 			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(thread.getCreateDate(), thread.getCreateTime()));
 			Boolean flag = communityService.sendNotification(user, opinionRequest);
 			log.debug("flag : " + flag);
@@ -398,8 +408,6 @@ public class CommunityController extends BaseController{
 
 		ThreadComment retComment = communityService.addComment(user, comment);	//添加评论
 
-		//moveImgsFromTencent2Qiniu(retComment);//上传图片到qiniu
-
 		String tcAttachmentUrl = retComment.getAttachmentUrl();
 		if (!StringUtil.isEmpty(tcAttachmentUrl)) {
 			String[]urls = tcAttachmentUrl.split(",");
@@ -419,6 +427,7 @@ public class CommunityController extends BaseController{
 			opinionRequest.setCellAddr(thread.getUserAddress());
 			opinionRequest.setSectId(thread.getUserSectId());
 			opinionRequest.setThreadContent(thread.getThreadContent());
+			opinionRequest.setUserOpenid(user.getOpenid());
 			opinionRequest.setOpinionDate(DateUtil.formatDateTimeFromDB(retComment.getCommentDate(), retComment.getCommentTime()));
 			Boolean flag = communityService.sendNotification(user, opinionRequest);
 			log.debug("flag : " + flag);
@@ -458,9 +467,32 @@ public class CommunityController extends BaseController{
 			retComment.setPreviewLink(previewLinkList);
 		}
 
-		//通知业主
 		try {
 			User user = userService.getById(thread.getUserId());
+
+			//添加到消息中心
+			CommunityRequest request = new CommunityRequest();
+
+			StringBuilder sb = new StringBuilder();
+			sb.append("意见标题:").append(thread.getThreadContent()).append("|");
+			sb.append("回复内容:").append(retComment.getCommentContent()).append("|");
+			sb.append("地址:").append(thread.getUserAddress());
+			request.setTitle(sb.toString());
+			request.setContent(sb.toString());
+			request.setSummary(sb.toString());
+			request.setAppid(user.getAppId());
+			request.setOpenid(user.getOpenid());
+			request.setNoticeType(ModelConstant.NOTICE_TYPE2_THREAD);
+			String url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE);
+			url = AppUtil.addAppOnUrl(url, user.getAppId());
+			url = url.replaceAll("THREAD_ID", thread.getThreadId()+"");
+			request.setUrl(url);
+
+			SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
+			request.setPublishDate(df1.format(new Date()));
+			noticeService.addOutSidNotice(request);
+
+			//通知业主
 			OpinionRequestTemp opinionRequest = new OpinionRequestTemp();
 			opinionRequest.setContent(retComment.getCommentContent());
 			opinionRequest.setThreadId(thread.getThreadId()+"");
