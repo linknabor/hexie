@@ -41,6 +41,7 @@ public class NoticeVO implements Serializable {
 	
 	private String noticeDate;	//转化过的时间
 	private String url;	//跳转链接
+	private List<String> showMsg; //前端显示的内容
 	
 	@JsonIgnore
 	private QiniuUtil qiniuUtil;
@@ -100,6 +101,21 @@ public class NoticeVO implements Serializable {
 			break;
 		case ModelConstant.NOTICE_TYPE2_MOMENTS:
 			this.creator = "社区圈";
+			break;
+		case ModelConstant.NOTICE_TYPE2_NOTIFICATIONS:
+			this.creator = "小区通知";
+			break;
+		case ModelConstant.NOTICE_TYPE2_BIll:
+			this.creator = "账单推送";
+			break;
+		case ModelConstant.NOTICE_TYPE2_ARREARS_BILL:
+			this.creator = "欠费提醒";
+			break;
+		case ModelConstant.NOTICE_TYPE2_THREAD:
+			this.creator = "意见回复提醒";
+			break;
+		case ModelConstant.NOTICE_TYPE2_ORDER:
+			this.creator = "工单进度提醒";
 			break;
 		default:
 			this.creator = "系统消息";
@@ -243,6 +259,37 @@ public class NoticeVO implements Serializable {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
-	
+
+	public List<String> getShowMsg() {
+		return showMsg;
+	}
+
+	public void setShowMsg(List<String> showMsg) {
+		this.showMsg = showMsg;
+	}
+
+	@Override
+	public String toString() {
+		return "NoticeVO{" +
+				"id=" + id +
+				", createDate=" + createDate +
+				", noticeType=" + noticeType +
+				", title='" + title + '\'' +
+				", summary='" + summary + '\'' +
+				", content='" + content + '\'' +
+				", publishDate='" + publishDate + '\'' +
+				", status=" + status +
+				", top=" + top +
+				", image='" + image + '\'' +
+				", appid='" + appid + '\'' +
+				", creator='" + creator + '\'' +
+				", imgList=" + imgList +
+				", previewImgList=" + previewImgList +
+				", thumbnailImgList=" + thumbnailImgList +
+				", noticeDate='" + noticeDate + '\'' +
+				", url='" + url + '\'' +
+				", showMsg=" + showMsg +
+				", qiniuUtil=" + qiniuUtil +
+				'}';
+	}
 }

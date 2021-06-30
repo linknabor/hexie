@@ -1,10 +1,15 @@
 package com.yumu.hexie.web.shequ;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.model.community.Notice;
@@ -18,6 +23,7 @@ import com.yumu.hexie.web.shequ.vo.NoticeVO;
 @RequestMapping("/notice")
 public class NoticeController extends BaseController {
 
+	private static final Logger log = LoggerFactory.getLogger(NoticeController.class);
 	@Autowired
 	private NoticeService noticeService;
 	
@@ -31,7 +37,26 @@ public class NoticeController extends BaseController {
 		List<Notice> noticeList = noticeService.getNotice(user, page);
 		List<NoticeVO> noticeVoList = new ArrayList<>(noticeList.size());
 		noticeList.forEach(notice->noticeVoList.add(new NoticeVO(notice, qiniuUtil)));
+
+		for(NoticeVO vo : noticeVoList) {
+			List<String> list = new ArrayList<>();
+			String[] msgs = vo.getTitle().split("\\|");
+			Collections.addAll(list, msgs);
+			vo.setShowMsg(list);
+		}
 		return BaseResult.successResult(noticeVoList);
 	}
 
+	@RequestMapping(value = "/addOutSidNotice", method = RequestMethod.POST)
+	public BaseResult<String> addOutSidNotice(@RequestBody CommunityRequest request) {
+		log.error("CommunityRequest :" + request.toString());
+		String id = noticeService.addOutSidNotice(request);
+		return BaseResult.successResult(id);
+	}
+
+	@RequestMapping(value = "/delOutSidNotice/{noticeId}", method = RequestMethod.GET)
+	public BaseResult<String> delOutSidNotice(@PathVariable String noticeId) {
+		noticeService.delOutSidNotice(Long.parseLong(noticeId));
+		return BaseResult.successResult("ok");
+	}
 }
