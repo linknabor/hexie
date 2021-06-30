@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
@@ -44,7 +45,14 @@ public class NoticeServiceImpl implements NoticeService {
 		}
 		Sort sort = Sort.by(Direction.DESC, "top", "createDate");
 		Pageable pageable = PageRequest.of(page, PAGE_SIZE, sort);
-		return noticeRepository.getNoticeList(ModelConstant.MESSAGE_STATUS_VALID, user.getAppId(), sectId, user.getOpenid(), pageable);
+
+		List<Integer> list = new ArrayList<>();
+		list.add(ModelConstant.NOTICE_TYPE2_NOTIFICATIONS);
+		list.add(ModelConstant.NOTICE_TYPE2_BIll);
+		list.add(ModelConstant.NOTICE_TYPE2_ARREARS_BILL);
+		list.add(ModelConstant.NOTICE_TYPE2_THREAD);
+		list.add(ModelConstant.NOTICE_TYPE2_ORDER);
+		return noticeRepository.getNoticeList(ModelConstant.MESSAGE_STATUS_VALID, user.getAppId(), sectId, user.getOpenid(), list, pageable);
 	}
 
 	@Override
