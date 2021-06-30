@@ -41,6 +41,7 @@ public class NoticeVO implements Serializable {
 	
 	private String noticeDate;	//转化过的时间
 	private String url;	//跳转链接
+	private List<String> showMsg; //前端显示的内容
 	
 	@JsonIgnore
 	private QiniuUtil qiniuUtil;
@@ -258,6 +259,12 @@ public class NoticeVO implements Serializable {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
-	
+
+	public List<String> getShowMsg() {
+		return showMsg;
+	}
+
+	public void setShowMsg(List<String> showMsg) {
+		this.showMsg = showMsg;
+	}
 }

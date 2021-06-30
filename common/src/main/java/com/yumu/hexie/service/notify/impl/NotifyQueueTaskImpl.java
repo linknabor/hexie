@@ -865,10 +865,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
 		if(!StringUtils.isEmpty(title)) {
 			StringBuilder sb = new StringBuilder();
-			sb.append(title).append("\n")
-					.append("工单编号:").append(won.getOrderId()).append("\n")
-					.append("工单内容:").append(content).append("\n")
-					.append("工单状态:").append(won.getOrderStatus()).append("\n")
+			sb.append(title).append("|")
+					.append("工单编号:").append(won.getOrderId()).append("|")
+					.append("工单内容:").append(content).append("|")
+					.append("工单状态:").append(won.getOrderStatus()).append("|")
 					.append("工单处理人:").append(operName);
 
 			List<com.yumu.hexie.integration.notify.Operator> operList = won.getOperatorList();

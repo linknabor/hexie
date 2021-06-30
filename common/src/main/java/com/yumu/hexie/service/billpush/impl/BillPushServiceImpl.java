@@ -54,8 +54,8 @@ public class BillPushServiceImpl implements BillPushService {
         CommunityRequest request = new CommunityRequest();
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("房号:").append(billPushDetail.getCellAddr()).append("\n");
-            sb.append("账期:").append(billPushDetail.getPeriod()).append("\n");
+            sb.append("房号:").append(billPushDetail.getCellAddr()).append("|");
+            sb.append("账期:").append(billPushDetail.getPeriod()).append("|");
             sb.append("代缴金额:").append(billPushDetail.getFeePrice());
             request.setTitle(sb.toString());
             request.setContent(sb.toString());

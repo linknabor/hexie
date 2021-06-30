@@ -1,6 +1,7 @@
 package com.yumu.hexie.web.shequ;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
@@ -36,6 +37,13 @@ public class NoticeController extends BaseController {
 		List<Notice> noticeList = noticeService.getNotice(user, page);
 		List<NoticeVO> noticeVoList = new ArrayList<>(noticeList.size());
 		noticeList.forEach(notice->noticeVoList.add(new NoticeVO(notice, qiniuUtil)));
+
+		for(NoticeVO vo : noticeVoList) {
+			List<String> list = new ArrayList<>();
+			String[] msgs = vo.getTitle().split("|");
+			Collections.addAll(list, msgs);
+			vo.setShowMsg(list);
+		}
 		return BaseResult.successResult(noticeVoList);
 	}
 
