@@ -882,6 +882,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					request.setAppid(operator.getAppid());
 					request.setOpenid(operator.getOpenid());
 					request.setNoticeType(ModelConstant.NOTICE_TYPE2_ORDER);
+
 					SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
 					request.setPublishDate(df1.format(new Date()));
 					request.setOutsideKey(Long.parseLong(won.getOrderId()));
