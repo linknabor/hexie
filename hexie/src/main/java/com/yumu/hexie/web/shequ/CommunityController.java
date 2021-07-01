@@ -476,8 +476,7 @@ public class CommunityController extends BaseController{
 			StringBuilder sb = new StringBuilder();
 			sb.append("意见标题：").append(thread.getThreadContent()).append("|");
 			sb.append("回复内容：").append(retComment.getCommentContent()).append("|");
-			sb.append("地址：").append(thread.getUserAddress());
-
+			sb.append("回复人：").append(comment.getCommentUserName());
 			request.setTitle(sb.toString());
 			request.setContent(sb.toString());
 			request.setSummary(sb.toString());
