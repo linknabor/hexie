@@ -6,6 +6,7 @@ import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
+import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 
 public interface NotifyService {
@@ -29,6 +30,8 @@ public interface NotifyService {
 	void sendPayNotification4BinderAsync(AccountNotification accountNotification);
 
 	void notifyWorkOrderMsgAsync(WorkOrderNotification workOrderNotification);
+
+	void notifyConversionAsync(ConversionNotification notification);
 
 
 }

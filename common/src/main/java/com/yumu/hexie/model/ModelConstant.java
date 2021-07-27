@@ -356,6 +356,7 @@ public class ModelConstant {
 	public static final String KEY_TYPE_WUYEPAY_TABS = "cfg:page:wuyePayTabs";	//物业缴费选项卡
 	public static final String KEY_TYPE_MENU_APP = "cfg:page:menu:app";	//公众号菜单
 	public static final String KEY_TYPE_MENU_CSP = "cfg:page:menu:csp";	//公众号菜单
+	public static final String KEY_TYPE_MENU_SECT = "cfg:page:menu:sect";	//公众号菜单
 	public static final String KEY_TYPE_MENU_DEFAULT = "cfg:page:menu:default";	//公众号菜单
 
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
@@ -420,6 +421,7 @@ public class ModelConstant {
 	public static final String KEY_NOITFY_PAY_DUPLICATION_CHECK = "lock:payNotification:";
 	public static final String KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK = "lock:assginCsOrder:";
 	public static final String KEY_NOTIFY_WORK_ORDER_DUPLICATION_CHECK = "lock:workOrder:";
+	public static final String KEY_NOTIFY_CONVERSION_DUPLICATION_CHECK = "lock:conversion:";
 	public static final String KEY_CS_SERVED_SECT = "cfg:customservice:sect:";
 	
 	public static final String KEY_MSG_TEMPLATE = "cfg:msgtemplate:template";
@@ -468,4 +470,5 @@ public class ModelConstant {
 	public static final int WECHAT_USER_UNSUBSCRIBED = 0;
 
 	public static final String KEY_WORKORER_MSG_QUEUE = "queue:workorder:msg";
+	public static final String KEY_CONVERSION_MSG_QUEUE = "queue:conversion:msg";
 }		

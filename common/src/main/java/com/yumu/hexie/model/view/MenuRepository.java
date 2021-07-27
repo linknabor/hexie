@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-
+	List<Menu> findBySectId(String sectId, Sort sort);
+	
 	List<Menu> findByCspId(String cspId, Sort sort);
 	
 	List<Menu> findByAppid(String appid, Sort sort);

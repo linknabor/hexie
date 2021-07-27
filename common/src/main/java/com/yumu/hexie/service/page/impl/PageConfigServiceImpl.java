@@ -171,6 +171,18 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_SECT, key = "#sectId", unless = "#result == null")
+	public List<Menu> getMenuBySectId(String sectId) {
+		
+		Sort sort = new Sort(Direction.ASC, "sort");
+		return menuRepository.findBySectId(sectId, sort);
+	}
+	
+	/**
+	 * 动态获取公众号菜单
+	 * @param appId
+	 */
+	@Override
 	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_CSP, key = "#cspId", unless = "#result == null")
 	public List<Menu> getMenuByCspId(String cspId) {
 		

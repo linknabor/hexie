@@ -44,6 +44,7 @@ public class Thread implements Serializable{
 	private String userAddress;		//用户地址
 	private double userSectLatitude;	//用户所在小区纬度
 	private double userSectLongtitude;	//用户所在小区精度
+	private String userOpenid;	//用户openid
 	private String appid;	//所在公众号平台
 	private String attachmentUrl;	//一对多，逗号分割
 	private String uploadPicId;	//上传图片路径，一对多，逗号分隔
@@ -55,6 +56,8 @@ public class Thread implements Serializable{
 	private long lastCommentTime;	//最后评论时间
 	private String hasUnreadComment;	//是否有未读评论
 	private String remark;	//备注
+	
+	private Boolean rectified = Boolean.FALSE;	//是否发起整改
 	
 	@Transient
 	private List<ThreadComment> comments;
@@ -318,6 +321,18 @@ public class Thread implements Serializable{
 	}
 	public void setUserCspId(String userCspId) {
 		this.userCspId = userCspId;
+	}
+	public Boolean getRectified() {
+		return rectified;
+	}
+	public void setRectified(Boolean rectified) {
+		this.rectified = rectified;
+	}
+	public String getUserOpenid() {
+		return userOpenid;
+	}
+	public void setUserOpenid(String userOpenid) {
+		this.userOpenid = userOpenid;
 	}
 	
 	
