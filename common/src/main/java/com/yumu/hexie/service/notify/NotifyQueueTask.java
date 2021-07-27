@@ -24,4 +24,6 @@ public interface NotifyQueueTask {
 
 	void sendWorkOrderMsgNotificationAsyc();
 
+	void handleConversionAsyc();
+
 }

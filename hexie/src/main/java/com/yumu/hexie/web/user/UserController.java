@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -78,6 +79,8 @@ public class UserController extends BaseController{
     private SystemConfigService systemConfigService;
     @Autowired
     private WechatMsgService wechatMsgService;
+    @Autowired
+	private StringRedisTemplate stringRedisTemplate;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -141,21 +144,32 @@ public class UserController extends BaseController{
 			    userInfo.setWuyeTabsList(tabsList);
 			    
 			    List<Menu> menuList = new ArrayList<>();
-			    if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
-			    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
-			    	if (menuList.isEmpty()) {
-			    		menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//表示绑定了房屋的默认菜单
+			    /*
+			     * 取菜单顺序：
+			     * 1.绑定访问的用户，先取小区级别，没有取公司级别，公司级别没有的，取app级别的，再没有的，取默认菜单
+			     * 2.未绑定房屋的用户，取默认菜单
+			     */
+			    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {
+			    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
+			    }
+			    if (menuList.isEmpty()) {
+			    	if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
+				    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
 					}
-				}else {
+				}
+			    if (menuList.isEmpty()) {
 					menuList = pageConfigService.getMenuByAppid(user.getAppId());
+				}
+			    if (menuList.isEmpty()) {
+		    		menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//表示绑定了房屋的默认菜单
 				}
 			    if (menuList.isEmpty()) {
 			    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单
 				}
-			    
 			    userInfo.setMenuList(menuList);
-			    
 			    endTime = System.currentTimeMillis();
+			    /*菜单结束*/
+			    
 			    log.info("user3，耗时：" + ((endTime-beginTime)));
 			    
 			    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());	//TODO 缓存，主要是积分的变动频率。更新积分时需要刷新缓存
@@ -306,6 +320,13 @@ public class UserController extends BaseController{
 	@ResponseBody
     public BaseResult<String> getYzm(HttpServletRequest request, @RequestBody MobileYzm yzm, @ModelAttribute(Constants.USER)User user) throws Exception {
 		String requestIp = RequestUtil.getRealIp(request);
+		
+		String str = stringRedisTemplate.opsForValue().get("sms:blacklist");
+		if (!StringUtils.isEmpty(str)) {
+			if (str.indexOf(requestIp)>-1) {
+				return new BaseResult<String>().failMsg("发送验证码失败");
+			}
+		}
 		log.info("getyzm request ip : " + requestIp);
 		log.info("getyzm request mobile: " + requestIp);
 		log.info("getyzm request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));

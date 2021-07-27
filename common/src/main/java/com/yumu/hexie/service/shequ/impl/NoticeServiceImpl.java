@@ -53,6 +53,7 @@ public class NoticeServiceImpl implements NoticeService {
 		list.add(ModelConstant.NOTICE_TYPE2_THREAD);
 		list.add(ModelConstant.NOTICE_TYPE2_ORDER);
 		return noticeRepository.getNoticeList(ModelConstant.MESSAGE_STATUS_VALID, user.getAppId(), sectId, user.getOpenid(), list, pageable);
+
 	}
 
 	@Override

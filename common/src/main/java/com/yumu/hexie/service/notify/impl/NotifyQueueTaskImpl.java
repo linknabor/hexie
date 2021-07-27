@@ -1,7 +1,12 @@
 package com.yumu.hexie.service.notify.impl;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.yumu.hexie.common.util.AppUtil;
@@ -20,15 +25,19 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
+import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
+import com.yumu.hexie.integration.wechat.service.MsgCfg;
+import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -39,8 +48,11 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
+import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
+import com.yumu.hexie.service.shequ.CommunityService;
+import com.yumu.hexie.service.shequ.NoticeService;
 import com.yumu.hexie.service.user.CouponService;
 
 @Service
@@ -70,6 +82,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private WechatMsgService wechatMsgService;
 	@Autowired
 	private NoticeService noticeService;
+	@Autowired
+	private CommunityService communityService;
+	
 	/**
 	 * 异步发送到账模板消息
 	 */
@@ -816,9 +831,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				WorkOrderNotification won = objectMapper.readValue(orderStr, new TypeReference<WorkOrderNotification>(){});
 				logger.info("start to consume workorder queue : " + won);
 				
-				//保存需要发送的消息
-//				userNotificationService.saveWorkOrderNotification(won);	//TODO 是否需要保存？
-
 				//添加消息到消息中心
 				saveNotice(won);
 
@@ -882,6 +894,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					request.setAppid(operator.getAppid());
 					request.setOpenid(operator.getOpenid());
 					request.setNoticeType(ModelConstant.NOTICE_TYPE2_ORDER);
+
 					SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
 					request.setPublishDate(df1.format(new Date()));
 					request.setOutsideKey(Long.parseLong(won.getOrderId()));
@@ -890,6 +903,44 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					request.setUrl(url);
 					noticeService.addOutSidNotice(request);
 				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * 给移动端的物业员工推送工单消息
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void handleConversionAsyc() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String orderStr = redisTemplate.opsForList().leftPop(ModelConstant.KEY_CONVERSION_MSG_QUEUE, 10, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(orderStr)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				ConversionNotification cn = objectMapper.readValue(orderStr, new TypeReference<ConversionNotification>(){});
+				logger.info("start to consume conversion queue : " + cn);
+				
+				String threadId = cn.getSourceId();
+				if (StringUtils.isEmpty(threadId)) {
+					logger.warn("conversion source id is empty, will skip . orderId : " + cn.getOrderId());
+				}
+				
+				com.yumu.hexie.model.community.Thread thread = communityService.getThreadByTreadId(Long.valueOf(threadId));
+				thread.setRectified(Boolean.TRUE);
+				communityService.updateThread(thread);
+				
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}

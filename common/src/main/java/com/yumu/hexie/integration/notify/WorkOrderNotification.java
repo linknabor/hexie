@@ -31,7 +31,7 @@ public class WorkOrderNotification implements Serializable {
 	private String agentId;
 	
 	private String timestamp;
-	
+
 	public String getOrderId() {
 		return orderId;
 	}
