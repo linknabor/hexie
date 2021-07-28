@@ -930,8 +930,13 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.warn("conversion source id is empty, will skip . orderId : " + cn.getOrderId());
 				}
 				
+				String reversed = cn.getReversed();
+				
 				com.yumu.hexie.model.community.Thread thread = communityService.getThreadByTreadId(Long.valueOf(threadId));
 				thread.setRectified(Boolean.TRUE);
+				if ("1".equals(reversed)) {
+					thread.setRectified(Boolean.FALSE);
+				}
 				communityService.updateThread(thread);
 				
 			} catch (Exception e) {
