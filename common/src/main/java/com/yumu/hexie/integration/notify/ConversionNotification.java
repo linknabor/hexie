@@ -19,6 +19,8 @@ public class ConversionNotification implements Serializable {
 	@JsonProperty("source_type")
 	private String sourceType;
 	private String timestamp;
+	@JsonProperty("is_reverse")
+	private String reversed;
 	
 	public String getOrderId() {
 		return orderId;
@@ -44,10 +46,16 @@ public class ConversionNotification implements Serializable {
 	public void setTimestamp(String timestamp) {
 		this.timestamp = timestamp;
 	}
+	public String getReversed() {
+		return reversed;
+	}
+	public void setReversed(String reversed) {
+		this.reversed = reversed;
+	}
 	@Override
 	public String toString() {
 		return "ConversionNotification [orderId=" + orderId + ", sourceId=" + sourceId + ", sourceType=" + sourceType
-				+ ", timestamp=" + timestamp + "]";
+				+ ", timestamp=" + timestamp + ", reversed=" + reversed + "]";
 	}
 	
 	
