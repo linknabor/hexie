@@ -37,5 +37,7 @@ public interface PageConfigService {
 
 	List<Menu> getMenuByDefaultTypeLessThan(int defaultType);
 
+	List<Menu> getMenuBySectId(String sectId);
+
 
 }

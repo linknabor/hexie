@@ -1,7 +1,6 @@
 package com.yumu.hexie.service.shequ;
 
 import java.util.List;
-import java.util.Map;
 
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.community.Notice;
