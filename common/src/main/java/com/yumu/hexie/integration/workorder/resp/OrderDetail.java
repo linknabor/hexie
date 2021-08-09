@@ -44,6 +44,8 @@ public class OrderDetail implements Serializable {
 	private String content;
 	@JsonProperty("image_urls")
 	private String imageUrls;
+	@JsonProperty("finished_img_urls")
+	private String finishImageUrls;
 	
 	@JsonProperty("sect_name")
 	private String sectName;
@@ -101,6 +103,10 @@ public class OrderDetail implements Serializable {
 	private List<String> previewImgList;	//预览图
 	private List<String> thumbnailImgList;	//缩略图
 	
+	private List<String> finishImgList;			//完工实际图
+	private List<String> finishPreviewImgList;	//完工预览图
+	private List<String> finishThumbnailImgList;	//完工缩略图
+	
 	public void initImages(QiniuUtil qiniuUtil) {
 		this.qiniuUtil = qiniuUtil;
 		if (!StringUtils.isEmpty(imageUrls)) {
@@ -115,6 +121,20 @@ public class OrderDetail implements Serializable {
 			setThumbnailImgList(thumbnailList);
 			setPreviewImgList(previewList);
 		}
+		
+		if (!StringUtils.isEmpty(finishImageUrls)) {
+			String[]imgArr = finishImageUrls.split(",");
+			finishImgList = Arrays.asList(imgArr);
+			List<String> thumbnailList = new ArrayList<>(finishImgList.size());
+			List<String> previewList = new ArrayList<>(finishImgList.size());
+			finishImgList.forEach(img->{
+				thumbnailList.add(qiniuUtil.getThumbnailLink(img, "3", "0"));
+				previewList.add(qiniuUtil.getPreviewLink(img, "1", "0"));
+			});
+			setFinishThumbnailImgList(thumbnailList);
+			setFinishPreviewImgList(previewList);
+		}
+		
 	}
 	
 	public String getOrderId() {
@@ -360,21 +380,59 @@ public class OrderDetail implements Serializable {
 		
 		return DateUtil.formatFromDB(finishDate, finishTime);
 	}
-	
+
+	public String getFinishImageUrls() {
+		return finishImageUrls;
+	}
+
+	public void setFinishImageUrls(String finishImageUrls) {
+		this.finishImageUrls = finishImageUrls;
+	}
+
+	public List<String> getFinishImgList() {
+		return finishImgList;
+	}
+
+	public void setFinishImgList(List<String> finishImgList) {
+		this.finishImgList = finishImgList;
+	}
+
+	public List<String> getFinishPreviewImgList() {
+		return finishPreviewImgList;
+	}
+
+	public void setFinishPreviewImgList(List<String> finishPreviewImgList) {
+		this.finishPreviewImgList = finishPreviewImgList;
+	}
+
+	public List<String> getFinishThumbnailImgList() {
+		return finishThumbnailImgList;
+	}
+
+	public void setFinishThumbnailImgList(List<String> finishThumbnailImgList) {
+		this.finishThumbnailImgList = finishThumbnailImgList;
+	}
+
 	@Override
 	public String toString() {
-		return "OrderDetailVO [orderId=" + orderId + ", workOrderStatus=" + workOrderStatus + ", workOrderStatusCn="
+		return "OrderDetail [orderId=" + orderId + ", workOrderStatus=" + workOrderStatus + ", workOrderStatusCn="
 				+ workOrderStatusCn + ", distType=" + distType + ", distTypeCn=" + distTypeCn + ", workOrderSource="
 				+ workOrderSource + ", workOrderSourceCn=" + workOrderSourceCn + ", workOrderType=" + workOrderType
 				+ ", workOrderTypeCn=" + workOrderTypeCn + ", serveAddress=" + serveAddress + ", content=" + content
-				+ ", imageUrls=" + imageUrls + ", sectName=" + sectName + ", cspName=" + cspName + ", corpid=" + corpid
-				+ ", custName=" + custName + ", custConcact=" + custConcact + ", custOpenid=" + custOpenid
-				+ ", assigner=" + assigner + ", assignerContact=" + assignerContact + ", assignDate=" + assignDate
-				+ ", assignTime=" + assignTime + ", acceptor=" + acceptor + ", acceptorContact=" + acceptorContact
-				+ ", acceptDate=" + acceptDate + ", acceptTime=" + acceptTime + ", finisher=" + finisher
-				+ ", finishDate=" + finishDate + ", finishTime=" + finishTime + ", payOrderId=" + payOrderId
-				+ ", orderAmt=" + orderAmt + ", payMethod=" + payMethod + ", payMethodCn=" + payMethodCn + "]";
+				+ ", imageUrls=" + imageUrls + ", finishImageUrls=" + finishImageUrls + ", sectName=" + sectName
+				+ ", cspName=" + cspName + ", corpid=" + corpid + ", custName=" + custName + ", custConcact="
+				+ custConcact + ", custOpenid=" + custOpenid + ", createDate=" + createDate + ", createTime="
+				+ createTime + ", assigner=" + assigner + ", assignerContact=" + assignerContact + ", assignDate="
+				+ assignDate + ", assignTime=" + assignTime + ", acceptor=" + acceptor + ", acceptorContact="
+				+ acceptorContact + ", acceptDate=" + acceptDate + ", acceptTime=" + acceptTime + ", finisher="
+				+ finisher + ", finishDate=" + finishDate + ", finishTime=" + finishTime + ", payOrderId=" + payOrderId
+				+ ", orderAmt=" + orderAmt + ", payMethod=" + payMethod + ", payMethodCn=" + payMethodCn
+				+ ", qiniuUtil=" + qiniuUtil + ", imgList=" + imgList + ", previewImgList=" + previewImgList
+				+ ", thumbnailImgList=" + thumbnailImgList + ", finishImgList=" + finishImgList
+				+ ", finishPreviewImgList=" + finishPreviewImgList + ", finishThumbnailImgList="
+				+ finishThumbnailImgList + "]";
 	}
+	
 	
 	
 	
