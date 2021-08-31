@@ -61,7 +61,7 @@ public class SmsServiceImpl implements SmsService {
       
     	String code = RandomStringUtils.randomNumeric(6);
     	String message = MessageFormat.format(VERICODE_MESSAGE, code);
-//    	checkIpFrequency(requestIp);	TODO ip暂时不限制，可能一个公司200人都一个IP
+    	checkIpFrequency(requestIp);
     	checkMsgFrequency(mobilePhone);
     	checkMsgTotalLimit(mobilePhone);
     	return sendMessage(user, mobilePhone, message, code, msgType);
@@ -223,7 +223,7 @@ public class SmsServiceImpl implements SmsService {
 		if (lastSent != null) {
 			throw new BizValidateException("发送过于频繁，请稍后再试");
 		}else {
-			stringRedisTemplate.opsForValue().set(key, "1", 1, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+			stringRedisTemplate.opsForValue().set(key, "1", 5, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
 		}
 		
 	}
@@ -257,12 +257,12 @@ public class SmsServiceImpl implements SmsService {
 		Object totalSent = stringRedisTemplate.opsForValue().get(key);
 		if (totalSent != null) {
 			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
-			if (sent > 5) {
+			if (sent > 3) {
 				throw new BizValidateException("发送过于频繁，请稍后再试");
 			}
 		}else {
 			stringRedisTemplate.opsForValue().increment(key, 1);
-			stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);	//对于同一IP，设置30分钟内的访问次数限制
+			stringRedisTemplate.expire(key, 24, TimeUnit.HOURS);	//对于同一IP，设置30分钟内的访问次数限制
 		}
 		
 	}

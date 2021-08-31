@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.notify.CommonNotificationResponse;
+import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
@@ -93,5 +94,20 @@ public class NotifyController extends BaseController {
 		notifyService.notifyWorkOrderMsgAsync(workOrderNotification);
 		return "SUCCESS";
 	}
+	
+	/**
+	 * 工单消息通知
+	 * @param workOrderNotification
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/conversion/notication", method = RequestMethod.POST )
+	public String notifyRefund(@RequestBody ConversionNotification conversionNotification) throws Exception {
+		
+		log.info("conversionNotification :" + conversionNotification);
+		notifyService.notifyConversionAsync(conversionNotification);
+		return "SUCCESS";
+	}
+	
 	
 }

@@ -19,6 +19,7 @@ import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
+import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCardRepository;
@@ -426,6 +427,51 @@ public class NotifyServiceImpl implements NotifyService {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String value = objectMapper.writeValueAsString(workOrderNotification);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_WORKORER_MSG_QUEUE, value);
+
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * 其他业务转工单
+	 */
+	@Override
+	public void notifyConversionAsync(ConversionNotification notification) {
+		
+		String orderId = notification.getOrderId();
+		String timestamp = notification.getTimestamp();
+		String checkKey = orderId + "_" + timestamp;
+		String key = ModelConstant.KEY_NOTIFY_CONVERSION_DUPLICATION_CHECK + checkKey;
+		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		if (0 == result) {
+			log.info("orderId : " + orderId + ", already notified, will skip ! ");
+			return;
+		}
+		
+		if (StringUtils.isEmpty(notification.getOrderId())) {
+			log.info("notifyWorkOrderConversionAsync: orderid is empty, will return ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(notification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_CONVERSION_MSG_QUEUE, value);
 
 				isSuccess = true;
 			} catch (Exception e) {
