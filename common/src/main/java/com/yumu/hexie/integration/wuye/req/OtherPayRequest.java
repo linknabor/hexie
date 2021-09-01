@@ -33,6 +33,7 @@ public class OtherPayRequest extends WuyeRequest {
 	private String orderId;
 	@JsonProperty("order_detail")
 	private String orderDetail;
+	private String invoice_type;
 	
 	public OtherPayRequest(OtherPayDTO otherPayDTO) {
 		BeanUtils.copyProperties(otherPayDTO, this);
@@ -104,12 +105,36 @@ public class OtherPayRequest extends WuyeRequest {
 		this.payee_openid = payee_openid;
 	}
 
+	public String getOrderDetail() {
+		return orderDetail;
+	}
+
+	public void setOrderDetail(String orderDetail) {
+		this.orderDetail = orderDetail;
+	}
+
+	public String getInvoice_type() {
+		return invoice_type;
+	}
+
+	public void setInvoice_type(String invoice_type) {
+		this.invoice_type = invoice_type;
+	}
+
 	@Override
 	public String toString() {
-		return "OtherPayRequest [openid=" + openid + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
-				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + ", orderId=" + orderId
-				+ "]";
+		return "OtherPayRequest{" +
+				"openid='" + openid + '\'' +
+				", money='" + money + '\'' +
+				", sectId='" + sectId + '\'' +
+				", feeId='" + feeId + '\'' +
+				", remark='" + remark + '\'' +
+				", qrCodeId='" + qrCodeId + '\'' +
+				", mngCellId='" + mngCellId + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", orderId='" + orderId + '\'' +
+				", orderDetail='" + orderDetail + '\'' +
+				", invoice_type='" + invoice_type + '\'' +
+				'}';
 	}
-	
-	
 }
