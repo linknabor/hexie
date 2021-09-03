@@ -20,6 +20,8 @@ public interface ParkService {
 
     List<UserCarList.CarInfo> getCarList(User user, String carNo) throws Exception;
 
+    Boolean delCar(User user, String carNo) throws Exception;
+
     List<PayCarInfo> getParkPayList(User user, String carNo) throws Exception;
 
     Boolean addUserCar(User user, SaveCarInfo saveCarInfo) throws Exception;

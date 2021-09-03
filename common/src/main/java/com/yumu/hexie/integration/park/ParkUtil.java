@@ -37,6 +37,7 @@ public class ParkUtil {
     private static final String QUERY_PARK_MORE_URL = "park/getUserParkMoreSDO.do";
     private static final String QUERY_PARK_LIST_URL = "park/getParkListSDO.do";
     private static final String QUERY_USER_CAR_LIST_URL = "park/getCarListSDO.do";
+    private static final String DEL_USER_CAR_URL = "park/delUserCarSDO.do";
     private static final String QUERY_USER_PAY_CAR_LIST_URL = "park/getUserPayCarListSDO.do";
     private static final String ADD_USER_CAR_URL = "park/addUserCarSDO.do";
     private static final String QUERY_USER_PAYING_DETAIL_URL = "park/getPayingDetailSDO.do";
@@ -94,6 +95,25 @@ public class ParkUtil {
         map.put("carNo", carNo);
 
         TypeReference<CommonResponse<List<UserCarList.CarInfo>>> typeReference = new TypeReference<CommonResponse<List<UserCarList.CarInfo>>>(){};
+        return restUtil.exchangeOnUri(requestUrl, map, typeReference);
+    }
+
+    /**
+     * 查询用户车辆信息
+     * @param user
+     * @return
+     * @throws Exception
+     */
+    public CommonResponse<Boolean> delCar(User user, String carNo) throws Exception {
+        String requestUrl = requestUtil.getRequestUrl(user, null);
+        requestUrl += DEL_USER_CAR_URL;
+
+        Map<String, String> map = new HashMap<>();
+        map.put("user_id", String.valueOf(user.getId()));
+        map.put("appid", user.getAppId());
+        map.put("carNo", carNo);
+
+        TypeReference<CommonResponse<Boolean>> typeReference = new TypeReference<CommonResponse<Boolean>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
     }
 

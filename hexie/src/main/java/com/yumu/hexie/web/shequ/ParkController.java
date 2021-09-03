@@ -68,6 +68,19 @@ public class ParkController extends BaseController {
     }
 
     /**
+     * 根据车牌删除车辆
+     * @param user
+     * @param carNo
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/delCar/{carNo}", method = RequestMethod.POST)
+    public BaseResult<Boolean> delCar(@ModelAttribute(Constants.USER) User user, @PathVariable String carNo) throws Exception {
+        Boolean flag = parkService.delCar(user, carNo);
+        return BaseResult.successResult(flag);
+    }
+
+    /**
      * 获取缴费记录
      * @param user
      * @param carNo

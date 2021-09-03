@@ -52,6 +52,11 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
+    public Boolean delCar(User user, String carNo) throws Exception {
+        return parkUtil.delCar(user, carNo).getData();
+    }
+
+    @Override
     public List<PayCarInfo> getParkPayList(User user, String carNo) throws Exception {
         return parkUtil.getParkPayList(user, carNo).getData();
     }
