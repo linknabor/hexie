@@ -1,5 +1,10 @@
 package com.yumu.hexie.integration.park.req;
 
+import org.springframework.util.StringUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * 描述:
  *
@@ -42,6 +47,13 @@ public class PayUserCarInfo {
     }
 
     public void setCar_no(String car_no) {
+        if (!StringUtils.isEmpty(car_no)) {
+            try {
+                car_no = URLEncoder.encode(car_no,"GBK");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         this.car_no = car_no;
     }
 

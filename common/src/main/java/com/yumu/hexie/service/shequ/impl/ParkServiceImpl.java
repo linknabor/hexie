@@ -14,7 +14,10 @@ import com.yumu.hexie.service.shequ.ParkService;
 import com.yumu.hexie.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -43,21 +46,49 @@ public class ParkServiceImpl implements ParkService {
 
     @Override
     public List<ParkInfo> getParkList(User user, String parkName) throws Exception {
+        if (!StringUtils.isEmpty(parkName)) {
+            try {
+                parkName = URLEncoder.encode(parkName,"GBK");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         return parkUtil.getParkList(user, parkName).getData();
     }
 
     @Override
     public List<UserCarList.CarInfo> getCarList(User user, String carNo) throws Exception {
+        if (!StringUtils.isEmpty(carNo)) {
+            try {
+                carNo = URLEncoder.encode(carNo,"GBK");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         return parkUtil.getCarList(user, carNo).getData();
     }
 
     @Override
     public Boolean delCar(User user, String carNo) throws Exception {
+        if (!StringUtils.isEmpty(carNo)) {
+            try {
+                carNo = URLEncoder.encode(carNo,"GBK");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         return parkUtil.delCar(user, carNo).getData();
     }
 
     @Override
     public List<PayCarInfo> getParkPayList(User user, String carNo) throws Exception {
+        if (!StringUtils.isEmpty(carNo)) {
+            try {
+                carNo = URLEncoder.encode(carNo,"GBK");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         return parkUtil.getParkPayList(user, carNo).getData();
     }
 
@@ -68,6 +99,13 @@ public class ParkServiceImpl implements ParkService {
 
     @Override
     public PayingDetail getPayingDetail(User user, String carNo, String parkId) throws Exception {
+        if (!StringUtils.isEmpty(carNo)) {
+            try {
+                carNo = URLEncoder.encode(carNo,"GBK");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
         return parkUtil.getPayingDetail(user, carNo, parkId).getData();
     }
 
