@@ -2,6 +2,7 @@ package com.yumu.hexie.web.shequ;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
+import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.ParkInfo;
 import com.yumu.hexie.integration.park.resp.PayCarInfo;
 import com.yumu.hexie.integration.park.resp.PayingDetail;
@@ -82,13 +83,13 @@ public class ParkController extends BaseController {
     /**
      * 添加车牌号
      * @param user
-     * @param carNo
+     * @param saveCarInfo
      * @return
      * @throws Exception
      */
     @RequestMapping(value = "/addUserCar", method = RequestMethod.POST)
-    public BaseResult<Boolean> addUserCar(@ModelAttribute(Constants.USER) User user, @RequestBody String carNo) throws Exception {
-        Boolean flag = parkService.addUserCar(user, carNo);
+    public BaseResult<Boolean> addUserCar(@ModelAttribute(Constants.USER) User user, @RequestBody SaveCarInfo saveCarInfo) throws Exception {
+        Boolean flag = parkService.addUserCar(user, saveCarInfo);
         return BaseResult.successResult(flag);
     }
 

@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ.impl;
 
 import com.yumu.hexie.integration.park.ParkUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
+import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.ParkInfo;
 import com.yumu.hexie.integration.park.resp.PayCarInfo;
 import com.yumu.hexie.integration.park.resp.PayingDetail;
@@ -56,8 +57,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public Boolean addUserCar(User user, String carNo) throws Exception {
-        return parkUtil.addUserCar(user, carNo).getData();
+    public Boolean addUserCar(User user, SaveCarInfo saveCarInfo) throws Exception {
+        return parkUtil.addUserCar(user, saveCarInfo).getData();
     }
 
     @Override

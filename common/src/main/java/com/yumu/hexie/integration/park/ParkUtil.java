@@ -5,6 +5,7 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
+import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.ParkInfo;
 import com.yumu.hexie.integration.park.resp.PayCarInfo;
 import com.yumu.hexie.integration.park.resp.PayingDetail;
@@ -121,17 +122,15 @@ public class ParkUtil {
      * @return
      * @throws Exception
      */
-    public CommonResponse<Boolean> addUserCar(User user, String carNo) throws Exception {
+    public CommonResponse<Boolean> addUserCar(User user, SaveCarInfo saveCarInfo) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += ADD_USER_CAR_URL;
 
-        Map<String, String> map = new HashMap<>();
-        map.put("user_id", String.valueOf(user.getId()));
-        map.put("appid", String.valueOf(user.getAppId()));
-        map.put("carNo", carNo);
+        saveCarInfo.setUser_id(String.valueOf(user.getId()));
+        saveCarInfo.setAppid(user.getAppId());
 
         TypeReference<CommonResponse<Boolean>> typeReference = new TypeReference<CommonResponse<Boolean>>(){};
-        return restUtil.exchangeOnUri(requestUrl, map, typeReference);
+        return restUtil.exchangeOnUri(requestUrl, saveCarInfo, typeReference);
     }
 
     /**

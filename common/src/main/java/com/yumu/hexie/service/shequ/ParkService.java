@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.shequ;
 
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
+import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.ParkInfo;
 import com.yumu.hexie.integration.park.resp.PayCarInfo;
 import com.yumu.hexie.integration.park.resp.PayingDetail;
@@ -21,7 +22,7 @@ public interface ParkService {
 
     List<PayCarInfo> getParkPayList(User user, String carNo) throws Exception;
 
-    Boolean addUserCar(User user, String carNo) throws Exception;
+    Boolean addUserCar(User user, SaveCarInfo saveCarInfo) throws Exception;
 
     PayingDetail getPayingDetail(User user, String carNo, String parkId) throws Exception;
 
