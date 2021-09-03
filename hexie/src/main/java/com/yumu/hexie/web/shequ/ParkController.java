@@ -21,7 +21,8 @@ import java.util.List;
  * @author jackie
  * @create 2021-08-18 17:41
  */
-@RestController(value = "park")
+@RestController
+@RequestMapping("/park")
 public class ParkController extends BaseController {
 
     @Autowired
