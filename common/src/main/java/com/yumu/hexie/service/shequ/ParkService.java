@@ -19,7 +19,7 @@ public interface ParkService {
 
     Boolean delCar(User user, String carNo) throws Exception;
 
-    List<PayCarInfo> getParkPayList(User user, String carNo) throws Exception;
+    List<PayCarInfo> getParkPayList(User user, String carNo, String currPage) throws Exception;
 
     Boolean addUserCar(User user, SaveCarInfo saveCarInfo) throws Exception;
 

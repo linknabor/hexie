@@ -78,7 +78,7 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<PayCarInfo> getParkPayList(User user, String carNo) throws Exception {
+    public List<PayCarInfo> getParkPayList(User user, String carNo, String currPage) throws Exception {
         if (!StringUtils.isEmpty(carNo)) {
             try {
                 carNo = URLEncoder.encode(carNo,"GBK");
@@ -86,7 +86,7 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        return parkUtil.getParkPayList(user, carNo).getData();
+        return parkUtil.getParkPayList(user, carNo, currPage).getData();
     }
 
     @Override

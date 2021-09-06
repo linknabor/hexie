@@ -85,8 +85,8 @@ public class ParkController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(value = "/getParkPayList", method = RequestMethod.GET)
-    public BaseResult<List<PayCarInfo>> getParkPayList(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String carNo) throws Exception {
-        List<PayCarInfo> parkInfos = parkService.getParkPayList(user, carNo);
+    public BaseResult<List<PayCarInfo>> getParkPayList(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String carNo, @RequestParam(required = false) String currPage) throws Exception {
+        List<PayCarInfo> parkInfos = parkService.getParkPayList(user, carNo, currPage);
         return BaseResult.successResult(parkInfos);
     }
 

@@ -120,7 +120,7 @@ public class ParkUtil {
      * @return
      * @throws Exception
      */
-    public CommonResponse<List<PayCarInfo>> getParkPayList(User user, String carNo) throws Exception {
+    public CommonResponse<List<PayCarInfo>> getParkPayList(User user, String carNo, String currPage) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAY_CAR_LIST_URL;
 
@@ -128,6 +128,8 @@ public class ParkUtil {
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", user.getAppId());
         map.put("carNo", carNo);
+        map.put("curr_page", currPage);
+        map.put("total_count", "99999");
 
         TypeReference<CommonResponse<List<PayCarInfo>>> typeReference = new TypeReference<CommonResponse<List<PayCarInfo>>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
