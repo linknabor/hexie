@@ -6,10 +6,7 @@ import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
-import com.yumu.hexie.integration.park.resp.ParkInfo;
-import com.yumu.hexie.integration.park.resp.PayCarInfo;
-import com.yumu.hexie.integration.park.resp.PayingDetail;
-import com.yumu.hexie.integration.park.resp.UserCarList;
+import com.yumu.hexie.integration.park.resp.*;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +39,7 @@ public class ParkUtil {
     private static final String ADD_USER_CAR_URL = "park/addUserCarSDO.do";
     private static final String QUERY_USER_PAYING_DETAIL_URL = "park/getPayingDetailSDO.do";
     private static final String GET_USER_PRE_PAY_URL = "park/getUserPrePaySDO.do";
-
+    private static final String GET_PAY_DETAIL_URL = "park/getPayDetailByIdSDO.do";
     /**
      * 查询用户车辆、停车场和规则信息
      * @param user
@@ -189,5 +186,23 @@ public class ParkUtil {
 
         TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
         return restUtil.exchangeOnUri(requestUrl, payUserCarInfo, typeReference);
+    }
+
+    /**
+     * 根据交易ID查询交易详情
+     * @param user
+     * @return
+     * @throws Exception
+     */
+    public CommonResponse<PayDetail> getPayDetailById(User user, String orderId) throws Exception {
+        String requestUrl = requestUtil.getRequestUrl(user, null);
+        requestUrl += GET_PAY_DETAIL_URL;
+
+        Map<String, String> map = new HashMap<>();
+        map.put("appid", user.getAppId());
+        map.put("user_id", String.valueOf(user.getId()));
+        map.put("order_id", orderId);
+        TypeReference<CommonResponse<PayDetail>> typeReference = new TypeReference<CommonResponse<PayDetail>>(){};
+        return restUtil.exchangeOnUri(requestUrl, map, typeReference);
     }
 }

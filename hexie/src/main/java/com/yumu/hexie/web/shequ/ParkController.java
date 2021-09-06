@@ -3,10 +3,7 @@ package com.yumu.hexie.web.shequ;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
-import com.yumu.hexie.integration.park.resp.ParkInfo;
-import com.yumu.hexie.integration.park.resp.PayCarInfo;
-import com.yumu.hexie.integration.park.resp.PayingDetail;
-import com.yumu.hexie.integration.park.resp.UserCarList;
+import com.yumu.hexie.integration.park.resp.*;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.shequ.ParkService;
@@ -130,6 +127,19 @@ public class ParkController extends BaseController {
     public BaseResult<WechatPayInfo> getPaying(@ModelAttribute(Constants.USER) User user, @RequestBody PayUserCarInfo payUserCarInfo) throws Exception {
         WechatPayInfo wechatPayInfo = parkService.getPrePaying(user, payUserCarInfo);
         return BaseResult.successResult(wechatPayInfo);
+    }
+
+    /**
+     * 根据交易ID查询交易详情
+     * @param user
+     * @param orderId
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getPayDetailById", method = RequestMethod.GET)
+    public BaseResult<PayDetail> getPayDetailById(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
+        PayDetail payDetail = parkService.getPayDetailById(user, orderId);
+        return BaseResult.successResult(payDetail);
     }
 
 

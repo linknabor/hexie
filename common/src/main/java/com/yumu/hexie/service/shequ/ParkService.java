@@ -2,10 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
-import com.yumu.hexie.integration.park.resp.ParkInfo;
-import com.yumu.hexie.integration.park.resp.PayCarInfo;
-import com.yumu.hexie.integration.park.resp.PayingDetail;
-import com.yumu.hexie.integration.park.resp.UserCarList;
+import com.yumu.hexie.integration.park.resp.*;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.extreinfo.CarInfo;
 import com.yumu.hexie.model.user.User;
@@ -30,4 +27,5 @@ public interface ParkService {
 
     WechatPayInfo getPrePaying(User user, PayUserCarInfo payUserCarInfo) throws Exception;
 
+    PayDetail getPayDetailById(User user, String orderId) throws Exception;
 }

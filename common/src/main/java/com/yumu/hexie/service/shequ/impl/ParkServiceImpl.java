@@ -3,10 +3,7 @@ package com.yumu.hexie.service.shequ.impl;
 import com.yumu.hexie.integration.park.ParkUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
-import com.yumu.hexie.integration.park.resp.ParkInfo;
-import com.yumu.hexie.integration.park.resp.PayCarInfo;
-import com.yumu.hexie.integration.park.resp.PayingDetail;
-import com.yumu.hexie.integration.park.resp.UserCarList;
+import com.yumu.hexie.integration.park.resp.*;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.extreinfo.CarInfo;
 import com.yumu.hexie.model.user.User;
@@ -112,5 +109,10 @@ public class ParkServiceImpl implements ParkService {
     @Override
     public WechatPayInfo getPrePaying(User user, PayUserCarInfo payUserCarInfo) throws Exception {
         return parkUtil.getPrePaying(user, payUserCarInfo).getData();
+    }
+
+    @Override
+    public PayDetail getPayDetailById(User user, String orderId) throws Exception {
+        return parkUtil.getPayDetailById(user, orderId).getData();
     }
 }
