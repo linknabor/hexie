@@ -16,6 +16,7 @@ public class PayingDetail {
     private String pay_prompt; //支付提示语
     private String cust_tel; //客服电话
     private String out_park_prompt; //出场提示语
+    private String refresh_time; //刷新间隔
 
     public String getCar_no() {
         return car_no;
@@ -79,5 +80,13 @@ public class PayingDetail {
 
     public void setOut_park_prompt(String out_park_prompt) {
         this.out_park_prompt = out_park_prompt;
+    }
+
+    public String getRefresh_time() {
+        return refresh_time;
+    }
+
+    public void setRefresh_time(String refresh_time) {
+        this.refresh_time = refresh_time;
     }
 }
