@@ -131,51 +131,55 @@ public class GotongServiceImpl implements GotongService {
     }
     
     /**
-     * 发送关注客服消息
+     * 发送用户关注消息
      */
     @Override
 	public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO) {
     	
-//    	NewsMessage msg = null;
-    	TextMessage msg = null;
+    	TextMessage textmsg = null;
+    	NewsMessage newsmsg = null;
+    	boolean flag = false;
     	User user = subscribeVO.getUser();
-//    	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
-    	String cardServiceApps = systemConfigService.getSysConfigByKey("CARD_SERVICE_APPS");
+    	
+    	boolean cardService = systemConfigService.isCardServiceAvailable(user.getAppId());
     	String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-    	if (!StringUtils.isEmpty(cardServiceApps)) {
-    		if (cardServiceApps.indexOf(user.getAppId()) > -1) {
-    			
-    			String key = "DEFAULT_SIGN";
-    			key = key + "_" + user.getAppId();
-    			String appName = systemConfigService.getSysConfigByKey(key);
-    			if (StringUtils.isEmpty(appName)) {
-					appName = "合协社区";
-				}
-//    			Article article = new Article();
-//    			article.setTitle(appName + "欢迎您的加入！");
-//    			article.setPicurl(url);
-    			
-    			/**/
-//    			article.setDescription("点击这里注册会员，新会员独享多重好礼。");
-//    			article.setUrl(subscribeVO.getGetCardUrl());	//开卡组件获取链接
-    			
-//    			News news = new News(new ArrayList<Article>());
-//    			news.getArticles().add(article);
-//    			msg = new NewsMessage(news);
-    			
-    			Text text = new Text();
-    			text.setContent(appName + "欢迎您的加入！");
-    			msg = new TextMessage(text);
-    			msg.setTouser(user.getOpenid());
-    			msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_TEXT);
-			}
-    		
-		}
-    	if (msg == null) {
-			return false;
+    	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
+    	
+    	String enventKey = subscribeVO.getEventKey();
+    	
+    	String key = "DEFAULT_SIGN";
+		key = key + "_" + user.getAppId();
+		String appName = systemConfigService.getSysConfigByKey(key);
+		if (StringUtils.isEmpty(appName)) {
+			appName = "合协社区";
 		}
     	
-		return CustomService.sendCustomerMessage(msg, accessToken);
+    	if (!StringUtils.isEmpty(enventKey) && enventKey.equals("qrscene_201")) {
+    		//201表示需要申请开票的用户关注进来。需要推送带有开票页面链接的模板消息
+			Article article = new Article();
+			article.setTitle(appName + "欢迎您的加入！");
+			article.setPicurl(url);
+			
+			article.setDescription("点击申请开票。");
+			article.setUrl("https://test.e-shequ.cn");
+			
+			News news = new News(new ArrayList<Article>());
+			news.getArticles().add(article);
+			newsmsg = new NewsMessage(news);
+			flag = CustomService.sendCustomerMessage(newsmsg, accessToken);
+    		
+		} else {	//原来的逻辑，保留
+			if (cardService) {
+				Text text = new Text();
+				text.setContent(appName + "欢迎您的加入！");
+				textmsg = new TextMessage(text);
+				textmsg.setTouser(user.getOpenid());
+				textmsg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_TEXT);
+				flag = CustomService.sendCustomerMessage(textmsg, accessToken);
+			}
+		}
+    	
+    	return flag;
          
 	}
     
