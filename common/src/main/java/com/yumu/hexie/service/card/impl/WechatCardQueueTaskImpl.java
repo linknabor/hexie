@@ -72,7 +72,6 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
-				String eventKey = map.get("eventKey");
 				
 				User user = new User();
 				user.setOpenid(openid);
@@ -80,15 +79,15 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 
 				EventSubscribeDTO eventSubscribeDTO = new EventSubscribeDTO();
 				eventSubscribeDTO.setUser(user);
-				eventSubscribeDTO.setEventKey(eventKey);
-				boolean isSuccess = false;
+				
+				boolean isSuccess = false;	//投放会员卡是否成功
 				try {
 					wechatCardService.eventSubscribe(eventSubscribeDTO);
 					isSuccess = true;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
-
+				
 				if (!isSuccess) {
 					logger.info("subscribe event consume failed !, repush into the queue. json : " + json);
 					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SUBSCRIBE_QUEUE, json);

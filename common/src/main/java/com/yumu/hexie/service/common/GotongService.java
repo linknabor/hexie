@@ -8,6 +8,7 @@ import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.community.Thread;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -59,5 +60,7 @@ public interface GotongService {
 	String sendBillPush(String openId, String appId, BillPushDetail billPushDetail);
 
 	boolean sendWorkOrderNotification(WorkOrderNotification workOrderNotification);
+
+	boolean sendMsg4ApplyInvoice(BaseEventDTO baseEventDTO);
 
 }

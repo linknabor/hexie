@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.shequ.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
@@ -115,6 +117,120 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				logger.error(e.getMessage(), e);
 			}
 		}
+	}
+
+	/**
+	 * 扫开票二维码关注事件
+	 */
+	@SuppressWarnings("unchecked")
+	@Async("taskExecutor")
+	@Override
+	public void eventScanSubscribe4Invoice() {
+		
+		while (true) {
+			try {
+
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String json = (String) redisTemplate.opsForList().leftPop(ModelConstant.KEY_EVENT_SCAN_SUBSCRIBE_QUEUE,
+						30, TimeUnit.SECONDS);
+
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				Map<String, String> map = objectMapper.readValue(json, Map.class);
+				logger.info("strat to consume eventScanSubscribe4Invoice queue : " + map);
+
+				String appId = map.get("appId");
+				String openid = map.get("openid");
+				String eventKey = map.get("eventKey");
+				
+				User user = new User();
+				user.setOpenid(openid);
+				user.setAppId(appId);
+
+				BaseEventDTO baseEventDTO = new BaseEventDTO();
+				baseEventDTO.setAppId(appId);
+				baseEventDTO.setOpenid(openid);
+				baseEventDTO.setEventKey(eventKey);
+				
+				boolean isSuccess = false;	//投放会员卡是否成功
+				try {
+					wuyeService.scanEvent4Invoice(baseEventDTO);
+					isSuccess = true;
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+				}
+				
+				if (!isSuccess) {
+					logger.info("eventScanSubscribe4Invoice queue consume failed !, repush into the queue. json : " + json);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_SUBSCRIBE_QUEUE, json);
+				}
+
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Async("taskExecutor")
+	@Override
+	public void eventScan4Invoice() {
+		
+		while (true) {
+			try {
+
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String json = (String) redisTemplate.opsForList().leftPop(ModelConstant.KEY_EVENT_SCAN_QUEUE, 30, TimeUnit.SECONDS);
+
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				Map<String, String> map = objectMapper.readValue(json, Map.class);
+				logger.info("strat to consume eventScan4Invoice queue : " + map);
+
+				String appId = map.get("appId");
+				String openid = map.get("openid");
+				String eventKey = map.get("eventKey");
+				
+				User user = new User();
+				user.setOpenid(openid);
+				user.setAppId(appId);
+
+				BaseEventDTO baseEventDTO = new BaseEventDTO();
+				baseEventDTO.setAppId(appId);
+				baseEventDTO.setOpenid(openid);
+				baseEventDTO.setEventKey(eventKey);
+				
+				boolean isSuccess = false;	//投放会员卡是否成功
+				try {
+					wuyeService.scanEvent4Invoice(baseEventDTO);
+					isSuccess = true;
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+				}
+				
+				if (!isSuccess) {
+					logger.info("eventScan4Invoice queue consume failed !, repush into the queue. json : " + json);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_QUEUE, json);
+				}
+
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
 	}
 
 }
