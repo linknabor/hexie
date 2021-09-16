@@ -471,4 +471,6 @@ public class ModelConstant {
 
 	public static final String KEY_WORKORER_MSG_QUEUE = "queue:workorder:msg";
 	public static final String KEY_CONVERSION_MSG_QUEUE = "queue:conversion:msg";
+
+	public static final String KEY_MP_QRCODE_CACHED = "mpQrCode:cached:";
 }		
