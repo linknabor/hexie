@@ -416,10 +416,6 @@ public class GotongServiceImpl implements GotongService {
     @Override
 	public boolean sendMsg4ApplyInvoice(BaseEventDTO baseEventDTO) {
 
-    	String event = baseEventDTO.getEvent();
-    	if (!"subscribe".equalsIgnoreCase(event) && !"SCAN".equalsIgnoreCase(event)) {
-			return true;
-		}
     	String eventKey = baseEventDTO.getEvent();
     	if (!eventKey.startsWith("01")) {	//01表示扫二维码开票的场景
 			return true;

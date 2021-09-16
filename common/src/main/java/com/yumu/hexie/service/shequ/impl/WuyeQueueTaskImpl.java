@@ -215,8 +215,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				
 				boolean isSuccess = false;	//投放会员卡是否成功
 				try {
-					wuyeService.scanEvent4Invoice(baseEventDTO);
-					isSuccess = true;
+					isSuccess = wuyeService.scanEvent4Invoice(baseEventDTO);
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
