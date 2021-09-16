@@ -1,13 +1,18 @@
 package com.yumu.hexie.service.mpqrcode.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.mpqrcode.MpQrCodeService;
 import com.yumu.hexie.service.mpqrcode.req.CreateMpQrCodeReq;
@@ -30,6 +35,8 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 	
 	@Autowired
 	private RestUtil restUtil;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 
 	@Override
 	public String createQrCode(CreateMpQrCodeReq createQrCodeReq) throws Exception {
@@ -46,8 +53,15 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		Assert.hasText(shopName, "商户名称不能为空");
 		Assert.hasText(appid, "appid不能为空");
 		
+		String keyStr = "01"+"_"+orderId+"_"+appid;
+		String key = ModelConstant.KEY_MP_QRCODE_CACHED + keyStr;
+		String qrCodeUrl = stringRedisTemplate.opsForValue().get(key);
+		if (!StringUtils.isEmpty(qrCodeUrl)) {	//同一场景下，同一个公众号的同一笔流水申请二维码，只从腾讯生成一次。后面取缓存里的
+			return qrCodeUrl;
+		}
+		
 		//01表示场景
-		String sceneStr = "01" +  SEPERATOR + orderId + SEPERATOR + tranAmt + SEPERATOR + shopName;
+		String sceneStr = "01" +  SEPERATOR + orderId + SEPERATOR + tranAmt + SEPERATOR + shopName;	//01代表场景
 		if (sceneStr.length()>64) {	//二维码参数最大长度为64
 			sceneStr = sceneStr.substring(0, 63) + ELLIPSIS;
 		}
@@ -67,6 +81,8 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		
 		TypeReference<GenMpQrCodeResponse> typeReference = new TypeReference<GenMpQrCodeResponse>() {};
 		GenMpQrCodeResponse genQrCodeResponse = restUtil.exchangeOnBody(requestUrl, genQrCodeRequest, typeReference);
+		
+		stringRedisTemplate.opsForValue().set(key, genQrCodeResponse.getUrl(), 24, TimeUnit.HOURS);	//一天过期
 		return genQrCodeResponse.getUrl();
 	}
 	
