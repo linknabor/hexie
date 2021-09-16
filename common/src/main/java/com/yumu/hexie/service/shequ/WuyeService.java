@@ -20,6 +20,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
 
@@ -244,14 +245,6 @@ public interface WuyeService {
 	void addCouponsFromSeed(User user, List<CouponCombination> list);
 
 	/**
-	 * 发送物业缴费红包的模板消息
-	 * @param user
-	 * @param tradeWaterId
-	 * @param feePrice
-	 */
-	void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice);
-	
-	/**
 	 * 获取支付的优惠明细
 	 * @param prepayRequestDTO
 	 * @throws Exception 
@@ -327,4 +320,11 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception;
+	
+	/**
+	 * 扫公众号二维码申请电子发票事件
+	 * @param baseEventDTO
+	 * @return 
+	 */
+	boolean scanEvent4Invoice(BaseEventDTO baseEventDTO);
 }

@@ -19,7 +19,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
@@ -44,6 +43,7 @@ import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
@@ -52,7 +52,7 @@ import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
-import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
@@ -77,10 +77,6 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private LocationService locationService;
 	
-	
-	@Autowired
-	private SystemConfigService systemConfigService;
-	
 	@Autowired
 	private UserRepository userRepository;
 	
@@ -94,7 +90,7 @@ public class WuyeServiceImpl implements WuyeService {
 	private ServiceOperatorRepository serviceOperatorRepository;
 	
 	@Autowired
-	private TemplateMsgService templateMsgService;
+	private GotongService gotongService;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -467,13 +463,6 @@ public class WuyeServiceImpl implements WuyeService {
 
 	}
 
-	@Async
-	@Override
-	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
-
-		templateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
-	}
-
 	@Override
 	public Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
 		
@@ -597,6 +586,12 @@ public class WuyeServiceImpl implements WuyeService {
 	public CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception {
 		
 		return wuyeUtil2.queryCellAddr(user, sectId, cellAddr).getData();
+	}
+
+	@Override
+	public boolean scanEvent4Invoice(BaseEventDTO baseEventDTO) {
+		
+		return gotongService.sendMsg4ApplyInvoice(baseEventDTO);
 	}
 
 }

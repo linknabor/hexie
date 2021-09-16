@@ -31,6 +31,7 @@ import com.yumu.hexie.integration.wechat.service.SubscribeMsgService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.community.Thread;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
@@ -137,15 +138,11 @@ public class GotongServiceImpl implements GotongService {
 	public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO) {
     	
     	TextMessage textmsg = null;
-    	NewsMessage newsmsg = null;
     	boolean flag = false;
     	User user = subscribeVO.getUser();
     	
     	boolean cardService = systemConfigService.isCardServiceAvailable(user.getAppId());
     	String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-    	String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_IMG);
-    	
-    	String enventKey = subscribeVO.getEventKey();
     	
     	String key = "DEFAULT_SIGN";
 		key = key + "_" + user.getAppId();
@@ -154,29 +151,13 @@ public class GotongServiceImpl implements GotongService {
 			appName = "合协社区";
 		}
     	
-    	if (!StringUtils.isEmpty(enventKey) && enventKey.equals("qrscene_201")) {
-    		//201表示需要申请开票的用户关注进来。需要推送带有开票页面链接的模板消息
-			Article article = new Article();
-			article.setTitle(appName + "欢迎您的加入！");
-			article.setPicurl(url);
-			
-			article.setDescription("点击申请开票。");
-			article.setUrl("https://test.e-shequ.cn");
-			
-			News news = new News(new ArrayList<Article>());
-			news.getArticles().add(article);
-			newsmsg = new NewsMessage(news);
-			flag = CustomService.sendCustomerMessage(newsmsg, accessToken);
-    		
-		} else {	//原来的逻辑，保留
-			if (cardService) {
-				Text text = new Text();
-				text.setContent(appName + "欢迎您的加入！");
-				textmsg = new TextMessage(text);
-				textmsg.setTouser(user.getOpenid());
-				textmsg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_TEXT);
-				flag = CustomService.sendCustomerMessage(textmsg, accessToken);
-			}
+		if (cardService) {
+			Text text = new Text();
+			text.setContent(appName + "欢迎您的加入！");
+			textmsg = new TextMessage(text);
+			textmsg.setTouser(user.getOpenid());
+			textmsg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_TEXT);
+			flag = CustomService.sendCustomerMessage(textmsg, accessToken);
 		}
     	
     	return flag;
@@ -427,6 +408,57 @@ public class GotongServiceImpl implements GotongService {
 		templateMsgService.sendWorkOrderMsg(workOrderNotification, accessToken);
 		return success;
 		
+	}
+	
+	/**
+     * 发送用户申请电子发票消息
+     */
+    @Override
+	public boolean sendMsg4ApplyInvoice(BaseEventDTO baseEventDTO) {
+
+    	String event = baseEventDTO.getEvent();
+    	if (!"subscribe".equalsIgnoreCase(event) && !"SCAN".equalsIgnoreCase(event)) {
+			return true;
+		}
+    	String eventKey = baseEventDTO.getEvent();
+    	if (!eventKey.startsWith("01")) {	//01表示扫二维码开票的场景
+			return true;
+		}
+    	String[]eventKeyArr = eventKey.split(",");
+    	if (eventKeyArr == null || eventKeyArr.length < 4) {
+			return true;
+		}
+    	String tradeWaterId = "";
+    	String tranAmt = ""; 
+    	String shopName = "";
+    	try {
+			tradeWaterId = eventKeyArr[1];
+			tranAmt = eventKeyArr[2];
+			shopName = eventKeyArr[3];
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+			return true;
+		}
+    	
+    	String accessToken = systemConfigService.queryWXAToken(baseEventDTO.getAppId());
+
+    	String title = "欢迎使用合协社区";
+    	String description = "开票金额：" + tranAmt + " \n";
+    	description += "商户名称：" + shopName + " \n";
+    	description += "交易流水：" + tradeWaterId + " \n";
+    	description += "点击申请电子发票";
+    	
+    	News news = new News(new ArrayList<Article>());
+        Article article = new Article();
+        article.setTitle(title);
+        article.setDescription(description);
+        article.setUrl("https://test.e-shequ.cn?oriApp="+baseEventDTO.getAppId()+"&openid="+baseEventDTO.getOpenid());
+        news.getArticles().add(article);
+        NewsMessage msg = new NewsMessage(news);
+        msg.setTouser(baseEventDTO.getOpenid());
+        msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
+        return CustomService.sendCustomerMessage(msg, accessToken);
+        
 	}
 
 }

@@ -473,4 +473,8 @@ public class ModelConstant {
 	public static final String KEY_CONVERSION_MSG_QUEUE = "queue:conversion:msg";
 
 	public static final String KEY_MP_QRCODE_CACHED = "mpQrCode:cached:";
+	
+	public static final String KEY_EVENT_SCAN_SUBSCRIBE_QUEUE = "queue:event:scanSubscribe";	//扫码关注事件消息队列(未关注过的用户)
+	
+	public static final String KEY_EVENT_SCAN_QUEUE = "queue:event:scan";	//扫码事件消息队列(已关注过的用户)
 }		

@@ -8,7 +8,6 @@ public class EventSubscribeDTO {
 	private String getCardUrl;	//领取地址
 	private String couponId;	//红包礼券
 	private String getCouponUrl;	//领取地址
-	private String eventKey;	//关注事件key, 通常是场景码
 	
 	private User user;	//用户信息
 	
@@ -41,12 +40,6 @@ public class EventSubscribeDTO {
 	}
 	public void setUser(User user) {
 		this.user = user;
-	}
-	public String getEventKey() {
-		return eventKey;
-	}
-	public void setEventKey(String eventKey) {
-		this.eventKey = eventKey;
 	}
 	
 	
