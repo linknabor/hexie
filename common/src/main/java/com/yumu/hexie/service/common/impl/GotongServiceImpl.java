@@ -420,7 +420,7 @@ public class GotongServiceImpl implements GotongService {
     	if (!eventKey.startsWith("01")) {	//01表示扫二维码开票的场景
 			return true;
 		}
-    	String[]eventKeyArr = eventKey.split(",");
+    	String[]eventKeyArr = eventKey.split("\\|");
     	if (eventKeyArr == null || eventKeyArr.length < 4) {
 			return true;
 		}
@@ -439,9 +439,9 @@ public class GotongServiceImpl implements GotongService {
     	String accessToken = systemConfigService.queryWXAToken(baseEventDTO.getAppId());
 
     	String title = "欢迎使用合协社区";
-    	String description = "开票金额：" + tranAmt + " \n";
+    	String description = "交易流水：" + tradeWaterId + " \n";
+    	description += "开票金额：" + tranAmt + " \n";
     	description += "商户名称：" + shopName + " \n";
-    	description += "交易流水：" + tradeWaterId + " \n";
     	description += "点击申请电子发票";
     	
     	News news = new News(new ArrayList<Article>());
