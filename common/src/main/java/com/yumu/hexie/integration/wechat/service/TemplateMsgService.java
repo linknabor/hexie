@@ -37,6 +37,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
@@ -680,5 +681,64 @@ public class TemplateMsgService {
     	sendMsg(msg, accessToken);
     	
     }
+    
+    
+    /**
+	 * 发送电子发票申请模板消息
+	 * @param opinionRequest
+	 * @param accessToken
+	 */
+	public boolean sendInvoiceApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
+		
+		
+		String eventKey = baseEventDTO.getEventKey();
+    	if (!eventKey.startsWith("01")) {	//01表示扫二维码开票的场景
+			return true;
+		}
+    	String[]eventKeyArr = eventKey.split("\\|");
+    	if (eventKeyArr == null || eventKeyArr.length < 4) {
+			return true;
+		}
+    	String tradeWaterId = "";
+    	String tranAmt = ""; 
+    	String shopName = "";
+    	try {
+			tradeWaterId = eventKeyArr[1];
+			tranAmt = eventKeyArr[2];
+			shopName = eventKeyArr[3];
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return true;
+		}
+    	
+    	TemplateItem firstItem = new TemplateItem("请及时完成自助开票，点击详情进入");
+    	firstItem.setColor("#173177");
+    	
+    	TemplateItem keywordItem1 = new TemplateItem(shopName);
+    	keywordItem1.setColor("#173177");
+    	
+    	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
+    	keywordItem1.setColor("#173177");
+    	
+    	TemplateItem remarkItem = new TemplateItem(tranAmt);
+    	keywordItem1.setColor("#173177");
+
+		CommonVO2 vo = new CommonVO2();
+		vo.setFirst(firstItem);
+		vo.setKeyword1(keywordItem1);
+		vo.setKeyword2(keywordItem2);
+		vo.setRemark(remarkItem);
+
+		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER, baseEventDTO.getAppId()));
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_INVOICE_APPLICATION_URL);
+		url = AppUtil.addAppOnUrl(url, baseEventDTO.getAppId());
+		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", baseEventDTO.getUser().getTel());
+		msg.setUrl(url);
+		msg.setTouser(baseEventDTO.getOpenid());
+		return sendMsg(msg, accessToken);
+
+	}
 
 }

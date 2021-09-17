@@ -27,6 +27,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.BindHouseQueue;
 
 @Service
@@ -38,6 +39,8 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private WuyeService wuyeService;
+	@Autowired
+	private UserService userService;
 	@Autowired
 	private MaintenanceService maintenanceService;
 	
@@ -149,14 +152,13 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				String openid = map.get("openid");
 				String eventKey = map.get("eventKey");
 				
-				User user = new User();
-				user.setOpenid(openid);
-				user.setAppId(appId);
+				User user = userService.multiFindByOpenId(openid);
 
 				BaseEventDTO baseEventDTO = new BaseEventDTO();
 				baseEventDTO.setAppId(appId);
 				baseEventDTO.setOpenid(openid);
 				baseEventDTO.setEventKey(eventKey);
+				baseEventDTO.setUser(user);
 				
 				boolean isSuccess = false;	//投放会员卡是否成功
 				try {
@@ -204,14 +206,13 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				String openid = map.get("openid");
 				String eventKey = map.get("eventKey");
 				
-				User user = new User();
-				user.setOpenid(openid);
-				user.setAppId(appId);
+				User user = userService.multiFindByOpenId(openid);
 
 				BaseEventDTO baseEventDTO = new BaseEventDTO();
 				baseEventDTO.setAppId(appId);
 				baseEventDTO.setOpenid(openid);
 				baseEventDTO.setEventKey(eventKey);
+				baseEventDTO.setUser(user);
 				
 				boolean isSuccess = false;	//投放会员卡是否成功
 				try {

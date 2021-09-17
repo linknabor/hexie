@@ -2,6 +2,8 @@ package com.yumu.hexie.model.event.dto;
 
 import java.io.Serializable;
 
+import com.yumu.hexie.model.user.User;
+
 /**
  * 微信公众号事件的基类
  * TODO 以后把诸如开卡、订阅消息的事件类都继承这个类
@@ -19,6 +21,8 @@ public class BaseEventDTO implements Serializable {
 	private String appId;
 	private String event;	//事件类型
 	private String eventKey;	//事件key
+	
+	private User user; 
 	
 	public String getOpenid() {
 		return openid;
@@ -44,12 +48,18 @@ public class BaseEventDTO implements Serializable {
 	public void setEvent(String event) {
 		this.event = event;
 	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
 	@Override
 	public String toString() {
 		return "BaseEventDTO [openid=" + openid + ", appId=" + appId + ", event=" + event + ", eventKey=" + eventKey
-				+ "]";
+				+ ", user=" + user + "]";
 	}
-		
+	
 	
 	
 	
