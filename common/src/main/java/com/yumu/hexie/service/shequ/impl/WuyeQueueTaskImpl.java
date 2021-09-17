@@ -153,6 +153,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				String eventKey = map.get("eventKey");
 				
 				User user = userService.multiFindByOpenId(openid);
+				if (user == null) {
+					user = new User();
+				}
 
 				BaseEventDTO baseEventDTO = new BaseEventDTO();
 				baseEventDTO.setAppId(appId);
@@ -207,6 +210,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				String eventKey = map.get("eventKey");
 				
 				User user = userService.multiFindByOpenId(openid);
+				if (user == null) {
+					user = new User();
+				}
 
 				BaseEventDTO baseEventDTO = new BaseEventDTO();
 				baseEventDTO.setAppId(appId);
