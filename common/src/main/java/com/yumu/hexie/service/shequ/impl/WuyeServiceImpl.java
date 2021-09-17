@@ -591,7 +591,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public boolean scanEvent4Invoice(BaseEventDTO baseEventDTO) {
 		
-		return gotongService.sendMsg4ApplyInvoice(baseEventDTO);
+		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
 	}
 
 }

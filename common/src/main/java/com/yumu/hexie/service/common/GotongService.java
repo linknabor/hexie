@@ -61,6 +61,6 @@ public interface GotongService {
 
 	boolean sendWorkOrderNotification(WorkOrderNotification workOrderNotification);
 
-	boolean sendMsg4ApplyInvoice(BaseEventDTO baseEventDTO);
+	boolean sendMsg4ApplicationInvoice(BaseEventDTO baseEventDTO);
 
 }

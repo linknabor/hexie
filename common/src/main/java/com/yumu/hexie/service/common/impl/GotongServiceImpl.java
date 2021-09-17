@@ -414,46 +414,10 @@ public class GotongServiceImpl implements GotongService {
      * 发送用户申请电子发票消息
      */
     @Override
-	public boolean sendMsg4ApplyInvoice(BaseEventDTO baseEventDTO) {
+	public boolean sendMsg4ApplicationInvoice(BaseEventDTO baseEventDTO) {
 
-    	String eventKey = baseEventDTO.getEventKey();
-    	if (!eventKey.startsWith("01")) {	//01表示扫二维码开票的场景
-			return true;
-		}
-    	String[]eventKeyArr = eventKey.split("\\|");
-    	if (eventKeyArr == null || eventKeyArr.length < 4) {
-			return true;
-		}
-    	String tradeWaterId = "";
-    	String tranAmt = ""; 
-    	String shopName = "";
-    	try {
-			tradeWaterId = eventKeyArr[1];
-			tranAmt = eventKeyArr[2];
-			shopName = eventKeyArr[3];
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-			return true;
-		}
-    	
     	String accessToken = systemConfigService.queryWXAToken(baseEventDTO.getAppId());
-
-    	String title = "欢迎使用合协社区";
-    	String description = "交易流水：" + tradeWaterId + " \n";
-    	description += "开票金额：" + tranAmt + " \n";
-    	description += "商户名称：" + shopName + " \n";
-    	description += "点击申请电子发票";
-    	
-    	News news = new News(new ArrayList<Article>());
-        Article article = new Article();
-        article.setTitle(title);
-        article.setDescription(description);
-        article.setUrl("https://test.e-shequ.cn?oriApp="+baseEventDTO.getAppId()+"&openid="+baseEventDTO.getOpenid());
-        news.getArticles().add(article);
-        NewsMessage msg = new NewsMessage(news);
-        msg.setTouser(baseEventDTO.getOpenid());
-        msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        return CustomService.sendCustomerMessage(msg, accessToken);
+        return templateMsgService.sendInvoiceApplicationMessage(baseEventDTO, accessToken);
         
 	}
 
