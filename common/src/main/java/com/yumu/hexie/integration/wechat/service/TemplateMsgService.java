@@ -692,7 +692,7 @@ public class TemplateMsgService {
 		
 		
 		String eventKey = baseEventDTO.getEventKey();
-    	if (!eventKey.startsWith("01")) {	//01表示扫二维码开票的场景
+    	if (!eventKey.startsWith("01") && !eventKey.startsWith("qrscene_01")) {	//01表示扫二维码开票的场景
 			return true;
 		}
     	String[]eventKeyArr = eventKey.split("\\|");
@@ -712,16 +712,9 @@ public class TemplateMsgService {
 		}
     	
     	TemplateItem firstItem = new TemplateItem("请及时完成自助开票，点击详情进入");
-    	firstItem.setColor("#173177");
-    	
     	TemplateItem keywordItem1 = new TemplateItem(shopName);
-    	keywordItem1.setColor("#173177");
-    	
     	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
-    	keywordItem1.setColor("#173177");
-    	
-    	TemplateItem remarkItem = new TemplateItem(tranAmt);
-    	keywordItem1.setColor("#173177");
+    	TemplateItem remarkItem = new TemplateItem("请及时进行申请");
 
 		CommonVO2 vo = new CommonVO2();
 		vo.setFirst(firstItem);
@@ -734,7 +727,12 @@ public class TemplateMsgService {
 		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER, baseEventDTO.getAppId()));
 		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_INVOICE_APPLICATION_URL);
 		url = AppUtil.addAppOnUrl(url, baseEventDTO.getAppId());
-		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", baseEventDTO.getUser().getTel());
+		
+		String tel = baseEventDTO.getUser().getTel();
+		if (StringUtils.isEmpty(tel)) {
+			tel = "";
+		}
+		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
 		msg.setUrl(url);
 		msg.setTouser(baseEventDTO.getOpenid());
 		return sendMsg(msg, accessToken);
