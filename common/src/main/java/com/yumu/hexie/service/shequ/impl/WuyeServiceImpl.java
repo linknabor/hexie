@@ -231,8 +231,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
-		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
+	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid) {
+		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id, openid);
 		return r.getResult();
 	}
 
@@ -368,9 +368,10 @@ public class WuyeServiceImpl implements WuyeService {
 	 * @param bindSwitch
 	 * @param user
 	 * @param tradeWaterId
+	 * @param bindType 4:交易绑定，5开票绑定
 	 */
 	@Override
-	public void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId) {
+	public void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId, String bindType) {
 		
 		Assert.hasText(tradeWaterId, "物业交易ID不能为空。 ");
 		
@@ -384,6 +385,7 @@ public class WuyeServiceImpl implements WuyeService {
 					BindHouseQueue bindHouseQueue = new BindHouseQueue();
 					bindHouseQueue.setUser(user);
 					bindHouseQueue.setTradeWaterId(tradeWaterId);
+					bindHouseQueue.setBindType(bindType);
 					
 					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 					String value = objectMapper.writeValueAsString(bindHouseQueue);
@@ -592,6 +594,48 @@ public class WuyeServiceImpl implements WuyeService {
 	public boolean scanEvent4Invoice(BaseEventDTO baseEventDTO) {
 		
 		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
+	}
+	
+	/**
+	 * 到账消息推送(给物业配置的工作人推送)
+	 */
+	@Override
+	public void registerAndBind(User user, String tradeWaterId) {
+		
+		if (user == null) {
+			log.info("user is null, will return ! ");
+			return;
+		}
+		if (StringUtils.isEmpty(tradeWaterId)) {
+			log.info("tradeWaterId is null, will return ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				
+				BindHouseQueue bindHouseQueue = new BindHouseQueue();
+				bindHouseQueue.setUser(user);
+				bindHouseQueue.setTradeWaterId(tradeWaterId);
+				
+				String value = objectMapper.writeValueAsString(bindHouseQueue);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
 	}
 
 }

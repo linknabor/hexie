@@ -149,7 +149,7 @@ public interface WuyeService {
 	 * @param trade_water_id
 	 * @return
 	 */
-	String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id);
+	String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid);
 
 	/**
 	 * 根据交易号获取对应房子的发票信息
@@ -227,7 +227,7 @@ public interface WuyeService {
 	 * @param user
 	 * @param tradeWaterId
 	 */
-	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
+	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId, String bindType);
 
 	/**
 	 * 根据户号获取房屋信息
@@ -327,4 +327,11 @@ public interface WuyeService {
 	 * @return 
 	 */
 	boolean scanEvent4Invoice(BaseEventDTO baseEventDTO);
+
+	/**
+	 * 申请电子发票后创建用户并为其绑定房屋
+	 * @param user
+	 * @param tradeWaterId
+	 */
+	void registerAndBind(User user, String tradeWaterId);
 }

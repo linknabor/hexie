@@ -114,6 +114,7 @@ public class BatchServiceImpl implements BatchService {
 		wuyeQueueTask.bindHouseByTrade();
 		wuyeQueueTask.eventScan4Invoice();
 		wuyeQueueTask.eventScanSubscribe4Invoice();
+		wuyeQueueTask.registerAndBind();
 //		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
 		wechatCardQueueTask.eventUpdateCard();
@@ -203,7 +204,7 @@ public class BatchServiceImpl implements BatchService {
 	public void fixBindHouse(String userId, String tradeWaterId) {
 
 		User user = userRepository.findById(Long.valueOf(userId)).get();
-		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
+		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId, "");
 	}
 
 

@@ -101,7 +101,7 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 			//4.绑定所缴纳物业费的房屋
 			if ("0".equals(payNotification.getTranType())) {	//0管理费， 1其他收费
-				wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId());
+				wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId(), "4");
 			}
 			
 		}

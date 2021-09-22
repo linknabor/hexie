@@ -58,6 +58,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.shequ.req.InvoiceApplicationReq;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.BankCardService;
 import com.yumu.hexie.service.user.CouponService;
@@ -465,26 +466,76 @@ public class WuyeController extends BaseController {
 
 	}
 
+	/**
+	 * 申请电子发票
+	 * 如果用户没有注册的，则直接注册。
+	 * 如果用户没有绑定房屋的，则直接绑定
+	 * @param mobile
+	 * @param invoice_title
+	 * @param yzm
+	 * @param trade_water_id
+	 * @param invoice_title_type
+	 * @param credit_code
+	 * @param openid
+	 * @param event
+	 * @return
+	 */
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/applyInvoice", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult applyInvoice(@RequestParam(required = false) String mobile,
-			@RequestParam(required = false) String invoice_title, @RequestParam(required = false) String yzm,
-			@RequestParam(required = false) String trade_water_id,
-			@RequestParam(required = false) String invoice_title_type,
-			@RequestParam(required = false) String credit_code) {
+	public BaseResult applyInvoice(InvoiceApplicationReq applicationReq) {
 		
-		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);
+		log.info("invoiceApplicationReq : " + applicationReq);
+		
+		String mobile = applicationReq.getMobile();
+		String yzm = applicationReq.getYzm();
+		String openid = applicationReq.getOpenid();
+		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);	//校验验证码
+		
+		User user = null;
+		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
+			user = userService.multiFindByOpenId(openid);
+			if (user != null) {
+				if (user.getTel()!=null && user.getTel().equals(mobile)) {
+					isCheck = true;
+				}
+				if (StringUtils.isEmpty(user.getTel())) {
+					user.setTel(mobile);
+				}
+			} else {
+				user = new User();
+				user.setTel(mobile);
+				user.setAppId(applicationReq.getAppid());
+				user.setOpenid(applicationReq.getOpenid());
+			}
+		} else {
+			user = new User();
+			log.info("no openid, will not create user !");
+		}
 		if (!isCheck) {
 			return new BaseResult<UserInfo>().failMsg("校验失败！");
-		} else {
-			String result = wuyeService.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code,
-					trade_water_id);
-			if ("99".equals(result)) {
-				return BaseResult.fail("网络异常，请刷新后重试");
-			}
-			return BaseResult.successResult("succeeded");
 		}
+		
+		String result = wuyeService.updateInvoice(mobile, applicationReq.getInvoice_title(), applicationReq.getInvoice_title_type(), 
+				applicationReq.getCredit_code(), applicationReq.getTrade_water_id(), applicationReq.getOpenid());
+		if ("99".equals(result)) {
+			return BaseResult.fail("网络异常，请刷新后重试");
+		}
+		
+		if (!StringUtils.isEmpty(openid)) {
+			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id());	//队列，异步执行
+		}
+		return BaseResult.successResult("succeeded");
+	}
+	
+	public static void main(String[] args) {
+		
+		String mobile = "18116419486";
+		String prefix = mobile.substring(0, 3);
+		String suffix = mobile.substring(7, mobile.length());
+		String name = prefix + "***" + suffix;
+		System.out.println(name);
+		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -842,6 +893,7 @@ public class WuyeController extends BaseController {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/cleanUser", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<String> cleanUser(@RequestParam String wuyeId, @Valid HexieUser hexieUser) {

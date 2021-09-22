@@ -37,10 +37,10 @@ public class WuyeUtil {
 
 	// 接口地址
 	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s"; // 房屋详情地址
-	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s&openid=%s"; // 添加房子
-	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s&openid=%s"; // 无账单添加房子
+	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s&openid=%s&appid=%s&mobile=%s"; // 添加房子
+	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s&openid=%s&appid=%s&mobile=%s"; // 无账单添加房子
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s&house_id=%s"; // 扫一扫（添加房子）
-	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s"; // 删除房子
+	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s&openid=%s&appid=%s&mobile=%s"; // 删除房子
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
@@ -49,14 +49,14 @@ public class WuyeUtil {
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&trade_water_id=%s"; // 微信支付返回
 	private static final String COUPON_USE_QUERY_URL = "conponUseQuerySDO.do?user_id=%s";
-	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s";
+	private static final String APPLY_INVOICE_URL = "applyInvoiceSDO.do?mobile=%s&invoice_title=%s&invoice_title_type=%s&credit_code=%s&trade_water_id=%s&openid=%s";
 	private static final String INVOICE_INFO_TO_TRADE = "getInvoiceInfoSDO.do?trade_water_id=%s";
 	private static final String MNG_HEXIE_LIST_URL = "queryHeXieMngByIdSDO.do"+ "?sect_id=%s&build_id=%s&unit_id=%s&data_type=%s";//合协社区物业缴费的小区级联
 	
 	private static final String SYNC_SERVICE_CFG_URL = "param/getParamSDO.do?info_id=%s&type=%s&para_name=%s";
 	private static final String BILL_LIST_DATE = "getBillStartDateSDO.do?user_id=%s&mng_cell_id=%s";//获取无账单日期
 	private static final String PAY_WATER_URL = "getMngCellByTradeIdSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录涉及的房屋
-	private static final String BIND_BY_TRADE_URL = "bindHouseByTradeIdSDO.do?user_id=%s&trade_water_id=%s&openid=%s";
+	private static final String BIND_BY_TRADE_URL = "bindHouseByTradeIdSDO.do?user_id=%s&trade_water_id=%s&openid=%s&appid=%s&bind_type=%s&mobile=%s";
 	private static final String GET_HOUSE_VERNO_URL = "queryHouByVouNoSDO.do?user_id=%s&ver_no=%s"; //根据户号查询房屋
 	
 	private static final Logger Log = LoggerFactory.getLogger(WuyeUtil.class);
@@ -81,7 +81,8 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<HexieUser> bindHouse(User user, String stmtId,String houseId) {
-		String url = getRequestUri(user) + String.format(ADD_HOUSE_URL, user.getWuyeId(), stmtId,houseId, user.getOpenid());
+		String url = getRequestUri(user) + String.format(ADD_HOUSE_URL, user.getWuyeId(), stmtId,houseId, 
+				user.getWuyeId(), user.getOpenid(), user.getAppId(), user.getTel());
 		log.info("【绑定房产url】="+url);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
@@ -107,7 +108,7 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<HexieUser> bindHouseNoStmt(User user, String houseId, String area) {
-		String url = getRequestUri(user) + String.format(ADD_HOUSENOSTMT_URL, user.getWuyeId(), houseId, area, user.getOpenid());
+		String url = getRequestUri(user) + String.format(ADD_HOUSENOSTMT_URL, user.getWuyeId(), houseId, area, user.getOpenid(), user.getAppId(), user.getTel());
 		log.error("【绑定房产url】="+url);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
@@ -120,7 +121,7 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<String> deleteHouse(User user, String houseId) {
-		String url = getRequestUri(user) + String.format(DEL_HOUSE_URL, user.getWuyeId(), houseId);
+		String url = getRequestUri(user) + String.format(DEL_HOUSE_URL, user.getWuyeId(), houseId, user.getOpenid(), user.getAppId(), user.getTel());
 		return (BaseResult<String>)httpGet(url,String.class);
 	}
 	
@@ -238,12 +239,12 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
+	public static BaseResult<String> updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid) {
 
 		try {
 			User user = new User();
 			invoice_title = URLEncoder.encode(invoice_title,"GBK");
-			String url = getRequestUri(user) + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
+			String url = getRequestUri(user) + String.format(APPLY_INVOICE_URL, mobile, invoice_title, invoice_title_type, credit_code, trade_water_id, openid);
 			return (BaseResult<String>)httpGet(url,String.class);
 		} catch (UnsupportedEncodingException e) {
 			BaseResult r= new BaseResult();
@@ -367,9 +368,9 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<HexieHouses> bindByTrade(User user, String tradeWaterId) {
+	public static BaseResult<HexieHouses> bindByTrade(User user, String tradeWaterId, String bindType) {
 		
-		String url = getRequestUri(user) + String.format(BIND_BY_TRADE_URL, user.getWuyeId(), tradeWaterId, user.getOpenid());
+		String url = getRequestUri(user) + String.format(BIND_BY_TRADE_URL, user.getWuyeId(), tradeWaterId, user.getOpenid(), user.getAppId(), bindType, user.getTel());
 		BaseResult<HexieHouses> baseResult = httpGet(url,HexieHouses.class);
 		return baseResult;
 	}
