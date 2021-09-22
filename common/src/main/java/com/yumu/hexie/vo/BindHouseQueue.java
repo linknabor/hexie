@@ -11,6 +11,7 @@ public class BindHouseQueue implements Serializable {
 	 */
 	private static final long serialVersionUID = 8171021633196646617L;
 	
+	private String bindType;
 	private String tradeWaterId;
 	private User user;
 	
@@ -26,9 +27,15 @@ public class BindHouseQueue implements Serializable {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	public String getBindType() {
+		return bindType;
+	}
+	public void setBindType(String bindType) {
+		this.bindType = bindType;
+	}
 	@Override
 	public String toString() {
-		return "BindHouseQueue [tradeWaterId=" + tradeWaterId + ", user=" + user + "]";
+		return "BindHouseQueue [bindType=" + bindType + ", tradeWaterId=" + tradeWaterId + ", user=" + user + "]";
 	}
 	
 	

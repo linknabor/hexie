@@ -79,7 +79,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				
 				while(!isSuccess && totalFailed < 3) {
 					
-					BaseResult<HexieHouses> baseResult = WuyeUtil.bindByTrade(user, queue.getTradeWaterId());
+					BaseResult<HexieHouses> baseResult = WuyeUtil.bindByTrade(user, queue.getTradeWaterId(), queue.getBindType());
 					if (baseResult.isSuccess()) {
 						HexieHouses hexieHouses = baseResult.getData();
 						List<HexieHouse> houseList = hexieHouses.getHouses();
@@ -237,6 +237,86 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 			}
 		}
 		
+	}
+	
+	/**
+	 * 注册&绑定房屋
+	 * 申请电子发票后的异步操作:
+	 * 1.完成用户注册（如果未注册的话）
+	 * 2.帮助用户绑定房屋（根据申请发票关联交易的房屋）
+	 * 
+	 * @throws InterruptedException 
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void registerAndBind() {
+		
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(json)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				BindHouseQueue queue = objectMapper.readValue(json, new TypeReference<BindHouseQueue>(){});
+				
+				logger.info("strat to consume registerAndBind queue : " + queue);
+				User user = queue.getUser();	//这里的user有3种情况：1）没有wuyeId的，从来没登陆过的。2）没有手机号码的，已生成用户但未注册的。3）有手机的
+				
+				User dbUser = userService.multiFindByOpenId(user.getOpenid());	//这时候可能已经产生了user或者没有user,因为跟开票是异步进行的
+				User savedUser = null;
+				boolean isSuccess = false;
+				try {
+					if (dbUser == null) {	//对于没有wuyeId的，需要从community获取新的wuyeId
+						BaseResult<HexieUser> baseResult = WuyeUtil.userLogin(user);
+						if (baseResult.isSuccess()) {
+							String wuyeId = baseResult.getData().getUser_id();
+							user.setWuyeId(wuyeId);
+							String mobile = user.getTel();
+							String prefix = mobile.substring(0, 3);
+							String suffix = mobile.substring(7, mobile.length());
+							String name = prefix + "***" + suffix;	//使用手机号虚构一个名称，中间打码
+							user.setName(name);
+							savedUser = userService.simpleRegister(user);
+							isSuccess = true;
+						}
+					} else if (StringUtils.isEmpty(dbUser.getWuyeId())) {
+						BaseResult<HexieUser> baseResult = WuyeUtil.userLogin(user);
+						if (baseResult.isSuccess()) {
+							String wuyeId = baseResult.getData().getUser_id();
+							String mobile = user.getTel();
+							dbUser.setWuyeId(wuyeId);
+							dbUser.setTel(mobile);
+							savedUser = userService.simpleRegister(dbUser);
+							isSuccess = true;
+						}
+						
+					} else if (StringUtils.isEmpty(dbUser.getTel())) {
+						dbUser.setTel(user.getTel());
+						savedUser = userService.simpleRegister(dbUser);
+						isSuccess = true;
+					}
+					
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+				}
+				
+				if (isSuccess) {
+					wuyeService.bindHouseByTradeAsync("1", savedUser, queue.getTradeWaterId(), "5");	//绑定房屋队列
+				}
+				if (!isSuccess) {
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, json);
+				}
+			
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
 	}
 
 }

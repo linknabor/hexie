@@ -1,9 +1,7 @@
 package com.yumu.hexie.integration.wuye;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.yumu.hexie.integration.wuye.req.*;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +27,7 @@ import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
+import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
@@ -75,6 +74,7 @@ public class WuyeUtil2 {
 	private static final String SEND_NOTIFICATION_URL = "msg/sendNotificationSDO.do";//业主意见回复消息推送
 	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
+	private static final String REGISTER_AND_BIND_URL = "registerAndBindSDO.do";//用户注册并且绑定房屋
 
 
 	/**
@@ -548,6 +548,31 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<Boolean>> typeReference = new TypeReference<CommonResponse<Boolean>>(){};
 		CommonResponse<Boolean> hexieResponse = restUtil.exchangeOnUri(requestUrl, opinionRequest, typeReference);
 		BaseResult<Boolean> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
+	
+	/**
+	 * 开票后
+	 * @param user
+	 * @param tradeWaterId
+	 * @return
+	 * @throws Exception 
+	 */
+	public BaseResult<HexieHouses> registerAndBind(User user, String tradeWaterId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += REGISTER_AND_BIND_URL;
+		
+		RegisterAndBindRequest request = new RegisterAndBindRequest();
+		request.setMobile(user.getTel());
+		request.setAppid(user.getAppId());
+		request.setOpenid(user.getOpenid());
+		request.setTradeWaterId(tradeWaterId);
+
+		TypeReference<CommonResponse<HexieHouses>> typeReference = new TypeReference<CommonResponse<HexieHouses>>(){};
+		CommonResponse<HexieHouses> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
+		BaseResult<HexieHouses> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
