@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
@@ -418,6 +419,17 @@ public class GotongServiceImpl implements GotongService {
 
     	String accessToken = systemConfigService.queryWXAToken(baseEventDTO.getAppId());
         return templateMsgService.sendInvoiceApplicationMessage(baseEventDTO, accessToken);
+        
+	}
+    
+    /**
+     * 发送开具电子发票消息
+     */
+    @Override
+	public boolean sendMsg4FinishInvoice(InvoiceNotification invoiceNotification) {
+
+    	String accessToken = systemConfigService.queryWXAToken(invoiceNotification.getUser().getAppId());
+        return templateMsgService.sendFinishInvoiceMessage(invoiceNotification, accessToken);
         
 	}
 

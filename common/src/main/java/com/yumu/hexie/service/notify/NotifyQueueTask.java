@@ -26,4 +26,6 @@ public interface NotifyQueueTask {
 
 	void handleConversionAsyc();
 
+	void sendInvoiceMsgAsyc();
+
 }

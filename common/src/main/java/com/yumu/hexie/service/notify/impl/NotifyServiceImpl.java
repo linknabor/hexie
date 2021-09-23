@@ -20,6 +20,7 @@ import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.notify.ConversionNotification;
+import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCardRepository;
@@ -472,6 +473,52 @@ public class NotifyServiceImpl implements NotifyService {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String value = objectMapper.writeValueAsString(notification);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_CONVERSION_MSG_QUEUE, value);
+
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * 开票/红冲 成功通知
+	 */
+	@Override
+	public void notifyInvoiceMsgAsync(InvoiceNotification invoiceNotification) {
+		
+		String invoiceNo = invoiceNotification.getInvoiceNo();
+		
+		if (StringUtils.isEmpty(invoiceNo)) {
+			log.info("notifyWorkOrderConversionAsync: orderid is empty, will return ! ");
+			return;
+		}
+		
+		String timestamp = invoiceNotification.getTimestamp();
+		String checkKey = invoiceNo + "_" + timestamp;
+		String key = ModelConstant.KEY_INVOICE_NOTIFICATION_LOCK + checkKey;
+		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		if (0 == result) {
+			log.info("invoiceNo : " + invoiceNo + ", already notified, will skip ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(invoiceNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, value);
 
 				isSuccess = true;
 			} catch (Exception e) {

@@ -32,6 +32,7 @@ import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.notify.ConversionNotification;
+import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
@@ -943,6 +944,58 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					thread.setRectified(Boolean.FALSE);
 				}
 				communityService.updateThread(thread);
+				
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+	}
+	
+	
+	/**
+	 * 发票开局模板消息通知
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void sendInvoiceMsgAsyc() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String queue = redisTemplate.opsForList().leftPop(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, 10, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(queue)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				InvoiceNotification in = objectMapper.readValue(queue, new TypeReference<InvoiceNotification>(){});
+				logger.info("start to consume invoice msg queue : " + in);
+				
+				String openid = in.getOpenid();
+				User user = null;
+				List<User> userList = userRepository.findByOpenid(openid);
+				if (userList!=null && !userList.isEmpty()) {
+					user = userList.get(0);
+				}else {
+					logger.warn("can not find user, openid : " + openid);
+				}
+				boolean isSuccess = false;
+				if (user!=null) {
+					try {
+						in.setUser(user);
+						isSuccess = gotongService.sendMsg4FinishInvoice(in);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);	//发送失败的，需要重发
+						
+					}
+					if (!isSuccess) {
+						redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
+					}
+				}
+				
 				
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);

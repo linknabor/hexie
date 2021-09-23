@@ -18,6 +18,7 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
@@ -735,6 +736,51 @@ public class TemplateMsgService {
 		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
 		msg.setUrl(url);
 		msg.setTouser(baseEventDTO.getOpenid());
+		return sendMsg(msg, accessToken);
+
+	}
+	
+	/**
+	 * 发送电子发票开具成功的模板消息
+	 * @param opinionRequest
+	 * @param accessToken
+	 */
+	public boolean sendFinishInvoiceMessage(InvoiceNotification invoiceNotification, String accessToken) {
+		
+		String first = "您的电子发票已开具。";
+		if ("1".equals(invoiceNotification.getApplyType())) {
+			first = "您的电子发票已红冲。";
+		}
+		String shopName = invoiceNotification.getShopName();
+		String title = invoiceNotification.getInvoiceTitle();
+		String type = invoiceNotification.getInvoiceType();
+		String amt = invoiceNotification.getJsAmt();
+		String makeDate = invoiceNotification.getMakeDate();
+    	
+    	TemplateItem firstItem = new TemplateItem(first);
+    	TemplateItem keywordItem1 = new TemplateItem(shopName);
+    	TemplateItem keywordItem2 = new TemplateItem(title);
+    	TemplateItem keywordItem3 = new TemplateItem(type);
+    	TemplateItem keywordItem4 = new TemplateItem(amt);
+    	TemplateItem keywordItem5 = new TemplateItem(makeDate);
+    	TemplateItem remarkItem = new TemplateItem("点击查看发票详情");
+
+		CommonVO2 vo = new CommonVO2();
+		vo.setFirst(firstItem);
+		vo.setKeyword1(keywordItem1);
+		vo.setKeyword2(keywordItem2);
+		vo.setKeyword3(keywordItem3);
+		vo.setKeyword4(keywordItem4);
+		vo.setKeyword5(keywordItem5);
+		vo.setRemark(remarkItem);
+
+		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_FINISH, 
+				invoiceNotification.getUser().getAppId()));
+		String url = wechatMsgService.getMsgUrl(invoiceNotification.getPdfAddr());
+		msg.setUrl(url);
+		msg.setTouser(invoiceNotification.getOpenid());
 		return sendMsg(msg, accessToken);
 
 	}
