@@ -501,8 +501,7 @@ public class NotifyServiceImpl implements NotifyService {
 			return;
 		}
 		
-		String timestamp = invoiceNotification.getTimestamp();
-		String checkKey = orderId + "_" + timestamp;
+		String checkKey = orderId;
 		String key = ModelConstant.KEY_INVOICE_NOTIFICATION_LOCK + checkKey;
 		Long result = RedisLock.lock(key, redisTemplate, 3600l);
 		if (0 == result) {
