@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,9 +232,12 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid) {
+	public void updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid) {
 		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id, openid);
-		return r.getResult();
+		if ("99".equals(r.getResult())) {
+			throw new BizValidateException("网络异常，请刷新后重试。");
+		}
+		redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG, "1", 1, TimeUnit.DAYS);
 	}
 
 	@Override
@@ -606,11 +610,6 @@ public class WuyeServiceImpl implements WuyeService {
 			log.info("user is null, will return ! ");
 			return;
 		}
-		if (StringUtils.isEmpty(tradeWaterId)) {
-			log.info("tradeWaterId is null, will return ! ");
-			return;
-		}
-		
 		int retryTimes = 0;
 		boolean isSuccess = false;
 		
@@ -620,7 +619,6 @@ public class WuyeServiceImpl implements WuyeService {
 				
 				BindHouseQueue bindHouseQueue = new BindHouseQueue();
 				bindHouseQueue.setUser(user);
-				bindHouseQueue.setTradeWaterId(tradeWaterId);
 				
 				String value = objectMapper.writeValueAsString(bindHouseQueue);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, value);

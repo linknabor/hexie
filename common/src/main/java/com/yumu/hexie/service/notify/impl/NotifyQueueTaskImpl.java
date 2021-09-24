@@ -974,6 +974,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				InvoiceNotification in = objectMapper.readValue(queue, new TypeReference<InvoiceNotification>(){});
 				logger.info("start to consume invoice msg queue : " + in);
 				
+				//查看用户有没有在移动端申请，如果没有，不推送模板消息
+				String orderId = in.getOrderId();
+				String applied = redisTemplate.opsForValue().get(orderId);
+				if (!"1".equals(applied)) {
+					continue;
+				}
 				String openid = in.getOpenid();
 				User user = null;
 				List<User> userList = userRepository.findByOpenid(openid);

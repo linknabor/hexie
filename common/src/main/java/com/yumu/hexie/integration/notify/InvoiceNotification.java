@@ -12,8 +12,8 @@ public class InvoiceNotification implements Serializable {
 	 */
 	private static final long serialVersionUID = -7934245648248376679L;
 
-	@JsonProperty("invoice_no")
-	private String invoiceNo;	//发票号码
+	@JsonProperty("trade_water_id")
+	private String orderId;	//交易流水号
 	@JsonProperty("shop_name")
 	private String shopName;	//商户名称
 	@JsonProperty("invoice_title")
@@ -81,12 +81,6 @@ public class InvoiceNotification implements Serializable {
 	public void setOpenid(String openid) {
 		this.openid = openid;
 	}
-	public String getInvoiceNo() {
-		return invoiceNo;
-	}
-	public void setInvoiceNo(String invoiceNo) {
-		this.invoiceNo = invoiceNo;
-	}
 	public String getTimestamp() {
 		return timestamp;
 	}
@@ -99,12 +93,18 @@ public class InvoiceNotification implements Serializable {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	public String getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
 	@Override
 	public String toString() {
-		return "InvoiceNotification [invoiceNo=" + invoiceNo + ", shopName=" + shopName + ", invoiceTitle="
-				+ invoiceTitle + ", invoiceType=" + invoiceType + ", jsAmt=" + jsAmt + ", makeDate=" + makeDate
-				+ ", pdfAddr=" + pdfAddr + ", applyType=" + applyType + ", openid=" + openid + ", timestamp="
-				+ timestamp + "]";
+		return "InvoiceNotification [orderId=" + orderId + ", shopName=" + shopName + ", invoiceTitle=" + invoiceTitle
+				+ ", invoiceType=" + invoiceType + ", jsAmt=" + jsAmt + ", makeDate=" + makeDate + ", pdfAddr="
+				+ pdfAddr + ", applyType=" + applyType + ", openid=" + openid + ", timestamp=" + timestamp + ", user="
+				+ user + "]";
 	}
 	
 	
