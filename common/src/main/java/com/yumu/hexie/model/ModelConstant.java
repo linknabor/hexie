@@ -478,5 +478,5 @@ public class ModelConstant {
 	public static final String KEY_REGISER_AND_BIND_QUEUE = "queue:registerBind";
 	public static final String KEY_INVOICE_NOTIFICATION_LOCK = "lock:invoiceNotification:";	//开票成功通知-锁
 	public static final String KEY_INVOICE_NOTIFICATION_QUEUE = "queue:invoice:notification";	//开票成功通知
-
+	public static final String KEY_INVOICE_APPLICATIONF_FLAG = "invoice:application:";	//发票申请标记，后面接trade_water_id
 }		

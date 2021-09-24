@@ -149,7 +149,7 @@ public interface WuyeService {
 	 * @param trade_water_id
 	 * @return
 	 */
-	String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid);
+	void updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid);
 
 	/**
 	 * 根据交易号获取对应房子的发票信息

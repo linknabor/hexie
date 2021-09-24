@@ -516,11 +516,9 @@ public class WuyeController extends BaseController {
 			return new BaseResult<UserInfo>().failMsg("校验失败！");
 		}
 		
-		String result = wuyeService.updateInvoice(mobile, applicationReq.getInvoice_title(), applicationReq.getInvoice_title_type(), 
+		wuyeService.updateInvoice(mobile, applicationReq.getInvoice_title(), applicationReq.getInvoice_title_type(), 
 				applicationReq.getCredit_code(), applicationReq.getTrade_water_id(), applicationReq.getOpenid());
-		if ("99".equals(result)) {
-			return BaseResult.fail("网络异常，请刷新后重试");
-		}
+		
 		
 		if (!StringUtils.isEmpty(openid)) {
 			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id());	//队列，异步执行
