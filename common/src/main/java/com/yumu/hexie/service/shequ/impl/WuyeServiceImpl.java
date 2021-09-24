@@ -237,7 +237,8 @@ public class WuyeServiceImpl implements WuyeService {
 		if ("99".equals(r.getResult())) {
 			throw new BizValidateException("网络异常，请刷新后重试。");
 		}
-		redisTemplate.opsForValue().setIfAbsent(ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG, "1", 1, TimeUnit.DAYS);
+		String key = ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + trade_water_id;
+		redisTemplate.opsForValue().setIfAbsent(key, "1", 1, TimeUnit.DAYS);
 	}
 
 	@Override
