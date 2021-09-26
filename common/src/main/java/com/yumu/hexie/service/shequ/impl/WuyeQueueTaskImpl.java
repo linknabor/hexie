@@ -106,7 +106,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 						logger.info("交易[" + queue.getTradeWaterId() + "] 用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。.");
 						isSuccess = true;
 					} else {
-						logger.error("用户：" + user.getId() + " + 交易[" + queue.getTradeWaterId() + "]，绑定房屋失败！");
+						logger.error("用户：" + user.getId() + " 交易[" + queue.getTradeWaterId() + "]，绑定房屋失败！");
 						totalFailed++;
 						Thread.sleep(10000);
 					}

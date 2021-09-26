@@ -972,14 +972,21 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				InvoiceNotification in = objectMapper.readValue(queue, new TypeReference<InvoiceNotification>(){});
-				logger.info("start to consume invoice msg queue : " + in);
 				
 				//查看用户有没有在移动端申请，如果没有，不推送模板消息
 				String orderId = in.getOrderId();
 				String applied = redisTemplate.opsForValue().get(orderId);
-				if (!"1".equals(applied)) {
+				if (!"1".equals(applied)) {	//表示用户没有在移动端申请。扔回队列继续轮，直到用户在移动端申请位置
+					
+					if (System.currentTimeMillis() - Long.valueOf(in.getTimestamp()) > 3600l*24*10) {	//超过10天没申请，出队
+						logger.info("user does not apply 4 invoice .. more than 10 days. will remove from the queue! orderId : " + orderId);
+					} else {
+						redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
+//						logger.info("user does not apply 4 invoice .. will loop again. orderId: " + orderId);
+					}
 					continue;
 				}
+				logger.info("start to consume invoice msg queue : " + in);
 				String openid = in.getOpenid();
 				User user = null;
 				List<User> userList = userRepository.findByOpenid(openid);
