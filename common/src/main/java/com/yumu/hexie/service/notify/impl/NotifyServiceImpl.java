@@ -503,7 +503,7 @@ public class NotifyServiceImpl implements NotifyService {
 		
 		String checkKey = orderId;
 		String key = ModelConstant.KEY_INVOICE_NOTIFICATION_LOCK + checkKey;
-		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*10);
 		if (0 == result) {
 			log.info("invoiceNo : " + orderId + ", already notified, will skip ! ");
 			return;
