@@ -309,7 +309,11 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				
 				if (isSuccess) {
-					wuyeService.bindHouseByTradeAsync("1", savedUser, queue.getTradeWaterId(), "5");	//绑定房屋队列
+					try {
+						wuyeService.bindHouseByTradeAsync("1", savedUser, queue.getTradeWaterId(), "5");	//绑定房屋队列
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}	
 				}
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, json);

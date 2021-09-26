@@ -620,7 +620,7 @@ public class WuyeServiceImpl implements WuyeService {
 				
 				BindHouseQueue bindHouseQueue = new BindHouseQueue();
 				bindHouseQueue.setUser(user);
-				
+				bindHouseQueue.setTradeWaterId(tradeWaterId);
 				String value = objectMapper.writeValueAsString(bindHouseQueue);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, value);
 				isSuccess = true;
