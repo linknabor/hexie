@@ -975,7 +975,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				
 				//查看用户有没有在移动端申请，如果没有，不推送模板消息
 				String orderId = in.getOrderId();
-				String applied = redisTemplate.opsForValue().get(orderId);
+				String applied = redisTemplate.opsForValue().get(ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + orderId);
 				if (!"1".equals(applied)) {	//表示用户没有在移动端申请。扔回队列继续轮，直到用户在移动端申请位置
 					
 					if (System.currentTimeMillis() - Long.valueOf(in.getTimestamp()) > 3600l*24*10) {	//超过10天没申请，出队

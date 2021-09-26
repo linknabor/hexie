@@ -112,9 +112,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 					}
 				}
 				
-				if (!isSuccess && totalFailed >= 3) {
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, json);
-				}
+//				if (!isSuccess && totalFailed >= 3) {
+//					redisTemplate.opsForList().rightPush(ModelConstant.KEY_BIND_HOUSE_QUEUE, json);
+//				}
 			
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
