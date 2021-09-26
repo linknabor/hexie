@@ -301,6 +301,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 						savedUser = userService.simpleRegister(dbUser);
 						isSuccess = true;
 					} else if (!StringUtils.isEmpty(dbUser.getTel())){	//这种情况只要绑定房子即可
+						savedUser = dbUser;
 						isSuccess = true;
 					}
 					
