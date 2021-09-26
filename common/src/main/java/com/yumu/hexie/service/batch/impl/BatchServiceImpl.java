@@ -136,6 +136,7 @@ public class BatchServiceImpl implements BatchService {
 //		userQueueTask.eventUnsubscribe();
 		notifyQueueTask.sendWorkOrderMsgNotificationAsyc();
 		notifyQueueTask.handleConversionAsyc();
+		notifyQueueTask.sendInvoiceMsgAsyc();
 
 		logger.info("异步队列任务启动完成。");
 		
