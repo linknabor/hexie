@@ -28,6 +28,8 @@ public class InvoiceNotification implements Serializable {
 	private String pdfAddr;	//发票地址
 	@JsonProperty("apply_type")
 	private String applyType;	//正常开票或者红冲;0正数1负数
+	
+	private String applied;	//是否已经申请。一般公众号交易无须申请。0否1是
 	private String openid;	//用户openid
 	private String timestamp;	//时间戳
 	
@@ -99,12 +101,18 @@ public class InvoiceNotification implements Serializable {
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
+	public String getApplied() {
+		return applied;
+	}
+	public void setApplied(String applied) {
+		this.applied = applied;
+	}
 	@Override
 	public String toString() {
 		return "InvoiceNotification [orderId=" + orderId + ", shopName=" + shopName + ", invoiceTitle=" + invoiceTitle
 				+ ", invoiceType=" + invoiceType + ", jsAmt=" + jsAmt + ", makeDate=" + makeDate + ", pdfAddr="
-				+ pdfAddr + ", applyType=" + applyType + ", openid=" + openid + ", timestamp=" + timestamp + ", user="
-				+ user + "]";
+				+ pdfAddr + ", applyType=" + applyType + ", applied=" + applied + ", openid=" + openid + ", timestamp="
+				+ timestamp + ", user=" + user + "]";
 	}
 	
 	

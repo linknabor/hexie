@@ -163,7 +163,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setEventKey(eventKey);
 				baseEventDTO.setUser(user);
 				
-				boolean isSuccess = false;	//投放会员卡是否成功
+				boolean isSuccess = false;
 				try {
 					wuyeService.scanEvent4Invoice(baseEventDTO);
 					isSuccess = true;
@@ -220,7 +220,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setEventKey(eventKey);
 				baseEventDTO.setUser(user);
 				
-				boolean isSuccess = false;	//投放会员卡是否成功
+				boolean isSuccess = false;
 				try {
 					isSuccess = wuyeService.scanEvent4Invoice(baseEventDTO);
 				} catch (Exception e) {
