@@ -778,7 +778,7 @@ public class TemplateMsgService {
 		msg.setData(vo);
 		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_FINISH, 
 				invoiceNotification.getUser().getAppId()));
-		String url = wechatMsgService.getMsgUrl(invoiceNotification.getPdfAddr());
+		String url = invoiceNotification.getPdfAddr();
 		msg.setUrl(url);
 		msg.setTouser(invoiceNotification.getOpenid());
 		return sendMsg(msg, accessToken);
