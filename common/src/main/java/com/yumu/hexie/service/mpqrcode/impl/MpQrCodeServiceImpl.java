@@ -12,7 +12,11 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.resp.BaseResult;
+import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.mpqrcode.MpQrCodeService;
 import com.yumu.hexie.service.mpqrcode.req.CreateMpQrCodeReq;
@@ -37,6 +41,8 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 	private RestUtil restUtil;
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
 
 	@Override
 	public String createQrCode(CreateMpQrCodeReq createQrCodeReq) throws Exception {
@@ -49,7 +55,7 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		String appid = createQrCodeReq.getAppid();
 		
 		Assert.hasText(orderId, "交易ID不能为空");
-		Assert.hasText(tranAmt, "交易金额不能未空");
+		Assert.hasText(tranAmt, "交易金额不能为空");
 		Assert.hasText(shopName, "商户名称不能为空");
 		Assert.hasText(appid, "appid不能为空");
 		
@@ -86,10 +92,25 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		return genQrCodeResponse.getUrl();
 	}
 	
-	public static void main(String[] args) {
-		
-		String str = "…";
-		System.out.println(str.length());
-	}
+	@Override
+	public String getQrCode(String tradeWaterId) throws Exception {
 
+		logger.info("getQrCode, tradeWaterId : " + tradeWaterId);
+		Assert.hasText(tradeWaterId, "交易ID不能为空");
+		User user = new User();
+		String mpUrl = "";
+		BaseResult<MpQrCodeParam> baseResult = wuyeUtil2.queryMpQrCodeParam(user, tradeWaterId);
+		if (baseResult.isSuccess()) {
+			MpQrCodeParam mpQrCodeParam = baseResult.getData();
+			CreateMpQrCodeReq req = new CreateMpQrCodeReq();
+			req.setAppid(mpQrCodeParam.getAppid());
+			req.setOrderId(mpQrCodeParam.getTrade_water_id());
+			req.setShopName(mpQrCodeParam.getShop_name());
+			req.setTranAmt(mpQrCodeParam.getTran_amt());
+			mpUrl = createQrCode(req);
+		} else {
+			logger.error("can't not gen qrcode, msg : " + baseResult.getMessage());
+		}
+		return mpUrl;
+	}
 }

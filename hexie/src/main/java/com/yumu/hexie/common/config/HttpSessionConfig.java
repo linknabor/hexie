@@ -26,7 +26,7 @@ public class HttpSessionConfig {
 			DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
 			if (testMode) {
 				cookieSerializer.setUseHttpOnlyCookie(false);
-				cookieSerializer.setSameSite("None");
+//				cookieSerializer.setSameSite("None");
 				cookieSerializer.setCookiePath("/");
 				cookieSerializer.setUseSecureCookie(true);
 			}
