@@ -233,12 +233,18 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public void updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid) {
+		
+		String key = ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + trade_water_id;
+		String applied = redisTemplate.opsForValue().get(key);
+		if ("1".equals(applied)) {
+			throw new BizValidateException("电子发票已申请，请勿重复操作。");
+		}
 		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id, openid);
 		if ("99".equals(r.getResult())) {
 			throw new BizValidateException("网络异常，请刷新后重试。");
 		}
-		String key = ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + trade_water_id;
-		redisTemplate.opsForValue().setIfAbsent(key, "1", 1, TimeUnit.DAYS);
+		
+		redisTemplate.opsForValue().setIfAbsent(key, "1", 3, TimeUnit.DAYS);
 	}
 
 	@Override
