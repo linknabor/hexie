@@ -1,16 +1,20 @@
 package com.yumu.hexie.service.mpqrcode.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.QRCodeUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -43,6 +47,9 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private WuyeUtil2 wuyeUtil2;
+	
+	@Value(value="qrcode.image.dir")
+	private String qrcodeImgPath;
 
 	@Override
 	public String createQrCode(CreateMpQrCodeReq createQrCodeReq) throws Exception {
@@ -98,7 +105,7 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		logger.info("getQrCode, tradeWaterId : " + tradeWaterId);
 		Assert.hasText(tradeWaterId, "交易ID不能为空");
 		User user = new User();
-		String mpUrl = "";
+		String qrCodeStr = "";
 		BaseResult<MpQrCodeParam> baseResult = wuyeUtil2.queryMpQrCodeParam(user, tradeWaterId);
 		if (baseResult.isSuccess()) {
 			MpQrCodeParam mpQrCodeParam = baseResult.getData();
@@ -107,10 +114,21 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 			req.setOrderId(mpQrCodeParam.getTrade_water_id());
 			req.setShopName(mpQrCodeParam.getShop_name());
 			req.setTranAmt(mpQrCodeParam.getTran_amt());
-			mpUrl = createQrCode(req);
+			String mpUrl = createQrCode(req);
+			
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			try {
+				String logoPath = qrcodeImgPath;
+				QRCodeUtil.createQRCodeToIO(mpUrl, logoPath, os);
+				String codeStr = new String (Base64.getEncoder().encode(os.toByteArray()));
+				qrCodeStr = "data:image/jpg;base64," + codeStr;
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
 		} else {
 			logger.error("can't not gen qrcode, msg : " + baseResult.getMessage());
 		}
-		return mpUrl;
+		return qrCodeStr;
 	}
 }

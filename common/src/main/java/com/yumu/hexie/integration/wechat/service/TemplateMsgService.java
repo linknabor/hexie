@@ -712,7 +712,7 @@ public class TemplateMsgService {
 			return true;
 		}
     	
-    	TemplateItem firstItem = new TemplateItem("请及时完成自助开票，点击详情进入");
+    	TemplateItem firstItem = new TemplateItem("请点击查看详情进入电子发票自助申请！");
     	TemplateItem keywordItem1 = new TemplateItem(shopName);
     	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
     	TemplateItem remarkItem = new TemplateItem("请及时进行申请");
