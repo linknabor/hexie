@@ -48,7 +48,7 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 	@Autowired
 	private WuyeUtil2 wuyeUtil2;
 	
-	@Value(value="qrcode.image.dir")
+	@Value(value = "${qrcode.image.dir}")
 	private String qrcodeImgPath;
 
 	@Override
