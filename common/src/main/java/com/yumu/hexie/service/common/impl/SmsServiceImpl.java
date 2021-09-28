@@ -238,7 +238,7 @@ public class SmsServiceImpl implements SmsService {
 		Object totalSent = stringRedisTemplate.opsForValue().get(key);
 		if (totalSent != null) {
 			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
-			if (sent > 20) {
+			if (sent > 15) {
 				throw new BizValidateException("当日短信验证码发送次数超限，请联系社区客服。");
 			}
 		}else {
@@ -257,7 +257,7 @@ public class SmsServiceImpl implements SmsService {
 		Object totalSent = stringRedisTemplate.opsForValue().get(key);
 		if (totalSent != null) {
 			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
-			if (sent > 3) {
+			if (sent > 15) {
 				throw new BizValidateException("发送过于频繁，请稍后再试");
 			}
 		}else {

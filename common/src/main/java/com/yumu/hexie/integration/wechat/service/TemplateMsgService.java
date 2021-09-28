@@ -18,6 +18,7 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
@@ -37,6 +38,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
@@ -680,5 +682,107 @@ public class TemplateMsgService {
     	sendMsg(msg, accessToken);
     	
     }
+    
+    
+    /**
+	 * 发送电子发票申请模板消息
+	 * @param opinionRequest
+	 * @param accessToken
+	 */
+	public boolean sendInvoiceApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
+		
+		
+		String eventKey = baseEventDTO.getEventKey();
+    	if (!eventKey.startsWith("01") && !eventKey.startsWith("qrscene_01")) {	//01表示扫二维码开票的场景
+			return true;
+		}
+    	String[]eventKeyArr = eventKey.split("\\|");
+    	if (eventKeyArr == null || eventKeyArr.length < 4) {
+			return true;
+		}
+    	String tradeWaterId = "";
+    	String tranAmt = ""; 
+    	String shopName = "";
+    	try {
+			tradeWaterId = eventKeyArr[1];
+			tranAmt = eventKeyArr[2];
+			shopName = eventKeyArr[3];
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return true;
+		}
+    	
+    	TemplateItem firstItem = new TemplateItem("请点击查看详情进入电子发票自助申请！");
+    	TemplateItem keywordItem1 = new TemplateItem(shopName);
+    	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
+    	TemplateItem remarkItem = new TemplateItem("请及时进行申请");
+
+		CommonVO2 vo = new CommonVO2();
+		vo.setFirst(firstItem);
+		vo.setKeyword1(keywordItem1);
+		vo.setKeyword2(keywordItem2);
+		vo.setRemark(remarkItem);
+
+		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER, baseEventDTO.getAppId()));
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_INVOICE_APPLICATION_URL);
+		url = AppUtil.addAppOnUrl(url, baseEventDTO.getAppId());
+		
+		String tel = baseEventDTO.getUser().getTel();
+		if (StringUtils.isEmpty(tel)) {
+			tel = "";
+		}
+		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
+		msg.setUrl(url);
+		msg.setTouser(baseEventDTO.getOpenid());
+		return sendMsg(msg, accessToken);
+
+	}
+	
+	/**
+	 * 发送电子发票开具成功的模板消息
+	 * @param opinionRequest
+	 * @param accessToken
+	 */
+	public boolean sendFinishInvoiceMessage(InvoiceNotification invoiceNotification, String accessToken) {
+		
+		String first = "您的电子发票已开具。";
+		if ("1".equals(invoiceNotification.getApplyType())) {
+			first = "您的电子发票已红冲。";
+		}
+		String shopName = invoiceNotification.getShopName();
+		String title = invoiceNotification.getInvoiceTitle();
+		String type = invoiceNotification.getInvoiceType();
+		String amt = invoiceNotification.getJsAmt();
+		String makeDate = invoiceNotification.getMakeDate();
+    	
+    	TemplateItem firstItem = new TemplateItem(first);
+    	TemplateItem keywordItem1 = new TemplateItem(shopName);
+    	TemplateItem keywordItem2 = new TemplateItem(title);
+    	TemplateItem keywordItem3 = new TemplateItem(type);
+    	TemplateItem keywordItem4 = new TemplateItem(amt);
+    	TemplateItem keywordItem5 = new TemplateItem(makeDate);
+    	TemplateItem remarkItem = new TemplateItem("点击查看发票详情");
+
+		CommonVO2 vo = new CommonVO2();
+		vo.setFirst(firstItem);
+		vo.setKeyword1(keywordItem1);
+		vo.setKeyword2(keywordItem2);
+		vo.setKeyword3(keywordItem3);
+		vo.setKeyword4(keywordItem4);
+		vo.setKeyword5(keywordItem5);
+		vo.setRemark(remarkItem);
+
+		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_FINISH, 
+				invoiceNotification.getUser().getAppId()));
+		String url = invoiceNotification.getPdfAddr();
+		msg.setUrl(url);
+		msg.setTouser(invoiceNotification.getOpenid());
+		return sendMsg(msg, accessToken);
+
+	}
 
 }

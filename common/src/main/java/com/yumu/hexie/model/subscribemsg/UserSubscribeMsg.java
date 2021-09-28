@@ -4,6 +4,11 @@ import javax.persistence.Entity;
 
 import com.yumu.hexie.model.BaseModel;
 
+/**
+ * 订阅消息
+ * @author david
+ *
+ */
 @Entity
 public class UserSubscribeMsg extends BaseModel {
 

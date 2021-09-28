@@ -26,6 +26,7 @@ import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
+import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
@@ -75,6 +76,7 @@ public class WuyeUtil2 {
 	private static final String SEND_NOTIFICATION_URL = "msg/sendNotificationSDO.do";//业主意见回复消息推送
 	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
+	private static final String QUERY_MPQRCODE_PARAM_URL = "queryMpQrCodeParamSDO.do";//获取生成公众号动态二维码的必要参数
 
 
 	/**
@@ -551,6 +553,26 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
+	
+	/**
+	 * 获取生成公众号动态二维码的必要参数
+	 * @param user
+	 * @param opinionRequest
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<MpQrCodeParam> queryMpQrCodeParam(User user, String tradeWaterId) throws Exception{
+		String requestUrl = requestUtil.getRequestUrl(user, "上海");
+		requestUrl += QUERY_MPQRCODE_PARAM_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("trade_water_id", tradeWaterId);
 
+		TypeReference<CommonResponse<MpQrCodeParam>> typeReference = new TypeReference<CommonResponse<MpQrCodeParam>>(){};
+		CommonResponse<MpQrCodeParam> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<MpQrCodeParam> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+	}
 	
 }

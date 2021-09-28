@@ -44,7 +44,8 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 	private MaintenanceService maintenanceService;
 
 	/**
-	 * 关注事件 1.发送关注客服消息，推送会员卡 2.记录推送出去的会员卡到表里
+	 * 关注事件 1.发送关注客服消息，推送会员卡 2.记录推送出去的会员卡到表里.
+	 * 3.如果是发票二维码进来的，退送开票信息（二维码上有场景信息）
 	 */
 	@SuppressWarnings("unchecked")
 	@Async("taskExecutor")
@@ -72,24 +73,21 @@ public class WechatCardQueueTaskImpl implements WechatCardQueueTask {
 				String appId = map.get("appId");
 				String openid = map.get("openid");
 				
-				//校验当前公众号是否卡通了卡券服务
-				if (!systemConfigService.isCardServiceAvailable(appId)) {
-					continue;
-				}
 				User user = new User();
 				user.setOpenid(openid);
 				user.setAppId(appId);
 
 				EventSubscribeDTO eventSubscribeDTO = new EventSubscribeDTO();
 				eventSubscribeDTO.setUser(user);
-				boolean isSuccess = false;
+				
+				boolean isSuccess = false;	//投放会员卡是否成功
 				try {
 					wechatCardService.eventSubscribe(eventSubscribeDTO);
 					isSuccess = true;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
-
+				
 				if (!isSuccess) {
 					logger.info("subscribe event consume failed !, repush into the queue. json : " + json);
 					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SUBSCRIBE_QUEUE, json);

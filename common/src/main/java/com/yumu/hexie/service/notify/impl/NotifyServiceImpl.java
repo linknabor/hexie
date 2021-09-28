@@ -20,6 +20,8 @@ import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.notify.ConversionNotification;
+import com.yumu.hexie.integration.notify.InvoiceNotification;
+
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCardRepository;
@@ -101,7 +103,7 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 			//4.绑定所缴纳物业费的房屋
 			if ("0".equals(payNotification.getTranType())) {	//0管理费， 1其他收费
-				wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId());
+				wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId(), "4");
 			}
 			
 		}
@@ -486,5 +488,51 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		
 	}
+	
+	/**
+	 * 开票/红冲 成功通知
+	 */
+	@Override
+	public void notifyInvoiceMsgAsync(InvoiceNotification invoiceNotification) {
+		
+		String orderId = invoiceNotification.getOrderId();
+		
+		if (StringUtils.isEmpty(orderId)) {
+			log.info("notifyWorkOrderConversionAsync: orderid is empty, will return ! ");
+			return;
+		}
+		
+		String checkKey = orderId;
+		String key = ModelConstant.KEY_INVOICE_NOTIFICATION_LOCK + checkKey;
+		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*10);
+		if (0 == result) {
+			log.info("invoiceNo : " + orderId + ", already notified, will skip ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(invoiceNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, value);
+
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+
 
 }

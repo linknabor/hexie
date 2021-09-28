@@ -27,6 +27,8 @@ import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.notify.ConversionNotification;
+import com.yumu.hexie.integration.notify.InvoiceNotification;
+
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
@@ -944,5 +946,72 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 			}
 		}
 	}
+	
+	
+	/**
+	 * 发票开局模板消息通知
+	 */
+	@Override
+	@Async("taskExecutor")
+	public void sendInvoiceMsgAsyc() {
+
+		while(true) {
+			try {
+				if (!maintenanceService.isQueueSwitchOn()) {
+					logger.info("queue switch off ! ");
+					Thread.sleep(60000);
+					continue;
+				}
+				String queue = redisTemplate.opsForList().leftPop(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, 10, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(queue)) {
+					continue;
+				}
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				InvoiceNotification in = objectMapper.readValue(queue, new TypeReference<InvoiceNotification>(){});
+				
+				//查看用户有没有在移动端申请，如果没有，不推送模板消息
+				String orderId = in.getOrderId();
+				String pageApplied = redisTemplate.opsForValue().get(ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + orderId);	//页面申请
+				String applied = in.getApplied();	//公众号是1交易无须申请.其他交易0
+				if (!"1".equals(pageApplied) && !"1".equals(applied)) {	//表示用户没有在移动端申请。扔回队列继续轮，直到用户在移动端申请位置
+					
+					if (System.currentTimeMillis() - Long.valueOf(in.getTimestamp()) > 3600l*24*10*1000) {	//超过10天没申请，出队
+						logger.info("user does not apply 4 invoice .. more than 10 days. will remove from the queue! orderId : " + orderId);
+					} else {
+						redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
+//						logger.info("user does not apply 4 invoice .. will loop again. orderId: " + orderId);
+					}
+					continue;
+				}
+				logger.info("start to consume invoice msg queue : " + in);
+				String openid = in.getOpenid();
+				User user = null;
+				List<User> userList = userRepository.findByOpenid(openid);
+				if (userList!=null && !userList.isEmpty()) {
+					user = userList.get(0);
+				}else {
+					logger.warn("can not find user, openid : " + openid);
+				}
+				boolean isSuccess = false;
+				if (user!=null) {
+					try {
+						in.setUser(user);
+						isSuccess = gotongService.sendMsg4FinishInvoice(in);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);	//发送失败的，需要重发
+						
+					}
+					if (!isSuccess) {
+						redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
+					}
+				}
+				
+				
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+	}
+
 
 }

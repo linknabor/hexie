@@ -8,6 +8,7 @@ public class EventSubscribeDTO {
 	private String getCardUrl;	//领取地址
 	private String couponId;	//红包礼券
 	private String getCouponUrl;	//领取地址
+	
 	private User user;	//用户信息
 	
 	public String getCardId() {

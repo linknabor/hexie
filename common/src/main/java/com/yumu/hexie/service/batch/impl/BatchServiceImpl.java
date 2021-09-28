@@ -112,7 +112,10 @@ public class BatchServiceImpl implements BatchService {
 		init();
 		
 		wuyeQueueTask.bindHouseByTrade();
-		wechatCardQueueTask.eventSubscribe();
+		wuyeQueueTask.eventScan4Invoice();
+		wuyeQueueTask.eventScanSubscribe4Invoice();
+		wuyeQueueTask.registerAndBind();
+//		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
 		wechatCardQueueTask.eventUpdateCard();
 		wechatCardQueueTask.updatePointAsync();
@@ -133,6 +136,8 @@ public class BatchServiceImpl implements BatchService {
 //		userQueueTask.eventUnsubscribe();
 		notifyQueueTask.sendWorkOrderMsgNotificationAsyc();
 		notifyQueueTask.handleConversionAsyc();
+		notifyQueueTask.sendInvoiceMsgAsyc();
+
 
 		logger.info("异步队列任务启动完成。");
 		
@@ -201,7 +206,7 @@ public class BatchServiceImpl implements BatchService {
 	public void fixBindHouse(String userId, String tradeWaterId) {
 
 		User user = userRepository.findById(Long.valueOf(userId)).get();
-		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId);
+		wuyeService.bindHouseByTradeAsync("1", user, tradeWaterId, "");
 	}
 
 

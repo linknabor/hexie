@@ -20,6 +20,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
 
@@ -148,7 +149,7 @@ public interface WuyeService {
 	 * @param trade_water_id
 	 * @return
 	 */
-	String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id);
+	void updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid);
 
 	/**
 	 * 根据交易号获取对应房子的发票信息
@@ -226,7 +227,7 @@ public interface WuyeService {
 	 * @param user
 	 * @param tradeWaterId
 	 */
-	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId);
+	void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId, String bindType);
 
 	/**
 	 * 根据户号获取房屋信息
@@ -243,14 +244,6 @@ public interface WuyeService {
 	 */
 	void addCouponsFromSeed(User user, List<CouponCombination> list);
 
-	/**
-	 * 发送物业缴费红包的模板消息
-	 * @param user
-	 * @param tradeWaterId
-	 * @param feePrice
-	 */
-	void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice);
-	
 	/**
 	 * 获取支付的优惠明细
 	 * @param prepayRequestDTO
@@ -327,4 +320,18 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception;
+	
+	/**
+	 * 扫公众号二维码申请电子发票事件
+	 * @param baseEventDTO
+	 * @return 
+	 */
+	boolean scanEvent4Invoice(BaseEventDTO baseEventDTO);
+
+	/**
+	 * 申请电子发票后创建用户并为其绑定房屋
+	 * @param user
+	 * @param tradeWaterId
+	 */
+	void registerAndBind(User user, String tradeWaterId);
 }

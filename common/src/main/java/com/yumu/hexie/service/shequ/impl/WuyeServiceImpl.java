@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
@@ -44,6 +44,7 @@ import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
@@ -52,7 +53,7 @@ import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
-import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
@@ -77,10 +78,6 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private LocationService locationService;
 	
-	
-	@Autowired
-	private SystemConfigService systemConfigService;
-	
 	@Autowired
 	private UserRepository userRepository;
 	
@@ -94,7 +91,7 @@ public class WuyeServiceImpl implements WuyeService {
 	private ServiceOperatorRepository serviceOperatorRepository;
 	
 	@Autowired
-	private TemplateMsgService templateMsgService;
+	private GotongService gotongService;
 	
 	@Override
 	public HouseListVO queryHouse(User user) {
@@ -235,9 +232,19 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public String updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id) {
-		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id);
-		return r.getResult();
+	public void updateInvoice(String mobile, String invoice_title, String invoice_title_type, String credit_code, String trade_water_id, String openid) {
+		
+		String key = ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + trade_water_id;
+		String applied = redisTemplate.opsForValue().get(key);
+		if ("1".equals(applied)) {
+			throw new BizValidateException("电子发票已申请，请勿重复操作。");
+		}
+		BaseResult<String> r = WuyeUtil.updateInvoice(mobile, invoice_title, invoice_title_type, credit_code, trade_water_id, openid);
+		if ("99".equals(r.getResult())) {
+			throw new BizValidateException("网络异常，请刷新后重试。");
+		}
+		
+		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
 	}
 
 	@Override
@@ -372,9 +379,10 @@ public class WuyeServiceImpl implements WuyeService {
 	 * @param bindSwitch
 	 * @param user
 	 * @param tradeWaterId
+	 * @param bindType 4:交易绑定，5开票绑定
 	 */
 	@Override
-	public void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId) {
+	public void bindHouseByTradeAsync(String bindSwitch, User user, String tradeWaterId, String bindType) {
 		
 		Assert.hasText(tradeWaterId, "物业交易ID不能为空。 ");
 		
@@ -388,6 +396,7 @@ public class WuyeServiceImpl implements WuyeService {
 					BindHouseQueue bindHouseQueue = new BindHouseQueue();
 					bindHouseQueue.setUser(user);
 					bindHouseQueue.setTradeWaterId(tradeWaterId);
+					bindHouseQueue.setBindType(bindType);
 					
 					ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 					String value = objectMapper.writeValueAsString(bindHouseQueue);
@@ -465,13 +474,6 @@ public class WuyeServiceImpl implements WuyeService {
 			log.error("add Coupons for wuye Pay : " + e.getMessage());
 		}
 
-	}
-
-	@Async
-	@Override
-	public void sendPayTemplateMsg(User user, String tradeWaterId, String feePrice) {
-
-		templateMsgService.sendWuYePaySuccessMsg(user, tradeWaterId, feePrice, systemConfigService.queryWXAToken(user.getAppId()));
 	}
 
 	@Override
@@ -597,6 +599,48 @@ public class WuyeServiceImpl implements WuyeService {
 	public CellListVO getCellList(User user, String sectId, String cellAddr) throws Exception {
 		
 		return wuyeUtil2.queryCellAddr(user, sectId, cellAddr).getData();
+	}
+
+	@Override
+	public boolean scanEvent4Invoice(BaseEventDTO baseEventDTO) {
+		
+		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
+	}
+	
+	/**
+	 * 到账消息推送(给物业配置的工作人推送)
+	 */
+	@Override
+	public void registerAndBind(User user, String tradeWaterId) {
+		
+		if (user == null) {
+			log.info("user is null, will return ! ");
+			return;
+		}
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				
+				BindHouseQueue bindHouseQueue = new BindHouseQueue();
+				bindHouseQueue.setUser(user);
+				bindHouseQueue.setTradeWaterId(tradeWaterId);
+				String value = objectMapper.writeValueAsString(bindHouseQueue);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, value);
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
 	}
 
 }
