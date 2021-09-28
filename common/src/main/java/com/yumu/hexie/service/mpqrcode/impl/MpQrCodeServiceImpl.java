@@ -119,6 +119,9 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			try {
 				String logoPath = qrcodeImgPath;
+				if (StringUtils.isEmpty(logoPath)) {
+					logoPath = "";
+				}
 				QRCodeUtil.createQRCodeToIO(mpUrl, logoPath, os);
 				String codeStr = new String (Base64.getEncoder().encode(os.toByteArray()));
 				qrCodeStr = "data:image/jpg;base64," + codeStr;
