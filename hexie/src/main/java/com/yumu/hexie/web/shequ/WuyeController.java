@@ -513,7 +513,7 @@ public class WuyeController extends BaseController {
 			log.info("no openid, will not create user !");
 		}
 		if (!isCheck) {
-			return new BaseResult<UserInfo>().failMsg("校验失败！");
+			return new BaseResult<UserInfo>().failMsg("验证码错误！");
 		}
 		
 		wuyeService.updateInvoice(mobile, applicationReq.getInvoice_title(), applicationReq.getInvoice_title_type(), 
