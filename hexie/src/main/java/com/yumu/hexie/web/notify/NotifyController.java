@@ -19,6 +19,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.notify.CommonNotificationResponse;
 import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
+
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
@@ -123,5 +124,6 @@ public class NotifyController extends BaseController {
 		notifyService.notifyInvoiceMsgAsync(invoiceNotification);
 		return "SUCCESS";
 	}
+
 	
 }
