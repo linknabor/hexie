@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
+
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
@@ -1016,5 +1017,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 			}
 		}
 	}
+
 
 }
