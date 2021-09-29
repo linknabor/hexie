@@ -90,6 +90,10 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		logger.info("genQrCodeRequest : " + JacksonJsonUtil.getMapperInstance(false).writeValueAsString(genQrCodeRequest));
 		
 		String accessToken = systemConfigService.queryWXAToken(appid);
+		if (StringUtils.isEmpty(accessToken)) {
+			return "";
+		}
+
 		String requestUrl = CREATE_QR_CODE_URL.replaceAll("ACCESS_TOKEN", accessToken);
 		
 		TypeReference<GenMpQrCodeResponse> typeReference = new TypeReference<GenMpQrCodeResponse>() {};
