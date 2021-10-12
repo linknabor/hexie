@@ -85,6 +85,7 @@ public class UserInfo implements Serializable {
  	private ServeRole serveRole;
  	private List<String> subscribeTemplateIds;	//未订阅需要弹窗提示的模板列表
  	private List<Menu> menuList;
+ 	private boolean repairService;	//新版工单是否开通
 
  	public static class ServeRole{
  		
@@ -425,6 +426,14 @@ public class UserInfo implements Serializable {
 	}
 	public void setMenuList(List<Menu> menuList) {
 		this.menuList = menuList;
+	}
+
+	public boolean isRepairService() {
+		return repairService;
+	}
+
+	public void setRepairService(boolean repairService) {
+		this.repairService = repairService;
 	}
 	
 	

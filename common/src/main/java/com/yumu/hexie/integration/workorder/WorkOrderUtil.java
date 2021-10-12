@@ -1,5 +1,8 @@
 package com.yumu.hexie.integration.workorder;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,8 +17,10 @@ import com.yumu.hexie.integration.workorder.req.QueryUserOrderRequest;
 import com.yumu.hexie.integration.workorder.req.ReverseOrderRequest;
 import com.yumu.hexie.integration.workorder.req.SaveWorkOrderRequest;
 import com.yumu.hexie.integration.workorder.resp.OrderDetailVO;
+import com.yumu.hexie.integration.workorder.resp.WorkOrderServiceVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrdersVO;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.workorder.req.WorkOrderReq;
 
 @Service
@@ -32,6 +37,7 @@ public class WorkOrderUtil {
 	private static final String ADD_WORKORDER_URL = "workorder/addOrderSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String QUERY_WORKORDER_URL = "workorder/queryOrderSDO.do";//查询工单列表
 	private static final String REVERSE_WORKORDER_URL = "workorder/reverseOrderSDO.do";//工单撤消
+	private static final String QUERY_SERVICE_URL = "workorder/queryServiceSDO.do";
 	
 	/**
 	 * 标准版查询账单
@@ -113,5 +119,33 @@ public class WorkOrderUtil {
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnBody(requestUrl, request, typeReference);
 		return hexieResponse;
 		
+	}
+	
+	/**
+	 * 获取工单服务
+	 * 1)如果在接单时间内，则返回房屋地址
+	 * 2)如果超出接单时间，则返回报修电话
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	public CommonResponse<WorkOrderServiceVO> getService(User user) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, null);
+		requestUrl += QUERY_SERVICE_URL;
+		
+		String userSysCode = SystemConfigServiceImpl.getSysMap().get(user.getAppId());	//获取用户所属的公众号
+		String city_db = userSysCode;
+		if (!"_guizhou".equals(userSysCode) && !"_hebei".equals(userSysCode)) {
+			city_db = "_sh";
+		}
+		Map<String, String> request = new HashMap<>();
+		request.put("user_id", user.getWuyeId());
+		request.put("sect_id", user.getSectId());
+		request.put("city_db", city_db);
+		
+		TypeReference<CommonResponse<WorkOrderServiceVO>> typeReference = new TypeReference<CommonResponse<WorkOrderServiceVO>>(){};
+		CommonResponse<WorkOrderServiceVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
+		return hexieResponse;
 	}
 }

@@ -15,6 +15,7 @@ public class WorkOrderReq implements Serializable {
 	 */
 	private static final long serialVersionUID = 1282969012458023843L;
 	
+	private String acceptType;	//接派单类型
 	private String distType;	//维修区域类型，0公共，1入室
 	private String address;	//维修地址,公共部位填写
 	private String addressId;	//维修地址id,入室
@@ -59,11 +60,17 @@ public class WorkOrderReq implements Serializable {
 	public void setImages(List<String> images) {
 		this.images = images;
 	}
+	public String getAcceptType() {
+		return acceptType;
+	}
+	public void setAcceptType(String acceptType) {
+		this.acceptType = acceptType;
+	}
 	@Override
 	public String toString() {
-		return "WorkOrderReq [distType=" + distType + ", address=" + address + ", addressId=" + addressId + ", content="
-				+ content + ", fileList=" + Arrays.toString(fileList) + ", images=" + images + "]";
+		return "WorkOrderReq [acceptType=" + acceptType + ", distType=" + distType + ", address=" + address
+				+ ", addressId=" + addressId + ", content=" + content + ", fileList=" + Arrays.toString(fileList)
+				+ ", images=" + images + "]";
 	}
 	
-
 }
