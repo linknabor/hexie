@@ -989,6 +989,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.warn("openid is null, will skip.");
 					continue;
 				}
+
 				User user = null;
 				List<User> userList = userRepository.findByOpenid(openid);
 				if (userList!=null && !userList.isEmpty()) {
@@ -1001,6 +1002,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					try {
 						in.setUser(user);
 						logger.info("start send Msg4FinishInvoice,  invoiceNotification : " + in);
+
 						isSuccess = gotongService.sendMsg4FinishInvoice(in);
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);	//发送失败的，需要重发

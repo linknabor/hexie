@@ -83,6 +83,7 @@ public class WuyeUtil {
 	public static BaseResult<HexieUser> bindHouse(User user, String stmtId,String houseId) {
 		String url = getRequestUri(user) + String.format(ADD_HOUSE_URL, user.getWuyeId(), stmtId,houseId, 
 				user.getOpenid(), user.getAppId(), user.getTel());
+
 		log.info("【绑定房产url】="+url);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
