@@ -1,8 +1,6 @@
 package com.yumu.hexie.service.eshop.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,11 +175,13 @@ public class EvoucherServiceImpl implements EvoucherService {
 		}
 		
 	}
-	
+
 	/**
 	 * 使用优惠券
-	 * @param serviceOrder
-	 * @throws Exception 
+	 * @param operator
+	 * @param code
+	 * @param evouchers
+	 * @throws Exception
 	 */
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
@@ -272,7 +272,80 @@ public class EvoucherServiceImpl implements EvoucherService {
 		eshopUtil.notifyConsume(operator, serviceOrder.getOrderNo(), bf.toString());
 		
 	}
-	
+
+	/**
+	 * 使用优惠券
+	 * @param userId
+	 * @param code
+	 * @throws Exception
+	 */
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public Map<String, String> consume(String userId, String code) {
+
+		Assert.hasText(code, "核销券码不能为空。");
+
+		long orderId = 0;
+		StringBuilder bf = new StringBuilder();
+		Evoucher e = evoucherRepository.findByCode(code);
+		long agentId = e.getAgentId();
+
+		List<ServiceOperator> opList;
+		if (agentId == 1) {	//奈博自己发的核销券
+			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, Long.parseLong(userId));
+		}else {	//代理商、合伙人发的和小小去按
+			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, Long.parseLong(userId), agentId);
+		}
+
+		if (opList == null || opList.isEmpty()) {
+			logger.warn("用户不能进行当前操作。用户id: " + userId);
+			throw new BizValidateException("您没有权限核销该券码，请确认该券码详细信息。");
+		}
+
+		ServiceOperator serviceOperator = opList.get(0);
+		ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), e.getProductId());
+		if (serviceOperatorItem == null) {
+			logger.warn("用户不能进行当前操作。用户id: " + userId);
+			throw new BizValidateException("您没有权限核销该券码，请确认该券码详细信息。");
+		}
+
+		List<Evoucher> evoucherList = evoucherRepository.findByOrderId(e.getOrderId());
+
+		for (int i =0; i < evoucherList.size(); i ++) {
+			Evoucher evoucher = evoucherList.get(i);
+			if (ModelConstant.EVOUCHER_STATUS_NORMAL != evoucher.getStatus()) {
+				switch (evoucher.getStatus()) {
+					case ModelConstant.EVOUCHER_STATUS_EXPIRED:
+						throw new BizValidateException("当前券码已过期。");
+					case ModelConstant.EVOUCHER_STATUS_INVALID:
+						throw new BizValidateException("当前券码已退款。");
+					case ModelConstant.EVOUCHER_STATUS_USED:
+						throw new BizValidateException("当前券码已使用。");
+					default:
+						break;
+				}
+			}
+
+			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
+			evoucher.setConsumeDate(new Date());
+			evoucher.setOperatorName(serviceOperator.getName());
+			evoucher.setOperatorUserId(Long.parseLong(userId));
+			evoucherRepository.save(evoucher);
+			bf.append(evoucher.getCode());
+			if (i!=(evoucherList.size()-1)) {
+				bf.append(",");
+			}
+			orderId = evoucher.getOrderId();
+		}
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(orderId).get();
+
+		Map<String, String> map = new HashMap<>();
+		map.put("trade_water_id", serviceOrder.getOrderNo());
+		map.put("evouchers", bf.toString());
+		return map;
+	}
+
+
 	@Override
 	public EvoucherView getEvoucher(String code){
 

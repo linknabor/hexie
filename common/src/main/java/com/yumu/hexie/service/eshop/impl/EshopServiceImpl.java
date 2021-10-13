@@ -29,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -112,6 +113,7 @@ import com.yumu.hexie.service.user.dto.GainCouponDTO;
  *
  * @param <T>
  */
+@Service
 public class EshopServiceImpl implements EshopSerivce {
 	
 	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);

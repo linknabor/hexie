@@ -2,6 +2,7 @@ package com.yumu.hexie.web.eshop;
 
 import java.util.Map;
 
+import com.yumu.hexie.service.eshop.EvoucherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ public class EshopController<T> extends BaseController {
 
 	@Autowired
 	private EshopSerivce eshopSerivce;
+
+	@Autowired
+	private EvoucherService evoucherService;
 	
 	@RequestMapping(value = "/product/get", method = RequestMethod.POST)
 	public CommonResponse<Object> getProduct(@RequestBody QueryProductVO queryProductVO) {
@@ -86,10 +90,10 @@ public class EshopController<T> extends BaseController {
 		commonResponse.setResult("00");
 		return commonResponse;
 	}
-	
+
 	/**
 	 * 获取服务人员列表
-	 * @param <T>
+	 * @param queryOperVO
 	 * @return
 	 */
 	@RequestMapping(value = "/operator/get", method = RequestMethod.POST)
@@ -99,10 +103,10 @@ public class EshopController<T> extends BaseController {
 		return eshopSerivce.getOper(queryOperVO);
 		
 	}
-	
+
 	/**
 	 * 保存服务人员信息
-	 * @param <T>
+	 * @param saveOperVO
 	 * @return
 	 */
 	@RequestMapping(value = "/operator/save", method = RequestMethod.POST)
@@ -115,11 +119,10 @@ public class EshopController<T> extends BaseController {
 		return commonResponse;
 		
 	}
-	
+
 	/**
 	 * 后台查询
-	 * @param user
-	 * @param orderId
+	 * @param queryEvoucherVO
 	 * @return
 	 */
 	@RequestMapping(value = "/evoucher/get")
@@ -250,10 +253,10 @@ public class EshopController<T> extends BaseController {
 		return eshopSerivce.getCouponCfg(queryCouponCfgVO);
 		
 	}
-	
+
 	/**
 	 * 根据规则ID查询优惠券配置
-	 * @param queryProductVO
+	 * @param queryCouponCfgVO
 	 * @return
 	 */
 	@RequestMapping(value = "/coupon/cfg/getById", method = RequestMethod.POST)
@@ -318,6 +321,20 @@ public class EshopController<T> extends BaseController {
 		return commonResponse;
 	}
 
-	
-	
+	/**
+	 * 后台调用(运营端券码核销)
+	 * @param requestMap
+	 * @return
+	 */
+	@RequestMapping(value = "/evoucher/updateConsume", method = RequestMethod.POST)
+	public CommonResponse<Map<String, String>> updateConsume(@RequestBody Map<String, String> requestMap){
+
+		logger.info("updateConsume : " + requestMap);
+		Map<String, String> map = evoucherService.consume(requestMap.get("userId"), requestMap.get("code"));
+		CommonResponse<Map<String, String>> commonResponse = new CommonResponse<>();
+		commonResponse.setData(map);
+		commonResponse.setResult("00");
+		return commonResponse;
+	}
+
 }
