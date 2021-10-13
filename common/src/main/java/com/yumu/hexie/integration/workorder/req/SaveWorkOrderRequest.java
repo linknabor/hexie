@@ -12,6 +12,7 @@ public class SaveWorkOrderRequest implements Serializable {
 	 */
 	private static final long serialVersionUID = -4821662021373055017L;
 	
+	private String acceptType;	//接派单类型
 	private String distType;	//维修区域类型，0公共，1入室
 	private String address;	//维修地址,公共部位填写
 	private String content;	//维修内容
@@ -31,6 +32,7 @@ public class SaveWorkOrderRequest implements Serializable {
 	}
 	public SaveWorkOrderRequest(WorkOrderReq workOrderReq){
 		super();
+		this.acceptType = workOrderReq.getAcceptType();
 		this.distType = workOrderReq.getDistType();
 		this.address = workOrderReq.getAddress();
 		this.content = workOrderReq.getContent();
@@ -108,12 +110,19 @@ public class SaveWorkOrderRequest implements Serializable {
 	public void setCspId(String cspId) {
 		this.cspId = cspId;
 	}
+	public String getAcceptType() {
+		return acceptType;
+	}
+	public void setAcceptType(String acceptType) {
+		this.acceptType = acceptType;
+	}
 	@Override
 	public String toString() {
-		return "SaveWorkOrderRequest [distType=" + distType + ", address=" + address + ", content=" + content
-				+ ", images=" + images + ", creator=" + creator + ", creatorUserId=" + creatorUserId
-				+ ", creatorContact=" + creatorContact + ", creatorOpenid=" + creatorOpenid + ", creatorAppid="
-				+ creatorAppid + ", wuyeId=" + wuyeId + ", sectId=" + sectId + ", cspId=" + cspId + "]";
+		return "SaveWorkOrderRequest [acceptType=" + acceptType + ", distType=" + distType + ", address=" + address
+				+ ", content=" + content + ", images=" + images + ", creator=" + creator + ", creatorUserId="
+				+ creatorUserId + ", creatorContact=" + creatorContact + ", creatorOpenid=" + creatorOpenid
+				+ ", creatorAppid=" + creatorAppid + ", wuyeId=" + wuyeId + ", sectId=" + sectId + ", cspId=" + cspId
+				+ "]";
 	}
 	
 	

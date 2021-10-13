@@ -18,10 +18,12 @@ import com.qiniu.api.io.PutExtra;
 import com.qiniu.api.io.PutRet;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
+import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.integration.workorder.WorkOrderUtil;
 import com.yumu.hexie.integration.workorder.resp.OrderDetailVO;
+import com.yumu.hexie.integration.workorder.resp.WorkOrderServiceVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrdersVO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -41,6 +43,31 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 	
 	@Value(value = "${qiniu.domain}")
     private String domain;
+	
+	public static void main(String[] args) {
+		
+		String str = DateUtil.dtFormat(System.currentTimeMillis(), DateUtil.dttmSimple);
+		System.out.println(str);
+	}
+	
+	/**
+	 * 首页获取工单服务
+	 * @param user
+	 * @throws Exception 
+	 */
+	@Override
+	public WorkOrderServiceVO getService(User user) throws Exception {
+		
+		if (StringUtil.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) {
+			throw new BizValidateException("您暂未绑定房屋，请前往“我是业主”进行操作！");
+		}
+		CommonResponse<WorkOrderServiceVO> commonResponse =	workOrderUtil.getService(user);
+		if (!"00".equals(commonResponse.getResult())) {
+			throw new BizValidateException(commonResponse.getErrMsg());
+		}
+		return commonResponse.getData(); 
+	
+	}
 	
 	/**
 	 * 业主添加工单

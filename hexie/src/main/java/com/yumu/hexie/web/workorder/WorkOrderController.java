@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.workorder.resp.OrderDetailVO;
+import com.yumu.hexie.integration.workorder.resp.WorkOrderServiceVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrdersVO;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
@@ -104,6 +105,19 @@ public class WorkOrderController extends BaseController {
 		
 		workOrderService.reverseOrder(user, orderId, reason);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+	}
+	
+	/**
+	 * 获取工单服务（如果用户当前所在小区支持工单服务，则显示该用户绑定的房屋，否则）
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/service", method = RequestMethod.GET)
+	public BaseResult<WorkOrderServiceVO> queryService(@ModelAttribute(name = Constants.USER) User user) throws Exception {
+		
+		WorkOrderServiceVO workOrderServiceVO = workOrderService.getService(user);
+		return BaseResult.successResult(workOrderServiceVO);
 	}
 	
 }
