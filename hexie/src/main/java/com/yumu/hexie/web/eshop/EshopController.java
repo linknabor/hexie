@@ -330,10 +330,15 @@ public class EshopController<T> extends BaseController {
 	public CommonResponse<Map<String, String>> updateConsume(@RequestBody Map<String, String> requestMap){
 
 		logger.info("updateConsume : " + requestMap);
-		Map<String, String> map = evoucherService.consume(requestMap.get("userId"), requestMap.get("code"));
 		CommonResponse<Map<String, String>> commonResponse = new CommonResponse<>();
-		commonResponse.setData(map);
-		commonResponse.setResult("00");
+		try {
+			Map<String, String> map = evoucherService.consume(requestMap.get("userId"), requestMap.get("code"));
+			commonResponse.setData(map);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");
+		}
 		return commonResponse;
 	}
 
