@@ -6,14 +6,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wuye.WuyeParamService;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.shequ.ParamService;
 
 @Service
@@ -26,6 +29,9 @@ public class ParamServiceImpl implements ParamService {
 
 	@Autowired
 	private WuyeParamService wuyeParamService;
+	
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 	
 	/**
 	 * 根据用户的cspId获取该用户的公司参数，如果缓存中没有参数，则发起请求获取参数
@@ -82,5 +88,42 @@ public class ParamServiceImpl implements ParamService {
 		return paramMap;
 	}
 	
+	/**
+	 * 是否开启维修服务（新版工单）
+	 * @param user
+	 * @return
+	 */
+	@Override
+	public boolean repairServiceAvailable(User user) {
+		
+		if (StringUtil.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) {
+			return false;
+		}
+		String valueStr = getRepairService(user);
+		
+		if (StringUtils.isEmpty(valueStr)) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 是否开启维修服务（新版工单）
+	 * @param user
+	 * @return
+	 */
+	@Override
+	public String getRepairService(User user) {
+		
+		String sys = SystemConfigServiceImpl.getSysMap().get(user.getAppId());
+		String location = "";
+		if (!"_guizhou".equals(sys) && !"_hebei".equals(sys)) {
+			location = "_sh";
+		} else {
+			location = sys;
+		}
+		String key = ModelConstant.KEY_WORKORDER_CFG + location + ":" + user.getSectId();
+		return stringRedisTemplate.opsForValue().get(key);
+	}
 
 }
