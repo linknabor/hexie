@@ -129,16 +129,14 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     public List<Object[]> findByTypeAndServiceId(int type, long serviceId);
     
     @Query(value = "select "
-    		+ column2
+    		+ column1
     		+ "from serviceoperator s "
-    		+ "join user u on u.id = s.userId "
     		+ "where s.type = ?1 and s.agentId is null ", nativeQuery = true)
     public List<Object[]> findByTypeWithAppid(int type);
     
     @Query(value = "select "
-    		+ column2
+    		+ column1
     		+ "from serviceoperator s "
-    		+ "join user u on u.id = s.userId "
     		+ "where s.type = ?1 and s.agentId = ?2 ", nativeQuery = true)
     public List<Object[]> findByTypeAndAgentIdWithAppid(int type, Long agentId);
     
