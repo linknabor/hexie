@@ -118,9 +118,9 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 and agentId is null ")
     public void deleteByTypeAndNullAgent(int type);
     
-    String column1 = "s.id, s.openId, s.name, s.tel, s.userId ";
+    String column1 = "s.id, s.openId, s.name, s.tel, '' as appid, s.userId ";
 	String column2 = "s.id, s.openId, s.name, s.tel, u.appid, s.userId ";
-	
+
     @Query(value = "select "
     		+ column1
     		+ "from serviceoperator s "
