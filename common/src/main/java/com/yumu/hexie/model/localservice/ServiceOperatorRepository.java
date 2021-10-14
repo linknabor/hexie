@@ -123,7 +123,6 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Query(value = "select "
     		+ column1
     		+ "from serviceoperator s "
-    		+ "join user u on u.id = s.userId "
     		+ "join serviceOperatorItem oi on s.id = oi.operatorId "
     		+ "where s.type = ?1 and oi.serviceId = ?2 ", nativeQuery = true)
     public List<Object[]> findByTypeAndServiceId(int type, long serviceId);
