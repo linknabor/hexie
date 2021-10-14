@@ -133,6 +133,9 @@ public class UserController extends BaseController{
 			    Map<String, String> paramMap = paramService.getWuyeParam(user);
 			    userInfo.setCfgParam(paramMap);
 			    
+			    boolean repairService = paramService.repairServiceAvailable(user);
+			    userInfo.setRepairService(repairService);	//新版工单服务是否开通
+			    
 			    endTime = System.currentTimeMillis();
 			    log.info("userInfo2，耗时：" + ((endTime-beginTime)));
 			    

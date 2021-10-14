@@ -11,4 +11,8 @@ public interface ParamService {
 	Map<String, String> getWuyeParamAsync(User user, String type);
 
 	void updateSysParam();
+
+	boolean repairServiceAvailable(User user);
+
+	String getRepairService(User user);
 }
