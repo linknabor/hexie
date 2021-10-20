@@ -16,6 +16,7 @@ import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
+import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
@@ -334,4 +335,12 @@ public interface WuyeService {
 	 * @param tradeWaterId
 	 */
 	void registerAndBind(User user, String tradeWaterId);
+
+	/**
+	 * 获取当前用户开具过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	List<InvoiceDetail> getInvoice(User user, String currPage) throws Exception;
 }
