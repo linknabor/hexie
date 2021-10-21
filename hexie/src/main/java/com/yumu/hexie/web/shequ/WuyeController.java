@@ -46,6 +46,7 @@ import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
+import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
@@ -903,6 +904,15 @@ public class WuyeController extends BaseController {
 
 		}
 		return BaseResult.successResult("true");
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/inovice/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<InvoiceDetail>> getInvoice(@ModelAttribute(Constants.USER) User user, @PathVariable String page) throws Exception {
+		
+		List<InvoiceDetail> invoiceList = wuyeService.getInvoice(user, page);
+		return BaseResult.successResult(invoiceList);
 	}
 
 

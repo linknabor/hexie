@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.yumu.hexie.integration.wuye.req.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +22,24 @@ import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
+import com.yumu.hexie.integration.wuye.req.BillDetailRequest;
+import com.yumu.hexie.integration.wuye.req.BillStdRequest;
+import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
+import com.yumu.hexie.integration.wuye.req.GetCellRequest;
+import com.yumu.hexie.integration.wuye.req.MessageRequest;
+import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
+import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
+import com.yumu.hexie.integration.wuye.req.PrepayRequest;
+import com.yumu.hexie.integration.wuye.req.QrCodePayServiceRequest;
+import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
+import com.yumu.hexie.integration.wuye.req.QueryCellRequest;
+import com.yumu.hexie.integration.wuye.req.QueryEReceiptRequest;
+import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
+import com.yumu.hexie.integration.wuye.req.QuerySectRequet;
+import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
+import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
+import com.yumu.hexie.integration.wuye.req.WuyeParamRequest;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -30,6 +47,7 @@ import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
+import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
@@ -77,7 +95,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String QUERY_MPQRCODE_PARAM_URL = "queryMpQrCodeParamSDO.do";//获取生成公众号动态二维码的必要参数
-
+	private static final String QUERY_USER_INVOICE_URL = "queryInvoiceByUserSDO.do";	//获取用户申请过的发票 
 
 	/**
 	 * 标准版查询账单
@@ -574,5 +592,28 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 	}
-	
+
+	/**
+	 * 查询当前用户申请过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<InvoiceDetail>> queryInvoiceByUser(User user, String currPage) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "上海");
+		requestUrl += QUERY_USER_INVOICE_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("user_id", user.getWuyeId());
+		map.put("openid", user.getOpenid());
+		map.put("curr_page", currPage);
+		map.put("total_count", "1000");
+
+		TypeReference<CommonResponse<List<InvoiceDetail>>> typeReference = new TypeReference<CommonResponse<List<InvoiceDetail>>>(){};
+		CommonResponse<List<InvoiceDetail>> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<List<InvoiceDetail>> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
 }
