@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.system;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import com.yumu.hexie.model.BaseModel;
@@ -14,6 +15,8 @@ public class BizError extends BaseModel{
 	private long bizId;//业务ID
 	private String message;
 	private int level;
+	@Column(nullable = true, columnDefinition = "varchar(1024) null")
+	private String remark;
 	public BizError(){
 		
 	}
@@ -58,6 +61,12 @@ public class BizError extends BaseModel{
 	}
 	public void setLevel(int level) {
 		this.level = level;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 }

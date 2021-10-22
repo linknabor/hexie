@@ -1029,6 +1029,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 									bizError.setBizType(ModelConstant.EXCEPTION_BIZ_TYPE_TEMPLATEMSG);
 									bizError.setLevel(ModelConstant.EXCEPTION_LEVEL_INFO);
 									bizError.setMessage(wechatResponse.getErrmsg());
+									bizError.setRemark(queue);
 									bizErrorRepository.save(bizError);
 								} catch (Exception e) {
 									logger.error(e.getMessage(), e);
