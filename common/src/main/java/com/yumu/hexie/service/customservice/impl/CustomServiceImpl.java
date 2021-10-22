@@ -259,7 +259,7 @@ public class CustomServiceImpl implements CustomService {
 		logger.info("receivOrder : " + serviceNotification);
 		if (serviceNotification != null) {
 			serviceNotification.setOrderId(data.getTradeWaterId());
-			sendServiceNotificationAsync(data.getServiceNotification());
+			sendServiceNotificationAsync(serviceNotification);
 		}
 		
 		long end = System.currentTimeMillis();

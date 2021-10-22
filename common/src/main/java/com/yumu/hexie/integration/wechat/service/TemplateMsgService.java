@@ -60,24 +60,21 @@ public class TemplateMsgService {
 	/**
 	 * 模板消息发送
 	 */
-	private boolean sendMsg(TemplateMsg<?> msg, String accessToken) {
+	private WechatResponse sendMsg(TemplateMsg<?> msg, String accessToken) {
         
 		String requestUrl = MsgCfg.TEMPLATE_MSG;
 		if(StringUtil.isNotEmpty(accessToken)){
 	        requestUrl = requestUrl.replace("ACCESS_TOKEN", accessToken);
 	    }
 		TypeReference<WechatResponse> typeReference = new TypeReference<WechatResponse>() {};
+		WechatResponse wechatResponse = new WechatResponse();
 		try {
-			WechatResponse wechatResponse = restUtil.exchangeOnBody(requestUrl, msg, typeReference);
-			if (wechatResponse.getErrcode() == 0) {
-				return true;
-			}
-			
+			wechatResponse = restUtil.exchangeOnBody(requestUrl, msg, typeReference);
 		} catch (Exception e) {
 			log.error("发送模板消息失败: " +e.getMessage());
 			log.error(e.getMessage(), e);
 		}
-		return false;
+		return wechatResponse;
 	}
 
 	private WechatResponse sendMsgBill(TemplateMsg<?> msg, String accessToken) {
@@ -354,7 +351,7 @@ public class TemplateMsgService {
      * @param accessToken
      * @param appId
      */
-    public boolean sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
+    public WechatResponse sendHexieMessage(String openid, String accessToken, String appId,long messageId,String content) {
     	
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
@@ -689,16 +686,15 @@ public class TemplateMsgService {
 	 * @param opinionRequest
 	 * @param accessToken
 	 */
-	public boolean sendInvoiceApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
-		
+	public WechatResponse sendInvoiceApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
 		
 		String eventKey = baseEventDTO.getEventKey();
     	if (!eventKey.startsWith("01") && !eventKey.startsWith("qrscene_01")) {	//01表示扫二维码开票的场景
-			return true;
+			return new WechatResponse();
 		}
     	String[]eventKeyArr = eventKey.split("\\|");
     	if (eventKeyArr == null || eventKeyArr.length < 4) {
-			return true;
+			return new WechatResponse();
 		}
     	String tradeWaterId = "";
     	String tranAmt = ""; 
@@ -709,7 +705,7 @@ public class TemplateMsgService {
 			shopName = eventKeyArr[3];
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return true;
+			return new WechatResponse();
 		}
     	
     	TemplateItem firstItem = new TemplateItem("请点击查看详情进入电子发票自助申请！");
@@ -745,7 +741,7 @@ public class TemplateMsgService {
 	 * @param opinionRequest
 	 * @param accessToken
 	 */
-	public boolean sendFinishInvoiceMessage(InvoiceNotification invoiceNotification, String accessToken) {
+	public WechatResponse sendFinishInvoiceMessage(InvoiceNotification invoiceNotification, String accessToken) {
 		
 		String first = "您的电子发票已开具。";
 		if ("1".equals(invoiceNotification.getApplyType())) {

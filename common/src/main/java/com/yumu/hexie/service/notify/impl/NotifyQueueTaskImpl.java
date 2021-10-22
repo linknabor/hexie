@@ -38,6 +38,7 @@ import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.ModelConstant;
@@ -45,6 +46,8 @@ import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.system.BizError;
+import com.yumu.hexie.model.system.BizErrorRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -86,6 +89,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private NoticeService noticeService;
 	@Autowired
 	private CommunityService communityService;
+	@Autowired
+	private BizErrorRepository bizErrorRepository;
 	
 	/**
 	 * 异步发送到账模板消息
@@ -1003,12 +1008,34 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.warn("can not find user, openid : " + openid);
 				}
 				boolean isSuccess = false;
+				WechatResponse wechatResponse = null;
 				if (user!=null) {
 					try {
 						in.setUser(user);
 						logger.info("start send Msg4FinishInvoice,  invoiceNotification : " + in);
-
-						isSuccess = gotongService.sendMsg4FinishInvoice(in);
+						wechatResponse = gotongService.sendMsg4FinishInvoice(in);
+						if (wechatResponse.getErrcode() == 0) {
+							isSuccess = true;
+						} else {
+							if (wechatResponse.getErrcode() == 43004) {	//未关注的，不要重复发了。直接出队，并记录下来。
+								isSuccess = true;
+							} else if (wechatResponse.getErrcode() == 45009) {	//reach max api daily quota limit
+								isSuccess = true;
+							}
+							if (isSuccess) {
+								try {
+									BizError bizError = new BizError();
+									bizError.setBizId(Long.valueOf(in.getOrderId()));
+									bizError.setBizType(ModelConstant.EXCEPTION_BIZ_TYPE_TEMPLATEMSG);
+									bizError.setLevel(ModelConstant.EXCEPTION_LEVEL_INFO);
+									bizError.setMessage(wechatResponse.getErrmsg());
+									bizErrorRepository.save(bizError);
+								} catch (Exception e) {
+									logger.error(e.getMessage(), e);
+								}
+							}
+						}
+						
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);	//发送失败的，需要重发
 						

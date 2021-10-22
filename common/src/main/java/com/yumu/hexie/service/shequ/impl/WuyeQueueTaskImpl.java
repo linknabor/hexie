@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
@@ -221,8 +222,12 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setUser(user);
 				
 				boolean isSuccess = false;
+				WechatResponse wechatResponse = null;
 				try {
-					isSuccess = wuyeService.scanEvent4Invoice(baseEventDTO);
+					wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+					if (wechatResponse.getErrcode() == 0) {
+						isSuccess = true;
+					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
