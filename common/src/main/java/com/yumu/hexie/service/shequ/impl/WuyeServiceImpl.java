@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
@@ -38,6 +39,7 @@ import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
+import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
@@ -602,7 +604,7 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public boolean scanEvent4Invoice(BaseEventDTO baseEventDTO) {
+	public WechatResponse scanEvent4Invoice(BaseEventDTO baseEventDTO) {
 		
 		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
 	}
@@ -640,6 +642,19 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 		}
+		
+	}
+	
+	/**
+	 * 获取当前用户申请过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public List<InvoiceDetail> getInvoice(User user, String currPage) throws Exception {
+		
+		return wuyeUtil2.queryInvoiceByUser(user, currPage).getData();
 		
 	}
 

@@ -21,6 +21,7 @@ import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
 import com.yumu.hexie.integration.wechat.entity.customer.News;
 import com.yumu.hexie.integration.wechat.entity.customer.NewsMessage;
@@ -254,7 +255,7 @@ public class GotongServiceImpl implements GotongService {
      * 平台公告通知群发
      */
 	@Override
-	public boolean sendGroupMessage(String openId, String appId, long msgId, String content) {
+	public WechatResponse sendGroupMessage(String openId, String appId, long msgId, String content) {
 		
 		String accessToken = systemConfigService.queryWXAToken(appId);
 		return templateMsgService.sendHexieMessage(openId, accessToken, appId, msgId, content);
@@ -415,7 +416,7 @@ public class GotongServiceImpl implements GotongService {
      * 发送用户申请电子发票消息
      */
     @Override
-	public boolean sendMsg4ApplicationInvoice(BaseEventDTO baseEventDTO) {
+	public WechatResponse sendMsg4ApplicationInvoice(BaseEventDTO baseEventDTO) {
 
     	String accessToken = systemConfigService.queryWXAToken(baseEventDTO.getAppId());
         return templateMsgService.sendInvoiceApplicationMessage(baseEventDTO, accessToken);
@@ -426,7 +427,7 @@ public class GotongServiceImpl implements GotongService {
      * 发送开具电子发票消息
      */
     @Override
-	public boolean sendMsg4FinishInvoice(InvoiceNotification invoiceNotification) {
+	public WechatResponse sendMsg4FinishInvoice(InvoiceNotification invoiceNotification) {
 
     	String accessToken = systemConfigService.queryWXAToken(invoiceNotification.getUser().getAppId());
         return templateMsgService.sendFinishInvoiceMessage(invoiceNotification, accessToken);

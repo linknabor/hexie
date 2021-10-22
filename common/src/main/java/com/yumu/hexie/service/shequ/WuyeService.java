@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -16,6 +17,7 @@ import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
+import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
@@ -326,7 +328,7 @@ public interface WuyeService {
 	 * @param baseEventDTO
 	 * @return 
 	 */
-	boolean scanEvent4Invoice(BaseEventDTO baseEventDTO);
+	WechatResponse scanEvent4Invoice(BaseEventDTO baseEventDTO);
 
 	/**
 	 * 申请电子发票后创建用户并为其绑定房屋
@@ -334,4 +336,12 @@ public interface WuyeService {
 	 * @param tradeWaterId
 	 */
 	void registerAndBind(User user, String tradeWaterId);
+
+	/**
+	 * 获取当前用户开具过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	List<InvoiceDetail> getInvoice(User user, String currPage) throws Exception;
 }
