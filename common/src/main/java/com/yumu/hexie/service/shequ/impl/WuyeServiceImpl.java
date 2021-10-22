@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
@@ -603,7 +604,7 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public boolean scanEvent4Invoice(BaseEventDTO baseEventDTO) {
+	public WechatResponse scanEvent4Invoice(BaseEventDTO baseEventDTO) {
 		
 		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
 	}

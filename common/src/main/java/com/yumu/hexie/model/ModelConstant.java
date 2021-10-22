@@ -268,6 +268,7 @@ public class ModelConstant {
 	public static final int EXCEPTION_BIZ_TYPE_SCHEDULE = 7;
 	public static final int EXCEPTION_BIZ_TYPE_COUPON = 8;
 	public static final int EXCEPTION_BIZ_TYPE_SYSTEM = 9;
+	public static final int EXCEPTION_BIZ_TYPE_TEMPLATEMSG = 10;
 	
 	public static final int EXCEPTION_LEVEL_INFO = 1;
 	public static final int EXCEPTION_LEVEL_ERROR = 2;

@@ -7,6 +7,7 @@ package com.yumu.hexie.service.common;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
 import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -40,7 +41,7 @@ public interface GotongService {
 
 	void sendRegiserMsg(User user);
 
-	boolean sendGroupMessage(String openId, String appId, long msgId, String content);
+	WechatResponse sendGroupMessage(String openId, String appId, long msgId, String content);
 
 	void sendPayNotification(AccountNotification accountNotification);
 	
@@ -62,8 +63,8 @@ public interface GotongService {
 
 	boolean sendWorkOrderNotification(WorkOrderNotification workOrderNotification);
 
-	boolean sendMsg4ApplicationInvoice(BaseEventDTO baseEventDTO);
+	WechatResponse sendMsg4ApplicationInvoice(BaseEventDTO baseEventDTO);
 
-	boolean sendMsg4FinishInvoice(InvoiceNotification invoiceNotification);
+	WechatResponse sendMsg4FinishInvoice(InvoiceNotification invoiceNotification);
 
 }

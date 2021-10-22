@@ -2,6 +2,7 @@ package com.yumu.hexie.service.shequ;
 
 import java.util.List;
 
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -327,7 +328,7 @@ public interface WuyeService {
 	 * @param baseEventDTO
 	 * @return 
 	 */
-	boolean scanEvent4Invoice(BaseEventDTO baseEventDTO);
+	WechatResponse scanEvent4Invoice(BaseEventDTO baseEventDTO);
 
 	/**
 	 * 申请电子发票后创建用户并为其绑定房屋

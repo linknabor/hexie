@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
@@ -138,11 +139,13 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 
 		noticeService.addOutSidNotice(request);
 
-		boolean success;
+		boolean success = false;
+		WechatResponse wechatResponse = null;
 		if (!StringUtils.isEmpty(user.getWuyeId())) {
-			success = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
-		}else {
-			success = false;
+			wechatResponse = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
+			if (wechatResponse.getErrcode() == 0) {
+				success = true;
+			}
 		}
 		hexieMessage.setSuccess(success);
 		hexieMessageRepository.save(hexieMessage);
