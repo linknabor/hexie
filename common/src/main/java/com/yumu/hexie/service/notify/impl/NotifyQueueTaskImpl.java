@@ -1036,7 +1036,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								}
 							}
 						}
-						
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);	//发送失败的，需要重发
 						
