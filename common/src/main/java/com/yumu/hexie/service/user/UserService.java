@@ -40,7 +40,7 @@ public interface UserService {
 	User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp);
 	User multiFindByOpenId(String openId);
 	void bindWuYeId(User user);
-	boolean checkDuplicateLogin(HttpSession httpSession);
+	boolean checkDuplicateLogin(HttpSession httpSession, String code);
 	
 	//注册
 	User simpleRegister(User user);
