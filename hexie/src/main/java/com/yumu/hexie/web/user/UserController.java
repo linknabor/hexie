@@ -278,7 +278,7 @@ public class UserController extends BaseController{
 		    if(userAccount == null) {
 		    	
 		    	if (userService.checkDuplicateLogin(session, code)) {
-					throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+					throw new BizValidateException(599, 0, "正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
 				}
 		    	
 		    	UserWeiXin weixinUser = null;
