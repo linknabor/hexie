@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -762,9 +763,11 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/requestOtherPay", method = {RequestMethod.POST})
 	@ResponseBody
-	public BaseResult<WechatPayInfo> requestOtherPay(@RequestBody OtherPayVO otherPayVo) throws Exception {
+	public BaseResult<WechatPayInfo> requestOtherPay(HttpServletRequest httpServpletReuqest, @RequestBody OtherPayVO otherPayVo) throws Exception {
 		
 		log.info("requestOtherPay : " + otherPayVo);
+		String userAgent = httpServpletReuqest.getHeader("user-agent");  
+		log.info("userAgent: " + userAgent);
 		
 		OtherPayDTO dto = new OtherPayDTO();
 		BeanUtils.copyProperties(otherPayVo, dto);
