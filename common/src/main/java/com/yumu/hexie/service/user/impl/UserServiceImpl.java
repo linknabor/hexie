@@ -321,15 +321,15 @@ public class UserServiceImpl implements UserService {
 	 * 防止用户短时间内重复调用login接口
 	 */
 	@Override
-	public boolean checkDuplicateLogin(HttpSession httpSession) {
+	public boolean checkDuplicateLogin(HttpSession httpSession, String code) {
 
 		boolean isDuplicateRequest = false;
 		String sessionId = httpSession.getId();
 		logger.info("user session : " + sessionId);
 
-		String key = ModelConstant.KEY_USER_LOGIN + sessionId;
+		String key = ModelConstant.KEY_USER_LOGIN + sessionId+"_"+code;	//检查code,一个code只能在一次登陆中使用，如果重复，则不再向腾讯请求
 		
-		boolean absent = redisTemplate.opsForValue().setIfAbsent(key, sessionId, 2, TimeUnit.SECONDS);
+		boolean absent = redisTemplate.opsForValue().setIfAbsent(key, 1, 1, TimeUnit.HOURS);
 		if (!absent) {
 			isDuplicateRequest = true;	//已经存在的情况下
 		}
