@@ -496,17 +496,18 @@ public class NotifyServiceImpl implements NotifyService {
 	public void notifyInvoiceMsgAsync(InvoiceNotification invoiceNotification) {
 		
 		String orderId = invoiceNotification.getOrderId();
+		String applyId = invoiceNotification.getApplyId();
 		
 		if (StringUtils.isEmpty(orderId)) {
 			log.info("notifyWorkOrderConversionAsync: orderid is empty, will return ! ");
 			return;
 		}
 		
-		String checkKey = orderId;
+		String checkKey = applyId;
 		String key = ModelConstant.KEY_INVOICE_NOTIFICATION_LOCK + checkKey;
-		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*10);
+		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*1);
 		if (0 == result) {
-			log.info("invoiceNo : " + orderId + ", already notified, will skip ! ");
+			log.info("invoice msg notification, applyId : " + applyId + ", already notified, will skip ! ");
 			return;
 		}
 		
