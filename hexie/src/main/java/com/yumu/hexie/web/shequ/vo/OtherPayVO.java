@@ -30,6 +30,8 @@ public class OtherPayVO implements Serializable {
 	private String orderId;
 	@JsonProperty("order_detail")
 	private String orderDetail;
+	@JsonProperty("sms_batch")
+	private String smsBatch;
 	
 	public String getMoney() {
 		return money;
