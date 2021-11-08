@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -7,6 +8,10 @@ import javax.inject.Inject;
 
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.service.shequ.req.CommunitySummary;
+import com.yumu.hexie.service.shequ.req.RatioDetail;
+import com.yumu.hexie.service.shequ.req.RatioSum;
+import com.yumu.hexie.service.shequ.req.SectsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -313,6 +318,98 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception{
 		return wuyeUtil2.sendMinNotification(user, opinionRequest).getData();
+	}
+
+	@Override
+	public List<RatioSum> getThreadBySectIdsAndCycle(CommunitySummary summary) {
+		String start;
+		String end;
+		Date currDate = new Date();
+		String currDateStr = DateUtil.dtFormat(currDate).replaceAll("-", "");
+		if ("02".equals(summary.getDateCycle())) { //查询上周
+			String last = DateUtil.getNextDateByNum(currDateStr, -7);
+			start = DateUtil.getFirstOfWeek(last);
+			end = DateUtil.getNextDateByNum(start, 6);
+		} else {
+			start = DateUtil.getFirstOfWeek(currDateStr);
+			end = DateUtil.getNextDateByNum(start, 6);
+		}
+
+		List<String> list = new ArrayList<>();
+		for(SectsVO.SectVO sectVO : summary.getSects()) {
+			list.add(sectVO.getId());
+		}
+		String[] strs = list.toArray(new String[0]);
+
+		//总数
+		List<Thread> threadListCount = threadRepository.findThreadCount(start, end, strs);
+
+		//回复数
+		List<Thread> threadListCommentCount = threadRepository.findThreadCommentCount(start, end, strs);
+
+		//未回复数
+		List<Thread> threadListNoCommentCount = threadRepository.findThreadNoCommentCount(start, end, strs);
+
+		//转工单数
+		List<Thread> threadListRectifiedCount = threadRepository.findThreadRectified(start, end, strs);
+
+		List<RatioSum> ratioSumList = new ArrayList<>();
+		for(Thread t : threadListCount) {
+			RatioSum ratioSum = new RatioSum();
+			ratioSum.setSect_id(t.getUserSectId());
+			ratioSum.setSect_name(t.getUserSectName());
+
+			List<RatioDetail> ratioDetails = new ArrayList<>();
+
+			RatioDetail detail = new RatioDetail();
+			detail.setFeeName("意见总数");
+			detail.setRatio(t.getCommentsCount()+"");
+			ratioDetails.add(detail);
+
+			String feeName = "回复数";
+			String ratio = "0";
+			for(Thread tc: threadListCommentCount) {
+				if(t.getUserSectId().equals(tc.getUserSectId())) {
+					ratio = tc.getCommentsCount()+"";
+					break;
+				}
+			}
+			detail = new RatioDetail();
+			detail.setFeeName(feeName);
+			detail.setRatio(ratio);
+			ratioDetails.add(detail);
+
+			feeName = "未回复数";
+			ratio = "0";
+			for(Thread tc: threadListNoCommentCount) {
+				if(t.getUserSectId().equals(tc.getUserSectId())) {
+					ratio = tc.getCommentsCount()+"";
+					break;
+				}
+			}
+			detail = new RatioDetail();
+			detail.setFeeName(feeName);
+			detail.setRatio(ratio);
+			ratioDetails.add(detail);
+
+			feeName = "转工单数";
+			ratio = "0";
+			for(Thread tc: threadListRectifiedCount) {
+				if(t.getUserSectId().equals(tc.getUserSectId())) {
+					ratio = tc.getCommentsCount()+"";
+					break;
+				}
+			}
+			detail = new RatioDetail();
+			detail.setFeeName(feeName);
+			detail.setRatio(ratio);
+			ratioDetails.add(detail);
+
+			ratioSum.setDetail(ratioDetails);
+
+			ratioSumList.add(ratioSum);
+		}
+		return ratioSumList;
 	}
 
 }
