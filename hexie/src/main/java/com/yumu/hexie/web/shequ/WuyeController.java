@@ -66,6 +66,7 @@ import com.yumu.hexie.service.user.BankCardService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
@@ -918,5 +919,15 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(invoiceList);
 	}
 
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getFeeSmsBill", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<PaymentInfo> getFeeSmsBill(QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		User user = new User();
+		user.setAppId(queryFeeSmsBillReq.getAppid());
+		PaymentInfo paymentInfo = wuyeService.getFeeSmsBill(user, queryFeeSmsBillReq);
+		return BaseResult.successResult(paymentInfo);
+	}
 
 }

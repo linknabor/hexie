@@ -11,7 +11,7 @@ public class PaymentData implements Serializable {
 	private String city_name;
 	private String ver_no;//户号
 	private List<PaymentItem> fee_name;
-	
+	private String fee_price;
 	
 	public String getSect_name() {
 		return sect_name;
@@ -36,6 +36,12 @@ public class PaymentData implements Serializable {
 	}
 	public void setFee_name(List<PaymentItem> fee_name) {
 		this.fee_name = fee_name;
+	}
+	public String getFee_price() {
+		return fee_price;
+	}
+	public void setFee_price(String fee_price) {
+		this.fee_price = fee_price;
 	}
 	
 

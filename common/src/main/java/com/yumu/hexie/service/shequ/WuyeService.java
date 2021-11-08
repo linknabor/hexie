@@ -25,6 +25,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
 public interface WuyeService {
 
@@ -344,4 +345,13 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	List<InvoiceDetail> getInvoice(User user, String currPage) throws Exception;
+
+	/**
+	 * 获取催缴短信用户欠费账单
+	 * @param user
+	 * @param queryFeeSmsBillReq
+	 * @return
+	 * @throws Exception
+	 */
+	PaymentInfo getFeeSmsBill(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception;
 }

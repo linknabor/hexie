@@ -62,6 +62,7 @@ import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.vo.BindHouseQueue;
+import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
 @Service("wuyeService")
 public class WuyeServiceImpl implements WuyeService {
@@ -656,6 +657,19 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.queryInvoiceByUser(user, currPage).getData();
 		
+	}
+	
+	/**
+	 * 获取催缴短信用户欠费账单
+	 * @param user
+	 * @param queryFeeSmsBillReq
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public PaymentInfo getFeeSmsBill(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		return wuyeUtil2.getFeeSmsBill(user, queryFeeSmsBillReq).getData();
 	}
 
 }
