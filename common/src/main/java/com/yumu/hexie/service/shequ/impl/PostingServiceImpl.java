@@ -4,6 +4,9 @@ import java.util.*;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.posting.vo.QueryPostingSummaryVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +35,9 @@ import com.yumu.hexie.service.shequ.PostingService;
 
 @Service
 public class PostingServiceImpl implements PostingService {
-	
+
+	private static Logger logger = LoggerFactory.getLogger(PostingServiceImpl.class);
+
 	@Autowired
 	private ThreadRepository threadRepository;
 	@Autowired
@@ -168,25 +173,29 @@ public class PostingServiceImpl implements PostingService {
 	}
 
 	@Override
-	public CommonResponse<Object> getPostingSummary(QueryPostingVO queryPostingVO) {
+	public CommonResponse<Object> getPostingSummary(QueryPostingSummaryVO queryPostingSummaryVO) {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			if(queryPostingVO.getSectIds() == null) {
+			if(queryPostingSummaryVO.getSectIds() == null || queryPostingSummaryVO.getSectIds().isEmpty()) {
 				throw new BizValidateException("查询范围有误");
 			}
-			String[] sectIds = queryPostingVO.getSectIds().toArray(new String[0]);
+			String[] sectIds = queryPostingSummaryVO.getSectIds().toArray(new String[0]);
+
+			logger.info("sectIds :" + Arrays.toString(sectIds));
 			//总数
-			List<Thread> listCount = threadRepository.findThreadCount(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
+			List<Thread> listCount = threadRepository.findThreadCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+
+			logger.info("listCount :" + listCount);
 
 			//回复数
-			List<Thread> listComm = threadRepository.findThreadCommentCount(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
-
+			List<Thread> listComm = threadRepository.findThreadCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			logger.info("listComm :" + listComm);
 			//未回复数
-			List<Thread> listNoComm = threadRepository.findThreadNoCommentCount(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
-
+			List<Thread> listNoComm = threadRepository.findThreadNoCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			logger.info("listNoComm :" + listNoComm);
 			//转工单数
-			List<Thread> listRectified = threadRepository.findThreadRectified(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
-
+			List<Thread> listRectified = threadRepository.findThreadRectified(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			logger.info("listRectified :" + listRectified);
 
 			List<Map<String, String>> list = new ArrayList<>();
 			for(String key : sectIds) {
@@ -232,6 +241,7 @@ public class PostingServiceImpl implements PostingService {
 				list.add(map);
 			}
 
+			logger.info("posing list : " + list);
 			commonResponse.setData(list);
 			commonResponse.setResult("00");
 		} catch (Exception e) {

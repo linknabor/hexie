@@ -2,6 +2,7 @@ package com.yumu.hexie.web.shequ;
 
 import java.util.Map;
 
+import com.yumu.hexie.integration.posting.vo.QueryPostingSummaryVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +67,8 @@ public class PostingController extends BaseController {
 	}
 
 	@RequestMapping(value = "/getPostingSummary", method = RequestMethod.POST)
-	public CommonResponse<Object> getPostingSummary(@RequestBody QueryPostingVO queryPostingVO) {
-		logger.info("getPostingSummary : " + queryPostingVO);
-		return postingService.getPostingSummary(queryPostingVO);
-
+	public CommonResponse<Object> getPostingSummary(@RequestBody QueryPostingSummaryVO queryPostingSummaryVO) {
+		logger.info("QueryPostingSummaryVO : " + queryPostingSummaryVO);
+		return postingService.getPostingSummary(queryPostingSummaryVO);
 	}
 }
