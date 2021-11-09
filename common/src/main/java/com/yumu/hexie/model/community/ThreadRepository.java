@@ -105,7 +105,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			"where a.createDate >= ?1 " +
 			"and a.createDate <= ?2 " +
 			"and a.userSectId in (?3) " +
-			"group by a.userSectId, a.userSectName "
+			"group by a.userSectId "
 			,nativeQuery = true)
 	List<Object[]> findThreadCount(String startDate, String endDate, String[] sectIds);
 
@@ -115,7 +115,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			"and b.createDate >= ?1 " +
 			"and b.createDate <= ?2 " +
 			"and b.userSectId in (?3) " +
-			"group by b.userSectId, b.userSectName "
+			"group by b.userSectId "
 			,nativeQuery = true)
 	List<Object[]> findThreadCommentCount(String startDate, String endDate, String[] sectIds);
 
@@ -131,7 +131,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			") m  " +
 			"join thread t on m.threadId = t.threadId " +
 			"where m.abc = '0' " +
-			"group by t.userSectId, t.userSectName "
+			"group by t.userSectId "
 			,nativeQuery = true)
 	List<Object[]> findThreadNoCommentCount(String startDate, String endDate, String[] sectIds);
 
@@ -140,7 +140,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			"and a.createDate <= ?2 " +
 			"and a.userSectId in (?3) " +
 			"and a.rectified = '1' " +
-			"group by a.userSectId, a.userSectName "
+			"group by a.userSectId "
 			,nativeQuery = true)
 	List<Object[]> findThreadRectified(String startDate, String endDate, String[] sectIds);
 }

@@ -1,5 +1,7 @@
 package com.yumu.hexie.integration.posting.mapper;
 
+import java.math.BigInteger;
+
 /**
  * 描述:
  *
@@ -8,15 +10,23 @@ package com.yumu.hexie.integration.posting.mapper;
  */
 public class QueryPostingSummaryMapper {
 
-    private String userSectId;
+    private BigInteger userSectId;
     private String userSectName;
-    private String num;
+    private BigInteger num;
 
-    public String getUserSectId() {
+    public QueryPostingSummaryMapper(BigInteger userSectId, String userSectName,
+                                     BigInteger num) {
+        super();
+        this.userSectId = userSectId;
+        this.userSectName = userSectName;
+        this.num = num;
+    }
+
+    public BigInteger getUserSectId() {
         return userSectId;
     }
 
-    public void setUserSectId(String userSectId) {
+    public void setUserSectId(BigInteger userSectId) {
         this.userSectId = userSectId;
     }
 
@@ -28,11 +38,11 @@ public class QueryPostingSummaryMapper {
         this.userSectName = userSectName;
     }
 
-    public String getNum() {
+    public BigInteger getNum() {
         return num;
     }
 
-    public void setNum(String num) {
+    public void setNum(BigInteger num) {
         this.num = num;
     }
 }

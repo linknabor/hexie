@@ -205,32 +205,30 @@ public class PostingServiceImpl implements PostingService {
 				String posting_abnormal_num = "0";
 				String posting_rectify_num = "0";
 
-
-
 				for(QueryPostingSummaryMapper t : queryListCount) {
-					if(key.equals(t.getUserSectId())) {
-						posting_num = t.getNum();
+					if(key.equals(String.valueOf(t.getUserSectId()))) {
+						posting_num = t.getNum()+"";
 						break;
 					}
 				}
 
 				for(QueryPostingSummaryMapper t : queryListComm) {
-					if(key.equals(t.getUserSectId())) {
-						posting_normal_num = t.getNum();
+					if(key.equals(String.valueOf(t.getUserSectId()))) {
+						posting_normal_num = t.getNum()+"";
 						break;
 					}
 				}
 
 				for(QueryPostingSummaryMapper t : queryListNoComm) {
-					if(key.equals(t.getUserSectId())) {
-						posting_abnormal_num = t.getNum();
+					if(key.equals(String.valueOf(t.getUserSectId()))) {
+						posting_abnormal_num = t.getNum()+"";
 						break;
 					}
 				}
 
 				for(QueryPostingSummaryMapper t : queryListRectified) {
-					if(key.equals(t.getUserSectId())) {
-						posting_rectify_num = t.getNum();
+					if(key.equals(String.valueOf(t.getUserSectId()))) {
+						posting_rectify_num = t.getNum()+"";
 						break;
 					}
 				}

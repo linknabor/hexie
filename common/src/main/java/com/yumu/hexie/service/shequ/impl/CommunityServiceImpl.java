@@ -395,21 +395,21 @@ public class CommunityServiceImpl implements CommunityService {
 
 		for(QueryPostingSummaryMapper t : queryListCount) {
 			RatioSum ratioSum = new RatioSum();
-			ratioSum.setSect_id(t.getUserSectId());
+			ratioSum.setSect_id(String.valueOf(t.getUserSectId()));
 			ratioSum.setSect_name(t.getUserSectName());
 
 			List<RatioDetail> ratioDetails = new ArrayList<>();
 
 			RatioDetail detail = new RatioDetail();
 			detail.setFeeName("意见总数");
-			detail.setRatio(t.getNum());
+			detail.setRatio(t.getNum()+"");
 			ratioDetails.add(detail);
 
 			String feeName = "回复数";
 			String ratio = "0";
 			for(QueryPostingSummaryMapper tc: queryListComm) {
 				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getNum();
+					ratio = tc.getNum()+"";
 					break;
 				}
 			}
@@ -422,7 +422,7 @@ public class CommunityServiceImpl implements CommunityService {
 			ratio = "0";
 			for(QueryPostingSummaryMapper tc: queryListNoComm) {
 				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getNum();
+					ratio = tc.getNum()+"";
 					break;
 				}
 			}
@@ -435,7 +435,7 @@ public class CommunityServiceImpl implements CommunityService {
 			ratio = "0";
 			for(QueryPostingSummaryMapper tc: queryListRectified) {
 				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getNum();
+					ratio = tc.getNum()+"";
 					break;
 				}
 			}
