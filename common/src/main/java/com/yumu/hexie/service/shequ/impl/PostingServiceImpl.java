@@ -4,6 +4,7 @@ import java.util.*;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.posting.mapper.QueryPostingSummaryMapper;
 import com.yumu.hexie.integration.posting.vo.QueryPostingSummaryVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,14 +183,20 @@ public class PostingServiceImpl implements PostingService {
 			String[] sectIds = queryPostingSummaryVO.getSectIds().toArray(new String[0]);
 
 			//总数
-			List<Thread> listCount = threadRepository.findThreadCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
-			logger.error("listCount :" + listCount);
+			List<Object[]> listCount = threadRepository.findThreadCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListCount = ObjectToBeanUtils.objectToBean(listCount, QueryPostingSummaryMapper.class);
+
 			//回复数
-			List<Thread> listComm = threadRepository.findThreadCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<Object[]> listComm = threadRepository.findThreadCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListComm = ObjectToBeanUtils.objectToBean(listComm, QueryPostingSummaryMapper.class);
+
 			//未回复数
-			List<Thread> listNoComm = threadRepository.findThreadNoCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<Object[]> listNoComm = threadRepository.findThreadNoCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListNoComm = ObjectToBeanUtils.objectToBean(listNoComm, QueryPostingSummaryMapper.class);
+
 			//转工单数
-			List<Thread> listRectified = threadRepository.findThreadRectified(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<Object[]> listRectified = threadRepository.findThreadRectified(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListRectified = ObjectToBeanUtils.objectToBean(listRectified, QueryPostingSummaryMapper.class);
 
 			List<Map<String, String>> list = new ArrayList<>();
 			for(String key : sectIds) {
@@ -198,30 +205,32 @@ public class PostingServiceImpl implements PostingService {
 				String posting_abnormal_num = "0";
 				String posting_rectify_num = "0";
 
-				for(Thread t : listCount) {
+
+
+				for(QueryPostingSummaryMapper t : queryListCount) {
 					if(key.equals(t.getUserSectId())) {
-						posting_num = String.valueOf(t.getCommentsCount());
+						posting_num = t.getNum();
 						break;
 					}
 				}
 
-				for(Thread t : listComm) {
+				for(QueryPostingSummaryMapper t : queryListComm) {
 					if(key.equals(t.getUserSectId())) {
-						posting_normal_num = String.valueOf(t.getCommentsCount());
+						posting_normal_num = t.getNum();
 						break;
 					}
 				}
 
-				for(Thread t : listNoComm) {
+				for(QueryPostingSummaryMapper t : queryListNoComm) {
 					if(key.equals(t.getUserSectId())) {
-						posting_abnormal_num = String.valueOf(t.getCommentsCount());
+						posting_abnormal_num = t.getNum();
 						break;
 					}
 				}
 
-				for(Thread t : listRectified) {
+				for(QueryPostingSummaryMapper t : queryListRectified) {
 					if(key.equals(t.getUserSectId())) {
-						posting_rectify_num = String.valueOf(t.getCommentsCount());
+						posting_rectify_num = t.getNum();
 						break;
 					}
 				}

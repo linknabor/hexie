@@ -202,5 +202,5 @@ public interface CommunityService {
 	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception;
 
 	//根据小区ID和区间汇总意见信息
-	List<RatioSum> getThreadBySectIdsAndCycle(CommunitySummary summary);
+	List<RatioSum> getThreadBySectIdsAndCycle(CommunitySummary summary) throws Exception;
 }

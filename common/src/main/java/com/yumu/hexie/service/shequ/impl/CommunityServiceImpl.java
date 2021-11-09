@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.common.util.ObjectToBeanUtils;
+import com.yumu.hexie.integration.posting.mapper.QueryPostingSummaryMapper;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import com.yumu.hexie.service.shequ.req.CommunitySummary;
@@ -321,7 +323,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<RatioSum> getThreadBySectIdsAndCycle(CommunitySummary summary) {
+	public List<RatioSum> getThreadBySectIdsAndCycle(CommunitySummary summary) throws Exception {
 		String start;
 		String end;
 		Date currDate = new Date();
@@ -342,16 +344,20 @@ public class CommunityServiceImpl implements CommunityService {
 		String[] strs = list.toArray(new String[0]);
 
 		//总数
-		List<Thread> threadListCount = threadRepository.findThreadCount(start, end, strs);
+		List<Object[]> threadListCount = threadRepository.findThreadCount(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListCount = ObjectToBeanUtils.objectToBean(threadListCount, QueryPostingSummaryMapper.class);
 
 		//回复数
-		List<Thread> threadListCommentCount = threadRepository.findThreadCommentCount(start, end, strs);
+		List<Object[]> threadListCommentCount = threadRepository.findThreadCommentCount(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListComm = ObjectToBeanUtils.objectToBean(threadListCommentCount, QueryPostingSummaryMapper.class);
 
 		//未回复数
-		List<Thread> threadListNoCommentCount = threadRepository.findThreadNoCommentCount(start, end, strs);
+		List<Object[]> threadListNoCommentCount = threadRepository.findThreadNoCommentCount(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListNoComm = ObjectToBeanUtils.objectToBean(threadListNoCommentCount, QueryPostingSummaryMapper.class);
 
 		//转工单数
-		List<Thread> threadListRectifiedCount = threadRepository.findThreadRectified(start, end, strs);
+		List<Object[]> threadListRectifiedCount = threadRepository.findThreadRectified(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListRectified = ObjectToBeanUtils.objectToBean(threadListRectifiedCount, QueryPostingSummaryMapper.class);
 
 		List<RatioSum> ratioSumList = new ArrayList<>();
 		if(threadListCount.size() == 0) {
@@ -387,7 +393,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return ratioSumList;
 		}
 
-		for(Thread t : threadListCount) {
+		for(QueryPostingSummaryMapper t : queryListCount) {
 			RatioSum ratioSum = new RatioSum();
 			ratioSum.setSect_id(t.getUserSectId());
 			ratioSum.setSect_name(t.getUserSectName());
@@ -396,14 +402,14 @@ public class CommunityServiceImpl implements CommunityService {
 
 			RatioDetail detail = new RatioDetail();
 			detail.setFeeName("意见总数");
-			detail.setRatio(t.getCommentsCount()+"");
+			detail.setRatio(t.getNum());
 			ratioDetails.add(detail);
 
 			String feeName = "回复数";
 			String ratio = "0";
-			for(Thread tc: threadListCommentCount) {
+			for(QueryPostingSummaryMapper tc: queryListComm) {
 				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getCommentsCount()+"";
+					ratio = tc.getNum();
 					break;
 				}
 			}
@@ -414,9 +420,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 			feeName = "未回复数";
 			ratio = "0";
-			for(Thread tc: threadListNoCommentCount) {
+			for(QueryPostingSummaryMapper tc: queryListNoComm) {
 				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getCommentsCount()+"";
+					ratio = tc.getNum();
 					break;
 				}
 			}
@@ -427,9 +433,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 			feeName = "转工单数";
 			ratio = "0";
-			for(Thread tc: threadListRectifiedCount) {
+			for(QueryPostingSummaryMapper tc: queryListRectified) {
 				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getCommentsCount()+"";
+					ratio = tc.getNum();
 					break;
 				}
 			}
