@@ -183,7 +183,7 @@ public class PostingServiceImpl implements PostingService {
 
 			//总数
 			List<Thread> listCount = threadRepository.findThreadCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
-
+			logger.error("listCount :" + listCount);
 			//回复数
 			List<Thread> listComm = threadRepository.findThreadCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
 			//未回复数
