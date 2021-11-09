@@ -181,21 +181,15 @@ public class PostingServiceImpl implements PostingService {
 			}
 			String[] sectIds = queryPostingSummaryVO.getSectIds().toArray(new String[0]);
 
-			logger.info("sectIds :" + Arrays.toString(sectIds));
 			//总数
 			List<Thread> listCount = threadRepository.findThreadCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
 
-			logger.info("listCount :" + listCount);
-
 			//回复数
 			List<Thread> listComm = threadRepository.findThreadCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
-			logger.info("listComm :" + listComm);
 			//未回复数
 			List<Thread> listNoComm = threadRepository.findThreadNoCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
-			logger.info("listNoComm :" + listNoComm);
 			//转工单数
 			List<Thread> listRectified = threadRepository.findThreadRectified(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
-			logger.info("listRectified :" + listRectified);
 
 			List<Map<String, String>> list = new ArrayList<>();
 			for(String key : sectIds) {
@@ -206,28 +200,28 @@ public class PostingServiceImpl implements PostingService {
 
 				for(Thread t : listCount) {
 					if(key.equals(t.getUserSectId())) {
-						posting_num = t.getCommentsCount()+"";
+						posting_num = String.valueOf(t.getCommentsCount());
 						break;
 					}
 				}
 
 				for(Thread t : listComm) {
 					if(key.equals(t.getUserSectId())) {
-						posting_normal_num = t.getCommentsCount()+"";
+						posting_normal_num = String.valueOf(t.getCommentsCount());
 						break;
 					}
 				}
 
 				for(Thread t : listNoComm) {
 					if(key.equals(t.getUserSectId())) {
-						posting_abnormal_num = t.getCommentsCount()+"";
+						posting_abnormal_num = String.valueOf(t.getCommentsCount());
 						break;
 					}
 				}
 
 				for(Thread t : listRectified) {
 					if(key.equals(t.getUserSectId())) {
-						posting_rectify_num = t.getCommentsCount()+"";
+						posting_rectify_num = String.valueOf(t.getCommentsCount());
 						break;
 					}
 				}
