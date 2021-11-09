@@ -1,9 +1,6 @@
 package com.yumu.hexie.service.shequ.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.transaction.Transactional;
 
@@ -30,7 +27,6 @@ import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.community.ThreadCommentRepository;
 import com.yumu.hexie.model.community.ThreadRepository;
-import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.PostingService;
 
@@ -41,10 +37,7 @@ public class PostingServiceImpl implements PostingService {
 	private ThreadRepository threadRepository;
 	@Autowired
 	private ThreadCommentRepository threadCommentRepository;
-	@Autowired
-	private GotongService gotongService;
-	
-	
+
 	@Override
 	public CommonResponse<Object> getPosting(QueryPostingVO queryPostingVO) {
 
@@ -87,7 +80,7 @@ public class PostingServiceImpl implements PostingService {
 	
 	/**
 	 * 根据ID删除帖子
-	 * @param postingId
+	 * @param delIds
 	 */
 	@Override
 	@Transactional
@@ -120,7 +113,7 @@ public class PostingServiceImpl implements PostingService {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			
-			List<Object[]> page = threadCommentRepository.getCommentList(Long.valueOf(queryPostingVO.getId()));
+			List<Object[]> page = threadCommentRepository.getCommentList(Long.parseLong(queryPostingVO.getId()));
 			List<QueryCommentMapper> list = ObjectToBeanUtils.objectToBean(page, QueryCommentMapper.class);
 			QueryListDTO<List<QueryCommentMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setContent(list);
@@ -169,14 +162,83 @@ public class PostingServiceImpl implements PostingService {
 		comment.setCommentDateTime(System.currentTimeMillis());
 		comment.setCommentDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
 		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
-		comment.setCommentUserId(Long.valueOf(saveCommentVO.getUserId()));
+		comment.setCommentUserId(Long.parseLong(saveCommentVO.getUserId()));
 		comment.setCommentUserName(saveCommentVO.getUserName());
 		threadCommentRepository.save(comment);
-		
-//		if (comment.getCommentUserId() != thread.getUserId()) {
-//			gotongService.sendPostingReplyMsg(thread);
-//		}
-		
 	}
-	
+
+	@Override
+	public CommonResponse<Object> getPostingSummary(QueryPostingVO queryPostingVO) {
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			if(queryPostingVO.getSectIds() == null) {
+				throw new BizValidateException("查询范围有误");
+			}
+			String[] sectIds = queryPostingVO.getSectIds().toArray(new String[0]);
+			//总数
+			List<Thread> listCount = threadRepository.findThreadCount(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
+
+			//回复数
+			List<Thread> listComm = threadRepository.findThreadCommentCount(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
+
+			//未回复数
+			List<Thread> listNoComm = threadRepository.findThreadNoCommentCount(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
+
+			//转工单数
+			List<Thread> listRectified = threadRepository.findThreadRectified(queryPostingVO.getStartDate(), queryPostingVO.getEndDate(), sectIds);
+
+
+			List<Map<String, String>> list = new ArrayList<>();
+			for(String key : sectIds) {
+				String posting_num = "0";
+				String posting_normal_num = "0";
+				String posting_abnormal_num = "0";
+				String posting_rectify_num = "0";
+
+				for(Thread t : listCount) {
+					if(key.equals(t.getUserSectId())) {
+						posting_num = t.getCommentsCount()+"";
+						break;
+					}
+				}
+
+				for(Thread t : listComm) {
+					if(key.equals(t.getUserSectId())) {
+						posting_normal_num = t.getCommentsCount()+"";
+						break;
+					}
+				}
+
+				for(Thread t : listNoComm) {
+					if(key.equals(t.getUserSectId())) {
+						posting_abnormal_num = t.getCommentsCount()+"";
+						break;
+					}
+				}
+
+				for(Thread t : listRectified) {
+					if(key.equals(t.getUserSectId())) {
+						posting_rectify_num = t.getCommentsCount()+"";
+						break;
+					}
+				}
+
+				Map<String, String> map = new HashMap<>();
+				map.put("sect_id", key);
+				map.put("posting_num", posting_num);
+				map.put("posting_normal_num", posting_normal_num);
+				map.put("posting_abnormal_num", posting_abnormal_num);
+				map.put("posting_rectify_num", posting_rectify_num);
+				list.add(map);
+			}
+
+			commonResponse.setData(list);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+	}
+
 }

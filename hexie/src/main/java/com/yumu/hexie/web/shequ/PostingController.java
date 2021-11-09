@@ -64,4 +64,11 @@ public class PostingController extends BaseController {
 		commonResponse.setResult("00");
 		return commonResponse;
 	}
+
+	@RequestMapping(value = "/getPostingSummary", method = RequestMethod.POST)
+	public CommonResponse<Object> getPostingSummary(@RequestBody QueryPostingVO queryPostingVO) {
+		logger.info("getPostingSummary : " + queryPostingVO);
+		return postingService.getPostingSummary(queryPostingVO);
+
+	}
 }

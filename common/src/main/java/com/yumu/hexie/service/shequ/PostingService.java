@@ -14,4 +14,5 @@ public interface PostingService {
 
 	void addComment(SaveCommentVO saveCommentVO);
 
+	CommonResponse<Object> getPostingSummary(QueryPostingVO queryPostingVO);
 }
