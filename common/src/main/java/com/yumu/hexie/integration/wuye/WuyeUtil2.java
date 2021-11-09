@@ -98,6 +98,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_MPQRCODE_PARAM_URL = "queryMpQrCodeParamSDO.do";//获取生成公众号动态二维码的必要参数
 	private static final String QUERY_USER_INVOICE_URL = "queryInvoiceByUserSDO.do";	//获取用户申请过的发票 
 	private static final String QUERY_FEE_SMS_BILL_URL = "getFeeSmsBillSDO.do";	//获取催缴短信中的欠费账单
+	private static final String FEE_SMS_PAY_QRCODE = "getSmsPayQrCodeSDO.do";	//获取催缴短信二维码
 
 	/**
 	 * 标准版查询账单
@@ -637,6 +638,33 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<PaymentInfo>> typeReference = new TypeReference<CommonResponse<PaymentInfo>>(){};
 		CommonResponse<PaymentInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
 		BaseResult<PaymentInfo> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 查询当前用户申请过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<Discounts> getFeeSmsPayQrCode(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += FEE_SMS_PAY_QRCODE;
+		Map<String, String> map = new HashMap<>();
+		map.put("batch_no", queryFeeSmsBillReq.getBatchNo());
+		map.put("cell_id", queryFeeSmsBillReq.getCellId());
+		map.put("appid", queryFeeSmsBillReq.getAppid());
+		map.put("pay_fee_type", "01");	//01账单支付
+		map.put("pay_type", "0");	//非银行卡支付
+		map.put("is_qrcode", "1");	//1，二维码支付
+		
+		TypeReference<CommonResponse<Discounts>> typeReference = new TypeReference<CommonResponse<Discounts>>(){};
+		CommonResponse<Discounts> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<Discounts> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;

@@ -929,5 +929,16 @@ public class WuyeController extends BaseController {
 		PaymentInfo paymentInfo = wuyeService.getFeeSmsBill(user, queryFeeSmsBillReq);
 		return BaseResult.successResult(paymentInfo);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getFeeSmsPayQrCode", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Discounts> getFeeSmsPayQrCode(QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		User user = new User();
+		user.setAppId(queryFeeSmsBillReq.getAppid());
+		Discounts discounts = wuyeService.getFeeSmsPayQrCode(user, queryFeeSmsBillReq);
+		return BaseResult.successResult(discounts);
+	}
 
 }

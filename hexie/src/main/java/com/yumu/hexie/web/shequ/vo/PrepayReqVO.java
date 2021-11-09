@@ -57,6 +57,9 @@ public class PrepayReqVO implements Serializable {
 	private String appid;	//alibaba appid
 	private String payee_openid; //收款人的openid
 	
+	private String cellId;	//催缴短信支付的房屋ID
+	private String batchNo;	//催缴短信批次号
+	
 	public String getBillId() {
 		return billId;
 	}
@@ -219,48 +222,37 @@ public class PrepayReqVO implements Serializable {
 	}
 	public void setOpenid(String openid) {
 		this.openid = openid;
-
 	}
-
 	public String getPayee_openid() {
 		return payee_openid;
 	}
-
 	public void setPayee_openid(String payee_openid) {
 		this.payee_openid = payee_openid;
 	}
-
+	public String getCellId() {
+		return cellId;
+	}
+	public void setCellId(String cellId) {
+		this.cellId = cellId;
+	}
+	public String getBatchNo() {
+		return batchNo;
+	}
+	public void setBatchNo(String batchNo) {
+		this.batchNo = batchNo;
+	}
 	@Override
 	public String toString() {
-		return "PrepayReqVO{" +
-				"billId='" + billId + '\'' +
-				", stmtId='" + stmtId + '\'' +
-				", couponUnit='" + couponUnit + '\'' +
-				", couponNum='" + couponNum + '\'' +
-				", couponId='" + couponId + '\'' +
-				", reduceAmt='" + reduceAmt + '\'' +
-				", invoiceTitleType='" + invoiceTitleType + '\'' +
-				", creditCode='" + creditCode + '\'' +
-				", invoiceTitle='" + invoiceTitle + '\'' +
-				", regionName='" + regionName + '\'' +
-				", payType='" + payType + '\'' +
-				", customerName='" + customerName + '\'' +
-				", certType='" + certType + '\'' +
-				", certId='" + certId + '\'' +
-				", acctNo='" + acctNo + '\'' +
-				", phoneNo='" + phoneNo + '\'' +
-				", quickToken='" + quickToken + '\'' +
-				", veriCode='" + veriCode + '\'' +
-				", remember='" + remember + '\'' +
-				", cardId='" + cardId + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", ruleType='" + ruleType + '\'' +
-				", reductionAmt='" + reductionAmt + '\'' +
-				", payFeeType='" + payFeeType + '\'' +
-				", isQrcode='" + isQrcode + '\'' +
-				", openid='" + openid + '\'' +
-				", appid='" + appid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				'}';
+		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
+				+ couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitleType="
+				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", regionName="
+				+ regionName + ", payType=" + payType + ", customerName=" + customerName + ", certType=" + certType
+				+ ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken
+				+ ", veriCode=" + veriCode + ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo
+				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType
+				+ ", isQrcode=" + isQrcode + ", openid=" + openid + ", appid=" + appid + ", payee_openid="
+				+ payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo + "]";
 	}
+	
+	
 }

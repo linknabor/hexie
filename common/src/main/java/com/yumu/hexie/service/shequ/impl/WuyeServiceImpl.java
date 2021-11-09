@@ -671,5 +671,18 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.getFeeSmsBill(user, queryFeeSmsBillReq).getData();
 	}
+	
+	/**
+	 * 获取催缴短信用付费二维码
+	 * @param user
+	 * @param queryFeeSmsBillReq
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public Discounts getFeeSmsPayQrCode(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		return wuyeUtil2.getFeeSmsPayQrCode(user, queryFeeSmsBillReq).getData();
+	}
 
 }

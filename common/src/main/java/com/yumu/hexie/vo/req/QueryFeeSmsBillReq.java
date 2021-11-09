@@ -12,6 +12,8 @@ public class QueryFeeSmsBillReq implements Serializable {
 	private String batchNo;
 	private String cellId;
 	private String appid;
+	private String payFeeType;	//01账单支付，02其他收费支付
+	private String payMethod;
 	
 	public String getBatchNo() {
 		return batchNo;
@@ -31,9 +33,22 @@ public class QueryFeeSmsBillReq implements Serializable {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
+	public String getPayFeeType() {
+		return payFeeType;
+	}
+	public void setPayFeeType(String payFeeType) {
+		this.payFeeType = payFeeType;
+	}
+	public String getPayMethod() {
+		return payMethod;
+	}
+	public void setPayMethod(String payMethod) {
+		this.payMethod = payMethod;
+	}
 	@Override
 	public String toString() {
-		return "QueryFeeSmsBillReq [batchNo=" + batchNo + ", cellId=" + cellId + ", appid=" + appid + "]";
+		return "QueryFeeSmsBillReq [batchNo=" + batchNo + ", cellId=" + cellId + ", appid=" + appid + ", payFeeType="
+				+ payFeeType + ", payMethod=" + payMethod + "]";
 	}
 	
 	

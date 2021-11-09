@@ -354,4 +354,13 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	PaymentInfo getFeeSmsBill(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception;
+
+	/**
+	 * 获取催缴短信用付费二维码
+	 * @param user
+	 * @param queryFeeSmsBillReq
+	 * @return
+	 * @throws Exception
+	 */
+	Discounts getFeeSmsPayQrCode(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception;
 }

@@ -56,6 +56,10 @@ public class PrepayRequestDTO implements Serializable {
 	private String isQrcode;
 	private String appid;
 	private String payee_openid; //收款人的openid
+	
+	//短信催缴
+	private String cellId;
+	private String batchNo;
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -225,47 +229,37 @@ public class PrepayRequestDTO implements Serializable {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
-
 	public String getPayee_openid() {
 		return payee_openid;
 	}
-
 	public void setPayee_openid(String payee_openid) {
 		this.payee_openid = payee_openid;
 	}
-
+	public String getCellId() {
+		return cellId;
+	}
+	public void setCellId(String cellId) {
+		this.cellId = cellId;
+	}
+	public String getBatchNo() {
+		return batchNo;
+	}
+	public void setBatchNo(String batchNo) {
+		this.batchNo = batchNo;
+	}
 	@Override
 	public String toString() {
-		return "PrepayRequestDTO{" +
-				"user=" + user +
-				", couponUnit='" + couponUnit + '\'' +
-				", couponNum='" + couponNum + '\'' +
-				", couponId='" + couponId + '\'' +
-				", reduceAmt='" + reduceAmt + '\'' +
-				", invoiceTitle='" + invoiceTitle + '\'' +
-				", invoiceTitleType='" + invoiceTitleType + '\'' +
-				", creditCode='" + creditCode + '\'' +
-				", regionUrl='" + regionUrl + '\'' +
-				", regionName='" + regionName + '\'' +
-				", billId='" + billId + '\'' +
-				", stmtId='" + stmtId + '\'' +
-				", payType='" + payType + '\'' +
-				", customerName='" + customerName + '\'' +
-				", certType='" + certType + '\'' +
-				", certId='" + certId + '\'' +
-				", acctNo='" + acctNo + '\'' +
-				", phoneNo='" + phoneNo + '\'' +
-				", quickToken='" + quickToken + '\'' +
-				", veriCode='" + veriCode + '\'' +
-				", remember='" + remember + '\'' +
-				", cardId='" + cardId + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", ruleType='" + ruleType + '\'' +
-				", reductionAmt='" + reductionAmt + '\'' +
-				", payFeeType='" + payFeeType + '\'' +
-				", isQrcode='" + isQrcode + '\'' +
-				", appid='" + appid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				'}';
+		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
+				+ ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitle=" + invoiceTitle
+				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", regionUrl=" + regionUrl
+				+ ", regionName=" + regionName + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType
+				+ ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo="
+				+ acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode
+				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
+				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
+				+ ", appid=" + appid + ", payee_openid=" + payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo
+				+ "]";
 	}
+	
+	
 }
