@@ -43,6 +43,7 @@ public class ThreadComment implements Serializable {
 	private String uploadPicId;
 	private String imgHeight;	//图片高度 ，一对多，逗号分割
 	private String imgWidth;	//图片宽度，一对多，逗号分割
+	private String isManageComment = "0"; //是否是物业人员回复
 	
 	@Transient
 	private String isCommentOwner;
@@ -186,5 +187,13 @@ public class ThreadComment implements Serializable {
 
 	public void setImgUrlLink(List<String> imgUrlLink) {
 		this.imgUrlLink = imgUrlLink;
+	}
+
+	public String getIsManageComment() {
+		return isManageComment;
+	}
+
+	public void setIsManageComment(String isManageComment) {
+		this.isManageComment = isManageComment;
 	}
 }

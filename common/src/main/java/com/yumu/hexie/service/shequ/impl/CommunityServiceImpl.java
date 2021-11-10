@@ -1,12 +1,19 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.common.util.ObjectToBeanUtils;
+import com.yumu.hexie.integration.posting.mapper.QueryPostingSummaryMapper;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.service.shequ.req.CommunitySummary;
+import com.yumu.hexie.service.shequ.req.RatioDetail;
+import com.yumu.hexie.service.shequ.req.RatioSum;
+import com.yumu.hexie.service.shequ.req.SectsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -313,6 +320,144 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception{
 		return wuyeUtil2.sendMinNotification(user, opinionRequest).getData();
+	}
+
+	@Override
+	public List<RatioSum> getThreadBySectIdsAndCycle(CommunitySummary summary) throws Exception {
+		String start;
+		String end;
+		Date currDate = new Date();
+		String currDateStr = DateUtil.dtFormat(currDate).replaceAll("-", "");
+		if ("02".equals(summary.getDateCycle())) { //查询上周
+			String last = DateUtil.getNextDateByNum(currDateStr, -7);
+			start = DateUtil.getFirstOfWeek(last);
+			end = DateUtil.getNextDateByNum(start, 6);
+		} else {
+			start = DateUtil.getFirstOfWeek(currDateStr);
+			end = DateUtil.getNextDateByNum(start, 6);
+		}
+
+		List<String> list = new ArrayList<>();
+		for(SectsVO.SectVO sectVO : summary.getSects()) {
+			list.add(sectVO.getId());
+		}
+		String[] strs = list.toArray(new String[0]);
+
+		//总数
+		List<Object[]> threadListCount = threadRepository.findThreadCount(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListCount = ObjectToBeanUtils.objectToBean(threadListCount, QueryPostingSummaryMapper.class);
+
+		//回复数
+		List<Object[]> threadListCommentCount = threadRepository.findThreadCommentCount(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListComm = ObjectToBeanUtils.objectToBean(threadListCommentCount, QueryPostingSummaryMapper.class);
+
+		//未回复数
+		List<Object[]> threadListNoCommentCount = threadRepository.findThreadNoCommentCount(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListNoComm = ObjectToBeanUtils.objectToBean(threadListNoCommentCount, QueryPostingSummaryMapper.class);
+
+		//转工单数
+		List<Object[]> threadListRectifiedCount = threadRepository.findThreadRectified(start, end, strs);
+		List<QueryPostingSummaryMapper> queryListRectified = ObjectToBeanUtils.objectToBean(threadListRectifiedCount, QueryPostingSummaryMapper.class);
+
+		List<RatioSum> ratioSumList = new ArrayList<>();
+		if(threadListCount.size() == 0) {
+			List<SectsVO.SectVO> sectVOS = summary.getSects();
+			for(SectsVO.SectVO sectVO : sectVOS) {
+				RatioSum ratioSum = new RatioSum();
+				ratioSum.setSect_id(sectVO.getId());
+				ratioSum.setSect_name(sectVO.getName());
+
+				List<RatioDetail> ratioDetails = new ArrayList<>();
+				RatioDetail detail = new RatioDetail();
+				detail.setFeeName("意见总数");
+				detail.setRatio("0");
+				ratioDetails.add(detail);
+
+				detail = new RatioDetail();
+				detail.setFeeName("回复数");
+				detail.setRatio("0");
+				ratioDetails.add(detail);
+
+				detail = new RatioDetail();
+				detail.setFeeName("未回复数");
+				detail.setRatio("0");
+				ratioDetails.add(detail);
+
+				detail = new RatioDetail();
+				detail.setFeeName("转工单数");
+				detail.setRatio("0");
+				ratioDetails.add(detail);
+				ratioSum.setDetail(ratioDetails);
+				ratioSumList.add(ratioSum);
+			}
+			return ratioSumList;
+		}
+
+		for(QueryPostingSummaryMapper t : queryListCount) {
+			RatioSum ratioSum = new RatioSum();
+			ratioSum.setSect_id(String.valueOf(t.getUserSectId()));
+			ratioSum.setSect_name(t.getUserSectName());
+
+			List<RatioDetail> ratioDetails = new ArrayList<>();
+
+			RatioDetail detail = new RatioDetail();
+			detail.setFeeName("意见总数");
+			detail.setRatio(t.getNum()+"");
+			ratioDetails.add(detail);
+
+			String feeName = "回复数";
+			String ratio = "0";
+			if(threadListCommentCount.size() != 0) {
+				for(QueryPostingSummaryMapper tc: queryListComm) {
+					if(t.getUserSectId().equals(tc.getUserSectId())) {
+						ratio = tc.getNum()+"";
+						break;
+					}
+				}
+			}
+
+			detail = new RatioDetail();
+			detail.setFeeName(feeName);
+			detail.setRatio(ratio);
+			ratioDetails.add(detail);
+
+			feeName = "未回复数";
+			ratio = "0";
+			if(threadListNoCommentCount.size() != 0) {
+				for(QueryPostingSummaryMapper tc: queryListNoComm) {
+					if(t.getUserSectId().equals(tc.getUserSectId())) {
+						ratio = tc.getNum()+"";
+						break;
+					}
+				}
+			}
+
+			detail = new RatioDetail();
+			detail.setFeeName(feeName);
+			detail.setRatio(ratio);
+			ratioDetails.add(detail);
+
+			feeName = "转工单数";
+			ratio = "0";
+			if(threadListRectifiedCount.size() != 0) {
+				for(QueryPostingSummaryMapper tc: queryListRectified) {
+					if(t.getUserSectId().equals(tc.getUserSectId())) {
+						ratio = tc.getNum()+"";
+						break;
+					}
+				}
+			}
+
+			detail = new RatioDetail();
+			detail.setFeeName(feeName);
+			detail.setRatio(ratio);
+			ratioDetails.add(detail);
+
+			ratioSum.setDetail(ratioDetails);
+
+			ratioSumList.add(ratioSum);
+		}
+		return ratioSumList;
 	}
 
 }

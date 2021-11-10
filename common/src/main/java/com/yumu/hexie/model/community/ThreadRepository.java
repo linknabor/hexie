@@ -4,6 +4,7 @@
 package com.yumu.hexie.model.community;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -99,6 +100,55 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			,nativeQuery = true)
 	public Page<Object[]> getThreadList(int threadCategory, String userName, String startDate, String endDate,String sectId, List<String> sectIds, Pageable pageable);
 	
-	
-	
+
+	@Query(value="select a.userSectId, a.userSectName, count(distinct a.threadId) as num from thread a " +
+			"where a.createDate >= ?1 " +
+			"and a.createDate <= ?2 " +
+			"and a.userSectId in (?3) " +
+			"group by a.userSectId "
+			,nativeQuery = true)
+	List<Object[]> findThreadCount(String startDate, String endDate, String[] sectIds);
+
+	@Query(value="select b.userSectId, b.userSectName, count(distinct b.threadId) as num from threadcomment a " +
+			"join thread b on a.threadId = b.threadId " +
+			"where a.isManageComment = '1' " +
+			"and b.createDate >= ?1 " +
+			"and b.createDate <= ?2 " +
+			"and b.userSectId in (?3) " +
+			"group by b.userSectId "
+			,nativeQuery = true)
+	List<Object[]> findThreadCommentCount(String startDate, String endDate, String[] sectIds);
+
+	@Query(value="select t.userSectId, t.userSectName, count(distinct t.threadId) as num from ( " +
+			"select m.threadId from ( " +
+			"select z.threadId, group_concat(z.isManageComment SEPARATOR '/') as abc from ( " +
+			"select a.threadId, a.isManageComment from threadcomment a " +
+			"join thread b on a.threadId = b.threadId " +
+			"where b.createDate >= ?1 " +
+			"and b.createDate <= ?2 " +
+			"and b.userSectId in (?3) " +
+			"group by a.threadId, a.isManageComment " +
+			") z group by z.threadId " +
+			") m  " +
+			"where m.abc = '0' " +
+			"UNION ALL " +
+			"select a.threadId from thread a " +
+			"where a.createDate >= ?1 " +
+			"and a.createDate <= ?2 " +
+			"and a.userSectId in (?3) " +
+			"and a.commentsCount = '0' " +
+			") w " +
+			"join thread t on w.threadId = t.threadId " +
+			"group by t.userSectId "
+			,nativeQuery = true)
+	List<Object[]> findThreadNoCommentCount(String startDate, String endDate, String[] sectIds);
+
+	@Query(value="select a.userSectId, a.userSectName, count(distinct a.threadId) as num from thread a " +
+			"where a.createDate >= ?1 " +
+			"and a.createDate <= ?2 " +
+			"and a.userSectId in (?3) " +
+			"and a.rectified = '1' " +
+			"group by a.userSectId "
+			,nativeQuery = true)
+	List<Object[]> findThreadRectified(String startDate, String endDate, String[] sectIds);
 }
