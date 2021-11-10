@@ -119,7 +119,8 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			,nativeQuery = true)
 	List<Object[]> findThreadCommentCount(String startDate, String endDate, String[] sectIds);
 
-	@Query(value="select t.userSectId, t.userSectName, count(t.threadId) as num from ( " +
+	@Query(value="select t.userSectId, t.userSectName, count(distinct t.threadId) as num from ( " +
+			"select m.threadId from ( " +
 			"select z.threadId, group_concat(z.isManageComment SEPARATOR '/') as abc from ( " +
 			"select a.threadId, a.isManageComment from threadcomment a " +
 			"join thread b on a.threadId = b.threadId " +
@@ -129,8 +130,15 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
 			"group by a.threadId, a.isManageComment " +
 			") z group by z.threadId " +
 			") m  " +
-			"join thread t on m.threadId = t.threadId " +
 			"where m.abc = '0' " +
+			"UNION ALL " +
+			"select a.threadId from thread a " +
+			"where a.createDate >= ?1 " +
+			"and a.createDate <= ?2 " +
+			"and a.userSectId in (?3) " +
+			"and a.commentsCount = '0' " +
+			") w " +
+			"join thread t on w.threadId = t.threadId " +
 			"group by t.userSectId "
 			,nativeQuery = true)
 	List<Object[]> findThreadNoCommentCount(String startDate, String endDate, String[] sectIds);
