@@ -32,7 +32,9 @@ public class OtherPayVO implements Serializable {
 	private String orderDetail;
 	@JsonProperty("sms_batch")
 	private String smsBatch;
-	
+
+	private String invoice_type;
+
 	public String getMoney() {
 		return money;
 	}
@@ -103,11 +105,35 @@ public class OtherPayVO implements Serializable {
 		this.orderId = orderId;
 	}
 
+	public String getOrderDetail() {
+		return orderDetail;
+	}
+
+	public void setOrderDetail(String orderDetail) {
+		this.orderDetail = orderDetail;
+	}
+
+	public String getInvoice_type() {
+		return invoice_type;
+	}
+
+	public void setInvoice_type(String invoice_type) {
+		this.invoice_type = invoice_type;
+	}
+	public String getSmsBatch() {
+		return smsBatch;
+	}
+	public void setSmsBatch(String smsBatch) {
+		this.smsBatch = smsBatch;
+	}
 	@Override
 	public String toString() {
 		return "OtherPayVO [money=" + money + ", sectId=" + sectId + ", feeId=" + feeId + ", openid=" + openid
 				+ ", remark=" + remark + ", appid=" + appid + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId
-				+ ", realAppid=" + realAppid + ", orderId=" + orderId + "]";
+				+ ", realAppid=" + realAppid + ", payee_openid=" + payee_openid + ", orderId=" + orderId
+				+ ", orderDetail=" + orderDetail + ", smsBatch=" + smsBatch + ", invoice_type=" + invoice_type + "]";
 	}
 	
+	
+
 }
