@@ -361,35 +361,35 @@ public class CommunityServiceImpl implements CommunityService {
 
 		List<RatioSum> ratioSumList = new ArrayList<>();
 		if(threadListCount.size() == 0) {
-			List<SectsVO.SectVO> sectVOS = summary.getSects();
-			for(SectsVO.SectVO sectVO : sectVOS) {
-				RatioSum ratioSum = new RatioSum();
-				ratioSum.setSect_id(sectVO.getId());
-				ratioSum.setSect_name(sectVO.getName());
-
-				List<RatioDetail> ratioDetails = new ArrayList<>();
-				RatioDetail detail = new RatioDetail();
-				detail.setFeeName("意见总数");
-				detail.setRatio("0");
-				ratioDetails.add(detail);
-
-				detail = new RatioDetail();
-				detail.setFeeName("回复数");
-				detail.setRatio("0");
-				ratioDetails.add(detail);
-
-				detail = new RatioDetail();
-				detail.setFeeName("未回复数");
-				detail.setRatio("0");
-				ratioDetails.add(detail);
-
-				detail = new RatioDetail();
-				detail.setFeeName("转工单数");
-				detail.setRatio("0");
-				ratioDetails.add(detail);
-				ratioSum.setDetail(ratioDetails);
-				ratioSumList.add(ratioSum);
-			}
+//			List<SectsVO.SectVO> sectVOS = summary.getSects();
+//			for(SectsVO.SectVO sectVO : sectVOS) {
+//				RatioSum ratioSum = new RatioSum();
+//				ratioSum.setSect_id(sectVO.getId());
+//				ratioSum.setSect_name(sectVO.getName());
+//
+//				List<RatioDetail> ratioDetails = new ArrayList<>();
+//				RatioDetail detail = new RatioDetail();
+//				detail.setFeeName("意见总数");
+//				detail.setRatio("0");
+//				ratioDetails.add(detail);
+//
+//				detail = new RatioDetail();
+//				detail.setFeeName("回复数");
+//				detail.setRatio("0");
+//				ratioDetails.add(detail);
+//
+//				detail = new RatioDetail();
+//				detail.setFeeName("未回复数");
+//				detail.setRatio("0");
+//				ratioDetails.add(detail);
+//
+//				detail = new RatioDetail();
+//				detail.setFeeName("转工单数");
+//				detail.setRatio("0");
+//				ratioDetails.add(detail);
+//				ratioSum.setDetail(ratioDetails);
+//				ratioSumList.add(ratioSum);
+//			}
 			return ratioSumList;
 		}
 
@@ -457,6 +457,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 			ratioSumList.add(ratioSum);
 		}
+
 		return ratioSumList;
 	}
 
