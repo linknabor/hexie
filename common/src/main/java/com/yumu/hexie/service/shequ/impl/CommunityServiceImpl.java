@@ -407,12 +407,15 @@ public class CommunityServiceImpl implements CommunityService {
 
 			String feeName = "回复数";
 			String ratio = "0";
-			for(QueryPostingSummaryMapper tc: queryListComm) {
-				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getNum()+"";
-					break;
+			if(threadListCommentCount.size() != 0) {
+				for(QueryPostingSummaryMapper tc: queryListComm) {
+					if(t.getUserSectId().equals(tc.getUserSectId())) {
+						ratio = tc.getNum()+"";
+						break;
+					}
 				}
 			}
+
 			detail = new RatioDetail();
 			detail.setFeeName(feeName);
 			detail.setRatio(ratio);
@@ -420,12 +423,15 @@ public class CommunityServiceImpl implements CommunityService {
 
 			feeName = "未回复数";
 			ratio = "0";
-			for(QueryPostingSummaryMapper tc: queryListNoComm) {
-				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getNum()+"";
-					break;
+			if(threadListNoCommentCount.size() != 0) {
+				for(QueryPostingSummaryMapper tc: queryListNoComm) {
+					if(t.getUserSectId().equals(tc.getUserSectId())) {
+						ratio = tc.getNum()+"";
+						break;
+					}
 				}
 			}
+
 			detail = new RatioDetail();
 			detail.setFeeName(feeName);
 			detail.setRatio(ratio);
@@ -433,12 +439,15 @@ public class CommunityServiceImpl implements CommunityService {
 
 			feeName = "转工单数";
 			ratio = "0";
-			for(QueryPostingSummaryMapper tc: queryListRectified) {
-				if(t.getUserSectId().equals(tc.getUserSectId())) {
-					ratio = tc.getNum()+"";
-					break;
+			if(threadListRectifiedCount.size() != 0) {
+				for(QueryPostingSummaryMapper tc: queryListRectified) {
+					if(t.getUserSectId().equals(tc.getUserSectId())) {
+						ratio = tc.getNum()+"";
+						break;
+					}
 				}
 			}
+
 			detail = new RatioDetail();
 			detail.setFeeName(feeName);
 			detail.setRatio(ratio);
