@@ -59,7 +59,7 @@ public class PrepayRequestDTO implements Serializable {
 	
 	//短信催缴
 	private String cellId;
-	private String batchNo;
+	private String batchNo;	//批次号
 
 	public String getCouponUnit() {
 		return couponUnit;
