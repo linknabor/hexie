@@ -63,11 +63,9 @@ public class OtherPayDTO {
 	public String getPayee_openid() {
 		return payee_openid;
 	}
-
 	public void setPayee_openid(String payee_openid) {
 		this.payee_openid = payee_openid;
 	}
-
 	public String getOrderId() {
 		return orderId;
 	}
@@ -89,17 +87,15 @@ public class OtherPayDTO {
 	public String getInvoice_type() {
 		return invoice_type;
 	}
-
 	public void setInvoice_type(String invoice_type) {
 		this.invoice_type = invoice_type;
 	}
-
 	@Override
 	public String toString() {
 		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
 				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + ", payee_openid="
-				+ payee_openid + ", orderId=" + orderId + ", orderDetail=" + orderDetail + ", smsBatch=" + smsBatch
-				+ "]";
+				+ payee_openid + ", orderId=" + orderId + ", orderDetail=" + orderDetail + ", invoice_type="
+				+ invoice_type + ", smsBatch=" + smsBatch + "]";
 	}
 	
 }
