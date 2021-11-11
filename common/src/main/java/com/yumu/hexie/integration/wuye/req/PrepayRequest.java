@@ -119,6 +119,10 @@ public class PrepayRequest extends WuyeRequest {
 	@JsonProperty("is_qrcode")
 	private String isQrcode;
 
+	//短信催缴
+	private String batchNo;	//短信批次号
+	private String cellId;	//房屋id
+	
 	public String getCouponUnit() {
 		return couponUnit;
 	}
@@ -281,46 +285,35 @@ public class PrepayRequest extends WuyeRequest {
 	public void setIsQrcode(String isQrcode) {
 		this.isQrcode = isQrcode;
 	}
-
 	public String getPayee_openid() {
 		return payee_openid;
 	}
-
 	public void setPayee_openid(String payee_openid) {
 		this.payee_openid = payee_openid;
 	}
-
+	public String getBatchNo() {
+		return batchNo;
+	}
+	public void setBatchNo(String batchNo) {
+		this.batchNo = batchNo;
+	}
+	public String getCellId() {
+		return cellId;
+	}
+	public void setCellId(String cellId) {
+		this.cellId = cellId;
+	}
 	@Override
 	public String toString() {
-		return "PrepayRequest{" +
-				"wuyeId='" + wuyeId + '\'' +
-				", fromSys='" + fromSys + '\'' +
-				", couponUnit='" + couponUnit + '\'' +
-				", couponNum='" + couponNum + '\'' +
-				", couponId='" + couponId + '\'' +
-				", reduceAmt='" + reduceAmt + '\'' +
-				", openid='" + openid + '\'' +
-				", appid='" + appid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				", mobile='" + mobile + '\'' +
-				", invoiceTitle='" + invoiceTitle + '\'' +
-				", invoiceTitleType='" + invoiceTitleType + '\'' +
-				", creditCode='" + creditCode + '\'' +
-				", billId='" + billId + '\'' +
-				", stmtId='" + stmtId + '\'' +
-				", payType='" + payType + '\'' +
-				", customerName='" + customerName + '\'' +
-				", certType='" + certType + '\'' +
-				", certId='" + certId + '\'' +
-				", acctNo='" + acctNo + '\'' +
-				", phoneNo='" + phoneNo + '\'' +
-				", quickToken='" + quickToken + '\'' +
-				", veriCode='" + veriCode + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", ruleType='" + ruleType + '\'' +
-				", reductionAmt='" + reductionAmt + '\'' +
-				", payFeeType='" + payFeeType + '\'' +
-				", isQrcode='" + isQrcode + '\'' +
-				'}';
+		return "PrepayRequest [wuyeId=" + wuyeId + ", fromSys=" + fromSys + ", couponUnit=" + couponUnit
+				+ ", couponNum=" + couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", openid="
+				+ openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", mobile=" + mobile
+				+ ", invoiceTitle=" + invoiceTitle + ", invoiceTitleType=" + invoiceTitleType + ", creditCode="
+				+ creditCode + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType + ", customerName="
+				+ customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo="
+				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo
+				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType
+				+ ", isQrcode=" + isQrcode + ", batchNo=" + batchNo + ", cellId=" + cellId + "]";
 	}
+	
 }
