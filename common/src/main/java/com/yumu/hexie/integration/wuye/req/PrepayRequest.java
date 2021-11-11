@@ -120,7 +120,9 @@ public class PrepayRequest extends WuyeRequest {
 	private String isQrcode;
 
 	//短信催缴
+	@JsonProperty("batch_no")
 	private String batchNo;	//短信批次号
+	@JsonProperty("cell_id")
 	private String cellId;	//房屋id
 	
 	public String getCouponUnit() {
