@@ -77,6 +77,7 @@ public class WuyeUtil2 {
 	
 	private static final String QUICK_PAY_URL = "quickPaySDO.do"; // 快捷支付
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
+	private static final String SMS_PAY_URL = "smsPayRequestSDO.do"; // 微信支付请求
 	private static final String DISCOUNT_URL = "getBillPayDetailSDO.do";	//获取优惠明细
 	private static final String CARD_PAY_SMS_URL = "getCardPaySmsCodeSDO.do";	//获取优惠明细
 	private static final String QUERY_ORDER_URL = "queryOrderSDO.do";	//订单查询
@@ -204,6 +205,36 @@ public class WuyeUtil2 {
 		}
 		String requestUrl = requestUtil.getRequestUrl(user, prepayRequestDTO.getRegionName());
 		requestUrl += WX_PAY_URL;
+		
+		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
+		prepayRequest.setFromSys(fromSys);
+		prepayRequest.setAppid(user.getAppId());
+		prepayRequest.setPayee_openid(prepayRequestDTO.getPayee_openid());
+
+		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
+		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
+		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 专业版缴费
+	 * @param prepayRequestDTO
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<WechatPayInfo> getSmsPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
+		User user = prepayRequestDTO.getUser();
+		String appid = user.getAppId();
+		String fromSys = sysName;
+		if (!StringUtils.isEmpty(appid)) {
+			//TODO 下面静态引用以后改注入
+			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
+		}
+		String requestUrl = requestUtil.getRequestUrl(user, prepayRequestDTO.getRegionName());
+		requestUrl += SMS_PAY_URL;
 		
 		PrepayRequest prepayRequest = new PrepayRequest(prepayRequestDTO);
 		prepayRequest.setFromSys(fromSys);

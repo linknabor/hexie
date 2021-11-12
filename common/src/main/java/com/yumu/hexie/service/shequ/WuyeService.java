@@ -363,4 +363,12 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	Discounts getFeeSmsPayQrCode(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception;
+
+	/**
+	 * 崔较短信支付获取预支付信息
+	 * @param prepayRequestDTO
+	 * @return
+	 * @throws Exception
+	 */
+	WechatPayInfo getSmsPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
 }
