@@ -223,6 +223,16 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
+	public WechatPayInfo getSmsPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
+		
+		User user = prepayRequestDTO.getUser();
+		if (user.getId() == 0) {
+			log.info("qrcode pay, no user id .");
+		}
+		return wuyeUtil2.getSmsPrePayInfo(prepayRequestDTO).getData();
+	}
+	
+	@Override
 	public BillListVO quickPayInfo(User user, String stmtId, String currPage, String totalCount) throws Exception {
 		return wuyeUtil2.quickPayInfo(user, stmtId, currPage, totalCount).getData();
 	}

@@ -369,6 +369,33 @@ public class WuyeController extends BaseController {
 		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
+	
+	/**
+	 * 创建交易，获取预支付ID
+	 * stmtId在快捷支付的时候会用到
+	 * @param user
+	 * @param prepayReq
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getSmsPrePayInfo4Qrcode", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<WechatPayInfo> getSmsPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
+		
+		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
+		PrepayRequestDTO dto = new PrepayRequestDTO();
+		BeanUtils.copyProperties(prepayReqVo, dto);
+		
+		User user = new User();
+		dto.setUser(user);
+		user.setAppId(prepayReqVo.getAppid());
+		user.setOpenid(prepayReqVo.getOpenid());
+		
+		log.info("getSmsPrePayInfo4Qrcode prepayRequestDTO : " + dto);
+		WechatPayInfo result = wuyeService.getSmsPrePayInfo(dto);
+		return BaseResult.successResult(result);
+	}
 
 	/**
 	 *  通知支付成功，并获取支付查询的返回结果
