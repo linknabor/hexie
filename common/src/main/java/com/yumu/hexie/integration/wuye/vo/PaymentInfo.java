@@ -14,6 +14,7 @@ public class PaymentInfo implements Serializable {
 	private String tran_time;;
 	private String bill_tran_amt;
 	private String sect_name;
+	private String office_tel;
 	private String csp_name;
 	private String paymethod;
 	private String show_invoice_flag;//是否开通电子发票功能
@@ -113,6 +114,12 @@ public class PaymentInfo implements Serializable {
 	}
 	public void setCsp_name(String csp_name) {
 		this.csp_name = csp_name;
+	}
+	public String getOffice_tel() {
+		return office_tel;
+	}
+	public void setOffice_tel(String office_tel) {
+		this.office_tel = office_tel;
 	}
 	
 	
