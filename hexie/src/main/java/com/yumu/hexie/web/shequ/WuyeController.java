@@ -66,6 +66,7 @@ import com.yumu.hexie.service.user.BankCardService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.shequ.vo.DiscountViewReqVO;
@@ -366,6 +367,33 @@ public class WuyeController extends BaseController {
 		
 		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
 		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
+		return BaseResult.successResult(result);
+	}
+	
+	/**
+	 * 创建交易，获取预支付ID
+	 * stmtId在快捷支付的时候会用到
+	 * @param user
+	 * @param prepayReq
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getSmsPrePayInfo4Qrcode", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<WechatPayInfo> getSmsPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
+		
+		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
+		PrepayRequestDTO dto = new PrepayRequestDTO();
+		BeanUtils.copyProperties(prepayReqVo, dto);
+		
+		User user = new User();
+		dto.setUser(user);
+		user.setAppId(prepayReqVo.getAppid());
+		user.setOpenid(prepayReqVo.getOpenid());
+		
+		log.info("getSmsPrePayInfo4Qrcode prepayRequestDTO : " + dto);
+		WechatPayInfo result = wuyeService.getSmsPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 
@@ -918,5 +946,26 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(invoiceList);
 	}
 
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getFeeSmsBill", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<PaymentInfo> getFeeSmsBill(QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		User user = new User();
+		user.setAppId(queryFeeSmsBillReq.getAppid());
+		PaymentInfo paymentInfo = wuyeService.getFeeSmsBill(user, queryFeeSmsBillReq);
+		return BaseResult.successResult(paymentInfo);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getFeeSmsPayQrCode", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Discounts> getFeeSmsPayQrCode(QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		User user = new User();
+		user.setAppId(queryFeeSmsBillReq.getAppid());
+		Discounts discounts = wuyeService.getFeeSmsPayQrCode(user, queryFeeSmsBillReq);
+		return BaseResult.successResult(discounts);
+	}
 
 }
