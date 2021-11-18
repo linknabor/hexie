@@ -701,4 +701,5 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
+
 }

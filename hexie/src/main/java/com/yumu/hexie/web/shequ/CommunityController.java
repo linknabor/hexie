@@ -21,6 +21,8 @@ import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.shequ.NoticeService;
+import com.yumu.hexie.service.shequ.req.CommunitySummary;
+import com.yumu.hexie.service.shequ.req.RatioSum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -454,7 +456,7 @@ public class CommunityController extends BaseController{
 		comment.setToUserId(thread.getUserId());
 		comment.setToUserName(thread.getUserName());
 		comment.setToUserReaded("false");
-
+		comment.setIsManageComment("1");
 		ThreadComment retComment = communityService.addComment(null, comment);	//添加评论
 
 		String tcAttachmentUrl = retComment.getAttachmentUrl();
@@ -566,6 +568,23 @@ public class CommunityController extends BaseController{
 		}
 		return BaseResult.successResult(imgUrl);
 	}
+
+
+	/**
+	 * 物业端请求的接口，汇总业主意见
+	 * @param comment
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/thread/getOptSummary", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<List<RatioSum>> getOptSummary(@RequestBody CommunitySummary comment) throws Exception{
+		log.info("getOptSummary:" + comment.toString());
+		List<RatioSum> list = communityService.getThreadBySectIdsAndCycle(comment);
+		return BaseResult.successResult(list);
+	}
+
 
 
 
@@ -1025,7 +1044,6 @@ public class CommunityController extends BaseController{
 	@SuppressWarnings("rawtypes")
 	private void upload2Qiniu(ThreadComment ret, String uploadIds ){
 		
-		InputStream inputStream = null;
 		if (!StringUtil.isEmpty(uploadIds)) {
 			
 			uploadIds = uploadIds.substring(0, uploadIds.length()-1);	//截掉最后一个逗号
@@ -1043,9 +1061,9 @@ public class CommunityController extends BaseController{
 			if (!file.exists()||!file.isDirectory()) {
 				file.mkdirs();
 			}
-			String keyListStr = "";
-			String imgHeight = "";
-			String imgWidth = "";
+			StringBuilder keyListStr = new StringBuilder();
+			StringBuilder imgHeight = new StringBuilder();
+			StringBuilder imgWidth = new StringBuilder();
 			
 			PutExtra extra = new PutExtra();
 			
@@ -1096,42 +1114,31 @@ public class CommunityController extends BaseController{
 						
 						if (isUploaded) {
 							
-							keyListStr+=domain+key;
+							keyListStr.append(domain).append(key);
 							
 							Integer width = (Integer)map.get("width");
 							Integer height = (Integer)map.get("height");
 							
-							imgWidth+=width;
-							imgHeight+=height;
+							imgWidth.append(width);
+							imgHeight.append(height);
 							
 							if (i!=uploadIdArr.length-1) {
-								keyListStr+=",";
-								imgWidth+=",";
-								imgHeight+=",";
+								keyListStr.append(",");
+								imgWidth.append(",");
+								imgHeight.append(",");
 							}
 						}
-						
-					
 					}
-					
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage());
 			}finally{
-				if (inputStream!=null) {
-					try {
-						inputStream.close();
-					} catch (IOException e) {
-						log.error(e.getMessage());
-					}
-				}
 			}
 		
-			ret.setAttachmentUrl(keyListStr);
-			ret.setImgHeight(imgHeight);
-			ret.setImgWidth(imgWidth);
+			ret.setAttachmentUrl(keyListStr.toString());
+			ret.setImgHeight(imgHeight.toString());
+			ret.setImgWidth(imgWidth.toString());
 			communityService.updateThreadComment(ret);	//更新上传文件路径
-		
 		}
 	}
 }

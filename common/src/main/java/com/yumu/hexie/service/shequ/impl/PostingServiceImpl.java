@@ -1,12 +1,13 @@
 package com.yumu.hexie.service.shequ.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.posting.mapper.QueryPostingSummaryMapper;
+import com.yumu.hexie.integration.posting.vo.QueryPostingSummaryVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,21 +31,19 @@ import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.community.ThreadComment;
 import com.yumu.hexie.model.community.ThreadCommentRepository;
 import com.yumu.hexie.model.community.ThreadRepository;
-import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.PostingService;
 
 @Service
 public class PostingServiceImpl implements PostingService {
-	
+
+	private static Logger logger = LoggerFactory.getLogger(PostingServiceImpl.class);
+
 	@Autowired
 	private ThreadRepository threadRepository;
 	@Autowired
 	private ThreadCommentRepository threadCommentRepository;
-	@Autowired
-	private GotongService gotongService;
-	
-	
+
 	@Override
 	public CommonResponse<Object> getPosting(QueryPostingVO queryPostingVO) {
 
@@ -87,7 +86,7 @@ public class PostingServiceImpl implements PostingService {
 	
 	/**
 	 * 根据ID删除帖子
-	 * @param postingId
+	 * @param delIds
 	 */
 	@Override
 	@Transactional
@@ -120,7 +119,7 @@ public class PostingServiceImpl implements PostingService {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			
-			List<Object[]> page = threadCommentRepository.getCommentList(Long.valueOf(queryPostingVO.getId()));
+			List<Object[]> page = threadCommentRepository.getCommentList(Long.parseLong(queryPostingVO.getId()));
 			List<QueryCommentMapper> list = ObjectToBeanUtils.objectToBean(page, QueryCommentMapper.class);
 			QueryListDTO<List<QueryCommentMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setContent(list);
@@ -169,14 +168,96 @@ public class PostingServiceImpl implements PostingService {
 		comment.setCommentDateTime(System.currentTimeMillis());
 		comment.setCommentDate(DateUtil.dtFormat(new Date(), "yyyyMMdd"));
 		comment.setCommentTime(DateUtil.dtFormat(new Date().getTime(), "HHMMss"));
-		comment.setCommentUserId(Long.valueOf(saveCommentVO.getUserId()));
+		comment.setCommentUserId(Long.parseLong(saveCommentVO.getUserId()));
 		comment.setCommentUserName(saveCommentVO.getUserName());
 		threadCommentRepository.save(comment);
-		
-//		if (comment.getCommentUserId() != thread.getUserId()) {
-//			gotongService.sendPostingReplyMsg(thread);
-//		}
-		
 	}
-	
+
+	@Override
+	public CommonResponse<Object> getPostingSummary(QueryPostingSummaryVO queryPostingSummaryVO) {
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			if(queryPostingSummaryVO.getSectIds() == null || queryPostingSummaryVO.getSectIds().isEmpty()) {
+				throw new BizValidateException("查询范围有误");
+			}
+			String[] sectIds = queryPostingSummaryVO.getSectIds().toArray(new String[0]);
+
+			//总数
+			List<Object[]> listCount = threadRepository.findThreadCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListCount = ObjectToBeanUtils.objectToBean(listCount, QueryPostingSummaryMapper.class);
+
+			//回复数
+			List<Object[]> listComm = threadRepository.findThreadCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListComm = ObjectToBeanUtils.objectToBean(listComm, QueryPostingSummaryMapper.class);
+
+			//未回复数
+			List<Object[]> listNoComm = threadRepository.findThreadNoCommentCount(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListNoComm = ObjectToBeanUtils.objectToBean(listNoComm, QueryPostingSummaryMapper.class);
+
+			//转工单数
+			List<Object[]> listRectified = threadRepository.findThreadRectified(queryPostingSummaryVO.getStartDate(), queryPostingSummaryVO.getEndDate(), sectIds);
+			List<QueryPostingSummaryMapper> queryListRectified = ObjectToBeanUtils.objectToBean(listRectified, QueryPostingSummaryMapper.class);
+
+			List<Map<String, String>> list = new ArrayList<>();
+			for(String key : sectIds) {
+				String posting_num = "0";
+				String posting_normal_num = "0";
+				String posting_abnormal_num = "0";
+				String posting_rectify_num = "0";
+
+				if(listCount.size() != 0) {
+					for(QueryPostingSummaryMapper t : queryListCount) {
+						if(key.equals(String.valueOf(t.getUserSectId()))) {
+							posting_num = t.getNum()+"";
+							break;
+						}
+					}
+				}
+
+				if(listComm.size() != 0) {
+					for(QueryPostingSummaryMapper t : queryListComm) {
+						if(key.equals(String.valueOf(t.getUserSectId()))) {
+							posting_normal_num = t.getNum()+"";
+							break;
+						}
+					}
+				}
+
+				if(listNoComm.size() != 0) {
+					for(QueryPostingSummaryMapper t : queryListNoComm) {
+						if(key.equals(String.valueOf(t.getUserSectId()))) {
+							posting_abnormal_num = t.getNum()+"";
+							break;
+						}
+					}
+				}
+
+				if(listRectified.size() != 0) {
+					for(QueryPostingSummaryMapper t : queryListRectified) {
+						if(key.equals(String.valueOf(t.getUserSectId()))) {
+							posting_rectify_num = t.getNum()+"";
+							break;
+						}
+					}
+				}
+
+				Map<String, String> map = new HashMap<>();
+				map.put("sect_id", key);
+				map.put("posting_num", posting_num);
+				map.put("posting_normal_num", posting_normal_num);
+				map.put("posting_abnormal_num", posting_abnormal_num);
+				map.put("posting_rectify_num", posting_rectify_num);
+				list.add(map);
+			}
+
+			logger.info("posing list : " + list);
+			commonResponse.setData(list);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+	}
+
 }

@@ -371,4 +371,5 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	WechatPayInfo getSmsPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
+
 }
