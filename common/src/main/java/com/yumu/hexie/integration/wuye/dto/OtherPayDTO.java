@@ -14,6 +14,8 @@ public class OtherPayDTO {
 	private String payee_openid;
 	private String orderId;
 	private String orderDetail;
+	private String invoice_type;
+	private String smsBatch;
 	
 	public User getUser() {
 		return user;
@@ -61,11 +63,9 @@ public class OtherPayDTO {
 	public String getPayee_openid() {
 		return payee_openid;
 	}
-
 	public void setPayee_openid(String payee_openid) {
 		this.payee_openid = payee_openid;
 	}
-
 	public String getOrderId() {
 		return orderId;
 	}
@@ -78,12 +78,25 @@ public class OtherPayDTO {
 	public void setOrderDetail(String orderDetail) {
 		this.orderDetail = orderDetail;
 	}
-
+	public String getSmsBatch() {
+		return smsBatch;
+	}
+	public void setSmsBatch(String smsBatch) {
+		this.smsBatch = smsBatch;
+	}
+	public String getInvoice_type() {
+		return invoice_type;
+	}
+	public void setInvoice_type(String invoice_type) {
+		this.invoice_type = invoice_type;
+	}
 	@Override
 	public String toString() {
 		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
-				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + ", orderId=" + orderId
-				+ ", orderDetail=" + orderDetail + "]";
+				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + ", payee_openid="
+				+ payee_openid + ", orderId=" + orderId + ", orderDetail=" + orderDetail + ", invoice_type="
+				+ invoice_type + ", smsBatch=" + smsBatch + "]";
 	}
+
 	
 }

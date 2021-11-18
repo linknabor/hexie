@@ -62,6 +62,7 @@ import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.vo.BindHouseQueue;
+import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
 @Service("wuyeService")
 public class WuyeServiceImpl implements WuyeService {
@@ -219,6 +220,16 @@ public class WuyeServiceImpl implements WuyeService {
 			}
 		}
 		return wuyeUtil2.getPrePayInfo(prepayRequestDTO).getData();
+	}
+	
+	@Override
+	public WechatPayInfo getSmsPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception {
+		
+		User user = prepayRequestDTO.getUser();
+		if (user.getId() == 0) {
+			log.info("qrcode pay, no user id .");
+		}
+		return wuyeUtil2.getSmsPrePayInfo(prepayRequestDTO).getData();
 	}
 	
 	@Override
@@ -656,6 +667,32 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.queryInvoiceByUser(user, currPage).getData();
 		
+	}
+	
+	/**
+	 * 获取催缴短信用户欠费账单
+	 * @param user
+	 * @param queryFeeSmsBillReq
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public PaymentInfo getFeeSmsBill(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		return wuyeUtil2.getFeeSmsBill(user, queryFeeSmsBillReq).getData();
+	}
+	
+	/**
+	 * 获取催缴短信用付费二维码
+	 * @param user
+	 * @param queryFeeSmsBillReq
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public Discounts getFeeSmsPayQrCode(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
+		
+		return wuyeUtil2.getFeeSmsPayQrCode(user, queryFeeSmsBillReq).getData();
 	}
 
 }

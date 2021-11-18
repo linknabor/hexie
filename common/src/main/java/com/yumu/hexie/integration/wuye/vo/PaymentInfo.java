@@ -14,6 +14,8 @@ public class PaymentInfo implements Serializable {
 	private String tran_time;;
 	private String bill_tran_amt;
 	private String sect_name;
+	private String office_tel;
+	private String csp_name;
 	private String paymethod;
 	private String show_invoice_flag;//是否开通电子发票功能
 	private String show_com_flag;//是否允许公司开票功能
@@ -23,6 +25,7 @@ public class PaymentInfo implements Serializable {
 	private List<PaymentCellInfo> pay_cell;
 	private String support_card_pay;	//是否支持绑卡支付
 	private String is_create_qrcode;
+	private String total_fee_price;
 	
 	@Transient
 	public String getPaymethodStr(){
@@ -99,6 +102,24 @@ public class PaymentInfo implements Serializable {
 	}
 	public void setPay_cell(List<PaymentCellInfo> pay_cell) {
 		this.pay_cell = pay_cell;
+	}
+	public String getTotal_fee_price() {
+		return total_fee_price;
+	}
+	public void setTotal_fee_price(String total_fee_price) {
+		this.total_fee_price = total_fee_price;
+	}
+	public String getCsp_name() {
+		return csp_name;
+	}
+	public void setCsp_name(String csp_name) {
+		this.csp_name = csp_name;
+	}
+	public String getOffice_tel() {
+		return office_tel;
+	}
+	public void setOffice_tel(String office_tel) {
+		this.office_tel = office_tel;
 	}
 	
 	
