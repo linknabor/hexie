@@ -17,6 +17,7 @@ import com.yumu.hexie.service.shequ.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -66,6 +67,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	private static Logger logger = LoggerFactory.getLogger(NotifyQueueTaskImpl.class);
 	
 	@Autowired
+	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private MaintenanceService maintenanceService;

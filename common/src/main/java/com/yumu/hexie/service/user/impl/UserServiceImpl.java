@@ -11,6 +11,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -61,7 +62,9 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 	@Inject
 	private WechatCoreService wechatCoreService;
+
 	@Autowired
+	@Qualifier("authRedisTemplate")
 	private RedisTemplate<String, Object> redisTemplate;
 	@Autowired
 	private WechatCardRepository wechatCardRepository;
@@ -278,7 +281,7 @@ public class UserServiceImpl implements UserService {
 	/**
 	 * @param user
 	 * @return
-	 * @see com.yumu.hexie.service.user.UserService#save(com.yumu.hexie.model.user.User)
+	 * @see UserService#save(User)
 	 */
 	@Override
 	public User save(User user) {
@@ -288,7 +291,7 @@ public class UserServiceImpl implements UserService {
 	/**
 	 * @param code
 	 * @return
-	 * @see com.yumu.hexie.service.user.UserService#queryByShareCode(java.lang.String)
+	 * @see UserService#queryByShareCode(String)
 	 */
 	@Override
 	public User queryByShareCode(String code) {

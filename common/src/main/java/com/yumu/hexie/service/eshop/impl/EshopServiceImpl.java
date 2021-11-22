@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
@@ -146,6 +147,7 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Autowired
 	private RedisRepository redisRepository;
 	@Autowired
+	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private EvoucherService evoucherService;

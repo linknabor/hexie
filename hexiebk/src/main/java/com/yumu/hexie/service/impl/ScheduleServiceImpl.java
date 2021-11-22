@@ -117,6 +117,7 @@ public class ScheduleServiceImpl implements ScheduleService{
 	@Autowired
 	private EvoucherRepository evoucherRepository;
 	@Autowired
+	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
 	
 	

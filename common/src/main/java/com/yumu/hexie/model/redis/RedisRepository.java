@@ -35,8 +35,10 @@ public class RedisRepository {
 	@Qualifier(value = "authRedisTemplate")
 	private RedisTemplate<String, Object> authRedisTemplate;
     @Autowired
+    @Qualifier("redisTemplate")
     private RedisTemplate<String, ProductRule> proRedisTemplate;
     @Autowired
+    @Qualifier("redisTemplate")
     private RedisTemplate<String, CouponCfg> couponRuleRedisTemplate;
     
     /**
