@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.ServiceOrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,6 @@ public class NotifyServiceImpl implements NotifyService {
 	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
-	
 
 	/**
 	 * 	1.优惠券核销
@@ -187,7 +188,6 @@ public class NotifyServiceImpl implements NotifyService {
 		
 		int retryTimes = 0;
 		boolean isSuccess = false;
-		
 		while(!isSuccess && retryTimes < 3) {
 			try {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);

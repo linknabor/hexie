@@ -257,11 +257,9 @@ public class CustomServiceImpl implements CustomService {
 		long begin = System.currentTimeMillis();
 		
 		//如果是非一口价的订单，需要分发抢单的信息给操作员,异步
-		ServiceNotification serviceNotification = data.getServiceNotification();
-		logger.info("receivOrder : " + serviceNotification);
-		if (serviceNotification != null) {
-			serviceNotification.setOrderId(data.getTradeWaterId());
-			sendServiceNotificationAsync(serviceNotification);
+		logger.info("receivOrder : " + data.getServiceNotification());
+		if (data.getServiceNotification() != null) {
+			sendServiceNotificationAsync(data.getTradeWaterId());
 		}
 		
 		long end = System.currentTimeMillis();
@@ -272,17 +270,17 @@ public class CustomServiceImpl implements CustomService {
 	/**
 	 * 服务消息推送
 	 */
-	public void sendServiceNotificationAsync(ServiceNotification serviceNotification) {
+	public void sendServiceNotificationAsync(String orderId) {
 		
-		if (serviceNotification == null) {
+		if (StringUtils.isEmpty(orderId)) {
 			return;
 		}
 		
-		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + serviceNotification.getOrderId();
-		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + orderId;
+		Long result = RedisLock.lock(key, redisTemplate, 3600L);
 		logger.info("result : " + result);
 		if (0 == result) {
-			logger.info("trade : " + serviceNotification.getOrderId() + ", already in the send queue, will skip .");
+			logger.info("trade : " + orderId + ", already in the send queue, will skip .");
 			return;
 		}
 		
@@ -291,9 +289,7 @@ public class CustomServiceImpl implements CustomService {
 		
 		while(!isSuccess && retryTimes < 3) {
 			try {
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				String value = objectMapper.writeValueAsString(serviceNotification);
-				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, orderId);
 				isSuccess = true;
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);

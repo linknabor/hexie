@@ -113,7 +113,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				AccountNotification queue = objectMapper.readValue(json, new TypeReference<AccountNotification>(){});
-				
+
 				logger.info("start to consume wuyeNotificatione queue : " + queue);
 				
 				boolean isSuccess = false;
@@ -234,72 +234,78 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					Thread.sleep(60000);
 					continue;
 				}
-				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, 30, TimeUnit.SECONDS);
-				if (StringUtils.isEmpty(json)) {
-					continue;
-				}
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				ServiceNotification queue = objectMapper.readValue(json, new TypeReference<ServiceNotification>(){});
-				logger.info("start to consume customServiceNotification queue : " + queue);
-				
-				boolean isSuccess = false;
-				List<Map<String, String>> openidList = queue.getOpenids();
-				if (openidList == null || openidList.isEmpty()) {
-					logger.info("openIdList is empty, will skip !");
-					continue;
-				}
-				
-				if (StringUtils.isEmpty(queue.getOrderId())) {
+				String orderId = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, 30, TimeUnit.SECONDS);
+				if (StringUtils.isEmpty(orderId)) {
 					logger.info("order id is null, will skip !");
 					continue;
 				}
-				ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(String.valueOf(queue.getOrderId()));
-				if (serviceOrder == null || serviceOrder.getId() == 0) {
-					logger.info("can not find order : " + queue.getOrderId());
-					continue;
-				}
+				logger.info("start to consume customServiceNotification queue : " + orderId);
 				
-				List<Map<String, String>> resendList = new ArrayList<>();
-				for (Map<String, String> openidMap : openidList) {
-					
-					User user = null;
-					String openid = openidMap.get("openid");
-					if (StringUtils.isEmpty(openid)) {
-						logger.warn("openid is empty, will skip. ");
+				boolean isSuccess = false;
+				try {
+					ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(String.valueOf(orderId));
+					if (serviceOrder == null || serviceOrder.getId() == 0) {
+						logger.info("can not find order : " + orderId);
 						continue;
 					}
-					List<User> userList = userRepository.findByOpenid(openid);
-					if (userList!=null && !userList.isEmpty()) {
-						user = userList.get(0);
+
+					//给操作员发送发货模板消息
+					NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+					noticeServiceOperator.setAddress(serviceOrder.getAddress());
+					noticeServiceOperator.setCreateDate(serviceOrder.getCreateDate());
+					noticeServiceOperator.setReceiverName(serviceOrder.getReceiverName());
+					noticeServiceOperator.setId(serviceOrder.getId());
+					noticeServiceOperator.setProductName(serviceOrder.getProductName());
+
+					int operType;
+					switch (serviceOrder.getOrderType()) {
+						case ModelConstant.ORDER_TYPE_RGROUP : //团购
+							operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
+							break;
+						case ModelConstant.ORDER_TYPE_SERVICE : //自定义服务
+							operType = ModelConstant.SERVICE_OPER_TYPE_SERVICE;
+							break;
+						default :
+							operType = 0;
+					}
+
+					long agentId = serviceOrder.getAgentId();
+					logger.info("agentId is : " + agentId);
+					List<ServiceOperator> opList;
+					if (agentId > 1) {	//1是默认奈博的，所以跳过
+						opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
 					}else {
-						logger.warn("can not find user, openid : " + openid);
+						opList = serviceOperatorRepository.findByType(operType);
 					}
-					if (user!=null) {
-						try {
-							gotongService.sendServiceNotification(user, serviceOrder);
-						} catch (Exception e) {
-							logger.error(e.getMessage(), e);	//发送失败的，需要重发
-							resendList.add(openidMap);
-						}
+					logger.info("oper list size : " + opList.size());
+					List<Long> list = new ArrayList<>();
+					for (ServiceOperator serviceOperator : opList) {
+						list.add(serviceOperator.getUserId());
 					}
-					
-				}
-				if (resendList.isEmpty()) {
+					noticeServiceOperator.setOpers(list);
+
+					try {
+						ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+						String value = objectMapper.writeValueAsString(noticeServiceOperator);
+						logger.info("redis service order push :" + value);
+						//放入合协管家的redis中
+						staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE, value);
+					} catch (Exception e) {
+						logger.error("custom push redis error", e);
+					}
 					isSuccess = true;
+				}catch (Exception e) {
+					logger.error(e.getMessage(), e);
 				}
-				
 				if (!isSuccess) {
-					queue.setOpenids(resendList);
-					String value = objectMapper.writeValueAsString(queue);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, orderId);
 				}
-			
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
 		}
 
-		
+
 	}
 	
 	/**
@@ -582,15 +588,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							} catch (Exception e) {
 								logger.error("custom push redis error", e);
 							}
-
-//							for (ServiceOperator serviceOperator : opList) {
-//								logger.info("delivery user id : " + serviceOperator.getUserId());
-//								User sendUser = userRepository.findById(serviceOperator.getUserId());
-//								if (sendUser != null) {
-//									logger.info("send user : " + sendUser.getId());
-//									gotongService.sendDeliveryNotification(sendUser, o);
-//								}
-//							}
 						}
 					}
 					isSuccess = true;
