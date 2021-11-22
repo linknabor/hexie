@@ -547,7 +547,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.info("notify delivery, orderNo : " + serviceOrder.getOrderNo());
 					logger.info("notify delivery, orderType : " + serviceOrder.getOrderType());
 					
-					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()
+							|| ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
 						
 						long groupOrderId = serviceOrder.getGroupOrderId();
 						logger.info("notify delivery, groupOrderId : " + groupOrderId);
