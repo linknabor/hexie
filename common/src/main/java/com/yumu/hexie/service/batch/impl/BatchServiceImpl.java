@@ -125,7 +125,7 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.updateOpereratorAysc();
 		notifyQueueTask.updateServiceCfgAysc();
 		notifyQueueTask.updateOrderStatusAysc();
-		//notifyQueueTask.sendDeliveryNotificationAsyc();
+		notifyQueueTask.sendDeliveryNotificationAsyc();
 		notifyQueueTask.updatePartnerAsync();
 		notifyQueueTask.eshopRefundAsync();
 		couponQueueTask.gainCouponAsync();

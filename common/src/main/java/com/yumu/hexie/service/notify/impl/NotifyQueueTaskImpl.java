@@ -13,6 +13,7 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
+import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import com.yumu.hexie.service.shequ.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
@@ -40,8 +40,6 @@ import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
-import com.yumu.hexie.integration.wechat.service.MsgCfg;
-import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -54,21 +52,22 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
-import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.shequ.CommunityService;
-import com.yumu.hexie.service.shequ.NoticeService;
 import com.yumu.hexie.service.user.CouponService;
 
 @Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
 	
-	private static Logger logger = LoggerFactory.getLogger(NotifyQueueTaskImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(NotifyQueueTaskImpl.class);
 	
 	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
+	@Qualifier(value = "staffclientStringRedisTemplate")
+	private RedisTemplate<String, String> staffclientStringRedisTemplate;
 	@Autowired
 	private MaintenanceService maintenanceService;
 	@Autowired
@@ -126,10 +125,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					int orderType = order.getOrderType();
 					if (ModelConstant.ORDER_TYPE_PROMOTION == orderType || ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
 						List<Map<String, String>> openidList = new ArrayList<>();
-						int operType = 0;
+						int operType;
 						if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
 							operType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
-						}else if (ModelConstant.ORDER_TYPE_SAASSALE == orderType) {
+						}else {
 							operType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
 						}
 						List<ServiceOperator> opList = serviceOperatorRepository.findByType(operType);
@@ -154,10 +153,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								String county = addrArr[2];
 								String sect = addrArr[3];
 								
-								if(province.indexOf("上海")>=0
-										||province.indexOf("北京")>=0
-										||province.indexOf("重庆")>=0
-										||province.indexOf("天津")>=0){
+								if(province.contains("上海")
+										|| province.contains("北京")
+										|| province.contains("重庆")
+										|| province.contains("天津")){
 									province = "";
 								}
 								
@@ -373,8 +372,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.error(e.getMessage(), e);
 			}
 		}
-	
-		
 	}
 	
 	/**
@@ -445,11 +442,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								return;
 							}
 							String[]subTypeArr = subTypes.split(",");
-							List<String> tepmList = new ArrayList<>();
 							List<String> opSubList = Arrays.asList(subTypeArr);	//返回的list不是java.util.list，是一个内部类，不能使用remove等操作。所以外面套一层
-							tepmList.addAll(opSubList);
+							List<String> tepmList = new ArrayList<>(opSubList);
 							tepmList.remove(serviceId);
-							StringBuffer bf = new StringBuffer();
+							StringBuilder bf = new StringBuilder();
 							for (String subType : tepmList) {
 								bf.append(subType).append(",");
 							}
@@ -504,19 +500,14 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
-				
-				
+
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_ORDER_STATUS_QUEUE, tradeWaterId);
 				}
-			
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
-			
 		}
-	
-		
 	}
 
 	/**
@@ -557,6 +548,15 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						
 						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupOrderId);
 						for (ServiceOrder o : orderList) {
+
+							//给操作员发送发货模板消息
+							NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+							noticeServiceOperator.setAddress(o.getAddress());
+							noticeServiceOperator.setCreateDate(o.getCreateDate());
+							noticeServiceOperator.setReceiverName(o.getReceiverName());
+							noticeServiceOperator.setId(o.getId());
+							noticeServiceOperator.setProductName(o.getProductName());
+
 							int operType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
 							long agentId = o.getAgentId();
 							logger.info("agentId is : " + agentId);
@@ -567,20 +567,33 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 								opList = serviceOperatorRepository.findByType(operType);
 							}
 							logger.info("oper list size : " + opList.size());
+							List<Long> list = new ArrayList<>();
 							for (ServiceOperator serviceOperator : opList) {
-								logger.info("delivery user id : " + serviceOperator.getUserId());
-								User sendUser = userRepository.findById(serviceOperator.getUserId());
-								if (sendUser != null) {
-									logger.info("send user : " + sendUser.getId());
-									gotongService.sendDeliveryNotification(sendUser, o);
-								}
+								list.add(serviceOperator.getUserId());
 							}
-						}
-						
-					} 
+							noticeServiceOperator.setOpers(list);
 
+							try {
+								ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+								String value = objectMapper.writeValueAsString(noticeServiceOperator);
+								logger.info("redis service order push :" + value);
+								//放入合协管家的redis中
+								staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE, value);
+							} catch (Exception e) {
+								logger.error("custom push redis error", e);
+							}
+
+//							for (ServiceOperator serviceOperator : opList) {
+//								logger.info("delivery user id : " + serviceOperator.getUserId());
+//								User sendUser = userRepository.findById(serviceOperator.getUserId());
+//								if (sendUser != null) {
+//									logger.info("send user : " + sendUser.getId());
+//									gotongService.sendDeliveryNotification(sendUser, o);
+//								}
+//							}
+						}
+					}
 					isSuccess = true;
-					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
 				}
@@ -593,7 +606,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.error(e.getMessage(), e);
 			}
 		}
-		
 	}
 	
 	/**
@@ -987,7 +999,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				String applied = in.getApplied();	//公众号是1交易无须申请.其他交易0
 				if (!"1".equals(pageApplied) && !"1".equals(applied)) {	//表示用户没有在移动端申请。扔回队列继续轮，直到用户在移动端申请位置
 				
-						if (System.currentTimeMillis() - Long.valueOf(in.getTimestamp()) > 3600l*24*10*1000) {	//超过10天没申请，出队
+						if (System.currentTimeMillis() - Long.parseLong(in.getTimestamp()) > 3600l*24*10*1000) {	//超过10天没申请，出队
 							logger.info("user does not apply 4 invoice .. more than 10 days. will remove from the queue! orderId : " + orderId);
 						} else {
 							redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
@@ -1010,7 +1022,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					logger.warn("can not find user, openid : " + openid);
 				}
 				boolean isSuccess = false;
-				WechatResponse wechatResponse = null;
+				WechatResponse wechatResponse;
 				if (user!=null) {
 					try {
 						in.setUser(user);
@@ -1027,7 +1039,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							if (isSuccess) {
 								try {
 									BizError bizError = new BizError();
-									bizError.setBizId(Long.valueOf(in.getOrderId()));
+									bizError.setBizId(Long.parseLong(in.getOrderId()));
 									bizError.setBizType(ModelConstant.EXCEPTION_BIZ_TYPE_TEMPLATEMSG);
 									bizError.setLevel(ModelConstant.EXCEPTION_LEVEL_INFO);
 									bizError.setMessage(wechatResponse.getErrmsg());
@@ -1046,13 +1058,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 						redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
 					}
 				}
-				
-				
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
 		}
 	}
-
-
 }
