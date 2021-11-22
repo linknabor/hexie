@@ -256,19 +256,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					noticeServiceOperator.setReceiverName(serviceOrder.getReceiverName());
 					noticeServiceOperator.setId(serviceOrder.getId());
 					noticeServiceOperator.setProductName(serviceOrder.getProductName());
+					noticeServiceOperator.setOrderType(serviceOrder.getOrderType());
 
-					int operType;
-					switch (serviceOrder.getOrderType()) {
-						case ModelConstant.ORDER_TYPE_RGROUP : //团购
-							operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
-							break;
-						case ModelConstant.ORDER_TYPE_SERVICE : //自定义服务
-							operType = ModelConstant.SERVICE_OPER_TYPE_SERVICE;
-							break;
-						default :
-							operType = 0;
-					}
-
+					int operType = ModelConstant.SERVICE_OPER_TYPE_SERVICE;
 					long agentId = serviceOrder.getAgentId();
 					logger.info("agentId is : " + agentId);
 					List<ServiceOperator> opList;
@@ -304,8 +294,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				logger.error(e.getMessage(), e);
 			}
 		}
-
-
 	}
 	
 	/**
@@ -563,11 +551,23 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							noticeServiceOperator.setReceiverName(o.getReceiverName());
 							noticeServiceOperator.setId(o.getId());
 							noticeServiceOperator.setProductName(o.getProductName());
+							noticeServiceOperator.setOrderType(serviceOrder.getOrderType());
 
-							int operType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
+							int operType;
+							switch (serviceOrder.getOrderType()) {
+								case ModelConstant.ORDER_TYPE_ONSALE : //特卖
+									operType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
+									break;
+								case ModelConstant.ORDER_TYPE_RGROUP : //团购
+									operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
+									break;
+								default :
+									operType = 0;
+							}
+
 							long agentId = o.getAgentId();
 							logger.info("agentId is : " + agentId);
-							List<ServiceOperator> opList = new ArrayList<>();
+							List<ServiceOperator> opList;
 							if (agentId > 1) {	//1是默认奈博的，所以跳过
 								opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
 							}else {

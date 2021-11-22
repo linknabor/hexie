@@ -21,6 +21,8 @@ public class NoticeServiceOperator implements Serializable {
     private String address;
     private String productName;
 
+    private int orderType;
+
     public NoticeServiceOperator() {
 
     }
@@ -73,6 +75,14 @@ public class NoticeServiceOperator implements Serializable {
         this.productName = productName;
     }
 
+    public int getOrderType() {
+        return orderType;
+    }
+
+    public void setOrderType(int orderType) {
+        this.orderType = orderType;
+    }
+
     @Override
     public String toString() {
         return "NoticeServiceOperator{" +
@@ -82,6 +92,7 @@ public class NoticeServiceOperator implements Serializable {
                 ", id=" + id +
                 ", address='" + address + '\'' +
                 ", productName='" + productName + '\'' +
+                ", orderType='" + orderType + '\'' +
                 '}';
     }
 }
