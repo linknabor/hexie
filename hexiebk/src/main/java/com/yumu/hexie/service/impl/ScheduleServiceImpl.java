@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,8 +40,6 @@ import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
-import com.yumu.hexie.model.op.ScheduleRecord;
-import com.yumu.hexie.model.op.ScheduleRecordRepository;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrderRepository;
 import com.yumu.hexie.model.payment.RefundOrder;
@@ -54,7 +53,6 @@ import com.yumu.hexie.model.user.MemberBillRepository;
 import com.yumu.hexie.model.user.MemberRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
-import com.yumu.hexie.service.ScheduleService;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -65,9 +63,12 @@ import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.impl.CouponServiceImpl;
 import com.yumu.hexie.service.user.req.MemberVo;
+import com.yumu.hexie.service.ScheduleService;
+import com.yumu.hexie.model.op.ScheduleRecordRepository;
+import com.yumu.hexie.model.op.ScheduleRecord;
 
 @Service("scheduleService")
-public class ScheduleServiceImpl implements ScheduleService{
+public class ScheduleServiceImpl implements ScheduleService {
 
 	private static final Logger SCHEDULE_LOG = LoggerFactory.getLogger("com.yumu.hexie.schedule");
 	@Inject
