@@ -541,10 +541,16 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()
 							|| ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
 						
-						long groupOrderId = serviceOrder.getGroupOrderId();
+						Long groupOrderId = serviceOrder.getGroupOrderId();
 						logger.info("notify delivery, groupOrderId : " + groupOrderId);
-						
-						List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupOrderId);
+
+						List<ServiceOrder> orderList = new ArrayList<>();
+						if(groupOrderId != null) {
+							orderList = serviceOrderRepository.findByGroupOrderId(groupOrderId);
+						} else {
+							orderList.add(serviceOrder);
+						}
+
 						for (ServiceOrder o : orderList) {
 
 							//给操作员发送发货模板消息
