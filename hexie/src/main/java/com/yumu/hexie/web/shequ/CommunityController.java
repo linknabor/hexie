@@ -22,7 +22,8 @@ import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.shequ.NoticeService;
 import com.yumu.hexie.service.shequ.req.CommunitySummary;
-import com.yumu.hexie.service.shequ.req.RatioSum;
+import com.yumu.hexie.service.shequ.req.Ratio;
+import com.yumu.hexie.service.shequ.req.RatioDetail;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -569,19 +570,33 @@ public class CommunityController extends BaseController{
 		return BaseResult.successResult(imgUrl);
 	}
 
-
 	/**
 	 * 物业端请求的接口，汇总业主意见
-	 * @param comment
+	 * @param communitySummary
 	 * @return
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/thread/getOptSummary", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<List<RatioSum>> getOptSummary(@RequestBody CommunitySummary comment) throws Exception{
-		log.info("getOptSummary:" + comment.toString());
-		List<RatioSum> list = communityService.getThreadBySectIdsAndCycle(comment);
+	public BaseResult<List<Ratio>> getOptSummary(@RequestBody CommunitySummary communitySummary) throws Exception{
+		List<Ratio> list = communityService.getThreadByCycleSummary(communitySummary);
+		return BaseResult.successResult(list);
+	}
+
+
+	/**
+	 * 物业端请求的接口，业主意见
+	 * @param sectId
+	 * @param dateCycle
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/thread/getOptSummaryDetail/{sectId}/{dateCycle}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<List<RatioDetail>> getOptSummaryDetail(@PathVariable String sectId, @PathVariable String dateCycle) throws Exception{
+		List<RatioDetail> list = communityService.getThreadBySectIdsAndCycle(sectId, dateCycle);
 		return BaseResult.successResult(list);
 	}
 
