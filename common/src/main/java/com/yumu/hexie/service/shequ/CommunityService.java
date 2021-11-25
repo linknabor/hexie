@@ -221,6 +221,6 @@ public interface CommunityService {
     List<Ratio> getThreadByCycleSummary(CommunitySummary communitySummary) throws Exception;
 
     //根据小区ID和区间汇总意见信息
-    List<RatioDetail> getThreadBySectIdsAndCycle(String sectId, String dateCycle);
+    List<RatioDetail> getThreadBySectIdsAndCycle(String sectId, String dateCycle) throws Exception ;
 
 }
