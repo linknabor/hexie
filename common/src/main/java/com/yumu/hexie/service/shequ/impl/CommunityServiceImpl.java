@@ -393,7 +393,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	public List<RatioDetail> getThreadBySectIdsAndCycle(String sectId, String dateCycle) {
+	public List<RatioDetail> getThreadBySectIdsAndCycle(String sectId, String dateCycle) throws Exception {
 		String start;
 		String end;
 		Date currDate = new Date();
@@ -412,15 +412,19 @@ public class CommunityServiceImpl implements CommunityService {
 		String[] sectIds = listSect.toArray(new String[0]);
 		//总数
 		List<Object[]> threadListCount = threadRepository.findThreadCount(start, end, sectIds);
+		List<QueryPostingSummaryMapper> queryListCount = ObjectToBeanUtils.objectToBean(threadListCount, QueryPostingSummaryMapper.class);
 
 		//回复数
 		List<Object[]> threadListCommentCount = threadRepository.findThreadCommentCount(start, end, sectIds);
+		List<QueryPostingSummaryMapper> queryListComm = ObjectToBeanUtils.objectToBean(threadListCommentCount, QueryPostingSummaryMapper.class);
 
 		//未回复数
 		List<Object[]> threadListNoCommentCount = threadRepository.findThreadNoCommentCount(start, end, sectIds);
+		List<QueryPostingSummaryMapper> queryListNoComm = ObjectToBeanUtils.objectToBean(threadListNoCommentCount, QueryPostingSummaryMapper.class);
 
 		//转工单数
 		List<Object[]> threadListRectifiedCount = threadRepository.findThreadRectified(start, end, sectIds);
+		List<QueryPostingSummaryMapper> queryListRectified = ObjectToBeanUtils.objectToBean(threadListRectifiedCount, QueryPostingSummaryMapper.class);
 
 		List<RatioDetail> list = new ArrayList<>();
 		if(threadListCount.size() == 0) {
@@ -429,22 +433,34 @@ public class CommunityServiceImpl implements CommunityService {
 
 		RatioDetail detail = new RatioDetail();
 		detail.setFeeName("意见总数");
-		detail.setRatio(threadListCount.size()+"");
+		detail.setRatio("0");
+		if(queryListCount != null && queryListCount.size() > 0) {
+			detail.setRatio(queryListCount.get(0).getNum()+"");
+		}
 		list.add(detail);
 
 		detail = new RatioDetail();
 		detail.setFeeName("回复数");
-		detail.setRatio(threadListCommentCount.size()+"");
+		detail.setRatio("0");
+		if(queryListComm != null && queryListComm.size() > 0) {
+			detail.setRatio(queryListComm.get(0).getNum()+"");
+		}
 		list.add(detail);
 
 		detail = new RatioDetail();
 		detail.setFeeName("未回复数");
-		detail.setRatio(threadListNoCommentCount.size()+"");
+		detail.setRatio("0");
+		if(queryListNoComm != null && queryListNoComm.size() > 0) {
+			detail.setRatio(queryListNoComm.get(0).getNum()+"");
+		}
 		list.add(detail);
 
 		detail = new RatioDetail();
 		detail.setFeeName("转工单数");
-		detail.setRatio(threadListRectifiedCount.size()+"");
+		detail.setRatio("0");
+		if(queryListRectified != null && queryListRectified.size() > 0) {
+			detail.setRatio(queryListRectified.get(0).getNum()+"");
+		}
 		list.add(detail);
 		return list;
 	}
