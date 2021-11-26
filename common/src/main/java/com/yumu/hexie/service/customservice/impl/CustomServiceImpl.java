@@ -24,7 +24,6 @@ import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.CustomServiceUtil;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
-import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
@@ -627,40 +626,6 @@ public class CustomServiceImpl implements CustomService {
 		
 		if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {	//1.先支付，后完工
 			serviceOrderRepository.deleteById(serviceOrder.getId());
-		}
-		
-	}
-	
-	/**
-	 * 获取服务人员
-	 * @param operatorDTO
-	 * @throws Exception
-	 */
-	@Override
-	@Transactional
-	public void operator(OperatorDTO operatorDTO) {
-		
-		if (operatorDTO == null) {
-			return;
-		}
-		int retryTimes = 0;
-		boolean isSuccess = false;
-		
-		while(!isSuccess && retryTimes < 3) {
-			try {
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				String value = objectMapper.writeValueAsString(operatorDTO);
-				redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_OPERATOR_QUEUE, value);
-				isSuccess = true;
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-				retryTimes++;
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e1) {
-					logger.error(e.getMessage(), e);
-				}
-			}
 		}
 		
 	}

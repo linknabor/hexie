@@ -76,7 +76,7 @@ public class ModelConstant {
 	//订单状态
 	//0. 创建完成 1. 已支付 2. 已用户取消 3. 待退款 4. 退款中  5. 已发货 6.已签收 7. 已后台取消 8. 商户取消 9. 已确认 10.已退货（退货中走线下流程） 11.已退款 12.配货中（商户确认中）
 	public static final int ORDER_STATUS_INIT = 0; 
-	public static final int ORDER_STATUS_PAYED = 1; 
+	public static final int ORDER_STATUS_PAYED = 1;
 	public static final int ORDER_STATUS_CANCEL = 2; 
 	public static final int ORDER_STATUS_APPLYREFUND = 3; //暂时不使用
 	public static final int ORDER_STATUS_REFUNDING = 4; 

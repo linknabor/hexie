@@ -28,8 +28,6 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
-import com.yumu.hexie.integration.customservice.dto.OperatorDTO.Operator;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.notify.ConversionNotification;
@@ -37,7 +35,6 @@ import com.yumu.hexie.integration.notify.InvoiceNotification;
 
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
-import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.ModelConstant;
@@ -293,78 +290,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 				if (!isSuccess) {
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, orderId);
 				}
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-	}
-	
-	/**
-	 * 异步更新服务人员信息
-	 */
-	@Override
-	@Async("taskExecutor")
-	public void updateOpereratorAysc() {
-		
-		while(true) {
-			try {
-				if (!maintenanceService.isQueueSwitchOn()) {
-					logger.info("queue switch off ! ");
-					Thread.sleep(60000);
-					continue;
-				}
-				String json = redisTemplate.opsForList().leftPop(ModelConstant.KEY_UPDATE_OPERATOR_QUEUE, 30, TimeUnit.SECONDS);
-				if (StringUtils.isEmpty(json)) {
-					continue;
-				}
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				OperatorDTO queue = objectMapper.readValue(json, new TypeReference<OperatorDTO>(){});
-				
-				logger.info("start to consume opererator queue : " + queue);
-
-				List<Operator> operList = queue.getOperatorList();
-				if (operList!=null && !operList.isEmpty()) {
-					serviceOperatorRepository.deleteByType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
-				}
-				List<Operator> failedList = new ArrayList<>();
-				operList.forEach(operator->{
-					try {
-						if (StringUtils.isEmpty(operator.getTel()) || StringUtils.isEmpty(operator.getOpenid())) {
-							logger.warn("operator tel or openid is null, oper : " + operator);
-							return;
-						}
-						List<User> userList = userRepository.findByTelAndOpenid(operator.getTel(), operator.getOpenid());
-						User user = null;
-						if (userList!=null && !userList.isEmpty()) {
-							user = userList.get(0);
-						}
-						if (user == null) {
-							logger.warn("user not exists, openid : " + operator.getOpenid());
-						}
-						if ("0".equals(operator.getServiceId())) {
-							return;
-						}
-						ServiceOperator serviceOperator = new ServiceOperator();
-						serviceOperator.setName(user.getName());
-						serviceOperator.setOpenId(operator.getOpenid());
-						serviceOperator.setTel(operator.getTel());
-						serviceOperator.setType(ModelConstant.SERVICE_OPER_TYPE_SERVICE);
-						serviceOperator.setUserId(user.getId());
-						serviceOperator.setSubType(operator.getServiceId());
-						serviceOperatorRepository.save(serviceOperator);
-					} catch (Exception e) {
-						logger.error("save serviceOperator failed ! oper : " + operator);
-						failedList.add(operator);
-					
-					}
-				});
-				
-				if (failedList.size() == operList.size() && operList.size() > 0) {
-					queue.setOperatorList(failedList);
-					String value = objectMapper.writeValueAsString(queue);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_UPDATE_OPERATOR_QUEUE, value);
-				}
-			
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}

@@ -748,7 +748,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
 			Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
 			serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
-		}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType() ||
+		} else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_SAASSALE == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()) {
@@ -758,13 +758,17 @@ public class EshopServiceImpl implements EshopSerivce {
 			}else {
 				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
 			}
-			
-			
+		} else if(ModelConstant.SERVICE_OPER_TYPE_SERVICE == saveOperVO.getOperatorType()) {
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+			}else {
+				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
+			}
 		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
 			
-			ServiceOperator serviceOperator = null;
+			ServiceOperator serviceOperator;
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
 				serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenIdAndAgentId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId(), agent.getId());
 			}else {
@@ -797,7 +801,6 @@ public class EshopServiceImpl implements EshopSerivce {
 					serviceOperatorItemRepository.save(serviceOperatorItem);
 				}
 			}
-			
 		}
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
 			//查看有哪些操作员已经没有服务项目了，没有的删除该操作员
@@ -806,8 +809,6 @@ public class EshopServiceImpl implements EshopSerivce {
 				serviceOperatorRepository.delete(serviceOperator);
 			}
 		}
-		
-		
 	}
 
 	/**
