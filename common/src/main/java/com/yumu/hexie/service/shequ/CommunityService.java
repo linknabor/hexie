@@ -3,6 +3,8 @@ package com.yumu.hexie.service.shequ;
 import java.util.List;
 
 import com.yumu.hexie.integration.wuye.req.OpinionRequest;
+import com.yumu.hexie.service.shequ.req.CommunitySummary;
+import com.yumu.hexie.service.shequ.req.RatioSum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -198,4 +200,7 @@ public interface CommunityService {
 	public void updateThreadComment(ThreadComment thread);
 
 	public Boolean sendNotification(User user, OpinionRequest opinionRequest) throws Exception;
+
+	//根据小区ID和区间汇总意见信息
+	List<RatioSum> getThreadBySectIdsAndCycle(CommunitySummary summary) throws Exception;
 }
