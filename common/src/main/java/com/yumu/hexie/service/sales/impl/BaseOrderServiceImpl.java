@@ -486,7 +486,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			request.setOpenid(order.getOpenId());
 			request.setTranAmt(String.valueOf(order.getPrice()));
 			request.setTradeWaterId(order.getOrderNo());
-			
+			request.setShipFee((String.valueOf(order.getShipFee()));
+
 			String productName = order.getProductName();
 			if (!StringUtils.isEmpty(productName)) {
 				productName = URLEncoder.encode(productName,"GBK");
@@ -524,7 +525,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				subOrder.setAgentNo(orderItem.getAgentNo());
 				subOrder.setAmount(orderItem.getAmount());
 				subOrder.setCount(orderItem.getCount());
-				
+				subOrder.setSubPic(orderItem.getProductThumbPic());
+
 				String subProductName = orderItem.getProductName();
 				if (!StringUtils.isEmpty(subProductName)) {
 					subProductName = URLEncoder.encode(subProductName,"GBK");

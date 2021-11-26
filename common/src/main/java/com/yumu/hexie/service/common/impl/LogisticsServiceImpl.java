@@ -133,7 +133,7 @@ public class LogisticsServiceImpl implements LogisticsService {
 	@Transactional
 	public void saveLogisticsInfo(LogisticsInfoReq logisticsInfoReq) {
 		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(logisticsInfoReq.getOrderId()+"");
-		if (ModelConstant.ORDER_STATUS_CONFIRM != serviceOrder.getStatus() && ModelConstant.ORDER_STATUS_PAYED!=serviceOrder.getStatus()) {
+		if (ModelConstant.ORDER_STATUS_PAYED != serviceOrder.getStatus()) {
 			throw new BizValidateException("订单状态不允许当前操作，订单ID：" + serviceOrder.getId());
 		}
 		serviceOrder.setLogisticCode(logisticsInfoReq.getLogisticCode());
