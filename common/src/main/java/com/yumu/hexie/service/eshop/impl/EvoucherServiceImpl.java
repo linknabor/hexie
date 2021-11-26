@@ -46,7 +46,7 @@ import com.yumu.hexie.vo.EvoucherView;
 @Service
 public class EvoucherServiceImpl implements EvoucherService {
 	
-	private static Logger logger = LoggerFactory.getLogger(EvoucherServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(EvoucherServiceImpl.class);
 	
 	@Value("${evoucher.qrcode.url}")
 	private String EVOUCHER_QRCODE_URL;
@@ -97,7 +97,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 				evoucher.setOriPrice(product.getOriPrice());	//原价
 				evoucher.setProductId(serviceOrder.getProductId());
 				evoucher.setProductName(serviceOrder.getProductName());
-				evoucher.setProductType(Integer.valueOf(product.getProductType()));
+				evoucher.setProductType(Integer.parseInt(product.getProductType()));
 				evoucher.setRuleId(serviceOrder.getGroupRuleId());
 				evoucher.setSmallPicture(product.getSmallPicture());
 				evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_INIT);
@@ -116,7 +116,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 				evoucher.setCode(OrderNoUtil.generateEvoucherNo());
 				evoucher.setOrderId(serviceOrder.getId());
 				evoucher.setProductId(serviceOrder.getProductId());
-				evoucher.setProductType(Integer.valueOf(product.getProductType()));
+				evoucher.setProductType(Integer.parseInt(product.getProductType()));
 				evoucher.setProductName(serviceOrder.getProductName());
 				evoucher.setRuleId(serviceOrder.getGroupRuleId());
 				evoucher.setSmallPicture(product.getSmallPicture());
@@ -130,14 +130,9 @@ public class EvoucherServiceImpl implements EvoucherService {
 				evoucher.setAgentId(agent.getId());
 				evoucher.setAgentName(agent.getName());
 				evoucher.setAgentNo(agent.getAgentNo());
-				
 			}
-			
 			evoucherRepository.save(evoucher);
-			
 		}
-		
-		
 	}
 	
 	/**
@@ -165,7 +160,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			
 			Date endDate = DateUtil.addDate(evoucher.getBeginDate(), 30);	//过期时间默认往后加一个月
 			if (ModelConstant.ORDER_TYPE_PROMOTION == serviceOrder.getOrderType()) {
-				endDate = DateUtil.addDate(evoucher.getBeginDate(), 365*1);	//过期时间默认往后加一年
+				endDate = DateUtil.addDate(evoucher.getBeginDate(), 365);	//过期时间默认往后加一年
 			}
 			String ed = DateUtil.dtFormat(endDate, DateUtil.dSimple);
 			ed += " 23:59:59";
@@ -186,41 +181,14 @@ public class EvoucherServiceImpl implements EvoucherService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void consume(User operator, String code, String evouchers) throws Exception {
-		
 		Assert.hasText(code, "核销券码不能为空。");
-		
-//		String[]ids = evouchers.split(",");
-//		long orderId = 0;
-//		for (String id : ids) {
-//			if (StringUtil.isEmpty(id)) {
-//				continue;
-//			}
-//			Evoucher evoucher = evoucherRepository.findOne(Long.valueOf(id));
-//			evoucher.setStatus(ModelConstant.EVOUCHER_STATUS_USED);
-//			evoucher.setCosumeDate(new Date());
-//			evoucher.setOperatorName(operator.getName());
-//			evoucher.setOperatorId(operator.getId());
-//			evoucherRepository.save(evoucher);
-//			orderId = evoucher.getOrderId();
-//		}
-//		ServiceOrder serviceOrder = serviceOrderRepository.findOne(orderId);
-//		
-//		List<Evoucher> list = evoucherRepository.findByOrderIdAndStatus(serviceOrder.getId(), ModelConstant.EVOUCHER_STATUS_USED);
-//		StringBuffer bf = new StringBuffer();
-//		for (int i = 0; i < list.size(); i++) {
-//			Evoucher evoucher = list.get(i);
-//			bf.append(evoucher.getCode());
-//			if (i!=(list.size()-1)) {
-//				bf.append(",");
-//			}
-//		}
-		
+
 		long orderId = 0;
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		Evoucher e = evoucherRepository.findByCode(code);
 		long agentId = e.getAgentId();
 		
-		List<ServiceOperator> opList = new ArrayList<>();
+		List<ServiceOperator> opList;
 		if (agentId == 1) {	//奈博自己发的核销券
 			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
 		}else {	//代理商、合伙人发的和小小去按
@@ -268,7 +236,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			}
 			orderId = evoucher.getOrderId();
 		}
-		ServiceOrder serviceOrder = serviceOrderRepository.findById(orderId).get();
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(orderId);
 		eshopUtil.notifyConsume(operator, serviceOrder.getOrderNo(), bf.toString());
 		
 	}
@@ -337,7 +305,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 			}
 			orderId = evoucher.getOrderId();
 		}
-		ServiceOrder serviceOrder = serviceOrderRepository.findById(orderId).get();
+		ServiceOrder serviceOrder = serviceOrderRepository.findById(orderId);
 
 		Map<String, String> map = new HashMap<>();
 		map.put("trade_water_id", serviceOrder.getOrderNo());
@@ -384,9 +352,9 @@ public class EvoucherServiceImpl implements EvoucherService {
 	@Override
 	public EvoucherView getAvailableEvoucher(User user, int type) {
 		
-		EvoucherView evoucherView = null;
+		EvoucherView evoucherView;
 		List<Evoucher> list = evoucherRepository.findByUserIdAndTypeAndStatus(user.getId(), type, ModelConstant.EVOUCHER_STATUS_NORMAL);
-		Evoucher evoucher = new Evoucher();
+		Evoucher evoucher;
 		if (!list.isEmpty()) {
 			evoucher = list.get(0);
 			String qrCodeUrl = EVOUCHER_QRCODE_URL;
@@ -441,8 +409,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 	public List<EvoucherPageMapper> getByOperator(User operator) throws Exception {
 		
 		List<Object[]> objList = evoucherRepository.findByOperatorAndType(operator.getId(), ModelConstant.EVOUCHER_TYPE_VERIFICATION);
-		List<EvoucherPageMapper> list = ObjectToBeanUtils.objectToBean(objList, EvoucherPageMapper.class);
-		return list;
+		return ObjectToBeanUtils.objectToBean(objList, EvoucherPageMapper.class);
 	}
 	
 	@Override
@@ -502,7 +469,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		}
 		logger.info("evoucher : " + evoucher);
 		
-		String qrCodeUrl = EVOUCHER_QRCODE_URL;
+		String qrCodeUrl;
 		String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
 		if (StringUtils.isEmpty(appid)) {
 			appid = "";
