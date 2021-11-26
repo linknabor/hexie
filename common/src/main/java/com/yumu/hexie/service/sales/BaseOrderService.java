@@ -3,6 +3,7 @@ package com.yumu.hexie.service.sales;
 import java.util.List;
 
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
+import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.Cart;
@@ -83,6 +84,9 @@ public interface BaseOrderService {
 
     //退款处理
     void finishRefund(ServiceOrder serviceOrder);
+
+    //退款完成
+    public void finishRefund(WxRefundOrder wxRefundOrder);
 
     //订单支付成功回调处理，包括消费红包，改状态等操作
     void finishOrder(String tradeWaterId);

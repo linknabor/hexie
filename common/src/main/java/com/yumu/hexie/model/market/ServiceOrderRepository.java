@@ -17,6 +17,8 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     @Query("from ServiceOrder p left outer join fetch p.items where p.id=?1")
     ServiceOrder findOneWithItem(long orderId);
 
+    List<ServiceOrder> findTimeoutServiceOrder(long timeLast);
+
     @Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.status in ?2 and p.orderType in ?3 order by id desc", nativeQuery = true)
     List<ServiceOrder> findByUserAndStatusAndTypes(long userId, List<Integer> statuses, List<Integer> types);
 
