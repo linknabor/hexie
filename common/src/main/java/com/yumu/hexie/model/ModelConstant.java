@@ -484,5 +484,6 @@ public class ModelConstant {
 	public static final String KEY_WORKORDER_CFG = "workorder:cfg:";	//工单配置，后面接city_db:sect_id
 
 
+	public static final String KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:deliveryReceiver"; //电商接单人推送
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送
 }		

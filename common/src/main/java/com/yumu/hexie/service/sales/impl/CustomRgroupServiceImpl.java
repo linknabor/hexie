@@ -161,7 +161,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
             ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
             String value = objectMapper.writeValueAsString(noticeServiceOperator);
             //放入合协管家的redis中
-            staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE, value);
+            staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE, value);
         } catch (Exception e) {
 		    logger.error("custom push redis error", e);
         }
