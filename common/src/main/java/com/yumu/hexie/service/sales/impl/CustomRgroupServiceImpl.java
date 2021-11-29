@@ -136,6 +136,10 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         noticeServiceOperator.setReceiverName(o.getReceiverName());
         noticeServiceOperator.setId(o.getId());
         noticeServiceOperator.setProductName(o.getProductName());
+        noticeServiceOperator.setOrderNo(o.getOrderNo());
+        noticeServiceOperator.setSubTypeName(o.getSubTypeName());
+        noticeServiceOperator.setSubType(o.getSubType());
+        noticeServiceOperator.setTel(o.getTel());
 
 		int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
 		long agentId = o.getAgentId();

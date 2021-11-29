@@ -257,6 +257,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					noticeServiceOperator.setTel(serviceOrder.getTel());
 					noticeServiceOperator.setSubType(serviceOrder.getSubType());
 					noticeServiceOperator.setSubTypeName(serviceOrder.getSubTypeName());
+					noticeServiceOperator.setOrderNo(serviceOrder.getOrderNo());
 
 					int operType = ModelConstant.SERVICE_OPER_TYPE_SERVICE;
 					long agentId = serviceOrder.getAgentId();
@@ -489,6 +490,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							noticeServiceOperator.setTel(serviceOrder.getTel());
 							noticeServiceOperator.setSubType(serviceOrder.getSubType());
 							noticeServiceOperator.setSubTypeName(serviceOrder.getSubTypeName());
+							noticeServiceOperator.setOrderNo(serviceOrder.getOrderNo());
 
 							int operType;
 							switch (serviceOrder.getOrderType()) {
