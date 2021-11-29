@@ -121,13 +121,13 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 			
 		}
+
 		//6.自定义服务
 		ServiceNotification serviceNotification = payNotification.getServiceNotify();
 		if (serviceNotification!=null) {
-			serviceNotification.setOrderId(payNotification.getOrderId());
-			sendServiceNotificationAsync(serviceNotification);
+			sendServiceNotificationAsync(serviceNotification.getOrderId());
 		}
-		
+
 		//7.更新serviceOrder订单状态
 		updateServiceOrderStatusAsync(payNotification.getOrderId());
 		
@@ -172,17 +172,9 @@ public class NotifyServiceImpl implements NotifyService {
 	 * 服务消息推送
 	 */
 	@Override
-	public void sendServiceNotificationAsync(ServiceNotification serviceNotification) {
-		
-		if (serviceNotification == null) {
-			return;
-		}
-		
-		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + serviceNotification.getOrderId();
-		Long result = RedisLock.lock(key, redisTemplate, 3600l);
-		log.info("result : " + result);
-		if (0 == result) {
-			log.info("trade : " + serviceNotification.getOrderId() + ", already in the send queue, will skip .");
+	public void sendServiceNotificationAsync(String orderId) {
+
+		if (StringUtils.isEmpty(orderId)) {
 			return;
 		}
 		
@@ -190,9 +182,7 @@ public class NotifyServiceImpl implements NotifyService {
 		boolean isSuccess = false;
 		while(!isSuccess && retryTimes < 3) {
 			try {
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				String value = objectMapper.writeValueAsString(serviceNotification);
-				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, orderId);
 				isSuccess = true;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

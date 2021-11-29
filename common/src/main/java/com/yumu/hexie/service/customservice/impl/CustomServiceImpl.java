@@ -263,15 +263,7 @@ public class CustomServiceImpl implements CustomService {
 		if (StringUtils.isEmpty(orderId)) {
 			return;
 		}
-		
-		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + orderId;
-		Long result = RedisLock.lock(key, redisTemplate, 3600L);
-		logger.info("result : " + result);
-		if (0 == result) {
-			logger.info("trade : " + orderId + ", already in the send queue, will skip .");
-			return;
-		}
-		
+
 		int retryTimes = 0;
 		boolean isSuccess = false;
 		
