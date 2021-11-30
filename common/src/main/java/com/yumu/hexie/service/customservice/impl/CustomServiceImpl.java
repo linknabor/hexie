@@ -660,15 +660,23 @@ public class CustomServiceImpl implements CustomService {
 		if (StringUtils.isEmpty(serviceOrder.getOrderNo())) {
 			throw new BizValidateException("未查询到订单, orderNo : " + heXieServiceOrderReq.getOrderNo());
 		}
-		if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
-			throw new BizValidateException("订单["+heXieServiceOrderReq.getOrderNo()+"]已被抢。");
+
+		if(ModelConstant.ORDER_STATUS_ACCEPTED == heXieServiceOrderReq.getStatus()) {
+			if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+				throw new BizValidateException("订单["+heXieServiceOrderReq.getOrderNo()+"]已被抢。");
+			}
+		} else if(ModelConstant.ORDER_STATUS_CONFIRM == heXieServiceOrderReq.getStatus()) {
+			if (serviceOrder.getOperatorUserId() != heXieServiceOrderReq.getOperatorUserId()) {
+				throw new BizValidateException("当前用户无法查看此订单。orderId : " + serviceOrder.getId() + ", userId : " + serviceOrder.getOperatorUserId());
+			}
 		}
 
 		BeanUtils.copyProperties(heXieServiceOrderReq, serviceOrder);
 		serviceOrderRepository.save(serviceOrder);
 
-		//发送客服消息，告知客户已接单。应该做异步队列TODO
-		gotongService.sendCustomServiceAssignedMsg(serviceOrder);
-
+		if(ModelConstant.ORDER_STATUS_ACCEPTED == heXieServiceOrderReq.getStatus()) {
+			//发送客服消息，告知客户已接单。应该做异步队列TODO
+			gotongService.sendCustomServiceAssignedMsg(serviceOrder);
+		}
 	}
 }
