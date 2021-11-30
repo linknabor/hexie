@@ -6,8 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -651,4 +653,22 @@ public class CustomServiceImpl implements CustomService {
     	
     	return customServiceUtil.queryOrder(orderQueryDTO);
     }
+
+	@Override
+	public void updateServiceOrderByOutSid(HeXieServiceOrderReq heXieServiceOrderReq) {
+		ServiceOrder serviceOrder = serviceOrderRepository.findByOrderNo(heXieServiceOrderReq.getOrderNo());
+		if (StringUtils.isEmpty(serviceOrder.getOrderNo())) {
+			throw new BizValidateException("未查询到订单, orderNo : " + heXieServiceOrderReq.getOrderNo());
+		}
+		if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+			throw new BizValidateException("订单["+heXieServiceOrderReq.getOrderNo()+"]已被抢。");
+		}
+
+		BeanUtils.copyProperties(heXieServiceOrderReq, serviceOrder);
+		serviceOrderRepository.save(serviceOrder);
+
+		//发送客服消息，告知客户已接单。应该做异步队列TODO
+		gotongService.sendCustomServiceAssignedMsg(serviceOrder);
+
+	}
 }

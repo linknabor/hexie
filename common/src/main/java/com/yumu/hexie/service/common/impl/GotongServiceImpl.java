@@ -310,7 +310,7 @@ public class GotongServiceImpl implements GotongService {
         User user = userRepository.findById(serviceOrder.getUserId());
         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_CUSTOM_SERVICE_DETAIL) + serviceOrder.getId();
         
-        News news = new News(new ArrayList<Article>());
+        News news = new News(new ArrayList<>());
         Article article = new Article();
         article.setTitle("您的服务订单已被受理");
         article.setDescription("点击查看详情");

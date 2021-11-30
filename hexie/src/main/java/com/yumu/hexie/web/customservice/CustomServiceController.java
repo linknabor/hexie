@@ -2,6 +2,8 @@ package com.yumu.hexie.web.customservice;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -338,6 +340,13 @@ public class CustomServiceController extends BaseController {
 		orderQueryDTO.setUser(user);
 		ServiceOrderQueryVO serviceOrderQueryVO = customService.queryOrderByFeeType(orderQueryDTO);
 		return BaseResult.successResult(serviceOrderQueryVO);
+	}
+
+	@RequestMapping(value = "/outsid/serviceOrder/update", method = RequestMethod.POST)
+	public BaseResult<ServiceOrderQueryVO> updateServiceOrder(@RequestBody HeXieServiceOrderReq heXieServiceOrderReq) throws Exception{
+		logger.info("heXieServiceOrderReq : " + heXieServiceOrderReq);
+		customService.updateServiceOrderByOutSid(heXieServiceOrderReq);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
 
 }

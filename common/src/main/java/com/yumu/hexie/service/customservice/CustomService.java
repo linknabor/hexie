@@ -7,6 +7,7 @@ import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
 import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
+import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
@@ -49,5 +50,6 @@ public interface CustomService {
 
 	ServiceOrderQueryVO queryOrderByFeeType(OrderQueryDTO orderQueryDTO) throws Exception;
 
+	void updateServiceOrderByOutSid(HeXieServiceOrderReq heXieServiceOrderReq);
 
 }
