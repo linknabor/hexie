@@ -1,5 +1,9 @@
 package com.yumu.hexie.integration.eshop.resp;
 
+import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.ServiceOrder;
+import org.springframework.beans.BeanUtils;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -35,8 +39,8 @@ public class OrderDetailResp {
         private String memo; //用户下单时的描述信息
         private String imgUrls; //用户上传的图片地址
 
-        public OrderResp() {
-
+        public OrderResp(ServiceOrder order) {
+            BeanUtils.copyProperties(order, this);
         }
 
         public String getId() {
@@ -198,8 +202,8 @@ public class OrderDetailResp {
         private String amount;
         private String productPic;
 
-        public OrderSubResp() {
-
+        public OrderSubResp(OrderItem item) {
+            BeanUtils.copyProperties(item, this);
         }
 
         public String getProductName() {

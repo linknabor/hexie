@@ -1119,14 +1119,12 @@ public class EshopServiceImpl implements EshopSerivce {
 			return resp;
 		}
 
-		OrderDetailResp.OrderResp orderResp = new OrderDetailResp.OrderResp();
-		BeanUtils.copyProperties(orderResp, order);
+		OrderDetailResp.OrderResp orderResp = new OrderDetailResp.OrderResp(order);
 		resp.setOrder(orderResp);
 
 		List<OrderDetailResp.OrderSubResp> listSub = new ArrayList<>();
 		for(OrderItem item : itemList) {
-			OrderDetailResp.OrderSubResp sub = new OrderDetailResp.OrderSubResp();
-			BeanUtils.copyProperties(sub, item);
+			OrderDetailResp.OrderSubResp sub = new OrderDetailResp.OrderSubResp(item);
 			listSub.add(sub);
 		}
 		resp.setDetails(listSub);
