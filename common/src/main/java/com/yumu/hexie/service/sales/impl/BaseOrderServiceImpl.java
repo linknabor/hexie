@@ -503,7 +503,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
             List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
             List<SubOrder> subOrderList = new ArrayList<>(itemList.size());
-
+            log.error("itemList ::::::" + itemList);
             for (OrderItem orderItem : itemList) {
                 SubOrder subOrder = new SubOrder();
                 String subAgentName = orderItem.getAgentName();
@@ -524,6 +524,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 subOrder.setProductId(orderItem.getProductId());
                 subOrderList.add(subOrder);
             }
+
+            log.error("subOrderList ::::::" + subOrderList);
+
             if (order.getCouponId() != null && order.getCouponId() > 0) {
                 SubOrder subOrder = subOrderList.get(0);
                 if (subOrder != null) {
@@ -533,6 +536,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
 
             request.setSubOrders(subOrderList);
+
+            log.error("request ::::::" + request);
 
             CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
             sign = new JsSign();
