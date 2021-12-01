@@ -13,6 +13,7 @@ public class QueryOrderVO implements Serializable {
 	private String orderNo;
 	private String orderType;
 	private String status;
+	private String groupStatus; //成团状态
 	private String tel;
 	private String receiverName;
 	private String agentNo;
@@ -118,6 +119,14 @@ public class QueryOrderVO implements Serializable {
 		this.sectName = sectName;
 	}
 
+	public String getGroupStatus() {
+		return groupStatus;
+	}
+
+	public void setGroupStatus(String groupStatus) {
+		this.groupStatus = groupStatus;
+	}
+
 	@Override
 	public String toString() {
 		return "QueryOrderVO{" +
@@ -125,6 +134,7 @@ public class QueryOrderVO implements Serializable {
 				", orderNo='" + orderNo + '\'' +
 				", orderType='" + orderType + '\'' +
 				", status='" + status + '\'' +
+				", groupStatus='" + groupStatus + '\'' +
 				", tel='" + tel + '\'' +
 				", receiverName='" + receiverName + '\'' +
 				", agentNo='" + agentNo + '\'' +

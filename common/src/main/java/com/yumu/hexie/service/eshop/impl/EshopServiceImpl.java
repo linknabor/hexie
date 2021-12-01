@@ -1061,8 +1061,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			Pageable pageable = PageRequest.of(queryOrderVO.getCurrentPage(), queryOrderVO.getPageSize(), sort);
 			
-			Date startDate = null;
-			Date endDate = null;
+			Date startDate;
+			Date endDate;
 			String sDate = "";
 			String eDate = "";
 			if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
@@ -1077,7 +1077,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			Page<Object[]> page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(), 
 					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(), 
 					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(), 
-					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), pageable);
+					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
 			
 			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
 			QueryListDTO<List<QueryOrderMapper>> responsePage = new QueryListDTO<>();

@@ -2,7 +2,6 @@ package com.yumu.hexie.web.eshop;
 
 import java.util.Map;
 
-import com.yumu.hexie.integration.eshop.req.ServiceOrderReq;
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import org.slf4j.Logger;
