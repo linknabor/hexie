@@ -71,7 +71,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     List<ServiceOrder> findByGroupOrderId(long groupOrderId);
 
     String queryString = "o.id, o.address, o.count, o.logisticName, o.logisticNo, o.logisticType, o.orderNo, o.orderType, o.productName, "
-            + "o.refundDate, o.sendDate, o.status, o.tel, o.receiverName, o.totalAmount, o.agentNo, o.agentName";
+            + "o.refundDate, o.sendDate, o.status, o.tel, o.receiverName, o.totalAmount, o.agentNo, o.agentName, o.xiaoquName as sectName ";
 
     @Query(value = "select " + queryString + " from serviceorder o "
             + "where o.orderType in ( ?1 ) "
@@ -86,6 +86,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?10!='', o.sendDate <= ?10, 1=1) "
             + "and if(?11!='', o.agentNo = ?11, 1=1) "
             + "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
+            + "and if(?12!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
             , countQuery = "select count(1) from serviceorder o "
             + "where o.orderType in ( ?1 ) "
             + "and o.status in ( ?2 ) "
@@ -99,9 +100,10 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?10!='', o.sendDate <= ?10, 1=1) "
             + "and if(?11!='', o.agentNo = ?11, 1=1) "
             + "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
+            + "and if(?12!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
             , nativeQuery = true)
     Page<Object[]> findByMultiCondition(List<Integer> types, List<Integer> status, String orderId, String productName,
                                         String orderNo, String receiverName, String tel, String logisticNo, String sendDateBegin, String sendDateEnd,
-                                        String agentNo, String agentName, Pageable pageable);
+                                        String agentNo, String agentName, String sectName, Pageable pageable);
 
 }

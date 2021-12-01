@@ -2,14 +2,13 @@ package com.yumu.hexie.web.eshop;
 
 import java.util.Map;
 
+import com.yumu.hexie.integration.eshop.req.ServiceOrderReq;
+import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
 import com.yumu.hexie.service.eshop.EvoucherService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
@@ -224,6 +223,21 @@ public class EshopController<T> extends BaseController {
 		
 		logger.info("queryOrderVO : " + queryOrderVO);
 		return eshopSerivce.getOrder(queryOrderVO);
+	}
+
+	/**
+	 * 查询订单详情
+	 * @return
+	 */
+	@RequestMapping(value = "/order/detail/{orderId}", method = RequestMethod.POST)
+	public CommonResponse<OrderDetailResp> getOrderDetail(@PathVariable String orderId){
+
+		logger.info("orderId : " + orderId);
+		OrderDetailResp resp = eshopSerivce.getOrderDetail(orderId);
+		CommonResponse<OrderDetailResp> commonResponse = new CommonResponse<>();
+		commonResponse.setData(resp);
+		commonResponse.setResult("00");
+		return commonResponse;
 	}
 	
 	/**

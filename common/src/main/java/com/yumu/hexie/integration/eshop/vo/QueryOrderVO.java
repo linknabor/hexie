@@ -21,6 +21,7 @@ public class QueryOrderVO implements Serializable {
 	private String logisticNo;
 	private String sendDateBegin;
 	private String sendDateEnd;
+	private String sectName;
 	
 	private int currentPage;
 	private int pageSize;
@@ -108,14 +109,33 @@ public class QueryOrderVO implements Serializable {
 	public void setSendDateEnd(String sendDateEnd) {
 		this.sendDateEnd = sendDateEnd;
 	}
+
+	public String getSectName() {
+		return sectName;
+	}
+
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
+
 	@Override
 	public String toString() {
-		return "QueryOrderVO [id=" + id + ", orderNo=" + orderNo + ", orderType=" + orderType + ", status=" + status
-				+ ", tel=" + tel + ", receiverName=" + receiverName + ", agentNo=" + agentNo + ", agentName="
-				+ agentName + ", productName=" + productName + ", logisticNo=" + logisticNo + ", sendDateBegin="
-				+ sendDateBegin + ", sendDAteEnd=" + sendDateEnd + ", currentPage=" + currentPage + ", pageSize="
-				+ pageSize + "]";
+		return "QueryOrderVO{" +
+				"id='" + id + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", orderType='" + orderType + '\'' +
+				", status='" + status + '\'' +
+				", tel='" + tel + '\'' +
+				", receiverName='" + receiverName + '\'' +
+				", agentNo='" + agentNo + '\'' +
+				", agentName='" + agentName + '\'' +
+				", productName='" + productName + '\'' +
+				", logisticNo='" + logisticNo + '\'' +
+				", sendDateBegin='" + sendDateBegin + '\'' +
+				", sendDateEnd='" + sendDateEnd + '\'' +
+				", sectName='" + sectName + '\'' +
+				", currentPage=" + currentPage +
+				", pageSize=" + pageSize +
+				'}';
 	}
-	
-	
 }

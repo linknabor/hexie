@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
+import com.yumu.hexie.model.market.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,10 +84,6 @@ import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorItem;
 import com.yumu.hexie.model.localservice.ServiceOperatorItemRepository;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
-import com.yumu.hexie.model.market.Evoucher;
-import com.yumu.hexie.model.market.EvoucherRepository;
-import com.yumu.hexie.model.market.ServiceOrder;
-import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
@@ -112,12 +110,11 @@ import com.yumu.hexie.service.user.dto.GainCouponDTO;
  * 商品上、下架
  * @author david
  *
- * @param <T>
  */
 @Service
 public class EshopServiceImpl implements EshopSerivce {
 	
-	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
@@ -165,7 +162,9 @@ public class EshopServiceImpl implements EshopSerivce {
 	private CouponRepository couponRepository;
 	@Autowired
 	private CouponService couponService;
-		
+	@Autowired
+	protected OrderItemRepository orderItemRepository;
+
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
 	
@@ -650,7 +649,6 @@ public class EshopServiceImpl implements EshopSerivce {
 	/**
 	 * 获取平台小区对应的region
 	 * @param saleArea
-	 * @param region
 	 * @return
 	 */
 	private Region getRegion(Region saleArea) {
@@ -1079,7 +1077,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			Page<Object[]> page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(), 
 					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(), 
 					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(), 
-					queryOrderVO.getAgentName(), pageable);
+					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), pageable);
 			
 			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
 			QueryListDTO<List<QueryOrderMapper>> responsePage = new QueryListDTO<>();
@@ -1098,7 +1096,44 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		return commonResponse;
 	}
-	
+
+	@Override
+	public OrderDetailResp getOrderDetail(String orderId) {
+		List<OrderItem> itemList = new ArrayList<>();
+		ServiceOrder order = serviceOrderRepository.findById(Long.parseLong(orderId));
+		if (order != null) {
+			itemList = orderItemRepository.findByServiceOrder(order);
+		} else {
+			List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(Long.parseLong(orderId));
+			if (!orderList.isEmpty()) {
+				order = orderList.get(0);
+				for (ServiceOrder serviceOrder : orderList) {
+					List<OrderItem> oList = orderItemRepository.findByServiceOrder(serviceOrder);
+					itemList.addAll(oList);
+				}
+			}
+		}
+		OrderDetailResp resp = new OrderDetailResp();
+
+		if(order == null) {
+			return resp;
+		}
+
+		OrderDetailResp.OrderResp orderResp = new OrderDetailResp.OrderResp();
+		BeanUtils.copyProperties(orderResp, order);
+		resp.setOrder(orderResp);
+
+		List<OrderDetailResp.OrderSubResp> listSub = new ArrayList<>();
+		for(OrderItem item : itemList) {
+			OrderDetailResp.OrderSubResp sub = new OrderDetailResp.OrderSubResp();
+			BeanUtils.copyProperties(sub, item);
+			listSub.add(sub);
+		}
+		resp.setDetails(listSub);
+
+		return resp;
+	}
+
 	/**
 	 * 保存物流信息
 	 * @param saveLogisticsVO
@@ -1484,11 +1519,11 @@ public class EshopServiceImpl implements EshopSerivce {
 
 	/**
 	 * 获取核销券、特卖和团购商品所支持的区域列表
-	 * @param saveCouponCfgVO
+	 * @param supported
+	 * @param unsupported
 	 * @param agent
 	 * @param supportType
-	 * @param onsaleList
-	 * @param rgroupList
+	 * @return
 	 */
 	private List<String> getMarketRegions(String supported, String unsupported, Agent agent, String supportType) {
 		
