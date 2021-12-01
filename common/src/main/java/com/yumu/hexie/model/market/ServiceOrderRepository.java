@@ -108,4 +108,39 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
                                         String orderNo, String receiverName, String tel, String logisticNo, String sendDateBegin, String sendDateEnd,
                                         String agentNo, String agentName, String sectName, String groupStatus, Pageable pageable);
 
+    @Query(value = "select " + queryString + " from serviceorder o "
+            + "where o.orderType in ( ?1 ) "
+            + "and o.status in ( ?2 ) "
+            + "and if(?3!='', o.id = ?3, 1=1) "
+            + "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+            + "and if(?5!='', o.orderNo = ?5, 1=1) "
+            + "and if(?6!='', o.receiverName like CONCAT('%',?6,'%'), 1=1) "
+            + "and if(?7!='', o.tel like CONCAT('%',?7,'%'), 1=1) "
+            + "and if(?8!='', o.logisticNo = ?8, 1=1) "
+            + "and if(?9!='', o.createDate >= ?9, 1=1) "
+            + "and if(?10!='', o.createDate <= ?10, 1=1) "
+            + "and if(?11!='', o.agentNo = ?11, 1=1) "
+            + "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
+            + "and if(?13!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
+            + "and if(?14!='', o.groupStatus = ?14, 1=1) "
+            , countQuery = "select count(1) from serviceorder o "
+            + "where o.orderType in ( ?1 ) "
+            + "and o.status in ( ?2 ) "
+            + "and if(?3!='', o.id = ?3, 1=1) "
+            + "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+            + "and if(?5!='', o.orderNo = ?5, 1=1) "
+            + "and if(?6!='', o.receiverName like CONCAT('%',?6,'%'), 1=1) "
+            + "and if(?7!='', o.tel like CONCAT('%',?7,'%'), 1=1) "
+            + "and if(?8!='', o.logisticNo = ?8, 1=1) "
+            + "and if(?9!='', o.createDate >= ?9, 1=1) "
+            + "and if(?10!='', o.createDate <= ?10, 1=1) "
+            + "and if(?11!='', o.agentNo = ?11, 1=1) "
+            + "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
+            + "and if(?13!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
+            + "and if(?14!='', o.groupStatus = ?14, 1=1) "
+            , nativeQuery = true)
+    Page<Object[]> findByOrder(List<Integer> types, List<Integer> status, String orderId, String productName,
+                                        String orderNo, String receiverName, String tel, String logisticNo, String sendDateBegin, String sendDateEnd,
+                                        String agentNo, String agentName, String sectName, String groupStatus, Pageable pageable);
+
 }

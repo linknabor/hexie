@@ -23,7 +23,9 @@ public class QueryOrderVO implements Serializable {
 	private String sendDateBegin;
 	private String sendDateEnd;
 	private String sectName;
-	
+
+	private String queryFlag;
+
 	private int currentPage;
 	private int pageSize;
 	public String getId() {
@@ -127,6 +129,14 @@ public class QueryOrderVO implements Serializable {
 		this.groupStatus = groupStatus;
 	}
 
+	public String getQueryFlag() {
+		return queryFlag;
+	}
+
+	public void setQueryFlag(String queryFlag) {
+		this.queryFlag = queryFlag;
+	}
+
 	@Override
 	public String toString() {
 		return "QueryOrderVO{" +
@@ -144,6 +154,7 @@ public class QueryOrderVO implements Serializable {
 				", sendDateBegin='" + sendDateBegin + '\'' +
 				", sendDateEnd='" + sendDateEnd + '\'' +
 				", sectName='" + sectName + '\'' +
+				", queryFlag='" + queryFlag + '\'' +
 				", currentPage=" + currentPage +
 				", pageSize=" + pageSize +
 				'}';

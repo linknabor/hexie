@@ -1061,24 +1061,31 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			Pageable pageable = PageRequest.of(queryOrderVO.getCurrentPage(), queryOrderVO.getPageSize(), sort);
 			
-			Date startDate;
-			Date endDate;
-			String sDate = "";
-			String eDate = "";
-			if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
-				startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
-				sDate = startDate.toString();
+			String sDate = queryOrderVO.getSendDateBegin();
+			String eDate = queryOrderVO.getSendDateEnd();
+			Page<Object[]> page;
+
+			if(!"1".equals(queryOrderVO.getQueryFlag())) {
+				if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
+					Date startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
+					sDate = startDate.toString();
+				}
+				if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
+					Date endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
+					eDate = endDate.toString();
+				}
+
+				page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(),
+						queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
+						queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
+						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
+			} else { //从运营端过来
+				page = serviceOrderRepository.findByOrder(typeList, statusList, queryOrderVO.getId(),
+						queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
+						queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
+						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
 			}
-			if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
-				endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
-				eDate = endDate.toString();
-			}
-			
-			Page<Object[]> page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(), 
-					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(), 
-					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(), 
-					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
-			
+
 			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
 			QueryListDTO<List<QueryOrderMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
