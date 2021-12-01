@@ -164,6 +164,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setSubType(Long.parseLong(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
+		serviceOrder.setImgUrls(customerServiceOrderDTO.getImgUrls());
 
 		serviceOrder.setAgentId(agent.getId());
 		serviceOrder.setAgentName(agent.getName());
