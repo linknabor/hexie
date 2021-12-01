@@ -4,7 +4,6 @@ import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import org.springframework.beans.BeanUtils;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -19,7 +18,7 @@ public class OrderDetailResp {
     private List<OrderSubResp> details;
 
     public static class OrderResp {
-        private String id; //订单ID
+        private long id; //订单ID
         private String address; //送货地址
         private int count; //购买数量
         private String logisticNo; //运单号
@@ -27,15 +26,15 @@ public class OrderDetailResp {
         private String logisticType; //物流类型
         private String agentName; //服务商名称
         private String productName; //商品名称
-        private String status; //订单状态
+        private int status; //订单状态
         private String statusCn; //订单状态中文
         private String tel; //手机号
         private String xiaoquName; //小区名称
-        private String createDate; //订单时间
-        private BigDecimal totalAmount; //金额
+        private Long createDate; //订单时间
+        private Float totalAmount; //金额
         private String receiverName; //购买人
-        private BigDecimal shipFee; //快递费
-        private BigDecimal couponAmount; //优惠金额
+        private float shipFee; //快递费
+        private Float couponAmount; //优惠金额
         private String memo; //用户下单时的描述信息
         private String imgUrls; //用户上传的图片地址
 
@@ -43,11 +42,11 @@ public class OrderDetailResp {
             BeanUtils.copyProperties(order, this);
         }
 
-        public String getId() {
+        public long getId() {
             return id;
         }
 
-        public void setId(String id) {
+        public void setId(long id) {
             this.id = id;
         }
 
@@ -107,11 +106,11 @@ public class OrderDetailResp {
             this.productName = productName;
         }
 
-        public String getStatus() {
+        public int getStatus() {
             return status;
         }
 
-        public void setStatus(String status) {
+        public void setStatus(int status) {
             this.status = status;
         }
 
@@ -139,19 +138,19 @@ public class OrderDetailResp {
             this.xiaoquName = xiaoquName;
         }
 
-        public String getCreateDate() {
+        public Long getCreateDate() {
             return createDate;
         }
 
-        public void setCreateDate(String createDate) {
+        public void setCreateDate(Long createDate) {
             this.createDate = createDate;
         }
 
-        public BigDecimal getTotalAmount() {
+        public Float getTotalAmount() {
             return totalAmount;
         }
 
-        public void setTotalAmount(BigDecimal totalAmount) {
+        public void setTotalAmount(Float totalAmount) {
             this.totalAmount = totalAmount;
         }
 
@@ -163,19 +162,19 @@ public class OrderDetailResp {
             this.receiverName = receiverName;
         }
 
-        public BigDecimal getShipFee() {
+        public float getShipFee() {
             return shipFee;
         }
 
-        public void setShipFee(BigDecimal shipFee) {
+        public void setShipFee(float shipFee) {
             this.shipFee = shipFee;
         }
 
-        public BigDecimal getCouponAmount() {
+        public Float getCouponAmount() {
             return couponAmount;
         }
 
-        public void setCouponAmount(BigDecimal couponAmount) {
+        public void setCouponAmount(Float couponAmount) {
             this.couponAmount = couponAmount;
         }
 
@@ -198,8 +197,8 @@ public class OrderDetailResp {
 
     public static class OrderSubResp {
         private String productName;
-        private String count;
-        private String amount;
+        private Integer count;
+        private Float amount;
         private String productPic;
 
         public OrderSubResp(OrderItem item) {
@@ -214,19 +213,19 @@ public class OrderDetailResp {
             this.productName = productName;
         }
 
-        public String getCount() {
+        public Integer getCount() {
             return count;
         }
 
-        public void setCount(String count) {
+        public void setCount(Integer count) {
             this.count = count;
         }
 
-        public String getAmount() {
+        public Float getAmount() {
             return amount;
         }
 
-        public void setAmount(String amount) {
+        public void setAmount(Float amount) {
             this.amount = amount;
         }
 
