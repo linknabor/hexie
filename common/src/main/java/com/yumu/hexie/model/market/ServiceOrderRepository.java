@@ -71,7 +71,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     List<ServiceOrder> findByGroupOrderId(long groupOrderId);
 
     String queryString = "o.id, o.address, o.count, o.logisticName, o.logisticNo, o.logisticType, o.orderNo, o.orderType, o.productName, "
-            + "o.refundDate, o.sendDate, o.status, o.tel, o.receiverName, o.price, o.totalAmount, o.agentNo, o.agentName, o.createDate, o.xiaoquName as sectName ";
+            + "o.refundDate, o.sendDate, o.status, o.tel, o.receiverName, o.price, o.totalAmount, o.agentNo, o.agentName, o.xiaoquName as sectName, o.createDate ";
 
     @Query(value = "select " + queryString + " from serviceorder o "
             + "where o.orderType in ( ?1 ) "
