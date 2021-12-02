@@ -1,11 +1,11 @@
 package com.yumu.hexie.integration.eshop.resp;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.StringUtils;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -31,6 +31,8 @@ public class OrderDetailResp {
         private String productName; //商品名称
         private int status; //订单状态
         private String statusCn; //订单状态中文
+        private int groupStatus; //团购状态
+        private String groupStatusCn; //团购状态中文
         private String tel; //手机号
         private String xiaoquName; //小区名称
         private Long createDate; //订单时间
@@ -224,6 +226,31 @@ public class OrderDetailResp {
             this.sendDate = sendDate;
         }
 
+        public int getGroupStatus() {
+            return groupStatus;
+        }
+
+        public void setGroupStatus(int groupStatus) {
+            if(!StringUtils.isEmpty(groupStatus)) {
+                if(ModelConstant.RGROUP_STAUS_GROUPING == groupStatus) {
+                    this.groupStatusCn = "成团中";
+                } else if(ModelConstant.RGROUP_STAUS_FINISH == groupStatus) {
+                    this.groupStatusCn = "已成团";
+                } else if(ModelConstant.RGROUP_STAUS_CANCEL == groupStatus) {
+                    this.groupStatusCn = "未成团";
+                }
+            }
+            this.groupStatus = groupStatus;
+        }
+
+        public String getGroupStatusCn() {
+            return groupStatusCn;
+        }
+
+        public void setGroupStatusCn(String groupStatusCn) {
+            this.groupStatusCn = groupStatusCn;
+        }
+
         @Override
         public String toString() {
             return "OrderResp{" +
@@ -237,6 +264,8 @@ public class OrderDetailResp {
                     ", productName='" + productName + '\'' +
                     ", status=" + status +
                     ", statusCn='" + statusCn + '\'' +
+                    ", groupStatus=" + groupStatus +
+                    ", groupStatusCn='" + groupStatusCn + '\'' +
                     ", tel='" + tel + '\'' +
                     ", xiaoquName='" + xiaoquName + '\'' +
                     ", createDate=" + createDate +
