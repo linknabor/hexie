@@ -14,6 +14,7 @@ public class NoticeServiceOperator implements Serializable {
     private static final long serialVersionUID = -8690857153975384483L;
 
     private List<Long> opers;
+    private String orderNo; //订单号
 
     private Long createDate;
     private String receiverName;
@@ -111,10 +112,19 @@ public class NoticeServiceOperator implements Serializable {
         this.subTypeName = subTypeName;
     }
 
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
     @Override
     public String toString() {
         return "NoticeServiceOperator{" +
                 "opers=" + opers +
+                ", orderNo='" + orderNo + '\'' +
                 ", createDate=" + createDate +
                 ", receiverName='" + receiverName + '\'' +
                 ", id=" + id +

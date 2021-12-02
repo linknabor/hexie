@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
+import com.yumu.hexie.model.market.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,10 +84,6 @@ import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorItem;
 import com.yumu.hexie.model.localservice.ServiceOperatorItemRepository;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
-import com.yumu.hexie.model.market.Evoucher;
-import com.yumu.hexie.model.market.EvoucherRepository;
-import com.yumu.hexie.model.market.ServiceOrder;
-import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
@@ -112,12 +110,11 @@ import com.yumu.hexie.service.user.dto.GainCouponDTO;
  * 商品上、下架
  * @author david
  *
- * @param <T>
  */
 @Service
 public class EshopServiceImpl implements EshopSerivce {
 	
-	private Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
+	private final Logger logger = LoggerFactory.getLogger(EshopServiceImpl.class);
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
@@ -165,7 +162,9 @@ public class EshopServiceImpl implements EshopSerivce {
 	private CouponRepository couponRepository;
 	@Autowired
 	private CouponService couponService;
-		
+	@Autowired
+	protected OrderItemRepository orderItemRepository;
+
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
 	
@@ -650,7 +649,6 @@ public class EshopServiceImpl implements EshopSerivce {
 	/**
 	 * 获取平台小区对应的region
 	 * @param saleArea
-	 * @param region
 	 * @return
 	 */
 	private Region getRegion(Region saleArea) {
@@ -748,7 +746,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
 			Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
 			serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
-		}else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType() ||
+		} else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_SAASSALE == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType() ||
 				ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()) {
@@ -758,13 +756,17 @@ public class EshopServiceImpl implements EshopSerivce {
 			}else {
 				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
 			}
-			
-			
+		} else if(ModelConstant.SERVICE_OPER_TYPE_SERVICE == saveOperVO.getOperatorType()) {
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+			}else {
+				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
+			}
 		}
 		List<Oper> operList = saveOperVO.getOpers();
 		for (Oper oper : operList) {
 			
-			ServiceOperator serviceOperator = null;
+			ServiceOperator serviceOperator;
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
 				serviceOperator = serviceOperatorRepository.findByTypeAndTelAndOpenIdAndAgentId(saveOperVO.getOperatorType(), oper.getTel(), oper.getOpenId(), agent.getId());
 			}else {
@@ -797,7 +799,6 @@ public class EshopServiceImpl implements EshopSerivce {
 					serviceOperatorItemRepository.save(serviceOperatorItem);
 				}
 			}
-			
 		}
 		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
 			//查看有哪些操作员已经没有服务项目了，没有的删除该操作员
@@ -806,8 +807,6 @@ public class EshopServiceImpl implements EshopSerivce {
 				serviceOperatorRepository.delete(serviceOperator);
 			}
 		}
-		
-		
 	}
 
 	/**
@@ -1062,24 +1061,33 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			Pageable pageable = PageRequest.of(queryOrderVO.getCurrentPage(), queryOrderVO.getPageSize(), sort);
 			
-			Date startDate = null;
-			Date endDate = null;
-			String sDate = "";
-			String eDate = "";
-			if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
-				startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
-				sDate = startDate.toString();
+			String sDate = queryOrderVO.getSendDateBegin();
+			String eDate = queryOrderVO.getSendDateEnd();
+			Page<Object[]> page;
+
+			if(!"1".equals(queryOrderVO.getQueryFlag())) {
+				if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
+					Date startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
+					sDate = startDate.toString();
+				}
+				if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
+					Date endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
+					eDate = endDate.toString();
+				}
+
+				page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(),
+						queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
+						queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
+						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
+			} else { //从运营端过来
+				page = serviceOrderRepository.findByOrder(typeList, statusList, queryOrderVO.getId(),
+						queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
+						queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
+						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
 			}
-			if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
-				endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
-				eDate = endDate.toString();
-			}
-			
-			Page<Object[]> page = serviceOrderRepository.findByMultiCondition(typeList, statusList, queryOrderVO.getId(), 
-					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(), 
-					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(), 
-					queryOrderVO.getAgentName(), pageable);
-			
+
+			logger.error("page.getContent():" + page.getContent());
+
 			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
 			QueryListDTO<List<QueryOrderMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
@@ -1097,7 +1105,42 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		return commonResponse;
 	}
-	
+
+	@Override
+	public OrderDetailResp getOrderDetail(String orderId) {
+		List<OrderItem> itemList = new ArrayList<>();
+		ServiceOrder order = serviceOrderRepository.findById(Long.parseLong(orderId));
+		if (order != null) {
+			itemList = orderItemRepository.findByServiceOrder(order);
+		} else {
+			List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(Long.parseLong(orderId));
+			if (!orderList.isEmpty()) {
+				order = orderList.get(0);
+				for (ServiceOrder serviceOrder : orderList) {
+					List<OrderItem> oList = orderItemRepository.findByServiceOrder(serviceOrder);
+					itemList.addAll(oList);
+				}
+			}
+		}
+		OrderDetailResp resp = new OrderDetailResp();
+
+		if(order == null) {
+			return resp;
+		}
+
+		OrderDetailResp.OrderResp orderResp = new OrderDetailResp.OrderResp(order);
+		resp.setOrder(orderResp);
+
+		List<OrderDetailResp.OrderSubResp> listSub = new ArrayList<>();
+		for(OrderItem item : itemList) {
+			OrderDetailResp.OrderSubResp sub = new OrderDetailResp.OrderSubResp(item);
+			listSub.add(sub);
+		}
+		resp.setDetails(listSub);
+
+		return resp;
+	}
+
 	/**
 	 * 保存物流信息
 	 * @param saveLogisticsVO
@@ -1483,11 +1526,11 @@ public class EshopServiceImpl implements EshopSerivce {
 
 	/**
 	 * 获取核销券、特卖和团购商品所支持的区域列表
-	 * @param saveCouponCfgVO
+	 * @param supported
+	 * @param unsupported
 	 * @param agent
 	 * @param supportType
-	 * @param onsaleList
-	 * @param rgroupList
+	 * @return
 	 */
 	private List<String> getMarketRegions(String supported, String unsupported, Agent agent, String supportType) {
 		

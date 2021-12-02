@@ -52,16 +52,22 @@ public class QueryOrderMapper implements Serializable {
 	private String receiverName;
 	
 	private Float price;
-	
+
+	private Float totalAmount;
+
 	@JsonProperty("agent_no")
 	private String agentNo;
 	
 	@JsonProperty("agent_name")
 	private String agentName;
-	
-	public QueryOrderMapper(BigInteger id, String address, Integer count, String logisticName, String logisticNo,
-			Integer logisticType, String orderNo, Integer orderType, String productName, Timestamp refundDate,
-			Timestamp sendDate, Integer status, String tel, String receiverName, Float price, String agentNo, String agentName) {
+
+	@JsonProperty("sect_name")
+	private String sectName;
+
+	@JsonProperty("create_date")
+	private Long createDate;
+
+	public QueryOrderMapper(BigInteger id, String address, Integer count, String logisticName, String logisticNo, Integer logisticType, String orderNo, Integer orderType, String productName, Timestamp refundDate, Timestamp sendDate, Integer status, String tel, String receiverName, Float price, Float totalAmount, String agentNo, String agentName, String sectName) {
 		super();
 		this.id = id;
 		this.address = address;
@@ -78,8 +84,10 @@ public class QueryOrderMapper implements Serializable {
 		this.tel = tel;
 		this.receiverName = receiverName;
 		this.price = price;
+		this.totalAmount = totalAmount;
 		this.agentNo = agentNo;
 		this.agentName = agentName;
+		this.sectName = sectName;
 	}
 
 	public BigInteger getId() {
@@ -218,15 +226,61 @@ public class QueryOrderMapper implements Serializable {
 		this.receiverName = receiverName;
 	}
 
-	@Override
-	public String toString() {
-		return "QueryOrderMapper [id=" + id + ", address=" + address + ", count=" + count + ", logisticName="
-				+ logisticName + ", logisticNo=" + logisticNo + ", logisticType=" + logisticType + ", orderNo="
-				+ orderNo + ", orderType=" + orderType + ", productName=" + productName + ", refundDate=" + refundDate
-				+ ", sendDate=" + sendDate + ", status=" + status + ", tel=" + tel + ", receiverName=" + receiverName
-				+ ", price=" + price + ", agentNo=" + agentNo + ", agentName=" + agentName + "]";
+	public void setOrderType(Integer orderType) {
+		this.orderType = orderType;
 	}
 
-	
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
 
+	public Float getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(Float totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	public String getSectName() {
+		return sectName;
+	}
+
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
+
+	public Long getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Long createDate) {
+		this.createDate = createDate;
+	}
+
+	@Override
+	public String toString() {
+		return "QueryOrderMapper{" +
+				"id=" + id +
+				", address='" + address + '\'' +
+				", count=" + count +
+				", logisticName='" + logisticName + '\'' +
+				", logisticNo='" + logisticNo + '\'' +
+				", logisticType=" + logisticType +
+				", orderNo='" + orderNo + '\'' +
+				", orderType=" + orderType +
+				", productName='" + productName + '\'' +
+				", refundDate=" + refundDate +
+				", sendDate=" + sendDate +
+				", status=" + status +
+				", tel='" + tel + '\'' +
+				", receiverName='" + receiverName + '\'' +
+				", price=" + price +
+				", totalAmount=" + totalAmount +
+				", agentNo='" + agentNo + '\'' +
+				", agentName='" + agentName + '\'' +
+				", sectName='" + sectName + '\'' +
+				", createDate=" + createDate +
+				'}';
+	}
 }

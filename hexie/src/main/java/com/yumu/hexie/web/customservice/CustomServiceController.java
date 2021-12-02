@@ -2,6 +2,8 @@ package com.yumu.hexie.web.customservice;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -17,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
-import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
@@ -97,7 +98,7 @@ public class CustomServiceController extends BaseController {
 		if (!StringUtils.isEmpty(imgUrls)) {
 			String[]imgArr = imgUrls.split(",");
 			List<String> imgList = Arrays.asList(imgArr);
-			customService.saveServiceImages(user.getAppId(), Long.valueOf(cvo.getOrderId()), imgList);	//异步保存上传的图片	
+			customService.saveServiceImages(user.getAppId(), Long.parseLong(cvo.getOrderId()), imgList);	//异步保存上传的图片
 		}
 		
 		end = System.currentTimeMillis();
@@ -161,11 +162,12 @@ public class CustomServiceController extends BaseController {
 		ServiceOrder serviceOrder = customService.queryOrder(user, orderId);
 		return BaseResult.successResult(serviceOrder);
 	}
-	
+
 	/**
 	 * 查询订单
 	 * @param user
-	 * @param orderId
+	 * @param orderStatus
+	 * @param serivceId
 	 * @return
 	 * @throws Exception
 	 */
@@ -179,11 +181,10 @@ public class CustomServiceController extends BaseController {
 		List<ServiceOrder> orderList = customService.queryOrderByStatus(user, orderStatus, serivceId);
 		return BaseResult.successResult(orderList);
 	}
-	
+
 	/**
 	 * 查询订单
 	 * @param user
-	 * @param orderId
 	 * @return
 	 * @throws Exception
 	 */
@@ -268,11 +269,11 @@ public class CustomServiceController extends BaseController {
 		ServiceOrderPrepayVO vo = customService.orderPay(user, orderId, amount, couponId);
 		return BaseResult.successResult(vo);
 	}
-	
+
 	/**
 	 * 服务评价
 	 * @param user
-	 * @param orderId
+	 * @param serviceCommentVO
 	 * @return
 	 * @throws Exception
 	 */
@@ -293,7 +294,7 @@ public class CustomServiceController extends BaseController {
 		if (!StringUtils.isEmpty(imgUrls)) {
 			String[]imgArr = imgUrls.split(",");
 			List<String> imgList = Arrays.asList(imgArr);
-			customService.saveCommentImages(user.getAppId(), Long.valueOf(serviceCommentVO.getOrderId()), imgList);	//异步保存上传的图片	
+			customService.saveCommentImages(user.getAppId(), Long.parseLong(serviceCommentVO.getOrderId()), imgList);	//异步保存上传的图片
 		}
 		
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
@@ -320,19 +321,6 @@ public class CustomServiceController extends BaseController {
 
 	}
 	
-	/**
-	 * 更新服务人员列表（全量）
-	 * @param operatorDTO
-	 * @return
-	 */
-	@RequestMapping(value = "/operator", method = RequestMethod.POST)
-	public String operator(@RequestBody OperatorDTO operatorDTO){
-		
-		logger.info("operatorDTO : " + operatorDTO);
-		customService.operator(operatorDTO);
-		return "success";
-	}
-	
 	@RequestMapping(value = "/cfg", method = RequestMethod.POST)
 	public String updateCustomServiceCfg(@RequestBody ServiceCfgDTO serviceCfgDTO) throws Exception {
 		
@@ -352,6 +340,13 @@ public class CustomServiceController extends BaseController {
 		orderQueryDTO.setUser(user);
 		ServiceOrderQueryVO serviceOrderQueryVO = customService.queryOrderByFeeType(orderQueryDTO);
 		return BaseResult.successResult(serviceOrderQueryVO);
+	}
+
+	@RequestMapping(value = "/outsid/serviceOrder/update", method = RequestMethod.POST)
+	public BaseResult<ServiceOrderQueryVO> updateServiceOrder(@RequestBody HeXieServiceOrderReq heXieServiceOrderReq) throws Exception{
+		logger.info("heXieServiceOrderReq : " + heXieServiceOrderReq);
+		customService.updateServiceOrderByOutSid(heXieServiceOrderReq);
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
 
 }

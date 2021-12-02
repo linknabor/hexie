@@ -52,6 +52,8 @@ public class CommonPayRequest extends CommonRequest {
 	private String couponAmt;
 	@JsonProperty("ship_fee")
 	private String shipFee;
+	private String memo; //客户描述
+	private String imgUrls; //客户上传图片地址
 	
 	public CommonPayRequest() {
 		super();
@@ -74,6 +76,9 @@ public class CommonPayRequest extends CommonRequest {
 			}
 			if (!StringUtils.isEmpty(dto.getServiceName())) {
 				this.serviceName = URLEncoder.encode(dto.getServiceName(),"GBK");
+			}
+			if (!StringUtils.isEmpty(dto.getMemo())) {
+				this.memo = URLEncoder.encode(dto.getMemo(),"GBK");
 			}
 		} catch (UnsupportedEncodingException e) {
 			throw new BizValidateException(e.getMessage(), e);	
@@ -297,14 +302,46 @@ public class CommonPayRequest extends CommonRequest {
 		this.shipFee = shipFee;
 	}
 
-	@Override
-	public String toString() {
-		return "CommonPayRequest [userId=" + userId + ", serviceId=" + serviceId + ", sectId=" + sectId + ", linkman="
-				+ linkman + ", linktel=" + linktel + ", serviceAddr=" + serviceAddr + ", appid=" + appid + ", openid="
-				+ openid + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", orderType=" + orderType
-				+ ", serviceName=" + serviceName + ", agentName=" + agentName + ", agentNo=" + agentNo + ", count="
-				+ count + ", subOrders=" + subOrders + ", couponId=" + couponId + ", couponAmt=" + couponAmt + "]";
+	public String getMemo() {
+		return memo;
 	}
 
-	
+	public void setMemo(String memo) {
+		this.memo = memo;
+	}
+
+	public String getImgUrls() {
+		return imgUrls;
+	}
+
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
+	}
+
+	@Override
+	public String toString() {
+		return "CommonPayRequest{" +
+				"userId='" + userId + '\'' +
+				", serviceId='" + serviceId + '\'' +
+				", sectId='" + sectId + '\'' +
+				", linkman='" + linkman + '\'' +
+				", linktel='" + linktel + '\'' +
+				", serviceAddr='" + serviceAddr + '\'' +
+				", appid='" + appid + '\'' +
+				", openid='" + openid + '\'' +
+				", tranAmt='" + tranAmt + '\'' +
+				", tradeWaterId='" + tradeWaterId + '\'' +
+				", orderType='" + orderType + '\'' +
+				", serviceName='" + serviceName + '\'' +
+				", agentName='" + agentName + '\'' +
+				", agentNo='" + agentNo + '\'' +
+				", count='" + count + '\'' +
+				", subOrders=" + subOrders +
+				", couponId='" + couponId + '\'' +
+				", couponAmt='" + couponAmt + '\'' +
+				", shipFee='" + shipFee + '\'' +
+				", memo='" + memo + '\'' +
+				", imgUrls='" + imgUrls + '\'' +
+				'}';
+	}
 }
