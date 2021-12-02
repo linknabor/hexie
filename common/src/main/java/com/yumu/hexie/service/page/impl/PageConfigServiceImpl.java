@@ -9,6 +9,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
@@ -29,6 +30,7 @@ import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.QrCodeRepository;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.model.view.WuyePayTabsRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.page.PageConfigService;
 
 @Service("pageConfigService")
@@ -50,6 +52,10 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private WuyePayTabsRepository wuyePayTabsRepository;
 	@Autowired
 	private MenuRepository menuRepository;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	/**
 	 * 根据banner类型动态获取
@@ -208,6 +214,18 @@ public class PageConfigServiceImpl implements PageConfigService {
 			, allEntries = true)
 	public void updatePageConfig() {
 
+	}
+	
+	@Override
+	public String getBindHouseTips(User user) {
+		
+		String tips = "";
+		String key = ModelConstant.KEY_BIND_HOUSE_TIP + user.getId();
+		Long value = stringRedisTemplate.opsForValue().increment(key);
+		if (value == 1) {
+			tips = systemConfigService.getSysConfigByKey("BIND_HOUSE_TIP_TEXT");
+		}
+		return tips;
 	}
 
 }

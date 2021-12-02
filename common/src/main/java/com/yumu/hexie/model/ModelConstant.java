@@ -482,4 +482,6 @@ public class ModelConstant {
 	public static final String KEY_INVOICE_APPLICATIONF_FLAG = "invoice:application:";	//发票申请标记，后面接trade_water_id
 
 	public static final String KEY_WORKORDER_CFG = "workorder:cfg:";	//工单配置，后面接city_db:sect_id
+	
+	public static final String KEY_BIND_HOUSE_TIP = "user:bind:tip:";	//后面接userid
 }		

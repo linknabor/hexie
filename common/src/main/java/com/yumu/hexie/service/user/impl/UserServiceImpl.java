@@ -51,6 +51,7 @@ import com.yumu.hexie.service.coupon.CouponStrategyFactory;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 @Service("userService")
 public class UserServiceImpl implements UserService {
@@ -466,6 +467,23 @@ public class UserServiceImpl implements UserService {
 			userRepository.save(dbuser);
 		}
 		return updated;
+		
+	}
+	
+	@Override
+	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	public User switchSect(User user, SwitchSectReq switchSectReq) {
+		
+		User dbUser = userRepository.findById(user.getId());
+		dbUser.setXiaoquName(switchSectReq.getSectName());
+		dbUser.setProvince(switchSectReq.getProvince());
+		dbUser.setCity(switchSectReq.getCity());
+		dbUser.setCounty(switchSectReq.getCounty());
+		dbUser.setSectId(switchSectReq.getSectId());	
+		dbUser.setCspId(switchSectReq.getCspId());
+		dbUser.setOfficeTel(switchSectReq.getOfficeTel());
+		return userRepository.save(dbUser);
 		
 	}
 

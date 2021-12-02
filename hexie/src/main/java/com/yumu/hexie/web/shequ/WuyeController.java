@@ -967,5 +967,6 @@ public class WuyeController extends BaseController {
 		Discounts discounts = wuyeService.getFeeSmsPayQrCode(user, queryFeeSmsBillReq);
 		return BaseResult.successResult(discounts);
 	}
+	
 
 }
