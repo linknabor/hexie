@@ -1086,6 +1086,8 @@ public class EshopServiceImpl implements EshopSerivce {
 						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
 			}
 
+			logger.error("page.getContent():" + page.getContent());
+
 			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
 			QueryListDTO<List<QueryOrderMapper>> responsePage = new QueryListDTO<>();
 			responsePage.setTotalPages(page.getTotalPages());
