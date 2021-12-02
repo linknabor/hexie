@@ -617,11 +617,11 @@ public class TemplateMsgService {
 		sendMsg(msg, accessToken);
 
 	}
-	
+
 	/**
 	 * 发送维修单信息给维修工
-	 * @param seed
-	 * @param ro
+	 * @param workOrderNotification
+	 * @param accessToken
 	 */
     public void sendWorkOrderMsg(WorkOrderNotification workOrderNotification, String accessToken) {
     	
@@ -679,12 +679,13 @@ public class TemplateMsgService {
     	sendMsg(msg, accessToken);
     	
     }
-    
-    
-    /**
+
+
+	/**
 	 * 发送电子发票申请模板消息
-	 * @param opinionRequest
+	 * @param baseEventDTO
 	 * @param accessToken
+	 * @return
 	 */
 	public WechatResponse sendInvoiceApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
 		
@@ -735,11 +736,12 @@ public class TemplateMsgService {
 		return sendMsg(msg, accessToken);
 
 	}
-	
+
 	/**
 	 * 发送电子发票开具成功的模板消息
-	 * @param opinionRequest
+	 * @param invoiceNotification
 	 * @param accessToken
+	 * @return
 	 */
 	public WechatResponse sendFinishInvoiceMessage(InvoiceNotification invoiceNotification, String accessToken) {
 		
@@ -779,6 +781,39 @@ public class TemplateMsgService {
 		msg.setTouser(invoiceNotification.getOpenid());
 		return sendMsg(msg, accessToken);
 
+	}
+
+	/**
+	 * 电商支付成功通知
+	 * @param user
+	 * @param serviceOrder
+	 * @param accessToken
+	 */
+	public void sendOrderSuccessMsg(User user, ServiceOrder serviceOrder, String accessToken) {
+
+		String title = "您好，您购买的"+serviceOrder.getProductName()+"已支付成功。";
+		String orderDate = DateUtil.dttmFormat(new Date(serviceOrder.getCreateDate()));
+		String customerName = serviceOrder.getReceiverName();
+
+		CommonVO vo = new CommonVO();
+		vo.setFirst(new TemplateItem(title));
+		vo.setKeyword1(new TemplateItem(String.valueOf(serviceOrder.getId())));
+		vo.setKeyword2(new TemplateItem(orderDate));    //下单时间
+		vo.setKeyword3(new TemplateItem(customerName));
+		vo.setKeyword4(new TemplateItem(serviceOrder.getAddress()));
+		vo.setRemark(new TemplateItem(serviceOrder.getProductName() + ", 支付金额:" + serviceOrder.getPrice()));
+
+		TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_DELIVERY_MESSAGE, user.getAppId()));
+		String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_DELIVERY_DETAIL);
+		if (!StringUtils.isEmpty(msgUrl)) {
+			msgUrl = msgUrl + serviceOrder.getId();
+			msgUrl = AppUtil.addAppOnUrl(msgUrl, user.getAppId());
+		}
+		msg.setUrl(msgUrl);
+		msg.setTouser(user.getOpenid());
+		sendMsg(msg, accessToken);
 	}
 
 }
