@@ -1,9 +1,12 @@
 package com.yumu.hexie.integration.eshop.resp;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
 import org.springframework.beans.BeanUtils;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +34,9 @@ public class OrderDetailResp {
         private String tel; //手机号
         private String xiaoquName; //小区名称
         private Long createDate; //订单时间
+        private Date payDate; //支付时间
+        private Date refundDate;	//退款时间
+        private Date sendDate;	//发货时间
         private Float totalAmount; //金额
         private String receiverName; //购买人
         private float shipFee; //快递费
@@ -193,6 +199,58 @@ public class OrderDetailResp {
         public void setImgUrls(String imgUrls) {
             this.imgUrls = imgUrls;
         }
+
+        public Date getPayDate() {
+            return payDate;
+        }
+
+        public void setPayDate(Date payDate) {
+            this.payDate = payDate;
+        }
+
+        public Date getRefundDate() {
+            return refundDate;
+        }
+
+        public void setRefundDate(Date refundDate) {
+            this.refundDate = refundDate;
+        }
+
+        public Date getSendDate() {
+            return sendDate;
+        }
+
+        public void setSendDate(Date sendDate) {
+            this.sendDate = sendDate;
+        }
+
+        @Override
+        public String toString() {
+            return "OrderResp{" +
+                    "id=" + id +
+                    ", address='" + address + '\'' +
+                    ", count=" + count +
+                    ", logisticNo='" + logisticNo + '\'' +
+                    ", logisticName='" + logisticName + '\'' +
+                    ", logisticType='" + logisticType + '\'' +
+                    ", agentName='" + agentName + '\'' +
+                    ", productName='" + productName + '\'' +
+                    ", status=" + status +
+                    ", statusCn='" + statusCn + '\'' +
+                    ", tel='" + tel + '\'' +
+                    ", xiaoquName='" + xiaoquName + '\'' +
+                    ", createDate=" + createDate +
+                    ", payDate=" + payDate +
+                    ", refundDate=" + refundDate +
+                    ", sendDate=" + sendDate +
+                    ", totalAmount=" + totalAmount +
+                    ", receiverName='" + receiverName + '\'' +
+                    ", shipFee=" + shipFee +
+                    ", couponAmount=" + couponAmount +
+                    ", memo='" + memo + '\'' +
+                    ", imgUrls='" + imgUrls + '\'' +
+                    '}';
+        }
     }
 
     public static class OrderSubResp {
@@ -236,6 +294,16 @@ public class OrderDetailResp {
         public void setProductPic(String productPic) {
             this.productPic = productPic;
         }
+
+        @Override
+        public String toString() {
+            return "OrderSubResp{" +
+                    "productName='" + productName + '\'' +
+                    ", count=" + count +
+                    ", amount=" + amount +
+                    ", productPic='" + productPic + '\'' +
+                    '}';
+        }
     }
 
     public OrderResp getOrder() {
@@ -252,5 +320,13 @@ public class OrderDetailResp {
 
     public void setDetails(List<OrderSubResp> details) {
         this.details = details;
+    }
+
+    @Override
+    public String toString() {
+        return "OrderDetailResp{" +
+                "order=" + order +
+                ", details=" + details +
+                '}';
     }
 }

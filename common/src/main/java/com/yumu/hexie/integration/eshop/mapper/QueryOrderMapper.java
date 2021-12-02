@@ -65,9 +65,9 @@ public class QueryOrderMapper implements Serializable {
 	private String sectName;
 
 	@JsonProperty("create_date")
-	private Long createDate;
+	private BigInteger createDate;
 
-	public QueryOrderMapper(BigInteger id, String address, Integer count, String logisticName, String logisticNo, Integer logisticType, String orderNo, Integer orderType, String productName, Timestamp refundDate, Timestamp sendDate, Integer status, String tel, String receiverName, Float price, Float totalAmount, String agentNo, String agentName, String sectName, Long createDate) {
+	public QueryOrderMapper(BigInteger id, String address, Integer count, String logisticName, String logisticNo, Integer logisticType, String orderNo, Integer orderType, String productName, Timestamp refundDate, Timestamp sendDate, Integer status, String tel, String receiverName, Float price, Float totalAmount, String agentNo, String agentName, String sectName, BigInteger createDate) {
 		this.id = id;
 		this.address = address;
 		this.count = count;
@@ -250,11 +250,11 @@ public class QueryOrderMapper implements Serializable {
 		this.sectName = sectName;
 	}
 
-	public Long getCreateDate() {
+	public BigInteger getCreateDate() {
 		return createDate;
 	}
 
-	public void setCreateDate(Long createDate) {
+	public void setCreateDate(BigInteger createDate) {
 		this.createDate = createDate;
 	}
 
