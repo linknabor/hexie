@@ -76,7 +76,7 @@ public class EvoucherMapper implements Serializable {
     }
 
     public void setStatus(int status) {
-        if (StringUtils.isEmpty(status)) {
+        if (!StringUtils.isEmpty(status)) {
             if (ModelConstant.EVOUCHER_STATUS_NORMAL == status) {
                 this.status_cn = "正常";
             } else if (ModelConstant.EVOUCHER_STATUS_USED == status) {
@@ -240,5 +240,33 @@ public class EvoucherMapper implements Serializable {
 
     public void setStatus_cn(String status_cn) {
         this.status_cn = status_cn;
+    }
+
+    @Override
+    public String toString() {
+        return "EvoucherMapper{" +
+                "code='" + code + '\'' +
+                ", orderId=" + orderId +
+                ", status=" + status +
+                ", status_cn='" + status_cn + '\'' +
+                ", actualPrice=" + actualPrice +
+                ", oriPrice=" + oriPrice +
+                ", userId=" + userId +
+                ", tel='" + tel + '\'' +
+                ", openid='" + openid + '\'' +
+                ", productId=" + productId +
+                ", productName='" + productName + '\'' +
+                ", beginDate=" + beginDate +
+                ", endDate=" + endDate +
+                ", consumeDate=" + consumeDate +
+                ", operatorUserId=" + operatorUserId +
+                ", operatorName='" + operatorName + '\'' +
+                ", operatorTel='" + operatorTel + '\'' +
+                ", agentId=" + agentId +
+                ", agentName='" + agentName + '\'' +
+                ", agentNo='" + agentNo + '\'' +
+                ", merchantId=" + merchantId +
+                ", merchantName='" + merchantName + '\'' +
+                '}';
     }
 }

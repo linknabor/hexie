@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -806,7 +807,12 @@ public class TemplateMsgService {
 		TemplateMsg<CommonVO> msg = new TemplateMsg<>();
 		msg.setData(vo);
 		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_DELIVERY_MESSAGE, user.getAppId()));
-		String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_DELIVERY_DETAIL);
+		String msgUrl = "";
+		if(ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
+			msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_CUSTOMER_DELIVERY);
+		} else if(ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+			msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_CUSTOMER_GROUP_DELIVERY);
+		}
 		if (!StringUtils.isEmpty(msgUrl)) {
 			msgUrl = msgUrl + serviceOrder.getId();
 			msgUrl = AppUtil.addAppOnUrl(msgUrl, user.getAppId());
