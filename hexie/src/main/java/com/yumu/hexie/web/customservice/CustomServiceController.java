@@ -3,7 +3,9 @@ package com.yumu.hexie.web.customservice;
 import java.util.Arrays;
 import java.util.List;
 
+import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
+import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -342,6 +344,12 @@ public class CustomServiceController extends BaseController {
 		return BaseResult.successResult(serviceOrderQueryVO);
 	}
 
+	/**
+	 * 运营端调用，抢单或完工
+	 * @param heXieServiceOrderReq
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/outsid/serviceOrder/update", method = RequestMethod.POST)
 	public BaseResult<ServiceOrderQueryVO> updateServiceOrder(@RequestBody HeXieServiceOrderReq heXieServiceOrderReq) throws Exception{
 		logger.info("heXieServiceOrderReq : " + heXieServiceOrderReq);
