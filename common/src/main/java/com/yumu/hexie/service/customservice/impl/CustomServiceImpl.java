@@ -137,14 +137,17 @@ public class CustomServiceImpl implements CustomService {
 			} else {
 				customerServiceOrderDTO.setTranAmt("0.01");
 			}
-			
 		}
+
+		ServiceOrder serviceOrder = new ServiceOrder();
+		serviceOrder.setImgUrls(customerServiceOrderDTO.getImgUrls());
+
+		customerServiceOrderDTO.setImgUrls(serviceOrder.getImgUrls());
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
 		
 		//2.保存本地订单
-		ServiceOrder serviceOrder = new ServiceOrder();
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
 		serviceOrder.setProductId(Long.parseLong(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setUserId(currUser.getId());
@@ -164,7 +167,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setSubType(Long.parseLong(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
-		serviceOrder.setImgUrls(customerServiceOrderDTO.getImgUrls());
+
 
 		serviceOrder.setAgentId(agent.getId());
 		serviceOrder.setAgentName(agent.getName());

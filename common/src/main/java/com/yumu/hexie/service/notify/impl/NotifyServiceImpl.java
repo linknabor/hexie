@@ -125,7 +125,7 @@ public class NotifyServiceImpl implements NotifyService {
 		//6.自定义服务
 		ServiceNotification serviceNotification = payNotification.getServiceNotify();
 		if (serviceNotification!=null) {
-			sendServiceNotificationAsync(serviceNotification.getOrderId());
+			sendServiceNotificationAsync(payNotification.getOrderId());
 		}
 
 		//7.更新serviceOrder订单状态
