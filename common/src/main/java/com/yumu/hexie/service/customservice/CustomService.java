@@ -45,7 +45,7 @@ public interface CustomService {
 
 	void assginOrder(CommonPayResponse data);
 
-	CompletableFuture<String> saveServiceImages(String appId, List<String> imgUrls);
+	void saveServiceImages(String appId, long orderId, List<String> imgUrls);
 
 	void saveCommentImages(String appId, long orderId, List<String> imgUrls);
 

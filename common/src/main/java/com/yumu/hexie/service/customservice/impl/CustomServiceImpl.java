@@ -2,8 +2,6 @@ package com.yumu.hexie.service.customservice.impl;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-
 import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,9 +76,6 @@ public class CustomServiceImpl implements CustomService {
 	@Autowired
 	private CouponService couponService;
 
-	@Autowired
-	private CustomService customService;
-	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
 		
@@ -142,12 +137,9 @@ public class CustomServiceImpl implements CustomService {
 
 		//保存上传的图片
 		String imgUrls = customerServiceOrderDTO.getImgUrls();
-		if (!StringUtils.isEmpty(imgUrls)) {
-			String[]imgArr = imgUrls.split(",");
-			List<String> imgList = Arrays.asList(imgArr);
-			CompletableFuture<String> imgs = customService.saveServiceImages(currUser.getAppId(), imgList);	//异步保存上传的图片
-			imgUrls = imgs.get();
-		}
+		imgUrls = getUploadImgs(currUser.getAppId(), imgUrls);
+
+
 		customerServiceOrderDTO.setImgUrls(imgUrls);
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
 		long end = System.currentTimeMillis();
@@ -210,30 +202,65 @@ public class CustomServiceImpl implements CustomService {
 		return data;
 		
 	}
-	
+
+	private String getUploadImgs(String appId, String imgUrls) {
+
+		if (StringUtils.isEmpty(imgUrls)) {
+			return "";
+		}
+		String[] imgArr = imgUrls.split(",");
+		List<String> imgList = Arrays.asList(imgArr);
+
+		Map<String, String> uploaded = uploadService.uploadImages(appId, imgList);
+		StringBuilder bf = new StringBuilder();
+		for (int i = 0; i < imgList.size(); i++) {
+			String uploadedUrl = uploaded.get(imgList.get(i));
+			if (!StringUtils.isEmpty(uploadedUrl)) {
+				bf.append(uploadedUrl);
+				if (i != imgList.size() - 1) {
+					bf.append(",");
+				}
+			}
+		}
+		return bf.toString();
+	}
+
+	@Transactional
 	@Override
 	@Async("taskExecutor")
-	public CompletableFuture<String> saveServiceImages(String appId, List<String>imgUrls) {
-		
+	public void saveServiceImages(String appId, long orderId, List<String>imgUrls) {
+
 		long begin = System.currentTimeMillis();
 		Map<String, String> uploaded = uploadService.uploadImages(appId, imgUrls);
 		long end = System.currentTimeMillis();
 		logger.info("upload time : " + (end - begin)/1000);
-		
+
+		ServiceOrder serviceOrder = null;
+		int count = 0;
+		while (serviceOrder == null && count < 3) {
+			serviceOrder = serviceOrderRepository.findById(orderId);
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				logger.error(e.getMessage(), e);
+			}
+			count++;
+		}
 		StringBuilder bf = new StringBuilder();
 		for (int i = 0; i < imgUrls.size(); i++) {
 			String uploadedUrl = uploaded.get(imgUrls.get(i));
 			if (!StringUtils.isEmpty(uploadedUrl)) {
 				bf.append(uploadedUrl);
-				if (i != imgUrls.size() - 1) {
+				if (i!=imgUrls.size()-1) {
 					bf.append(",");
 				}
 			}
 		}
+		serviceOrderRepository.updateImgUrls(bf.toString(), orderId);
 
 		end = System.currentTimeMillis();
 		logger.info("save img2db time : " + (end - begin)/1000);
-		return CompletableFuture.completedFuture(bf.toString());
+
 	}
 	
 	/**
