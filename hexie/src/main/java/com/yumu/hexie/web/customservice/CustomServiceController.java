@@ -96,16 +96,6 @@ public class CustomServiceController extends BaseController {
 		end = System.currentTimeMillis();
 		logger.info("createOrderController location 2 : " + (end-begin)/1000);
 		
-		String imgUrls = customServiceOrderVO.getImgUrls();
-		if (!StringUtils.isEmpty(imgUrls)) {
-			String[]imgArr = imgUrls.split(",");
-			List<String> imgList = Arrays.asList(imgArr);
-			customService.saveServiceImages(user.getAppId(), Long.parseLong(cvo.getOrderId()), imgList);	//异步保存上传的图片
-		}
-		
-		end = System.currentTimeMillis();
-		logger.info("createOrder location 3 : " + (end-begin)/1000);
-		
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(cvo);
 		return BaseResult.successResult(vo);
 	}

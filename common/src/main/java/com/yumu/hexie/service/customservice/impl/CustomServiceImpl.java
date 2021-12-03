@@ -1,10 +1,8 @@
 package com.yumu.hexie.service.customservice.impl;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import org.slf4j.Logger;
@@ -79,6 +77,9 @@ public class CustomServiceImpl implements CustomService {
 	private AgentRepository agentRepository;
 	@Autowired
 	private CouponService couponService;
+
+	@Autowired
+	private CustomService customService;
 	
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
@@ -139,15 +140,21 @@ public class CustomServiceImpl implements CustomService {
 			}
 		}
 
-		ServiceOrder serviceOrder = new ServiceOrder();
-		serviceOrder.setImgUrls(customerServiceOrderDTO.getImgUrls());
-
-		customerServiceOrderDTO.setImgUrls(serviceOrder.getImgUrls());
+		//保存上传的图片
+		String imgUrls = customerServiceOrderDTO.getImgUrls();
+		if (!StringUtils.isEmpty(imgUrls)) {
+			String[]imgArr = imgUrls.split(",");
+			List<String> imgList = Arrays.asList(imgArr);
+			CompletableFuture<String> imgs = customService.saveServiceImages(currUser.getAppId(), imgList);	//异步保存上传的图片
+			imgUrls = imgs.get();
+		}
+		customerServiceOrderDTO.setImgUrls(imgUrls);
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
 		
 		//2.保存本地订单
+		ServiceOrder serviceOrder = new ServiceOrder();
 		serviceOrder.setOrderType(ModelConstant.ORDER_TYPE_SERVICE);
 		serviceOrder.setProductId(Long.parseLong(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setUserId(currUser.getId());
@@ -167,7 +174,7 @@ public class CustomServiceImpl implements CustomService {
 		serviceOrder.setMemo(customerServiceOrderDTO.getMemo());
 		serviceOrder.setSubType(Long.parseLong(customerServiceOrderDTO.getServiceId()));
 		serviceOrder.setSubTypeName(customerServiceOrderDTO.getServiceName());
-
+		serviceOrder.setImgUrls(customerServiceOrderDTO.getImgUrls());
 
 		serviceOrder.setAgentId(agent.getId());
 		serviceOrder.setAgentName(agent.getName());
@@ -204,42 +211,29 @@ public class CustomServiceImpl implements CustomService {
 		
 	}
 	
-	@Transactional
 	@Override
 	@Async("taskExecutor")
-	public void saveServiceImages(String appId, long orderId, List<String>imgUrls) {
+	public CompletableFuture<String> saveServiceImages(String appId, List<String>imgUrls) {
 		
 		long begin = System.currentTimeMillis();
 		Map<String, String> uploaded = uploadService.uploadImages(appId, imgUrls);
 		long end = System.currentTimeMillis();
 		logger.info("upload time : " + (end - begin)/1000);
 		
-		ServiceOrder serviceOrder = null;
-		int count = 0;
-		while (serviceOrder == null && count < 3) {
-			serviceOrder = serviceOrderRepository.findById(orderId);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				logger.error(e.getMessage(), e);
-			}
-			count++;
-		}
 		StringBuilder bf = new StringBuilder();
 		for (int i = 0; i < imgUrls.size(); i++) {
 			String uploadedUrl = uploaded.get(imgUrls.get(i));
 			if (!StringUtils.isEmpty(uploadedUrl)) {
 				bf.append(uploadedUrl);
-				if (i!=imgUrls.size()-1) {
+				if (i != imgUrls.size() - 1) {
 					bf.append(",");
 				}
 			}
 		}
-		serviceOrderRepository.updateImgUrls(bf.toString(), orderId);
-		
+
 		end = System.currentTimeMillis();
 		logger.info("save img2db time : " + (end - begin)/1000);
-		
+		return CompletableFuture.completedFuture(bf.toString());
 	}
 	
 	/**

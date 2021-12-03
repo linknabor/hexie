@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.customservice;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
@@ -44,7 +45,7 @@ public interface CustomService {
 
 	void assginOrder(CommonPayResponse data);
 
-	void saveServiceImages(String appId, long orderId, List<String> imgUrls);
+	CompletableFuture<String> saveServiceImages(String appId, List<String> imgUrls);
 
 	void saveCommentImages(String appId, long orderId, List<String> imgUrls);
 
