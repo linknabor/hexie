@@ -476,14 +476,17 @@ public class UserServiceImpl implements UserService {
 	public User switchSect(User user, SwitchSectReq switchSectReq) {
 		
 		User dbUser = userRepository.findById(user.getId());
-		dbUser.setXiaoquName(switchSectReq.getSectName());
-		dbUser.setProvince(switchSectReq.getProvince());
-		dbUser.setCity(switchSectReq.getCity());
-		dbUser.setCounty(switchSectReq.getCounty());
-		dbUser.setSectId(switchSectReq.getSectId());	
-		dbUser.setCspId(switchSectReq.getCspId());
-		dbUser.setOfficeTel(switchSectReq.getOfficeTel());
-		return userRepository.save(dbUser);
+		if (!dbUser.getSectId().equals(switchSectReq.getSectId()) && !dbUser.getCspId().equals(switchSectReq.getCspId())) {
+			dbUser.setXiaoquName(switchSectReq.getSectName());
+			dbUser.setProvince(switchSectReq.getProvince());
+			dbUser.setCity(switchSectReq.getCity());
+			dbUser.setCounty(switchSectReq.getCounty());
+			dbUser.setSectId(switchSectReq.getSectId());	
+			dbUser.setCspId(switchSectReq.getCspId());
+			dbUser.setOfficeTel(switchSectReq.getOfficeTel());
+			dbUser = userRepository.save(dbUser);
+		}
+		return dbUser;
 		
 	}
 

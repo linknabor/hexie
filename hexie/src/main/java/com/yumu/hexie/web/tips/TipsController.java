@@ -2,6 +2,7 @@ package com.yumu.hexie.web.tips;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,9 +21,9 @@ public class TipsController extends BaseController {
 	private PageConfigService pageConfigService;
 	
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/bindHouse", method = RequestMethod.GET)
-    public BaseResult<String> getBindHouseTips(@ModelAttribute(Constants.USER)User user) throws Exception {
-		String tips = pageConfigService.getBindHouseTips(user);
+	@RequestMapping(value = "/switchSect/{page}", method = RequestMethod.GET)
+    public BaseResult<String> getSwitchSectTips(@ModelAttribute(Constants.USER)User user, @PathVariable String page) throws Exception {
+		String tips = pageConfigService.getSwtichSectTips(user, page);
 		return BaseResult.successResult(tips);
 	}
 }

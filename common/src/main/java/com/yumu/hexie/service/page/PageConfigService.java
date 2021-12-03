@@ -39,7 +39,7 @@ public interface PageConfigService {
 
 	List<Menu> getMenuBySectId(String sectId);
 
-	String getBindHouseTips(User user);
+	String getSwtichSectTips(User user, String page);
 
 
 }

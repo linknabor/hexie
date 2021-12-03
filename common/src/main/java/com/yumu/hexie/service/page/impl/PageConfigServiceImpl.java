@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
@@ -217,13 +218,16 @@ public class PageConfigServiceImpl implements PageConfigService {
 	}
 	
 	@Override
-	public String getBindHouseTips(User user) {
+	public String getSwtichSectTips(User user, String page) {
 		
 		String tips = "";
-		String key = ModelConstant.KEY_BIND_HOUSE_TIP + user.getId();
+		if(StringUtils.isEmpty(page)) {
+			return "";
+		}
+		String key = ModelConstant.KEY_PAGE_TIPS_SWITCH_SECT + page + ":" + user.getId();
 		Long value = stringRedisTemplate.opsForValue().increment(key);
 		if (value == 1) {
-			tips = systemConfigService.getSysConfigByKey("BIND_HOUSE_TIP_TEXT");
+			tips = systemConfigService.getSysConfigByKey("SWITCH_SECT_TIPS_"+page.toUpperCase());
 		}
 		return tips;
 	}

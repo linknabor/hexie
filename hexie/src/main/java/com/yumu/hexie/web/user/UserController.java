@@ -506,7 +506,8 @@ public class UserController extends BaseController{
 	 */
 	@RequestMapping(value = "/switchSect", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<UserInfo> switchSect(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, SwitchSectReq switchSectReq) throws Exception {
+	public BaseResult<UserInfo> switchSect(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, 
+			@RequestBody SwitchSectReq switchSectReq) throws Exception {
 		
 		long beginTime = System.currentTimeMillis();
 		User dbUser = userService.switchSect(user, switchSectReq);
