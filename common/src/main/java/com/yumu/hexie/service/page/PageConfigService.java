@@ -31,10 +31,10 @@ public interface PageConfigService {
 	
 	void updatePageConfig();
 
-	List<Menu> getMenuByAppid(String appId);
-
 	List<Menu> getMenuByCspId(String cspId);
 
+	List<Menu> getMenuByAppidAndDefaultTypeLessThan(String appid, int defaultType);
+	
 	List<Menu> getMenuByDefaultTypeLessThan(int defaultType);
 
 	List<Menu> getMenuBySectId(String sectId);

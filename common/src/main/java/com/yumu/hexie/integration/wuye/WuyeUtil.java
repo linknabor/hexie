@@ -121,9 +121,9 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<String> deleteHouse(User user, String houseId) {
+	public static BaseResult<HouseListVO> deleteHouse(User user, String houseId) {
 		String url = getRequestUri(user) + String.format(DEL_HOUSE_URL, user.getWuyeId(), houseId, user.getOpenid(), user.getAppId(), user.getTel());
-		return (BaseResult<String>)httpGet(url,String.class);
+		return (BaseResult<HouseListVO>)httpGet(url,HouseListVO.class);
 	}
 	
 	/**

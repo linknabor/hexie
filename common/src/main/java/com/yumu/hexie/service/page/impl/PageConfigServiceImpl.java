@@ -166,18 +166,6 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_APP, key = "#appId", unless = "#result == null")
-	public List<Menu> getMenuByAppid(String appId) {
-		
-		Sort sort = new Sort(Direction.ASC, "sort");
-		return menuRepository.findByAppid(appId, sort);
-	}
-	
-	/**
-	 * 动态获取公众号菜单
-	 * @param appId
-	 */
-	@Override
 	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_SECT, key = "#sectId", unless = "#result == null")
 	public List<Menu> getMenuBySectId(String sectId) {
 		
@@ -204,8 +192,15 @@ public class PageConfigServiceImpl implements PageConfigService {
 		Sort sort = new Sort(Direction.ASC, "sort");
 		return menuRepository.findByDefaultTypeLessThan(defaultType, sort);
 	}
-
-
+	
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_APP_BINDED, key = "#appid+'_'+#defaultType", unless = "#result == null")
+	public List<Menu> getMenuByAppidAndDefaultTypeLessThan(String appid, int defaultType) {
+		
+		Sort sort = new Sort(Direction.ASC, "sort");
+		return menuRepository.findByDefaultTypeLessThan(defaultType, sort);
+	}
+	
 	/**
 	 * 清楚所有页面配置参数缓存
 	 */

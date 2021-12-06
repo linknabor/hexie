@@ -153,23 +153,23 @@ public class UserController extends BaseController{
 			     * 1.绑定访问的用户，先取小区级别，没有取公司级别，公司级别没有的，取app级别的，再没有的，取默认菜单
 			     * 2.未绑定房屋的用户，取默认菜单
 			     */
-			    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {
+			    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
 			    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
-			    }
-			    if (menuList.isEmpty()) {
-			    	if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
-				    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			    	if (menuList.isEmpty()) {
+			    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
 					}
-				}
-			    if (menuList.isEmpty()) {
-					menuList = pageConfigService.getMenuByAppid(user.getAppId());
-				}
-			    if (menuList.isEmpty()) {
-		    		menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//表示绑定了房屋的默认菜单
-				}
-			    if (menuList.isEmpty()) {
-			    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单
-				}
+			    	if (menuList.isEmpty()) {
+			    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
+					}
+			    	if (menuList.isEmpty()) {
+				    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
+					}
+			    } else {	//未绑定房屋的
+			    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 2);	//表示绑定了房屋的默认菜单
+			    	if (menuList.isEmpty()) {
+				    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
+					}
+			    }
 			    userInfo.setMenuList(menuList);
 			    endTime = System.currentTimeMillis();
 			    /*菜单结束*/
@@ -545,23 +545,23 @@ public class UserController extends BaseController{
 	     * 1.绑定访问的用户，先取小区级别，没有取公司级别，公司级别没有的，取app级别的，再没有的，取默认菜单
 	     * 2.未绑定房屋的用户，取默认菜单
 	     */
-	    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {
+	    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
 	    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
-	    }
-	    if (menuList.isEmpty()) {
-	    	if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
-		    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
+	    	if (menuList.isEmpty()) {
+	    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
 			}
-		}
-	    if (menuList.isEmpty()) {
-			menuList = pageConfigService.getMenuByAppid(user.getAppId());
-		}
-	    if (menuList.isEmpty()) {
-    		menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//表示绑定了房屋的默认菜单
-		}
-	    if (menuList.isEmpty()) {
-	    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单
-		}
+	    	if (menuList.isEmpty()) {
+	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
+			}
+	    	if (menuList.isEmpty()) {
+		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
+			}
+	    } else {	//未绑定房屋的
+	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 2);	//表示绑定了房屋的默认菜单
+	    	if (menuList.isEmpty()) {
+		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
+			}
+	    }
 	    userInfo.setMenuList(menuList);
 	    
 	    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());	//TODO 缓存，主要是积分的变动频率。更新积分时需要刷新缓存

@@ -106,31 +106,55 @@ public class WuyeServiceImpl implements WuyeService {
 	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public boolean deleteHouse(User user, String houseId) {
 		
-		BaseResult<String> result = WuyeUtil.deleteHouse(user, houseId);
+		BaseResult<HouseListVO> result = WuyeUtil.deleteHouse(user, houseId);
+		int totalBind = 0;
 		if (result.isSuccess()) {
 			// 添加电话到user表
-			String data = result.getData();
-			int totalBind = 0;
-			if (!StringUtils.isEmpty(data)) {
-				totalBind = Integer.valueOf(data);
-			}
-			if (totalBind < 0) {
+			HouseListVO houseListVO = result.getData();
+			if (houseListVO!=null) {
+				totalBind = houseListVO.getHou_info().size();
+				if (totalBind < 0) {
+					totalBind = 0;
+				}
+			} else {
 				totalBind = 0;
 			}
+			
 			if (totalBind == 0) {
 				user.setXiaoquId(0l);
 				user.setXiaoquName("");
-				user.setTotalBind(totalBind);
 				user.setProvince("");
 				user.setCity("");
 				user.setCountry("");
 				user.setSectId("0");
 				user.setCspId("0");
 				user.setOfficeTel("");
-			}else {
 				user.setTotalBind(totalBind);
+				userRepository.save(user);
+			}else {
+				String currSectId = user.getSectId();	//当前用户所在小区。如果解绑后的房子不包含这个小区了，则要切换去其他小区
+				List<HexieHouse> houseList = houseListVO.getHou_info();
+				boolean hasCurrSect = false;
+				for (HexieHouse hexieHouse : houseList) {
+					if (currSectId.equals(hexieHouse.getSect_id())) {
+						hasCurrSect = true;	//这种情况不需要切换小区
+						break;
+					}
+				}
+				if (!hasCurrSect) {
+					HexieHouse hexieHouse = houseList.get(0);
+					user.setXiaoquName(hexieHouse.getSect_name());
+					user.setProvince(hexieHouse.getProvince_name());
+					user.setCity(hexieHouse.getCity_name());
+					user.setCountry(hexieHouse.getRegion_name());
+					user.setSectId(hexieHouse.getSect_id());
+					user.setCspId(hexieHouse.getCsp_id());
+					user.setOfficeTel(hexieHouse.getOffice_tel());
+					user.setTotalBind(totalBind);
+					userRepository.save(user);
+				}
 			}
-			userRepository.save(user);
+			
 			
 		} else {
 			throw new BizValidateException("解绑房屋失败。");
