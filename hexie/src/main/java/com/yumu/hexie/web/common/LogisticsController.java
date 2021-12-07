@@ -25,7 +25,7 @@ import com.yumu.hexie.web.BaseResult;
 @Controller(value = "logisticsController")
 public class LogisticsController extends BaseController{
 	
-	private static Logger logger = LoggerFactory.getLogger(LogisticsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(LogisticsController.class);
 	
 	@Inject
     private LogisticsService logisticsService;
@@ -35,8 +35,8 @@ public class LogisticsController extends BaseController{
 	@ResponseBody
 	public BaseResult<List<Logistics>> queryLogisticsInfo( @PathVariable String nu , @PathVariable String com) throws Exception {
 		List<Logistics> queryKuaidi = new ArrayList<Logistics>();
-		String n[] = nu.split(",");
-		String c[] = com.split(",");
+		String[] n = nu.split(",");
+		String[] c = com.split(",");
 		for(int i=0 ; i<n.length ; i++){
 				Logistics logistics =logisticsService.queryLogisticsInfo(n[i] , c[i]);
 				if(logistics.getDescription()!=null){
@@ -44,8 +44,7 @@ public class LogisticsController extends BaseController{
 				}
 		    	queryKuaidi.add(logistics);	
 		}
-		BaseResult<List<Logistics>> result =  BaseResult.successResult(queryKuaidi);
-		return result;
+		return (BaseResult<List<Logistics>>) BaseResult.successResult(queryKuaidi);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -54,8 +53,7 @@ public class LogisticsController extends BaseController{
 	public BaseResult<List<LogisticCompanyQueryResp>> queryByTrackingNo( @PathVariable(name = "logisticNo") String trackingNo) throws Exception {
 		
 		List<LogisticCompany> list = logisticsService.queryByTrackingNo(trackingNo);
-		BaseResult<List<LogisticCompanyQueryResp>> result =  BaseResult.successResult(list);
-		return result;
+		return (BaseResult<List<LogisticCompanyQueryResp>>) BaseResult.successResult(list);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -65,7 +63,6 @@ public class LogisticsController extends BaseController{
 		
 		logger.info("saveLogisticsInfo : " + logisticsInfoReq);
 		logisticsService.saveLogisticsInfo(logisticsInfoReq);
-		BaseResult<String> result =  BaseResult.successResult(com.yumu.hexie.common.Constants.PAGE_SUCCESS);
-		return result;
+		return (BaseResult<String>) BaseResult.successResult(com.yumu.hexie.common.Constants.PAGE_SUCCESS);
 	}
 }

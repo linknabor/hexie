@@ -68,7 +68,7 @@ public class OrderController extends BaseController{
 	@Autowired
 	private UserService userService;
 	
-	private static Logger logger = LoggerFactory.getLogger(OrderController.class);
+	private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 	
 	@RequestMapping(value = "/getProduct/{productId}", method = RequestMethod.GET)
 	@ResponseBody
@@ -80,13 +80,13 @@ public class OrderController extends BaseController{
 	@ResponseBody
 	public BaseResult<List<ServiceOrder>> orders(@ModelAttribute(Constants.USER)User user,@PathVariable String statusType) throws Exception {
 		//订单中排除服务单
-		List<Integer> types = new ArrayList<Integer>();
+		List<Integer> types = new ArrayList<>();
 		types.add(ModelConstant.ORDER_TYPE_GROUP);
 		types.add(ModelConstant.ORDER_TYPE_GROUP_SINGLE);
 		types.add(ModelConstant.ORDER_TYPE_ONSALE);
 		types.add(ModelConstant.ORDER_TYPE_RGROUP);
 
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		if("NEEDPAY".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 		}else if("NEEDRECEIVE".equalsIgnoreCase(statusType)){
@@ -102,7 +102,7 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_SENDED);
 		}else if("PREPARE".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
-		}else{//if("ALL".equalsIgnoreCase(statusType)){
+		}else{
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
 			status.add(ModelConstant.ORDER_STATUS_CANCEL);
@@ -121,12 +121,11 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/orders/status/onsale/{statusType}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<ServiceOrder>> onSaleOrders(@ModelAttribute(Constants.USER)User user,@PathVariable String statusType) throws Exception {
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		if("NEEDPAY".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 		}else if("NEEDRECEIVE".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
-//			status.add(ModelConstant.ORDER_STATUS_SENDED);
 		}else if("CANCELD".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_CANCEL);
 			status.add(ModelConstant.ORDER_STATUS_CANCEL_BACKEND);
@@ -137,7 +136,7 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
 		}else if("PREPARE".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
-		}else{//if("ALL".equalsIgnoreCase(statusType)){
+		}else{
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
 			status.add(ModelConstant.ORDER_STATUS_CANCEL);
@@ -156,7 +155,7 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/orders/status/group/{statusType}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<RgroupOrder>> groupOrders(@ModelAttribute(Constants.USER)User user,@PathVariable String statusType) throws Exception {
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		if("NEEDPAY".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 		}else if("NEEDRECEIVE".equalsIgnoreCase(statusType)){
@@ -170,7 +169,7 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
 		}else if("PREPARE".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
-		}else{//if("ALL".equalsIgnoreCase(statusType)){
+		}else{
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
 			status.add(ModelConstant.ORDER_STATUS_CANCEL);
@@ -217,10 +216,6 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/getOrder/{orderId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<ServiceOrder> getOrder(@ModelAttribute(Constants.USER)User user,@PathVariable long orderId) throws Exception {
-//		ServiceOrder order = baseOrderService.findOne(orderId);
-//		if(order.getUserId() != user.getId()){
-//			return new BaseResult<ServiceOrder>().failMsg("你没有权限查看该订单！");
-//		}
 		ServiceOrder order = baseOrderService.getOrder(user, orderId);
 		return new BaseResult<ServiceOrder>().success(order);
     }
@@ -340,11 +335,12 @@ public class OrderController extends BaseController{
 		}
 		return new BaseResult<ServiceOrder>().success(o);
 	}
-	
+
 	/**
 	 * 社区合伙人购买
+	 * @param session
 	 * @param user
-	 * @param req
+	 * @param promotionOrder
 	 * @return
 	 * @throws Exception
 	 */
@@ -359,11 +355,11 @@ public class OrderController extends BaseController{
 		session.setAttribute(Constants.USER, user);
 		return new BaseResult<JsSign>().success(jsSign);
 	}
-	
+
 	/**
 	 * saas软件售卖
 	 * @param user
-	 * @param req
+	 * @param promotionOrder
 	 * @return
 	 * @throws Exception
 	 */
@@ -376,11 +372,11 @@ public class OrderController extends BaseController{
 		JsSign jsSign = baseOrderService.promotionPayV2(user, promotionOrder);
 		return new BaseResult<JsSign>().success(jsSign);
 	}
-	
+
 	/**
 	 * 查询是否购买过推广商品(有退款的也算)
 	 * @param user
-	 * @param req
+	 * @param orderType
 	 * @return
 	 * @throws Exception
 	 */
@@ -404,7 +400,7 @@ public class OrderController extends BaseController{
 			typeList.add(type);
 		}
 		List<ServiceOrder> orderList = baseOrderService.queryPromotionOrder(user, statusList, typeList);
-		Long orderId = 0l;
+		long orderId = 0L;
 		if (!orderList.isEmpty()) {
 			for (ServiceOrder serviceOrder : orderList) {
 				if (serviceOrder.getStatus() == ModelConstant.EVOUCHER_STATUS_NORMAL) {
@@ -412,7 +408,7 @@ public class OrderController extends BaseController{
 					break;
 				}
 			}
-			if (orderId == 0l) {
+			if (orderId == 0L) {
 				orderId = orderList.get(0).getId();
 			}
 		}

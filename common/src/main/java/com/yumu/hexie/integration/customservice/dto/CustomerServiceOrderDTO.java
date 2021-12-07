@@ -22,6 +22,7 @@ public class CustomerServiceOrderDTO {
 	private String couponAmt;
 	private String agentNo;
 	private String agentName;
+	private String imgUrls;
 	
 	public User getUser() {
 		return user;
@@ -125,14 +126,36 @@ public class CustomerServiceOrderDTO {
 	public void setCouponAmt(String couponAmt) {
 		this.couponAmt = couponAmt;
 	}
+
+	public String getImgUrls() {
+		return imgUrls;
+	}
+
+	public void setImgUrls(String imgUrls) {
+		this.imgUrls = imgUrls;
+	}
+
 	@Override
 	public String toString() {
-		return "CustomerServiceOrderDTO [user=" + user + ", serviceId=" + serviceId + ", serviceName=" + serviceName
-				+ ", image=" + image + ", sectId=" + sectId + ", linkman=" + linkman + ", linktel=" + linktel
-				+ ", serviceAddr=" + serviceAddr + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", memo="
-				+ memo + ", sectName=" + sectName + ", orderType=" + orderType + ", couponId=" + couponId
-				+ ", couponAmt=" + couponAmt + ", agentNo=" + agentNo + ", agentName=" + agentName + "]";
+		return "CustomerServiceOrderDTO{" +
+				"user=" + user +
+				", serviceId='" + serviceId + '\'' +
+				", serviceName='" + serviceName + '\'' +
+				", image='" + image + '\'' +
+				", sectId='" + sectId + '\'' +
+				", linkman='" + linkman + '\'' +
+				", linktel='" + linktel + '\'' +
+				", serviceAddr='" + serviceAddr + '\'' +
+				", tranAmt='" + tranAmt + '\'' +
+				", tradeWaterId='" + tradeWaterId + '\'' +
+				", memo='" + memo + '\'' +
+				", sectName='" + sectName + '\'' +
+				", orderType='" + orderType + '\'' +
+				", couponId='" + couponId + '\'' +
+				", couponAmt='" + couponAmt + '\'' +
+				", agentNo='" + agentNo + '\'' +
+				", agentName='" + agentName + '\'' +
+				", imgUrls='" + imgUrls + '\'' +
+				'}';
 	}
-	
-	
 }
