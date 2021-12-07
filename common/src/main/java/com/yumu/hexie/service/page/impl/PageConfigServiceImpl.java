@@ -198,7 +198,7 @@ public class PageConfigServiceImpl implements PageConfigService {
 	public List<Menu> getMenuByAppidAndDefaultTypeLessThan(String appid, int defaultType) {
 		
 		Sort sort = new Sort(Direction.ASC, "sort");
-		return menuRepository.findByDefaultTypeLessThan(defaultType, sort);
+		return menuRepository.findByAppidAndDefaultTypeLessThan(appid, defaultType, sort);
 	}
 	
 	/**
