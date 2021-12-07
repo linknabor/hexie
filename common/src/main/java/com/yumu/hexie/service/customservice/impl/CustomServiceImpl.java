@@ -1,11 +1,7 @@
 package com.yumu.hexie.service.customservice.impl;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,7 +75,7 @@ public class CustomServiceImpl implements CustomService {
 	private AgentRepository agentRepository;
 	@Autowired
 	private CouponService couponService;
-	
+
 	@Override
 	public List<CustomServiceVO> getService(User user) throws Exception {
 		
@@ -137,8 +133,14 @@ public class CustomServiceImpl implements CustomService {
 			} else {
 				customerServiceOrderDTO.setTranAmt("0.01");
 			}
-			
 		}
+
+		//保存上传的图片
+		String imgUrls = customerServiceOrderDTO.getImgUrls();
+		imgUrls = getUploadImgs(currUser.getAppId(), imgUrls);
+
+
+		customerServiceOrderDTO.setImgUrls(imgUrls);
 		CommonPayResponse data = customServiceUtil.createOrder(customerServiceOrderDTO);
 		long end = System.currentTimeMillis();
 		logger.info("createOrderService location 1 : " + (end - begin)/1000);
@@ -200,17 +202,39 @@ public class CustomServiceImpl implements CustomService {
 		return data;
 		
 	}
-	
+
+	private String getUploadImgs(String appId, String imgUrls) {
+
+		if (StringUtils.isEmpty(imgUrls)) {
+			return "";
+		}
+		String[] imgArr = imgUrls.split(",");
+		List<String> imgList = Arrays.asList(imgArr);
+
+		Map<String, String> uploaded = uploadService.uploadImages(appId, imgList);
+		StringBuilder bf = new StringBuilder();
+		for (int i = 0; i < imgList.size(); i++) {
+			String uploadedUrl = uploaded.get(imgList.get(i));
+			if (!StringUtils.isEmpty(uploadedUrl)) {
+				bf.append(uploadedUrl);
+				if (i != imgList.size() - 1) {
+					bf.append(",");
+				}
+			}
+		}
+		return bf.toString();
+	}
+
 	@Transactional
 	@Override
 	@Async("taskExecutor")
 	public void saveServiceImages(String appId, long orderId, List<String>imgUrls) {
-		
+
 		long begin = System.currentTimeMillis();
 		Map<String, String> uploaded = uploadService.uploadImages(appId, imgUrls);
 		long end = System.currentTimeMillis();
 		logger.info("upload time : " + (end - begin)/1000);
-		
+
 		ServiceOrder serviceOrder = null;
 		int count = 0;
 		while (serviceOrder == null && count < 3) {
@@ -233,10 +257,10 @@ public class CustomServiceImpl implements CustomService {
 			}
 		}
 		serviceOrderRepository.updateImgUrls(bf.toString(), orderId);
-		
+
 		end = System.currentTimeMillis();
 		logger.info("save img2db time : " + (end - begin)/1000);
-		
+
 	}
 	
 	/**

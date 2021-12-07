@@ -3,7 +3,9 @@ package com.yumu.hexie.web.customservice;
 import java.util.Arrays;
 import java.util.List;
 
+import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
+import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -93,16 +95,6 @@ public class CustomServiceController extends BaseController {
 		
 		end = System.currentTimeMillis();
 		logger.info("createOrderController location 2 : " + (end-begin)/1000);
-		
-		String imgUrls = customServiceOrderVO.getImgUrls();
-		if (!StringUtils.isEmpty(imgUrls)) {
-			String[]imgArr = imgUrls.split(",");
-			List<String> imgList = Arrays.asList(imgArr);
-			customService.saveServiceImages(user.getAppId(), Long.parseLong(cvo.getOrderId()), imgList);	//异步保存上传的图片
-		}
-		
-		end = System.currentTimeMillis();
-		logger.info("createOrder location 3 : " + (end-begin)/1000);
 		
 		ServiceOrderPrepayVO vo = new ServiceOrderPrepayVO(cvo);
 		return BaseResult.successResult(vo);
@@ -342,6 +334,12 @@ public class CustomServiceController extends BaseController {
 		return BaseResult.successResult(serviceOrderQueryVO);
 	}
 
+	/**
+	 * 运营端调用，抢单或完工
+	 * @param heXieServiceOrderReq
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/outsid/serviceOrder/update", method = RequestMethod.POST)
 	public BaseResult<ServiceOrderQueryVO> updateServiceOrder(@RequestBody HeXieServiceOrderReq heXieServiceOrderReq) throws Exception{
 		logger.info("heXieServiceOrderReq : " + heXieServiceOrderReq);

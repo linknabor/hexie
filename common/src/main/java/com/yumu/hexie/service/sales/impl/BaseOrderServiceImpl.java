@@ -407,13 +407,15 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             shareService.record(order);
         } else if (orderOp == ModelConstant.ORDER_OP_UPDATE_PAYSTATUS
                 && (order.getStatus() == ModelConstant.ORDER_STATUS_PAYED || order.getStatus() == ModelConstant.ORDER_STATUS_CONFIRM)) {
-            if (order.getOrderType() != ModelConstant.ORDER_TYPE_YUYUE) {
-                userNoticeService.orderSuccess(order.getUserId(), user.getTel(), order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
-            }
+//            if (order.getOrderType() != ModelConstant.ORDER_TYPE_YUYUE) {
+//                userNoticeService.orderSuccess(order.getUserId(), user.getTel(), order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
+//            }
             String token = systemconfigservice.queryWXAToken(user.getAppId());
-            templateMsgService.sendPaySuccessMsg(order, token, user.getAppId());
+            templateMsgService.sendOrderSuccessMsg(user, order, token);
         } else if (orderOp == ModelConstant.ORDER_OP_SEND) {
-            userNoticeService.orderSend(order.getUserId(), order.getTel(), order.getId(), order.getOrderNo(), order.getLogisticName(), order.getLogisticNo());
+            String token = systemconfigservice.queryWXAToken(user.getAppId());
+            templateMsgService.sendCustomerDeliveryMessage(user, order, token);
+//            userNoticeService.orderSend(order.getUserId(), order.getTel(), order.getId(), order.getOrderNo(), order.getLogisticName(), order.getLogisticNo());
         }
     }
 
@@ -1428,6 +1430,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         log.info("update orderStatus, orderType : " + serviceOrder.getOrderType());
         log.info("update orderStatus, orderStatus : " + serviceOrder.getStatus());
 
+        User user = userService.getById(serviceOrder.getUserId());
+
         if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
             List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(serviceOrder.getGroupOrderId());
             for (ServiceOrder order : orderList) {
@@ -1441,8 +1445,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     salePlanService.getService(order.getOrderType()).postPaySuccess(order);    //修改orderItems
 
                     //发送模板消息和短信
-                    userNoticeService.orderSuccess(order.getUserId(), order.getTel(),
-                            order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
+//                    userNoticeService.orderSuccess(order.getUserId(), order.getTel(),
+//                            order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
+
+                    String token = systemconfigservice.queryWXAToken(user.getAppId());
+                    templateMsgService.sendOrderSuccessMsg(user, order, token);
+
                     //清空购物车中已购买的商品
                     List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
                     cartService.delFromCart(order.getUserId(), itemList);
@@ -1475,8 +1483,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
                 if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
                     //发送模板消息和短信
-                    userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
-                            serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+//                    userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
+//                            serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
+
+                    String token = systemconfigservice.queryWXAToken(user.getAppId());
+                    templateMsgService.sendOrderSuccessMsg(user, serviceOrder, token);
+
                     //清空购物车中已购买的商品
                     if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
                         List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);

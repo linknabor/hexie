@@ -45,7 +45,9 @@ public class QueryOrderMapper implements Serializable {
 	private Timestamp sendDate;	//发货时间
 	
 	private Integer status;	//订单状态，0. 创建完成 1. 已支付 2. 已用户取消 3. 待退款 4. 退款中  5. 已发货 6.已签收 7. 已后台取消 8. 商户取消 9. 已确认 10.已退货（退货中走线下流程） 11.已退款 12.配货中（商户确认中）
-	
+
+	private Integer groupStatus; //成团状态
+
 	private String tel;
 	
 	@JsonProperty("receiver_name")
@@ -65,10 +67,9 @@ public class QueryOrderMapper implements Serializable {
 	private String sectName;
 
 	@JsonProperty("create_date")
-	private Long createDate;
+	private BigInteger createDate;
 
-	public QueryOrderMapper(BigInteger id, String address, Integer count, String logisticName, String logisticNo, Integer logisticType, String orderNo, Integer orderType, String productName, Timestamp refundDate, Timestamp sendDate, Integer status, String tel, String receiverName, Float price, Float totalAmount, String agentNo, String agentName, String sectName) {
-		super();
+	public QueryOrderMapper(BigInteger id, String address, Integer count, String logisticName, String logisticNo, Integer logisticType, String orderNo, Integer orderType, String productName, Timestamp refundDate, Timestamp sendDate, Integer status, Integer groupStatus, String tel, String receiverName, Float price, Float totalAmount, String agentNo, String agentName, String sectName, BigInteger createDate) {
 		this.id = id;
 		this.address = address;
 		this.count = count;
@@ -81,6 +82,7 @@ public class QueryOrderMapper implements Serializable {
 		this.refundDate = refundDate;
 		this.sendDate = sendDate;
 		this.status = status;
+		this.groupStatus = groupStatus;
 		this.tel = tel;
 		this.receiverName = receiverName;
 		this.price = price;
@@ -88,6 +90,7 @@ public class QueryOrderMapper implements Serializable {
 		this.agentNo = agentNo;
 		this.agentName = agentName;
 		this.sectName = sectName;
+		this.createDate = createDate;
 	}
 
 	public BigInteger getId() {
@@ -250,12 +253,20 @@ public class QueryOrderMapper implements Serializable {
 		this.sectName = sectName;
 	}
 
-	public Long getCreateDate() {
+	public BigInteger getCreateDate() {
 		return createDate;
 	}
 
-	public void setCreateDate(Long createDate) {
+	public void setCreateDate(BigInteger createDate) {
 		this.createDate = createDate;
+	}
+
+	public Integer getGroupStatus() {
+		return groupStatus;
+	}
+
+	public void setGroupStatus(Integer groupStatus) {
+		this.groupStatus = groupStatus;
 	}
 
 	@Override
@@ -273,6 +284,7 @@ public class QueryOrderMapper implements Serializable {
 				", refundDate=" + refundDate +
 				", sendDate=" + sendDate +
 				", status=" + status +
+				", groupStatus=" + groupStatus +
 				", tel='" + tel + '\'' +
 				", receiverName='" + receiverName + '\'' +
 				", price=" + price +
