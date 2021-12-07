@@ -168,8 +168,18 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				
 				boolean isSuccess = false;
 				try {
-					wuyeService.scanEvent4Invoice(baseEventDTO);
-					isSuccess = true;
+					WechatResponse wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+					if (wechatResponse.getErrcode() == 0) {
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 40037) {
+						logger.error("invalid template_id, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 45009) {
+						logger.error("reach max api daily quota limit, 请联系系统管理员！");
+						isSuccess = true;
+					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
@@ -228,6 +238,14 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				try {
 					wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
 					if (wechatResponse.getErrcode() == 0) {
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 40037) {
+						logger.error("invalid template_id, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 45009) {
+						logger.error("reach max api daily quota limit, 请联系系统管理员！");
 						isSuccess = true;
 					}
 				} catch (Exception e) {

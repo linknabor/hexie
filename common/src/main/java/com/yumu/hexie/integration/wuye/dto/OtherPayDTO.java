@@ -97,5 +97,5 @@ public class OtherPayDTO {
 				+ payee_openid + ", orderId=" + orderId + ", orderDetail=" + orderDetail + ", invoice_type="
 				+ invoice_type + ", smsBatch=" + smsBatch + "]";
 	}
-	
+
 }
