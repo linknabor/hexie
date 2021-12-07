@@ -75,7 +75,8 @@ public class CustomServiceUtil {
 	
 	/**
 	 * 服务订单创建
-	 * @param dto
+	 * @param user
+	 * @param operOrderRequest
 	 * @return
 	 * @throws Exception
 	 */
@@ -90,7 +91,8 @@ public class CustomServiceUtil {
 	
 	/**
 	 * 支付订单取消
-	 * @param dto
+	 * @param user
+	 * @param tradeWaterId
 	 * @return
 	 * @throws Exception
 	 */
@@ -108,7 +110,7 @@ public class CustomServiceUtil {
 	
 	/**
 	 * 二维码 服务订单查询
-	 * @param dto
+	 * @param orderQueryDTO
 	 * @return
 	 * @throws Exception
 	 */

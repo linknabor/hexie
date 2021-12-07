@@ -1,13 +1,14 @@
 package com.yumu.hexie.service.customservice;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import com.yumu.hexie.integration.common.CommonPayResponse;
 import com.yumu.hexie.integration.customservice.dto.CustomerServiceOrderDTO;
-import com.yumu.hexie.integration.customservice.dto.OperatorDTO;
 import com.yumu.hexie.integration.customservice.dto.OrderQueryDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCommentDTO;
+import com.yumu.hexie.integration.customservice.req.HeXieServiceOrderReq;
 import com.yumu.hexie.integration.customservice.resp.CustomServiceVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderPrepayVO;
 import com.yumu.hexie.integration.customservice.resp.ServiceOrderQueryVO;
@@ -40,8 +41,6 @@ public interface CustomService {
 
 	void cancelPay(User user, String orderId) throws Exception;
 
-	void operator(OperatorDTO operatorDTO);
-
 	void updateServiceCfg(ServiceCfgDTO serviceCfgDTO);
 
 	void assginOrder(CommonPayResponse data);
@@ -52,5 +51,6 @@ public interface CustomService {
 
 	ServiceOrderQueryVO queryOrderByFeeType(OrderQueryDTO orderQueryDTO) throws Exception;
 
+	void updateServiceOrderByOutSid(HeXieServiceOrderReq heXieServiceOrderReq);
 
 }

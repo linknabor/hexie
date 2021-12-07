@@ -17,7 +17,7 @@ public interface NotifyService {
 
 	void sendPayNotificationAsync(AccountNotification accountNotification);
 
-	void sendServiceNotificationAsync(ServiceNotification serviceNotification);
+	void sendServiceNotificationAsync(String orderId);
 
 	void updateServiceOrderStatusAsync(String orderId);
 
