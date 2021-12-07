@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 
 /**
@@ -62,5 +63,13 @@ public interface UserService {
 	boolean eventUnsubscribe(User user);
 
 	User findwuyeId(String wuyeId);
+	
+	/**
+	 * 用户切换小区
+	 * @param user
+	 * @param switchSectReq
+	 * @return 
+	 */
+	User switchSect(User user, SwitchSectReq switchSectReq);
 
 }
