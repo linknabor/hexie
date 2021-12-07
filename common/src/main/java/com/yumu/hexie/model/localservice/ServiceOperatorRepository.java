@@ -118,12 +118,12 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 and agentId is null ")
     public void deleteByTypeAndNullAgent(int type);
     
-    String column1 = "s.id, s.openId, s.name, s.tel, u.appid, s.userId ";
-    
+    String column1 = "s.id, s.openId, s.name, s.tel, '' as appid, s.userId ";
+	String column2 = "s.id, s.openId, s.name, s.tel, u.appid, s.userId ";
+
     @Query(value = "select "
     		+ column1
     		+ "from serviceoperator s "
-    		+ "join user u on u.id = s.userId "
     		+ "join serviceOperatorItem oi on s.id = oi.operatorId "
     		+ "where s.type = ?1 and oi.serviceId = ?2 ", nativeQuery = true)
     public List<Object[]> findByTypeAndServiceId(int type, long serviceId);
@@ -131,14 +131,12 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     @Query(value = "select "
     		+ column1
     		+ "from serviceoperator s "
-    		+ "join user u on u.id = s.userId "
     		+ "where s.type = ?1 and s.agentId is null ", nativeQuery = true)
     public List<Object[]> findByTypeWithAppid(int type);
     
     @Query(value = "select "
     		+ column1
     		+ "from serviceoperator s "
-    		+ "join user u on u.id = s.userId "
     		+ "where s.type = ?1 and s.agentId = ?2 ", nativeQuery = true)
     public List<Object[]> findByTypeAndAgentIdWithAppid(int type, Long agentId);
     
@@ -148,7 +146,7 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     public List<ServiceOperator> queryNoServiceOper(int type);
 
     @Query(value="select "
-    		+ column1
+    		+ column2
     		+ "from serviceoperator s "
     		+ "join serviceoperatorSect b on s.id = b.operatorId "
     		+ "join user u on u.id = s.userId "
