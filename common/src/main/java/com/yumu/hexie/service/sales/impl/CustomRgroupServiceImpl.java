@@ -5,9 +5,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
@@ -24,7 +29,6 @@ import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.DistributionService;
-import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CacheableService;
 import com.yumu.hexie.service.sales.ProductService;
@@ -51,8 +55,10 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private OrderItemRepository orderItemRepository;
     @Autowired
     private ServiceOperatorRepository serviceOperatorRepository;
+
     @Autowired
-    private GotongService gotongService;
+    @Qualifier(value = "staffclientStringRedisTemplate")
+    private RedisTemplate<String, String> staffclientStringRedisTemplate;
 
     @Override
     public void validateRule(ServiceOrder order, SalePlan plan, OrderItem item, Address address) {
@@ -68,15 +74,11 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     }
 
     private void limitRuleByUser(RgroupRule rule, long userId) {
-        if (rule.getRuleLimitUserCount() == 0) {
-            return;
-        } else {
-            if (orderItemRepository.countBuyedOrderItem(userId, rule.getId(), ModelConstant.ORDER_TYPE_RGROUP) < rule
-                .getRuleLimitUserCount()) {
-                return;
-            } else {
+        if (rule.getRuleLimitUserCount() > 0) {
+            int num = orderItemRepository.countBuyedOrderItem(userId, rule.getId(), ModelConstant.ORDER_TYPE_RGROUP);
+            if (num >= rule.getRuleLimitUserCount()) {
                 throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_RGROUP, rule.getId(),
-                    "感谢您的参与，每个用户限购" + rule.getRuleLimitUserCount() + "份，请参与其他团购").setError();
+                        "感谢您的参与，每个用户限购" + rule.getRuleLimitUserCount() + "份，请参与其他团购").setError();
             }
         }
     }
@@ -128,26 +130,44 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
             rule.getProductName(), rule.getName());
         
         //给操作员发送发货模板消息
+        NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+        noticeServiceOperator.setAddress(o.getAddress());
+        noticeServiceOperator.setCreateDate(o.getCreateDate());
+        noticeServiceOperator.setReceiverName(o.getReceiverName());
+        noticeServiceOperator.setId(o.getId());
+        noticeServiceOperator.setProductName(o.getProductName());
+        noticeServiceOperator.setOrderNo(o.getOrderNo());
+        noticeServiceOperator.setSubTypeName(o.getSubTypeName());
+        noticeServiceOperator.setSubType(o.getSubType());
+        noticeServiceOperator.setTel(o.getTel());
+
 		int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
 		long agentId = o.getAgentId();
 		logger.info("agentId is : " + agentId);
-		List<ServiceOperator> opList = new ArrayList<>();
+		List<ServiceOperator> opList;
 		if (agentId > 1) {	//1是默认奈博的，奈博的操作员都是null
 			opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
 		}else {
 			opList = serviceOperatorRepository.findByTypeAndAgentIdIsNull(operType);
 		}
 		logger.info("oper list size : " + opList.size());
+		List<Long> list = new ArrayList<>();
 		for (ServiceOperator serviceOperator : opList) {
-			logger.info("delivery user id : " + serviceOperator.getUserId());
-			User sendUser = userRepository.findById(serviceOperator.getUserId());
-			if (sendUser != null) {
-				logger.info("send user : " + sendUser.getId());
-				gotongService.sendDeliveryNotification(sendUser, o);
-			}
+            list.add(serviceOperator.getUserId());
 		}
-        
-        
+        noticeServiceOperator.setOpers(list);
+
+		try {
+            ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+            String value = objectMapper.writeValueAsString(noticeServiceOperator);
+            //放入合协管家的redis中
+            staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE, value);
+        } catch (Exception e) {
+		    logger.error("custom push redis error", e);
+        }
+
+
+
     }
 
     /** 
