@@ -36,7 +36,7 @@ public class WuyeUtil {
 	private static final Logger log = LoggerFactory.getLogger(WuyeUtil.class);
 
 	// 接口地址
-	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s"; // 房屋详情地址
+	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s&sect_id=%s"; // 房屋详情地址
 	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s&openid=%s&appid=%s&mobile=%s"; // 添加房子
 	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s&openid=%s&appid=%s&mobile=%s"; // 无账单添加房子
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s&house_id=%s"; // 扫一扫（添加房子）
@@ -67,8 +67,11 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<HouseListVO> queryHouse(User user){
-		String url = getRequestUri(user) + String.format(HOUSE_DETAIL_URL, user.getWuyeId());
+	public static BaseResult<HouseListVO> queryHouse(User user, String sectId){
+		if (StringUtils.isEmpty(sectId)) {
+			sectId = "";
+		}
+		String url = getRequestUri(user) + String.format(HOUSE_DETAIL_URL, user.getWuyeId(), sectId);
 		return (BaseResult<HouseListVO>)httpGet(url,HouseListVO.class);
 	}
 	

@@ -99,8 +99,8 @@ public class WuyeServiceImpl implements WuyeService {
 	private GotongService gotongService;
 	
 	@Override
-	public HouseListVO queryHouse(User user) {
-		return WuyeUtil.queryHouse(user).getData();
+	public HouseListVO queryHouse(User user, String sectId) {
+		return WuyeUtil.queryHouse(user, sectId).getData();
 	}
 
 	@Override
