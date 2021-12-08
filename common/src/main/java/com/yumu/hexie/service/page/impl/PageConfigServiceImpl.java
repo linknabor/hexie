@@ -219,11 +219,18 @@ public class PageConfigServiceImpl implements PageConfigService {
 		if(StringUtils.isEmpty(page)) {
 			return "";
 		}
-		String key = ModelConstant.KEY_PAGE_TIPS_SWITCH_SECT + page + ":" + user.getId();
-		Long value = stringRedisTemplate.opsForValue().increment(key);
-		if (value == 1) {
+		String key = ModelConstant.KEY_PAGE_TIPS_SWITCH_SECT + page;
+		long offset = user.getId();
+		
+		Boolean shown = stringRedisTemplate.opsForValue().getBit(key, offset);
+		if (!shown) {
+			stringRedisTemplate.opsForValue().setBit(key, offset, true);	//用bitmap做，占用的存储空间要小的多
 			tips = systemConfigService.getSysConfigByKey("SWITCH_SECT_TIPS_"+page.toUpperCase());
 		}
+//		Long value = stringRedisTemplate.opsForValue().increment(key);
+//		if (value == 1) {
+//			tips = systemConfigService.getSysConfigByKey("SWITCH_SECT_TIPS_"+page.toUpperCase());
+//		}
 		return tips;
 	}
 

@@ -483,5 +483,5 @@ public class ModelConstant {
 
 	public static final String KEY_WORKORDER_CFG = "workorder:cfg:";	//工单配置，后面接city_db:sect_id
 	
-	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接 page:userid
+	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 }		
