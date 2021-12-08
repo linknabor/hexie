@@ -225,7 +225,7 @@ public class BatchServiceImpl implements BatchService {
 			if (!StringUtils.isEmpty(user.getSectId())) {
 				continue;
 			}
-			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
+			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user, "");
 			HouseListVO vo = baseResult.getData();
 			if (vo!=null) {
 				List<HexieHouse> houseList = vo.getHou_info();
@@ -264,7 +264,7 @@ public class BatchServiceImpl implements BatchService {
 			if (StringUtils.isEmpty(user.getTel())) {
 				continue;
 			}
-			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
+			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user, "");
 			HouseListVO vo = baseResult.getData();
 			if (vo!=null) {
 				List<HexieHouse> houseList = vo.getHou_info();
