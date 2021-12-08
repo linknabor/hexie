@@ -45,7 +45,7 @@ public interface WuyeService {
 	 * @param user
 	 * @return
 	 */
-	HouseListVO queryHouse(User user);
+	HouseListVO queryHouse(User user, String sectId);
 
 	/**
 	 * 纸质账单绑定房屋
