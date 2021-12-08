@@ -121,10 +121,4 @@ public class RedisConfig {
     	return builder.build();
     	
     }
-
-	@Bean
-	public StringRedisSerializer stringRedisSerializer() {
-		return new StringRedisSerializer();
-
-	}
 }

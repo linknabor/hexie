@@ -64,7 +64,6 @@ public class UserServiceImpl implements UserService {
 	private WechatCoreService wechatCoreService;
 
 	@Autowired
-	@Qualifier("authRedisTemplate")
 	private RedisTemplate<String, Object> redisTemplate;
 	@Autowired
 	private WechatCardRepository wechatCardRepository;

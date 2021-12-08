@@ -57,7 +57,6 @@ public class WechatCardServiceImpl implements WechatCardService {
 	private WechatCardRepository wechatCardRepository;
 
 	@Autowired
-	@Qualifier("authRedisTemplate")
 	private RedisTemplate<String, Object> redisTemplate;
 
 	@Autowired

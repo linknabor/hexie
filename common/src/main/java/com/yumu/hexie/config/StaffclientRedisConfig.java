@@ -29,9 +29,6 @@ public class StaffclientRedisConfig {
     @Value("${staffclient.redis.database}")
     private Integer redisDatabase;
 
-    @Autowired
-    private StringRedisSerializer stringRedisSerializer;
-
     @Bean(name = "staffclientRedisStandaloneConfiguration")
     public RedisStandaloneConfiguration redisStandaloneConfiguration() {
 
@@ -75,18 +72,10 @@ public class StaffclientRedisConfig {
      */
     @Bean(name = "staffclientRedisTemplate")
     public RedisTemplate<String, Object> redisTemplate(@Qualifier(value = "staffclientLettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory) {
-
         RedisTemplate<String, Object> template = new RedisTemplate<>();
-
-        Jackson2JsonRedisSerializer<String> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(String.class);
-        template.setKeySerializer(stringRedisSerializer);
-        template.setValueSerializer(jackson2JsonRedisSerializer);    //有泛型的对象先转换成json字符串再往redis里存，不然反序列化时会报错。
-        template.setHashKeySerializer(stringRedisSerializer);
-        template.setHashValueSerializer(jackson2JsonRedisSerializer);    //同上
         template.setConnectionFactory(lettuceConnectionFactory);
         return template;
     }
-
 
     @Bean(name = "staffclientStringRedisTemplate")
     public StringRedisTemplate stringRedisTemplate(@Qualifier(value = "staffclientLettuceConnectionFactory") LettuceConnectionFactory lettuceConnectionFactory) {
@@ -94,6 +83,4 @@ public class StaffclientRedisConfig {
         stringRedisTemplate.setConnectionFactory(lettuceConnectionFactory);
         return stringRedisTemplate;
     }
-
-
 }
