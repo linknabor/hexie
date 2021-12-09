@@ -4,9 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.ServiceOrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +51,8 @@ public class NotifyServiceImpl implements NotifyService {
 	@Autowired
 	private WuyeService wuyeService;
 	@Autowired
+	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
-	
 
 	/**
 	 * 	1.优惠券核销
@@ -118,13 +121,15 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 			
 		}
+
 		//6.自定义服务
-		ServiceNotification serviceNotification = payNotification.getServiceNotify();
-		if (serviceNotification!=null) {
-			serviceNotification.setOrderId(payNotification.getOrderId());
-			sendServiceNotificationAsync(serviceNotification);
-		}
-		
+		sendServiceNotificationAsync(payNotification.getOrderId());
+//		ServiceNotification serviceNotification = payNotification.getServiceNotify();
+//		log.error("serviceNotification :" + serviceNotification);
+//		if (serviceNotification!=null) {
+//			sendServiceNotificationAsync(payNotification.getOrderId());
+//		}
+
 		//7.更新serviceOrder订单状态
 		updateServiceOrderStatusAsync(payNotification.getOrderId());
 		
@@ -169,28 +174,17 @@ public class NotifyServiceImpl implements NotifyService {
 	 * 服务消息推送
 	 */
 	@Override
-	public void sendServiceNotificationAsync(ServiceNotification serviceNotification) {
-		
-		if (serviceNotification == null) {
-			return;
-		}
-		
-		String key = ModelConstant.KEY_ASSIGN_CS_ORDER_DUPLICATION_CHECK + serviceNotification.getOrderId();
-		Long result = RedisLock.lock(key, redisTemplate, 3600l);
-		log.info("result : " + result);
-		if (0 == result) {
-			log.info("trade : " + serviceNotification.getOrderId() + ", already in the send queue, will skip .");
+	public void sendServiceNotificationAsync(String orderId) {
+
+		if (StringUtils.isEmpty(orderId)) {
 			return;
 		}
 		
 		int retryTimes = 0;
 		boolean isSuccess = false;
-		
 		while(!isSuccess && retryTimes < 3) {
 			try {
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				String value = objectMapper.writeValueAsString(serviceNotification);
-				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, value);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_SERVICE_QUEUE, orderId);
 				isSuccess = true;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

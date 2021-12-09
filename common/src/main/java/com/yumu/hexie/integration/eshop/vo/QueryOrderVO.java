@@ -13,6 +13,7 @@ public class QueryOrderVO implements Serializable {
 	private String orderNo;
 	private String orderType;
 	private String status;
+	private String groupStatus; //成团状态
 	private String tel;
 	private String receiverName;
 	private String agentNo;
@@ -21,7 +22,10 @@ public class QueryOrderVO implements Serializable {
 	private String logisticNo;
 	private String sendDateBegin;
 	private String sendDateEnd;
-	
+	private String sectName;
+
+	private String queryFlag;
+
 	private int currentPage;
 	private int pageSize;
 	public String getId() {
@@ -108,14 +112,51 @@ public class QueryOrderVO implements Serializable {
 	public void setSendDateEnd(String sendDateEnd) {
 		this.sendDateEnd = sendDateEnd;
 	}
+
+	public String getSectName() {
+		return sectName;
+	}
+
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
+
+	public String getGroupStatus() {
+		return groupStatus;
+	}
+
+	public void setGroupStatus(String groupStatus) {
+		this.groupStatus = groupStatus;
+	}
+
+	public String getQueryFlag() {
+		return queryFlag;
+	}
+
+	public void setQueryFlag(String queryFlag) {
+		this.queryFlag = queryFlag;
+	}
+
 	@Override
 	public String toString() {
-		return "QueryOrderVO [id=" + id + ", orderNo=" + orderNo + ", orderType=" + orderType + ", status=" + status
-				+ ", tel=" + tel + ", receiverName=" + receiverName + ", agentNo=" + agentNo + ", agentName="
-				+ agentName + ", productName=" + productName + ", logisticNo=" + logisticNo + ", sendDateBegin="
-				+ sendDateBegin + ", sendDAteEnd=" + sendDateEnd + ", currentPage=" + currentPage + ", pageSize="
-				+ pageSize + "]";
+		return "QueryOrderVO{" +
+				"id='" + id + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", orderType='" + orderType + '\'' +
+				", status='" + status + '\'' +
+				", groupStatus='" + groupStatus + '\'' +
+				", tel='" + tel + '\'' +
+				", receiverName='" + receiverName + '\'' +
+				", agentNo='" + agentNo + '\'' +
+				", agentName='" + agentName + '\'' +
+				", productName='" + productName + '\'' +
+				", logisticNo='" + logisticNo + '\'' +
+				", sendDateBegin='" + sendDateBegin + '\'' +
+				", sendDateEnd='" + sendDateEnd + '\'' +
+				", sectName='" + sectName + '\'' +
+				", queryFlag='" + queryFlag + '\'' +
+				", currentPage=" + currentPage +
+				", pageSize=" + pageSize +
+				'}';
 	}
-	
-	
 }

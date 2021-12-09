@@ -21,35 +21,32 @@ import com.yumu.hexie.service.user.req.AddressReq;
 public interface AddressService {
 
 	//添加地址
-	public Address addAddress(AddressReq address);
-	
-	public void deleteAddress(long id,long userId);
+	 Address addAddress(AddressReq address);
+
+	 void deleteAddress(long id,long userId);
     //设置默认地址
-    public Address configDefaultAddress(User user, long addressId);
+     Address configDefaultAddress(User user, long addressId);
 
-    public Address queryDefaultAddress(User user);
+     Address queryDefaultAddress(User user);
     //根据id查询地址
-    public Address queryAddressById(long id);
-	
-	public List<Address> queryAddressByUser(long userId);
-	
-	
-	public List<Region> queryRegions(int type,long regionId);
-	
-	public void fillAmapInfo(Address address);
-	public List<AmapAddress> queryAmapYuntuLocal(String city, String keyword) ;
-	public DataCreateResp addAmapYuntuDataCreate(DataCreateReq newAddr);
-	
-	public List<AmapAddress> queryAroundByCoordinate(double longitude, double latitude);
+     Address queryAddressById(long id);
 
-	public List<Address> getAddressByuserIdAndAddress(long id, String cell_addr);
-	
-	public List<Address> getAddressByMain(long id,boolean main);
-	
-	public List<Address> getAddressByShareCode(String shareCode);
+	 List<Address> queryAddressByUser(long userId);
+
+
+	 List<Region> queryRegions(int type,long regionId);
+
+	 void fillAmapInfo(Address address);
+	 List<AmapAddress> queryAmapYuntuLocal(String city, String keyword) ;
+
+	 List<AmapAddress> queryAroundByCoordinate(double longitude, double latitude);
+
+	 List<Address> getAddressByuserIdAndAddress(long id, String cell_addr);
+
+	 List<Address> getAddressByMain(long id,boolean main);
 
 	void updateDefaultAddress(User user, HexieAddress addr);
-	
+
 	List<Address> queryBindedAddressByUser(long userId);
 
 	List<Province> queryProvince();
@@ -57,6 +54,6 @@ public interface AddressService {
 	List<City> queryCity(long provinceId);
 
 	List<County> queryCounty(long cityId);
-	
-	
+
+
 }

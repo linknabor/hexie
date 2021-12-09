@@ -263,17 +263,12 @@ public class AddressServiceImpl implements AddressService {
         return AmapUtil.dataSearchLocal(city, keyword);
     }
     @Override
-    public DataCreateResp addAmapYuntuDataCreate(DataCreateReq newAddr) {
-        return AmapUtil.dataManageDataCreate(newAddr);
-    }
-    @Override
     public Address queryAddressById(long id) {
         return addressRepository.findById(id).get();
     }
     
     /** 
      * 根据坐标查找周围10个小区
-     * @see com.yumu.hexie.service.user.AddressService#queryNearByCoordinate()
      */
     @Override
     public List<AmapAddress> queryAroundByCoordinate(double longitude, double latitude) {
@@ -303,11 +298,6 @@ public class AddressServiceImpl implements AddressService {
 		return addressRepository.getAddressByMain(id,main);
 	}
 
-	@Override
-	public List<Address> getAddressByShareCode(String shareCode) {
-		return addressRepository.getAddressByShareCode(shareCode);
-	}
-	
 	/**
 	 * 根据合协社区用户绑定的房屋设置默认地址
 	 * @param user
@@ -381,19 +371,19 @@ public class AddressServiceImpl implements AddressService {
 					add.setCity(addr.getCity_name());
 					Long cityId = map.get(addr.getCity_name());
 					if (cityId == null) {
-						cityId = 0l;
+						cityId = 0L;
 					}
 					add.setCityId(cityId);
 					add.setCounty(addr.getRegion_name());
 					Long countyId = map.get(addr.getRegion_name());
 					if (countyId == null) {
-						countyId = 0l;
+						countyId = 0L;
 					}
 					add.setCountyId(countyId);
 					add.setProvince(addr.getProvince_name());
 					Long provinceId = map.get(addr.getProvince_name());
 					if (provinceId == null) {
-						provinceId = 0l;
+						provinceId = 0L;
 					}
 					add.setProvinceId(provinceId);
 					double latitude = 0;

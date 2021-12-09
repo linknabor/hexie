@@ -3,6 +3,7 @@ package com.yumu.hexie.service.eshop;
 import java.util.Map;
 
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
 import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
@@ -45,6 +46,8 @@ public interface EshopSerivce {
 	CommonResponse<Object> genPromotionQrCode(Map<String, String> requestMap);
 	
 	CommonResponse<Object> getOrder(QueryOrderVO queryOrderVO);
+
+	OrderDetailResp getOrderDetail(String orderId);
 
 	void saveLogistics(SaveLogisticsVO saveLogisticsVO);
 

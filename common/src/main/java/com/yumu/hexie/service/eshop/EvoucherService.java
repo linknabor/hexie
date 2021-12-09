@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.eshop;
 
 import java.util.List;
+import java.util.Map;
 
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.market.Evoucher;
@@ -16,6 +17,7 @@ public interface EvoucherService {
 	void enable(ServiceOrder serviceOrder);
 
 	void consume(User operator, String code, String evouchers) throws Exception;
+	Map<String, String> consume(String userId, String code);
 
 	EvoucherView getEvoucher(String code);
 	
