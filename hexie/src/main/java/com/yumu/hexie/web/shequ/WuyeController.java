@@ -279,9 +279,6 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
 		
-		if (StringUtils.isEmpty(sect_id)) {
-			sect_id = user.getSectId();
-		}
 		BillListVO listVo = wuyeService.queryBillList(user, payStatus, startDate, endDate, currentPage,
 				totalCount, house_id, sect_id, regionname);
 		if (listVo != null && listVo.getBill_info() != null) {
