@@ -103,18 +103,21 @@ public class WuyeController extends BaseController {
 
 	/**
 	 * 根据用户身份查询其所绑定的房屋
+	 *@param user
+	 *@param sectId 这个小区ID是当前业主所在的小区，一个业主可能拥有多个小区的房产，如果不传这个值，则查所有的房产。如果传了小区ID，则只查当前小区的房产 
 	 */
 	/***************** [BEGIN]房产 ********************/
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouses", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user) throws Exception {
+	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user, 
+			@RequestParam(required = false) String sectId) throws Exception {
 		
 		log.info("user is : " + user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
-		HouseListVO listVo = wuyeService.queryHouse(user);
+		HouseListVO listVo = wuyeService.queryHouse(user, sectId);
 		if (listVo != null && listVo.getHou_info() != null) {
 			return BaseResult.successResult(listVo.getHou_info());
 		} else {
@@ -275,6 +278,10 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String totalCount, @RequestParam(required = false) String house_id, 
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
+		
+		if (StringUtils.isEmpty(sect_id)) {
+			sect_id = user.getSectId();
+		}
 		BillListVO listVo = wuyeService.queryBillList(user, payStatus, startDate, endDate, currentPage,
 				totalCount, house_id, sect_id, regionname);
 		if (listVo != null && listVo.getBill_info() != null) {
@@ -967,5 +974,6 @@ public class WuyeController extends BaseController {
 		Discounts discounts = wuyeService.getFeeSmsPayQrCode(user, queryFeeSmsBillReq);
 		return BaseResult.successResult(discounts);
 	}
+	
 
 }

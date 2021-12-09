@@ -9,7 +9,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
@@ -29,6 +31,7 @@ import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.QrCodeRepository;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.model.view.WuyePayTabsRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.page.PageConfigService;
 
 @Service("pageConfigService")
@@ -50,6 +53,10 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private WuyePayTabsRepository wuyePayTabsRepository;
 	@Autowired
 	private MenuRepository menuRepository;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	/**
 	 * 根据banner类型动态获取
@@ -159,18 +166,6 @@ public class PageConfigServiceImpl implements PageConfigService {
 	 * @param appId
 	 */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_APP, key = "#appId", unless = "#result == null")
-	public List<Menu> getMenuByAppid(String appId) {
-		
-		Sort sort = new Sort(Direction.ASC, "sort");
-		return menuRepository.findByAppid(appId, sort);
-	}
-	
-	/**
-	 * 动态获取公众号菜单
-	 * @param appId
-	 */
-	@Override
 	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_SECT, key = "#sectId", unless = "#result == null")
 	public List<Menu> getMenuBySectId(String sectId) {
 		
@@ -197,8 +192,15 @@ public class PageConfigServiceImpl implements PageConfigService {
 		Sort sort = new Sort(Direction.ASC, "sort");
 		return menuRepository.findByDefaultTypeLessThan(defaultType, sort);
 	}
-
-
+	
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MENU_APP_BINDED, key = "#appid+'_'+#defaultType", unless = "#result == null")
+	public List<Menu> getMenuByAppidAndDefaultTypeLessThan(String appid, int defaultType) {
+		
+		Sort sort = new Sort(Direction.ASC, "sort");
+		return menuRepository.findByAppidAndDefaultTypeLessThan(appid, defaultType, sort);
+	}
+	
 	/**
 	 * 清楚所有页面配置参数缓存
 	 */
@@ -208,6 +210,28 @@ public class PageConfigServiceImpl implements PageConfigService {
 			, allEntries = true)
 	public void updatePageConfig() {
 
+	}
+	
+	@Override
+	public String getSwtichSectTips(User user, String page) {
+		
+		String tips = "";
+		if(StringUtils.isEmpty(page)) {
+			return "";
+		}
+		String key = ModelConstant.KEY_PAGE_TIPS_SWITCH_SECT + page;
+		long offset = user.getId();
+		
+		Boolean shown = stringRedisTemplate.opsForValue().getBit(key, offset);
+		if (!shown) {
+			stringRedisTemplate.opsForValue().setBit(key, offset, true);	//用bitmap做，占用的存储空间要小的多
+			tips = systemConfigService.getSysConfigByKey("SWITCH_SECT_TIPS_"+page.toUpperCase());
+		}
+//		Long value = stringRedisTemplate.opsForValue().increment(key);
+//		if (value == 1) {
+//			tips = systemConfigService.getSysConfigByKey("SWITCH_SECT_TIPS_"+page.toUpperCase());
+//		}
+		return tips;
 	}
 
 }

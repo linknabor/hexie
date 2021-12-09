@@ -355,10 +355,10 @@ public class ModelConstant {
 	public static final String KEY_TYPE_CSHOTLINE = "cfg:page:csHotline";
 	public static final String KEY_TYPE_PAGECONFIG = "cfg:page:pageConfigView";	//页面配置
 	public static final String KEY_TYPE_WUYEPAY_TABS = "cfg:page:wuyePayTabs";	//物业缴费选项卡
-	public static final String KEY_TYPE_MENU_APP = "cfg:page:menu:app";	//公众号菜单
 	public static final String KEY_TYPE_MENU_CSP = "cfg:page:menu:csp";	//公众号菜单
 	public static final String KEY_TYPE_MENU_SECT = "cfg:page:menu:sect";	//公众号菜单
 	public static final String KEY_TYPE_MENU_DEFAULT = "cfg:page:menu:default";	//公众号菜单
+	public static final String KEY_TYPE_MENU_APP_BINDED = "cfg:page:menu:app:default";	//公众号菜单-绑定了房屋的
 
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
@@ -482,6 +482,8 @@ public class ModelConstant {
 	public static final String KEY_INVOICE_APPLICATIONF_FLAG = "invoice:application:";	//发票申请标记，后面接trade_water_id
 
 	public static final String KEY_WORKORDER_CFG = "workorder:cfg:";	//工单配置，后面接city_db:sect_id
+	
+	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 
 
 	public static final String KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:deliveryReceiver"; //电商接单人推送
