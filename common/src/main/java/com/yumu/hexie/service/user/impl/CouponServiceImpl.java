@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -99,6 +100,7 @@ public class CouponServiceImpl implements CouponService {
     @Inject
     private HomeItemService homeItemService;
 	@Autowired
+	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private RedisRepository redisRepository;

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	private static Logger logger = LoggerFactory.getLogger(WuyeQueueTaskImpl.class);
 	
 	@Autowired
+	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private WuyeService wuyeService;
@@ -166,8 +168,18 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				
 				boolean isSuccess = false;
 				try {
-					wuyeService.scanEvent4Invoice(baseEventDTO);
-					isSuccess = true;
+					WechatResponse wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+					if (wechatResponse.getErrcode() == 0) {
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 40037) {
+						logger.error("invalid template_id, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 45009) {
+						logger.error("reach max api daily quota limit, 请联系系统管理员！");
+						isSuccess = true;
+					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
@@ -226,6 +238,14 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				try {
 					wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
 					if (wechatResponse.getErrcode() == 0) {
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 40037) {
+						logger.error("invalid template_id, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 45009) {
+						logger.error("reach max api daily quota limit, 请联系系统管理员！");
 						isSuccess = true;
 					}
 				} catch (Exception e) {
