@@ -824,7 +824,7 @@ public class TemplateMsgService {
 		vo.setFirst(firstItem);
 		vo.setKeyword1(keywordItem1);
 		vo.setKeyword2(keywordItem2);
-		vo.setKeyword2(keywordItem3);
+		vo.setKeyword3(keywordItem3);
 		vo.setRemark(remarkItem);
 
 		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
