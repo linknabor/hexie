@@ -1066,11 +1066,11 @@ public class EshopServiceImpl implements EshopSerivce {
 			Page<Object[]> page;
 
 			if(!"1".equals(queryOrderVO.getQueryFlag())) {
-				if (!StringUtils.isEmpty(sDate)) {
+				if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
 					Date startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
 					sDate = startDate.toString();
 				}
-				if (!StringUtils.isEmpty(eDate)) {
+				if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
 					Date endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
 					eDate = endDate.toString();
 				}
