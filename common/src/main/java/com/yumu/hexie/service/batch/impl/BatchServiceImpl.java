@@ -112,8 +112,8 @@ public class BatchServiceImpl implements BatchService {
 		init();
 		
 		wuyeQueueTask.bindHouseByTrade();
-		wuyeQueueTask.eventScan4Invoice();
-		wuyeQueueTask.eventScanSubscribe4Invoice();
+		wuyeQueueTask.eventScan();
+		wuyeQueueTask.eventScanSubscribe();
 		wuyeQueueTask.registerAndBind();
 //		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();

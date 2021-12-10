@@ -371,4 +371,11 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	WechatPayInfo getSmsPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
+	/**
+	 * 扫公众号二维码申请电子收据
+	 * @param baseEventDTO
+	 * @return 
+	 */
+	WechatResponse scanEvent4Receipt(BaseEventDTO baseEventDTO);
+
 }

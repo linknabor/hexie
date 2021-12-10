@@ -783,7 +783,67 @@ public class TemplateMsgService {
 		return sendMsg(msg, accessToken);
 
 	}
+	
+	/**
+	 * 发送电子发票申请模板消息
+	 * @param opinionRequest
+	 * @param accessToken
+	 */
+	public WechatResponse sendReceiptApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
+		
+		String eventKey = baseEventDTO.getEventKey();
+    	if (!eventKey.startsWith("02") && !eventKey.startsWith("qrscene_02")) {	//01表示扫二维码开票的场景
+			return new WechatResponse();
+		}
+    	String[]eventKeyArr = eventKey.split("\\|");
+    	if (eventKeyArr == null || eventKeyArr.length < 6) {
+			return new WechatResponse();
+		}
+    	String shopName = "";
+    	String tradeWaterId = "";
+    	String tranAmt = ""; 
+//    	String payMethod = "";
+    	try {
+			tradeWaterId = eventKeyArr[1];
+			tranAmt = eventKeyArr[2];
+			shopName = eventKeyArr[3];
+//			payMethod = eventKeyArr[4];
+//			feeName = eventKeyArr[5];
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return new WechatResponse();
+		}
+    	
+    	TemplateItem firstItem = new TemplateItem("请点击查看详情进入电子收据自助申请！");
+    	TemplateItem keywordItem1 = new TemplateItem(shopName);
+    	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
+    	TemplateItem keywordItem3 = new TemplateItem(DateUtil.dttmFormat(new Date()));
+    	TemplateItem remarkItem = new TemplateItem("请及时进行申请");
 
+		CommonVO2 vo = new CommonVO2();
+		vo.setFirst(firstItem);
+		vo.setKeyword1(keywordItem1);
+		vo.setKeyword2(keywordItem2);
+		vo.setKeyword2(keywordItem3);
+		vo.setRemark(remarkItem);
+
+		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_RECEIPT_APPLICATION_REMINDER, baseEventDTO.getAppId()));
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_RECEIPT_APPLICATION_URL);
+		url = AppUtil.addAppOnUrl(url, baseEventDTO.getAppId());
+		
+		String tel = baseEventDTO.getUser().getTel();
+		if (StringUtils.isEmpty(tel)) {
+			tel = "";
+		}
+		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
+		msg.setUrl(url);
+		msg.setTouser(baseEventDTO.getOpenid());
+		return sendMsg(msg, accessToken);
+
+	}
+	
 	/**
 	 * 电商支付成功通知
 	 * @param user
