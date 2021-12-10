@@ -433,5 +433,16 @@ public class GotongServiceImpl implements GotongService {
         return templateMsgService.sendFinishInvoiceMessage(invoiceNotification, accessToken);
         
 	}
+    
+    /**
+     * 发送用户申请电子收据消息
+     */
+    @Override
+	public WechatResponse sendMsg4ApplicationReceipt(BaseEventDTO baseEventDTO) {
+
+    	String accessToken = systemConfigService.queryWXAToken(baseEventDTO.getAppId());
+        return templateMsgService.sendReceiptApplicationMessage(baseEventDTO, accessToken);
+        
+	}
 
 }

@@ -29,6 +29,8 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_WORKORDER_NOTIFY = "workOrderNotificationTemplate";
 	public static final String TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER = "invoiceApplicationReminderTemplate";	//发票申请提醒
 	public static final String TEMPLATE_TYPE_INVOICE_FINISH = "invoiceFinishTemplate";	//发票开具完成提醒
+	public static final String TEMPLATE_TYPE_RECEIPT_APPLICATION_REMINDER = "receiptApplicationReminderTemplate";	//收据申请提醒
+	public static final String TEMPLATE_TYPE_RECEIPT_FINISH = "receiptFinishTemplate";	//收据下发提醒
 	
 	public static final String URL_SUCCESS = "successUrl";
 	public static final String URL_REG_SUCCESS = "regSuccessUrl";
@@ -53,6 +55,7 @@ public class MsgCfg {
 	public static final String URL_OPINION_NOTICE = "sendOpinionUrl";
 	public static final String URL_WORK_ORDER_DETAIL = "workOrderDetail";	//工单明细页面
 	public static final String URL_INVOICE_APPLICATION_URL = "invoiceApplicationUrl";	//发票申请页面
+	public static final String URL_RECEIPT_APPLICATION_URL = "receiptApplicationUrl";	//电子收据申请页面
 	
 	//订阅消息
 	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";

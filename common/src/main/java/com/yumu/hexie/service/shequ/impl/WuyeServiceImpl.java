@@ -646,6 +646,12 @@ public class WuyeServiceImpl implements WuyeService {
 		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
 	}
 	
+	@Override
+	public WechatResponse scanEvent4Receipt(BaseEventDTO baseEventDTO) {
+		
+		return gotongService.sendMsg4ApplicationReceipt(baseEventDTO);
+	}
+	
 	/**
 	 * 到账消息推送(给物业配置的工作人推送)
 	 */

@@ -67,4 +67,6 @@ public interface GotongService {
 
 	WechatResponse sendMsg4FinishInvoice(InvoiceNotification invoiceNotification);
 
+	WechatResponse sendMsg4ApplicationReceipt(BaseEventDTO baseEventDTO);
+
 }

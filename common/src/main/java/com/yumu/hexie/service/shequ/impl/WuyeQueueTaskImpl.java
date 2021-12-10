@@ -131,7 +131,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	@SuppressWarnings("unchecked")
 	@Async("taskExecutor")
 	@Override
-	public void eventScanSubscribe4Invoice() {
+	public void eventScanSubscribe() {
 		
 		while (true) {
 			try {
@@ -149,7 +149,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
-				logger.info("strat to consume eventScanSubscribe4Invoice queue : " + map);
+				logger.info("strat to consume eventScanSubscribe queue : " + map);
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
@@ -166,9 +166,23 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setEventKey(eventKey);
 				baseEventDTO.setUser(user);
 				
+				String type = "01";
+				if (eventKey.startsWith("01") || eventKey.startsWith("qrscene_01")) {
+					//donothing
+				} else if (eventKey.startsWith("02") || eventKey.startsWith("qrscene_02")) {
+					type = "02";
+				}
+				
 				boolean isSuccess = false;
+				WechatResponse wechatResponse = null;
 				try {
-					WechatResponse wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+					if ("01".equals(type)) {
+						logger.info("event type : " + type + ", apply invoice . " );
+						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+					} else if ("02".equals(type)) {
+						logger.info("event type : " + type + ", apply receipt . " );
+						wechatResponse = wuyeService.scanEvent4Receipt(baseEventDTO);
+					}
 					if (wechatResponse.getErrcode() == 0) {
 						isSuccess = true;
 					}
@@ -185,7 +199,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				
 				if (!isSuccess) {
-					logger.info("eventScanSubscribe4Invoice queue consume failed !, repush into the queue. json : " + json);
+					logger.info("eventScanSubscribe queue consume failed !, repush into the queue. json : " + json);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_SUBSCRIBE_QUEUE, json);
 				}
 
@@ -199,7 +213,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	@SuppressWarnings("unchecked")
 	@Async("taskExecutor")
 	@Override
-	public void eventScan4Invoice() {
+	public void eventScan() {
 		
 		while (true) {
 			try {
@@ -216,7 +230,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
-				logger.info("strat to consume eventScan4Invoice queue : " + map);
+				logger.info("strat to consume eventScan queue : " + map);
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
@@ -233,10 +247,24 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setEventKey(eventKey);
 				baseEventDTO.setUser(user);
 				
+				String type = "01";
+				if (eventKey.startsWith("01") || eventKey.startsWith("qrscene_01")) {
+					//donothing
+				} else if (eventKey.startsWith("02") || eventKey.startsWith("qrscene_02")) {
+					type = "02";
+				}
+				
 				boolean isSuccess = false;
 				WechatResponse wechatResponse = null;
 				try {
-					wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+					if ("01".equals(type)) {
+						logger.info("event type : " + type + ", apply invoice . " );
+						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+					} else if ("02".equals(type)) {
+						logger.info("event type : " + type + ", apply receipt . " );
+						wechatResponse = wuyeService.scanEvent4Receipt(baseEventDTO);
+					}
+					
 					if (wechatResponse.getErrcode() == 0) {
 						isSuccess = true;
 					}
@@ -253,7 +281,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				
 				if (!isSuccess) {
-					logger.info("eventScan4Invoice queue consume failed !, repush into the queue. json : " + json);
+					logger.info("eventScan queue consume failed !, repush into the queue. json : " + json);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_QUEUE, json);
 				}
 
