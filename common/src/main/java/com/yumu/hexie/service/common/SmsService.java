@@ -24,6 +24,11 @@ public interface SmsService {
 	
 	String saveAndGetInvoiceToken(String tradeWaterId);
 	
-	boolean verifySmsToken(String tradeWaterId, String token);
+	boolean verifySmsToken(String tradeWaterId, int type, String token, String appid);
+	
+	String saveAndGetReceiptToken(String tradeWaterId, String appid);
+
+	
+
 
 }

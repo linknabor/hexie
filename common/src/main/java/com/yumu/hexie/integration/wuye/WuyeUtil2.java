@@ -56,6 +56,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.vo.req.MessageReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
@@ -696,6 +697,33 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<Discounts>> typeReference = new TypeReference<CommonResponse<Discounts>>(){};
 		CommonResponse<Discounts> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
 		BaseResult<Discounts> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 查询当前用户申请过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += FEE_SMS_PAY_QRCODE;
+		Map<String, String> map = new HashMap<>();
+//		map.put("batch_no", queryFeeSmsBillReq.getBatchNo());
+//		map.put("cell_id", queryFeeSmsBillReq.getCellId());
+//		map.put("appid", queryFeeSmsBillReq.getAppid());
+//		map.put("pay_fee_type", "01");	//01账单支付
+//		map.put("pay_type", "0");	//非银行卡支付
+//		map.put("is_qrcode", "1");	//1，二维码支付
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;

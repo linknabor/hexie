@@ -25,6 +25,7 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
 public interface WuyeService {
@@ -378,5 +379,13 @@ public interface WuyeService {
 	 * @return 
 	 */
 	WechatResponse scanEvent4Receipt(BaseEventDTO baseEventDTO);
+
+	/**
+	 * 申请电子收据
+	 * @param user
+	 * @param receiptApplicationReq
+	 * @throws Exception 
+	 */
+	void applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception;
 
 }

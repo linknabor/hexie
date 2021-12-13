@@ -362,13 +362,21 @@ public class UserController extends BaseController{
 		String requestIp = RequestUtil.getRealIp(request);
 		log.info("getyzm1 trade_water_id : " + trade_water_id);
 		log.info("getyzm1 request mobile: " + requestIp);
-		log.info("getyzm1 request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
 		String token = request.getHeader("Access-Control-Allow-Token");
-		boolean result = smsService.verifySmsToken(trade_water_id, token);
+		if (StringUtils.isEmpty(token)) {
+			token = request.getHeader("access-control-allow-token");
+		}
+		log.info("getyzm1 request header [Access-Control-Allow-Token]: " + token);
+		
+		int smsType = ModelConstant.SMS_TYPE_INVOICE;
+		if (ModelConstant.SMS_TYPE_RECEIPT == yzm.getType()) {
+			smsType = ModelConstant.SMS_TYPE_RECEIPT;
+		}
+		boolean result = smsService.verifySmsToken(trade_water_id, smsType, token, yzm.getAppid());
 		if (!result) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_INVOICE);
+		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, smsType);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
