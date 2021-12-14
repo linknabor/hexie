@@ -85,7 +85,7 @@ public class GaofeiServiceImpl implements GaofeiService {
 
 	@Override
 	public YuyueOrder addGaofeiYuyueOrder(User user, GaofeiReq gaofeiReq, long addressId) {
-		Address address = addressRepository.findById(addressId).get();
+		Address address = addressRepository.findById(addressId);
 		YuyueOrder yOrder = new YuyueOrder();
 
 		Merchant merchant = merchantRepository.findMerchantByProductType(ModelConstant.YUYUE_PRODUCT_TYPE_GAOFEI);

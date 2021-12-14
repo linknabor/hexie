@@ -52,7 +52,6 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		log.error("saveComment的用户="+user);
 		log.error("saveComment的用户id="+user.getId());
 		log.error("saveComment的用户电话="+user.getTel());
-		int count = 0;
 		if(comment.getCommentType()==ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
 			comment.setComplainStatus(0);//0待确认 1已确认 2拒绝
 		}
@@ -67,10 +66,10 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		if(comment.getCommentType() == ModelConstant.HAOJIAAN_COMMPENT_STATUS_COMPLAIN) {
 			YuyueOrder yuyueOrder =yuyueOrderRepository.findByOrderNo(comment.getYuyueOrderNo());//投诉的订单
 			log.error("投诉的预约订单Id为："+yuyueOrder.getId());
-			Address address = addressRepository.findById(yuyueOrder.getAddressId()).get();
-			List<ServiceOperator> ops = null;
-			List<Long> regionIds = new ArrayList<Long>();
-	        regionIds.add(1l);
+			Address address = addressRepository.findById(yuyueOrder.getAddressId());
+			List<ServiceOperator> ops;
+			List<Long> regionIds = new ArrayList<>();
+	        regionIds.add(1L);
 	        regionIds.add(address.getProvinceId());
 	        regionIds.add(address.getCityId());
 	        regionIds.add(address.getCountyId());
@@ -78,7 +77,7 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 			//查找对应服务类型和服务区的操作员
 	        List<Long> operatorIds = serviceRegionRepository.findByOrderTypeAndRegionIds(HomeServiceConstant.SERVICE_TYPE_BAOJIE,regionIds);
 	        log.error("预约订单对应操作员数量" + operatorIds.size());
-	        if(operatorIds != null && operatorIds.size() > 0) {
+	        if(operatorIds.size() > 0) {
 	        	//查找操作员的基础信息
 	            ops = serviceOperatorRepository.findOperators(operatorIds);
 	            for (ServiceOperator op : ops) {
@@ -89,17 +88,14 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 	        }
 		}
 		//不为空表示保存成功
-		if(haoJiaAnComment!=null) {
-			return count = 1;
-		}
-		return count;
+		return 1;
 	}
 	
 	//获得投诉详情页信息
 	@Override
 	public Map<String,Object> getComplainDetail(long commentId) {
 		List<Object[]> list = haoJiaAnCommentRepository.getComplainDetail(commentId);
-		Map<String,Object> map = new HashMap<String,Object>();
+		Map<String,Object> map = new HashMap<>();
 		for (Object[] object : list) {
 			map.put("address", object[0]);//服务地址
 			map.put("tel", object[1]);//手机号
@@ -119,24 +115,22 @@ public class HaoJiaAnCommentServiceImpl implements HaoJiaAnCommentService{
 		log.error("feedBack = "+feedBack);
 		log.error("complainStatus = "+complainStatus);
 		log.error("commentId = "+commentId);
-		int count = 0;
+		int count;
 		HaoJiaAnComment haoJiaAnComment = haoJiaAnCommentRepository.findById(commentId).get();
 		haoJiaAnComment.setComplainStatus(complainStatus);//投诉状态
 		haoJiaAnComment.setFeedBack(feedBack);//投诉反馈
 		haoJiaAnComment.setComplainTime(System.currentTimeMillis());//处理投诉的时间
 		haoJiaAnComment.setProcessUserId(user.getId());//处理投诉的人的id
 		haoJiaAnComment.setProcessUserName(user.getName());//处理投诉的人的姓名
-		if(haoJiaAnCommentRepository.save(haoJiaAnComment) != null) {
-			count = 1;
-		}
+		haoJiaAnCommentRepository.save(haoJiaAnComment);
+		count = 1;
 		return count;
 	}
 
 	//根据订单id和评论类型查看当前订单是否有被评论和投诉
 	@Override
 	public HaoJiaAnComment getCommentByOrderNoAndType(String yuyueOrderNo, int commentType) {
-		HaoJiaAnComment hjac = haoJiaAnCommentRepository.getCommentByOrderNoAndType(yuyueOrderNo, commentType);
-		return hjac;
+		return haoJiaAnCommentRepository.getCommentByOrderNoAndType(yuyueOrderNo, commentType);
 	}
 
 

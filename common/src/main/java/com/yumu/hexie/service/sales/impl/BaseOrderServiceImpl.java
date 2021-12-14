@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -628,10 +627,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         User user = userService.getById(o.getUserId());
         request.setUserId(user.getWuyeId());
         request.setAppid(user.getAppId());
-        Optional<Region> optional = regionRepository.findById(o.getXiaoquId());
-        Region region;
-        if (optional.isPresent()) {
-            region = optional.get();
+        Region region = regionRepository.findById(o.getXiaoquId());
+        if (region != null) {
             request.setSectId(region.getSectId());
         }
         if (StringUtils.isEmpty(request.getSectId())) {

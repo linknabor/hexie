@@ -59,7 +59,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	@Transactional
 	public Long addNoNeedPayOrder(User user, HaoJiaAnReq haoJiaAnReq,
 			long addressId) {
-		Address address = addressRepository.findById(addressId).get();
+		Address address = addressRepository.findById(addressId);
 		haoJiaAnReq.setStrMobile(address.getTel());
 		haoJiaAnReq.setStrName(address.getReceiveName());
 		haoJiaAnReq.setStrWorkAddr(address.getRegionStr()+address.getDetailAddress());
@@ -102,9 +102,9 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 		userNoticeService.yuyueSuccess(user.getId(), yOrder.getTel(), yOrder.getReceiverName(), yOrder.getId(), yOrder.getProductName(), ModelConstant.YUYUE_PAYMENT_TYPE_OFFLINE, 0);
 		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 
-        List<ServiceOperator> ops = null;
-        List<Long> regionIds = new ArrayList<Long>();
-        regionIds.add(1l);
+        List<ServiceOperator> ops;
+        List<Long> regionIds = new ArrayList<>();
+        regionIds.add(1L);
         regionIds.add(address.getProvinceId());
         regionIds.add(address.getCityId());
         regionIds.add(address.getCountyId());
@@ -112,7 +112,7 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
         //查找对应服务类型和服务区的操作员
         List<Long> operatorIds = serviceRegionRepository.findByOrderTypeAndRegionIds(HomeServiceConstant.SERVICE_TYPE_BAOJIE,regionIds);
         log.error("预约订单对应操作员数量" + operatorIds.size());
-        if(operatorIds != null && operatorIds.size() > 0) {
+        if(operatorIds.size() > 0) {
         	//查找操作员的基础信息
             ops = serviceOperatorRepository.findOperators(operatorIds);
             for (ServiceOperator op : ops) {
@@ -158,20 +158,20 @@ public class HaoJiaAnServiceImpl implements HaoJiaAnService{
 	public List<Long> orderAccessAuthority(long orderId) {
 		log.error("进来了");
 		YuyueOrder yorder = yuyueOrderRepository.findById(orderId).get();
-		Address address = addressRepository.findById(yorder.getAddressId()).get();
-		List<Long> regionIds = new ArrayList<Long>();
-        regionIds.add(1l);
+		Address address = addressRepository.findById(yorder.getAddressId());
+		List<Long> regionIds = new ArrayList<>();
+        regionIds.add(1L);
         regionIds.add(address.getProvinceId());
         regionIds.add(address.getCityId());
         regionIds.add(address.getCountyId());
         regionIds.add(address.getXiaoquId());
-        List<ServiceOperator> ops = null;
-        List<Long> userIds = new ArrayList<Long>(); //拥有当前订单查看权限的用户
+        List<ServiceOperator> ops;
+        List<Long> userIds = new ArrayList<>(); //拥有当前订单查看权限的用户
         userIds.add(yorder.getUserId());//创建订单的用户
         //查找对应服务类型和服务区的操作员
         List<Long> operatorIds = serviceRegionRepository.findByOrderTypeAndRegionIds(HomeServiceConstant.SERVICE_TYPE_BAOJIE,regionIds);
         log.error("订单访问权限对应操作员数量" + operatorIds.size());
-        if(operatorIds != null && operatorIds.size() > 0) {
+        if(operatorIds.size() > 0) {
         	//查找操作员的基础信息
             ops = serviceOperatorRepository.findOperators(operatorIds);
             for (ServiceOperator op : ops) {
