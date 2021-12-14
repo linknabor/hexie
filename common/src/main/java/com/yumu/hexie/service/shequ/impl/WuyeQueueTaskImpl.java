@@ -364,7 +364,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				
 				if (isSuccess) {
 					try {
-						wuyeService.bindHouseByTradeAsync("1", savedUser, queue.getTradeWaterId(), "5");	//绑定房屋队列
+						wuyeService.bindHouseByTradeAsync("1", savedUser, queue.getTradeWaterId(), queue.getBindType());	//绑定房屋队列
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}	

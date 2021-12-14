@@ -658,7 +658,7 @@ public class WuyeServiceImpl implements WuyeService {
 	 * 到账消息推送(给物业配置的工作人推送)
 	 */
 	@Override
-	public void registerAndBind(User user, String tradeWaterId) {
+	public void registerAndBind(User user, String tradeWaterId, String bindType) {
 		
 		if (user == null) {
 			log.info("user is null, will return ! ");
@@ -674,6 +674,7 @@ public class WuyeServiceImpl implements WuyeService {
 				BindHouseQueue bindHouseQueue = new BindHouseQueue();
 				bindHouseQueue.setUser(user);
 				bindHouseQueue.setTradeWaterId(tradeWaterId);
+				bindHouseQueue.setBindType(bindType);
 				String value = objectMapper.writeValueAsString(bindHouseQueue);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, value);
 				isSuccess = true;

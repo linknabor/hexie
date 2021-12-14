@@ -556,7 +556,7 @@ public class WuyeController extends BaseController {
 		
 		
 		if (!StringUtils.isEmpty(openid)) {
-			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id());	//队列，异步执行
+			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id(), "5");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");
 	}
@@ -1064,7 +1064,7 @@ public class WuyeController extends BaseController {
 		wuyeService.applyReceipt(user, receiptApplicationReq);	//申请电子收据
 		
 		if (!StringUtils.isEmpty(openid)) {
-			wuyeService.registerAndBind(user, receiptApplicationReq.getTradeWaterId());	//队列，异步执行
+			wuyeService.registerAndBind(user, receiptApplicationReq.getTradeWaterId(), "6");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");
 	}

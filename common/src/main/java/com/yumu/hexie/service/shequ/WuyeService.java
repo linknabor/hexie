@@ -336,8 +336,9 @@ public interface WuyeService {
 	 * 申请电子发票后创建用户并为其绑定房屋
 	 * @param user
 	 * @param tradeWaterId
+	 * @param bindType
 	 */
-	void registerAndBind(User user, String tradeWaterId);
+	void registerAndBind(User user, String tradeWaterId, String bindType);
 
 	/**
 	 * 获取当前用户开具过的发票
@@ -387,5 +388,6 @@ public interface WuyeService {
 	 * @throws Exception 
 	 */
 	void applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception;
+
 
 }

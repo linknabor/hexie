@@ -101,6 +101,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_USER_INVOICE_URL = "queryInvoiceByUserSDO.do";	//获取用户申请过的发票 
 	private static final String QUERY_FEE_SMS_BILL_URL = "getFeeSmsBillSDO.do";	//获取催缴短信中的欠费账单
 	private static final String FEE_SMS_PAY_QRCODE = "getSmsPayQrCodeSDO.do";	//获取催缴短信二维码
+	private static final String APPLY_RECEIPT_URL = "allpyReceiptSDO.do";
 
 	/**
 	 * 标准版查询账单
@@ -712,14 +713,12 @@ public class WuyeUtil2 {
 	public BaseResult<String> applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception {
 		
 		String requestUrl = requestUtil.getRequestUrl(user, "");
-		requestUrl += FEE_SMS_PAY_QRCODE;
+		requestUrl += APPLY_RECEIPT_URL;
 		Map<String, String> map = new HashMap<>();
-//		map.put("batch_no", queryFeeSmsBillReq.getBatchNo());
-//		map.put("cell_id", queryFeeSmsBillReq.getCellId());
-//		map.put("appid", queryFeeSmsBillReq.getAppid());
-//		map.put("pay_fee_type", "01");	//01账单支付
-//		map.put("pay_type", "0");	//非银行卡支付
-//		map.put("is_qrcode", "1");	//1，二维码支付
+		map.put("trade_water_id", receiptApplicationReq.getTradeWaterId());
+		map.put("mobile", receiptApplicationReq.getMobile());
+		map.put("openid", receiptApplicationReq.getOpenid());
+		map.put("appid", receiptApplicationReq.getAppid());
 		
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
