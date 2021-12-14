@@ -19,7 +19,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 public class JacksonJsonUtil {
 	private static ObjectMapper mapper;
-	private static XmlMapper xmlMapper = new XmlMapper();  
+	private static final XmlMapper xmlMapper = new XmlMapper();
 	
 	/**
 	 * 获取ObjectMapper实例
@@ -86,8 +86,7 @@ public class JacksonJsonUtil {
 	public static String beanToJson(Object obj) throws JSONException {
 		try {
 			ObjectMapper objectMapper = getMapperInstance(false);
-			String json = objectMapper.writeValueAsString(obj);
-			return json;
+			return objectMapper.writeValueAsString(obj);
 		} catch (Exception e) {
 			throw new JSONException(e.getMessage());
 		}
@@ -107,8 +106,7 @@ public class JacksonJsonUtil {
 			throws JSONException {
 		try {
 			ObjectMapper objectMapper = getMapperInstance(createNew);
-			String json = objectMapper.writeValueAsString(obj);
-			return json;
+			return objectMapper.writeValueAsString(obj);
 		} catch (Exception e) {
 			throw new JSONException(e.getMessage());
 		}
@@ -127,8 +125,7 @@ public class JacksonJsonUtil {
 	public static Object jsonToBean(String json, Class<?> cls) throws JSONException {
 		try {
 			ObjectMapper objectMapper = getMapperInstance(false);
-			Object vo = objectMapper.readValue(json, cls);
-			return vo;
+			return objectMapper.readValue(json, cls);
 		} catch (Exception e) {
 			throw new JSONException(e.getMessage());
 		}
@@ -150,8 +147,7 @@ public class JacksonJsonUtil {
 			throws JSONException {
 		try {
 			ObjectMapper objectMapper = getMapperInstance(createNew);
-			Object vo = objectMapper.readValue(json, cls);
-			return vo;
+			return objectMapper.readValue(json, cls);
 		} catch (Exception e) {
 			throw new JSONException(e.getMessage());
 		}
@@ -161,9 +157,8 @@ public class JacksonJsonUtil {
      * json string convert to xml string 
      */  
     public static String json2xml(String jsonStr)throws Exception{  
-        JsonNode root = getMapperInstance(false).readTree(jsonStr);  
-        String xml = xmlMapper.writeValueAsString(root);  
-        return xml;  
+        JsonNode root = getMapperInstance(false).readTree(jsonStr);
+		return xmlMapper.writeValueAsString(root);
     }  
       
     /** 

@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.eshop.vo;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class QueryEvoucherVO implements Serializable {
 
@@ -14,7 +15,10 @@ public class QueryEvoucherVO implements Serializable {
 	private String agentNo;
 	private String agentName;
 	private String type;
-	
+
+	private String userid;
+	private List<String> sectIds;
+
 	private int currentPage;
 	private int pageSize;
 	
@@ -60,12 +64,35 @@ public class QueryEvoucherVO implements Serializable {
 	public void setType(String type) {
 		this.type = type;
 	}
+
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public List<String> getSectIds() {
+		return sectIds;
+	}
+
+	public void setSectIds(List<String> sectIds) {
+		this.sectIds = sectIds;
+	}
+
 	@Override
 	public String toString() {
-		return "QueryEvoucherVO [tel=" + tel + ", status=" + status + ", agentNo=" + agentNo + ", agentName="
-				+ agentName + ", type=" + type + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
+		return "QueryEvoucherVO{" +
+				"tel='" + tel + '\'' +
+				", status='" + status + '\'' +
+				", agentNo='" + agentNo + '\'' +
+				", agentName='" + agentName + '\'' +
+				", type='" + type + '\'' +
+				", userid='" + userid + '\'' +
+				", sectIds=" + sectIds +
+				", currentPage=" + currentPage +
+				", pageSize=" + pageSize +
+				'}';
 	}
-	
-	
-	
 }

@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.sales.impl;
 
 import java.util.List;
@@ -37,9 +33,7 @@ public abstract class CustomOrderServiceImpl implements CustomOrderService {
     public abstract SalePlan findSalePlan(long ruleId);
 
     /** 
-     * @param po
      * @param so
-     * @see com.yumu.hexie.service.sales.CustomOrderService#postPaySuccess(com.yumu.hexie.model.payment.PaymentOrder, com.yumu.hexie.model.market.ServiceOrder)
      */
     @Override
     public abstract void postPaySuccess(ServiceOrder so);

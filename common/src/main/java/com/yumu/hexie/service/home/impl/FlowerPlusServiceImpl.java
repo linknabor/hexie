@@ -52,9 +52,6 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 	@Inject
 	private ProductRepository productRepository;
 
-	public String datefomat = "yyyy-MM-dd";
-	
-
 	@Override
 	public YuyueOrder addFlowerPlusOrder(User user, FlowerPlusReq flowerPlusReq, long addressId) {
 		Address address = addressService.queryAddressById(addressId);
@@ -96,7 +93,7 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 			fOrder.setServiceIsSingle(flowerPlusReq.getServiceIsSingle());
 			fOrder.setServiceNo(rule.getServiceNo());
 			fOrder.setServiceCount(1);
-			fOrder = flowerPlusOrderRepository.save(fOrder);			
+			flowerPlusOrderRepository.save(fOrder);
 		}else if(flowerPlusReq.getServiceIsSingle() == ModelConstant.YUYUE_SERVICE_CYCLE){
 			//修改时间格式
 			SimpleDateFormat sf = new SimpleDateFormat(DateUtil.dSimple);
@@ -122,7 +119,7 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 				fOrder.setCycleTime(flowerPlusReq.getCycleTime());
 				fOrder.setServiceNo(rule.getServiceNo());
 				fOrder.setServiceCount(i);
-				fOrder = flowerPlusOrderRepository.save(fOrder);
+				flowerPlusOrderRepository.save(fOrder);
 				//先换包月周期为一周
 				calendar.add(Calendar.DAY_OF_MONTH, 7);
 			}
@@ -131,19 +128,17 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 			log.error("validateFlowerPlusServiceType:"+flowerPlusReq.getServiceIsSingle());
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_DAOJIA,rule.getId(),"鲜花包月类型错误").setError();
 		}
-
-
 		return yOrder;
 	}
 	
 	@Override
 	public boolean checkIsExistenceByProduct(User user, long ruleId) {
 		YuyueRule yRule = yuyueRuleRepository.findById(ruleId).get();
-		Product product = productRepository.findById(yRule.getProductId()).get();
+		Product product = productRepository.findById(yRule.getProductId());
 		
 		log.error("checkIsExperience userId" + user.getId() + ", yRuleId=" + ruleId + "productId=" + product.getId());
 
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.ORDER_STATUS_PAYED);
 		status.add(ModelConstant.ORDER_STATUS_SENDED);
 		status.add(ModelConstant.ORDER_STATUS_RECEIVED);
@@ -151,34 +146,26 @@ public class FlowerPlusServiceImpl implements FlowerPlusService {
 		status.add(ModelConstant.ORDER_STATUS_REFUNDED);
 		
 		List<ServiceOrder> lists= serviceOrderRepository.findByUserAndStatusAndProductIdAndOrderType(user.getId(), status, product.getId(), ModelConstant.ORDER_TYPE_YUYUE);
-		
-		if(lists.size() == 0){
-			return false;
-		}else{
-			return true;
-		}
+
+		return lists.size() != 0;
 	}
 
 	@Override
 	public boolean checkCountByProduct(long ruleId, int count) {
 		YuyueRule yRule = yuyueRuleRepository.findById(ruleId).get();
-		Product product = productRepository.findById(yRule.getProductId()).get();
+		Product product = productRepository.findById(yRule.getProductId());
 		
 		log.error("checkCountByProduct yRuleId=" + ruleId + "productId=" + product.getId());
 
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.ORDER_STATUS_PAYED);
 		status.add(ModelConstant.ORDER_STATUS_SENDED);
 		status.add(ModelConstant.ORDER_STATUS_RECEIVED);
 		status.add(ModelConstant.ORDER_STATUS_CONFIRM);
 		status.add(ModelConstant.ORDER_STATUS_REFUNDED);
 
-		List<ServiceOrder> lists= serviceOrderRepository.CheckCountByStatusAndProductIdAndOrderType(status, product.getId(), ModelConstant.ORDER_TYPE_YUYUE);	
-		if(lists.size() >= count){
-			return false;
-		}else{
-			return true;
-		}
+		List<ServiceOrder> lists= serviceOrderRepository.CheckCountByStatusAndProductIdAndOrderType(status, product.getId(), ModelConstant.ORDER_TYPE_YUYUE);
+		return lists.size() < count;
 	}
 
 }

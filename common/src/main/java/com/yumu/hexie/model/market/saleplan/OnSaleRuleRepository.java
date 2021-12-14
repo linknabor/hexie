@@ -9,7 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface OnSaleRuleRepository extends JpaRepository<OnSaleRule, Long> {
-	
+	OnSaleRule findById(long id);
+
 	List<OnSaleRule> findAllByProductId(long productId);
 	
 	@Transactional

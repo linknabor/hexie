@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.o2o;
 
 import java.util.List;
@@ -24,21 +20,17 @@ import com.yumu.hexie.service.o2o.req.CommonBillReq;
  */
 public interface XiyiService {
     
-    public YunXiyiBill createBill(User user,CommonBillReq req,HomeCart cart);
-    public JsSign pay(YunXiyiBill bill,User user);
-    public void update4Payment(PaymentOrder payment);
-    public void notifyPayed(long billId);
-    //public void accept(long billId,long userId);
-    public void cancel(long billId, long userId);
-    //public void received(long billId);
-    //public void serviced(long billId);
-    //public void sended(long billId);
-    public void signed(long billId,long userId);
+    YunXiyiBill createBill(User user, CommonBillReq req, HomeCart cart);
+    JsSign pay(YunXiyiBill bill, User user);
+    void update4Payment(PaymentOrder payment);
+    void notifyPayed(long billId);
+    void cancel(long billId, long userId);
+    void signed(long billId, long userId);
     
-    public void timeout(long billId);
+    void timeout(long billId);
     
-    public List<YunXiyiBill> queryBills(long userId, int page);
+    List<YunXiyiBill> queryBills(long userId, int page);
     
-    public YunXiyiBill queryById(long id);
-    public List<HomeBillItem> findItems(long billId);
+    YunXiyiBill queryById(long id);
+    List<HomeBillItem> findItems(long billId);
 }

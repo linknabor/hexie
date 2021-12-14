@@ -13,6 +13,8 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import com.yumu.hexie.service.shequ.NoticeService;
@@ -91,6 +93,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     @Autowired
     private BizErrorRepository bizErrorRepository;
 
+    @Autowired
+    private RegionRepository regionRepository;
     /**
      * 异步发送到账模板消息
      */
@@ -248,8 +252,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         continue;
                     }
 
+                    Region region = regionRepository.findById(serviceOrder.getXiaoquId());
+
                     //给操作员发送发货模板消息
                     NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+                    noticeServiceOperator.setSectId(region.getSectId());
                     noticeServiceOperator.setAddress(serviceOrder.getAddress());
                     noticeServiceOperator.setCreateDate(serviceOrder.getCreateDate());
                     noticeServiceOperator.setReceiverName(serviceOrder.getReceiverName());
@@ -490,8 +497,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                         for (ServiceOrder o : orderList) {
 
+                            Region region = regionRepository.findById(o.getXiaoquId());
                             //给操作员发送发货模板消息
                             NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+                            noticeServiceOperator.setSectId(region.getSectId());
                             noticeServiceOperator.setAddress(o.getAddress());
                             noticeServiceOperator.setCreateDate(o.getCreateDate());
                             noticeServiceOperator.setReceiverName(o.getReceiverName());
