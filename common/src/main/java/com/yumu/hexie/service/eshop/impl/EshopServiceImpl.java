@@ -1110,10 +1110,10 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		String date = DateUtil.dtFormat(new Date());
 		Date startDate = DateUtil.parse(date + " 00:00:00", DateUtil.dttmSimple);
-		String sDate = startDate.toString();
+		long sDate = startDate.getTime();
 
 		Date endDate = DateUtil.parse(date + " 23:59:59", DateUtil.dttmSimple);
-		String eDate = endDate.toString();
+		long eDate = endDate.getTime();
 
 		List<ServiceOrder> list = serviceOrderRepository.findOrderSummary(typeList, statusList, sDate, eDate, orderSummaryVO.getAgentNo(), orderSummaryVO.getUserid(), listSect);
 		return String.valueOf(list.size());

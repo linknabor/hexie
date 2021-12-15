@@ -158,5 +158,5 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?6!='', s.operatorId = ?6, 1=1) "
             + "and if(?7 is not null, o.xiaoquId in (?7), 1=1) "
             , nativeQuery = true)
-    List<ServiceOrder> findOrderSummary(List<Integer> types, List<Integer> status, String sDate, String eDate, String agentNo, String userid, List<String> listSect);
+    List<ServiceOrder> findOrderSummary(List<Integer> types, List<Integer> status, long sDate, long eDate, String agentNo, String userid, List<String> listSect);
 }
