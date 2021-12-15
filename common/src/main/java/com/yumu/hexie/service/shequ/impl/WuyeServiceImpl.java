@@ -45,6 +45,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -750,6 +751,18 @@ public class WuyeServiceImpl implements WuyeService {
 			throw new BizValidateException("连接超时，请稍后再试。");
 		}
 		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
+	}
+	
+	@Override
+	public ReceiptInfo getReceipt(String sys, String receiptId) throws Exception {
+		
+		if ("guizhou".equals(sys)) {
+			sys = "贵州省";
+		} else {
+			sys = "";
+		}
+		return wuyeUtil2.getReceipt(receiptId, sys).getData();
+		
 	}
 
 }

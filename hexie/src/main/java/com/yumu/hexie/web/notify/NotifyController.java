@@ -22,6 +22,7 @@ import com.yumu.hexie.integration.notify.InvoiceNotification;
 
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.service.notify.NotifyService;
@@ -112,7 +113,7 @@ public class NotifyController extends BaseController {
 	}
 	
 	/**
-	 * 工单消息通知
+	 * 发票开具成功消息通知
 	 * @param workOrderNotification
 	 * @return
 	 * @throws Exception
@@ -125,5 +126,18 @@ public class NotifyController extends BaseController {
 		return "SUCCESS";
 	}
 
+	/**
+	 * 电子收据开具成功消息通知
+	 * @param workOrderNotification
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/receipt/notification", method = RequestMethod.POST )
+	public String notifyReceipt(@RequestBody ReceiptNotification receiptNotification) throws Exception {
+		
+		log.info("receiptNotification :" + receiptNotification);
+//		notifyService.notifyInvoiceMsgAsync(invoiceNotification);
+		return "SUCCESS";
+	}
 	
 }

@@ -21,6 +21,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
@@ -388,6 +389,15 @@ public interface WuyeService {
 	 * @throws Exception 
 	 */
 	void applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception;
+
+	/**
+	 * 获取电子收据
+	 * @param sys
+	 * @param receiptId
+	 * @return
+	 * @throws Exception
+	 */
+	ReceiptInfo getReceipt(String sys, String receiptId) throws Exception;
 
 
 }

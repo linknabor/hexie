@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -52,6 +53,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
@@ -1028,7 +1030,7 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/receipt/apply", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult applyReceipt(ReceiptApplicationReq receiptApplicationReq) throws Exception {
+	public BaseResult applyReceipt(@RequestBody ReceiptApplicationReq receiptApplicationReq) throws Exception {
 		
 		log.info("receiptApplicationReq : " + receiptApplicationReq);
 		
@@ -1067,6 +1069,32 @@ public class WuyeController extends BaseController {
 			wuyeService.registerAndBind(user, receiptApplicationReq.getTradeWaterId(), "6");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");
+	}
+	
+	/**
+	 * 申请电子收据
+	 * 如果用户没有注册的，则直接注册。
+	 * 如果用户没有绑定房屋的，则直接绑定
+	 * @param mobile
+	 * @param invoice_title
+	 * @param yzm
+	 * @param trade_water_id
+	 * @param invoice_title_type
+	 * @param credit_code
+	 * @param openid
+	 * @param event
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings({"unchecked"})
+	@RequestMapping(value = "/receipt/detail", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<ReceiptNotification> getReceipt(@RequestParam String sys, @RequestParam String receiptId) throws Exception {
+		
+		log.info("getReceiptDetail, receiptId : " + receiptId);
+		
+		ReceiptInfo receiptInfo = wuyeService.getReceipt(sys, receiptId);
+		return BaseResult.successResult(receiptInfo);
 	}
 	
 

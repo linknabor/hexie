@@ -51,6 +51,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
@@ -101,7 +102,8 @@ public class WuyeUtil2 {
 	private static final String QUERY_USER_INVOICE_URL = "queryInvoiceByUserSDO.do";	//获取用户申请过的发票 
 	private static final String QUERY_FEE_SMS_BILL_URL = "getFeeSmsBillSDO.do";	//获取催缴短信中的欠费账单
 	private static final String FEE_SMS_PAY_QRCODE = "getSmsPayQrCodeSDO.do";	//获取催缴短信二维码
-	private static final String APPLY_RECEIPT_URL = "allpyReceiptSDO.do";
+	private static final String APPLY_RECEIPT_URL = "receipt/allpyReceiptSDO.do";
+	private static final String QUERY_RECEIPT_URL = "receipt/getReceiptSDO.do";
 
 	/**
 	 * 标准版查询账单
@@ -705,7 +707,7 @@ public class WuyeUtil2 {
 	}
 	
 	/**
-	 * 查询当前用户申请过的发票
+	 * 申请电子收据
 	 * @param user
 	 * @return
 	 * @throws Exception
@@ -723,6 +725,28 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 根据收据ID获取电子收据
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<ReceiptInfo> getReceipt(String receiptId,String region) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(null, region);
+		requestUrl += QUERY_RECEIPT_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("receipt_id", receiptId);
+		
+		TypeReference<CommonResponse<ReceiptInfo>> typeReference = new TypeReference<CommonResponse<ReceiptInfo>>(){};
+		CommonResponse<ReceiptInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<ReceiptInfo> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
