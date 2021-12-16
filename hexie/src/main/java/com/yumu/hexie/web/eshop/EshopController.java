@@ -49,7 +49,20 @@ public class EshopController extends BaseController {
 		return eshopSerivce.getProductById(queryProductVO);
 		
 	}
-	
+
+	/**
+	 * 查询团购商品涉及的小区和团长
+	 * @param queryProductVO
+	 * @return
+	 */
+	@RequestMapping(value = "/product/getSect", method = RequestMethod.POST)
+	public CommonResponse<Object> getProductSect(@RequestBody QueryProductVO queryProductVO) {
+
+		logger.info("getById queryProductVO : " + queryProductVO);
+		return eshopSerivce.getProductSect(queryProductVO);
+
+	}
+
 	@RequestMapping(value = "/product/save", method = RequestMethod.POST)
 	public CommonResponse<String> saveProduct(@RequestBody SaveProductVO saveProductVO) throws Exception{
 		

@@ -27,6 +27,8 @@ public class SaveOperVO implements Serializable {
 		private int type;
 		@JsonProperty("userid")
 		private long userId;
+		@JsonProperty("regionid")
+		private long regionId;
 		
 		public long getId() {
 			return id;
@@ -64,13 +66,27 @@ public class SaveOperVO implements Serializable {
 		public void setUserId(long userId) {
 			this.userId = userId;
 		}
+
+		public long getRegionId() {
+			return regionId;
+		}
+
+		public void setRegionId(long regionId) {
+			this.regionId = regionId;
+		}
+
 		@Override
 		public String toString() {
-			return "Oper [id=" + id + ", name=" + name + ", openId=" + openId + ", tel=" + tel + ", type=" + type
-					+ ", userId=" + userId;
+			return "Oper{" +
+					"id=" + id +
+					", name='" + name + '\'' +
+					", openId='" + openId + '\'' +
+					", tel='" + tel + '\'' +
+					", type=" + type +
+					", userId=" + userId +
+					", regionId=" + regionId +
+					'}';
 		}
-		
-		
 	}
 	
 	public int getOperatorType() {

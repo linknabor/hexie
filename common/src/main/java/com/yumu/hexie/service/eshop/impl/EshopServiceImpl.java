@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.eshop.mapper.*;
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
 import com.yumu.hexie.integration.eshop.vo.*;
 import com.yumu.hexie.model.market.*;
@@ -43,14 +44,6 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryCouponCfgDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
-import com.yumu.hexie.integration.eshop.mapper.EvoucherMapper;
-import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryCouponCfgMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryCouponMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
-import com.yumu.hexie.integration.eshop.mapper.QuerySupportProductMapper;
-import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO.LogisticInfo;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO.Oper;
 import com.yumu.hexie.model.ModelConstant;
@@ -285,6 +278,32 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 		} catch (Exception e) {
 			
+			logger.info(e.getMessage(), e);
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+	}
+
+	@Override
+	public CommonResponse<Object> getProductSect(QueryProductVO queryProductVO) {
+		Assert.hasText(queryProductVO.getProductId(), "商品ID不能为空。");
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+
+			List<Object[]> regionList = null;
+			String productType = queryProductVO.getProductType();
+			if ("1002".equals(productType)) {
+				regionList = regionRepository.findByProductId4RgroupAndHead(queryProductVO.getProductId());
+			}
+			if(regionList == null) {
+				throw new BizValidateException("商品类型不正确");
+			}
+
+			List<RgroupOperatorMapper> areaList = ObjectToBeanUtils.objectToBean(regionList, RgroupOperatorMapper.class);
+			commonResponse.setData(areaList);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
 			logger.info(e.getMessage(), e);
 			commonResponse.setErrMsg(e.getMessage());
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
@@ -760,6 +779,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setUserId(oper.getUserId());
 			serviceOperator.setLongitude(0d);
 			serviceOperator.setLatitude(0d);
+			serviceOperator.setRegionId(oper.getRegionId());
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
 				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
 				serviceOperator.setAgentId(agent.getId());

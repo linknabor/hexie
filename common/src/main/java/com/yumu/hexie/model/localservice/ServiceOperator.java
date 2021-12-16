@@ -27,7 +27,9 @@ public class ServiceOperator  extends BaseModel {
     private String name;//维修工名称
     private String tel;
     private String openId;//设置用户ID的时候将其匹配
-    private long userId;
+    private long userId; //运营端用户ID
+    private String orgOperName; //运营端用户名称
+    private String groupAddr; //团购地址
     
     private Long regionId;//合协社区区域ID
     private boolean fromWuye = false;
@@ -117,13 +119,41 @@ public class ServiceOperator  extends BaseModel {
 	public void setSubType(String subType) {
 		this.subType = subType;
 	}
-	@Override
-	public String toString() {
-		return "ServiceOperator [type=" + type + ", companyName=" + companyName + ", name=" + name + ", tel=" + tel
-				+ ", openId=" + openId + ", userId=" + userId + ", regionId=" + regionId + ", fromWuye=" + fromWuye
-				+ ", longitude=" + longitude + ", latitude=" + latitude + ", subType=" + subType + ", agentId="
-				+ agentId + ", merchantId=" + merchantId + "]";
-	}
-	
-	
+
+    public String getOrgOperName() {
+        return orgOperName;
+    }
+
+    public void setOrgOperName(String orgOperName) {
+        this.orgOperName = orgOperName;
+    }
+
+    public String getGroupAddr() {
+        return groupAddr;
+    }
+
+    public void setGroupAddr(String groupAddr) {
+        this.groupAddr = groupAddr;
+    }
+
+    @Override
+    public String toString() {
+        return "ServiceOperator{" +
+                "type=" + type +
+                ", companyName='" + companyName + '\'' +
+                ", name='" + name + '\'' +
+                ", tel='" + tel + '\'' +
+                ", openId='" + openId + '\'' +
+                ", userId=" + userId +
+                ", orgOperName='" + orgOperName + '\'' +
+                ", groupAddr='" + groupAddr + '\'' +
+                ", regionId=" + regionId +
+                ", fromWuye=" + fromWuye +
+                ", longitude=" + longitude +
+                ", latitude=" + latitude +
+                ", subType='" + subType + '\'' +
+                ", agentId=" + agentId +
+                ", merchantId=" + merchantId +
+                '}';
+    }
 }
