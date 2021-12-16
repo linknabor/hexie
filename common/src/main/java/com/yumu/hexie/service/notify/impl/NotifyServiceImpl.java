@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.yumu.hexie.model.market.ServiceOrder;
-import com.yumu.hexie.model.market.ServiceOrderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +18,8 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
-import com.yumu.hexie.integration.notify.PayNotification.ServiceNotification;
 import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 
@@ -493,7 +491,7 @@ public class NotifyServiceImpl implements NotifyService {
 		String applyId = invoiceNotification.getApplyId();
 		
 		if (StringUtils.isEmpty(orderId)) {
-			log.info("notifyWorkOrderConversionAsync: orderid is empty, will return ! ");
+			log.info("notifyInvoiceMsgAsync: orderid is empty, will return ! ");
 			return;
 		}
 		
@@ -514,6 +512,50 @@ public class NotifyServiceImpl implements NotifyService {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String value = objectMapper.writeValueAsString(invoiceNotification);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, value);
+
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+	}
+	
+	/**
+	 * 电子收据开具成功通知
+	 */
+	@Override
+	public void sendReceiptMsgAsync(ReceiptNotification receiptNotification) {
+		
+		String receiptId = receiptNotification.getReceiptId();
+		
+		if (StringUtils.isEmpty(receiptId)) {
+			log.info("sendReceiptMsgAsync: receiptId is empty, will return ! ");
+			return;
+		}
+		
+		String key = ModelConstant.KEY_RECEIPT_NOTIFICATION_LOCK + receiptId;
+		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*1);
+		if (0 == result) {
+			log.info("receipt msg notification, receiptId : " + receiptId + ", already notified, will skip ! ");
+			return;
+		}
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(receiptNotification);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, value);
 
 				isSuccess = true;
 			} catch (Exception e) {

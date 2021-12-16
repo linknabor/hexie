@@ -23,6 +23,7 @@ import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO2;
@@ -785,7 +786,7 @@ public class TemplateMsgService {
 	}
 	
 	/**
-	 * 发送电子发票申请模板消息
+	 * 发送电子收据申请模板消息
 	 * @param opinionRequest
 	 * @param accessToken
 	 */
@@ -840,6 +841,46 @@ public class TemplateMsgService {
 		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
 		msg.setUrl(url);
 		msg.setTouser(baseEventDTO.getOpenid());
+		return sendMsg(msg, accessToken);
+
+	}
+	
+	/**
+	 * 发送电子收据开具成功的模板消息
+	 * @param invoiceNotification
+	 * @param accessToken
+	 * @return
+	 */
+	public WechatResponse sendFinishReceiveMessage(ReceiptNotification receiptNotification, String accessToken) {
+		
+		String first = "您的电子收据已开具。";
+		
+		String receiptId = receiptNotification.getReceiptId();
+		String tranAmt = receiptNotification.getTranAmt();
+		String createDate = receiptNotification.getApplyDate();
+    	
+    	TemplateItem firstItem = new TemplateItem(first);
+    	TemplateItem keywordItem1 = new TemplateItem(receiptId);
+    	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
+    	TemplateItem keywordItem3 = new TemplateItem(createDate);
+    	TemplateItem remarkItem = new TemplateItem("点击\"详情\"查看收据");
+
+		CommonVO2 vo = new CommonVO2();
+		vo.setFirst(firstItem);
+		vo.setKeyword1(keywordItem1);
+		vo.setKeyword2(keywordItem2);
+		vo.setKeyword3(keywordItem3);
+		vo.setRemark(remarkItem);
+
+		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_RECEIPT_FINISH, receiptNotification.getAppid()));
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_RECEIPT_VIEW_URL);
+		
+		url += receiptId;
+		url = AppUtil.addAppOnUrl(url, receiptNotification.getAppid());
+		msg.setUrl(url);
+		msg.setTouser(receiptNotification.getOpenid());
 		return sendMsg(msg, accessToken);
 
 	}

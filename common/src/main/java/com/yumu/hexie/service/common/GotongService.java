@@ -6,6 +6,7 @@ package com.yumu.hexie.service.common;
 
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
@@ -68,5 +69,7 @@ public interface GotongService {
 	WechatResponse sendMsg4FinishInvoice(InvoiceNotification invoiceNotification);
 
 	WechatResponse sendMsg4ApplicationReceipt(BaseEventDTO baseEventDTO);
+
+	WechatResponse sendMsg4FinishReceipt(ReceiptNotification receiptNotification);
 
 }

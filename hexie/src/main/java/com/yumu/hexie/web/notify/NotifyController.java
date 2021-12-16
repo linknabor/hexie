@@ -136,7 +136,7 @@ public class NotifyController extends BaseController {
 	public String notifyReceipt(@RequestBody ReceiptNotification receiptNotification) throws Exception {
 		
 		log.info("receiptNotification :" + receiptNotification);
-//		notifyService.notifyInvoiceMsgAsync(invoiceNotification);
+		notifyService.sendReceiptMsgAsync(receiptNotification);
 		return "SUCCESS";
 	}
 	

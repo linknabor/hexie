@@ -754,14 +754,20 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public ReceiptInfo getReceipt(String sys, String receiptId) throws Exception {
+	public ReceiptInfo getReceipt(String appid, String receiptId) throws Exception {
 		
-		if ("guizhou".equals(sys)) {
-			sys = "贵州省";
-		} else {
-			sys = "";
+		String region = "";
+		String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
+		String sysSource = "_sh";
+		if ("_guizhou".equals(userSysCode)) {
+			sysSource = "_guizhou";
 		}
-		return wuyeUtil2.getReceipt(receiptId, sys).getData();
+		if ("guizhou".equals(sysSource)) {
+			region = "贵州省";
+		} else {
+			region = "";
+		}
+		return wuyeUtil2.getReceipt(receiptId, sysSource, region).getData();
 		
 	}
 

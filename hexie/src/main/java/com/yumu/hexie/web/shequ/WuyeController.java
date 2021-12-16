@@ -1072,28 +1072,20 @@ public class WuyeController extends BaseController {
 	}
 	
 	/**
-	 * 申请电子收据
-	 * 如果用户没有注册的，则直接注册。
-	 * 如果用户没有绑定房屋的，则直接绑定
-	 * @param mobile
-	 * @param invoice_title
-	 * @param yzm
-	 * @param trade_water_id
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param openid
-	 * @param event
+	 * 查看电子收据明细
+	 * @param sys
+	 * @param receiptId
 	 * @return
 	 * @throws Exception 
 	 */
 	@SuppressWarnings({"unchecked"})
 	@RequestMapping(value = "/receipt/detail", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<ReceiptNotification> getReceipt(@RequestParam String sys, @RequestParam String receiptId) throws Exception {
+	public BaseResult<ReceiptNotification> getReceipt(@RequestParam String appid, @RequestParam String receiptId) throws Exception {
 		
 		log.info("getReceiptDetail, receiptId : " + receiptId);
 		
-		ReceiptInfo receiptInfo = wuyeService.getReceipt(sys, receiptId);
+		ReceiptInfo receiptInfo = wuyeService.getReceipt(appid, receiptId);
 		return BaseResult.successResult(receiptInfo);
 	}
 	

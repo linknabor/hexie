@@ -737,12 +737,13 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<ReceiptInfo> getReceipt(String receiptId,String region) throws Exception {
+	public BaseResult<ReceiptInfo> getReceipt(String receiptId, String sys, String region) throws Exception {
 		
-		String requestUrl = requestUtil.getRequestUrl(null, region);
+		String requestUrl = requestUtil.getRequestUrl(new User(), region);
 		requestUrl += QUERY_RECEIPT_URL;
 		Map<String, String> map = new HashMap<>();
 		map.put("receipt_id", receiptId);
+		map.put("sys", sys);
 		
 		TypeReference<CommonResponse<ReceiptInfo>> typeReference = new TypeReference<CommonResponse<ReceiptInfo>>(){};
 		CommonResponse<ReceiptInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);

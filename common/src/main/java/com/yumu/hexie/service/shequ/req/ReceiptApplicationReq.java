@@ -58,5 +58,5 @@ public class ReceiptApplicationReq implements Serializable {
 				+ ", openid=" + openid + ", event=" + event + ", appid=" + appid + "]";
 	}
 	
-
+	
 }
