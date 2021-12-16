@@ -51,11 +51,13 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.vo.req.MessageReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
@@ -100,6 +102,8 @@ public class WuyeUtil2 {
 	private static final String QUERY_USER_INVOICE_URL = "queryInvoiceByUserSDO.do";	//获取用户申请过的发票 
 	private static final String QUERY_FEE_SMS_BILL_URL = "getFeeSmsBillSDO.do";	//获取催缴短信中的欠费账单
 	private static final String FEE_SMS_PAY_QRCODE = "getSmsPayQrCodeSDO.do";	//获取催缴短信二维码
+	private static final String APPLY_RECEIPT_URL = "receipt/allpyReceiptSDO.do";
+	private static final String QUERY_RECEIPT_URL = "receipt/getReceiptSDO.do";
 
 	/**
 	 * 标准版查询账单
@@ -701,4 +705,52 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
+	/**
+	 * 申请电子收据
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += APPLY_RECEIPT_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("trade_water_id", receiptApplicationReq.getTradeWaterId());
+		map.put("mobile", receiptApplicationReq.getMobile());
+		map.put("openid", receiptApplicationReq.getOpenid());
+		map.put("appid", receiptApplicationReq.getAppid());
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+}
+	
+	/**
+	 * 根据收据ID获取电子收据
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<ReceiptInfo> getReceipt(String receiptId, String sys, String region) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(new User(), region);
+		requestUrl += QUERY_RECEIPT_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("receipt_id", receiptId);
+		map.put("sys", sys);
+		
+		TypeReference<CommonResponse<ReceiptInfo>> typeReference = new TypeReference<CommonResponse<ReceiptInfo>>(){};
+		CommonResponse<ReceiptInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<ReceiptInfo> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+
 }

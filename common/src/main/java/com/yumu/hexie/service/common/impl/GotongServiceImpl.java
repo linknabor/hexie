@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.Operator;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
@@ -442,6 +443,17 @@ public class GotongServiceImpl implements GotongService {
 
     	String accessToken = systemConfigService.queryWXAToken(baseEventDTO.getAppId());
         return templateMsgService.sendReceiptApplicationMessage(baseEventDTO, accessToken);
+        
+	}
+    
+    /**
+     * 发送开具电子收据完成消息
+     */
+    @Override
+	public WechatResponse sendMsg4FinishReceipt(ReceiptNotification receiptNotification) {
+
+    	String accessToken = systemConfigService.queryWXAToken(receiptNotification.getAppid());
+        return templateMsgService.sendFinishReceiveMessage(receiptNotification, accessToken);
         
 	}
 

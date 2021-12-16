@@ -56,6 +56,7 @@ public class MsgCfg {
 	public static final String URL_WORK_ORDER_DETAIL = "workOrderDetail";	//工单明细页面
 	public static final String URL_INVOICE_APPLICATION_URL = "invoiceApplicationUrl";	//发票申请页面
 	public static final String URL_RECEIPT_APPLICATION_URL = "receiptApplicationUrl";	//电子收据申请页面
+	public static final String URL_RECEIPT_VIEW_URL = "receiptViewUrl";	//电子收据详情页面
 	
 	//订阅消息
 	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";

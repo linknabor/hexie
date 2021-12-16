@@ -26,5 +26,7 @@ public interface NotifyQueueTask {
 
 	void sendInvoiceMsgAsyc();
 
+	void sendReceiptMsgAsyc();
+
 
 }

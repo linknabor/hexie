@@ -5,9 +5,6 @@
 package com.yumu.hexie.web.filter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -55,7 +52,7 @@ public class SimpleCORSFilter implements Filter {
         logger.info("SimpleCORSFilter, requestUrl : " + requestUrl);
         logger.info("SimpleCORSFilter, remoteAddr : " + remoteAddr);
         
-        if (requestUrl.indexOf("/getInvoice") == -1) {	//发票的验证码添入额外的token，防止恶意刷验证码,其他的请求随意放一个token不做处理
+        if (requestUrl.indexOf("/getInvoice") == -1 && requestUrl.indexOf("/receipt/trade")== -1) {	//发票的验证码添入额外的token，防止恶意刷验证码,其他的请求随意放一个token不做处理
 			String random = RandomStringUtils.random(5);
 			String token = MD5Util.MD5Encode(random, "");
 			response.addHeader("Access-Control-Allow-Token", token);
@@ -67,6 +64,7 @@ public class SimpleCORSFilter implements Filter {
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Access-Control-Allow-Token");
+        response.setHeader("Access-Control-Expose-Headers", "Access-Control-Allow-Token");
         response.setHeader("Access-Control-Max-Age", "3600");
         chain.doFilter(req, res);
     }

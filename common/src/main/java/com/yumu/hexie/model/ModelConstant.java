@@ -381,7 +381,8 @@ public class ModelConstant {
 	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
 	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericodeTotalLimit_";
 	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
-	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";
+	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";	//发票申请短信验证码
+	public static final String KEY_VERICODE_RECEIPT_TRADE_ID = "vericode:receipt:trade:";	//电子申请短信验证码,后面接_sh:trade_water_id或者_guizhou:trade_water_id
 	
 	/*下面这些的value值不要改，是另一个系统推送过来的，要改两边都要改 start */
 	public static final String KEY_WECHAT_CARD_CATAGORY = "wechatCardCatagory";
@@ -435,6 +436,7 @@ public class ModelConstant {
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
 	public static final int SMS_TYPE_PROMOTION_PAY = 103;	//发票验证码获取
 	public static final int SMS_TYPE_RESET_PASSWORD = 104;	//发票验证码获取
+	public static final int SMS_TYPE_RECEIPT = 105;	//电子收据验证码获取
 	
 	public static final String KEY_PRO_RULE_INFO = "product:rule:";
 	public static final String KEY_PRO_STOCK = "product:stock:";
@@ -478,9 +480,12 @@ public class ModelConstant {
 	public static final String KEY_EVENT_SCAN_QUEUE = "queue:event:scan";	//扫码事件消息队列(已关注过的用户)
 	public static final String KEY_REGISER_AND_BIND_QUEUE = "queue:registerBind";
 	public static final String KEY_INVOICE_NOTIFICATION_LOCK = "lock:invoiceNotification:";	//开票成功通知-锁
+	public static final String KEY_RECEIPT_NOTIFICATION_LOCK = "lock:receiptNotification:";	//收据开具成功通知-锁
 	public static final String KEY_INVOICE_NOTIFICATION_QUEUE = "queue:invoice:notification";	//开票成功通知
+	public static final String KEY_RECEIPT_NOTIFICATION_QUEUE = "queue:receipt:notification";	//收据开具成功通知
 	public static final String KEY_INVOICE_APPLICATIONF_FLAG = "invoice:application:";	//发票申请标记，后面接trade_water_id
-
+	public static final String KEY_RECEIPT_APPLICATIONF_FLAG = "receipt:application:";	//电子收据申请标记，后面接_sh:trade_water_id
+	
 	public static final String KEY_WORKORDER_CFG = "workorder:cfg:";	//工单配置，后面接city_db:sect_id
 
 

@@ -45,6 +45,7 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -57,9 +58,11 @@ import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.vo.BindHouseQueue;
@@ -656,7 +659,7 @@ public class WuyeServiceImpl implements WuyeService {
 	 * 到账消息推送(给物业配置的工作人推送)
 	 */
 	@Override
-	public void registerAndBind(User user, String tradeWaterId) {
+	public void registerAndBind(User user, String tradeWaterId, String bindType) {
 		
 		if (user == null) {
 			log.info("user is null, will return ! ");
@@ -672,6 +675,7 @@ public class WuyeServiceImpl implements WuyeService {
 				BindHouseQueue bindHouseQueue = new BindHouseQueue();
 				bindHouseQueue.setUser(user);
 				bindHouseQueue.setTradeWaterId(tradeWaterId);
+				bindHouseQueue.setBindType(bindType);
 				String value = objectMapper.writeValueAsString(bindHouseQueue);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, value);
 				isSuccess = true;
@@ -725,6 +729,46 @@ public class WuyeServiceImpl implements WuyeService {
 	public Discounts getFeeSmsPayQrCode(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
 		
 		return wuyeUtil2.getFeeSmsPayQrCode(user, queryFeeSmsBillReq).getData();
+	}
+	
+	@Override
+	public void applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception {
+		
+		String tradeWaterId = receiptApplicationReq.getTradeWaterId();
+		String userSysCode = SystemConfigServiceImpl.getSysMap().get(receiptApplicationReq.getAppid());	//是否_guizhou
+		String sysSource = "_sh";
+		if ("_guizhou".equals(userSysCode)) {
+			sysSource = "_guizhou";
+		}
+		String key = ModelConstant.KEY_RECEIPT_APPLICATIONF_FLAG + sysSource + ":" +tradeWaterId;
+		
+		String applied = redisTemplate.opsForValue().get(key);
+		if ("1".equals(applied)) {
+			throw new BizValidateException("电子收据已申请，请勿重复操作。");
+		}
+		BaseResult<String> r = wuyeUtil2.applyReceipt(user, receiptApplicationReq);
+		if ("99".equals(r.getResult())) {
+			throw new BizValidateException("连接超时，请稍后再试。");
+		}
+		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
+	}
+	
+	@Override
+	public ReceiptInfo getReceipt(String appid, String receiptId) throws Exception {
+		
+		String region = "";
+		String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
+		String sysSource = "_sh";
+		if ("_guizhou".equals(userSysCode)) {
+			sysSource = "_guizhou";
+		}
+		if ("guizhou".equals(sysSource)) {
+			region = "贵州省";
+		} else {
+			region = "";
+		}
+		return wuyeUtil2.getReceipt(receiptId, sysSource, region).getData();
+		
 	}
 
 }
