@@ -16,14 +16,16 @@ public class SaveOperVO implements Serializable {
 	private Long serviceId;
 	private List<Oper> opers;
 	private String agentNo;
-	private long regionId;
+	private String agentName;
 
 	public static class Oper {
 		
 		private String name;
 		@JsonProperty("userid")
 		private long userId;
-		@JsonProperty("groupaddr")
+		@JsonProperty("region_id")
+		private long regionId;
+		@JsonProperty("group_addr")
 		private String groupAddr;
 
 		public String getName() {
@@ -47,11 +49,20 @@ public class SaveOperVO implements Serializable {
 			this.groupAddr = groupAddr;
 		}
 
+		public long getRegionId() {
+			return regionId;
+		}
+
+		public void setRegionId(long regionId) {
+			this.regionId = regionId;
+		}
+
 		@Override
 		public String toString() {
 			return "Oper{" +
 					"name='" + name + '\'' +
 					", userId=" + userId +
+					", regionId=" + regionId +
 					", groupAddr='" + groupAddr + '\'' +
 					'}';
 		}
@@ -82,12 +93,12 @@ public class SaveOperVO implements Serializable {
 		this.agentNo = agentNo;
 	}
 
-	public long getRegionId() {
-		return regionId;
+	public String getAgentName() {
+		return agentName;
 	}
 
-	public void setRegionId(long regionId) {
-		this.regionId = regionId;
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
 	}
 
 	@Override
@@ -97,7 +108,7 @@ public class SaveOperVO implements Serializable {
 				", serviceId=" + serviceId +
 				", opers=" + opers +
 				", agentNo='" + agentNo + '\'' +
-				", regionId='" + regionId + '\'' +
+				", agentName='" + agentName + '\'' +
 				'}';
 	}
 }

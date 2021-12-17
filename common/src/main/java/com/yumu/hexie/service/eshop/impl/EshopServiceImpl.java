@@ -765,8 +765,11 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setName(oper.getName());
 			serviceOperator.setType(saveOperVO.getOperatorType());
 			serviceOperator.setUserId(oper.getUserId());
-			serviceOperator.setRegionId(saveOperVO.getRegionId());
-			serviceOperator.setGroupAddr(oper.getGroupAddr());
+			serviceOperator.setRegionId(oper.getRegionId());
+			String groupAddr = oper.getGroupAddr();
+			if(!StringUtils.isEmpty(groupAddr) && !"null".equals(groupAddr)) {
+				serviceOperator.setGroupAddr(groupAddr);
+			}
 			serviceOperator.setProductId(saveOperVO.getServiceId());
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
 				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
