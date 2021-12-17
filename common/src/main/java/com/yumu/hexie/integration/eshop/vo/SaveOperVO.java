@@ -16,49 +16,21 @@ public class SaveOperVO implements Serializable {
 	private Long serviceId;
 	private List<Oper> opers;
 	private String agentNo;
+	private long regionId;
 
 	public static class Oper {
 		
-		private long id;
 		private String name;
-		@JsonProperty("openid")
-		private String openId;
-		private String tel;
-		private int type;
 		@JsonProperty("userid")
 		private long userId;
-		@JsonProperty("regionid")
-		private long regionId;
-		
-		public long getId() {
-			return id;
-		}
-		public void setId(long id) {
-			this.id = id;
-		}
+		@JsonProperty("groupaddr")
+		private String groupAddr;
+
 		public String getName() {
 			return name;
 		}
 		public void setName(String name) {
 			this.name = name;
-		}
-		public String getOpenId() {
-			return openId;
-		}
-		public void setOpenId(String openId) {
-			this.openId = openId;
-		}
-		public String getTel() {
-			return tel;
-		}
-		public void setTel(String tel) {
-			this.tel = tel;
-		}
-		public int getType() {
-			return type;
-		}
-		public void setType(int type) {
-			this.type = type;
 		}
 		public long getUserId() {
 			return userId;
@@ -67,24 +39,20 @@ public class SaveOperVO implements Serializable {
 			this.userId = userId;
 		}
 
-		public long getRegionId() {
-			return regionId;
+		public String getGroupAddr() {
+			return groupAddr;
 		}
 
-		public void setRegionId(long regionId) {
-			this.regionId = regionId;
+		public void setGroupAddr(String groupAddr) {
+			this.groupAddr = groupAddr;
 		}
 
 		@Override
 		public String toString() {
 			return "Oper{" +
-					"id=" + id +
-					", name='" + name + '\'' +
-					", openId='" + openId + '\'' +
-					", tel='" + tel + '\'' +
-					", type=" + type +
+					"name='" + name + '\'' +
 					", userId=" + userId +
-					", regionId=" + regionId +
+					", groupAddr='" + groupAddr + '\'' +
 					'}';
 		}
 	}
@@ -113,11 +81,23 @@ public class SaveOperVO implements Serializable {
 	public void setAgentNo(String agentNo) {
 		this.agentNo = agentNo;
 	}
+
+	public long getRegionId() {
+		return regionId;
+	}
+
+	public void setRegionId(long regionId) {
+		this.regionId = regionId;
+	}
+
 	@Override
 	public String toString() {
-		return "SaveOperVO [operatorType=" + operatorType + ", serviceId=" + serviceId + ", opers=" + opers
-				+ ", agentNo=" + agentNo + "]";
+		return "SaveOperVO{" +
+				"operatorType=" + operatorType +
+				", serviceId=" + serviceId +
+				", opers=" + opers +
+				", agentNo='" + agentNo + '\'' +
+				", regionId='" + regionId + '\'' +
+				'}';
 	}
-	
-	
 }

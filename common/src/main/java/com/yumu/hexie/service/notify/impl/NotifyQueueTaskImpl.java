@@ -528,12 +528,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                             long agentId = o.getAgentId();
                             logger.info("agentId is : " + agentId);
-                            List<ServiceOperator> opList;
-                            if (agentId > 1) {    //1是默认奈博的，所以跳过
-                                opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
-                            } else {
-                                opList = serviceOperatorRepository.findByType(operType);
-                            }
+                            List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, serviceOrder.getProductId(), agentId);
+//                            if (agentId > 1) {    //1是默认奈博的，所以跳过
+//                                opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, serviceOrder.getProductId(), agentId);
+//                            } else {
+//                                opList = serviceOperatorRepository.findByTypeAndProductId(operType, serviceOrder.getProductId());
+//                            }
                             logger.info("oper list size : " + opList.size());
                             List<Long> list = new ArrayList<>();
                             for (ServiceOperator serviceOperator : opList) {

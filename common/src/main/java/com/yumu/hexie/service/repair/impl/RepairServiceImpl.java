@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -401,11 +400,6 @@ public class RepairServiceImpl implements RepairService {
                 finishByOpeator,address,tel,operatorName,operatorTel,sectId,sectList,pageable);
 	}
 
-	
-	public List<String> getRegoinIds(List<String> sect_ids){
-		return regionRepository.getRegionBySectid(sect_ids);
-	}
-
 	@Override
 	public Page<Object> getServiceoperator(BaseRequestDTO<Map<String, String>> baseRequestDTO) {
 		Map<String,String> map=baseRequestDTO.getData();
@@ -446,8 +440,6 @@ public class RepairServiceImpl implements RepairService {
 
 			}
 			so.setCreateDate(System.currentTimeMillis());
-			so.setLatitude(0.0);
-			so.setLongitude(0.0);
 			so.setName(name);
 			so.setTel(tel);
 			so.setType(ModelConstant.SERVICE_OPER_TYPE_WEIXIU);

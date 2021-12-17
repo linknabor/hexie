@@ -47,10 +47,9 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 			, nativeQuery = true)
 	List<Region> findByAgentIdOrProductId4Rgroup(int status, List<String> productIds, List<String> uproductIds, String agentId);
 
-	@Query(value = "select r.name, r.parentName, r.sectId, item.productId, item.productName, so.userid, so.orgOperName, so.groupAddr  from region r "
+	@Query(value = "select r.id as regionId, r.name, r.parentName, r.sectId, item.productId, item.productName, so.userid, so.name as operName, so.groupAddr  from region r "
 			+ "join rgroupareaitem item on r.id = item.regionId "
-			+ "left join serviceOperatorItem s on s.serviceId = item.productId "
-			+ "left join serviceOperator so on s.operatorId = so.id "
+			+ "left join serviceOperator so on item.productId = so.productId "
 			+ "where item.productId = ?1 "
 			, nativeQuery = true)
 	List<Object[]> findByProductId4RgroupAndHead(String productId);

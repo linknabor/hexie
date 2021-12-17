@@ -95,7 +95,7 @@ public class OperServiceImpl implements OperService {
 			so.setName(user.getName());
 			so.setTel(user.getTel());
 			so.setUserId(user.getId());
-			so.setType(Integer.valueOf(oa.getType()));	//ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER
+			so.setType(Integer.parseInt(oa.getType()));	//ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER
 			so.setOpenId(user.getOpenid());
 			serviceOperatorRepository.save(so);
 			

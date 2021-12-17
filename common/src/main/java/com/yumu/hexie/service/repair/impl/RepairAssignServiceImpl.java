@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.yumu.hexie.common.util.DistanceUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -15,7 +14,6 @@ import com.yumu.hexie.model.localservice.repair.RepairConstant;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairSeed;
 import com.yumu.hexie.model.localservice.repair.RepairSeedRepository;
-import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.repair.RepairAssignService;
@@ -32,8 +30,6 @@ import com.yumu.hexie.service.repair.RepairAssignService;
 public class RepairAssignServiceImpl implements RepairAssignService {
 
     @Inject
-    private AddressRepository addressRepository;
-    @Inject
     private RepairSeedRepository repairSeedRepository;
     @Inject
     private ServiceOperatorRepository serviceOperatorRepository;
@@ -47,11 +43,10 @@ public class RepairAssignServiceImpl implements RepairAssignService {
     @Async
     @Override
     public void assignOrder(RepairOrder order) {
-        Address address = addressRepository.findById(order.getAddressId());
         List<ServiceOperator> ops=serviceOperatorRepository.findBySectId(order.getSectId(), ModelConstant.SERVICE_OPER_TYPE_WEIXIU);
-        assign(address,order, ops);
+        assign(order, ops);
     }
-    private void assign(Address address,RepairOrder ro, List<ServiceOperator> ops) {
+    private void assign(RepairOrder ro, List<ServiceOperator> ops) {
         if(ro.getStatus() == RepairConstant.STATUS_CREATE && ro.getOperatorId() != null && ro.getOperatorId() != 0){
             return;
         }
@@ -59,9 +54,7 @@ public class RepairAssignServiceImpl implements RepairAssignService {
             RepairSeed rs = new RepairSeed(op,ro);
             repairSeedRepository.save(rs);
             //FIXME 发送消息
-            gotongService.sendRepairAssignMsg(rs.getOperatorId(),ro,
-                (int)DistanceUtil.distanceBetween(address.getLatitude(), op.getLatitude(),
-                    address.getLongitude(), op.getLongitude()));
+            gotongService.sendRepairAssignMsg(rs.getOperatorId(),ro);
         }
     }
 }

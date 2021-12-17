@@ -151,12 +151,12 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
 		int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
 		long agentId = o.getAgentId();
 		logger.info("agentId is : " + agentId);
-		List<ServiceOperator> opList;
-		if (agentId > 1) {	//1是默认奈博的，奈博的操作员都是null
-			opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
-		}else {
-			opList = serviceOperatorRepository.findByTypeAndAgentIdIsNull(operType);
-		}
+		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, o.getProductId(), agentId);
+//		if (agentId > 1) {	//1是默认奈博的，奈博的操作员都是null
+//			opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, o.getProductId(), agentId);
+//		}else {
+//			opList = serviceOperatorRepository.findByTypeAndAgentIdIsNull(operType);
+//		}
 		logger.info("oper list size : " + opList.size());
 		List<Long> list = new ArrayList<>();
 		for (ServiceOperator serviceOperator : opList) {
