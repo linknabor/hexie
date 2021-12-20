@@ -206,11 +206,11 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							receiptApplicationReq.setAppid(appId);
 							receiptApplicationReq.setOpenid(openid);
 							receiptApplicationReq.setTradeWaterId(tradeWaterId);
-							wuyeService.applyReceipt(user, receiptApplicationReq);
 							
 							user.setAppId(appId);
 							user.setOpenid(openid);
-							if (!StringUtils.isEmpty(openid)) {
+							wuyeService.applyReceipt(user, receiptApplicationReq);
+							if (!StringUtils.isEmpty(user.getOpenid())) {
 								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
 							}
 							
@@ -313,11 +313,11 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							receiptApplicationReq.setAppid(appId);
 							receiptApplicationReq.setOpenid(openid);
 							receiptApplicationReq.setTradeWaterId(tradeWaterId);
-							wuyeService.applyReceipt(user, receiptApplicationReq);
 							
 							user.setAppId(appId);
 							user.setOpenid(openid);
-							if (!StringUtils.isEmpty(openid)) {
+							wuyeService.applyReceipt(user, receiptApplicationReq);
+							if (!StringUtils.isEmpty(user.getOpenid())) {
 								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
 							}
 							
