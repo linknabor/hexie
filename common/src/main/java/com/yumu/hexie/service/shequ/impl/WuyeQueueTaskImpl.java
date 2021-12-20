@@ -208,6 +208,8 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							receiptApplicationReq.setTradeWaterId(tradeWaterId);
 							wuyeService.applyReceipt(user, receiptApplicationReq);
 							
+							user.setAppId(appId);
+							user.setOpenid(openid);
 							if (!StringUtils.isEmpty(openid)) {
 								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
 							}
