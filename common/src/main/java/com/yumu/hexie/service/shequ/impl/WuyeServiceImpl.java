@@ -748,7 +748,7 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		BaseResult<String> r = wuyeUtil2.applyReceipt(user, receiptApplicationReq);
 		if ("99".equals(r.getResult())) {
-			throw new BizValidateException("连接超时，请稍后再试。");
+			throw new BizValidateException(r.getMessage());
 		}
 		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
 	}
