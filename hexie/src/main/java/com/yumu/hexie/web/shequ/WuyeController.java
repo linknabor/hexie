@@ -1030,6 +1030,7 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/receipt/apply", method = RequestMethod.POST)
 	@ResponseBody
+	@Deprecated
 	public BaseResult applyReceipt(@RequestBody ReceiptApplicationReq receiptApplicationReq) throws Exception {
 		
 		log.info("receiptApplicationReq : " + receiptApplicationReq);
