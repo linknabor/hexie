@@ -1049,29 +1049,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 ReceiptNotification in = objectMapper.readValue(queue, new TypeReference<ReceiptNotification>() {});
-                String orderId = in.getTradeWaterId();	//交易流水号
-                String appid = in.getAppid();	//判断贵州还是上海
-                
-                String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
-        		String sysSource = "_sh";
-        		if ("_guizhou".equals(userSysCode)) {
-        			sysSource = "_guizhou";
-        		}
-                
-                //查看用户有没有在移动端申请，如果没有，不推送模板消息
-                String key = ModelConstant.KEY_RECEIPT_APPLICATIONF_FLAG + sysSource + ":" +orderId;
-                String pageApplied = redisTemplate.opsForValue().get(key);    //页面申请
-                String applied = in.getApplied();    //公众号是1交易无须申请.其他交易0
-                if (!"1".equals(pageApplied) && !"1".equals(applied)) {    //表示用户没有在移动端申请。扔回队列继续轮，直到用户在移动端申请位置
-
-                    if (System.currentTimeMillis() - Long.parseLong(in.getTimestamp()) > 3600l * 24 * 10 * 1000) {    //超过10天没申请，出队;电子收据理论上不会有这种情况
-                        logger.info("user does not apply 4 invoice .. more than 10 days. will remove from the queue! orderId : " + orderId);
-                    } else {
-                        redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
-//							logger.info("user does not apply 4 invoice .. will loop again. orderId: " + orderId);
-                    }
-                    continue;
-                }
                 logger.info("start to consume receipt msg queue : " + in);
                 String openid = in.getOpenid();
                 if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
