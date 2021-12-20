@@ -649,6 +649,7 @@ public class WuyeServiceImpl implements WuyeService {
 		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
 	}
 	
+	@Deprecated
 	@Override
 	public WechatResponse scanEvent4Receipt(BaseEventDTO baseEventDTO) {
 		
@@ -734,23 +735,23 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public void applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception {
 		
-		String tradeWaterId = receiptApplicationReq.getTradeWaterId();
-		String userSysCode = SystemConfigServiceImpl.getSysMap().get(receiptApplicationReq.getAppid());	//是否_guizhou
-		String sysSource = "_sh";
-		if ("_guizhou".equals(userSysCode)) {
-			sysSource = "_guizhou";
-		}
-		String key = ModelConstant.KEY_RECEIPT_APPLICATIONF_FLAG + sysSource + ":" +tradeWaterId;
-		
-		String applied = redisTemplate.opsForValue().get(key);
-		if ("1".equals(applied)) {
-			throw new BizValidateException("电子收据已申请，请勿重复操作。");
-		}
+//		String tradeWaterId = receiptApplicationReq.getTradeWaterId();
+//		String userSysCode = SystemConfigServiceImpl.getSysMap().get(receiptApplicationReq.getAppid());	//是否_guizhou
+//		String sysSource = "_sh";
+//		if ("_guizhou".equals(userSysCode)) {
+//			sysSource = "_guizhou";
+//		}
+//		String key = ModelConstant.KEY_RECEIPT_APPLICATIONF_FLAG + sysSource + ":" +tradeWaterId;
+//		
+//		String applied = redisTemplate.opsForValue().get(key);
+//		if ("1".equals(applied)) {
+//			throw new BizValidateException("电子收据已申请，请勿重复操作。");
+//		}
 		BaseResult<String> r = wuyeUtil2.applyReceipt(user, receiptApplicationReq);
 		if ("99".equals(r.getResult())) {
 			throw new BizValidateException(r.getMessage());
 		}
-		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
+//		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
 	}
 	
 	@Override

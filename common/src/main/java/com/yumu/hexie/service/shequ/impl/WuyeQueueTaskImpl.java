@@ -29,6 +29,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.BindHouseQueue;
 
@@ -179,21 +180,44 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 					if ("01".equals(type)) {
 						logger.info("event type : " + type + ", apply invoice . " );
 						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+						
+						if (wechatResponse.getErrcode() == 0) {
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 40037) {
+							logger.error("invalid template_id, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 45009) {
+							logger.error("reach max api daily quota limit, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						
 					} else if ("02".equals(type)) {
 						logger.info("event type : " + type + ", apply receipt . " );
-						wechatResponse = wuyeService.scanEvent4Receipt(baseEventDTO);
+				    	String[]eventKeyArr = eventKey.split("\\|");
+				    	if (eventKeyArr == null || eventKeyArr.length < 6) {
+							logger.error("illegal event key : " + eventKey);
+						}
+				    	String tradeWaterId = "";
+				    	try {
+							tradeWaterId = eventKeyArr[1];
+							ReceiptApplicationReq receiptApplicationReq = new ReceiptApplicationReq();
+							receiptApplicationReq.setAppid(appId);
+							receiptApplicationReq.setOpenid(openid);
+							receiptApplicationReq.setTradeWaterId(tradeWaterId);
+							wuyeService.applyReceipt(user, receiptApplicationReq);
+							
+							if (!StringUtils.isEmpty(openid)) {
+								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
+							}
+							
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}
+				    	isSuccess = true;
 					}
-					if (wechatResponse.getErrcode() == 0) {
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 40037) {
-						logger.error("invalid template_id, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 45009) {
-						logger.error("reach max api daily quota limit, 请联系系统管理员！");
-						isSuccess = true;
-					}
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
@@ -260,22 +284,46 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 					if ("01".equals(type)) {
 						logger.info("event type : " + type + ", apply invoice . " );
 						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+						
+						if (wechatResponse.getErrcode() == 0) {
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 40037) {
+							logger.error("invalid template_id, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 45009) {
+							logger.error("reach max api daily quota limit, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						
 					} else if ("02".equals(type)) {
+						
 						logger.info("event type : " + type + ", apply receipt . " );
-						wechatResponse = wuyeService.scanEvent4Receipt(baseEventDTO);
+				    	String[]eventKeyArr = eventKey.split("\\|");
+				    	if (eventKeyArr == null || eventKeyArr.length < 6) {
+							logger.error("illegal event key : " + eventKey);
+						}
+				    	String tradeWaterId = "";
+				    	try {
+							tradeWaterId = eventKeyArr[1];
+							ReceiptApplicationReq receiptApplicationReq = new ReceiptApplicationReq();
+							receiptApplicationReq.setAppid(appId);
+							receiptApplicationReq.setOpenid(openid);
+							receiptApplicationReq.setTradeWaterId(tradeWaterId);
+							wuyeService.applyReceipt(user, receiptApplicationReq);
+							
+							if (!StringUtils.isEmpty(openid)) {
+								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
+							}
+							
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}
+				    	isSuccess = true;
+						
 					}
 					
-					if (wechatResponse.getErrcode() == 0) {
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 40037) {
-						logger.error("invalid template_id, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 45009) {
-						logger.error("reach max api daily quota limit, 请联系系统管理员！");
-						isSuccess = true;
-					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
@@ -331,9 +379,14 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							String wuyeId = baseResult.getData().getUser_id();
 							user.setWuyeId(wuyeId);
 							String mobile = user.getTel();
-							String prefix = mobile.substring(0, 3);
-							String suffix = mobile.substring(7, mobile.length());
-							String name = prefix + "***" + suffix;	//使用手机号虚构一个名称，中间打码
+							String name = "";
+							if (!StringUtils.isEmpty(mobile)) {
+								String prefix = mobile.substring(0, 3);
+								String suffix = mobile.substring(7, mobile.length());
+								name = prefix + "***" + suffix;	//使用手机号虚构一个名称，中间打码
+							} else {
+								name = user.getOpenid().substring(0, 11);	//申请电子收据存在没有手机号的情况，因此截取openid作为用户名
+							}
 							user.setName(name);
 							savedUser = userService.simpleRegister(user);
 							isSuccess = true;
@@ -344,7 +397,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							String wuyeId = baseResult.getData().getUser_id();
 							String mobile = user.getTel();
 							dbUser.setWuyeId(wuyeId);
-							dbUser.setTel(mobile);
+							if (!StringUtils.isEmpty(mobile)) {
+								dbUser.setTel(mobile);	//申请电子收据存在没有手机号的情况。因此有值才填
+							}
 							savedUser = userService.simpleRegister(dbUser);
 							isSuccess = true;
 						}
