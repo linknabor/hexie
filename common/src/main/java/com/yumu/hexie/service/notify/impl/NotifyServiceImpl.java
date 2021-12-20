@@ -534,13 +534,12 @@ public class NotifyServiceImpl implements NotifyService {
 	public void sendReceiptMsgAsync(ReceiptNotification receiptNotification) {
 		
 		String receiptId = receiptNotification.getReceiptId();
-		
+		String openid = receiptNotification.getOpenid();
 		if (StringUtils.isEmpty(receiptId)) {
 			log.info("sendReceiptMsgAsync: receiptId is empty, will return ! ");
 			return;
 		}
-		
-		String key = ModelConstant.KEY_RECEIPT_NOTIFICATION_LOCK + receiptId;
+		String key = ModelConstant.KEY_RECEIPT_NOTIFICATION_LOCK + receiptId + ":" + openid;
 		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*1);
 		if (0 == result) {
 			log.info("receipt msg notification, receiptId : " + receiptId + ", already notified, will skip ! ");
