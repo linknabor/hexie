@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -54,6 +53,7 @@ import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
@@ -1082,12 +1082,13 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings({"unchecked"})
 	@RequestMapping(value = "/receipt/detail", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<ReceiptNotification> getReceipt(@RequestParam String appid, @RequestParam String receiptId) throws Exception {
+	public BaseResult<ReceiptInfoVO> getReceipt(@RequestParam String appid, @RequestParam String receiptId) throws Exception {
 		
 		log.info("getReceiptDetail, receiptId : " + receiptId);
 		
 		ReceiptInfo receiptInfo = wuyeService.getReceipt(appid, receiptId);
-		return BaseResult.successResult(receiptInfo);
+		ReceiptInfoVO vo = new ReceiptInfoVO(receiptInfo);
+		return BaseResult.successResult(vo);
 	}
 	
 
