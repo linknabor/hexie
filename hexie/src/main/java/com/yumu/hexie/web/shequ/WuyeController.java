@@ -53,6 +53,7 @@ import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
@@ -1089,6 +1090,22 @@ public class WuyeController extends BaseController {
 		ReceiptInfo receiptInfo = wuyeService.getReceipt(appid, receiptId);
 		ReceiptInfoVO vo = new ReceiptInfoVO(receiptInfo);
 		return BaseResult.successResult(vo);
+	}
+	
+	/**
+	 * 查看电子收据明细
+	 * @param sys
+	 * @param receiptId
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings({"unchecked"})
+	@RequestMapping(value = "/receipt/list/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<Receipt>> getReceipt(@ModelAttribute(Constants.USER) User user, @PathVariable String page) throws Exception {
+		
+		List<Receipt> receiptList = wuyeService.getReceiptList(user, page);
+		return BaseResult.successResult(receiptList);
 	}
 	
 

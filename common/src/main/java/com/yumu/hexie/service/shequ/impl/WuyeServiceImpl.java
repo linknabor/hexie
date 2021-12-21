@@ -46,6 +46,7 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -770,6 +771,12 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		return wuyeUtil2.getReceipt(receiptId, sysSource, region).getData();
 		
+	}
+
+	@Override
+	public List<Receipt> getReceiptList(User user, String page) throws Exception {
+		
+		return wuyeUtil2.getReceiptList(user, page).getData();
 	}
 
 }

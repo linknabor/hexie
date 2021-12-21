@@ -52,6 +52,7 @@ import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
@@ -104,6 +105,7 @@ public class WuyeUtil2 {
 	private static final String FEE_SMS_PAY_QRCODE = "getSmsPayQrCodeSDO.do";	//获取催缴短信二维码
 	private static final String APPLY_RECEIPT_URL = "receipt/allpyReceiptSDO.do";
 	private static final String QUERY_RECEIPT_URL = "receipt/getReceiptSDO.do";
+	private static final String QUERY_RECEIPT_LIST_URL = "receipt/getReceiptByUserSDO.do";
 
 	/**
 	 * 标准版查询账单
@@ -748,6 +750,31 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<ReceiptInfo>> typeReference = new TypeReference<CommonResponse<ReceiptInfo>>(){};
 		CommonResponse<ReceiptInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
 		BaseResult<ReceiptInfo> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 根据收据ID获取电子收据
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<Receipt>> getReceiptList(User user, String page) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_RECEIPT_LIST_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("user_id", user.getWuyeId());
+		map.put("openid", user.getOpenid());
+		map.put("curr_page", page);
+		map.put("total_count", "1000");
+		
+		TypeReference<CommonResponse<List<Receipt>>> typeReference = new TypeReference<CommonResponse<List<Receipt>>>(){};
+		CommonResponse<List<Receipt>> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<List<Receipt>> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
