@@ -52,6 +52,9 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PayWater;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
@@ -61,6 +64,7 @@ import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.shequ.req.InvoiceApplicationReq;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.BankCardService;
 import com.yumu.hexie.service.user.CouponService;
@@ -555,7 +559,7 @@ public class WuyeController extends BaseController {
 		
 		
 		if (!StringUtils.isEmpty(openid)) {
-			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id());	//队列，异步执行
+			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id(), "5");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");
 	}
@@ -590,6 +594,43 @@ public class WuyeController extends BaseController {
 		log.info("token : " + token);
 		response.addHeader("Access-Control-Allow-Token", token);
 		return BaseResult.successResult(invoice);
+		
+	}
+	
+	/**
+	 * 申请电子收据页面获取交易信息
+	 * @param response
+	 * @param trade_water_id
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/receipt/trade", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<EReceipt> getTrade(HttpServletResponse response, @RequestParam(required = false) String tradeWaterId, 
+			@RequestParam(required = false) String appid) throws Exception {
+		
+		String token = smsService.getRandomToken();
+		log.info("random token : " + token);
+		if (StringUtils.isEmpty(tradeWaterId) || tradeWaterId.length() != 18) {
+			response.addHeader("Access-Control-Allow-Token", token);
+			return BaseResult.fail("交易ID不正确。");
+		}
+		if (StringUtil.isEmpty(appid)) {
+			response.addHeader("Access-Control-Allow-Token", token);
+			return BaseResult.fail("应用ID不正确。");
+		}
+		User user = new User();
+		user.setAppId(appid);
+		EReceipt eReceipt = wuyeService.getEReceipt(user, tradeWaterId, "");
+		if (eReceipt == null) {
+			response.addHeader("Access-Control-Allow-Token", token);
+			return BaseResult.fail("未查询到交易信息。");
+		}
+		token = smsService.saveAndGetReceiptToken(tradeWaterId, appid);
+		log.info("token : " + token);
+		response.addHeader("Access-Control-Allow-Token", token);
+		return BaseResult.successResult(eReceipt);
 		
 	}
 
@@ -972,5 +1013,99 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(discounts);
 	}
 	
-
+	/**
+	 * 申请电子收据
+	 * 如果用户没有注册的，则直接注册。
+	 * 如果用户没有绑定房屋的，则直接绑定
+	 * @param mobile
+	 * @param invoice_title
+	 * @param yzm
+	 * @param trade_water_id
+	 * @param invoice_title_type
+	 * @param credit_code
+	 * @param openid
+	 * @param event
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("rawtypes")
+	@RequestMapping(value = "/receipt/apply", method = RequestMethod.POST)
+	@ResponseBody
+	@Deprecated
+	public BaseResult applyReceipt(@RequestBody ReceiptApplicationReq receiptApplicationReq) throws Exception {
+		
+		log.info("receiptApplicationReq : " + receiptApplicationReq);
+		
+		String mobile = receiptApplicationReq.getMobile();
+		String vericode = receiptApplicationReq.getVericode();
+		String openid = receiptApplicationReq.getOpenid();
+		boolean isCheck = smsService.checkVerificationCode(mobile, vericode);	//校验验证码
+		
+		User user = null;
+		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
+			user = userService.multiFindByOpenId(openid);
+			if (user != null) {
+				if (user.getTel()!=null && user.getTel().equals(mobile)) {
+					isCheck = true;
+				}
+				if (StringUtils.isEmpty(user.getTel())) {
+					user.setTel(mobile);
+				}
+			} else {
+				user = new User();
+				user.setTel(mobile);
+				user.setAppId(receiptApplicationReq.getAppid());
+				user.setOpenid(receiptApplicationReq.getOpenid());
+			}
+		} else {
+			user = new User();
+			log.info("no openid, will not create user !");
+		}
+		if (!isCheck) {
+			return new BaseResult<UserInfo>().failMsg("验证码错误！");
+		}
+		
+		wuyeService.applyReceipt(user, receiptApplicationReq);	//申请电子收据
+		
+		if (!StringUtils.isEmpty(openid)) {
+			wuyeService.registerAndBind(user, receiptApplicationReq.getTradeWaterId(), "6");	//队列，异步执行
+		}
+		return BaseResult.successResult("succeeded");
+	}
+	
+	/**
+	 * 查看电子收据明细
+	 * @param sys
+	 * @param receiptId
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings({"unchecked"})
+	@RequestMapping(value = "/receipt/detail", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<ReceiptInfoVO> getReceipt(@RequestParam String appid, @RequestParam String receiptId) throws Exception {
+		
+		log.info("getReceiptDetail, receiptId : " + receiptId);
+		
+		ReceiptInfo receiptInfo = wuyeService.getReceipt(appid, receiptId);
+		ReceiptInfoVO vo = new ReceiptInfoVO(receiptInfo);
+		return BaseResult.successResult(vo);
+	}
+	
+	/**
+	 * 查看电子收据明细
+	 * @param sys
+	 * @param receiptId
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings({"unchecked"})
+	@RequestMapping(value = "/receipt/list/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<Receipt>> getReceipt(@ModelAttribute(Constants.USER) User user, @PathVariable String page) throws Exception {
+		
+		List<Receipt> receiptList = wuyeService.getReceiptList(user, page);
+		return BaseResult.successResult(receiptList);
+	}
+	
 }

@@ -51,6 +51,9 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 	@Value(value = "${qrcode.image.dir}")
 	private String qrcodeImgPath;
 
+	/**
+	 * 创建电子发票申请提醒的二维码
+	 */
 	@Override
 	public String createQrCode(CreateMpQrCodeReq createQrCodeReq) throws Exception {
 
@@ -66,18 +69,36 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		Assert.hasText(shopName, "商户名称不能为空");
 		Assert.hasText(appid, "appid不能为空");
 		
-		String keyStr = "01"+"_"+orderId+"_"+appid;
+		String payMethod = createQrCodeReq.getPayMethod();
+		String feeName = createQrCodeReq.getFeeName();
+		
+		String type = createQrCodeReq.getType();
+		if (StringUtils.isEmpty(type)) {
+			type = "01";
+		}
+		String keyStr = type+"_"+orderId+"_"+appid;
 		String key = ModelConstant.KEY_MP_QRCODE_CACHED + keyStr;
 		String qrCodeUrl = stringRedisTemplate.opsForValue().get(key);
 		if (!StringUtils.isEmpty(qrCodeUrl)) {	//同一场景下，同一个公众号的同一笔流水申请二维码，只从腾讯生成一次。后面取缓存里的
 			return qrCodeUrl;
 		}
 		
-		//01表示场景
-		String sceneStr = "01" +  SEPERATOR + orderId + SEPERATOR + tranAmt + SEPERATOR + shopName;	//01代表场景
+		//01表示场景-电子发票
+		String sceneStr = "";
+		if ("01".equals(type)) {
+			sceneStr = type +  SEPERATOR + orderId + SEPERATOR + tranAmt + SEPERATOR + shopName;	//01 电子发票
+		} else if ("02".equals(type)) {
+			sceneStr = type +  SEPERATOR + orderId + SEPERATOR + tranAmt + SEPERATOR + shopName 
+					+ SEPERATOR + payMethod + SEPERATOR + feeName;	//02电子收据
+		} else {
+			logger.error("unknow type : " + type);
+			return "";
+		}
+		
 		if (sceneStr.length()>64) {	//二维码参数最大长度为64
 			sceneStr = sceneStr.substring(0, 63) + ELLIPSIS;
 		}
+		
 		GenMpQrCodeRequest genQrCodeRequest = new GenMpQrCodeRequest();
 		genQrCodeRequest.setExpireSeconds(3600l*24*30);
 		genQrCodeRequest.setActionName(QR_STR_SCENE);
@@ -103,6 +124,9 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		return genQrCodeResponse.getUrl();
 	}
 	
+	/**
+	 * 移动pos创建开票提醒动态二维码
+	 */
 	@Override
 	public String getQrCode(String tradeWaterId) throws Exception {
 

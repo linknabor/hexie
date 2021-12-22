@@ -31,6 +31,8 @@ import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 
+
+
 /**
  * Created by Administrator on 2014/12/1.
  */
@@ -133,7 +135,7 @@ public class SmsServiceImpl implements SmsService {
 	private boolean sendMessage(User user, String mobilePhone, String message, String code, int msgType) {
 		
 		SmsHis smsHis = null;
-		if (ModelConstant.SMS_TYPE_REG == msgType || ModelConstant.SMS_TYPE_INVOICE == msgType) {
+		if (ModelConstant.SMS_TYPE_REG == msgType || ModelConstant.SMS_TYPE_INVOICE == msgType || ModelConstant.SMS_TYPE_RECEIPT == msgType) {
 			smsHis = getSmsFromCache(mobilePhone);
 		}
         if (smsHis == null) {
@@ -151,7 +153,8 @@ public class SmsServiceImpl implements SmsService {
 	        	smsHis.setUserName(user.getName());
 			}
 	        if (ModelConstant.SMS_TYPE_REG == msgType || ModelConstant.SMS_TYPE_INVOICE == msgType || 
-	        		ModelConstant.SMS_TYPE_PROMOTION_PAY == msgType || ModelConstant.SMS_TYPE_RESET_PASSWORD == msgType) {
+	        		ModelConstant.SMS_TYPE_PROMOTION_PAY == msgType || ModelConstant.SMS_TYPE_RESET_PASSWORD == msgType ||
+	        		ModelConstant.SMS_TYPE_RECEIPT == msgType) {
 	        	saveSms2Cache(smsHis);
 	        }
 	        smsHisRepository.save(smsHis);	//TODO 这个以后去掉
@@ -293,22 +296,56 @@ public class SmsServiceImpl implements SmsService {
 		return token;
 		
 	}
-
+	
+	/**
+	 * 校验申请发票短信
+	 *	给传上来的交易号打个码，打完码的token放在服务器端。请求验证码时需要前端将下发的token码重新带回来，否则不予以发短信
+	 */
 	@Override
-	public boolean verifySmsToken(String tradeWaterId, String token) {
+	public String saveAndGetReceiptToken(String tradeWaterId, String appid) {
+		
+		String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
+		String sysSource = "_sh";
+		if ("_guizhou".equals(userSysCode)) {
+			sysSource = "_guizhou";
+		}
+		String key = ModelConstant.KEY_VERICODE_RECEIPT_TRADE_ID + sysSource + ":" + tradeWaterId;
+		Object value = stringRedisTemplate.opsForValue().get(key);
+		String token = "";
+		if (value == null) {
+			token = MD5Util.MD5Encode(tradeWaterId, "");
+			stringRedisTemplate.opsForValue().set(key, token, 30, TimeUnit.MINUTES);
+		}else {
+			token = (String) value;
+		}
+		return token;
+		
+	}
+	
+	@Override
+	public boolean verifySmsToken(String tradeWaterId, int type, String token, String appid) {
 
 		if (StringUtils.isEmpty(token)) {
 			return false;
 		}
 		String key = ModelConstant.KEY_VERICODE_TRADE_ID + tradeWaterId;
-		String serverToken = (String)stringRedisTemplate.opsForValue().get(key);
+		if (ModelConstant.SMS_TYPE_RECEIPT == type) {
+			String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
+			String sysSource = "_sh";
+			if ("_guizhou".equals(userSysCode)) {
+				sysSource = "_guizhou";
+			}
+			key = ModelConstant.KEY_VERICODE_RECEIPT_TRADE_ID + sysSource + ":" +tradeWaterId;
+		}
+		
+		String serverToken = stringRedisTemplate.opsForValue().get(key);
 		LOGGER.info("token : " + token + ", serverToken : " + serverToken);
 		if (!token.equals(serverToken)) {
 			return false;
 		}
 		return true;
 	}
-
+	
 	/**
 	 * 获取随机无效token
 	 */
@@ -318,6 +355,6 @@ public class SmsServiceImpl implements SmsService {
 		String random = RandomStringUtils.random(10);
 		return MD5Util.MD5Encode(random, "");
 	}
-	
+
 	
 }
