@@ -126,7 +126,7 @@ public class MessageServiceImpl implements MessageService {
 
 		//在notice添加一条记录
 		Notice notice = new Notice();
-		BeanUtils.copyProperties(message, notice);
+		BeanUtils.copyProperties(message, notice, "id");
 		notice.setNoticeType(message.getMsgType());
 		notice.setOutsideKey(message.getId());
 		Notice n = noticeRepository.findByOutsideKey(message.getId());
