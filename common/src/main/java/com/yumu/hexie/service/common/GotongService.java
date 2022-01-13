@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.common;
 
 import com.yumu.hexie.integration.notify.InvoiceNotification;
@@ -28,15 +24,15 @@ import com.yumu.hexie.service.billpush.vo.BillPushDetail;
  */
 public interface GotongService {
 
-    public void sendRepairAssignMsg(long opId,RepairOrder order,int distance);
+    void sendRepairAssignMsg(long opId, RepairOrder order);
     
-    public void sendXiyiAssignMsg(long opId,YunXiyiBill bill);
+    void sendXiyiAssignMsg(long opId, YunXiyiBill bill);
     
-    public void sendRepairAssignedMsg(RepairOrder order);
+    void sendRepairAssignedMsg(RepairOrder order);
     
-    public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO);
+    boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO);
     
-    public void sendCommonYuyueBillMsg(int serviceType,String title,String billName, String requireTime, String url, String remark);
+    void sendCommonYuyueBillMsg(int serviceType, String title, String billName, String requireTime, String url, String remark);
     
 	void sendServiceResvMsg(long threadId, String openId, String title, String content, String requireTime, String remark, String appId);
 
@@ -46,17 +42,11 @@ public interface GotongService {
 
 	void sendPayNotification(AccountNotification accountNotification);
 	
-	void sendServiceNotification(User sendUser, ServiceOrder serviceOrder);
-
 	void sendCustomServiceAssignedMsg(ServiceOrder serviceOrder);
 
-	void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder);
-	
 	void sendResetPasswordMsg(User user, String password);
 
 	void sendCustomerDelivery(User user, ServiceOrder serviceOrder);
-
-	void sendPostingReplyMsg(Thread thread);
 
 	void sendPayNotification4HouseBinder(AccountNotification accountNotify);
 

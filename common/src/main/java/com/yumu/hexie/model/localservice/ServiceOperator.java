@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.model.localservice;
 
 import javax.persistence.Entity;
@@ -24,23 +20,21 @@ public class ServiceOperator  extends BaseModel {
     private int type;
     
     private String companyName;//维修队名称
-    private String name;//维修工名称
-    private String tel;
-    private String openId;//设置用户ID的时候将其匹配
+    private String name;//运营端用户名称
     private long userId; //运营端用户ID
-    private String orgOperName; //运营端用户名称
     private String groupAddr; //团购地址
-    
+    private long productId; //商品ID
+
     private Long regionId;//合协社区区域ID
     private boolean fromWuye = false;
-    private double longitude;
-    private double latitude;
-    
+
     private String subType;	//分项。自定义服务用来表示哪个服务;或收费人员用来表示收费项目，其他收入的feeId。
     
     private Long agentId;	//操作员来自哪个代理商
-    private Long merchantId;	//操作员来自哪个商户
-    
+
+    private String tel;
+    private String openId;
+
     public String getCompanyName() {
         return companyName;
     }
@@ -53,35 +47,11 @@ public class ServiceOperator  extends BaseModel {
     public void setName(String name) {
         this.name = name;
     }
-    public String getTel() {
-        return tel;
-    }
-    public void setTel(String tel) {
-        this.tel = tel;
-    }
-    public String getOpenId() {
-        return openId;
-    }
-    public void setOpenId(String openId) {
-        this.openId = openId;
-    }
     public long getUserId() {
         return userId;
     }
     public void setUserId(long userId) {
         this.userId = userId;
-    }
-    public double getLongitude() {
-        return longitude;
-    }
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-    public double getLatitude() {
-        return latitude;
-    }
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
     }
     public Long getRegionId() {
         return regionId;
@@ -107,26 +77,12 @@ public class ServiceOperator  extends BaseModel {
 	public void setAgentId(Long agentId) {
 		this.agentId = agentId;
 	}
-	public Long getMerchantId() {
-		return merchantId;
-	}
-	public void setMerchantId(Long merchantId) {
-		this.merchantId = merchantId;
-	}
 	public String getSubType() {
 		return subType;
 	}
 	public void setSubType(String subType) {
 		this.subType = subType;
 	}
-
-    public String getOrgOperName() {
-        return orgOperName;
-    }
-
-    public void setOrgOperName(String orgOperName) {
-        this.orgOperName = orgOperName;
-    }
 
     public String getGroupAddr() {
         return groupAddr;
@@ -136,24 +92,45 @@ public class ServiceOperator  extends BaseModel {
         this.groupAddr = groupAddr;
     }
 
+    public long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(long productId) {
+        this.productId = productId;
+    }
+
+    public String getTel() {
+        return tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
+    }
+
+    public String getOpenId() {
+        return openId;
+    }
+
+    public void setOpenId(String openId) {
+        this.openId = openId;
+    }
+
     @Override
     public String toString() {
         return "ServiceOperator{" +
                 "type=" + type +
                 ", companyName='" + companyName + '\'' +
                 ", name='" + name + '\'' +
-                ", tel='" + tel + '\'' +
-                ", openId='" + openId + '\'' +
                 ", userId=" + userId +
-                ", orgOperName='" + orgOperName + '\'' +
                 ", groupAddr='" + groupAddr + '\'' +
+                ", productId=" + productId +
                 ", regionId=" + regionId +
                 ", fromWuye=" + fromWuye +
-                ", longitude=" + longitude +
-                ", latitude=" + latitude +
                 ", subType='" + subType + '\'' +
                 ", agentId=" + agentId +
-                ", merchantId=" + merchantId +
+                ", tel='" + tel + '\'' +
+                ", openId='" + openId + '\'' +
                 '}';
     }
 }

@@ -38,6 +38,7 @@ import com.yumu.hexie.integration.notify.InvoiceNotification;
 
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.ModelConstant;
@@ -50,6 +51,7 @@ import com.yumu.hexie.model.system.BizErrorRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
@@ -526,12 +528,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                             long agentId = o.getAgentId();
                             logger.info("agentId is : " + agentId);
-                            List<ServiceOperator> opList;
-                            if (agentId > 1) {    //1是默认奈博的，所以跳过
-                                opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
-                            } else {
-                                opList = serviceOperatorRepository.findByType(operType);
-                            }
+                            List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, serviceOrder.getProductId(), agentId);
+//                            if (agentId > 1) {    //1是默认奈博的，所以跳过
+//                                opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, serviceOrder.getProductId(), agentId);
+//                            } else {
+//                                opList = serviceOperatorRepository.findByTypeAndProductId(operType, serviceOrder.getProductId());
+//                            }
                             logger.info("oper list size : " + opList.size());
                             List<Long> list = new ArrayList<>();
                             for (ServiceOperator serviceOperator : opList) {
@@ -935,7 +937,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
 
     /**
-     * 发票开局模板消息通知
+     * 发票开具模板消息通知
      */
     @Override
     @Async("taskExecutor")
@@ -1021,6 +1023,97 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
                     }
                 }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    /**
+     * 电子收据开具成功模板消息通知
+     */
+    @Override
+    @Async("taskExecutor")
+    public void sendReceiptMsgAsyc() {
+
+        while (true) {
+            try {
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String queue = redisTemplate.opsForList().leftPop(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, 10, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(queue)) {
+                    continue;
+                }
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                ReceiptNotification in = objectMapper.readValue(queue, new TypeReference<ReceiptNotification>() {});
+                String orderId = in.getTradeWaterId();	//交易流水号
+                String appid = in.getAppid();	//判断贵州还是上海
+                
+                String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
+        		String sysSource = "_sh";
+        		if ("_guizhou".equals(userSysCode)) {
+        			sysSource = "_guizhou";
+        		}
+                
+                //查看用户有没有在移动端申请，如果没有，不推送模板消息
+                String key = ModelConstant.KEY_RECEIPT_APPLICATIONF_FLAG + sysSource + ":" +orderId;
+                String pageApplied = redisTemplate.opsForValue().get(key);    //页面申请
+                String applied = in.getApplied();    //公众号是1交易无须申请.其他交易0
+                if (!"1".equals(pageApplied) && !"1".equals(applied)) {    //表示用户没有在移动端申请。扔回队列继续轮，直到用户在移动端申请位置
+
+                    if (System.currentTimeMillis() - Long.parseLong(in.getTimestamp()) > 3600l * 24 * 10 * 1000) {    //超过10天没申请，出队;电子收据理论上不会有这种情况
+                        logger.info("user does not apply 4 invoice .. more than 10 days. will remove from the queue! orderId : " + orderId);
+                    } else {
+                        redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+//							logger.info("user does not apply 4 invoice .. will loop again. orderId: " + orderId);
+                    }
+                    continue;
+                }
+                logger.info("start to consume receipt msg queue : " + in);
+                String openid = in.getOpenid();
+                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
+                    logger.warn("openid is null, will skip.");
+                    continue;
+                }
+
+                boolean isSuccess = false;
+                try {
+                    logger.info("start send Msg4FinishReceipt,  receiptNotification : " + in);
+                    WechatResponse wechatResponse = gotongService.sendMsg4FinishReceipt(in);
+                    if (wechatResponse.getErrcode() == 0) {
+                        isSuccess = true;
+                    } else {
+                        if (wechatResponse.getErrcode() == 43004) {    //未关注的，不要重复发了。直接出队，并记录下来。
+                            isSuccess = true;
+                        } else if (wechatResponse.getErrcode() == 45009) {    //reach max api daily quota limit
+                            isSuccess = true;
+                        }
+                        if (isSuccess) {
+                            try {
+                                BizError bizError = new BizError();
+                                bizError.setBizId(Long.parseLong(in.getReceiptId()));
+                                bizError.setBizType(ModelConstant.EXCEPTION_BIZ_TYPE_TEMPLATEMSG);
+                                bizError.setLevel(ModelConstant.EXCEPTION_LEVEL_INFO);
+                                bizError.setMessage(wechatResponse.getErrmsg());
+                                bizError.setRemark(queue);
+                                bizErrorRepository.save(bizError);
+                            } catch (Exception e) {
+                                logger.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);    //发送失败的，需要重发
+
+                }
+                if (!isSuccess) {
+                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+                }
+            
+                
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }

@@ -530,7 +530,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 			for (OnSaleAreaItem areaItem : areaList) {
 				onSaleAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_OFF, areaItem.getId());
 			}
-			Product product = productRepository.findById(onSaleRule.getProductId()).get();
+			Product product = productRepository.findById(onSaleRule.getProductId());
 			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
 		}
 	

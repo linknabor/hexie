@@ -124,7 +124,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?13!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
             + "and if(?14!='', o.groupStatus = ?14, 1=1) "
             + "and if(?15!='', s.operatorId = ?15, 1=1) "
-            + "and if(?16!=null, o.xiaoquId in ?16, 1=1) "
+            + "and if(?16 is not null, o.xiaoquId in (?16), 1=1) "
             , countQuery = "select count(distinct o.id) from serviceorder o "
             + "left join serviceOperatorItem s on o.productId = s.serviceId "
             + "where o.orderType in ( ?1 ) "
@@ -142,7 +142,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?13!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
             + "and if(?14!='', o.groupStatus = ?14, 1=1) "
             + "and if(?15!='', s.operatorId = ?15, 1=1) "
-            + "and if(?16!=null, o.xiaoquId in ?16, 1=1) "
+            + "and if(?16 is not null, o.xiaoquId in (?16), 1=1) "
             , nativeQuery = true)
     Page<Object[]> findByOrder(List<Integer> types, List<Integer> status, String orderId, String productName,
                                         String orderNo, String receiverName, String tel, String logisticNo, String sendDateBegin, String sendDateEnd,
@@ -156,7 +156,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?4!='', o.createDate <= ?4, 1=1) "
             + "and if(?5!='', o.agentNo = ?5, 1=1) "
             + "and if(?6!='', s.operatorId = ?6, 1=1) "
-            + "and if(?7!=null, o.xiaoquId in ?7, 1=1) "
+            + "and if(?7 is not null, o.xiaoquId in (?7), 1=1) "
             , nativeQuery = true)
-    List<ServiceOrder> findOrderSummary(List<Integer> types, List<Integer> status, String sDate, String eDate, String agentNo, String userid, List<String> listSect);
+    List<ServiceOrder> findOrderSummary(List<Integer> types, List<Integer> status, long sDate, long eDate, String agentNo, String userid, List<String> listSect);
 }

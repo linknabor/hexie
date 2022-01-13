@@ -2,6 +2,8 @@ package com.yumu.hexie.integration.eshop.mapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigInteger;
+
 /**
  * 描述:
  *
@@ -9,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @create 2021-12-15 17:14
  */
 public class RgroupOperatorMapper {
+    @JsonProperty("region_id")
+    private BigInteger regionId;
     private String name;
     @JsonProperty("parent_name")
     private String parentName;
@@ -16,27 +20,37 @@ public class RgroupOperatorMapper {
     private String sectId;
 
     @JsonProperty("product_id")
-    private String productId;
+    private BigInteger productId;
     @JsonProperty("product_name")
     private String productName;
 
-    private String userid; //小区对应的团长ID
-    @JsonProperty("org_oper_name")
-    private String orgOperName; //对应的团长名称
+    private BigInteger userid; //小区对应的团长ID
+    @JsonProperty("oper_name")
+    private String operName; //对应的团长名称
     @JsonProperty("group_addr")
     private String groupAddr; //对应的团长地址
 
-    public RgroupOperatorMapper(String name, String parentName, String sectId, String userid, String orgOperName, String groupAddr, String productId, String productName) {
+    public RgroupOperatorMapper(BigInteger regionId, String name, String parentName, String sectId, BigInteger productId, String productName, BigInteger userid, String operName, String groupAddr) {
         super();
+        this.regionId = regionId;
         this.name = name;
         this.parentName = parentName;
         this.sectId = sectId;
-        this.userid = userid;
-        this.orgOperName = orgOperName;
-        this.groupAddr = groupAddr;
         this.productId = productId;
         this.productName = productName;
+        this.userid = userid;
+        this.operName = operName;
+        this.groupAddr = groupAddr;
     }
+
+    public BigInteger getRegionId() {
+        return regionId;
+    }
+
+    public void setRegionId(BigInteger regionId) {
+        this.regionId = regionId;
+    }
+
     public String getName() {
         return name;
     }
@@ -56,20 +70,20 @@ public class RgroupOperatorMapper {
         this.sectId = sectId;
     }
 
-    public String getUserid() {
+    public BigInteger getUserid() {
         return userid;
     }
 
-    public void setUserid(String userid) {
+    public void setUserid(BigInteger userid) {
         this.userid = userid;
     }
 
-    public String getOrgOperName() {
-        return orgOperName;
+    public String getOperName() {
+        return operName;
     }
 
-    public void setOrgOperName(String orgOperName) {
-        this.orgOperName = orgOperName;
+    public void setOperName(String operName) {
+        this.operName = operName;
     }
 
     public String getGroupAddr() {
@@ -80,11 +94,11 @@ public class RgroupOperatorMapper {
         this.groupAddr = groupAddr;
     }
 
-    public String getProductId() {
+    public BigInteger getProductId() {
         return productId;
     }
 
-    public void setProductId(String productId) {
+    public void setProductId(BigInteger productId) {
         this.productId = productId;
     }
 
@@ -105,7 +119,7 @@ public class RgroupOperatorMapper {
                 ", productId='" + productId + '\'' +
                 ", productName='" + productName + '\'' +
                 ", userid='" + userid + '\'' +
-                ", orgOperName='" + orgOperName + '\'' +
+                ", operName='" + operName + '\'' +
                 ", groupAddr='" + groupAddr + '\'' +
                 '}';
     }

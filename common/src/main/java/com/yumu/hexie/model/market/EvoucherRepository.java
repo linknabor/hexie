@@ -44,7 +44,7 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 			+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) "
 			+ "and IF (?5!='', e.type = ?5, 1=1) "
 			+ "and IF (?6!='', s.operatorId = ?6, 1=1) "
-			+ "and IF (?7!= null, o.regionId in ?7, 1=1) "
+			+ "and IF (?7 is not null, o.regionId in (?7), 1=1) "
 			, nativeQuery = true
 			, countQuery = "select count(distinct e.id) as counts from evoucher e "
 				+ "left join serviceOperatorItem s on e.productId = s.serviceId "
@@ -56,7 +56,7 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 				+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) " 
 				+ "and IF (?5!='', e.type = ?5, 1=1) "
 				+ "and IF (?6!='', s.operatorId = ?6, 1=1) "
-				+ "and IF (?7!= null, o.regionId in ?7, 1=1) "
+				+ "and IF (?7 is not null, o.regionId in (?7), 1=1) "
 			)
 	Page<Evoucher> findByMultipleConditions(String status, String tel, String agentNo, String agentName, String type, String userId, List<String> listSect, Pageable pageable);
 	
