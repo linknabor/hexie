@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface AgentRepository extends JpaRepository<Agent, Long>{
 
+	Agent findById(long id);
 	@Query(value = "select a.id from agent a where a.status =?1 "
 			+ "and IF (?2!='', a.agentNo = ?2, 1=1 )"
 			+ "and IF (?3!='', a.name like CONCAT('%',?3,'%'), 1=1) ", nativeQuery = true)

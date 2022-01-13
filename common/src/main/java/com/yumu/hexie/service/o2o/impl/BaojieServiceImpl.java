@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.o2o.impl;
 
 import java.util.ArrayList;
@@ -96,7 +92,7 @@ public class BaojieServiceImpl implements BaojieService {
         item.setPrice(sItem.getPrice());
         item.setServiceId(sItem.getId());
         item.setTitle(sItem.getTitle());
-        List<HomeBillItem> items = new ArrayList<HomeBillItem>();
+        List<HomeBillItem> items = new ArrayList<>();
         items.add(item);
         
         
@@ -106,7 +102,7 @@ public class BaojieServiceImpl implements BaojieService {
             
         Coupon coupon = req.getCouponId() != null && req.getCouponId() > 0 ? couponService.findOne(req.getCouponId()) : null;
         if(couponService.isAvaible(PromotionConstant.COUPON_ITEM_TYPE_SERVICE,
-            new Long(HomeServiceConstant.SERVICE_TYPE_BAOJIE), item.getParentType(),item.getServiceId(), ob.getBill().getAmount().floatValue(), coupon, false)){
+                (long) HomeServiceConstant.SERVICE_TYPE_BAOJIE, item.getParentType(),item.getServiceId(), ob.getBill().getAmount().floatValue(), coupon, false)){
             ob.coupon(coupon);
         }
         ob.getBill().setTotalAmount(ob.getBill().getRealAmount());
@@ -131,7 +127,7 @@ public class BaojieServiceImpl implements BaojieService {
      */
     @Override
     public JsSign pay(long billId, User user) {
-        BaojieBill bill = baojieBillRepository.findById(billId).get();
+        BaojieBill bill = baojieBillRepository.findById(billId);
         log.warn("发起支付[BEG]" + billId); 
         //获取支付单
         PaymentOrder pay = commonHomeService.reqPay(bill, user.getOpenid());
@@ -150,7 +146,7 @@ public class BaojieServiceImpl implements BaojieService {
      */
     @Override
     public BaojieBill get(long billId, User user) {
-        BaojieBill bill = baojieBillRepository.findById(billId).get();
+        BaojieBill bill = baojieBillRepository.findById(billId);
         if(bill.getUserId() != user.getId()) {
             throw new BizValidateException("不能查看他人的订单");
         }
@@ -166,7 +162,7 @@ public class BaojieServiceImpl implements BaojieService {
      */
     @Override
     public BaojieBill confirm(long billId, User user) {
-        BaojieBill bill = baojieBillRepository.findById(billId).get();
+        BaojieBill bill = baojieBillRepository.findById(billId);
         if(bill.getUserId() != user.getId()) {
             throw new BizValidateException("不能操作他人的订单");
         }
@@ -197,7 +193,7 @@ public class BaojieServiceImpl implements BaojieService {
             case PaymentConstant.PAYMENT_STATUS_INIT:
                 break;
             case PaymentConstant.PAYMENT_STATUS_SUCCESS:
-                BaojieBill bill = baojieBillRepository.findById(payment.getOrderId()).get();
+                BaojieBill bill = baojieBillRepository.findById(payment.getOrderId());
                 if(bill.getStatus()==HomeServiceConstant.ORDER_STATUS_CREATE){
                     paySuccess(bill,payment);
                 }
@@ -232,12 +228,13 @@ public class BaojieServiceImpl implements BaojieService {
     @Async
     @Override
     public void notifyPayed(long billId) {
-        log.warn("到家notifyPayed成功[BEG]" + billId); 
+        log.warn("到家notifyPayed成功[BEG]" + billId);
         try {
             Thread.sleep(1000);//等待微信端处理完成
         } catch (InterruptedException e) {
+            log.error("sleep:", e);
         }
-        BaojieBill bill = baojieBillRepository.findById(billId).get();
+        BaojieBill bill = baojieBillRepository.findById(billId);
         if(bill == null || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_CREATE) {
             return;
         }
@@ -245,7 +242,7 @@ public class BaojieServiceImpl implements BaojieService {
         payment = paymentService.refreshStatus(payment);
         update4Payment(payment);
     }
-    private static final long BAOJIE_TIMEOUT = 3600000l;
+    private static final long BAOJIE_TIMEOUT = 3600000L;
     /** 
      * @param billId
      * @see com.yumu.hexie.service.o2o.BaojieService#timeout(long)
@@ -253,7 +250,7 @@ public class BaojieServiceImpl implements BaojieService {
     @Override
     public void timeout(long billId) {
 
-        BaojieBill bill = baojieBillRepository.findById(billId).get();
+        BaojieBill bill = baojieBillRepository.findById(billId);
 
         log.warn("保洁超时[BEG]" + billId);
         PaymentOrder payment = paymentService.queryPaymentOrder(PaymentConstant.TYPE_BAOJIE_ORDER,billId);
@@ -282,7 +279,7 @@ public class BaojieServiceImpl implements BaojieService {
     @Override
     public BaojieBill cancel(long billId, User user) {
         log.warn("取消洗衣订单" + billId); 
-        BaojieBill bill = baojieBillRepository.findById(billId).get();
+        BaojieBill bill = baojieBillRepository.findById(billId);
         if(bill.getUserId() != user.getId()) {
             throw new BizValidateException("不能操作他人的订单");
         }

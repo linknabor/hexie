@@ -16,7 +16,6 @@ public class SaleAreaMapper implements Serializable {
 	private String parentName;
 	@JsonProperty("sect_id")
 	private String sectId;
-	
 	public SaleAreaMapper(String name, String parentName, String sectId) {
 		super();
 		this.name = name;
@@ -42,6 +41,4 @@ public class SaleAreaMapper implements Serializable {
 		this.sectId = sectId;
 	}
 
-	
-	
 }

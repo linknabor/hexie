@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface AddressRepository extends JpaRepository<Address, Long> {
+	Address findById(long id);
 	List<Address> findAllByUserId(long userId);
 	
 	@Query("from Address a where a.userId = ?1 and a.detailAddress=?2")

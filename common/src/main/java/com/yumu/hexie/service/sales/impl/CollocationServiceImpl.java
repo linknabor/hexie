@@ -33,7 +33,7 @@ public class CollocationServiceImpl implements CollocationService {
 
 	public void fillItemInfo4Cart(Cart cart){
 		for(OrderItem item : cart.getItems()){
-			SalePlan salePlan = salePlanService.getService(item.getOrderType()).findSalePlan(Long.valueOf(item.getRuleId()));
+			SalePlan salePlan = salePlanService.getService(item.getOrderType()).findSalePlan(item.getRuleId());
 			Product product  = productService.getProduct(salePlan.getProductId());
 			item.fillDetail(salePlan, product);
 		}

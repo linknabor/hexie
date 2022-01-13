@@ -84,7 +84,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType()) {
 			return;
 		}
-		Product product = productRepository.findById(serviceOrder.getProductId()).get();
+		Product product = productRepository.findById(serviceOrder.getProductId());
 		for (int i = 0; i < serviceOrder.getCount(); i++) {
 			
 			Evoucher evoucher = new Evoucher();
@@ -320,10 +320,11 @@ public class EvoucherServiceImpl implements EvoucherService {
 		Assert.hasText(code, "核销券码不能为空。");
 		logger.info("code is : " + code);
 		Evoucher evoucher =  evoucherRepository.findByCode(code);
-		List<Evoucher> list = new ArrayList<>();
-		if (evoucher!=null) {
-			list = evoucherRepository.findByOrderId(evoucher.getOrderId());
+		if(evoucher == null) {
+			throw new BizValidateException("核销券码不正确。");
 		}
+		List<Evoucher> list = evoucherRepository.findByOrderId(evoucher.getOrderId());
+
 		String qrCodeUrl = EVOUCHER_QRCODE_URL;
 		if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
 			

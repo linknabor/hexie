@@ -9,9 +9,10 @@ import org.springframework.data.jpa.repository.Query;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 
 public interface BaojieBillRepository extends JpaRepository<BaojieBill, Long> {
-    public List<BaojieBill> findByUserId(long userId, Pageable page);
+    BaojieBill findById(long id);
+    List<BaojieBill> findByUserId(long userId, Pageable page);
 
     @Query("From BaojieBill b where b.status = " + HomeServiceConstant.ORDER_STATUS_CREATE
         +" AND b.createDate < ?1")
-    public List<BaojieBill> findTimeoutBill(long latestTime);
+    List<BaojieBill> findTimeoutBill(long latestTime);
 }

@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.eshop.vo;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class QueryOrderVO implements Serializable {
 
@@ -23,6 +24,10 @@ public class QueryOrderVO implements Serializable {
 	private String sendDateBegin;
 	private String sendDateEnd;
 	private String sectName;
+
+	private String userid;
+
+	private List<String> sectIds;
 
 	private String queryFlag;
 
@@ -137,6 +142,22 @@ public class QueryOrderVO implements Serializable {
 		this.queryFlag = queryFlag;
 	}
 
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public List<String> getSectIds() {
+		return sectIds;
+	}
+
+	public void setSectIds(List<String> sectIds) {
+		this.sectIds = sectIds;
+	}
+
 	@Override
 	public String toString() {
 		return "QueryOrderVO{" +
@@ -154,6 +175,8 @@ public class QueryOrderVO implements Serializable {
 				", sendDateBegin='" + sendDateBegin + '\'' +
 				", sendDateEnd='" + sendDateEnd + '\'' +
 				", sectName='" + sectName + '\'' +
+				", userid='" + userid + '\'' +
+				", sectIds=" + sectIds +
 				", queryFlag='" + queryFlag + '\'' +
 				", currentPage=" + currentPage +
 				", pageSize=" + pageSize +

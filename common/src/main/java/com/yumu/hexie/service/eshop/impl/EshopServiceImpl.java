@@ -15,7 +15,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
+import com.yumu.hexie.integration.eshop.mapper.*;
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
+import com.yumu.hexie.integration.eshop.vo.*;
 import com.yumu.hexie.model.market.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -42,28 +44,8 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryCouponCfgDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
-import com.yumu.hexie.integration.eshop.mapper.EvoucherMapper;
-import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryCouponCfgMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryCouponMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
-import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
-import com.yumu.hexie.integration.eshop.mapper.QuerySupportProductMapper;
-import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
-import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
-import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
-import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO.LogisticInfo;
-import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO.Oper;
-import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
@@ -174,15 +156,14 @@ public class EshopServiceImpl implements EshopSerivce {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			List<Long> agentList = null;
-			if (StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName())) {
-				//do nothing
-			}else {
-				agentList = agentRepository.findByAgentNoOrName(1, queryProductVO.getAgentNo(), 
+			if (!(StringUtils.isEmpty(queryProductVO.getAgentNo())
+					&& StringUtils.isEmpty(queryProductVO.getAgentName()))) {
+				agentList = agentRepository.findByAgentNoOrName(1, queryProductVO.getAgentNo(),
 						queryProductVO.getAgentName());
 			}
 			if (agentList != null ) {
 				if (agentList.isEmpty()) {
-					agentList.add(0l);
+					agentList.add(0L);
 				}
 			}
 			
@@ -203,17 +184,25 @@ public class EshopServiceImpl implements EshopSerivce {
 				page = productRepository.findByMultiCondRgroup(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 						queryProductVO.getProductName(), queryProductVO.getProductStatus(), agentList, queryProductVO.getDemo(), pageable);
 			}
+			if(page == null) {
+				throw new BizValidateException("商品类型不正确");
+			}
 			
 			List<ServiceOperator> opList = new ArrayList<>();
 			int operatorType = 0;
-			if ("1001".equals(productType)) {
-				operatorType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
-			}else if ("1002".equals(productType)) {
-				operatorType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
-			}else if ("1003".equals(productType)) {
-				operatorType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
-			}else if ("1004".equals(productType)) {
-				operatorType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
+			switch (productType) {
+				case "1001":
+					operatorType = ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER;
+					break;
+				case "1002":
+					operatorType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
+					break;
+				case "1003":
+					operatorType = ModelConstant.SERVICE_OPER_TYPE_PROMOTION;
+					break;
+				case "1004":
+					operatorType = ModelConstant.SERVICE_OPER_TYPE_SAASSALE;
+					break;
 			}
 			
 			if (StringUtils.isEmpty(queryProductVO.getAgentNo())) {
@@ -266,12 +255,15 @@ public class EshopServiceImpl implements EshopSerivce {
 				page = productRepository.findByMultiCondRgroup(queryProductVO.getProductType(), queryProductVO.getProductId(), 
 						"", "", null, "", pageable);
 			}
-			
+			if(page == null) {
+				throw new BizValidateException("商品类型不正确");
+			}
+
 			List<QueryProductMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryProductMapper.class);
-			List<Object[]> regionList = new ArrayList<>();
+			List<Object[]> regionList;
 			if ("1000".equals(productType) || "1001".equals(productType) || "1003".equals(productType) || "1004".equals(productType)) {
-				regionList = regionRepository.findByProductId(queryProductVO.getProductId());}
-			else if ("1002".equals(productType)) {
+				regionList = regionRepository.findByProductId(queryProductVO.getProductId());
+			} else {
 				regionList = regionRepository.findByProductId4Rgroup(queryProductVO.getProductId());
 			}
 			
@@ -286,6 +278,32 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 		} catch (Exception e) {
 			
+			logger.info(e.getMessage(), e);
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
+	}
+
+	@Override
+	public CommonResponse<Object> getProductSect(QueryProductVO queryProductVO) {
+		Assert.hasText(queryProductVO.getProductId(), "商品ID不能为空。");
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+
+			List<Object[]> regionList = null;
+			String productType = queryProductVO.getProductType();
+			if ("1002".equals(productType)) {
+				regionList = regionRepository.findByProductId4RgroupAndHead(queryProductVO.getProductId());
+			}
+			if(regionList == null) {
+				throw new BizValidateException("商品类型不正确");
+			}
+
+			List<RgroupOperatorMapper> areaList = ObjectToBeanUtils.objectToBean(regionList, RgroupOperatorMapper.class);
+			commonResponse.setData(areaList);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
 			logger.info(e.getMessage(), e);
 			commonResponse.setErrMsg(e.getMessage());
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
@@ -314,7 +332,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		Product product = new Product();
 		if ("edit".equals(saveProductVO.getOperType())) {
-			product = productRepository.findById(Long.valueOf(saveProductVO.getId())).get();
+			product = productRepository.findById(Long.parseLong(saveProductVO.getId()));
 			if (product == null) {
 				throw new BizValidateException("未查询到商品，id : " + saveProductVO.getId());
 			}
@@ -330,12 +348,12 @@ public class EshopServiceImpl implements EshopSerivce {
 		product.setMainPicture(saveProductVO.getMainPicture());
 		product.setSmallPicture(saveProductVO.getSmallPicture());
 		product.setPictures(saveProductVO.getPictures());
-		product.setMiniPrice(Float.valueOf(saveProductVO.getMiniPrice()));
-		product.setSinglePrice(Float.valueOf(saveProductVO.getSinglePrice()));
-		product.setOriPrice(Float.valueOf(saveProductVO.getOriPrice()));
+		product.setMiniPrice(Float.parseFloat(saveProductVO.getMiniPrice()));
+		product.setSinglePrice(Float.parseFloat(saveProductVO.getSinglePrice()));
+		product.setOriPrice(Float.parseFloat(saveProductVO.getOriPrice()));
 		product.setServiceDesc(saveProductVO.getContext());
-		product.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
-		if (ModelConstant.RULE_STATUS_ON == Integer.valueOf(saveProductVO.getStatus())) {
+		product.setPostageFee(Float.parseFloat(saveProductVO.getPostageFee()));
+		if (ModelConstant.RULE_STATUS_ON == Integer.parseInt(saveProductVO.getStatus())) {
 			product.setStatus(ModelConstant.PRODUCT_ONSALE);
 		}
 		Date startDate = DateUtil.parse(saveProductVO.getStartDate(), DateUtil.dttmSimple);
@@ -349,11 +367,11 @@ public class EshopServiceImpl implements EshopSerivce {
 			product.setUpdateUser(saveProductVO.getUpdateUser());
 		}
 		if (!StringUtils.isEmpty(saveProductVO.getProductCategoryId())) {
-			product.setProductCategoryId(Integer.valueOf(saveProductVO.getProductCategoryId()));
+			product.setProductCategoryId(Integer.parseInt(saveProductVO.getProductCategoryId()));
 		}
 		product = productRepository.save(product);
 		
-		int salePlanType = Integer.valueOf(saveProductVO.getSalePlanType());
+		int salePlanType = Integer.parseInt(saveProductVO.getSalePlanType());
 		if (ModelConstant.ORDER_TYPE_EVOUCHER != salePlanType &&
 				ModelConstant.ORDER_TYPE_ONSALE != salePlanType &&
 				ModelConstant.ORDER_TYPE_RGROUP != salePlanType &&
@@ -375,22 +393,22 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 				onSaleRule = ruleList.get(0);
 			}
-			onSaleRule.setProductId(Integer.valueOf(product.getProductType()));
+			onSaleRule.setProductId(Integer.parseInt(product.getProductType()));
 			onSaleRule.setProductName(product.getName());
-			onSaleRule.setProductType(Integer.valueOf(saveProductVO.getType()));
+			onSaleRule.setProductType(Integer.parseInt(saveProductVO.getType()));
 			onSaleRule.setCreateDate(product.getCreateDate());
 			onSaleRule.setDescription(product.getServiceDesc());
 			onSaleRule.setProductId(product.getId());
 			onSaleRule.setName(product.getName());
-			onSaleRule.setLimitNumOnce(Integer.valueOf(saveProductVO.getLimitNumOnce()));
+			onSaleRule.setLimitNumOnce(Integer.parseInt(saveProductVO.getLimitNumOnce()));
 			onSaleRule.setStartDate(product.getStartDate());
 			onSaleRule.setEndDate(product.getEndDate());
 			onSaleRule.setOriPrice(product.getOriPrice());
 			onSaleRule.setPrice(product.getSinglePrice());
 			onSaleRule.setDescription(product.getServiceDesc());
 			onSaleRule.setTimeoutForPay(30*60*1000);
-			onSaleRule.setFreeShippingNum(Integer.valueOf(saveProductVO.getFreeShippingNum()));
-			onSaleRule.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
+			onSaleRule.setFreeShippingNum(Integer.parseInt(saveProductVO.getFreeShippingNum()));
+			onSaleRule.setPostageFee(Float.parseFloat(saveProductVO.getPostageFee()));
 			if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
 				onSaleRule.setStatus(ModelConstant.RULE_STATUS_ON);
 			}else {
@@ -409,11 +427,11 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (ModelConstant.ORDER_TYPE_PROMOTION == salePlanType || ModelConstant.ORDER_TYPE_SAASSALE == salePlanType) {
 				
 				OnSaleAreaItem onSaleAreaItem = new OnSaleAreaItem();
-				onSaleAreaItem.setRegionId(1l);	//全国
+				onSaleAreaItem.setRegionId(1L);	//全国
 				onSaleAreaItem.setRuleId(onSaleRule.getId());
 				long ruleCloseTime = onSaleRule.getEndDate().getTime();
 				onSaleAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
-				onSaleAreaItem.setSortNo(Integer.valueOf(saveProductVO.getSortNo()));
+				onSaleAreaItem.setSortNo(Integer.parseInt(saveProductVO.getSortNo()));
 				onSaleAreaItem.setRuleName(onSaleRule.getName());
 				onSaleAreaItem.setOriPrice(product.getOriPrice());
 				onSaleAreaItem.setPrice(product.getSinglePrice());
@@ -441,7 +459,7 @@ public class EshopServiceImpl implements EshopSerivce {
 					onSaleAreaItem.setRuleId(onSaleRule.getId());
 					long ruleCloseTime = onSaleRule.getEndDate().getTime();
 					onSaleAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
-					onSaleAreaItem.setSortNo(Integer.valueOf(saveProductVO.getSortNo()));
+					onSaleAreaItem.setSortNo(Integer.parseInt(saveProductVO.getSortNo()));
 					onSaleAreaItem.setRuleName(onSaleRule.getName());
 					onSaleAreaItem.setOriPrice(product.getOriPrice());
 					onSaleAreaItem.setPrice(product.getSinglePrice());
@@ -464,9 +482,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 				
 			}
-			
-		} else if (ModelConstant.ORDER_TYPE_RGROUP == salePlanType) {
-			
+		} else {
 			rgroupRule = new RgroupRule();
 			if ("edit".equals(saveProductVO.getOperType())) {
 				List<RgroupRule> ruleList = rgroupRuleRepository.findAllByProductId(product.getId());
@@ -475,23 +491,23 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 				rgroupRule = ruleList.get(0);
 			}
-			rgroupRule.setProductId(Integer.valueOf(product.getProductType()));
+			rgroupRule.setProductId(Integer.parseInt(product.getProductType()));
 			rgroupRule.setProductName(product.getName());
-			rgroupRule.setProductType(Integer.valueOf(saveProductVO.getType()));
+			rgroupRule.setProductType(Integer.parseInt(saveProductVO.getType()));
 			rgroupRule.setCreateDate(product.getCreateDate());
 			rgroupRule.setDescription(product.getServiceDesc());
 			rgroupRule.setProductId(product.getId());
 			rgroupRule.setName(product.getName());
-			rgroupRule.setLimitNumOnce(Integer.valueOf(saveProductVO.getLimitNumOnce()));
+			rgroupRule.setLimitNumOnce(Integer.parseInt(saveProductVO.getLimitNumOnce()));
 			rgroupRule.setStartDate(product.getStartDate());
 			rgroupRule.setEndDate(product.getEndDate());
 			rgroupRule.setOriPrice(product.getOriPrice());
 			rgroupRule.setPrice(product.getSinglePrice());
 			rgroupRule.setDescription(product.getServiceDesc());
 			rgroupRule.setTimeoutForPay(30*60*1000);
-			rgroupRule.setFreeShippingNum(Integer.valueOf(saveProductVO.getFreeShippingNum()));
-			rgroupRule.setPostageFee(Float.valueOf(saveProductVO.getPostageFee()));
-			rgroupRule.setGroupMinNum(Integer.valueOf(saveProductVO.getGroupMinNum()));
+			rgroupRule.setFreeShippingNum(Integer.parseInt(saveProductVO.getFreeShippingNum()));
+			rgroupRule.setPostageFee(Float.parseFloat(saveProductVO.getPostageFee()));
+			rgroupRule.setGroupMinNum(Integer.parseInt(saveProductVO.getGroupMinNum()));
 			
 			if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
 				rgroupRule.setStatus(ModelConstant.RULE_STATUS_ON);
@@ -516,7 +532,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				rgroupAreaItem.setRuleId(rgroupRule.getId());
 				long ruleCloseTime = rgroupRule.getEndDate().getTime();
 				rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
-				rgroupAreaItem.setSortNo(Integer.valueOf(saveProductVO.getSortNo()));
+				rgroupAreaItem.setSortNo(Integer.parseInt(saveProductVO.getSortNo()));
 				rgroupAreaItem.setRuleName(rgroupRule.getName());
 				rgroupAreaItem.setOriPrice(product.getOriPrice());
 				rgroupAreaItem.setPrice(product.getSinglePrice());
@@ -535,9 +551,7 @@ public class EshopServiceImpl implements EshopSerivce {
 					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
 				}
 				rgroupAreaItemRepository.save(rgroupAreaItem);
-				
 			}
-			
 		}
 		
 		ProductPlat productPlat = new ProductPlat();
@@ -551,7 +565,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		productPlat.setProductId(product.getId());
 		productPlatRepository.save(productPlat);
 		
-		ProductRule productRule = null;
+		ProductRule productRule;
 		if (onSaleRule != null) {
 			productRule = new ProductRule(product, onSaleRule);
 		}else {
@@ -580,9 +594,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		String productId = saveProductVO.getId();
 		String operType = saveProductVO.getOperType();
 		
-		int productStatus = 0;
-		int ruleStatus = 0;
-		int itemStatus = 0;
+		int productStatus;
+		int ruleStatus;
+		int itemStatus;
 		if ("on".equals(operType)) {
 			productStatus = ModelConstant.PRODUCT_ONSALE;
 			ruleStatus = ModelConstant.RULE_STATUS_ON;
@@ -592,8 +606,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			ruleStatus = ModelConstant.RULE_STATUS_OFF;
 			itemStatus = ModelConstant.DISTRIBUTION_STATUS_OFF;
 		}
-		
-		Product product = productRepository.findById(Long.valueOf(productId)).get();
+		Product product = productRepository.findById(Long.parseLong(productId));
 		if (product == null) {
 			throw new BizValidateException("未查询到商品, id : " + productId);
 		}
@@ -621,9 +634,6 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 			}
 		}
-		
-		
-		
 	}
 	
 	/**
@@ -639,11 +649,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		String operType = saveProductVO.getOperType();
 		
 		if ("1".equals(operType)) {
-			productRepository.updateDemo(1, Long.valueOf(productId));
+			productRepository.updateDemo(1, Long.parseLong(productId));
 		}else if ("0".equals(operType)) {
-			productRepository.updateDemo(0, Long.valueOf(productId));
+			productRepository.updateDemo(0, Long.parseLong(productId));
 		}
-		
 	}
 
 	/**
@@ -665,8 +674,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				region = regionRepository.save(region);
 			}else {
 				if (regionList.size()>1) {
-					for (int i = 0; i < regionList.size(); i++) {
-						Region currRegion = regionList.get(i);
+					for (Region currRegion : regionList) {
 						if (!StringUtils.isEmpty(currRegion.getSectId())) {
 							region = currRegion;
 						}
@@ -681,19 +689,6 @@ public class EshopServiceImpl implements EshopSerivce {
 				region = regionRepository.save(region);
 			}
 		}else {
-			if (regionList.size()>1) {
-				for (int i = 0; i < regionList.size(); i++) {
-					Region currRegion = regionList.get(i);
-					if (!StringUtils.isEmpty(currRegion.getSectId())) {
-						region = currRegion;
-					}
-				}
-				if (region == null) {
-					region = regionList.get(0);
-				}
-			}else {
-				region = regionList.get(0);
-			}
 			region = regionList.get(0);
 		}
 		return region;
@@ -784,6 +779,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setUserId(oper.getUserId());
 			serviceOperator.setLongitude(0d);
 			serviceOperator.setLatitude(0d);
+			serviceOperator.setRegionId(oper.getRegionId());
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
 				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
 				serviceOperator.setAgentId(agent.getId());
@@ -819,7 +815,13 @@ public class EshopServiceImpl implements EshopSerivce {
 		try {
 			Sort sort = new Sort(Direction.DESC, "id");
 			Pageable pageable = PageRequest.of(queryEvoucherVO.getCurrentPage(), queryEvoucherVO.getPageSize(), sort);
-			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentNo(), queryEvoucherVO.getAgentName(), queryEvoucherVO.getType(), pageable);
+			List<String> listSect = null;
+			if(queryEvoucherVO.getSectIds() != null && queryEvoucherVO.getSectIds().size() > 0) {
+				//查询小区对应的ID
+				listSect = regionRepository.getRegionBySectid(queryEvoucherVO.getSectIds());
+			}
+
+			Page<Evoucher> page = evoucherRepository.findByMultipleConditions(queryEvoucherVO.getStatus(), queryEvoucherVO.getTel(), queryEvoucherVO.getAgentNo(), queryEvoucherVO.getAgentName(), queryEvoucherVO.getType(), queryEvoucherVO.getUserid(), listSect, pageable);
 
 			List<EvoucherMapper> mapperList = new ArrayList<>();
 			for (Evoucher evoucher : page.getContent()) {
@@ -896,8 +898,6 @@ public class EshopServiceImpl implements EshopSerivce {
 				evoucherRepository.save(evoucher);
 			}
 		}
-		
-		
 	}
 
 	/**
@@ -924,7 +924,6 @@ public class EshopServiceImpl implements EshopSerivce {
 		for (String delid : delArr) {
 			productCategoryRepository.deleteById(Long.valueOf(delid));
 		}
-		
 	}
 	
 	/**
@@ -940,7 +939,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				Sort sort = Sort.by(Direction.ASC, "sort");
 				list = productCategoryRepository.findAll(sort);
 			}else {
-				ProductCategory category = productCategoryRepository.findById(Long.valueOf(id)).get();
+				ProductCategory category = productCategoryRepository.findById(Long.parseLong(id));
 				list.add(category);
 			}
 			commonResponse.setData(list);
@@ -976,9 +975,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				if (agentNo.length()==11 && org.apache.commons.lang3.StringUtils.isNumeric(agentNo)) {	//合伙人是11位手机号
 					//查看合伙人是否购买过推广订单。如果有，说明是合伙人
 					List<ServiceOrder> orderList = serviceOrderRepository.findByTelAndStatusAndOrderType(agentNo, ModelConstant.ORDER_STATUS_PAYED, ModelConstant.ORDER_TYPE_PROMOTION);
-					if (orderList.isEmpty()) {
-						//do nothing
-					}else {
+					if (!orderList.isEmpty()) {
 						Agent agent = agentRepository.findByAgentNo(agentNo);
 						evoucher = evoucherService.createSingle4Promotion(agent);
 					}
@@ -1001,7 +998,6 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (evoucher == null) {
 				throw new BizValidateException("没有可以生成的海报。 ");
 			}
-//			ruleId=RULE_ID&productType=PRODUCT_TYPE&shareCode=SHARE_CODE
 			String appid = systemConfigService.getSysConfigByKey("PROMOTION_SERVICE_APPID");
 			if (StringUtils.isEmpty(appid)) {
 				appid = "";
@@ -1017,12 +1013,10 @@ public class EshopServiceImpl implements EshopSerivce {
 			commonResponse.setResult("00");
 			
 		} catch (Exception e) {
-			
 			commonResponse.setErrMsg(e.getMessage());
 			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
 		}
 		return commonResponse;
-		
 	}
 
 	/**
@@ -1066,12 +1060,12 @@ public class EshopServiceImpl implements EshopSerivce {
 			Page<Object[]> page;
 
 			if(!"1".equals(queryOrderVO.getQueryFlag())) {
-				if (!StringUtils.isEmpty(queryOrderVO.getSendDateBegin())) {
-					Date startDate = DateUtil.parse(queryOrderVO.getSendDateBegin() + " 00:00:00", DateUtil.dttmSimple);
+				if (!StringUtils.isEmpty(sDate)) {
+					Date startDate = DateUtil.parse(sDate + " 00:00:00", DateUtil.dttmSimple);
 					sDate = startDate.toString();
 				}
-				if (!StringUtils.isEmpty(queryOrderVO.getSendDateEnd())) {
-					Date endDate = DateUtil.parse(queryOrderVO.getSendDateEnd() + " 23:59:59", DateUtil.dttmSimple);
+				if (!StringUtils.isEmpty(eDate)) {
+					Date endDate = DateUtil.parse(eDate + " 23:59:59", DateUtil.dttmSimple);
 					eDate = endDate.toString();
 				}
 
@@ -1080,10 +1074,17 @@ public class EshopServiceImpl implements EshopSerivce {
 						queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
 						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
 			} else { //从运营端过来
+
+				List<String> listSect = null;
+				if(queryOrderVO.getSectIds() != null && queryOrderVO.getSectIds().size() > 0) {
+					//查询小区对应的ID
+					listSect = regionRepository.getRegionBySectid(queryOrderVO.getSectIds());
+				}
+
 				page = serviceOrderRepository.findByOrder(typeList, statusList, queryOrderVO.getId(),
 						queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
 						queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
-						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), pageable);
+						queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), queryOrderVO.getUserid(), listSect, pageable);
 			}
 
 			logger.error("page.getContent():" + page.getContent());
@@ -1104,6 +1105,38 @@ public class EshopServiceImpl implements EshopSerivce {
 		}
 
 		return commonResponse;
+	}
+
+	@Override
+	public String getOrderSummary(OrderSummaryVO orderSummaryVO) {
+		List<String> listSect = null;
+		if(orderSummaryVO.getSectIds() != null && orderSummaryVO.getSectIds().size() > 0) {
+			//查询小区对应的ID
+			listSect = regionRepository.getRegionBySectid(orderSummaryVO.getSectIds());
+		}
+
+		List<Integer> typeList = new ArrayList<>();
+		typeList.add(ModelConstant.ORDER_TYPE_ONSALE);
+		typeList.add(ModelConstant.ORDER_TYPE_RGROUP);
+		typeList.add(ModelConstant.ORDER_TYPE_SERVICE);
+
+		List<Integer> statusList = new ArrayList<>();
+		statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+		statusList.add(ModelConstant.ORDER_STATUS_REFUNDED);
+		statusList.add(ModelConstant.ORDER_STATUS_REFUNDING);
+		statusList.add(ModelConstant.ORDER_STATUS_RETURNED);
+		statusList.add(ModelConstant.ORDER_STATUS_SENDED);
+		statusList.add(ModelConstant.ORDER_STATUS_CONFIRM);
+
+		String date = DateUtil.dtFormat(new Date());
+		Date startDate = DateUtil.parse(date + " 00:00:00", DateUtil.dttmSimple);
+		long sDate = startDate.getTime();
+
+		Date endDate = DateUtil.parse(date + " 23:59:59", DateUtil.dttmSimple);
+		long eDate = endDate.getTime();
+
+		List<ServiceOrder> list = serviceOrderRepository.findOrderSummary(typeList, statusList, sDate, eDate, orderSummaryVO.getAgentNo(), orderSummaryVO.getUserid(), listSect);
+		return String.valueOf(list.size());
 	}
 
 	@Override
@@ -1156,9 +1189,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (optional.isPresent()) {
 			
 			List<LogisticInfo> logisticList = saveLogisticsVO.getLogistics();
-			StringBuffer codeBf  = new StringBuffer();
-			StringBuffer comBf = new StringBuffer();
-			StringBuffer noBf = new StringBuffer();
+			StringBuilder codeBf  = new StringBuilder();
+			StringBuilder comBf = new StringBuilder();
+			StringBuilder noBf = new StringBuilder();
 			
 			for (int i=0; i<logisticList.size(); i++) {
 				
@@ -1198,12 +1231,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			List<Long> agentList = null;
-			if (StringUtils.isEmpty(queryCouponCfgVO.getAgentNo()) && StringUtils.isEmpty(queryCouponCfgVO.getAgentName())) {
-			}else {
-				agentList = agentRepository.findByAgentNoOrName(1, queryCouponCfgVO.getAgentNo(), 
+			if (!(StringUtils.isEmpty(queryCouponCfgVO.getAgentNo()) && StringUtils.isEmpty(queryCouponCfgVO.getAgentName()))) {
+				agentList = agentRepository.findByAgentNoOrName(1, queryCouponCfgVO.getAgentNo(),
 						queryCouponCfgVO.getAgentName());
 			}
-			
 			List<Order> orderList = new ArrayList<>();
 	    	Order order = new Order(Direction.DESC, "id");
 	    	orderList.add(order);
@@ -1273,9 +1304,8 @@ public class EshopServiceImpl implements EshopSerivce {
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 			List<Long> agentList = null;
-			if (StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName())) {
-			}else {
-				agentList = agentRepository.findByAgentNoOrName(1, queryProductVO.getAgentNo(), 
+			if (!(StringUtils.isEmpty(queryProductVO.getAgentNo()) && StringUtils.isEmpty(queryProductVO.getAgentName()))) {
+				agentList = agentRepository.findByAgentNoOrName(1, queryProductVO.getAgentNo(),
 						queryProductVO.getAgentName());
 			}
 			
@@ -1323,10 +1353,10 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Transactional
 	public void saveCouponCfg(SaveCouponCfgVO saveCouponCfgVO) throws Exception {
 	
-		Agent agent = null;
+		Agent agent;
 		if ("1".equals(saveCouponCfgVO.getSupportAllAgent())) {	//全平台通用
 			agent = new Agent();
-			agent.setId(0l);
+			agent.setId(0L);
 		} else {	
 			agent = agentRepository.findByAgentNo(saveCouponCfgVO.getAgentNo());
 		}
@@ -1344,22 +1374,20 @@ public class EshopServiceImpl implements EshopSerivce {
 		/*保存红包种子 start */
 		CouponSeed couponSeed = new CouponSeed();
 		if ("edit".equals(saveCouponCfgVO.getOperType())) {
-			couponSeed = couponSeedRepository.findById(Long.valueOf(saveCouponCfgVO.getSeedId())).get();
+			couponSeed = couponSeedRepository.findById(Long.parseLong(saveCouponCfgVO.getSeedId()));
 			if (couponSeed == null) {
 				throw new BizValidateException("未查询到商品，id : " + saveCouponCfgVO.getSeedId());
 			}
 		}
 		couponSeed.setTitle(saveCouponCfgVO.getTitle());
-		couponSeed.setSeedType(Integer.valueOf(saveCouponCfgVO.getSeedType()));
+		couponSeed.setSeedType(Integer.parseInt(saveCouponCfgVO.getSeedType()));
 		
 		int seedStatus = ModelConstant.COUPON_SEED_STATUS_AVAILABLE;
-		if ("1".equals(saveCouponCfgVO.getStatus())) {
-			//do nothing
-		}else {
+		if (!"1".equals(saveCouponCfgVO.getStatus())) {
 			seedStatus = ModelConstant.COUPON_SEED_STATUS_INVALID;
 		}
 		int oriCount = couponSeed.getTotalCount();	//原来的库存，新增情况下，这个值是0
-		int addedCount = Integer.valueOf(saveCouponCfgVO.getTotalCount()) - oriCount; //编辑后增加的数量，跟当前有多少库存无关
+		int addedCount = Integer.parseInt(saveCouponCfgVO.getTotalCount()) - oriCount; //编辑后增加的数量，跟当前有多少库存无关
 		couponSeed.setTotalCount(Integer.valueOf(saveCouponCfgVO.getTotalCount()));	//总数，以种子的总数为统计单位，规则里的总数分享时用。
 		BigDecimal unitAmt = new BigDecimal(saveCouponCfgVO.getAmount());
 		BigDecimal count = new BigDecimal(couponSeed.getTotalCount());
@@ -1396,30 +1424,29 @@ public class EshopServiceImpl implements EshopSerivce {
 			couponRule.setAgentId(agent.getId());
 		}
 		if ("edit".equals(saveCouponCfgVO.getOperType())) {
-			couponRule = couponRuleRepository.findById(Long.valueOf(saveCouponCfgVO.getRuleId())).get();
+			couponRule = couponRuleRepository.findById(Long.parseLong(saveCouponCfgVO.getRuleId()));
 			if (couponRule == null) {
 				throw new BizValidateException("未查询到商品，id : " + saveCouponCfgVO.getRuleId());
 			}
 			if ("1".equals(saveCouponCfgVO.getSupportAllAgent())) {	//全平台通用
-				couponRule.setAgentId(0l);
+				couponRule.setAgentId(0L);
 			} else {
-				if (couponRule.getAgentId() == 0l) {
-					couponRule.setAgentId(1l);	//奈博的
+				if (couponRule.getAgentId() == 0L) {
+					couponRule.setAgentId(1L);	//奈博的
 				}
-				agent = agentRepository.findById(couponRule.getAgentId()).get();
+				agent = agentRepository.findById(couponRule.getAgentId());
 			}
-			
 		}
 		
 		List<String> marketRegions = null;
 		List<String> serviceRegions = null;
-		if (PromotionConstant.COUPON_ITEM_TYPE_ALL == Integer.valueOf(saveCouponCfgVO.getItemType())) {
+		if (PromotionConstant.COUPON_ITEM_TYPE_ALL.equals(Integer.valueOf(saveCouponCfgVO.getItemType()))) {
 			marketRegions = getMarketRegions(saveCouponCfgVO.getSupported(), saveCouponCfgVO.getUnsupported(), agent, supportType);
 			serviceRegions = getServiceRegions(saveCouponCfgVO.getServiceSupportedSect());
-		} else if (PromotionConstant.COUPON_ITEM_TYPE_EVOUCHER == Integer.valueOf(saveCouponCfgVO.getItemType()) ||
-				PromotionConstant.COUPON_ITEM_TYPE_MARKET == Integer.valueOf(saveCouponCfgVO.getItemType())) {
+		} else if (PromotionConstant.COUPON_ITEM_TYPE_EVOUCHER.equals(Integer.valueOf(saveCouponCfgVO.getItemType())) ||
+				PromotionConstant.COUPON_ITEM_TYPE_MARKET.equals(Integer.valueOf(saveCouponCfgVO.getItemType()))) {
 			marketRegions = getMarketRegions(saveCouponCfgVO.getSupported(), saveCouponCfgVO.getUnsupported(), agent, supportType);
-		} else if (PromotionConstant.COUPON_ITEM_TYPE_SERVICE == Integer.valueOf(saveCouponCfgVO.getItemType())) {
+		} else if (PromotionConstant.COUPON_ITEM_TYPE_SERVICE.equals(Integer.valueOf(saveCouponCfgVO.getItemType()))) {
 			serviceRegions = getServiceRegions(saveCouponCfgVO.getServiceSupportedSect());
 		}
 		if (marketRegions == null) {
@@ -1431,7 +1458,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		marketRegions.removeAll(serviceRegions);
 		marketRegions.addAll(serviceRegions);
 		
-		StringBuffer bf = new StringBuffer();
+		StringBuilder bf = new StringBuilder();
 		for (String sectId : marketRegions) {
 			if (StringUtils.isEmpty(sectId)) {
 				continue;
@@ -1446,29 +1473,33 @@ public class EshopServiceImpl implements EshopSerivce {
 		couponRule.setSeedId(couponSeed.getId());
 		couponRule.setTitle(couponSeed.getTitle());
 		couponRule.setTotalCount(couponSeed.getTotalCount());
-		couponRule.setAmount(Float.valueOf(saveCouponCfgVO.getAmount()));
-		couponRule.setUsageCondition(Float.valueOf(saveCouponCfgVO.getUsageCondition()));
-		couponRule.setItemType(Integer.valueOf(saveCouponCfgVO.getItemType()));	//适用模块
-		
-		if ("0".equals(supportType)) {
-			couponRule.setProductId("");
-			couponRule.setuProductId("");
-		}else if ("1".equals(supportType)) {
-			couponRule.setProductId(saveCouponCfgVO.getSupported());
-			couponRule.setuProductId("");
-		}else if ("2".equals(supportType)) {
-			couponRule.setuProductId(saveCouponCfgVO.getUnsupported());
-			couponRule.setProductId("");
+		couponRule.setAmount(Float.parseFloat(saveCouponCfgVO.getAmount()));
+		couponRule.setUsageCondition(Float.parseFloat(saveCouponCfgVO.getUsageCondition()));
+		couponRule.setItemType(Integer.parseInt(saveCouponCfgVO.getItemType()));	//适用模块
+
+		switch (supportType) {
+			case "0":
+				couponRule.setProductId("");
+				couponRule.setuProductId("");
+				break;
+			case "1":
+				couponRule.setProductId(saveCouponCfgVO.getSupported());
+				couponRule.setuProductId("");
+				break;
+			case "2":
+				couponRule.setuProductId(saveCouponCfgVO.getUnsupported());
+				couponRule.setProductId("");
+				break;
 		}
-		couponRule.setSupportType(Integer.valueOf(supportType));
+		couponRule.setSupportType(Integer.parseInt(supportType));
 		couponRule.setStartDate(couponSeed.getStartDate());
 		couponRule.setEndDate(couponSeed.getEndDate());
-		Integer expiredDays = 0;
+		int expiredDays = 0;
 		if (!StringUtils.isEmpty(saveCouponCfgVO.getExpiredDays())) {
-			expiredDays = Integer.valueOf(saveCouponCfgVO.getExpiredDays());
+			expiredDays = Integer.parseInt(saveCouponCfgVO.getExpiredDays());
 		}
 		if (expiredDays > 0) {
-			couponRule.setExpiredDays(Integer.valueOf(saveCouponCfgVO.getExpiredDays()));
+			couponRule.setExpiredDays(Integer.parseInt(saveCouponCfgVO.getExpiredDays()));
 			couponRule.setUseStartDate(null);
 			couponRule.setUseEndDate(null);
 		}else {
@@ -1481,9 +1512,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		}
 		
 		int ruleStatus = ModelConstant.COUPON_RULE_STATUS_AVAILABLE;
-		if ("1".equals(saveCouponCfgVO.getStatus())) {
-			//do nothing
-		}else {
+		if (!"1".equals(saveCouponCfgVO.getStatus())) {
 			ruleStatus = ModelConstant.COUPON_RULE_STATUS_INVALID;
 		}
 		couponRule.setSuggestUrl(saveCouponCfgVO.getSuggestUrl());
@@ -1495,10 +1524,10 @@ public class EshopServiceImpl implements EshopSerivce {
 		String key = ModelConstant.KEY_COUPON_RULE + couponRule.getId();
 		redisRepository.setCouponCfg(key, couponCfg);
 		
-		Integer currValue = 0;
+		int currValue;
 		String currCount = redisTemplate.opsForValue().get(ModelConstant.KEY_COUPON_TOTAL + couponRule.getId());
 		if (!StringUtils.isEmpty(currCount)) {
-			currValue = Integer.valueOf(currCount);
+			currValue = Integer.parseInt(currCount);
 			if (currValue < 0) {
 				addedCount = addedCount - currValue;	//先要平成0，因为redis里面是一直减的，会有负值
 			}
@@ -1555,12 +1584,14 @@ public class EshopServiceImpl implements EshopSerivce {
 			onsaleList = regionRepository.findByAgentIdOrProductId(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, agentId);
 			rgroupList = regionRepository.findByAgentIdOrProductId4Rgroup(ModelConstant.DISTRIBUTION_STATUS_ON, null, uproductList, agentId);
 		}
-		
-		onsaleList.removeAll(rgroupList);	//去重
-		onsaleList.addAll(rgroupList);	//取并集
-		List<String> sectIds = new ArrayList<>(onsaleList.size());
-		for (Region region : onsaleList) {
-			sectIds.add(region.getSectId());
+		List<String> sectIds = null;
+		if(rgroupList != null) {
+			onsaleList.removeAll(rgroupList);	//去重
+			onsaleList.addAll(rgroupList);	//取并集
+			sectIds = new ArrayList<>(onsaleList.size());
+			for (Region region : onsaleList) {
+				sectIds.add(region.getSectId());
+			}
 		}
 		return sectIds;
 	}
@@ -1575,16 +1606,9 @@ public class EshopServiceImpl implements EshopSerivce {
 		
 		try {
 			List<Long> agentList = null;
-			if (StringUtils.isEmpty(queryCouponVO.getAgentNo()) && StringUtils.isEmpty(queryCouponVO.getAgentName())) {
-				//do nothing
-			}else {
-				agentList = agentRepository.findByAgentNoOrName(1, queryCouponVO.getAgentNo(), 
+			if (!(StringUtils.isEmpty(queryCouponVO.getAgentNo()) && StringUtils.isEmpty(queryCouponVO.getAgentName()))) {
+				agentList = agentRepository.findByAgentNoOrName(1, queryCouponVO.getAgentNo(),
 						queryCouponVO.getAgentName());
-			}
-			if (agentList != null ) {
-				if (agentList.isEmpty()) {
-//					agentList.add(0l);
-				}
 			}
 			List<Order> orderList = new ArrayList<>();
 			Order order = new Order(Direction.DESC, "id");
@@ -1630,7 +1654,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		Assert.hasText(saveCouponVO.getUserId(), "用户id不能为空。");
 		Assert.hasText(saveCouponVO.getSeedStr(), "优惠券种子不能为空。");
 		
-		long userId = Long.valueOf(saveCouponVO.getUserId());
+		long userId = Long.parseLong(saveCouponVO.getUserId());
 		User user = userRepository.findById(userId);
 
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
@@ -1649,11 +1673,4 @@ public class EshopServiceImpl implements EshopSerivce {
 		return commonResponse;
 		
 	}
-	
-//	public void getCouponCfg(Query) {
-//		
-//		
-//		
-//	}
-
 }

@@ -7,6 +7,8 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +57,9 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private OrderItemRepository orderItemRepository;
     @Autowired
     private ServiceOperatorRepository serviceOperatorRepository;
+
+    @Autowired
+    private RegionRepository regionRepository;
 
     @Autowired
     @Qualifier(value = "staffclientStringRedisTemplate")
@@ -128,9 +133,11 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         logger.info("groupSuccess, ruleId : " + rule.getId());
         userNoticeService.groupSuccess(u, u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
             rule.getProductName(), rule.getName());
-        
+
+        Region region = regionRepository.findById(o.getXiaoquId());
         //给操作员发送发货模板消息
         NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+        noticeServiceOperator.setSectId(region.getSectId());
         noticeServiceOperator.setAddress(o.getAddress());
         noticeServiceOperator.setCreateDate(o.getCreateDate());
         noticeServiceOperator.setReceiverName(o.getReceiverName());

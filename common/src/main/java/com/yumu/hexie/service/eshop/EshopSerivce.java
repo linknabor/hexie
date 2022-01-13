@@ -4,24 +4,15 @@ import java.util.Map;
 
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
-import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
-import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
-import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
-import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
-import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
+import com.yumu.hexie.integration.eshop.vo.*;
 
 public interface EshopSerivce {
 	
 	CommonResponse<Object> getProduct(QueryProductVO queryProductVO);
 	
 	CommonResponse<Object> getProductById(QueryProductVO queryProductVO);
+
+	CommonResponse<Object> getProductSect(QueryProductVO queryProductVO);
 
 	void saveProduct(SaveProductVO saveProductVO) throws Exception;
 
@@ -46,6 +37,8 @@ public interface EshopSerivce {
 	CommonResponse<Object> genPromotionQrCode(Map<String, String> requestMap);
 	
 	CommonResponse<Object> getOrder(QueryOrderVO queryOrderVO);
+
+	String getOrderSummary(OrderSummaryVO orderSummaryVO);
 
 	OrderDetailResp getOrderDetail(String orderId);
 
