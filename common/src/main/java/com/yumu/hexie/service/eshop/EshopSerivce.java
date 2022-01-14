@@ -12,8 +12,6 @@ public interface EshopSerivce {
 	
 	CommonResponse<Object> getProductById(QueryProductVO queryProductVO);
 
-	CommonResponse<Object> getProductSect(QueryProductVO queryProductVO);
-
 	void saveProduct(SaveProductVO saveProductVO) throws Exception;
 
 	void updateStatus(SaveProductVO saveProductVO);
@@ -21,6 +19,8 @@ public interface EshopSerivce {
 	void updateDemo(SaveProductVO saveProductVO);
 
 	CommonResponse<Object> getOper(QueryOperVO queryOperVO);
+	
+	CommonResponse<Object> getRgroupLeader(QueryProductVO queryProductVO);
 
 	void saveOper(SaveOperVO saveOperVO);
 	
@@ -55,5 +55,7 @@ public interface EshopSerivce {
 	CommonResponse<Object> getCouponList(QueryCouponVO queryCouponVO);
 
 	CommonResponse<Object> saveCoupon(SaveCouponVO saveCouponVO);
+
+	void saveRgroupLeader(SaveOperVO saveOperVO);
 
 }

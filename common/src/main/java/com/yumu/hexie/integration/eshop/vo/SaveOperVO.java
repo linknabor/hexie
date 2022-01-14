@@ -23,10 +23,10 @@ public class SaveOperVO implements Serializable {
 		private String name;
 		@JsonProperty("userid")
 		private long userId;
-		@JsonProperty("region_id")
 		private long regionId;
-		@JsonProperty("group_addr")
-		private String groupAddr;
+		@JsonProperty("groupAddr")
+		private String leaderAddr;
+		private String mobile;	//TODO 备用
 
 		public String getName() {
 			return name;
@@ -40,32 +40,25 @@ public class SaveOperVO implements Serializable {
 		public void setUserId(long userId) {
 			this.userId = userId;
 		}
-
-		public String getGroupAddr() {
-			return groupAddr;
-		}
-
-		public void setGroupAddr(String groupAddr) {
-			this.groupAddr = groupAddr;
-		}
-
 		public long getRegionId() {
 			return regionId;
 		}
-
 		public void setRegionId(long regionId) {
 			this.regionId = regionId;
 		}
-
-		@Override
-		public String toString() {
-			return "Oper{" +
-					"name='" + name + '\'' +
-					", userId=" + userId +
-					", regionId=" + regionId +
-					", groupAddr='" + groupAddr + '\'' +
-					'}';
+		public String getMobile() {
+			return mobile;
 		}
+		public void setMobile(String mobile) {
+			this.mobile = mobile;
+		}
+		public String getLeaderAddr() {
+			return leaderAddr;
+		}
+		public void setLeaderAddr(String leaderAddr) {
+			this.leaderAddr = leaderAddr;
+		}
+		
 	}
 	
 	public int getOperatorType() {

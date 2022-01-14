@@ -15,10 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.transaction.Transactional;
 
-import com.yumu.hexie.integration.eshop.mapper.*;
-import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
-import com.yumu.hexie.integration.eshop.vo.*;
-import com.yumu.hexie.model.market.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +40,31 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryCouponCfgDTO;
 import com.yumu.hexie.integration.eshop.dto.QueryProductDTO;
+import com.yumu.hexie.integration.eshop.mapper.EvoucherMapper;
+import com.yumu.hexie.integration.eshop.mapper.OperatorMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryCouponCfgMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryCouponMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
+import com.yumu.hexie.integration.eshop.mapper.QuerySupportProductMapper;
+import com.yumu.hexie.integration.eshop.mapper.RgroupOperatorMapper;
+import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
+import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
+import com.yumu.hexie.integration.eshop.vo.OrderSummaryVO;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
+import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
+import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
+import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
+import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
+import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO.LogisticInfo;
+import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
 import com.yumu.hexie.integration.eshop.vo.SaveOperVO.Oper;
+import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
@@ -63,7 +82,15 @@ import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.localservice.ServiceOperatorItem;
+import com.yumu.hexie.model.localservice.ServiceOperatorItemRepository;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
+import com.yumu.hexie.model.market.Evoucher;
+import com.yumu.hexie.model.market.EvoucherRepository;
+import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.OrderItemRepository;
+import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.OnSaleRule;
 import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
@@ -141,7 +168,9 @@ public class EshopServiceImpl implements EshopSerivce {
 	@Autowired
 	private CouponService couponService;
 	@Autowired
-	protected OrderItemRepository orderItemRepository;
+	private OrderItemRepository orderItemRepository;
+	@Autowired
+	private ServiceOperatorItemRepository serviceOperatorItemRepository;
 
 	@Value("${promotion.qrcode.url}")
 	private String PROMOTION_QRCODE_URL;
@@ -281,17 +310,18 @@ public class EshopServiceImpl implements EshopSerivce {
 		return commonResponse;
 	}
 
+	/**
+	 * 获取团购团长
+	 */
 	@Override
-	public CommonResponse<Object> getProductSect(QueryProductVO queryProductVO) {
+	public CommonResponse<Object> getRgroupLeader(QueryProductVO queryProductVO) {
+		
 		Assert.hasText(queryProductVO.getProductId(), "商品ID不能为空。");
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
 
 			List<Object[]> regionList = null;
-			String productType = queryProductVO.getProductType();
-			if (String.valueOf(ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER).equals(productType)) {
-				regionList = regionRepository.findByProductId4RgroupAndHead(queryProductVO.getProductId());
-			}
+			regionList = regionRepository.findRgroupLeader(queryProductVO.getProductId());
 			if(regionList == null) {
 				throw new BizValidateException("商品类型不正确");
 			}
@@ -734,16 +764,23 @@ public class EshopServiceImpl implements EshopSerivce {
 			agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
 		}
 		
-		if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType()
-				|| ModelConstant.SERVICE_OPER_TYPE_SAASSALE == saveOperVO.getOperatorType()
-				|| ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType()
-				|| ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()
-				|| ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()
-				|| ModelConstant.SERVICE_OPER_TYPE_SERVICE == saveOperVO.getOperatorType()) {
+		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
+			Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
+			serviceOperatorItemRepository.deleteByServiceId(saveOperVO.getServiceId());
+		} else if (ModelConstant.SERVICE_OPER_TYPE_PROMOTION == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_SAASSALE == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_ONSALE_TAKER == saveOperVO.getOperatorType() ||
+				ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER == saveOperVO.getOperatorType()) {
 			
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
-				serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId(), saveOperVO.getServiceId());
-			} else {
+				serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+			}else {
+				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
+			}
+		} else if(ModelConstant.SERVICE_OPER_TYPE_SERVICE == saveOperVO.getOperatorType()) {
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+			}else {
 				serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
 			}
 		}
@@ -753,9 +790,9 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			ServiceOperator serviceOperator;
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
-				serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndProductIdAndAgentId(saveOperVO.getOperatorType(), oper.getUserId(), saveOperVO.getServiceId(), agent.getId());
+				serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(saveOperVO.getOperatorType(), oper.getUserId(), agent.getId());
 			}else {
-				serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndProductIdAndAgentIdIsNull(saveOperVO.getOperatorType(), oper.getUserId(), saveOperVO.getServiceId());
+				serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(saveOperVO.getOperatorType(), oper.getUserId());
 			}
 			
 			if (serviceOperator == null) {
@@ -766,34 +803,85 @@ public class EshopServiceImpl implements EshopSerivce {
 			serviceOperator.setType(saveOperVO.getOperatorType());
 			serviceOperator.setUserId(oper.getUserId());
 			serviceOperator.setRegionId(oper.getRegionId());
-			String groupAddr = oper.getGroupAddr();
-			if(!StringUtils.isEmpty(groupAddr) && !"null".equals(groupAddr)) {
-				serviceOperator.setGroupAddr(groupAddr);
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
+				serviceOperator.setAgentId(agent.getId());
 			}
-			serviceOperator.setProductId(saveOperVO.getServiceId());
+			serviceOperator.setLatitude(0d);
+			serviceOperator.setLongitude(0d);
+			serviceOperatorRepository.save(serviceOperator);
+			
+			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
+				ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), saveOperVO.getServiceId());
+				if (serviceOperatorItem == null) {
+					serviceOperatorItem = new ServiceOperatorItem();
+					serviceOperatorItem.setOperatorId(serviceOperator.getId());
+					serviceOperatorItem.setServiceId(saveOperVO.getServiceId());
+					serviceOperatorItemRepository.save(serviceOperatorItem);
+				}
+			}
+		}
+		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
+			//查看有哪些操作员已经没有服务项目了，没有的删除该操作员
+			List<ServiceOperator> noServiceList = serviceOperatorRepository.queryNoServiceOper(saveOperVO.getOperatorType());
+			for (ServiceOperator serviceOperator : noServiceList) {
+				serviceOperatorRepository.delete(serviceOperator);
+			}
+		}
+	}
+	
+	/**
+	 * 保存服务人员
+	 */
+	@Override
+	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_SERVE_ROLE, allEntries = true)
+	public void saveRgroupLeader(SaveOperVO saveOperVO) {
+		
+		Assert.notNull(saveOperVO.getServiceId(), "服务ID或产品ID不能为空。");
+		
+		Agent agent = new Agent();
+		if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+			agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
+		}
+		
+		if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+			serviceOperatorRepository.deleteByTypeAndAgentId(saveOperVO.getOperatorType(), agent.getId());
+		}else {
+			serviceOperatorRepository.deleteByTypeAndNullAgent(saveOperVO.getOperatorType());
+		} 
+
+		List<Oper> operList = saveOperVO.getOpers();
+		for (Oper oper : operList) {
+			
+			ServiceOperator serviceOperator;
+			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
+				serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(saveOperVO.getOperatorType(), oper.getUserId(), agent.getId());
+			}else {
+				serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(saveOperVO.getOperatorType(), oper.getUserId());
+			}
+			
+			if (serviceOperator == null) {
+				serviceOperator = new ServiceOperator();
+			}
+			
+			serviceOperator.setName(oper.getName());
+			serviceOperator.setType(saveOperVO.getOperatorType());
+			serviceOperator.setUserId(oper.getUserId());
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
 				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
 				serviceOperator.setAgentId(agent.getId());
 			}
 			serviceOperatorRepository.save(serviceOperator);
 			
-//			if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
-//				ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), saveOperVO.getServiceId());
-//				if (serviceOperatorItem == null) {
-//					serviceOperatorItem = new ServiceOperatorItem();
-//					serviceOperatorItem.setOperatorId(serviceOperator.getId());
-//					serviceOperatorItem.setServiceId(saveOperVO.getServiceId());
-//					serviceOperatorItemRepository.save(serviceOperatorItem);
-//				}
-//			}
+			List<RgroupAreaItem> rgroupAreaItems = rgroupAreaItemRepository.findByProductIdAndRegionId(saveOperVO.getServiceId(), oper.getRegionId());
+			for (RgroupAreaItem rgroupAreaItem : rgroupAreaItems) {
+				rgroupAreaItem.setAreaLeader(oper.getName());
+				rgroupAreaItem.setAreaLeaderAddr(oper.getLeaderAddr());
+				rgroupAreaItem.setAreaLeaderId(String.valueOf(oper.getUserId()));
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+			}
 		}
-//		if (ModelConstant.SERVICE_OPER_TYPE_EVOUCHER == saveOperVO.getOperatorType()) {
-//			//查看有哪些操作员已经没有服务项目了，没有的删除该操作员
-//			List<ServiceOperator> noServiceList = serviceOperatorRepository.queryNoServiceOper(saveOperVO.getOperatorType());
-//			for (ServiceOperator serviceOperator : noServiceList) {
-//				serviceOperatorRepository.delete(serviceOperator);
-//			}
-//		}
 	}
 
 	/**

@@ -27,23 +27,15 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     
     List<ServiceOperator> findByTypeAndUserId(int type, long userId);
     
-    List<ServiceOperator> findByTypeAndUserIdAndAgentId(int type, long userId, long agentId);
-    
-    List<ServiceOperator> findByTypeAndUserIdAndAgentIdIsNull(int type, long userId);
-    
     List<ServiceOperator> findByType(int type);
 
-	List<ServiceOperator> findByTypeAndProductId(int type, long productId);
-
-	ServiceOperator findByTypeAndUserIdAndProductIdAndAgentId(int type, long userId, long productId, long agentId);
+	ServiceOperator findByTypeAndUserIdAndAgentId(int type, long userId, long agentId);
 
     List<ServiceOperator> findByTypeAndAgentId(int type, long agentId);
 
-	List<ServiceOperator> findByTypeAndProductIdAndAgentId(int type, long productId, long agentId);
-
     List<ServiceOperator> findByTypeAndAgentIdIsNull(int type);
 
-	ServiceOperator findByTypeAndUserIdAndProductIdAndAgentIdIsNull(int type, long userId, long productId);
+	ServiceOperator findByTypeAndUserIdAndAgentIdIsNull(int type, long userId);
 
     @Query(nativeQuery = true,value="select * from serviceoperator a "
     		+ "join serviceoperatorSect b on a.id=b.operatorId "
@@ -107,8 +99,8 @@ public interface ServiceOperatorRepository  extends JpaRepository<ServiceOperato
     
     @Transactional
     @Modifying
-    @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 and agentId =?2 and productId = ?3 ")
-	void deleteByTypeAndAgentId(int type, long agentId, long productId);
+    @Query(nativeQuery = true, value = "delete from serviceoperator where type = ?1 and agentId =?2 ")
+	void deleteByTypeAndAgentId(int type, long agentId);
     
     @Transactional
     @Modifying

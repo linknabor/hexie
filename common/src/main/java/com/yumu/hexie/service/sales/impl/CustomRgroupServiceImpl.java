@@ -151,7 +151,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
 		int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
 		long agentId = o.getAgentId();
 		logger.info("agentId is : " + agentId);
-		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, o.getProductId(), agentId);
+		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
 //		if (agentId > 1) {	//1是默认奈博的，奈博的操作员都是null
 //			opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, o.getProductId(), agentId);
 //		}else {
