@@ -878,7 +878,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			for (RgroupAreaItem rgroupAreaItem : rgroupAreaItems) {
 				rgroupAreaItem.setAreaLeader(oper.getName());
 				rgroupAreaItem.setAreaLeaderAddr(oper.getLeaderAddr());
-				rgroupAreaItem.setAreaLeaderId(String.valueOf(oper.getUserId()));
+				rgroupAreaItem.setAreaLeaderId(oper.getUserId());
 				rgroupAreaItemRepository.save(rgroupAreaItem);
 			}
 		}
