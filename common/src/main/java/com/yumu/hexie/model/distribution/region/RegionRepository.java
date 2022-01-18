@@ -48,9 +48,11 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 	List<Region> findByAgentIdOrProductId4Rgroup(int status, List<String> productIds, List<String> uproductIds, String agentId);
 
 	@Query(value = "select r.id as regionId, r.name, r.parentName, r.sectId, item.productId, item.productName, "
-			+ "item.arealeaderId leaderId, item.areaLeader as operName, item.areaLeaderAddr as groupAddr from region r "
+			+ "item.arealeaderId leaderId, item.areaLeader as operName, item.areaLeaderTel as operTel, "
+			+ "item.areaLeaderOpenid as operOpenid, item.areaLeaderAddr as groupAddr from region r "
 			+ "join rgroupareaitem item on r.id = item.regionId "
 			+ "where item.productId = ?1 "
 			, nativeQuery = true)
-	List<Object[]> findRgroupLeader(String productId);
+	List<Object[]> findRgroupLeaderByProduct(Long productId);
+	
 }

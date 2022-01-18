@@ -97,10 +97,10 @@ public class EshopController extends BaseController {
 	 * @return
 	 */
 	@RequestMapping(value = "/operator/rGroupLeader", method = RequestMethod.POST)
-	public CommonResponse<Object> getRgroupLeader(@RequestBody QueryProductVO queryProductVO) {
+	public CommonResponse<Object> getRgroupLeader(@RequestBody QueryOperVO queryOperVO) {
 
-		logger.info("getRgroupLeader : " + queryProductVO);
-		return eshopSerivce.getRgroupLeader(queryProductVO);
+		logger.info("getRgroupLeader : " + queryOperVO);
+		return eshopSerivce.getRgroupLeader(queryOperVO);
 
 	}
 

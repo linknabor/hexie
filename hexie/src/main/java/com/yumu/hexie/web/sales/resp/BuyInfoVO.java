@@ -1,9 +1,9 @@
 package com.yumu.hexie.web.sales.resp;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.user.Address;
 
@@ -16,6 +16,9 @@ public class BuyInfoVO implements Serializable{
 	private Address address;
 	//规则
 	private SalePlan rule;
+	
+	private RgroupAreaItem rgroupAreaItem;
+	
 	public BuyInfoVO(){}
 	public Product getProduct() {
 		return product;
@@ -35,5 +38,12 @@ public class BuyInfoVO implements Serializable{
 	public void setAddress(Address address) {
 		this.address = address;
 	}
+	public RgroupAreaItem getRgroupAreaItem() {
+		return rgroupAreaItem;
+	}
+	public void setRgroupAreaItem(RgroupAreaItem rgroupAreaItem) {
+		this.rgroupAreaItem = rgroupAreaItem;
+	}
+	
 	
 }

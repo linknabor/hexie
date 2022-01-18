@@ -21,7 +21,9 @@ public class RgroupAreaItem  extends RuleDistribution {
 	
 	private long areaLeaderId;	//运营端用户ID
 	private String areaLeader;	//区域leader(团长)
+	private String areaLeaderOpenid;	//团长openid
 	private String areaLeaderAddr;	//团长地址
+	private String areaLeaderTel;	//团长电话
 	private String areaLeaderImg;	//团长头像
 
 	public boolean isFeatured() {
@@ -77,6 +79,18 @@ public class RgroupAreaItem  extends RuleDistribution {
 	}
 	public void setAreaLeaderId(long areaLeaderId) {
 		this.areaLeaderId = areaLeaderId;
+	}
+	public String getAreaLeaderTel() {
+		return areaLeaderTel;
+	}
+	public void setAreaLeaderTel(String areaLeaderTel) {
+		this.areaLeaderTel = areaLeaderTel;
+	}
+	public String getAreaLeaderOpenid() {
+		return areaLeaderOpenid;
+	}
+	public void setAreaLeaderOpenid(String areaLeaderOpenid) {
+		this.areaLeaderOpenid = areaLeaderOpenid;
 	}
 	
 }

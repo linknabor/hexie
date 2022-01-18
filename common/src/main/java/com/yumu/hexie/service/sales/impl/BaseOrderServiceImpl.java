@@ -38,6 +38,8 @@ import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.City;
 import com.yumu.hexie.model.distribution.region.CityRepository;
 import com.yumu.hexie.model.distribution.region.County;
@@ -148,6 +150,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     private CacheableService cacheableService;
     @Autowired
     private PartnerService partnerService;
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
 
 
     private void preOrderCreate(ServiceOrder order, Address address) {
@@ -182,6 +186,19 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     order.fillAgentInfo(agent);
                 }
                 order.setGroupRuleId(plan.getId());
+            }
+            
+            //填充团长信息
+            if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+            	List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(product.getId(), address.getXiaoquId());
+            	if(areaList!=null && areaList.size()>0) {
+            		RgroupAreaItem areaItem = areaList.get(0);
+            		order.setGroupLeader(areaItem.getAreaLeader());
+            		order.setGroupLeaderAddr(areaItem.getAreaLeaderAddr());
+            		order.setGroupLeaderId(areaItem.getAreaLeaderId());
+            		order.setGroupLeaderTel(areaItem.getAreaLeaderTel());
+            	}
+            	
             }
         }
         computePrice(order);

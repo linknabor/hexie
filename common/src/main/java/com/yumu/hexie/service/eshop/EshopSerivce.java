@@ -20,7 +20,7 @@ public interface EshopSerivce {
 
 	CommonResponse<Object> getOper(QueryOperVO queryOperVO);
 	
-	CommonResponse<Object> getRgroupLeader(QueryProductVO queryProductVO);
+	CommonResponse<Object> getRgroupLeader(QueryOperVO queryOperVO);
 
 	void saveOper(SaveOperVO saveOperVO);
 	

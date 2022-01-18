@@ -7,6 +7,8 @@ import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
@@ -18,8 +20,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.localservice.ServiceOperator;
-import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -56,10 +56,9 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     @Autowired
     private OrderItemRepository orderItemRepository;
     @Autowired
-    private ServiceOperatorRepository serviceOperatorRepository;
-
-    @Autowired
     private RegionRepository regionRepository;
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
 
     @Autowired
     @Qualifier(value = "staffclientStringRedisTemplate")
@@ -148,19 +147,11 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         noticeServiceOperator.setSubType(o.getSubType());
         noticeServiceOperator.setTel(o.getTel());
 
-		int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
-		long agentId = o.getAgentId();
-		logger.info("agentId is : " + agentId);
-		List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
-//		if (agentId > 1) {	//1是默认奈博的，奈博的操作员都是null
-//			opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, o.getProductId(), agentId);
-//		}else {
-//			opList = serviceOperatorRepository.findByTypeAndAgentIdIsNull(operType);
-//		}
-		logger.info("oper list size : " + opList.size());
+		
 		List<Long> list = new ArrayList<>();
-		for (ServiceOperator serviceOperator : opList) {
-            list.add(serviceOperator.getUserId());
+		List<RgroupAreaItem> areaItemList = rgroupAreaItemRepository.findByProductIdAndRegionId(o.getProductId(), o.getXiaoquId());
+		for (RgroupAreaItem rgroupAreaItem : areaItemList) {
+			list.add(rgroupAreaItem.getAreaLeaderId());
 		}
         noticeServiceOperator.setOpers(list);
 
@@ -172,8 +163,6 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         } catch (Exception e) {
 		    logger.error("custom push redis error", e);
         }
-
-
 
     }
 

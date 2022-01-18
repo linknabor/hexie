@@ -41,6 +41,7 @@ import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
+import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
@@ -50,6 +51,7 @@ import com.yumu.hexie.service.coupon.CouponStrategy;
 import com.yumu.hexie.service.coupon.CouponStrategyFactory;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.PointService;
+import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
@@ -79,6 +81,8 @@ public class UserServiceImpl implements UserService {
 	private RedisRepository redisRepository;
 	@Autowired
 	private AlipayClient alipayClient;
+	@Autowired
+	private RegionService regionService;
 		
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -485,6 +489,11 @@ public class UserServiceImpl implements UserService {
 			dbUser.setSectId(switchSectReq.getSectId());	
 			dbUser.setCspId(switchSectReq.getCspId());
 			dbUser.setOfficeTel(switchSectReq.getOfficeTel());
+			if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {
+				List<Region> regionList = regionService.findAllBySectId(user.getSectId());
+				Region region = regionList.get(0);
+				dbUser.setXiaoquId(region.getId());
+			}
 			dbUser = userRepository.save(dbUser);
 		}
 		return dbUser;

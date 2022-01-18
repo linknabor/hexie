@@ -314,18 +314,15 @@ public class EshopServiceImpl implements EshopSerivce {
 	 * 获取团购团长
 	 */
 	@Override
-	public CommonResponse<Object> getRgroupLeader(QueryProductVO queryProductVO) {
+	public CommonResponse<Object> getRgroupLeader(QueryOperVO queryOperVO) {
 		
-		Assert.hasText(queryProductVO.getProductId(), "商品ID不能为空。");
+		Assert.notNull(queryOperVO.getServiceId(), "商品ID不能为空。");
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-
-			List<Object[]> regionList = null;
-			regionList = regionRepository.findRgroupLeader(queryProductVO.getProductId());
+			List<Object[]> regionList = regionRepository.findRgroupLeaderByProduct(queryOperVO.getServiceId());
 			if(regionList == null) {
 				throw new BizValidateException("商品类型不正确");
 			}
-
 			List<RgroupOperatorMapper> areaList = ObjectToBeanUtils.objectToBean(regionList, RgroupOperatorMapper.class);
 			commonResponse.setData(areaList);
 			commonResponse.setResult("00");
@@ -864,10 +861,11 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (serviceOperator == null) {
 				serviceOperator = new ServiceOperator();
 			}
-			
 			serviceOperator.setName(oper.getName());
 			serviceOperator.setType(saveOperVO.getOperatorType());
 			serviceOperator.setUserId(oper.getUserId());
+			serviceOperator.setOpenId(oper.getLeaderOpenid());
+			serviceOperator.setTel(oper.getMobile());
 			if (!StringUtils.isEmpty(saveOperVO.getAgentNo())) {
 				agent = agentRepository.findByAgentNo(saveOperVO.getAgentNo());
 				serviceOperator.setAgentId(agent.getId());
@@ -879,6 +877,8 @@ public class EshopServiceImpl implements EshopSerivce {
 				rgroupAreaItem.setAreaLeader(oper.getName());
 				rgroupAreaItem.setAreaLeaderAddr(oper.getLeaderAddr());
 				rgroupAreaItem.setAreaLeaderId(oper.getUserId());
+				rgroupAreaItem.setAreaLeaderOpenid(oper.getLeaderOpenid());
+				rgroupAreaItem.setAreaLeaderTel(oper.getMobile());
 				rgroupAreaItemRepository.save(rgroupAreaItem);
 			}
 		}
