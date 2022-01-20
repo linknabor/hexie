@@ -58,4 +58,6 @@ public interface EshopSerivce {
 
 	void saveRgroupLeader(SaveOperVO saveOperVO);
 
+	CommonResponse<Object> getRgroupOrders(QueryOrderVO queryOrderVO);
+
 }

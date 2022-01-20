@@ -53,5 +53,7 @@ public interface AddressService {
 
 	List<County> queryCounty(long cityId);
 
+	List<Address> queryBindedAddressByUserAndRegion(User user);
+
 
 }

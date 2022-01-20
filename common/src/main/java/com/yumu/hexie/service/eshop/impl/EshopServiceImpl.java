@@ -50,6 +50,8 @@ import com.yumu.hexie.integration.eshop.mapper.QuerySupportProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.RgroupOperatorMapper;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
+import com.yumu.hexie.integration.eshop.resp.QueryRgroupOrdersResp;
+import com.yumu.hexie.integration.eshop.resp.QueryRgroupSummaryResp;
 import com.yumu.hexie.integration.eshop.vo.OrderSummaryVO;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
@@ -539,10 +541,14 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			rgroupRule = rgroupRuleRepository.save(rgroupRule);
 			
+			Map<Long, RgroupAreaItem> areaLeaderMap = new HashMap<>();	//如果是编辑，需要先将之前保存的团长信息取出来暂存,key:regionId, value: RgroupAreaItem
 			if ("edit".equals(saveProductVO.getOperType())) {
 				List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rgroupRule.getId());
 				if (areaList == null || areaList.isEmpty()) {
 					throw new BizValidateException("未查询到商品上架区域，product id : " + saveProductVO.getId());
+				}
+				for (RgroupAreaItem rgroupAreaItem : areaList) {
+					areaLeaderMap.put(rgroupAreaItem.getRegionId(), rgroupAreaItem);
 				}
 				rgroupAreaItemRepository.deleteByProductId(saveProductVO.getId());
 			}
@@ -572,6 +578,14 @@ public class EshopServiceImpl implements EshopSerivce {
 					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
 				}else {
 					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+				}
+				//团长信息，如果是编辑的话，要将上次保存的存到本次编辑后的数据中去
+				RgroupAreaItem leaderItem = areaLeaderMap.get(region.getId());
+				if (leaderItem!=null) {
+					rgroupAreaItem.setAreaLeader(leaderItem.getAreaLeader());
+					rgroupAreaItem.setAreaLeaderAddr(leaderItem.getAreaLeaderAddr());
+					rgroupAreaItem.setAreaLeaderId(leaderItem.getAreaLeaderId());
+					rgroupAreaItem.setAreaLeaderTel(leaderItem.getAreaLeaderTel());
 				}
 				rgroupAreaItemRepository.save(rgroupAreaItem);
 			}
@@ -1751,5 +1765,113 @@ public class EshopServiceImpl implements EshopSerivce {
 		}
 		return commonResponse;
 		
+	}
+	
+	/**
+	 * 订单查询
+	 */
+	@Override
+	public CommonResponse<Object> getRgroupOrders(QueryOrderVO queryOrderVO) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			List<Integer> typeList = new ArrayList<>();
+			String orderType = queryOrderVO.getOrderType();
+			if (StringUtils.isEmpty(orderType)) {
+				typeList.add(ModelConstant.ORDER_TYPE_RGROUP);
+			} else {
+				typeList.add(Integer.valueOf(orderType));
+			}
+			List<Integer> statusList = new ArrayList<>();
+			String status = queryOrderVO.getStatus();
+			if (StringUtils.isEmpty(status)) {
+				statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+				statusList.add(ModelConstant.ORDER_STATUS_SENDED);
+				statusList.add(ModelConstant.ORDER_STATUS_RECEIVED);
+			} else {
+				Integer currStatus = Integer.valueOf(status);
+				statusList.add(currStatus);
+				if (ModelConstant.ORDER_STATUS_SENDED == currStatus) {
+					statusList.add(ModelConstant.ORDER_STATUS_RECEIVED);
+				}
+			} 	
+			List<Order> sortList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "createD");
+	    	sortList.add(order);
+	    	Sort sort = Sort.by(sortList);
+			
+			Pageable pageable = PageRequest.of(queryOrderVO.getCurrentPage(), queryOrderVO.getPageSize(), sort);
+			
+			String sDate = queryOrderVO.getSendDateBegin();
+			String eDate = queryOrderVO.getSendDateEnd();
+
+			if (!StringUtils.isEmpty(sDate)) {
+				Date startDate = DateUtil.parse(sDate + " 00:00:00", DateUtil.dttmSimple);
+				sDate = startDate.toString();
+			}
+			if (!StringUtils.isEmpty(eDate)) {
+				Date endDate = DateUtil.parse(eDate + " 23:59:59", DateUtil.dttmSimple);
+				eDate = endDate.toString();
+			}
+			long leaderId = 0;
+			if (!StringUtils.isEmpty(queryOrderVO.getUserid())) {
+				leaderId = Long.valueOf(queryOrderVO.getUserid());
+			}
+			
+			//1.先查询列表和页数
+			Page<Object[]> page = serviceOrderRepository.findByMultiConditionAndLeaderId(typeList, statusList, queryOrderVO.getId(),
+					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
+					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
+					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), leaderId, pageable);
+
+			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
+			QueryListDTO<List<QueryOrderMapper>> queryListDTO = new QueryListDTO<>();
+			queryListDTO.setTotalPages(page.getTotalPages());
+			queryListDTO.setTotalSize(page.getTotalElements());
+			queryListDTO.setContent(list);
+			
+			QueryRgroupOrdersResp queryRgroupOrdersResp = new QueryRgroupOrdersResp();
+			queryRgroupOrdersResp.setOrderList(queryListDTO);
+			
+			//2.再查询各种状态的合计
+			statusList = new ArrayList<>();
+			statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+			statusList.add(ModelConstant.ORDER_STATUS_SENDED);
+			statusList.add(ModelConstant.ORDER_STATUS_RECEIVED);
+			
+			//分页数最大,先写10000条 TODO
+			Pageable sumamryPage = PageRequest.of(1, 10000, sort);
+			page = serviceOrderRepository.findByMultiConditionAndLeaderId(typeList, statusList, queryOrderVO.getId(),
+					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
+					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
+					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), leaderId, sumamryPage);
+			
+			QueryRgroupSummaryResp querySummary = new QueryRgroupSummaryResp();
+			List<QueryOrderMapper> summarylist = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
+			int delivered = 0;
+			int undelivered = 0;
+			for (QueryOrderMapper queryOrderMapper : summarylist) {
+				if (ModelConstant.ORDER_STATUS_PAYED == queryOrderMapper.getStatus()) {
+					undelivered++;
+				} else if (ModelConstant.ORDER_STATUS_SENDED == queryOrderMapper.getStatus() || ModelConstant.ORDER_STATUS_RECEIVED == queryOrderMapper.getStatus()) {
+					delivered++;
+				} else {
+					logger.info("unknonw rgropu status : " + queryOrderMapper.getStatus());
+				}
+			}
+			querySummary.setDelivered(delivered);
+			querySummary.setUndelivered(undelivered);
+			queryRgroupOrdersResp.setOrderSummary(querySummary);
+			
+			commonResponse.setData(queryRgroupOrdersResp);
+			commonResponse.setResult("00");
+		
+		} catch (Exception e) {
+
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+
+		return commonResponse;
 	}
 }

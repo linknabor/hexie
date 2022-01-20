@@ -489,8 +489,8 @@ public class UserServiceImpl implements UserService {
 			dbUser.setSectId(switchSectReq.getSectId());	
 			dbUser.setCspId(switchSectReq.getCspId());
 			dbUser.setOfficeTel(switchSectReq.getOfficeTel());
-			if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {
-				List<Region> regionList = regionService.findAllBySectId(user.getSectId());
+			List<Region> regionList = regionService.findAllBySectId(switchSectReq.getSectId());
+			if (regionList != null && regionList.size() > 0) {
 				Region region = regionList.get(0);
 				dbUser.setXiaoquId(region.getId());
 			}
