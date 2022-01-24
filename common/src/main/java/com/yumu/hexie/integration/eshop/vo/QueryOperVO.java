@@ -15,7 +15,7 @@ public class QueryOperVO implements Serializable {
 	private int type;
 	private String appid;
 	private String agentNo;
-	private long serviceId;
+	private Long serviceId;
 	
 	public long getId() {
 		return id;
@@ -47,10 +47,10 @@ public class QueryOperVO implements Serializable {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
-	public long getServiceId() {
+	public Long getServiceId() {
 		return serviceId;
 	}
-	public void setServiceId(long serviceId) {
+	public void setServiceId(Long serviceId) {
 		this.serviceId = serviceId;
 	}
 	public String getAgentNo() {

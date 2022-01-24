@@ -21,6 +21,8 @@ public interface EshopSerivce {
 	void updateDemo(SaveProductVO saveProductVO);
 
 	CommonResponse<Object> getOper(QueryOperVO queryOperVO);
+	
+	CommonResponse<Object> getRgroupLeader(QueryOperVO queryOperVO);
 
 	void saveOper(SaveOperVO saveOperVO);
 	
@@ -55,5 +57,9 @@ public interface EshopSerivce {
 	CommonResponse<Object> getCouponList(QueryCouponVO queryCouponVO);
 
 	CommonResponse<Object> saveCoupon(SaveCouponVO saveCouponVO);
+
+	void saveRgroupLeader(SaveOperVO saveOperVO);
+
+	CommonResponse<Object> getRgroupOrders(QueryOrderVO queryOrderVO);
 
 }

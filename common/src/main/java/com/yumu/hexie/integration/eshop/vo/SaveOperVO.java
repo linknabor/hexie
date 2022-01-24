@@ -23,10 +23,11 @@ public class SaveOperVO implements Serializable {
 		private String name;
 		@JsonProperty("userid")
 		private long userId;
-		@JsonProperty("region_id")
 		private long regionId;
-		@JsonProperty("group_addr")
-		private String groupAddr;
+		@JsonProperty("groupAddr")
+		private String leaderAddr;
+		private String leaderOpenid;
+		private String mobile;
 
 		public String getName() {
 			return name;
@@ -40,32 +41,36 @@ public class SaveOperVO implements Serializable {
 		public void setUserId(long userId) {
 			this.userId = userId;
 		}
-
-		public String getGroupAddr() {
-			return groupAddr;
-		}
-
-		public void setGroupAddr(String groupAddr) {
-			this.groupAddr = groupAddr;
-		}
-
 		public long getRegionId() {
 			return regionId;
 		}
-
 		public void setRegionId(long regionId) {
 			this.regionId = regionId;
 		}
-
+		public String getMobile() {
+			return mobile;
+		}
+		public void setMobile(String mobile) {
+			this.mobile = mobile;
+		}
+		public String getLeaderAddr() {
+			return leaderAddr;
+		}
+		public void setLeaderAddr(String leaderAddr) {
+			this.leaderAddr = leaderAddr;
+		}
+		public String getLeaderOpenid() {
+			return leaderOpenid;
+		}
+		public void setLeaderOpenid(String leaderOpenid) {
+			this.leaderOpenid = leaderOpenid;
+		}
 		@Override
 		public String toString() {
-			return "Oper{" +
-					"name='" + name + '\'' +
-					", userId=" + userId +
-					", regionId=" + regionId +
-					", groupAddr='" + groupAddr + '\'' +
-					'}';
+			return "Oper [name=" + name + ", userId=" + userId + ", regionId=" + regionId + ", leaderAddr=" + leaderAddr
+					+ ", leaderOpenid=" + leaderOpenid + ", mobile=" + mobile + "]";
 		}
+		
 	}
 	
 	public int getOperatorType() {
@@ -100,15 +105,11 @@ public class SaveOperVO implements Serializable {
 	public void setAgentName(String agentName) {
 		this.agentName = agentName;
 	}
-
 	@Override
 	public String toString() {
-		return "SaveOperVO{" +
-				"operatorType=" + operatorType +
-				", serviceId=" + serviceId +
-				", opers=" + opers +
-				", agentNo='" + agentNo + '\'' +
-				", agentName='" + agentName + '\'' +
-				'}';
+		return "SaveOperVO [operatorType=" + operatorType + ", serviceId=" + serviceId + ", opers=" + opers
+				+ ", agentNo=" + agentNo + ", agentName=" + agentName + "]";
 	}
+	
+	
 }

@@ -14,7 +14,6 @@ import com.yumu.hexie.model.localservice.repair.RepairConstant;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairSeed;
 import com.yumu.hexie.model.localservice.repair.RepairSeedRepository;
-import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.repair.RepairAssignService;
 

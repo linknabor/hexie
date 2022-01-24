@@ -24,6 +24,8 @@ import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -67,6 +69,8 @@ public class OrderController extends BaseController{
 	private AddressService addressService;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private RgroupAreaItemRepository rgroupAreaItemRepository;
 	
 	private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 	
@@ -201,9 +205,26 @@ public class OrderController extends BaseController{
 			addrList = addressService.queryAddressByUser(user.getId());
 		}
 		if (addrList!=null && addrList.size()>0) {
-			address = addrList.get(0);
+			for (Address currAddr : addrList) {
+				long currXiaoquId = currAddr.getXiaoquId();
+				if (currXiaoquId != user.getXiaoquId()) {
+					continue;
+				}
+				if (currXiaoquId == 0l) {
+					continue;
+				}
+				address = currAddr;
+				break;
+			}
 		}
 		vo.setAddress(address);
+		
+		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
+			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(sp.getProductId(), address.getXiaoquId());
+			if (areaList!=null && areaList.size()>0) {
+				vo.setRgroupAreaItem(areaList.get(0));
+			}
+		}
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == type) {
 			User currUser = userService.getById(user.getId());
 			if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {

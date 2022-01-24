@@ -27,10 +27,16 @@ public class RgroupOperatorMapper {
     private BigInteger userid; //小区对应的团长ID
     @JsonProperty("oper_name")
     private String operName; //对应的团长名称
+    @JsonProperty("oper_tel")
+    private String operTel;	//对应团长电话
+    @JsonProperty("oper_openid")
+    private String operOpenid;	//团长openid
+    
     @JsonProperty("group_addr")
     private String groupAddr; //对应的团长地址
 
-    public RgroupOperatorMapper(BigInteger regionId, String name, String parentName, String sectId, BigInteger productId, String productName, BigInteger userid, String operName, String groupAddr) {
+    public RgroupOperatorMapper(BigInteger regionId, String name, String parentName, String sectId, BigInteger productId, 
+    		String productName, BigInteger userid, String operName, String operTel, String operOpenid, String groupAddr) {
         super();
         this.regionId = regionId;
         this.name = name;
@@ -40,6 +46,8 @@ public class RgroupOperatorMapper {
         this.productName = productName;
         this.userid = userid;
         this.operName = operName;
+        this.operTel = operTel;
+        this.operOpenid = operOpenid;
         this.groupAddr = groupAddr;
     }
 
@@ -110,17 +118,29 @@ public class RgroupOperatorMapper {
         this.productName = productName;
     }
 
-    @Override
-    public String toString() {
-        return "RgroupOperatorMapper{" +
-                "name='" + name + '\'' +
-                ", parentName='" + parentName + '\'' +
-                ", sectId='" + sectId + '\'' +
-                ", productId='" + productId + '\'' +
-                ", productName='" + productName + '\'' +
-                ", userid='" + userid + '\'' +
-                ", operName='" + operName + '\'' +
-                ", groupAddr='" + groupAddr + '\'' +
-                '}';
-    }
+	public String getOperTel() {
+		return operTel;
+	}
+
+	public void setOperTel(String operTel) {
+		this.operTel = operTel;
+	}
+
+	public String getOperOpenid() {
+		return operOpenid;
+	}
+
+	public void setOperOpenid(String operOpenid) {
+		this.operOpenid = operOpenid;
+	}
+
+	@Override
+	public String toString() {
+		return "RgroupOperatorMapper [regionId=" + regionId + ", name=" + name + ", parentName=" + parentName
+				+ ", sectId=" + sectId + ", productId=" + productId + ", productName=" + productName + ", userid="
+				+ userid + ", operName=" + operName + ", operTel=" + operTel + ", operOpenid=" + operOpenid
+				+ ", groupAddr=" + groupAddr + "]";
+	}
+    
+    
 }

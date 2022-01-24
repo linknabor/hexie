@@ -442,5 +442,13 @@ public class AddressServiceImpl implements AddressService {
 		return countyRepository.findByCityIdAndStatus(cityId, 0);
 	}
 	
+	/**
+	 * 获取用户当前所在小区的地址
+	 */
+	@Override
+	public List<Address> queryBindedAddressByUserAndRegion(User user) {
+		return addressRepository.findByUserIdAndXiaoquId(user.getId(), user.getXiaoquId());
+	}
+	
 	
 }

@@ -97,6 +97,12 @@ public class ServiceOrder  extends BaseModel {
 	/**团购状态*/
 	private int groupStatus = ModelConstant.GROUP_STAUS_GROUPING;//拼单状态
 	/**团购状态*/
+	
+	//团长信息
+	private long groupLeaderId;	//团长id，运营端人员id
+	private String groupLeader;	//团长名字
+	private String groupLeaderAddr;	//团长地址
+	private String groupLeaderTel;	//团战电话
 
 	//产品冗余信息
 	private long merchantId;
@@ -621,8 +627,30 @@ public class ServiceOrder  extends BaseModel {
 	public long getMerchantId() {
 		return merchantId;
 	}
-
-
+	public long getGroupLeaderId() {
+		return groupLeaderId;
+	}
+	public void setGroupLeaderId(long groupLeaderId) {
+		this.groupLeaderId = groupLeaderId;
+	}
+	public String getGroupLeader() {
+		return groupLeader;
+	}
+	public void setGroupLeader(String groupLeader) {
+		this.groupLeader = groupLeader;
+	}
+	public String getGroupLeaderAddr() {
+		return groupLeaderAddr;
+	}
+	public void setGroupLeaderAddr(String groupLeaderAddr) {
+		this.groupLeaderAddr = groupLeaderAddr;
+	}
+	public String getGroupLeaderTel() {
+		return groupLeaderTel;
+	}
+	public void setGroupLeaderTel(String groupLeaderTel) {
+		this.groupLeaderTel = groupLeaderTel;
+	}
 	public void setMerchantId(long merchantId) {
 		this.merchantId = merchantId;
 	}
