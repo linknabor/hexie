@@ -29,10 +29,6 @@ public class QueryOrderVO implements Serializable {
 	private long createDateEnd;
 	private String userid;
 	private List<String> sectIds;
-	private String userid;
-
-	private List<String> sectIds;
-
 	private String queryFlag;
 
 	private int currentPage;

@@ -12,8 +12,6 @@ public interface EshopSerivce {
 	
 	CommonResponse<Object> getProductById(QueryProductVO queryProductVO);
 
-	CommonResponse<Object> getProductSect(QueryProductVO queryProductVO);
-
 	void saveProduct(SaveProductVO saveProductVO) throws Exception;
 
 	void updateStatus(SaveProductVO saveProductVO);
