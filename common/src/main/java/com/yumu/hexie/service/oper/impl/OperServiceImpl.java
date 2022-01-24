@@ -13,8 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
@@ -35,6 +35,7 @@ import com.yumu.hexie.service.oper.OperService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.OperAuthorization;
 
+@Service
 public class OperServiceImpl implements OperService {
 	
 	@Autowired
