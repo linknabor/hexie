@@ -667,6 +667,11 @@ public class EshopServiceImpl implements EshopSerivce {
 
 				List<RgroupAreaItem> itemList = rgroupAreaItemRepository.findByRuleId(rgroupRule.getId());
 				for (RgroupAreaItem item : itemList) {
+					if ("on".equals(operType)) {	//上架时校验是否每个小区都配备了团长
+						if (StringUtils.isEmpty(item.getAreaLeader()) || StringUtils.isEmpty(item.getAreaLeaderAddr())) {
+							throw new BizValidateException("当前商品仍有上架区域未配置团长，请检查。");
+						}
+					}
 					rgroupAreaItemRepository.updateStatus(itemStatus, item.getId());
 				}
 			}

@@ -51,20 +51,30 @@ public class EshopController extends BaseController {
 	@RequestMapping(value = "/product/save", method = RequestMethod.POST)
 	public CommonResponse<String> saveProduct(@RequestBody SaveProductVO saveProductVO) throws Exception{
 		
-		logger.info("saveProductVO : " + saveProductVO);
-		eshopSerivce.saveProduct(saveProductVO);
 		CommonResponse<String> commonResponse = new CommonResponse<>();
-		commonResponse.setResult("00");
+		try {
+			logger.info("saveProductVO : " + saveProductVO);
+			eshopSerivce.saveProduct(saveProductVO);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
 		return commonResponse;
 	}
 	
 	@RequestMapping(value = "/product/updateStatus", method = RequestMethod.POST)
 	public CommonResponse<String> updateStatus(@RequestBody SaveProductVO saveProductVO) throws Exception{
 		
-		logger.info("updateStatus : " + saveProductVO);
-		eshopSerivce.updateStatus(saveProductVO);
 		CommonResponse<String> commonResponse = new CommonResponse<>();
-		commonResponse.setResult("00");
+		try {
+			logger.info("updateStatus : " + saveProductVO);
+			eshopSerivce.updateStatus(saveProductVO);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
 		return commonResponse;
 	}
 	
