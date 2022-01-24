@@ -1234,8 +1234,13 @@ public class EshopServiceImpl implements EshopSerivce {
 
 	@Override
 	public OrderDetailResp getOrderDetail(String orderId) {
+		
+		Assert.hasText(orderId, "订单编号不能为空。");
 		List<OrderItem> itemList = new ArrayList<>();
 		ServiceOrder order = serviceOrderRepository.findById(Long.parseLong(orderId));
+		if (order == null) {
+			order = serviceOrderRepository.findByOrderNo(orderId);
+		}
 		if (order != null) {
 			itemList = orderItemRepository.findByServiceOrder(order);
 		} else {
@@ -1248,6 +1253,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 			}
 		}
+		
 		OrderDetailResp resp = new OrderDetailResp();
 
 		if(order == null) {
@@ -1783,7 +1789,7 @@ public class EshopServiceImpl implements EshopSerivce {
 				typeList.add(Integer.valueOf(orderType));
 			}
 			List<Integer> statusList = new ArrayList<>();
-			String status = queryOrderVO.getStatus();
+			String status = queryOrderVO.getOrderStatus();
 			if (StringUtils.isEmpty(status)) {
 				statusList.add(ModelConstant.ORDER_STATUS_PAYED);
 				statusList.add(ModelConstant.ORDER_STATUS_SENDED);
@@ -1796,23 +1802,13 @@ public class EshopServiceImpl implements EshopSerivce {
 				}
 			} 	
 			List<Order> sortList = new ArrayList<>();
-	    	Order order = new Order(Direction.DESC, "createD");
+	    	Order order = new Order(Direction.DESC, "createDate");
 	    	sortList.add(order);
 	    	Sort sort = Sort.by(sortList);
 			
 			Pageable pageable = PageRequest.of(queryOrderVO.getCurrentPage(), queryOrderVO.getPageSize(), sort);
 			
-			String sDate = queryOrderVO.getSendDateBegin();
-			String eDate = queryOrderVO.getSendDateEnd();
-
-			if (!StringUtils.isEmpty(sDate)) {
-				Date startDate = DateUtil.parse(sDate + " 00:00:00", DateUtil.dttmSimple);
-				sDate = startDate.toString();
-			}
-			if (!StringUtils.isEmpty(eDate)) {
-				Date endDate = DateUtil.parse(eDate + " 23:59:59", DateUtil.dttmSimple);
-				eDate = endDate.toString();
-			}
+			
 			long leaderId = 0;
 			if (!StringUtils.isEmpty(queryOrderVO.getUserid())) {
 				leaderId = Long.valueOf(queryOrderVO.getUserid());
@@ -1821,17 +1817,16 @@ public class EshopServiceImpl implements EshopSerivce {
 			//1.先查询列表和页数
 			Page<Object[]> page = serviceOrderRepository.findByMultiConditionAndLeaderId(typeList, statusList, queryOrderVO.getId(),
 					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
-					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
-					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), leaderId, pageable);
+					queryOrderVO.getLogisticNo(), "", "", queryOrderVO.getAgentNo(),
+					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), 
+					leaderId, queryOrderVO.getCreateDateBegin(), queryOrderVO.getCreateDateEnd(), pageable);
 
 			List<QueryOrderMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
-			QueryListDTO<List<QueryOrderMapper>> queryListDTO = new QueryListDTO<>();
-			queryListDTO.setTotalPages(page.getTotalPages());
-			queryListDTO.setTotalSize(page.getTotalElements());
-			queryListDTO.setContent(list);
-			
+			if (list == null) {
+				list = new ArrayList<>();
+			}
 			QueryRgroupOrdersResp queryRgroupOrdersResp = new QueryRgroupOrdersResp();
-			queryRgroupOrdersResp.setOrderList(queryListDTO);
+			queryRgroupOrdersResp.setOrderList(list);
 			
 			//2.再查询各种状态的合计
 			statusList = new ArrayList<>();
@@ -1840,23 +1835,26 @@ public class EshopServiceImpl implements EshopSerivce {
 			statusList.add(ModelConstant.ORDER_STATUS_RECEIVED);
 			
 			//分页数最大,先写10000条 TODO
-			Pageable sumamryPage = PageRequest.of(1, 10000, sort);
+			Pageable sumamryPage = PageRequest.of(0, 10000, sort);
 			page = serviceOrderRepository.findByMultiConditionAndLeaderId(typeList, statusList, queryOrderVO.getId(),
 					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
-					queryOrderVO.getLogisticNo(), sDate, eDate, queryOrderVO.getAgentNo(),
-					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), leaderId, sumamryPage);
+					queryOrderVO.getLogisticNo(), "", "", queryOrderVO.getAgentNo(),
+					queryOrderVO.getAgentName(), queryOrderVO.getSectName(), queryOrderVO.getGroupStatus(), 
+					leaderId, queryOrderVO.getCreateDateBegin(), queryOrderVO.getCreateDateEnd(), sumamryPage);
 			
 			QueryRgroupSummaryResp querySummary = new QueryRgroupSummaryResp();
 			List<QueryOrderMapper> summarylist = ObjectToBeanUtils.objectToBean(page.getContent(), QueryOrderMapper.class);
 			int delivered = 0;
 			int undelivered = 0;
-			for (QueryOrderMapper queryOrderMapper : summarylist) {
-				if (ModelConstant.ORDER_STATUS_PAYED == queryOrderMapper.getStatus()) {
-					undelivered++;
-				} else if (ModelConstant.ORDER_STATUS_SENDED == queryOrderMapper.getStatus() || ModelConstant.ORDER_STATUS_RECEIVED == queryOrderMapper.getStatus()) {
-					delivered++;
-				} else {
-					logger.info("unknonw rgropu status : " + queryOrderMapper.getStatus());
+			if (summarylist != null) {
+				for (QueryOrderMapper queryOrderMapper : summarylist) {
+					if (ModelConstant.ORDER_STATUS_PAYED == queryOrderMapper.getStatus()) {
+						undelivered++;
+					} else if (ModelConstant.ORDER_STATUS_SENDED == queryOrderMapper.getStatus() || ModelConstant.ORDER_STATUS_RECEIVED == queryOrderMapper.getStatus()) {
+						delivered++;
+					} else {
+						logger.info("unknonw rgroup status : " + queryOrderMapper.getStatus());
+					}
 				}
 			}
 			querySummary.setDelivered(delivered);

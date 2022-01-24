@@ -13,6 +13,7 @@ public class QueryOrderVO implements Serializable {
 	private String id;
 	private String orderNo;
 	private String orderType;
+	private String orderStatus;
 	private String status;
 	private String groupStatus; //成团状态
 	private String tel;
@@ -24,11 +25,10 @@ public class QueryOrderVO implements Serializable {
 	private String sendDateBegin;
 	private String sendDateEnd;
 	private String sectName;
-
+	private long createDateBegin;
+	private long createDateEnd;
 	private String userid;
-
 	private List<String> sectIds;
-
 	private String queryFlag;
 
 	private int currentPage;
@@ -157,29 +157,39 @@ public class QueryOrderVO implements Serializable {
 	public void setSectIds(List<String> sectIds) {
 		this.sectIds = sectIds;
 	}
-
+	
+	public long getCreateDateBegin() {
+		return createDateBegin;
+	}
+	
+	public void setCreateDateBegin(long createDateBegin) {
+		this.createDateBegin = createDateBegin;
+	}
+	
+	public long getCreateDateEnd() {
+		return createDateEnd;
+	}
+	
+	public void setCreateDateEnd(long createDateEnd) {
+		this.createDateEnd = createDateEnd;
+	}
+	
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+	
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+	
 	@Override
 	public String toString() {
-		return "QueryOrderVO{" +
-				"id='" + id + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", orderType='" + orderType + '\'' +
-				", status='" + status + '\'' +
-				", groupStatus='" + groupStatus + '\'' +
-				", tel='" + tel + '\'' +
-				", receiverName='" + receiverName + '\'' +
-				", agentNo='" + agentNo + '\'' +
-				", agentName='" + agentName + '\'' +
-				", productName='" + productName + '\'' +
-				", logisticNo='" + logisticNo + '\'' +
-				", sendDateBegin='" + sendDateBegin + '\'' +
-				", sendDateEnd='" + sendDateEnd + '\'' +
-				", sectName='" + sectName + '\'' +
-				", userid='" + userid + '\'' +
-				", sectIds=" + sectIds +
-				", queryFlag='" + queryFlag + '\'' +
-				", currentPage=" + currentPage +
-				", pageSize=" + pageSize +
-				'}';
+		return "QueryOrderVO [id=" + id + ", orderNo=" + orderNo + ", orderType=" + orderType + ", orderStatus="
+				+ orderStatus + ", status=" + status + ", groupStatus=" + groupStatus + ", tel=" + tel
+				+ ", receiverName=" + receiverName + ", agentNo=" + agentNo + ", agentName=" + agentName
+				+ ", productName=" + productName + ", logisticNo=" + logisticNo + ", sendDateBegin=" + sendDateBegin
+				+ ", sendDateEnd=" + sendDateEnd + ", sectName=" + sectName + ", createDateBegin=" + createDateBegin
+				+ ", createDateEnd=" + createDateEnd + ", userid=" + userid + ", sectIds=" + sectIds + ", queryFlag="
+				+ queryFlag + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
 	}
 }
