@@ -1855,7 +1855,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			int undelivered = 0;
 			if (summarylist != null) {
 				for (QueryOrderMapper queryOrderMapper : summarylist) {
-					if (ModelConstant.ORDER_STATUS_PAYED == queryOrderMapper.getStatus()) {
+					if (ModelConstant.ORDER_STATUS_PAYED == queryOrderMapper.getStatus() || ModelConstant.ORDER_STATUS_CONFIRM == queryOrderMapper.getStatus()) {
 						undelivered++;
 					} else if (ModelConstant.ORDER_STATUS_SENDED == queryOrderMapper.getStatus() || ModelConstant.ORDER_STATUS_RECEIVED == queryOrderMapper.getStatus()) {
 						delivered++;
