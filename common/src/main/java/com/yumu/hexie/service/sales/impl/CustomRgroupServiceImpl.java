@@ -146,6 +146,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         noticeServiceOperator.setSubTypeName(o.getSubTypeName());
         noticeServiceOperator.setSubType(o.getSubType());
         noticeServiceOperator.setTel(o.getTel());
+        noticeServiceOperator.setOrderType(o.getOrderType());
 
 		
 		List<Long> list = new ArrayList<>();
