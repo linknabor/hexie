@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.kuaidi100.resp.LogisticCompanyQueryResp;
 import com.yumu.hexie.model.commonsupport.logistics.LogisticCompany;
 import com.yumu.hexie.model.commonsupport.logistics.Logistics;
@@ -59,10 +60,15 @@ public class LogisticsController extends BaseController{
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/logistics/save", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<String> saveLogisticsInfo(@RequestBody LogisticsInfoReq logisticsInfoReq) throws Exception {
-		
-		logger.info("saveLogisticsInfo : " + logisticsInfoReq);
-		logisticsService.saveLogisticsInfo(logisticsInfoReq);
-		return (BaseResult<String>) BaseResult.successResult(com.yumu.hexie.common.Constants.PAGE_SUCCESS);
+	public BaseResult<String> saveLogisticsInfo(@RequestBody LogisticsInfoReq logisticsInfoReq) {
+		BaseResult<String> baseResult = new BaseResult<>();
+		try {
+			logger.info("saveLogisticsInfo : " + logisticsInfoReq);
+			logisticsService.saveLogisticsInfo(logisticsInfoReq);
+			baseResult = BaseResult.successResult(Constants.PAGE_SUCCESS);
+		} catch (Exception e) {
+			baseResult = baseResult.failMsg(e.getMessage());
+		}
+		return baseResult;
 	}
 }
