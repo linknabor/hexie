@@ -175,10 +175,12 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?11!='', o.agentNo = ?11, 1=1) "
             + "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
             + "and if(?13!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
-            + "and if(?14!='', o.groupStatus = ?14, 1=1) "
-            + "and if(?15!='', o.groupLeaderId = ?15, 1=1) "
-            + "and if(?16!='', o.createDate >= ?16, 1=1) "
-            + "and if(?17!='', o.createDate <= ?17, 1=1) "
+            + "and if(?14!='', o.groupRuleId = ?14, 1=1) "
+            + "and if(?15!='', o.groupStatus = ?15, 1=1) "
+            + "and if(?16!='', o.groupLeaderId = ?16, 1=1) "
+            + "and if(?17!='', o.createDate >= ?17, 1=1) "
+            + "and if(?18!='', o.createDate <= ?18, 1=1) "
+            + "and if(?19 is not null, o.xiaoquId in (?19), 1=1) "
             , countQuery = "select count(1) from serviceorder o "
             + "where o.orderType in ( ?1 ) "
             + "and o.status in ( ?2 ) "
@@ -193,15 +195,17 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "and if(?11!='', o.agentNo = ?11, 1=1) "
             + "and if(?12!='', o.agentName like CONCAT('%',?12,'%'), 1=1) "
             + "and if(?13!='', o.xiaoquName like CONCAT('%',?13,'%'), 1=1) "
-            + "and if(?14!='', o.groupStatus = ?14, 1=1) "
-            + "and if(?15!='', o.groupLeaderId = ?15, 1=1) "
-            + "and if(?16!='', o.createDate >= ?16, 1=1) "
-            + "and if(?17!='', o.createDate <= ?17, 1=1) "
+            + "and if(?14!='', o.groupRuleId = ?14, 1=1) "
+            + "and if(?15!='', o.groupStatus = ?15, 1=1) "
+            + "and if(?16!='', o.groupLeaderId = ?16, 1=1) "
+            + "and if(?17!='', o.createDate >= ?17, 1=1) "
+            + "and if(?18!='', o.createDate <= ?18, 1=1) "
+            + "and if(?19 is not null, o.xiaoquId in (?19), 1=1) "
             , nativeQuery = true)
     Page<Object[]> findByMultiConditionAndLeaderId(List<Integer> types, List<Integer> status, String orderId, String productName,
                                         String orderNo, String receiverName, String tel, String logisticNo, String sendDateBegin, String sendDateEnd,
-                                        String agentNo, String agentName, String sectName, String groupStatus, long groupLeaderId, 
-                                        long createDateBegin, long createDateEnd, Pageable pageable);
+                                        String agentNo, String agentName, String sectName, String groupRuleId, String groupStatus, String groupLeaderId, 
+                                        long createDateBegin, long createDateEnd, List<String> sectList, Pageable pageable);
 
     
 }

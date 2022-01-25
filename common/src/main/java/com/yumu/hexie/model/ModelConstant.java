@@ -491,6 +491,7 @@ public class ModelConstant {
 
 	public static final String KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:deliveryReceiver"; //电商接单人推送
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送
+	public static final String KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE = "queue:eshop:notice:rgroupSuccess"; //成团提醒
 	
 	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 }		

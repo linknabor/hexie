@@ -21,6 +21,7 @@ public class QueryOrderVO implements Serializable {
 	private String agentNo;
 	private String agentName;
 	private String productName;
+	private String ruleId;
 	private String logisticNo;
 	private String sendDateBegin;
 	private String sendDateEnd;
@@ -182,14 +183,24 @@ public class QueryOrderVO implements Serializable {
 		this.orderStatus = orderStatus;
 	}
 	
+	public String getRuleId() {
+		return ruleId;
+	}
+	
+	public void setRuleId(String ruleId) {
+		this.ruleId = ruleId;
+	}
 	@Override
 	public String toString() {
 		return "QueryOrderVO [id=" + id + ", orderNo=" + orderNo + ", orderType=" + orderType + ", orderStatus="
 				+ orderStatus + ", status=" + status + ", groupStatus=" + groupStatus + ", tel=" + tel
 				+ ", receiverName=" + receiverName + ", agentNo=" + agentNo + ", agentName=" + agentName
-				+ ", productName=" + productName + ", logisticNo=" + logisticNo + ", sendDateBegin=" + sendDateBegin
-				+ ", sendDateEnd=" + sendDateEnd + ", sectName=" + sectName + ", createDateBegin=" + createDateBegin
-				+ ", createDateEnd=" + createDateEnd + ", userid=" + userid + ", sectIds=" + sectIds + ", queryFlag="
-				+ queryFlag + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
+				+ ", productName=" + productName + ", ruleId=" + ruleId + ", logisticNo=" + logisticNo
+				+ ", sendDateBegin=" + sendDateBegin + ", sendDateEnd=" + sendDateEnd + ", sectName=" + sectName
+				+ ", createDateBegin=" + createDateBegin + ", createDateEnd=" + createDateEnd + ", userid=" + userid
+				+ ", sectIds=" + sectIds + ", queryFlag=" + queryFlag + ", currentPage=" + currentPage + ", pageSize="
+				+ pageSize + "]";
 	}
+	
+	
 }
