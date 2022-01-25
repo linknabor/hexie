@@ -77,7 +77,8 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 	@Override
 	public void groupSuccess(User user, String tel,long groupId, int ruleMinNum,
 			String productName, String ruleName) {
-		String msg = "恭喜您，您参与的"+ruleName+"已经顺利成团，我们将尽快为您发货或服务。";
+//		String msg = "恭喜您，您参与的"+ruleName+"已经顺利成团，我们将尽快为您发货或服务。";
+		String msg = "恭喜您，您参与的"+ruleName+"已经顺利成团，请您尽快到自提点提货。";
 		userNoticeRepository.save(new UserNotice(user.getId(), ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPSUCCESS,
 				msg, groupId));
 		smsService.sendMsg(user, tel, msg, getKey(user.getId(),groupId,4));
