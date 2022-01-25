@@ -607,7 +607,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
 
                 if (!isSuccess) {
-                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
+                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_PARTNER_REFUND_QUEUE, queue);
                 }
 
             } catch (Exception e) {

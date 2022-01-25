@@ -1,17 +1,9 @@
 package com.yumu.hexie.service.sales.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.model.distribution.RgroupAreaItem;
-import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
-import com.yumu.hexie.model.distribution.region.Region;
-import com.yumu.hexie.model.distribution.region.RegionRepository;
-import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +47,6 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private UserNoticeService      userNoticeService;
     @Autowired
     private OrderItemRepository orderItemRepository;
-    @Autowired
-    private RegionRepository regionRepository;
-    @Autowired
-    private RgroupAreaItemRepository rgroupAreaItemRepository;
 
     @Autowired
     @Qualifier(value = "staffclientStringRedisTemplate")
@@ -132,38 +120,6 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         logger.info("groupSuccess, ruleId : " + rule.getId());
         userNoticeService.groupSuccess(u, u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
             rule.getProductName(), rule.getName());
-
-        Region region = regionRepository.findById(o.getXiaoquId());
-        //给操作员发送发货模板消息
-        NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
-        noticeServiceOperator.setSectId(region.getSectId());
-        noticeServiceOperator.setAddress(o.getAddress());
-        noticeServiceOperator.setCreateDate(o.getCreateDate());
-        noticeServiceOperator.setReceiverName(o.getReceiverName());
-        noticeServiceOperator.setId(o.getId());
-        noticeServiceOperator.setProductName(o.getProductName());
-        noticeServiceOperator.setOrderNo(o.getOrderNo());
-        noticeServiceOperator.setSubTypeName(o.getSubTypeName());
-        noticeServiceOperator.setSubType(o.getSubType());
-        noticeServiceOperator.setTel(o.getTel());
-        noticeServiceOperator.setOrderType(o.getOrderType());
-
-		
-		List<Long> list = new ArrayList<>();
-		List<RgroupAreaItem> areaItemList = rgroupAreaItemRepository.findByProductIdAndRegionId(o.getProductId(), o.getXiaoquId());
-		for (RgroupAreaItem rgroupAreaItem : areaItemList) {
-			list.add(rgroupAreaItem.getAreaLeaderId());
-		}
-        noticeServiceOperator.setOpers(list);
-
-		try {
-            ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-            String value = objectMapper.writeValueAsString(noticeServiceOperator);
-            //放入合协管家的redis中
-            staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE, value);
-        } catch (Exception e) {
-		    logger.error("custom push redis error", e);
-        }
 
     }
 
