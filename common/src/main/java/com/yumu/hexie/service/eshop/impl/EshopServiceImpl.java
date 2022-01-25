@@ -1836,7 +1836,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			//2.再查询各种状态的合计
 			statusList = new ArrayList<>();
-			statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+//			statusList.add(ModelConstant.ORDER_STATUS_PAYED);
+			statusList.add(ModelConstant.ORDER_STATUS_CONFIRM);
 			statusList.add(ModelConstant.ORDER_STATUS_SENDED);
 			statusList.add(ModelConstant.ORDER_STATUS_RECEIVED);
 			
