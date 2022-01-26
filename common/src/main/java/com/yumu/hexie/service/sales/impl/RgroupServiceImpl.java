@@ -164,6 +164,7 @@ public class RgroupServiceImpl implements RgroupService {
 			}
 		}
 		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_FINISH);
+		rule.setGroupFinishDate(System.currentTimeMillis());
 		cacheableService.save(rule);
 		
 		long currTime = System.currentTimeMillis();

@@ -46,10 +46,13 @@ import com.yumu.hexie.integration.eshop.mapper.QueryCouponCfgMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryCouponMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryOrderMapper;
 import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
+import com.yumu.hexie.integration.eshop.mapper.QueryRgroupMapper;
 import com.yumu.hexie.integration.eshop.mapper.QuerySupportProductMapper;
 import com.yumu.hexie.integration.eshop.mapper.RgroupOperatorMapper;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
+import com.yumu.hexie.integration.eshop.resp.QueryRgoupsResp;
+import com.yumu.hexie.integration.eshop.resp.QueryRgoupsResp.RgroupSummaryResp;
 import com.yumu.hexie.integration.eshop.resp.QueryRgroupOrdersResp;
 import com.yumu.hexie.integration.eshop.resp.QueryRgroupSummaryResp;
 import com.yumu.hexie.integration.eshop.vo.OrderSummaryVO;
@@ -59,6 +62,7 @@ import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
 import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
+import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
@@ -1779,7 +1783,7 @@ public class EshopServiceImpl implements EshopSerivce {
 	}
 	
 	/**
-	 * 订单查询
+	 * 团购订单查询
 	 */
 	@Override
 	public CommonResponse<Object> getRgroupOrders(QueryOrderVO queryOrderVO) {
@@ -1869,6 +1873,141 @@ public class EshopServiceImpl implements EshopSerivce {
 			queryRgroupOrdersResp.setOrderSummary(querySummary);
 			
 			commonResponse.setData(queryRgroupOrdersResp);
+			commonResponse.setResult("00");
+		
+		} catch (Exception e) {
+
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+
+		return commonResponse;
+	}
+	
+	/**
+	 * 团购信息查询
+	 */
+	@Override
+	public CommonResponse<Object> getRgroups(QueryRgroupsVO queryRgroupsVO) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+				
+			List<Order> sortList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "createDate");
+	    	sortList.add(order);
+	    	Sort sort = Sort.by(sortList);
+			
+			Pageable pageable = PageRequest.of(queryRgroupsVO.getCurrentPage(), queryRgroupsVO.getPageSize(), sort);
+			
+			List<String> sectList = null;
+			if(queryRgroupsVO.getSectList() != null && queryRgroupsVO.getSectList().size() > 0) {
+				//查询小区对应的ID
+				sectList = regionRepository.getRegionBySectid(queryRgroupsVO.getSectList());
+			}
+			
+			List<Integer> allStatus = new ArrayList<>();
+			allStatus.add(ModelConstant.RGROUP_STAUS_FINISH);	//已成团
+			allStatus.add(ModelConstant.RGROUP_STAUS_DELIVERING);	//发货中
+			allStatus.add(ModelConstant.RGROUP_STAUS_DELIVERED);	//发货完成
+			
+			List<Integer> statusList = null;
+			String groupStatus = queryRgroupsVO.getGroupStatus();
+			if (!StringUtils.isEmpty(groupStatus)) {
+				statusList = new ArrayList<>();
+				statusList.add(Integer.valueOf(groupStatus));
+			} else {
+				statusList = allStatus;
+			}
+			String productType = "1002";
+			Page<Object[]> page = rgroupRuleRepository.findByMultiCondRgroup(productType, queryRgroupsVO.getRuleId(), queryRgroupsVO.getRuleName(), 
+					statusList, queryRgroupsVO.getStartDate(), queryRgroupsVO.getEndDate(), queryRgroupsVO.getAgentNo(), Boolean.FALSE.toString(), 
+					queryRgroupsVO.getUserid(), sectList, pageable);
+			
+
+			List<QueryRgroupMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupMapper.class);
+			if (list == null) {
+				list = new ArrayList<>();
+			}
+			QueryRgoupsResp queryRgoupsResp = new QueryRgoupsResp();
+			queryRgoupsResp.setGroupList(list);
+			
+			//2.再查询各种状态的合计
+			statusList = null;
+			
+			//分页数最大,先写10000条 TODO
+			Pageable sumamryPage = PageRequest.of(0, 10000, sort);
+			page = rgroupRuleRepository.findByMultiCondRgroup(productType, queryRgroupsVO.getRuleId(), queryRgroupsVO.getRuleName(), 
+					allStatus, queryRgroupsVO.getStartDate(), queryRgroupsVO.getEndDate(), queryRgroupsVO.getAgentNo(), Boolean.FALSE.toString(), 
+					queryRgroupsVO.getUserid(), sectList, sumamryPage);
+			
+			List<QueryRgroupMapper> summarylist = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupMapper.class);
+			int grouping = 0;
+			int grouped = 0;
+			int delivering = 0;
+			int delivered = 0;
+			if (summarylist != null) {
+				for (QueryRgroupMapper queryRgroupMapper : summarylist) {
+					if (ModelConstant.RGROUP_STAUS_GROUPING == queryRgroupMapper.getGroupStatus()) {
+						grouping++;
+					} else if (ModelConstant.RGROUP_STAUS_FINISH == queryRgroupMapper.getGroupStatus()) {
+						grouped++;
+					} else if (ModelConstant.RGROUP_STAUS_DELIVERING == queryRgroupMapper.getGroupStatus()) {
+						delivering++; 
+					} else if (ModelConstant.RGROUP_STAUS_DELIVERED == queryRgroupMapper.getGroupStatus()) {
+						delivered++; 
+					} else {
+						logger.info("unknonw groupStatus : " + queryRgroupMapper.getGroupStatus());
+					}
+				}
+			}
+			RgroupSummaryResp rgroupSummaryResp = new RgroupSummaryResp();
+			rgroupSummaryResp.setGrouping(grouping);
+			rgroupSummaryResp.setGrouped(grouped);
+			rgroupSummaryResp.setDelivered(delivered);
+			rgroupSummaryResp.setDelivering(delivering);
+			queryRgoupsResp.setGroupSummary(rgroupSummaryResp);
+			
+			commonResponse.setData(queryRgoupsResp);
+			commonResponse.setResult("00");
+		
+		} catch (Exception e) {
+
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+		}
+
+		return commonResponse;
+	}
+	
+	/**
+	 * 团购信息明细查询
+	 */
+	@Override
+	public CommonResponse<Object> getRroupDetail(QueryRgroupsVO queryRgroupsVO) {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+				
+			List<Order> sortList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "createDate");
+	    	sortList.add(order);
+	    	Sort sort = Sort.by(sortList);
+			
+			Pageable pageable = PageRequest.of(0, 10, sort);
+			
+			List<Integer> statusList = null;
+			String productType = "1002";
+			Page<Object[]> page = rgroupRuleRepository.findByMultiCondRgroup(productType, queryRgroupsVO.getRuleId(), "", 
+					statusList, "", "", "", Boolean.FALSE.toString(), 
+					queryRgroupsVO.getUserid(), null, pageable);
+			
+
+			List<QueryRgroupMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupMapper.class);
+			if (list == null) {
+				list = new ArrayList<>();
+			}
+			commonResponse.setData(list.get(0));
 			commonResponse.setResult("00");
 		
 		} catch (Exception e) {

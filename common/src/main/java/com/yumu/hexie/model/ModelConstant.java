@@ -118,6 +118,9 @@ public class ModelConstant {
 	public static final int RGROUP_STAUS_GROUPING = 1;
 	public static final int RGROUP_STAUS_FINISH = 2;
 	public static final int RGROUP_STAUS_CANCEL = 3;
+	public static final int RGROUP_STAUS_DELIVERING = 4;	//发货中
+	public static final int RGROUP_STAUS_DELIVERED = 5;	//发货完成
+	
 	//用户状态
 	//0.初始化  1.绑定手机 2.设定小区 3.绑定房产 4.禁止
 	public static final int USER_STATUS_INIT = 0;
