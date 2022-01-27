@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
+import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 
@@ -58,6 +59,7 @@ import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.UserNoticeService;
 
 @Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
@@ -94,9 +96,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     private CommunityService communityService;
     @Autowired
     private BizErrorRepository bizErrorRepository;
-
     @Autowired
     private RegionRepository regionRepository;
+    @Autowired
+    private UserNoticeService userNoticeService;
+    
     /**
      * 异步发送到账模板消息
      */
@@ -1114,6 +1118,64 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
             
                 
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    
+    /**
+     * 团购到货通知
+     */
+    @Override
+    @Async("taskExecutor")
+    public void noticeRgroupArrial() {
+
+        while (true) {
+            try {
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String str = redisTemplate.opsForList().leftPop(ModelConstant.KEY_RGROUP_ARRIVAL_NOTICE_QUEUE, 30, TimeUnit.SECONDS);
+                
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                QueryRgroupsVO queryRgroupsVO = objectMapper.readValue(str, new TypeReference<QueryRgroupsVO>() {});
+                String ruleId = queryRgroupsVO.getRuleId();		//团购规则id
+                String leaderId = queryRgroupsVO.getUserid();	//团长id
+                
+                logger.info("start to consume noticeRgroupArrial queue : " + queryRgroupsVO);
+                if (StringUtils.isEmpty(ruleId)) {
+                    logger.info("ruleId is null, will skip !");
+                    continue;
+                }
+
+                try {
+            		List<Integer> groupStatus = new ArrayList<>();
+            		groupStatus.add(ModelConstant.RGROUP_STAUS_FINISH);
+            		
+            		List<ServiceOrder> orderList = serviceOrderRepository.findByRGroupAndGroupStatusAndLeaderId(ruleId, leaderId, groupStatus);
+            		if (orderList == null || orderList.isEmpty()) {
+						logger.info("can't find orders, will skip . ruleId : " + ruleId);
+					}
+            		for (ServiceOrder serviceOrder : orderList) {
+//            			if (ModelConstant.ORDER_STATUS_SENDED == serviceOrder.getStatus()) {
+//            				logger.info("order sended, will skip !");
+//            				continue;
+//						}
+            			if (ModelConstant.ORDER_STATUS_RECEIVED == serviceOrder.getStatus()) {
+            				logger.info("order received, will skip !");
+            				continue;
+						}
+            			userNoticeService.groupArriaval(serviceOrder);
+            			
+            		}
+
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }

@@ -60,4 +60,8 @@ public interface EshopSerivce {
 
 	CommonResponse<Object> getRgroupOrders(QueryOrderVO queryOrderVO);
 
+	CommonResponse<Object> getRgroups(QueryRgroupsVO queryRgroupsVO);
+
+	CommonResponse<Object> getRroupDetail(QueryRgroupsVO queryRgroupsVO);
+
 }

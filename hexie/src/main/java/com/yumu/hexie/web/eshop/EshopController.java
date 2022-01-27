@@ -395,11 +395,33 @@ public class EshopController extends BaseController {
 	 * 团购发货和未发货的订单
 	 * @return
 	 */
-	@RequestMapping(value = "/order/rgroup/delivery", method = RequestMethod.POST)
+	@RequestMapping(value = "/order/rgroups/delivery", method = RequestMethod.POST)
 	public CommonResponse<Object> getRgroupOrders(@RequestBody QueryOrderVO queryOrderVO){
 		
 		logger.info("queryOrderVO : " + queryOrderVO);
 		return eshopSerivce.getRgroupOrders(queryOrderVO);
+	}
+	
+	/**
+	 * 团购发货和未发货的订单
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups", method = RequestMethod.POST)
+	public CommonResponse<Object> getRgroups(@RequestBody QueryRgroupsVO queryRgroupsVO){
+		
+		logger.info("queryRgroupsVO : " + queryRgroupsVO);
+		return eshopSerivce.getRgroups(queryRgroupsVO);
+	}
+	
+	/**
+	 * 团购发货和未发货的订单
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/detail", method = RequestMethod.POST)
+	public CommonResponse<Object> getRgroupDetail(@RequestBody QueryRgroupsVO queryRgroupsVO){
+		
+		logger.info("queryRgroupsVO : " + queryRgroupsVO);
+		return eshopSerivce.getRroupDetail(queryRgroupsVO);
 	}
 
 }

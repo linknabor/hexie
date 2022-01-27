@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
+import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserNotice;
@@ -26,5 +27,7 @@ public interface UserNoticeService {
 	public void commentNotice(long userId, long threadId,String replyerName,String replyInfo);
 
 	void couponSuccess(Coupon coupon);
+
+	void groupArriaval(ServiceOrder serviceOrder);
 	
 }

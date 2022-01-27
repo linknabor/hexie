@@ -16,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
@@ -164,6 +166,7 @@ public class RgroupServiceImpl implements RgroupService {
 			}
 		}
 		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_FINISH);
+		rule.setGroupFinishDate(System.currentTimeMillis());
 		cacheableService.save(rule);
 		
 		long currTime = System.currentTimeMillis();
@@ -210,6 +213,38 @@ public class RgroupServiceImpl implements RgroupService {
 			result.add(new RgroupOrder(cacheableService.findRgroupRule(so.getGroupRuleId()), so));
 		}
 		return result;
+	}
+	
+	@Override
+	public void noticeArrival(QueryRgroupsVO queryRgroupsVO) {
+	
+		Assert.hasText(queryRgroupsVO.getRuleId(), "团购id不能为空。");
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(queryRgroupsVO);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_ARRIVAL_NOTICE_QUEUE, value);
+
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		if (!isSuccess) {
+			throw new BizValidateException("发送团购到货通知失败，请稍后再试。");
+		}
+		
 	}
 }
 
