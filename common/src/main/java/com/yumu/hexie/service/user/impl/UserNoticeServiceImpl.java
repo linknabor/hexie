@@ -148,13 +148,10 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 				ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPARRIVAL,
 				msg, serviceOrder.getGroupRuleId()));	//如果以后团购数量很大，这个表可以不存
 		
-		User user = new User();
-		user.setId(serviceOrder.getUserId());
-		user.setAppId(serviceOrder.getAppid());
-		user.setOpenid(serviceOrder.getOpenId());
+		User user = userRepository.findById(serviceOrder.getUserId());
 		
 		//先发模板消息，如果失败，发短信
-		String accessToken = systemConfigService.queryWXAToken(serviceOrder.getAppid());
+		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 		boolean isSuccess = templateMsgService.sendRgroupArrivalNotice(user, serviceOrder, accessToken);
 		if (!isSuccess) {
 			smsService.sendMsg(user, serviceOrder.getTel(), msg, getKey(serviceOrder.getUserId(),serviceOrder.getGroupRuleId(),8));
