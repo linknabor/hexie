@@ -8,13 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserNotice;
 import com.yumu.hexie.model.user.UserNoticeRepository;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.user.UserNoticeService;
 
 @Service("userNoticeService")
@@ -26,6 +29,10 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 	protected SmsService smsService;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private TemplateMsgService templateMsgService;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 
 	@Override
@@ -123,6 +130,35 @@ public class UserNoticeServiceImpl implements UserNoticeService {
 
 		userNoticeRepository.save(new UserNotice(userId, ModelConstant.NOTICE_TYPE_COMMENT, 1,
 				replyerName+"回复了我的发布：（"+replyInfo+"）", threadId));
+		
+	}
+	
+	/**
+	 * 团购到货
+	 * @param userId
+	 * @param threadId
+	 * @param replyerName
+	 * @param replyInfo
+	 */
+	@Override
+	public void groupArriaval(ServiceOrder serviceOrder) {
+
+		String msg = "您参与的团购【"+serviceOrder.getProductName()+"】商品已到货。";
+		userNoticeRepository.save(new UserNotice(serviceOrder.getUserId(), 
+				ModelConstant.NOTICE_TYPE_RGROUP, ModelConstant.NOTICE_SUB_TYPE_GROUPARRIVAL,
+				msg, serviceOrder.getGroupRuleId()));	//如果以后团购数量很大，这个表可以不存
+		
+		User user = new User();
+		user.setId(serviceOrder.getUserId());
+		user.setAppId(serviceOrder.getAppid());
+		user.setOpenid(serviceOrder.getOpenId());
+		
+		//先发模板消息，如果失败，发短信
+		String accessToken = systemConfigService.queryWXAToken(serviceOrder.getAppid());
+		boolean isSuccess = templateMsgService.sendRgroupArrivalNotice(user, serviceOrder, accessToken);
+		if (!isSuccess) {
+			smsService.sendMsg(user, serviceOrder.getTel(), msg, getKey(serviceOrder.getUserId(),serviceOrder.getGroupRuleId(),8));
+		}
 		
 	}
 

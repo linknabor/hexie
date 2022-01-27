@@ -22,6 +22,7 @@ public class CommonVO implements Serializable {
 	private TemplateItem keyword2;
 	private TemplateItem keyword3;
 	private TemplateItem keyword4;
+	private TemplateItem keyword5;
 	private TemplateItem remark;
 	
 	public TemplateItem getFirst() {
@@ -60,10 +61,16 @@ public class CommonVO implements Serializable {
 	public void setRemark(TemplateItem remark) {
 		this.remark = remark;
 	}
+	public TemplateItem getKeyword5() {
+		return keyword5;
+	}
+	public void setKeyword5(TemplateItem keyword5) {
+		this.keyword5 = keyword5;
+	}
 	@Override
 	public String toString() {
 		return "CommonVO [first=" + first + ", keyword1=" + keyword1 + ", keyword2=" + keyword2 + ", keyword3="
-				+ keyword3 + ", keyword4=" + keyword4 + ", remark=" + remark + "]";
+				+ keyword3 + ", keyword4=" + keyword4 + ", keyword5=" + keyword5 + ", remark=" + remark + "]";
 	}
 	
 

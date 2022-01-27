@@ -68,6 +68,14 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     void updateCommentImgUrls(String imgUrls, long orderId);
 
     List<ServiceOrder> findByGroupOrderId(long groupOrderId);
+    
+    @Query(value = "select p.* from ServiceOrder p where p.status != " + ModelConstant.ORDER_STATUS_CANCEL + " "
+    		+ "and p.groupRuleId=?1 and p.orderType=" + ModelConstant.ORDER_TYPE_RGROUP + " "
+    		+ "and if(2!='', p.groupLeaderId = ?2, 1=1) "
+    		+ "and (COALESCE(?3) IS NULL OR (p.groupStatus IN (?3) )) "
+    		, nativeQuery = true)
+    List<ServiceOrder> findByRGroupAndGroupStatusAndLeaderId(String ruleId, String leaderId, List<Integer> groupStatus);
+
 
     String queryString = "o.id, o.address, o.count, o.logisticName, o.logisticNo, o.logisticType, o.orderNo, o.orderType, o.productName, "
             + "o.refundDate, o.sendDate, o.status, o.groupStatus, o.tel, o.receiverName, o.price, o.totalAmount, o.agentNo, o.agentName, o.xiaoquName as sectName, o.createDate ";
