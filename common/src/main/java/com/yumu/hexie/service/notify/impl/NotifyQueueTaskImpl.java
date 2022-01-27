@@ -1140,6 +1140,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                     continue;
                 }
                 String str = redisTemplate.opsForList().leftPop(ModelConstant.KEY_RGROUP_ARRIVAL_NOTICE_QUEUE, 30, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(str)) {
+                    logger.info("queue str is empty, will skip !");
+                    continue;
+                }
                 
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 QueryRgroupsVO queryRgroupsVO = objectMapper.readValue(str, new TypeReference<QueryRgroupsVO>() {});
