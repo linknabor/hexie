@@ -141,7 +141,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         executeMarketPayOrderStatusJob(paymentOrderRepository.queryAllUnpayMarketOrderIds());
     }
     
-   //4. 团购团超时
+    //4. 团购团超时
     @Scheduled(cron = "11 2/5 * * * ?")
     @Override
     public void executeRGroupTimeoutJob() {
@@ -171,6 +171,28 @@ public class ScheduleServiceImpl implements ScheduleService {
     	sr.setFinishDate(new Date());
     	scheduleRecordRepository.save(sr);
     	SCHEDULE_LOG.debug("--------------------executeGroupTimeoutJob[E][R]-------------------");
+    }
+    
+    //14.团购发货完成修改状态
+    @Scheduled(cron = "12 2/5 * * * ?")
+    @Override
+    public void executeRGroupDeliveryJob() {
+    	SCHEDULE_LOG.error("--------------------executeRGroupDeliveryJob[B][R]-------------------");
+    	List<RgroupRule> rules = rgroupRuleRepository.findByGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERING);
+    	if(rules.size() == 0) {
+    		SCHEDULE_LOG.error("**************executeRGroupDeliveryJob没有记录");
+    		return;
+    	}
+    	
+    	for(RgroupRule rule : rules) {
+    		try{
+    	    	SCHEDULE_LOG.error("updateGroupDeliveryStatus:" + rule.getId());
+    	    	rgroupService.refreshGroupDeliveryStatus(rule);
+    		} catch(Exception e){
+    			SCHEDULE_LOG.error("团购发货状态更新失败"+ rule.getId(),e);
+    		}
+    	}
+    	SCHEDULE_LOG.debug("--------------------executeRGroupDeliveryJob[E][R]-------------------");
     }
     
   //4. 保洁超时  YunXiyiBillRepository

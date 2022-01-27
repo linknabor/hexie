@@ -104,6 +104,35 @@ public class RgroupServiceImpl implements RgroupService {
 			log.error("该团购未到结束时间！" + rule.getId());
 		}
 	}
+	
+	@Override
+	@Transactional
+	public void refreshGroupDeliveryStatus(RgroupRule rule) {
+		List<ServiceOrder> orderList = serviceOrderRepository.findByRGroup(rule.getId());
+		if (orderList == null || orderList.isEmpty()) {
+			log.warn("can not find serviceOrder by rule, ruleId : " + rule.getId());
+			return;
+		}
+		int delivered = 0;
+		int undelivered = 0;
+		for (ServiceOrder serviceOrder : orderList) {
+			int orderStatus = serviceOrder.getStatus();
+			int count = serviceOrder.getCount();
+			if (ModelConstant.ORDER_STATUS_SENDED == orderStatus || ModelConstant.ORDER_STATUS_RECEIVED == orderStatus) {
+				delivered += count;
+			} else {
+				undelivered += count;
+			}
+		}
+		if (undelivered > 0) {
+			log.info("delivered : " + delivered);
+			log.info("still " + undelivered + " not be delivered . ruleId : " + rule.getId());
+			return;
+		}
+		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERED);
+		cacheableService.save(rule);
+		
+	}
 
 	private void cancelValidate(RgroupRule rule) {
 		if(rule.getGroupStatus() == ModelConstant.RGROUP_STAUS_FINISH){

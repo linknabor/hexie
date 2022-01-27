@@ -21,6 +21,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 
 	public List<RgroupRule> findAllByProductId(long productId);
 	
+	public List<RgroupRule> findByGroupStatus(int groupStatus);
 	
 	@Transactional
 	@Modifying

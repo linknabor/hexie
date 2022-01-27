@@ -17,4 +17,6 @@ public interface RgroupService {
 
 	void noticeArrival(QueryRgroupsVO queryRgroupsVO);
 
+	void refreshGroupDeliveryStatus(RgroupRule rule);
+
 }
