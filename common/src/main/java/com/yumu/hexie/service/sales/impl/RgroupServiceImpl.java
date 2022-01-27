@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,12 +217,19 @@ public class RgroupServiceImpl implements RgroupService {
 	}
 	
 	@Override
+	@Transactional
 	public void noticeArrival(QueryRgroupsVO queryRgroupsVO) {
 	
 		Assert.hasText(queryRgroupsVO.getRuleId(), "团购id不能为空。");
 		
 		int retryTimes = 0;
 		boolean isSuccess = false;
+		
+		RgroupRule rule = cacheableService.findRgroupRule(Long.valueOf(queryRgroupsVO.getRuleId()));
+		if (ModelConstant.RGROUP_STAUS_FINISH == rule.getGroupStatus()) {
+			rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERING);	//将状态改为发货中
+			cacheableService.save(rule);
+		}
 		
 		while(!isSuccess && retryTimes < 3) {
 			try {
