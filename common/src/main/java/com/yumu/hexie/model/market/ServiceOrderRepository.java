@@ -71,7 +71,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     
     @Query(value = "select p.* from ServiceOrder p where p.status != " + ModelConstant.ORDER_STATUS_CANCEL + " "
     		+ "and p.groupRuleId=?1 and p.orderType=" + ModelConstant.ORDER_TYPE_RGROUP + " "
-    		+ "and if(2!='', p.groupLeaderId = ?2, 1=1) "
+    		+ "and if(?2!='', p.groupLeaderId = ?2, 1=1) "
     		+ "and (COALESCE(?3) IS NULL OR (p.groupStatus IN (?3) )) "
     		, nativeQuery = true)
     List<ServiceOrder> findByRGroupAndGroupStatusAndLeaderId(String ruleId, String leaderId, List<Integer> groupStatus);
