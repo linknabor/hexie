@@ -215,6 +215,7 @@ public class RgroupServiceImpl implements RgroupService {
 			noticeRgroupSuccess.setSectId(region.getSectId());
 			String price = new BigDecimal(rule.getPrice()).setScale(2, RoundingMode.HALF_UP).toString();
 			noticeRgroupSuccess.setPrice(price);
+			noticeRgroupSuccess.setRuleId(rule.getId());
 			
 			List<Long> list = new ArrayList<>();
 			List<RgroupAreaItem> areaItemList = rgroupAreaItemRepository.findByProductIdAndRegionId(rule.getProductId(), regionId);
