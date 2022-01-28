@@ -503,7 +503,11 @@ public class TemplateMsgService {
 
     	CommonVO vo = new CommonVO();
     	vo.setFirst(new TemplateItem(title));
-    	vo.setKeyword1(new TemplateItem(String.valueOf(serviceOrder.getId())));	//订单号
+    	String orderNo = serviceOrder.getOrderNo();
+    	if (StringUtils.isEmpty(orderNo)) {
+    		orderNo = String.valueOf(serviceOrder.getId());
+		}
+    	vo.setKeyword1(new TemplateItem(orderNo));	//订单号
     	vo.setKeyword2(new TemplateItem(serviceOrder.getLogisticName()));	//物流公司名称
     	vo.setKeyword3(new TemplateItem(serviceOrder.getLogisticNo()));	//快递单好
 //    	String remark = "";
