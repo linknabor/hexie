@@ -1826,8 +1826,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			
 			//1.先查询列表和页数
 			Page<Object[]> page = serviceOrderRepository.findByMultiConditionAndLeaderId(typeList, statusList, queryOrderVO.getId(),
-					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
-					queryOrderVO.getLogisticNo(), "", "", queryOrderVO.getAgentNo(), queryOrderVO.getAgentName(),
+					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getUserTel(),
+					queryOrderVO.getUserAddr(), queryOrderVO.getLogisticNo(), "", "", queryOrderVO.getAgentNo(), queryOrderVO.getAgentName(),
 					queryOrderVO.getSectName(),  queryOrderVO.getRuleId(), queryOrderVO.getGroupStatus(), 
 					queryOrderVO.getUserid(), queryOrderVO.getCreateDateBegin(), queryOrderVO.getCreateDateEnd(), sectList, pageable);
 
@@ -1848,8 +1848,8 @@ public class EshopServiceImpl implements EshopSerivce {
 			//分页数最大,先写10000条 TODO
 			Pageable sumamryPage = PageRequest.of(0, 10000, sort);
 			page = serviceOrderRepository.findByMultiConditionAndLeaderId(typeList, statusList, queryOrderVO.getId(),
-					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getTel(),
-					queryOrderVO.getLogisticNo(), "", "", queryOrderVO.getAgentNo(), queryOrderVO.getAgentName(),
+					queryOrderVO.getProductName(), queryOrderVO.getOrderNo(), queryOrderVO.getReceiverName(), queryOrderVO.getUserTel(),
+					queryOrderVO.getUserAddr(), queryOrderVO.getLogisticNo(), "", "", queryOrderVO.getAgentNo(), queryOrderVO.getAgentName(),
 					queryOrderVO.getSectName(), queryOrderVO.getRuleId(), queryOrderVO.getGroupStatus(), 
 					queryOrderVO.getUserid(), queryOrderVO.getCreateDateBegin(), queryOrderVO.getCreateDateEnd(), sectList, sumamryPage);
 			
