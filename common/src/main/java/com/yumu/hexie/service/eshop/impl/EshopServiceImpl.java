@@ -2015,7 +2015,7 @@ public class EshopServiceImpl implements EshopSerivce {
 					for (ServiceOrder serviceOrder : orderList) {
 						if (ModelConstant.ORDER_STATUS_SENDED == serviceOrder.getStatus() || 
 								ModelConstant.ORDER_STATUS_RECEIVED == serviceOrder.getStatus()) {
-							delivered = delivered.add(delivered);
+							delivered = delivered.add(BigInteger.ONE);
 						}
 					}
 				}
