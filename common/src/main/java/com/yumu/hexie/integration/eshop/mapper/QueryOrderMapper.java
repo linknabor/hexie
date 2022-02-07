@@ -5,8 +5,6 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yumu.hexie.common.util.desensitize.annotation.Sensitive;
-import com.yumu.hexie.common.util.desensitize.enums.SensitiveType;
 
 public class QueryOrderMapper implements Serializable {
 
@@ -50,7 +48,6 @@ public class QueryOrderMapper implements Serializable {
 
 	private Integer groupStatus; //成团状态
 
-	@Sensitive(SensitiveType.MOBILE)
 	private String tel;
 	
 	@JsonProperty("receiver_name")
