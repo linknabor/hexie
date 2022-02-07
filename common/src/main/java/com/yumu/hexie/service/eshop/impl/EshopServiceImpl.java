@@ -2007,7 +2007,21 @@ public class EshopServiceImpl implements EshopSerivce {
 			if (list == null) {
 				list = new ArrayList<>();
 			}
-			commonResponse.setData(list.get(0));
+			QueryRgroupMapper rgroupDetail = list.get(0);
+			BigInteger delivered = BigInteger.ZERO;
+			if (rgroupDetail != null) {
+				List<ServiceOrder> orderList = serviceOrderRepository.findByRGroupAndGroupStatusAndLeaderId(queryRgroupsVO.getRuleId(), queryRgroupsVO.getUserid(), null);
+				if (orderList!=null) {
+					for (ServiceOrder serviceOrder : orderList) {
+						if (ModelConstant.ORDER_STATUS_SENDED == serviceOrder.getStatus() || 
+								ModelConstant.ORDER_STATUS_RECEIVED == serviceOrder.getStatus()) {
+							delivered = delivered.add(delivered);
+						}
+					}
+				}
+				rgroupDetail.setDelivered(delivered);
+			}
+			commonResponse.setData(rgroupDetail);
 			commonResponse.setResult("00");
 		
 		} catch (Exception e) {
