@@ -32,6 +32,7 @@ public class QueryRgroupMapper implements Serializable {
 	private Integer freeShippingNum;
 	private Integer limitNumOnce;
 	private Float postageFee;
+	private BigInteger delivered;
 	
 	public QueryRgroupMapper() {
 		super();
@@ -40,7 +41,7 @@ public class QueryRgroupMapper implements Serializable {
 	public QueryRgroupMapper(BigInteger id, BigInteger createDate, Timestamp startDate, Timestamp endDate, String name,
 			Float price, Integer currentNum, Integer groupStatus, String mainPicture, String areaLeader,
 			String areaLeaderAddr, String areaLeaderTel, BigInteger areaLeaderId, BigInteger groupFinishDate,
-			Integer freeShippingNum, Integer limitNumOnce, Float postageFee) {
+			Integer freeShippingNum, Integer limitNumOnce, Float postageFee, BigInteger delivered) {
 		super();
 		this.id = id;
 		this.createDate = createDate;
@@ -59,6 +60,7 @@ public class QueryRgroupMapper implements Serializable {
 		this.freeShippingNum = freeShippingNum;
 		this.limitNumOnce = limitNumOnce;
 		this.postageFee = postageFee;
+		this.delivered = delivered;
 	}
 
 
@@ -182,6 +184,14 @@ public class QueryRgroupMapper implements Serializable {
 	public void setPostageFee(Float postageFee) {
 		this.postageFee = postageFee;
 	}
-	
 
+	public BigInteger getDelivered() {
+		return delivered;
+	}
+
+	public void setDelivered(BigInteger delivered) {
+		this.delivered = delivered;
+	}
+	
+	
 }

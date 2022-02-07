@@ -32,7 +32,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	//不要修改顺序--团购
 	String sqlColumn1 = " rule.id, rule.createDate, rule.startDate, rule.endDate, rule.name, rule.price, "
 			+ "rule.currentNum, rule.groupStatus, p.mainPicture, item.areaLeader, item.areaLeaderAddr, item.areaLeaderTel, item.areaLeaderId, "
-			+ "rule.groupFinishDate,  rule.freeShippingNum, rule.limitNumOnce, rule.postageFee ";
+			+ "rule.groupFinishDate,  rule.freeShippingNum, rule.limitNumOnce, rule.postageFee, 0 as delivered ";
 	
 	/**
 	 * 查询团购信息
