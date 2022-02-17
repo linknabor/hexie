@@ -51,6 +51,7 @@ import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.req.SwitchSectReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.req.MobileYzm;
@@ -152,23 +153,23 @@ public class UserController extends BaseController{
 			     * 1.绑定访问的用户，先取小区级别，没有取公司级别，公司级别没有的，取app级别的，再没有的，取默认菜单
 			     * 2.未绑定房屋的用户，取默认菜单
 			     */
-			    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {
+			    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
 			    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
-			    }
-			    if (menuList.isEmpty()) {
-			    	if (!StringUtils.isEmpty(user.getCspId()) && !"0".equals(user.getCspId())) {
-				    	menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			    	if (menuList.isEmpty()) {
+			    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
 					}
-				}
-			    if (menuList.isEmpty()) {
-					menuList = pageConfigService.getMenuByAppid(user.getAppId());
-				}
-			    if (menuList.isEmpty()) {
-		    		menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//表示绑定了房屋的默认菜单
-				}
-			    if (menuList.isEmpty()) {
-			    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单
-				}
+			    	if (menuList.isEmpty()) {
+			    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
+					}
+			    	if (menuList.isEmpty()) {
+				    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
+					}
+			    } else {	//未绑定房屋的
+			    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 2);	//表示绑定了房屋的默认菜单
+			    	if (menuList.isEmpty()) {
+				    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
+					}
+			    }
 			    userInfo.setMenuList(menuList);
 			    endTime = System.currentTimeMillis();
 			    /*菜单结束*/
@@ -361,13 +362,21 @@ public class UserController extends BaseController{
 		String requestIp = RequestUtil.getRealIp(request);
 		log.info("getyzm1 trade_water_id : " + trade_water_id);
 		log.info("getyzm1 request mobile: " + requestIp);
-		log.info("getyzm1 request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
 		String token = request.getHeader("Access-Control-Allow-Token");
-		boolean result = smsService.verifySmsToken(trade_water_id, token);
+		if (StringUtils.isEmpty(token)) {
+			token = request.getHeader("access-control-allow-token");
+		}
+		log.info("getyzm1 request header [Access-Control-Allow-Token]: " + token);
+		
+		int smsType = ModelConstant.SMS_TYPE_INVOICE;
+		if (ModelConstant.SMS_TYPE_RECEIPT == yzm.getType()) {
+			smsType = ModelConstant.SMS_TYPE_RECEIPT;
+		}
+		boolean result = smsService.verifySmsToken(trade_water_id, smsType, token, yzm.getAppid());
 		if (!result) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, ModelConstant.SMS_TYPE_INVOICE);
+		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, smsType);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
@@ -496,5 +505,104 @@ public class UserController extends BaseController{
 		}
 		return new BaseResult<Map<String, String>>().success(map);
     }
+    
+    /**
+	 * 切换小区
+	 * @param queryFeeSmsBillReq
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/switchSect", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<UserInfo> switchSect(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, 
+			@RequestBody SwitchSectReq switchSectReq) throws Exception {
+		
+		long beginTime = System.currentTimeMillis();
+		User dbUser = userService.switchSect(user, switchSectReq);
+		BeanUtils.copyProperties(dbUser, user);
+	    request.getSession().setAttribute(Constants.USER, user);
+	    
+	    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
+	    
+		/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
+		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
+		List<String> templateIds = new ArrayList<>();
+		for (MsgTemplate msgTemplate : msgTemplateListAll) {
+			templateIds.add(msgTemplate.getValue());
+		}
+	    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
+	    
+	    UserInfo userInfo = new UserInfo(user, odDefinition, templateIds);
+
+	    Map<String, String> paramMap = paramService.getWuyeParam(user);
+	    userInfo.setCfgParam(paramMap);
+	    
+	    boolean repairService = paramService.repairServiceAvailable(user);
+	    userInfo.setRepairService(repairService);	//新版工单服务是否开通
+	    
+	    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
+	    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
+	    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
+	    userInfo.setIconList(iconList);
+	    userInfo.setBgImageList(bgImageList);
+	    userInfo.setWuyeTabsList(tabsList);
+	    
+	    List<Menu> menuList = new ArrayList<>();
+	    /*
+	     * 取菜单顺序：
+	     * 1.绑定访问的用户，先取小区级别，没有取公司级别，公司级别没有的，取app级别的，再没有的，取默认菜单
+	     * 2.未绑定房屋的用户，取默认菜单
+	     */
+	    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
+	    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
+	    	if (menuList.isEmpty()) {
+	    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			}
+	    	if (menuList.isEmpty()) {
+	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
+			}
+	    	if (menuList.isEmpty()) {
+		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
+			}
+	    } else {	//未绑定房屋的
+	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 2);	//表示绑定了房屋的默认菜单
+	    	if (menuList.isEmpty()) {
+		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
+			}
+	    }
+	    userInfo.setMenuList(menuList);
+	    
+	    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());	//TODO 缓存，主要是积分的变动频率。更新积分时需要刷新缓存
+	    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
+			//do nothing
+		}else {
+			userInfo.setPoint(wechatCard.getBonus());
+		}
+	    
+	    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
+	    String qrLink = "";
+	    if (qrCode != null) {
+	    	qrLink = qrCode.getQrLink();
+		}
+	    
+	    CsHotline csHotline = pageConfigService.getCsHotline(user.getAppId());
+	    String hotline = "";
+	    if (csHotline != null) {
+	    	hotline = csHotline.getHotline();
+		}
+	    
+	    userInfo.setQrCode(qrLink);
+	    userInfo.setCsHotline(hotline);
+	    userInfo.setCardStatus(wechatCard.getStatus());
+	    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
+	    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
+	    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
+	    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
+	    		    
+	    long endTime = System.currentTimeMillis();
+		log.info("switch sect :" + user.getName() + ", 耗时：" + ((endTime-beginTime)));
+		
+	    return new BaseResult<UserInfo>().success(userInfo);
+	}
     
 }

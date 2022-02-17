@@ -29,6 +29,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.BindHouseQueue;
 
@@ -131,7 +132,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	@SuppressWarnings("unchecked")
 	@Async("taskExecutor")
 	@Override
-	public void eventScanSubscribe4Invoice() {
+	public void eventScanSubscribe() {
 		
 		while (true) {
 			try {
@@ -149,7 +150,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
-				logger.info("strat to consume eventScanSubscribe4Invoice queue : " + map);
+				logger.info("strat to consume eventScanSubscribe queue : " + map);
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
@@ -166,26 +167,65 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setEventKey(eventKey);
 				baseEventDTO.setUser(user);
 				
+				String type = "01";
+				if (eventKey.startsWith("01") || eventKey.startsWith("qrscene_01")) {
+					//donothing
+				} else if (eventKey.startsWith("02") || eventKey.startsWith("qrscene_02")) {
+					type = "02";
+				}
+				
 				boolean isSuccess = false;
+				WechatResponse wechatResponse = null;
 				try {
-					WechatResponse wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
-					if (wechatResponse.getErrcode() == 0) {
-						isSuccess = true;
+					if ("01".equals(type)) {
+						logger.info("event type : " + type + ", apply invoice . " );
+						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+						
+						if (wechatResponse.getErrcode() == 0) {
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 40037) {
+							logger.error("invalid template_id, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 45009) {
+							logger.error("reach max api daily quota limit, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						
+					} else if ("02".equals(type)) {
+						logger.info("event type : " + type + ", apply receipt . " );
+				    	String[]eventKeyArr = eventKey.split("\\|");
+				    	if (eventKeyArr == null || eventKeyArr.length < 6) {
+							logger.error("illegal event key : " + eventKey);
+						}
+				    	String tradeWaterId = "";
+				    	try {
+							tradeWaterId = eventKeyArr[1];
+							ReceiptApplicationReq receiptApplicationReq = new ReceiptApplicationReq();
+							receiptApplicationReq.setAppid(appId);
+							receiptApplicationReq.setOpenid(openid);
+							receiptApplicationReq.setTradeWaterId(tradeWaterId);
+							
+							user.setAppId(appId);
+							user.setOpenid(openid);
+							wuyeService.applyReceipt(user, receiptApplicationReq);
+							if (!StringUtils.isEmpty(user.getOpenid())) {
+								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
+							}
+							
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}
+				    	isSuccess = true;
 					}
-					if (wechatResponse.getErrcode() == 40037) {
-						logger.error("invalid template_id, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 45009) {
-						logger.error("reach max api daily quota limit, 请联系系统管理员！");
-						isSuccess = true;
-					}
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
 				
 				if (!isSuccess) {
-					logger.info("eventScanSubscribe4Invoice queue consume failed !, repush into the queue. json : " + json);
+					logger.info("eventScanSubscribe queue consume failed !, repush into the queue. json : " + json);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_SUBSCRIBE_QUEUE, json);
 				}
 
@@ -199,7 +239,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	@SuppressWarnings("unchecked")
 	@Async("taskExecutor")
 	@Override
-	public void eventScan4Invoice() {
+	public void eventScan() {
 		
 		while (true) {
 			try {
@@ -216,7 +256,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
-				logger.info("strat to consume eventScan4Invoice queue : " + map);
+				logger.info("strat to consume eventScan queue : " + map);
 
 				String appId = map.get("appId");
 				String openid = map.get("openid");
@@ -233,27 +273,67 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setEventKey(eventKey);
 				baseEventDTO.setUser(user);
 				
+				String type = "01";
+				if (eventKey.startsWith("01") || eventKey.startsWith("qrscene_01")) {
+					//donothing
+				} else if (eventKey.startsWith("02") || eventKey.startsWith("qrscene_02")) {
+					type = "02";
+				}
+				
 				boolean isSuccess = false;
 				WechatResponse wechatResponse = null;
 				try {
-					wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
-					if (wechatResponse.getErrcode() == 0) {
-						isSuccess = true;
+					if ("01".equals(type)) {
+						logger.info("event type : " + type + ", apply invoice . " );
+						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+						
+						if (wechatResponse.getErrcode() == 0) {
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 40037) {
+							logger.error("invalid template_id, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 45009) {
+							logger.error("reach max api daily quota limit, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						
+					} else if ("02".equals(type)) {
+						
+						logger.info("event type : " + type + ", apply receipt . " );
+				    	String[]eventKeyArr = eventKey.split("\\|");
+				    	if (eventKeyArr == null || eventKeyArr.length < 6) {
+							logger.error("illegal event key : " + eventKey);
+						}
+				    	String tradeWaterId = "";
+				    	try {
+							tradeWaterId = eventKeyArr[1];
+							ReceiptApplicationReq receiptApplicationReq = new ReceiptApplicationReq();
+							receiptApplicationReq.setAppid(appId);
+							receiptApplicationReq.setOpenid(openid);
+							receiptApplicationReq.setTradeWaterId(tradeWaterId);
+							
+							user.setAppId(appId);
+							user.setOpenid(openid);
+							wuyeService.applyReceipt(user, receiptApplicationReq);
+							if (!StringUtils.isEmpty(user.getOpenid())) {
+								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
+							}
+							
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}
+				    	isSuccess = true;
+						
 					}
-					if (wechatResponse.getErrcode() == 40037) {
-						logger.error("invalid template_id, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 45009) {
-						logger.error("reach max api daily quota limit, 请联系系统管理员！");
-						isSuccess = true;
-					}
+					
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
 				}
 				
 				if (!isSuccess) {
-					logger.info("eventScan4Invoice queue consume failed !, repush into the queue. json : " + json);
+					logger.info("eventScan queue consume failed !, repush into the queue. json : " + json);
 					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_QUEUE, json);
 				}
 
@@ -303,9 +383,14 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							String wuyeId = baseResult.getData().getUser_id();
 							user.setWuyeId(wuyeId);
 							String mobile = user.getTel();
-							String prefix = mobile.substring(0, 3);
-							String suffix = mobile.substring(7, mobile.length());
-							String name = prefix + "***" + suffix;	//使用手机号虚构一个名称，中间打码
+							String name = "";
+							if (!StringUtils.isEmpty(mobile)) {
+								String prefix = mobile.substring(0, 3);
+								String suffix = mobile.substring(7, mobile.length());
+								name = prefix + "***" + suffix;	//使用手机号虚构一个名称，中间打码
+							} else {
+								name = user.getOpenid().substring(0, 11);	//申请电子收据存在没有手机号的情况，因此截取openid作为用户名
+							}
 							user.setName(name);
 							savedUser = userService.simpleRegister(user);
 							isSuccess = true;
@@ -316,7 +401,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							String wuyeId = baseResult.getData().getUser_id();
 							String mobile = user.getTel();
 							dbUser.setWuyeId(wuyeId);
-							dbUser.setTel(mobile);
+							if (!StringUtils.isEmpty(mobile)) {
+								dbUser.setTel(mobile);	//申请电子收据存在没有手机号的情况。因此有值才填
+							}
 							savedUser = userService.simpleRegister(dbUser);
 							isSuccess = true;
 						}
@@ -336,7 +423,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				
 				if (isSuccess) {
 					try {
-						wuyeService.bindHouseByTradeAsync("1", savedUser, queue.getTradeWaterId(), "5");	//绑定房屋队列
+						wuyeService.bindHouseByTradeAsync("1", savedUser, queue.getTradeWaterId(), queue.getBindType());	//绑定房屋队列
 					} catch (Exception e) {
 						logger.error(e.getMessage(), e);
 					}	

@@ -36,6 +36,7 @@ import com.yumu.hexie.integration.notify.InvoiceNotification;
 
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
+import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.ModelConstant;
@@ -926,7 +927,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
 
     /**
-     * 发票开局模板消息通知
+     * 发票开具模板消息通知
      */
     @Override
     @Async("taskExecutor")
@@ -1012,6 +1013,74 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         redisTemplate.opsForList().rightPush(ModelConstant.KEY_INVOICE_NOTIFICATION_QUEUE, queue);
                     }
                 }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    /**
+     * 电子收据开具成功模板消息通知
+     */
+    @Override
+    @Async("taskExecutor")
+    public void sendReceiptMsgAsyc() {
+
+        while (true) {
+            try {
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String queue = redisTemplate.opsForList().leftPop(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, 10, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(queue)) {
+                    continue;
+                }
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                ReceiptNotification in = objectMapper.readValue(queue, new TypeReference<ReceiptNotification>() {});
+                logger.info("start to consume receipt msg queue : " + in);
+                String openid = in.getOpenid();
+                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
+                    logger.warn("openid is null, will skip.");
+                    continue;
+                }
+
+                boolean isSuccess = false;
+                try {
+                    logger.info("start send Msg4FinishReceipt,  receiptNotification : " + in);
+                    WechatResponse wechatResponse = gotongService.sendMsg4FinishReceipt(in);
+                    if (wechatResponse.getErrcode() == 0) {
+                        isSuccess = true;
+                    } else {
+                        if (wechatResponse.getErrcode() == 43004) {    //未关注的，不要重复发了。直接出队，并记录下来。
+                            isSuccess = true;
+                        } else if (wechatResponse.getErrcode() == 45009) {    //reach max api daily quota limit
+                            isSuccess = true;
+                        }
+                        if (isSuccess) {
+                            try {
+                                BizError bizError = new BizError();
+                                bizError.setBizId(Long.parseLong(in.getReceiptId()));
+                                bizError.setBizType(ModelConstant.EXCEPTION_BIZ_TYPE_TEMPLATEMSG);
+                                bizError.setLevel(ModelConstant.EXCEPTION_LEVEL_INFO);
+                                bizError.setMessage(wechatResponse.getErrmsg());
+                                bizError.setRemark(queue);
+                                bizErrorRepository.save(bizError);
+                            } catch (Exception e) {
+                                logger.error(e.getMessage(), e);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);    //发送失败的，需要重发
+
+                }
+                if (!isSuccess) {
+                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+                }
+            
+                
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }

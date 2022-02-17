@@ -21,10 +21,13 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
 public interface WuyeService {
@@ -45,7 +48,7 @@ public interface WuyeService {
 	 * @param user
 	 * @return
 	 */
-	HouseListVO queryHouse(User user);
+	HouseListVO queryHouse(User user, String sectId);
 
 	/**
 	 * 纸质账单绑定房屋
@@ -335,8 +338,9 @@ public interface WuyeService {
 	 * 申请电子发票后创建用户并为其绑定房屋
 	 * @param user
 	 * @param tradeWaterId
+	 * @param bindType
 	 */
-	void registerAndBind(User user, String tradeWaterId);
+	void registerAndBind(User user, String tradeWaterId, String bindType);
 
 	/**
 	 * 获取当前用户开具过的发票
@@ -371,5 +375,39 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	WechatPayInfo getSmsPrePayInfo(PrepayRequestDTO prepayRequestDTO) throws Exception;
+
+	/**
+	 * 扫公众号二维码申请电子收据
+	 * @param baseEventDTO
+	 * @return 
+	 */
+	WechatResponse scanEvent4Receipt(BaseEventDTO baseEventDTO);
+
+	/**
+	 * 申请电子收据
+	 * @param user
+	 * @param receiptApplicationReq
+	 * @throws Exception 
+	 */
+	void applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception;
+
+	/**
+	 * 获取电子收据
+	 * @param sys
+	 * @param receiptId
+	 * @return
+	 * @throws Exception
+	 */
+	ReceiptInfo getReceipt(String sys, String receiptId) throws Exception;
+	
+	/**
+	 * 获取电子收据
+	 * @param sys
+	 * @param receiptId
+	 * @return
+	 * @throws Exception
+	 */
+	List<Receipt> getReceiptList(User user, String page) throws Exception;
+
 
 }

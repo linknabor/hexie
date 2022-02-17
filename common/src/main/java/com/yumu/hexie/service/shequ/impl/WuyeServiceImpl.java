@@ -45,6 +45,8 @@ import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
+import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -57,9 +59,11 @@ import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.LocationService;
 import com.yumu.hexie.service.shequ.WuyeService;
+import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.vo.BindHouseQueue;
@@ -99,8 +103,8 @@ public class WuyeServiceImpl implements WuyeService {
 	private GotongService gotongService;
 	
 	@Override
-	public HouseListVO queryHouse(User user) {
-		return WuyeUtil.queryHouse(user).getData();
+	public HouseListVO queryHouse(User user, String sectId) {
+		return WuyeUtil.queryHouse(user, sectId).getData();
 	}
 
 	@Override
@@ -108,31 +112,55 @@ public class WuyeServiceImpl implements WuyeService {
 	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public boolean deleteHouse(User user, String houseId) {
 		
-		BaseResult<String> result = WuyeUtil.deleteHouse(user, houseId);
+		BaseResult<HouseListVO> result = WuyeUtil.deleteHouse(user, houseId);
+		int totalBind = 0;
 		if (result.isSuccess()) {
 			// 添加电话到user表
-			String data = result.getData();
-			int totalBind = 0;
-			if (!StringUtils.isEmpty(data)) {
-				totalBind = Integer.valueOf(data);
-			}
-			if (totalBind < 0) {
+			HouseListVO houseListVO = result.getData();
+			if (houseListVO!=null) {
+				totalBind = houseListVO.getHou_info().size();
+				if (totalBind < 0) {
+					totalBind = 0;
+				}
+			} else {
 				totalBind = 0;
 			}
+			
 			if (totalBind == 0) {
 				user.setXiaoquId(0l);
 				user.setXiaoquName("");
-				user.setTotalBind(totalBind);
 				user.setProvince("");
 				user.setCity("");
 				user.setCountry("");
 				user.setSectId("0");
 				user.setCspId("0");
 				user.setOfficeTel("");
-			}else {
 				user.setTotalBind(totalBind);
+				userRepository.save(user);
+			}else {
+				String currSectId = user.getSectId();	//当前用户所在小区。如果解绑后的房子不包含这个小区了，则要切换去其他小区
+				List<HexieHouse> houseList = houseListVO.getHou_info();
+				boolean hasCurrSect = false;
+				for (HexieHouse hexieHouse : houseList) {
+					if (currSectId.equals(hexieHouse.getSect_id())) {
+						hasCurrSect = true;	//这种情况不需要切换小区
+						break;
+					}
+				}
+				if (!hasCurrSect) {
+					HexieHouse hexieHouse = houseList.get(0);
+					user.setXiaoquName(hexieHouse.getSect_name());
+					user.setProvince(hexieHouse.getProvince_name());
+					user.setCity(hexieHouse.getCity_name());
+					user.setCountry(hexieHouse.getRegion_name());
+					user.setSectId(hexieHouse.getSect_id());
+					user.setCspId(hexieHouse.getCsp_id());
+					user.setOfficeTel(hexieHouse.getOffice_tel());
+					user.setTotalBind(totalBind);
+					userRepository.save(user);
+				}
 			}
-			userRepository.save(user);
+			
 			
 		} else {
 			throw new BizValidateException("解绑房屋失败。");
@@ -622,11 +650,18 @@ public class WuyeServiceImpl implements WuyeService {
 		return gotongService.sendMsg4ApplicationInvoice(baseEventDTO);
 	}
 	
+	@Deprecated
+	@Override
+	public WechatResponse scanEvent4Receipt(BaseEventDTO baseEventDTO) {
+		
+		return gotongService.sendMsg4ApplicationReceipt(baseEventDTO);
+	}
+	
 	/**
 	 * 到账消息推送(给物业配置的工作人推送)
 	 */
 	@Override
-	public void registerAndBind(User user, String tradeWaterId) {
+	public void registerAndBind(User user, String tradeWaterId, String bindType) {
 		
 		if (user == null) {
 			log.info("user is null, will return ! ");
@@ -642,6 +677,7 @@ public class WuyeServiceImpl implements WuyeService {
 				BindHouseQueue bindHouseQueue = new BindHouseQueue();
 				bindHouseQueue.setUser(user);
 				bindHouseQueue.setTradeWaterId(tradeWaterId);
+				bindHouseQueue.setBindType(bindType);
 				String value = objectMapper.writeValueAsString(bindHouseQueue);
 				redisTemplate.opsForList().rightPush(ModelConstant.KEY_REGISER_AND_BIND_QUEUE, value);
 				isSuccess = true;
@@ -695,6 +731,52 @@ public class WuyeServiceImpl implements WuyeService {
 	public Discounts getFeeSmsPayQrCode(User user, QueryFeeSmsBillReq queryFeeSmsBillReq) throws Exception {
 		
 		return wuyeUtil2.getFeeSmsPayQrCode(user, queryFeeSmsBillReq).getData();
+	}
+	
+	@Override
+	public void applyReceipt(User user, ReceiptApplicationReq receiptApplicationReq) throws Exception {
+		
+//		String tradeWaterId = receiptApplicationReq.getTradeWaterId();
+//		String userSysCode = SystemConfigServiceImpl.getSysMap().get(receiptApplicationReq.getAppid());	//是否_guizhou
+//		String sysSource = "_sh";
+//		if ("_guizhou".equals(userSysCode)) {
+//			sysSource = "_guizhou";
+//		}
+//		String key = ModelConstant.KEY_RECEIPT_APPLICATIONF_FLAG + sysSource + ":" +tradeWaterId;
+//		
+//		String applied = redisTemplate.opsForValue().get(key);
+//		if ("1".equals(applied)) {
+//			throw new BizValidateException("电子收据已申请，请勿重复操作。");
+//		}
+		BaseResult<String> r = wuyeUtil2.applyReceipt(user, receiptApplicationReq);
+		if ("99".equals(r.getResult())) {
+			throw new BizValidateException(r.getMessage());
+		}
+//		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
+	}
+	
+	@Override
+	public ReceiptInfo getReceipt(String appid, String receiptId) throws Exception {
+		
+		String region = "";
+		String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
+		String sysSource = "_sh";
+		if ("_guizhou".equals(userSysCode)) {
+			sysSource = "_guizhou";
+		}
+		if ("guizhou".equals(sysSource)) {
+			region = "贵州省";
+		} else {
+			region = "";
+		}
+		return wuyeUtil2.getReceipt(receiptId, sysSource, region).getData();
+		
+	}
+
+	@Override
+	public List<Receipt> getReceiptList(User user, String page) throws Exception {
+		
+		return wuyeUtil2.getReceiptList(user, page).getData();
 	}
 
 }

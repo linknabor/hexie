@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CreateMpQrCodeReq implements Serializable {
+public class CreateVoucherMpQrCodeReq implements Serializable {
 
 	/**
 	 * 
@@ -18,12 +18,6 @@ public class CreateMpQrCodeReq implements Serializable {
 	@JsonProperty("shop_name")
 	private String shopName;
 	private String appid;
-	
-	private String type;	//01或空 代表电子发票，02表示电子凭证
-	@JsonProperty("pay_method")
-	private String payMethod;
-	@JsonProperty("fee_name")
-	private String feeName;
 	
 	public String getOrderId() {
 		return orderId;
@@ -49,29 +43,11 @@ public class CreateMpQrCodeReq implements Serializable {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
-	public String getPayMethod() {
-		return payMethod;
-	}
-	public void setPayMethod(String payMethod) {
-		this.payMethod = payMethod;
-	}
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
-	public String getFeeName() {
-		return feeName;
-	}
-	public void setFeeName(String feeName) {
-		this.feeName = feeName;
-	}
 	@Override
 	public String toString() {
-		return "CreateMpQrCodeReq [orderId=" + orderId + ", tranAmt=" + tranAmt + ", shopName=" + shopName + ", appid="
-				+ appid + ", type=" + type + ", payMethod=" + payMethod + ", feeName=" + feeName + "]";
+		return "CreateQrCodeReq [orderId=" + orderId + ", tranAmt=" + tranAmt + ", shopName=" + shopName + ", appid="
+				+ appid + "]";
 	}
 	
-	
+
 }

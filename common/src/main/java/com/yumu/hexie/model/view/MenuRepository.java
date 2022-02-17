@@ -14,8 +14,9 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 	
 	List<Menu> findByCspId(String cspId, Sort sort);
 	
-	List<Menu> findByAppid(String appid, Sort sort);
-	
 	List<Menu> findByDefaultTypeLessThan(int defaultType, Sort sort);
+	
+	List<Menu> findByAppidAndDefaultTypeLessThan(String appid, int defaultType, Sort sort);
+	
 	
 }

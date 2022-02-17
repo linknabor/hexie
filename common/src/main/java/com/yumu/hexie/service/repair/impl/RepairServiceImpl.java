@@ -535,7 +535,7 @@ public class RepairServiceImpl implements RepairService {
 		if (defaultAddr==null) {
 			log.info("未查询到默认绑定房屋的地址。will find house on communiy .");
 
-			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user);
+			BaseResult<HouseListVO> baseResult = WuyeUtil.queryHouse(user, "");
 			if (baseResult!=null) {
 				HouseListVO houseVo = baseResult.getData();
 				if (houseVo !=null ) {
