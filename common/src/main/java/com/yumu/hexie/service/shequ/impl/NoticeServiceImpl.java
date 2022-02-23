@@ -84,4 +84,10 @@ public class NoticeServiceImpl implements NoticeService {
 		noticeRepository.deleteById(noticeId);
 		noticeSectRepository.deleteByNoticeId(noticeId);
 	}
+
+	@Override
+	public List<Notice> getNoticeByOutSidKey(String outSidKey) {
+		Assert.hasText(outSidKey, "关联ID不能为空");
+		return noticeRepository.findByOutsideKey(Long.parseLong(outSidKey));
+	}
 }

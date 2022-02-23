@@ -14,6 +14,7 @@ import javax.transaction.Transactional;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
+import com.yumu.hexie.model.community.Notice;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.shequ.NoticeService;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -50,7 +52,7 @@ import com.yumu.hexie.vo.req.MessageReq;
 @Service
 public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	
-	private static Logger logger = LoggerFactory.getLogger(HexieMessageServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(HexieMessageServiceImpl.class);
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -69,6 +71,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 
 	@Autowired
 	private NoticeService noticeService;
+
 	@Autowired
 	private WechatMsgService wechatMsgService;
 	
@@ -133,6 +136,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
 		request.setPublishDate(df1.format(new Date()));
 		request.setOutsideKey(uMessage.getId());
+		request.setValid_date(exr.getValid_date());
 
 		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_MESSAGE) + hexieMessage.getId();
 		request.setUrl(url);
@@ -140,7 +144,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		noticeService.addOutSidNotice(request);
 
 		boolean success = false;
-		WechatResponse wechatResponse = null;
+		WechatResponse wechatResponse;
 		if (!StringUtils.isEmpty(user.getWuyeId())) {
 			wechatResponse = gotongService.sendGroupMessage(user.getOpenid(), user.getAppId(), hexieMessage.getId(), hexieMessage.getContent());
 			if (wechatResponse.getErrcode() == 0) {
@@ -295,21 +299,36 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	public BaseResult<List<Message>> getSendHistory(User user) throws Exception {
 
 		List<QueryOperRegionMapper> list = operService.getRegionListMobile(user, String.valueOf(ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER));
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		for (QueryOperRegionMapper queryOperRegionMapper : list) {
 			buffer.append(queryOperRegionMapper.getSectId()).append(",");
 		}
-		String sectIds = "";
+		String sectIds;
 		if (buffer.length()>0) {
 			sectIds = buffer.deleteCharAt(buffer.length() - 1).toString();
 			return wuyeUtil2.getMessageHistory(user, sectIds);
 		} else {
-			BaseResult<List<Message>> baseResult = new BaseResult<>();
-			return baseResult;
+			return new BaseResult<>();
 		}
 		
 	}
-	
+
+	@Override
+	@Transactional
+	@CacheEvict(cacheNames = ModelConstant.KEY_MSG_VIEW_CACHE, key = "#batchNo")
+	public String delMessage(String batchNo) {
+		Assert.hasText(batchNo, "通知ID不能为空");
+		List<HexieMessage> list = hexieMessageRepository.findByBatchNo(batchNo);
+		for(HexieMessage hexieMessage: list) {
+			hexieMessageRepository.delete(hexieMessage);
+
+			List<Notice> listNotice = noticeService.getNoticeByOutSidKey(String.valueOf(hexieMessage.getId()));
+			for(Notice notice : listNotice) {
+				noticeService.delOutSidNotice(notice.getId());
+			}
+		}
+		return "SUCCESS";
+	}
 
 
 }

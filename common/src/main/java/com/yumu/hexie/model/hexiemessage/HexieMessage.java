@@ -20,6 +20,7 @@ public class HexieMessage extends BaseModel{
 	@JsonProperty("img_urls")
 	private String imgUrls;
 	private boolean success;
+	private String valid_date; //有效日期
 	
 	public String getContent() {
 		return content;
@@ -87,16 +88,30 @@ public class HexieMessage extends BaseModel{
 	public void setImgUrls(String imgUrls) {
 		this.imgUrls = imgUrls;
 	}
-  
+
+	public String getValid_date() {
+		return valid_date;
+	}
+
+	public void setValid_date(String valid_date) {
+		this.valid_date = valid_date;
+	}
+
 	@Override
 	public String toString() {
-		return "HexieMessage [batchNo=" + batchNo + ", userId=" + userId + ", wuyeId=" + wuyeId + ", type=" + type
-				+ ", mng_cell_id=" + mng_cell_id + ", sect_name=" + sect_name + ", cell_addr=" + cell_addr
-				+ ", date_time=" + date_time + ", content=" + content + ", imgUrls=" + imgUrls + ", success=" + success
-				+ "]";
-
+		return "HexieMessage{" +
+				"batchNo='" + batchNo + '\'' +
+				", userId=" + userId +
+				", wuyeId='" + wuyeId + '\'' +
+				", type='" + type + '\'' +
+				", mng_cell_id='" + mng_cell_id + '\'' +
+				", sect_name='" + sect_name + '\'' +
+				", cell_addr='" + cell_addr + '\'' +
+				", date_time='" + date_time + '\'' +
+				", content='" + content + '\'' +
+				", imgUrls='" + imgUrls + '\'' +
+				", success=" + success +
+				", valid_date='" + valid_date + '\'' +
+				'}';
 	}
-	
-
-
 }

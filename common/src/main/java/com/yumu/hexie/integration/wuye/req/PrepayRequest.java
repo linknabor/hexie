@@ -86,7 +86,11 @@ public class PrepayRequest extends WuyeRequest {
 	private String invoiceTitleType;
 	@JsonProperty("credit_code")
 	private String creditCode;
-	
+	@JsonProperty("need_invoice")
+	private String needInvoice;
+	@JsonProperty("invoice_type")
+	private String invoiceType;
+
 	//专业版参数
 	@JsonProperty("bill_id")
 	private String billId;
@@ -305,17 +309,58 @@ public class PrepayRequest extends WuyeRequest {
 	public void setCellId(String cellId) {
 		this.cellId = cellId;
 	}
+
+	public String getNeedInvoice() {
+		return needInvoice;
+	}
+
+	public void setNeedInvoice(String needInvoice) {
+		this.needInvoice = needInvoice;
+	}
+
+	public String getInvoiceType() {
+		return invoiceType;
+	}
+
+	public void setInvoiceType(String invoiceType) {
+		this.invoiceType = invoiceType;
+	}
+
 	@Override
 	public String toString() {
-		return "PrepayRequest [wuyeId=" + wuyeId + ", fromSys=" + fromSys + ", couponUnit=" + couponUnit
-				+ ", couponNum=" + couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", openid="
-				+ openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", mobile=" + mobile
-				+ ", invoiceTitle=" + invoiceTitle + ", invoiceTitleType=" + invoiceTitleType + ", creditCode="
-				+ creditCode + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType + ", customerName="
-				+ customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo="
-				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo
-				+ ", ruleType=" + ruleType + ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType
-				+ ", isQrcode=" + isQrcode + ", batchNo=" + batchNo + ", cellId=" + cellId + "]";
+		return "PrepayRequest{" +
+				"wuyeId='" + wuyeId + '\'' +
+				", fromSys='" + fromSys + '\'' +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", openid='" + openid + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", mobile='" + mobile + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", needInvoice='" + needInvoice + '\'' +
+				", invoiceType='" + invoiceType + '\'' +
+				", billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", batchNo='" + batchNo + '\'' +
+				", cellId='" + cellId + '\'' +
+				'}';
 	}
-	
 }
