@@ -26,7 +26,7 @@ import javax.transaction.Transactional;
 @Service
 public class NoticeServiceImpl implements NoticeService {
 
-	private static Logger logger = LoggerFactory.getLogger(NoticeServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(NoticeServiceImpl.class);
 
 	private final static int PAGE_SIZE = 10;
 

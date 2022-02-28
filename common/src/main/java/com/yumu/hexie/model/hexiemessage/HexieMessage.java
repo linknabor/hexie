@@ -20,7 +20,7 @@ public class HexieMessage extends BaseModel{
 	@JsonProperty("img_urls")
 	private String imgUrls;
 	private boolean success;
-	private String valid_date; //有效日期
+	private String validDate; //有效日期
 	
 	public String getContent() {
 		return content;
@@ -89,12 +89,12 @@ public class HexieMessage extends BaseModel{
 		this.imgUrls = imgUrls;
 	}
 
-	public String getValid_date() {
-		return valid_date;
+	public String getValidDate() {
+		return validDate;
 	}
 
-	public void setValid_date(String valid_date) {
-		this.valid_date = valid_date;
+	public void setValidDate(String validDate) {
+		this.validDate = validDate;
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class HexieMessage extends BaseModel{
 				", content='" + content + '\'' +
 				", imgUrls='" + imgUrls + '\'' +
 				", success=" + success +
-				", valid_date='" + valid_date + '\'' +
+				", validDate='" + validDate + '\'' +
 				'}';
 	}
 }

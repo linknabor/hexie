@@ -133,7 +133,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		request.setNoticeType(ModelConstant.NOTICE_TYPE2_NOTIFICATIONS);
 		request.setPublishDate(DateUtil.dttmFormat(new Date()));
 		request.setOutsideKey(uMessage.getId());
-		request.setValid_date(exr.getValid_date());
+		request.setValidDate(exr.getValidDate());
 
 		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_MESSAGE) + hexieMessage.getId();
 		request.setUrl(url);
@@ -156,7 +156,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	@Override
 	public HexieMessage getMessage(long messageId) {
 		String nowDate = DateUtil.dttmFormat(new Date());
-		return hexieMessageRepository.findByIdAndValid_dateGreaterThanEqual(messageId, nowDate);
+		return hexieMessageRepository.findByIdAndValidDateGreaterThanEqual(messageId, nowDate);
 	}
 	
 	/**

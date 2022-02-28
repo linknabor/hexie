@@ -101,7 +101,7 @@ public class HexieMessageController extends BaseController{
 	}
 
 	@RequestMapping(value = "/servplat/hexiemessage/del", method = RequestMethod.POST )
-	public CommonResponse<String> notifyRefund(@RequestBody Map<String, String> map) throws Exception {
+	public CommonResponse<String> delMessage(@RequestBody Map<String, String> map) throws Exception {
 		logger.info("/hexiemessage/del :" + map);
 		String str = messageService.delMessage(map.get("batchNo"));
 		CommonResponse<String> commonResponse = new CommonResponse<>();
