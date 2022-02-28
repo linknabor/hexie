@@ -27,7 +27,9 @@ public class PrepayReqVO implements Serializable {
 	private String creditCode;
 	@JsonProperty("invoice_title")
 	private String invoiceTitle;
+	@JsonProperty("need_invoice")
 	private String needInvoice;
+	@JsonProperty("invoice_type")
 	private String invoiceType;
 	
 	//地区参数
