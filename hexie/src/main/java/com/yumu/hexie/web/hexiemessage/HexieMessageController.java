@@ -4,6 +4,7 @@ package com.yumu.hexie.web.hexiemessage;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.common.CommonResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,9 +101,13 @@ public class HexieMessageController extends BaseController{
 	}
 
 	@RequestMapping(value = "/servplat/hexiemessage/del", method = RequestMethod.POST )
-	public String notifyRefund(@RequestBody Map<String, String> map) throws Exception {
+	public CommonResponse<String> notifyRefund(@RequestBody Map<String, String> map) throws Exception {
 		logger.info("/hexiemessage/del :" + map);
-		return messageService.delMessage(map.get("batchNo"));
+		String str = messageService.delMessage(map.get("batchNo"));
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		commonResponse.setData(str);
+		return commonResponse;
 	}
 	
 	

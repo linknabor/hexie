@@ -11,4 +11,6 @@ public interface HexieMessageRepository extends JpaRepository<HexieMessage, Long
 
 	List<HexieMessage> findByBatchNo(String batchNo);
 
+	HexieMessage findByIdAndValid_dateGreaterThanEqual(long messageId, String nowDate);
+
 }

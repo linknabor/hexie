@@ -12,14 +12,14 @@ import org.springframework.stereotype.Repository;
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
 	@Query(value = "select DISTINCT n.* from ( "
-			+ "select n.* from notice n where n.status = ?1 and n.noticeType = '9' and n.valid_date <= now() "
+			+ "select n.* from notice n where n.status = ?1 and n.noticeType = '9' and n.valid_date >= now() "
 			+ "union all "
-			+ "select n.* from notice n where n.status = ?1 and n.appid = ?2 and n.noticeType not in ?5 and n.valid_date <= now() "
+			+ "select n.* from notice n where n.status = ?1 and n.appid = ?2 and n.noticeType not in ?5 and n.valid_date >= now() "
 			+ "union all "
 			+ "select n.* from notice n join noticeSect ns on n.id = ns.noticeId "
-			+ "where n.status = ?1 and ns.sectId = ?3 and n.valid_date <= now() "
+			+ "where n.status = ?1 and ns.sectId = ?3 and n.valid_date >= now() "
 			+ "union all "
-			+ "select n.* from notice n where n.status = ?1 and n.appid = ?2 and n.openid= ?4 and n.noticeType in ?5 and n.valid_date <= now() "
+			+ "select n.* from notice n where n.status = ?1 and n.appid = ?2 and n.openid= ?4 and n.noticeType in ?5 and n.valid_date >= now() "
 			+ ") n ", 
 			nativeQuery = true)
 	List<Notice>getNoticeList(int status, String appid, String sectId, String openid, List<Integer> list, Pageable pageable);

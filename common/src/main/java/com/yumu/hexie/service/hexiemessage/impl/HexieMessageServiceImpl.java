@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -116,11 +115,10 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	@Override
 	public boolean saveMessage(HexieMessage exr, User user) {
 		
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 		HexieMessage hexieMessage = new HexieMessage();
 		BeanUtils.copyProperties(exr, hexieMessage);
 		hexieMessage.setUserId(user.getId());
-		hexieMessage.setDate_time(df.format(new Date()));
+		hexieMessage.setDate_time(DateUtil.dttmFormat(new Date()));
 		hexieMessage.setWuyeId(user.getWuyeId());
 		HexieMessage uMessage = hexieMessageRepository.save(hexieMessage);
 
@@ -133,8 +131,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		request.setAppid(user.getAppId());
 		request.setOpenid(user.getOpenid());
 		request.setNoticeType(ModelConstant.NOTICE_TYPE2_NOTIFICATIONS);
-		SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
-		request.setPublishDate(df1.format(new Date()));
+		request.setPublishDate(DateUtil.dttmFormat(new Date()));
 		request.setOutsideKey(uMessage.getId());
 		request.setValid_date(exr.getValid_date());
 
@@ -158,8 +155,8 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 	
 	@Override
 	public HexieMessage getMessage(long messageId) {
-		
-		return hexieMessageRepository.findById(messageId).get();
+		String nowDate = DateUtil.dttmFormat(new Date());
+		return hexieMessageRepository.findByIdAndValid_dateGreaterThanEqual(messageId, nowDate);
 	}
 	
 	/**
@@ -180,7 +177,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 			
 			String indexStr = ";base64,";
 			int imageLastIndex = base64Image.lastIndexOf(indexStr);
-			String imgStr = base64Image.substring(imageLastIndex+indexStr.length(), base64Image.length());
+			String imgStr = base64Image.substring(imageLastIndex+indexStr.length());
 			
 			byte[] imageByte = base64img2byte(imgStr);					
 			
@@ -190,7 +187,7 @@ public class HexieMessageServiceImpl<T> implements HexieMessageService{
 		wuyeUtil2.sendMessage(user, messageReq);	//推送给community异步处理
 	}
 
-	private String upload2qiniu(byte[] imageByte) throws FileNotFoundException, IOException, InterruptedException {
+	private String upload2qiniu(byte[] imageByte) throws IOException, InterruptedException {
 		String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
 		String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
 		String tmpPathRoot = tmpFileRoot + File.separator + currDate+File.separator;
