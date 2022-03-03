@@ -19,6 +19,7 @@ public class CommunityRequest extends WuyeRequest{
     private String sectIds;
     private String openid;
     private String url;
+    private String validDate;
 
     public int getNoticeType() {
         return noticeType;
@@ -108,6 +109,14 @@ public class CommunityRequest extends WuyeRequest{
         this.url = url;
     }
 
+    public String getValidDate() {
+        return validDate;
+    }
+
+    public void setValidDate(String validDate) {
+        this.validDate = validDate;
+    }
+
     @Override
     public String toString() {
         return "CommunityRequest{" +
@@ -122,6 +131,7 @@ public class CommunityRequest extends WuyeRequest{
                 ", sectIds='" + sectIds + '\'' +
                 ", openid='" + openid + '\'' +
                 ", url='" + url + '\'' +
+                ", validDate='" + validDate + '\'' +
                 '}';
     }
 }
