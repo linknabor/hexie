@@ -26,7 +26,7 @@ import javax.transaction.Transactional;
 @Service
 public class NoticeServiceImpl implements NoticeService {
 
-	private static Logger logger = LoggerFactory.getLogger(NoticeServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(NoticeServiceImpl.class);
 
 	private final static int PAGE_SIZE = 10;
 
@@ -83,5 +83,11 @@ public class NoticeServiceImpl implements NoticeService {
 		Assert.hasText(String.valueOf(noticeId), "信息ID不能为空");
 		noticeRepository.deleteById(noticeId);
 		noticeSectRepository.deleteByNoticeId(noticeId);
+	}
+
+	@Override
+	public List<Notice> getNoticeByOutSidKey(String outSidKey) {
+		Assert.hasText(outSidKey, "关联ID不能为空");
+		return noticeRepository.findByOutsideKey(Long.parseLong(outSidKey));
 	}
 }
