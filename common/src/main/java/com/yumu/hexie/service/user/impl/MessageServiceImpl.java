@@ -139,7 +139,7 @@ public class MessageServiceImpl implements MessageService {
 		List<Notice> notices = new ArrayList<>();
 
 		List<Notice> ns = noticeRepository.findByOutsideKey(message.getId());
-		if(ns != null) {
+		if(ns != null && ns.size() > 0) {
 			for(Notice n : ns) {
 				notice.setId(n.getId());
 				notice = noticeRepository.save(notice);
