@@ -129,7 +129,7 @@ public class MessageServiceImpl implements MessageService {
 		BeanUtils.copyProperties(message, notice, "id");
 		notice.setNoticeType(message.getMsgType());
 		notice.setOutsideKey(message.getId());
-
+		notice.setValidDate("2099-12-31 23:59:59");
 		//这里特殊处理，如果conntext有内容，则转换成链接形式存在在notice表的url字段
 		if(!ObjectUtils.isEmpty(message.getContent())) {
 			String url = messageUrl + "?oriApp=" + message.getAppid() + "#/message?messageId="+ message.getId();
