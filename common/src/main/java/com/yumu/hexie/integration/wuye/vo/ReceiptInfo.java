@@ -41,6 +41,8 @@ public class ReceiptInfo implements Serializable {
 		private String openid;
 		@JsonProperty("trash_reason")
 		private String trashReason;
+		@JsonProperty("tips_desc")
+		private String tipsDesc;
 		
 		public String getReceiptId() {
 			return receiptId;
@@ -108,15 +110,32 @@ public class ReceiptInfo implements Serializable {
 		public void setTrashReason(String trashReason) {
 			this.trashReason = trashReason;
 		}
+
+		public String getTipsDesc() {
+			return tipsDesc;
+		}
+
+		public void setTipsDesc(String tipsDesc) {
+			this.tipsDesc = tipsDesc;
+		}
+
 		@Override
 		public String toString() {
-			return "Receipt [receiptId=" + receiptId + ", receiptStatus=" + receiptStatus + ", tradeWaterId="
-					+ tradeWaterId + ", sectName=" + sectName + ", cspName=" + cspName + ", tranDate=" + tranDate
-					+ ", tranTime=" + tranTime + ", payMethod=" + payMethod + ", tranAmt=" + tranAmt + ", openid="
-					+ openid + ", trashReason=" + trashReason + "]";
+			return "Receipt{" +
+					"receiptId='" + receiptId + '\'' +
+					", receiptStatus='" + receiptStatus + '\'' +
+					", tradeWaterId='" + tradeWaterId + '\'' +
+					", sectName='" + sectName + '\'' +
+					", cspName='" + cspName + '\'' +
+					", tranDate='" + tranDate + '\'' +
+					", tranTime='" + tranTime + '\'' +
+					", payMethod='" + payMethod + '\'' +
+					", tranAmt='" + tranAmt + '\'' +
+					", openid='" + openid + '\'' +
+					", trashReason='" + trashReason + '\'' +
+					", tipsDesc='" + tipsDesc + '\'' +
+					'}';
 		}
-		
-		
 	}
 	
 	public static class ReceiptDetail {
