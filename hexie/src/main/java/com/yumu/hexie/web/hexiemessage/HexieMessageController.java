@@ -2,7 +2,9 @@ package com.yumu.hexie.web.hexiemessage;
 
 
 import java.util.List;
+import java.util.Map;
 
+import com.yumu.hexie.integration.common.CommonResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +32,10 @@ public class HexieMessageController extends BaseController{
 	
 	@Autowired
 	private HexieMessageService messageService;
-	
+
 	/**
 	 * 公众号通知群发
-	 * @param expr
+	 * @param hexieMessage
 	 * @return
 	 */
 	@RequestMapping(value = "/servplat/hexiemessage/send", method = RequestMethod.POST)
@@ -52,7 +54,11 @@ public class HexieMessageController extends BaseController{
 	@RequestMapping(value = "/servplat/hexiemessage/get", method = RequestMethod.POST)
 	public BaseResult<HexieMessage> getMessage(@RequestParam(required=false) String messageId) {
 		Assert.hasText(messageId, "消息id不能为空。");
-		return BaseResult.successResult(messageService.getMessage(Long.parseLong(messageId)));
+		HexieMessage hexieMessage = messageService.getMessage(Long.parseLong(messageId));
+		if(hexieMessage == null) {
+			return BaseResult.fail("信息已被删除");
+		}
+		return BaseResult.successResult(hexieMessage);
 	}
 	
 	/**
@@ -69,10 +75,10 @@ public class HexieMessageController extends BaseController{
 		messageService.sendMessageMobile(user, messageReq);
 		return BaseResult.successResult(Constants.PAGE_SUCCESS);
 	}
-	
+
 	/**
 	 * 群发通知查询
-	 * @param messageId
+	 * @param batchNo
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -81,17 +87,27 @@ public class HexieMessageController extends BaseController{
 		Assert.hasText(batchNo, "短信批号不能为空。");
 		return BaseResult.successResult(messageService.getMessageByBatchNo(batchNo));
 	}
-	
+
 	/**
 	 * 群发通知查询
-	 * @param messageId
+	 * @param user
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiemessage/history", method = RequestMethod.GET)
 	public BaseResult<List<Message>> getSendHistory(@ModelAttribute(Constants.USER) User user) throws Exception {
 		return BaseResult.successResult(messageService.getSendHistory(user));
+	}
+
+	@RequestMapping(value = "/servplat/hexiemessage/del", method = RequestMethod.POST )
+	public CommonResponse<String> delMessage(@RequestBody Map<String, String> map) throws Exception {
+		logger.info("/hexiemessage/del :" + map);
+		String str = messageService.delMessage(map.get("batchNo"));
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		commonResponse.setData(str);
+		return commonResponse;
 	}
 	
 	

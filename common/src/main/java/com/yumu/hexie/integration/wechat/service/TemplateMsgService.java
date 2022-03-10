@@ -357,6 +357,14 @@ public class TemplateMsgService {
     	
     	WuyeServiceVO vo = new WuyeServiceVO();
 		vo.setTitle(new TemplateItem("物业通知"));
+
+		if(!StringUtils.isEmpty(content)) {
+			if(content.length() > 60) {
+				content = content.substring(0, 50);
+				content += "...";
+			}
+		}
+
 	  	vo.setOrderNum(new TemplateItem(content));
 	  	String recvDate = DateUtil.dtFormat(new Date(), "yyyy-MM-dd HH:mm:ss");
 	  	vo.setRecvDate(new TemplateItem(recvDate));

@@ -15,5 +15,6 @@ public interface NoticeService {
 
 	void delOutSidNotice(long noticeId);
 
+	List<Notice> getNoticeByOutSidKey(String outSidKey);
 
 }
