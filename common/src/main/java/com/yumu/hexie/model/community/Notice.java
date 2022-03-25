@@ -26,6 +26,7 @@ public class Notice extends BaseModel {
 	private String url;	//跳转链接
 	private long outsideKey; //外部主键 可能是message表
 	private String openid;
+	private String validDate;
 	
 	public int getNoticeType() {
 		return noticeType;
@@ -115,6 +116,14 @@ public class Notice extends BaseModel {
 		this.openid = openid;
 	}
 
+	public String getValidDate() {
+		return validDate;
+	}
+
+	public void setValidDate(String validDate) {
+		this.validDate = validDate;
+	}
+
 	@Override
 	public String toString() {
 		return "Notice{" +
@@ -131,6 +140,8 @@ public class Notice extends BaseModel {
 				", creator='" + creator + '\'' +
 				", url='" + url + '\'' +
 				", outsideKey=" + outsideKey +
+				", openid='" + openid + '\'' +
+				", validDate='" + validDate + '\'' +
 				'}';
 	}
 }

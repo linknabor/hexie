@@ -1076,6 +1076,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                     }
                     continue;
                 }
+
                 logger.info("start to consume receipt msg queue : " + in);
                 String openid = in.getOpenid();
                 if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
@@ -1123,7 +1124,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
             }
         }
     }
-    
     
     /**
      * 团购到货通知
@@ -1185,4 +1185,5 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
             }
         }
     }
+
 }
