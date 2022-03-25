@@ -203,33 +203,30 @@ public class OrderController extends BaseController{
 		vo.setProduct(productService.getProduct(sp.getProductId()));
 		
 		Address address = new Address();
-		if (!StringUtils.isEmpty(user.getSectId())&& !"0".equals(currUser.getSectId())) {	//绑定房屋的业主
-			List<Address> addrList = addressService.getAddressByMain(user.getId(), true);
-			if (addrList == null || addrList.size() == 0) {
-				addrList = addressService.queryAddressByUser(user.getId());
+		if (!StringUtils.isEmpty(currUser.getSectId())&& !"0".equals(currUser.getSectId())) {	//绑定房屋的业主
+			List<Address> addrList = addressService.getAddressByMain(currUser.getId(), true);
+			if (addrList==null || addrList.size() ==0) {
+				addrList = addressService.queryBindedAddressByUser(currUser.getId());
 			}
-			if (addrList!=null && addrList.size()>0) {
-				for (Address currAddr : addrList) {
-					long currXiaoquId = currAddr.getXiaoquId();
-					if (currXiaoquId != user.getXiaoquId()) {
-						continue;
-					}
-					if (currXiaoquId == 0l) {
-						continue;
-					}
-					address = currAddr;
-					break;
-				}
+			if (addrList!=null && addrList.size() > 0) {
+				address = addrList.get(0);
 			}
 		}
-		
 		vo.setAddress(address);
 		
 		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
 			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(sp.getProductId(), address.getXiaoquId());
+			RgroupAreaItem areaItem = new RgroupAreaItem();
 			if (areaList!=null && areaList.size()>0) {
-				vo.setRgroupAreaItem(areaList.get(0));
+				areaItem = areaList.get(0);
+				
+			} else {
+				areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
+				if (areaList!=null && areaList.size()>0) {
+					areaItem = areaList.get(0);
+				}
 			}
+			vo.setRgroupAreaItem(areaItem);
 		}
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == type) {
 			if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
