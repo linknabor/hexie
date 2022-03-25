@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.eshop.vo;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class QueryOrderVO implements Serializable {
 
@@ -12,6 +13,7 @@ public class QueryOrderVO implements Serializable {
 	private String id;
 	private String orderNo;
 	private String orderType;
+	private String orderStatus;
 	private String status;
 	private String groupStatus; //成团状态
 	private String tel;
@@ -19,11 +21,17 @@ public class QueryOrderVO implements Serializable {
 	private String agentNo;
 	private String agentName;
 	private String productName;
+	private String ruleId;
 	private String logisticNo;
 	private String sendDateBegin;
 	private String sendDateEnd;
 	private String sectName;
-
+	private long createDateBegin;
+	private long createDateEnd;
+	private String userid;
+	private String userTel;
+	private String userAddr;
+	private List<String> sectIds;
 	private String queryFlag;
 
 	private int currentPage;
@@ -137,26 +145,79 @@ public class QueryOrderVO implements Serializable {
 		this.queryFlag = queryFlag;
 	}
 
+	public String getUserid() {
+		return userid;
+	}
+
+	public void setUserid(String userid) {
+		this.userid = userid;
+	}
+
+	public List<String> getSectIds() {
+		return sectIds;
+	}
+
+	public void setSectIds(List<String> sectIds) {
+		this.sectIds = sectIds;
+	}
+	
+	public long getCreateDateBegin() {
+		return createDateBegin;
+	}
+	
+	public void setCreateDateBegin(long createDateBegin) {
+		this.createDateBegin = createDateBegin;
+	}
+	
+	public long getCreateDateEnd() {
+		return createDateEnd;
+	}
+	
+	public void setCreateDateEnd(long createDateEnd) {
+		this.createDateEnd = createDateEnd;
+	}
+	
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+	
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+	
+	public String getRuleId() {
+		return ruleId;
+	}
+	
+	public void setRuleId(String ruleId) {
+		this.ruleId = ruleId;
+	}
+	
+	public String getUserTel() {
+		return userTel;
+	}
+	
+	public void setUserTel(String userTel) {
+		this.userTel = userTel;
+	}
+	
+	public String getUserAddr() {
+		return userAddr;
+	}
+	
+	public void setUserAddr(String userAddr) {
+		this.userAddr = userAddr;
+	}
 	@Override
 	public String toString() {
-		return "QueryOrderVO{" +
-				"id='" + id + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", orderType='" + orderType + '\'' +
-				", status='" + status + '\'' +
-				", groupStatus='" + groupStatus + '\'' +
-				", tel='" + tel + '\'' +
-				", receiverName='" + receiverName + '\'' +
-				", agentNo='" + agentNo + '\'' +
-				", agentName='" + agentName + '\'' +
-				", productName='" + productName + '\'' +
-				", logisticNo='" + logisticNo + '\'' +
-				", sendDateBegin='" + sendDateBegin + '\'' +
-				", sendDateEnd='" + sendDateEnd + '\'' +
-				", sectName='" + sectName + '\'' +
-				", queryFlag='" + queryFlag + '\'' +
-				", currentPage=" + currentPage +
-				", pageSize=" + pageSize +
-				'}';
+		return "QueryOrderVO [id=" + id + ", orderNo=" + orderNo + ", orderType=" + orderType + ", orderStatus="
+				+ orderStatus + ", status=" + status + ", groupStatus=" + groupStatus + ", tel=" + tel
+				+ ", receiverName=" + receiverName + ", agentNo=" + agentNo + ", agentName=" + agentName
+				+ ", productName=" + productName + ", ruleId=" + ruleId + ", logisticNo=" + logisticNo
+				+ ", sendDateBegin=" + sendDateBegin + ", sendDateEnd=" + sendDateEnd + ", sectName=" + sectName
+				+ ", createDateBegin=" + createDateBegin + ", createDateEnd=" + createDateEnd + ", userid=" + userid
+				+ ", userTel=" + userTel + ", userAddr=" + userAddr + ", sectIds=" + sectIds + ", queryFlag="
+				+ queryFlag + ", currentPage=" + currentPage + ", pageSize=" + pageSize + "]";
 	}
+	
 }

@@ -35,7 +35,7 @@ public class WeiZhuangWangServiceImpl implements WeiZhuangWangService {
 	@Override
 	public YuyueOrder addNoNeedPayOrder(User user, WeiZhuangWangReq weiZhuangWangReq,
 			long addressId) {
-		Address address = addressRepository.findById(addressId).get();
+		Address address = addressRepository.findById(addressId);
 		weiZhuangWangReq.setStrMobile(address.getTel());
 		weiZhuangWangReq.setStrName(address.getReceiveName());
 		weiZhuangWangReq.setStrWorkAddr(address.getRegionStr()+address.getDetailAddress());
@@ -72,7 +72,7 @@ public class WeiZhuangWangServiceImpl implements WeiZhuangWangService {
 		wOrder.setStrWorkAddr(weiZhuangWangReq.getStrWorkAddr());
 		wOrder.setMemo(weiZhuangWangReq.getCustomerMemo());
 		wOrder.setServiceStatus(ModelConstant.YUYUE_SERVICE_STATUS_UNUSED);
-		wOrder = weiZhuangWangOrderRepository.save(wOrder);
+		weiZhuangWangOrderRepository.save(wOrder);
 		
 		userNoticeService.yuyueSuccess(user.getId(), yOrder.getTel(), yOrder.getReceiverName(), yOrder.getId(), yOrder.getProductName(), ModelConstant.YUYUE_PAYMENT_TYPE_OFFLINE, 0);
 

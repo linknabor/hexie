@@ -46,10 +46,7 @@ public class CustomYuyueServiceImpl extends CustomOrderServiceImpl {
 	private DistributionService distributionService;
     @Inject
     private UserNoticeService userNoticeService;
-	public void validateRule(SalePlan rule, ServiceOrder order,
-			Address address) {
-		
-	}
+
 	public void validateRule(ServiceOrder order,SalePlan plan, OrderItem item, Address address) {
 	    if(!plan.valid(item.getCount())){
             throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_DAOJIA,plan.getId(),"商品信息已过期，请重新下单！").setError();

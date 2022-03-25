@@ -28,5 +28,6 @@ public interface NotifyQueueTask {
 
 	void sendReceiptMsgAsyc();
 
+	void noticeRgroupArrial();
 
 }

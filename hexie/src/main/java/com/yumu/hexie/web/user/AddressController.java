@@ -87,7 +87,9 @@ public class AddressController extends BaseController{
 		List<Address> addresses = new ArrayList<>();
 		if ("repair".equals(module)) {
 			addresses = addressService.queryBindedAddressByUser(user.getId());
-		}else {
+		} else if ("rgroup".equals(module)) {
+			addresses = addressService.queryBindedAddressByUserAndRegion(user);
+		} else {
 			addresses = addressService.queryAddressByUser(user.getId());
 		}
 		BaseResult<List<Address>> r = BaseResult.successResult(addresses);

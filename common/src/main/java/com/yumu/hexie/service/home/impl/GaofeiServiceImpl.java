@@ -78,14 +78,14 @@ public class GaofeiServiceImpl implements GaofeiService {
 		gOrder.setExpectedTime(gaofeiReq.getExpectedTime());
 		gOrder.setPrices(gaofeiReq.getPrices());
 		gOrder.setStrName(gaofeiReq.getStrName());
-		gOrder = gaofeiOrderRepository.save(gOrder);
+		gaofeiOrderRepository.save(gOrder);
 
 		return yOrder;
 	}
 
 	@Override
 	public YuyueOrder addGaofeiYuyueOrder(User user, GaofeiReq gaofeiReq, long addressId) {
-		Address address = addressRepository.findById(addressId).get();
+		Address address = addressRepository.findById(addressId);
 		YuyueOrder yOrder = new YuyueOrder();
 
 		Merchant merchant = merchantRepository.findMerchantByProductType(ModelConstant.YUYUE_PRODUCT_TYPE_GAOFEI);
@@ -117,19 +117,18 @@ public class GaofeiServiceImpl implements GaofeiService {
 		gOrder.setPrices(gaofeiReq.getPrices());
 		gOrder.setStrName(address.getReceiveName());
 		gOrder.setStrWorkAddr(address.getRegionStr()+address.getDetailAddress());
-		gOrder = gaofeiOrderRepository.save(gOrder);
-
+		gaofeiOrderRepository.save(gOrder);
 		return yOrder;
 	}
 
 	@Override
 	public boolean checkIsExistenceByProduct(User user, long ruleId) {
 		YuyueRule yRule = yuyueRuleRepository.findById(ruleId).get();
-		Product product = productRepository.findById(yRule.getProductId()).get();
+		Product product = productRepository.findById(yRule.getProductId());
 		
 		log.error("checkIsExperience userId" + user.getId() + ", yRuleId=" + ruleId + "productId=" + product.getId());
 
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.ORDER_STATUS_PAYED);
 		status.add(ModelConstant.ORDER_STATUS_SENDED);
 		status.add(ModelConstant.ORDER_STATUS_RECEIVED);
@@ -137,11 +136,7 @@ public class GaofeiServiceImpl implements GaofeiService {
 		status.add(ModelConstant.ORDER_STATUS_REFUNDED);
 		
 		List<ServiceOrder> lists= serviceOrderRepository.findByUserAndStatusAndProductIdAndOrderType(user.getId(), status, product.getId(), ModelConstant.ORDER_TYPE_YUYUE);
-		
-		if(lists.size() == 0){
-			return false;
-		}else{
-			return true;
-		}
+
+		return lists.size() != 0;
 	}
 }

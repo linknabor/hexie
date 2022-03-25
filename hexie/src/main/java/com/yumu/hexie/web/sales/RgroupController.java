@@ -7,11 +7,14 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
+import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.DistributionService;
@@ -51,6 +54,29 @@ public class RgroupController extends BaseController{
 		
 		List<RgroupAreaItem> items = distributionService.queryRgroupsV2(user, page);
         return new BaseResult<List<RgroupAreaItem>>().success(rgroupService.addProcessStatus(items));
+    }
+	
+	/**
+	 * 团购到货通知
+	 * @param user
+	 * @param page
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/notice/arriaval", method = RequestMethod.POST)
+	@ResponseBody
+	public CommonResponse<Object> noticeArriaval(@RequestBody QueryRgroupsVO queryRgroupsVO) throws Exception {
+		
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			rgroupService.noticeArrival(queryRgroupsVO);
+			commonResponse.setData(Constants.PAGE_SUCCESS);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99");
+		}
+        return commonResponse;
     }
 	
 }

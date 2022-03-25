@@ -1,10 +1,5 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.repair.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,7 +7,6 @@ import javax.inject.Inject;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.yumu.hexie.common.util.DistanceUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -20,8 +14,6 @@ import com.yumu.hexie.model.localservice.repair.RepairConstant;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.localservice.repair.RepairSeed;
 import com.yumu.hexie.model.localservice.repair.RepairSeedRepository;
-import com.yumu.hexie.model.user.Address;
-import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.repair.RepairAssignService;
 
@@ -37,8 +29,6 @@ import com.yumu.hexie.service.repair.RepairAssignService;
 public class RepairAssignServiceImpl implements RepairAssignService {
 
     @Inject
-    private AddressRepository addressRepository;
-    @Inject
     private RepairSeedRepository repairSeedRepository;
     @Inject
     private ServiceOperatorRepository serviceOperatorRepository;
@@ -52,41 +42,18 @@ public class RepairAssignServiceImpl implements RepairAssignService {
     @Async
     @Override
     public void assignOrder(RepairOrder order) {
-        Address address = addressRepository.findById(order.getAddressId()).get();
-/*        List<ServiceOperator> ops = null;
-        List<Long> regionIds = new ArrayList<Long>();
-        regionIds.add(1l);
-        regionIds.add(address.getProvinceId());
-        regionIds.add(address.getCityId());
-        regionIds.add(address.getCountyId());
-        regionIds.add(address.getXiaoquId());
-        List<Long> operatorIds = serviceRegionRepository.findByOrderTypeAndRegionIds(HomeServiceConstant.SERVICE_TYPE_REPAIR,regionIds);
-        log.error("维修单对应维修工数量" + operatorIds.size());
-        if(operatorIds != null && operatorIds.size() > 0) {
-            ops = serviceOperatorRepository.findOperators(operatorIds);
-        }
-        if(ops == null) {
-//            ops = repairOperatorRepository.findByLongitudeAndLatitude(address.getLongitude(), address.getLatitude(),
-//                new PageRequest(0, 2));
-            //业务判断-通知下单失败
-        }
-        */
         List<ServiceOperator> ops=serviceOperatorRepository.findBySectId(order.getSectId(), ModelConstant.SERVICE_OPER_TYPE_WEIXIU);
-        assign(address,order, ops);
+        assign(order, ops);
     }
-    private void assign(Address address,RepairOrder ro, List<ServiceOperator> ops) {
+    private void assign(RepairOrder ro, List<ServiceOperator> ops) {
         if(ro.getStatus() == RepairConstant.STATUS_CREATE && ro.getOperatorId() != null && ro.getOperatorId() != 0){
             return;
         }
-        List<RepairSeed> seeds = new ArrayList<RepairSeed>();
         for(ServiceOperator op : ops) {
             RepairSeed rs = new RepairSeed(op,ro);
             repairSeedRepository.save(rs);
             //FIXME 发送消息
-            seeds.add(rs);
-            gotongService.sendRepairAssignMsg(rs.getOperatorId(),ro,
-                (int)DistanceUtil.distanceBetween(address.getLatitude(), op.getLatitude(),
-                    address.getLongitude(), op.getLongitude()));
+            gotongService.sendRepairAssignMsg(rs.getOperatorId(),ro);
         }
     }
 }

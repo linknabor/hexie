@@ -511,7 +511,11 @@ public class TemplateMsgService {
 
     	CommonVO vo = new CommonVO();
     	vo.setFirst(new TemplateItem(title));
-    	vo.setKeyword1(new TemplateItem(String.valueOf(serviceOrder.getId())));	//订单号
+    	String orderNo = serviceOrder.getOrderNo();
+    	if (StringUtils.isEmpty(orderNo)) {
+    		orderNo = String.valueOf(serviceOrder.getId());
+		}
+    	vo.setKeyword1(new TemplateItem(orderNo));	//订单号
     	vo.setKeyword2(new TemplateItem(serviceOrder.getLogisticName()));	//物流公司名称
     	vo.setKeyword3(new TemplateItem(serviceOrder.getLogisticNo()));	//快递单好
 //    	String remark = "";
@@ -929,6 +933,47 @@ public class TemplateMsgService {
 		msg.setUrl(msgUrl);
 		msg.setTouser(user.getOpenid());
 		sendMsg(msg, accessToken);
+	}
+	
+	/**
+	 * 电商支付成功通知
+	 * @param user
+	 * @param serviceOrder
+	 * @param accessToken
+	 */
+	public boolean sendRgroupArrivalNotice(User user, ServiceOrder serviceOrder, String accessToken) {
+
+		String title = "您参与的团购【"+serviceOrder.getProductName()+"】，商品已到货。";
+		CommonVO vo = new CommonVO();
+		vo.setFirst(new TemplateItem(title));
+		vo.setKeyword1(new TemplateItem(serviceOrder.getOrderNo()));
+		vo.setKeyword2(new TemplateItem(serviceOrder.getProductName()));
+		vo.setKeyword3(new TemplateItem(String.valueOf(serviceOrder.getId())));
+		vo.setKeyword4(new TemplateItem(serviceOrder.getGroupLeaderAddr()));
+		String orderDate = DateUtil.dttmFormat(new Date(serviceOrder.getCreateDate()));
+		vo.setKeyword5(new TemplateItem(orderDate));
+		vo.setRemark(new TemplateItem("点击查看订单详情。"));
+
+		TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_NOTICE_ARRIVAL, user.getAppId()));
+		String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_CUSTOMER_GROUP_DELIVERY);
+		if (!StringUtils.isEmpty(msgUrl)) {
+			msgUrl += serviceOrder.getId();
+			msgUrl = AppUtil.addAppOnUrl(msgUrl, user.getAppId());
+		}
+		msg.setUrl(msgUrl);
+		msg.setTouser(user.getOpenid());
+		WechatResponse wechatResponse = sendMsg(msg, accessToken);
+		
+		boolean isSuccess = false;
+		if (wechatResponse.getErrcode() == 0) {
+            isSuccess = true;
+        } else {
+        	log.warn(wechatResponse.getErrmsg());
+        }
+		return isSuccess;
+		
 	}
 
 }

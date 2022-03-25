@@ -41,12 +41,10 @@ public class JiuyeServiceImpl implements JiuyeService {
 	private YuyueOrderRepository yuyueOrderRepository;
 	@Inject
 	private MerchantRepository merchantRepository;
-	public String datefomat = "yyyy-MM-dd";
-	
 
 	@Override
 	public YuyueOrder addOrder(User user, JiuyeReq req, long addressId) {
-		Address address = addressRepository.findById(addressId).get();
+		Address address = addressRepository.findById(addressId);
 		YuyueRule rule = yuyueRuleRepository.findById(req.getRuleId()).get();
 		YuyueOrder yOrder = new YuyueOrder();
 		
@@ -85,7 +83,7 @@ public class JiuyeServiceImpl implements JiuyeService {
 			order.setServiceIsSingle(req.getServiceIsSingle());
 			order.setServiceNo(rule.getServiceNo());
 			order.setServiceCount(1);
-			order = jiuyeOrderRepository.save(order);			
+			jiuyeOrderRepository.save(order);
 		}else if(req.getServiceIsSingle() == ModelConstant.YUYUE_SERVICE_CYCLE){
 			//修改时间格式
 			SimpleDateFormat sf = new SimpleDateFormat(DateUtil.dSimple);
@@ -111,7 +109,7 @@ public class JiuyeServiceImpl implements JiuyeService {
 				order.setCycleTime(req.getCycleTime());
 				order.setServiceNo(rule.getServiceNo());
 				order.setServiceCount(i);
-				order = jiuyeOrderRepository.save(order);
+				jiuyeOrderRepository.save(order);
 				//先换包月周期为一周
 				calendar.add(Calendar.DAY_OF_MONTH, 7);
 			}

@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.o2o.impl;
 
 import java.util.Date;
@@ -84,7 +80,6 @@ public class XiyiServiceImpl implements XiyiService {
      * @param req
      * @param cart
      * @return
-     * @see com.yumu.hexie.service.o2o.XiyiService#createBill(com.yumu.hexie.vo.CreateOrderReq, com.yumu.hexie.model.localservice.HomeCart)
      */
     @Transactional
     @Override
@@ -133,7 +128,6 @@ public class XiyiServiceImpl implements XiyiService {
     /** 
      * @param bill
      * @return
-     * @see com.yumu.hexie.service.o2o.XiyiService#pay(com.yumu.hexie.model.localservice.bill.YunXiyiBill)
      */
     @Override
     public JsSign pay(YunXiyiBill bill, User user) {
@@ -174,7 +168,7 @@ public class XiyiServiceImpl implements XiyiService {
             case PaymentConstant.PAYMENT_STATUS_INIT:
                 break;
             case PaymentConstant.PAYMENT_STATUS_SUCCESS:
-                YunXiyiBill bill = yunXiyiBillRepository.findById(payment.getOrderId()).get();
+                YunXiyiBill bill = yunXiyiBillRepository.findById(payment.getOrderId());
                 if(bill.getStatus()==HomeServiceConstant.ORDER_STATUS_CREATE){
                     paySuccess(bill,payment);
                 }
@@ -197,8 +191,9 @@ public class XiyiServiceImpl implements XiyiService {
         try {
             Thread.sleep(1000);//等待微信端处理完成
         } catch (InterruptedException e) {
+            log.error("sleep:", e);
         }
-        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId);
         if(bill == null || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_CREATE) {
             return;
         }
@@ -210,9 +205,9 @@ public class XiyiServiceImpl implements XiyiService {
     @Override
     public void cancel(long billId, long userId) {
         log.warn("洗衣取消[BEG]" + billId); 
-        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId);
         checkOwner(userId, bill);
-        if(bill == null || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_CREATE) {
+        if(bill.getStatus() != HomeServiceConstant.ORDER_STATUS_CREATE) {
             throw new BizValidateException("该订单无法取消！");
         }
 
@@ -225,10 +220,9 @@ public class XiyiServiceImpl implements XiyiService {
     @Override
     public void signed(long billId, long userId) {
         log.warn("洗衣签收[BEG]" + billId); 
-        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId);
         checkOwner(userId, bill);
-        if(bill == null || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_SERVICED
-                || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_BACKED) {
+        if(bill.getStatus() != HomeServiceConstant.ORDER_STATUS_SERVICED || bill.getStatus() != HomeServiceConstant.ORDER_STATUS_BACKED) {
             return;
         }
         bill.signed();
@@ -254,7 +248,7 @@ public class XiyiServiceImpl implements XiyiService {
      */
     @Override
     public YunXiyiBill queryById(long id) {
-        return yunXiyiBillRepository.findById(id).get();
+        return yunXiyiBillRepository.findById(id);
     }
 
 
@@ -263,14 +257,14 @@ public class XiyiServiceImpl implements XiyiService {
     }
 
 
-    private static final long XIYI_TIMEOUT = 3600000l;
+    private static final long XIYI_TIMEOUT = 3600000L;
     /** 
      * @param billId
      * @see com.yumu.hexie.service.o2o.XiyiService#timeout(long)
      */
     @Override
     public void timeout(long billId) {
-        YunXiyiBill bill = yunXiyiBillRepository.findById(billId).get();
+        YunXiyiBill bill = yunXiyiBillRepository.findById(billId);
 
         log.warn("洗衣超时[BEG]" + billId);
         PaymentOrder payment = paymentService.queryPaymentOrder(PaymentConstant.TYPE_XIYI_ORDER,billId);

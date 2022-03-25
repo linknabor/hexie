@@ -2,8 +2,6 @@ package com.yumu.hexie.service.user;
 
 import java.util.List;
 
-import com.yumu.hexie.integration.amap.req.DataCreateReq;
-import com.yumu.hexie.integration.amap.resp.DataCreateResp;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.City;
@@ -54,6 +52,8 @@ public interface AddressService {
 	List<City> queryCity(long provinceId);
 
 	List<County> queryCounty(long cityId);
+
+	List<Address> queryBindedAddressByUserAndRegion(User user);
 
 
 }

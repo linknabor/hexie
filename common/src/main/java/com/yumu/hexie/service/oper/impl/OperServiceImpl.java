@@ -13,8 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
@@ -35,6 +35,7 @@ import com.yumu.hexie.service.oper.OperService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.OperAuthorization;
 
+@Service
 public class OperServiceImpl implements OperService {
 	
 	@Autowired
@@ -95,7 +96,7 @@ public class OperServiceImpl implements OperService {
 			so.setName(user.getName());
 			so.setTel(user.getTel());
 			so.setUserId(user.getId());
-			so.setType(Integer.valueOf(oa.getType()));	//ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER
+			so.setType(Integer.parseInt(oa.getType()));	//ModelConstant.SERVICE_OPER_TYPE_MSG_SENDER
 			so.setOpenId(user.getOpenid());
 			serviceOperatorRepository.save(so);
 			

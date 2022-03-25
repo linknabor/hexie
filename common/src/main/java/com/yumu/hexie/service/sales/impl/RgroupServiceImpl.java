@@ -1,29 +1,43 @@
 package com.yumu.hexie.service.sales.impl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
-import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.exception.BizValidateException;
-import com.yumu.hexie.service.sales.BaseOrderService;
-import com.yumu.hexie.service.user.UserNoticeService;
-import com.yumu.hexie.service.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
+import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.sales.CacheableService;
 import com.yumu.hexie.service.sales.RgroupService;
+import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
+import com.yumu.hexie.service.user.UserNoticeService;
+import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.RgroupOrder;
 
 @Service("rgroupService")
@@ -40,10 +54,16 @@ public class RgroupServiceImpl implements RgroupService {
 	private UserService userService;
 	@Inject
 	private UserNoticeService userNoticeService;
-
     @Autowired
 	@Qualifier("stringRedisTemplate")
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private RegionRepository regionRepository;
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
+    @Autowired
+    @Qualifier(value = "staffclientStringRedisTemplate")
+    private RedisTemplate<String, String> staffclientStringRedisTemplate;
 
 	/**
 	 * 前端显示进度和限制库存
@@ -83,6 +103,35 @@ public class RgroupServiceImpl implements RgroupService {
 		} else {
 			log.error("该团购未到结束时间！" + rule.getId());
 		}
+	}
+	
+	@Override
+	@Transactional
+	public void refreshGroupDeliveryStatus(RgroupRule rule) {
+		List<ServiceOrder> orderList = serviceOrderRepository.findByRGroup(rule.getId());
+		if (orderList == null || orderList.isEmpty()) {
+			log.warn("can not find serviceOrder by rule, ruleId : " + rule.getId());
+			return;
+		}
+		int delivered = 0;
+		int undelivered = 0;
+		for (ServiceOrder serviceOrder : orderList) {
+			int orderStatus = serviceOrder.getStatus();
+			int count = serviceOrder.getCount();
+			if (ModelConstant.ORDER_STATUS_SENDED == orderStatus || ModelConstant.ORDER_STATUS_RECEIVED == orderStatus) {
+				delivered += count;
+			} else {
+				undelivered += count;
+			}
+		}
+		if (undelivered > 0) {
+			log.info("delivered : " + delivered);
+			log.info("still " + undelivered + " not be delivered . ruleId : " + rule.getId());
+			return;
+		}
+		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERED);
+		cacheableService.save(rule);
+		
 	}
 
 	private void cancelValidate(RgroupRule rule) {
@@ -124,6 +173,7 @@ public class RgroupServiceImpl implements RgroupService {
 	private void finishGroup(RgroupRule rule) {
 		log.error("finishGroup:"+rule.getId());
 		finishValidate(rule);
+		Map<Long, Integer> regionMap = new HashMap<>();
 		List<ServiceOrder> orders = serviceOrderRepository.findByRGroup(rule.getId());
 		for(ServiceOrder o : orders){
 			try{
@@ -132,17 +182,58 @@ public class RgroupServiceImpl implements RgroupService {
 					baseOrderService.cancelOrder(o);
 				} else if(ModelConstant.ORDER_STATUS_PAYED == o.getStatus()) {
 					baseOrderService.confirmOrder(o);
+					if (!regionMap.containsKey(o.getXiaoquId())) {
+						regionMap.put(o.getXiaoquId(), 1);
+					} else {
+						Integer count = regionMap.get(o.getXiaoquId());
+						regionMap.put(o.getXiaoquId(), ++count);
+					}
 				} else {
 					log.error("finishGroup:"+rule.getId());
 				}
 			}catch(Exception e) {
 				log.error("finishGroup:"+rule.getId(),e);
 			}
-
 		}
-
 		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_FINISH);
+		rule.setGroupFinishDate(System.currentTimeMillis());
 		cacheableService.save(rule);
+		
+		long currTime = System.currentTimeMillis();
+		Iterator<Map.Entry<Long, Integer>> it = regionMap.entrySet().iterator();
+		while(it.hasNext()) {
+			Map.Entry<Long, Integer> entry = it.next();
+			long regionId = entry.getKey();
+			Integer currSectGroupNum = entry.getValue();	//当前小区成团份数
+			//给团长发送成团消息
+			Region region = regionRepository.findById(regionId);
+			NoticeRgroupSuccess noticeRgroupSuccess = new NoticeRgroupSuccess();
+			noticeRgroupSuccess.setCreateDate(currTime);
+			noticeRgroupSuccess.setGroupNum(currSectGroupNum);
+			noticeRgroupSuccess.setOrderType(ModelConstant.ORDER_TYPE_RGROUP);
+			noticeRgroupSuccess.setProductName(rule.getProductName());
+			noticeRgroupSuccess.setSectId(region.getSectId());
+			String price = new BigDecimal(rule.getPrice()).setScale(2, RoundingMode.HALF_UP).toString();
+			noticeRgroupSuccess.setPrice(price);
+			noticeRgroupSuccess.setRuleId(rule.getId());
+			
+			List<Long> list = new ArrayList<>();
+			List<RgroupAreaItem> areaItemList = rgroupAreaItemRepository.findByProductIdAndRegionId(rule.getProductId(), regionId);
+			for (RgroupAreaItem rgroupAreaItem : areaItemList) {
+				list.add(rgroupAreaItem.getAreaLeaderId());
+			}
+			noticeRgroupSuccess.setOpers(list);
+
+			try {
+	            ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+	            String value = objectMapper.writeValueAsString(noticeRgroupSuccess);
+	            //放入合协管家的redis中
+	            staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE, value);
+	        } catch (Exception e) {
+	        	log.error("custom push redis error", e);
+	        }
+		}
+		
 	}
 
 	@Override
@@ -153,6 +244,45 @@ public class RgroupServiceImpl implements RgroupService {
 			result.add(new RgroupOrder(cacheableService.findRgroupRule(so.getGroupRuleId()), so));
 		}
 		return result;
+	}
+	
+	@Override
+	@Transactional
+	public void noticeArrival(QueryRgroupsVO queryRgroupsVO) {
+	
+		Assert.hasText(queryRgroupsVO.getRuleId(), "团购id不能为空。");
+		
+		int retryTimes = 0;
+		boolean isSuccess = false;
+		
+		RgroupRule rule = cacheableService.findRgroupRule(Long.valueOf(queryRgroupsVO.getRuleId()));
+		if (ModelConstant.RGROUP_STAUS_FINISH == rule.getGroupStatus()) {
+			rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERING);	//将状态改为发货中
+			cacheableService.save(rule);
+		}
+		
+		while(!isSuccess && retryTimes < 3) {
+			try {
+				
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String value = objectMapper.writeValueAsString(queryRgroupsVO);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_ARRIVAL_NOTICE_QUEUE, value);
+
+				isSuccess = true;
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				retryTimes++;
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e1) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		if (!isSuccess) {
+			throw new BizValidateException("发送团购到货通知失败，请稍后再试。");
+		}
+		
 	}
 }
 

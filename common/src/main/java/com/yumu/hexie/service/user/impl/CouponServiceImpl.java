@@ -2,7 +2,6 @@ package com.yumu.hexie.service.user.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -110,13 +109,8 @@ public class CouponServiceImpl implements CouponService {
 	private CouponHisRepository couponHisRepository;
 	
 	@Override
-	public Coupon findById(Long couponId) {
-		Coupon coupon = null;
-		Optional<Coupon> optional = couponRepository.findById(couponId);
-		if (optional.isPresent()) {
-			coupon = optional.get();
-		}
-		return coupon;
+	public Coupon findById(long couponId) {
+		return couponRepository.findById(couponId);
 	}
 
 	@Override
@@ -126,7 +120,7 @@ public class CouponServiceImpl implements CouponService {
 	
 	@Async
 	public void updateSeedForRuleUpdate(long seedId){
-		CouponSeed oriSeed = couponSeedRepository.findById(seedId).get();
+		CouponSeed oriSeed = couponSeedRepository.findById(seedId);
 		oriSeed.getSeedStr();
 		oriSeed.updateTotal(couponRuleRepository.findBySeedId(seedId));
 		couponSeedRepository.save(oriSeed);
@@ -138,7 +132,7 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	public void updateSeedAndRuleForCouponUse(Coupon coupon){
-		CouponRule rule = couponRuleRepository.findById(coupon.getRuleId()).get();
+		CouponRule rule = couponRuleRepository.findById(coupon.getRuleId());
 		rule.addUsed();
 		saveRule(rule);
 	}
@@ -171,9 +165,7 @@ public class CouponServiceImpl implements CouponService {
 		List<CouponSeed> templates = couponSeedRepository.findBySeedType(seedTypes, order.getAgentId());
 		for(CouponSeed template : templates) {
 			log.info("CREATE SEED:templateId:" + template.getId());
-			if(template == null||!template.isCanUse()||!canUse(template,order)) {
-			} else {
-				
+			if(!(!template.isCanUse() || !canUse(template, order))) {
 				if (ModelConstant.COUPON_SEED_STATUS_AVAILABLE != template.getStatus()) {
 					log.info("种子状态不可用, 种子id：" + template.getId());
 					continue;
@@ -195,7 +187,7 @@ public class CouponServiceImpl implements CouponService {
 				}
 				log.error("CREATE SEED: rules:" + rules.size());
 				CouponRule templateRule = rules.get(rules.size()-1);
-				
+
 				User user = userRepository.findById(userId);
 				CouponSeed cs = new CouponSeed();
 				cs.update(template);
@@ -214,18 +206,18 @@ public class CouponServiceImpl implements CouponService {
 				cs.setReceivedCount(1);
 				cs.setReceivedAmount(templateRule.getAmount());
 				couponSeedRepository.save(cs);
-				
+
 				CouponRule rule = templateRule.copy(cs.getId());
 				rule.setTotalCount(1);
 				rule.setReceivedCount(1);
 				couponRuleRepository.save(rule);
-				
+
 				updateSeedAndRuleForCouponReceive(templateRule);
-				
+
 				CouponCfg couponCfg = new CouponCfg(rule, cs);
 				String key = ModelConstant.KEY_COUPON_RULE + rule.getId();
 				redisRepository.setCouponCfg(key, couponCfg);
-				
+
 				redisTemplate.opsForValue().increment(ModelConstant.KEY_COUPON_TOTAL + rule.getId(), 1);
 				long expire = rule.getEndDate().getTime() - rule.getStartDate().getTime();
 				redisTemplate.opsForValue().set(ModelConstant.KEY_COUPON_SEED + cs.getSeedStr(), String.valueOf(rule.getId()), expire, TimeUnit.SECONDS);
@@ -260,8 +252,7 @@ public class CouponServiceImpl implements CouponService {
 		if(seed == null || !seed.isCanUse()){
 			return null;
 		}
-		Coupon coupon  = findCouponBySeedAndUser(seed.getId(), user.getId());
-		
+		Coupon coupon;
 		List<CouponRule> rules = couponRuleRepository.findBySeedIdAndStatusDuration(
 				seed.getId(), ModelConstant.COUPON_RULE_STATUS_AVAILABLE,new Date(), new Date());
 		CouponRule chosedRule = null;
@@ -293,44 +284,24 @@ public class CouponServiceImpl implements CouponService {
 		
 		coupon = new Coupon(seed, chosedRule,user);
 		coupon = couponRepository.save(coupon);
-		try {
-            log.error("红包发放："+JacksonJsonUtil.beanToJson(coupon));
-        } catch (Exception e) {
-        }
 
 		//更新统计数据
 		updateSeedAndRuleForCouponReceive(chosedRule);
 
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		status.add(ModelConstant.COUPON_STATUS_LOCKED);
-		//status.add(ModelConstant.COUPON_STATUS_USED);
-		//status.add(ModelConstant.COUPON_STATUS_TIMEOUT);
 		int validNum = couponRepository.countByUserIdAndStatusIn(user.getId(),status);
 		user.setCouponCount(validNum);
 		userRepository.save(user);
 		return coupon;
 	}
-	@Override
-	public Coupon addCoupon4Regist(User user) {
-		if(couponRepository.countByUserAndSeedType(user.getId(), ModelConstant.COUPON_SEED_USER_REGIST) > 0){
-			return null;
-		}
-		List<CouponSeed> cs = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_USER_REGIST);
-		for(CouponSeed c:cs){
-			Coupon coupon = addCouponFromSeed(c, user);
-			if(coupon != null) {
-	            log.warn("添加注册红包 User["+user.getId()+"]Coupon["+coupon.getId()+"]");
-				return coupon;
-			}
-		}
-		return null;
-	}
+
 	/**
 	 * 会员
 	 */
 	@Override
-	public Coupon addCoupon4Member(User user) {
+	public void addCoupon4Member(User user) {
 		List<CouponSeed> cs = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_MEMBER);
 		for(CouponSeed c:cs){
 			Coupon coupon = addCouponFromSeed(c, user);
@@ -338,28 +309,6 @@ public class CouponServiceImpl implements CouponService {
 	            log.warn("添加会员红包 User["+user.getId()+"]Coupon["+coupon.getId()+"]");
 			}
 		}
-		return null;
-	}
-
-	@Override
-	public Coupon addCoupon4Subscribe(User user) {
-		
-		if(couponRepository.countByUserAndSeedType(user.getId(), ModelConstant.COUPON_SEED_USER_SUBSCRIB) > 0){
-			return null;
-		}
-		List<CouponSeed> cs = couponSeedRepository.findBySeedType(ModelConstant.COUPON_SEED_USER_SUBSCRIB);
-		
-		log.error("cs size is : " + cs.size());
-		
-		Coupon coupon = null;
-		for(CouponSeed c:cs){
-			
-			coupon = addCouponFromSeed(c, user);
-
-            log.warn("添加关注红包 User["+user.getId()+"]Coupon["+coupon.getId()+"]");
-		}
-		//此处返回最后一个红包，调用处需要根据返回值 空/非空 做业务处理
-		return coupon;
 	}
 
 	@Override
@@ -367,6 +316,7 @@ public class CouponServiceImpl implements CouponService {
 		CouponSeed cs = couponSeedRepository.findBySeedStr(seedStr);
 		return addCouponFromSeed(cs, user);
 	}
+
 	//不管是不是有效现金券
 	@Override
 	public List<Coupon> findCouponsFromOrder(long orderId) {
@@ -374,7 +324,7 @@ public class CouponServiceImpl implements CouponService {
 		if(cs != null) {
 			return couponRepository.findBySeedIdOrderByIdDesc(cs.getId(), PageRequest.of(0,20));
 		} else {
-			return new ArrayList<Coupon>();
+			return new ArrayList<>();
 		}
 	}
 	
@@ -385,16 +335,16 @@ public class CouponServiceImpl implements CouponService {
 		if(cs != null) {
 			return couponRepository.findBySeedIdOrderByIdDesc(cs.getId(), PageRequest.of(0,20));
 		} else {
-			return new ArrayList<Coupon>();
+			return new ArrayList<>();
 		}
 	}
 	@Override
 	public List<Coupon> findAvaibleCoupon(long userId,Cart cart) {
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
 		
-		List<Coupon> result = new ArrayList<Coupon>();
+		List<Coupon> result = new ArrayList<>();
 		for(Coupon coupon : coupons) {
 			if(isAvaible(cart, coupon)){
 				result.add(coupon);
@@ -406,13 +356,13 @@ public class CouponServiceImpl implements CouponService {
     @Override
 	public List<Coupon> findAvaibleCoupon(long userId,HomeCart cart) {
         if(cart == null) {
-            return new ArrayList<Coupon>();
+            return new ArrayList<>();
         }
-        List<Integer> status = new ArrayList<Integer>();
+        List<Integer> status = new ArrayList<>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
         List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
         
-        List<Coupon> result = new ArrayList<Coupon>();
+        List<Coupon> result = new ArrayList<>();
         for(Coupon coupon : coupons) {
             if(isAvaible(cart, coupon)){
                 result.add(coupon);
@@ -422,11 +372,11 @@ public class CouponServiceImpl implements CouponService {
 	}
     @Override//FIXME 红包使用范围需要限定更小值
     public List<Coupon> findAvaibleCoupon4ServiceType(long userId,long homeServiceType,Long parentType, Long itemId){
-        List<Integer> status = new ArrayList<Integer>();
+        List<Integer> status = new ArrayList<>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
         List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
         
-        List<Coupon> result = new ArrayList<Coupon>();
+        List<Coupon> result = new ArrayList<>();
         for(Coupon coupon : coupons) {
             if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, homeServiceType,
                 parentType, itemId, null, coupon, false)){
@@ -448,7 +398,7 @@ public class CouponServiceImpl implements CouponService {
 			log.error(e.getMessage(), e);
 		}
 		
-		List<Coupon> result = new ArrayList<Coupon>();
+		List<Coupon> result = new ArrayList<>();
 		List<Coupon> couponList = new ArrayList<>();
 		if(itemList == null || itemList.isEmpty()) {
 			return result;
@@ -462,7 +412,7 @@ public class CouponServiceImpl implements CouponService {
 			itemType = PromotionConstant.COUPON_ITEM_TYPE_MARKET;
 		}
 		
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId,status, PageRequest.of(0,200));
 		
@@ -483,7 +433,7 @@ public class CouponServiceImpl implements CouponService {
 			
 			couponList.addAll(couponSet);
 			Comparator<Coupon> comparator = (c1, c2)-> (int)(c2.getAmount() - c1.getAmount());
-			Collections.sort(couponList, comparator);	//根据金额排序
+			couponList.sort(comparator);	//根据金额排序
 		}
 		return couponList;
 	}
@@ -492,7 +442,7 @@ public class CouponServiceImpl implements CouponService {
     public List<Coupon> findAvaibleCoupon4CustomService(long userId, long serviceId, String agentNo){
         
 		List<Coupon> couponList = new ArrayList<>();
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
         List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(userId, status, PageRequest.of(0,200));
         
@@ -502,7 +452,7 @@ public class CouponServiceImpl implements CouponService {
         product.setService(true);
         product.setAgentId(agent.getId());
         
-        List<Coupon> result = new ArrayList<Coupon>();
+        List<Coupon> result = new ArrayList<>();
         for(Coupon coupon : coupons) {
         	CheckCouponDTO dto = checkAvailable4Service(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, product, null, coupon, false);
         	if (dto.isValid()) {
@@ -516,7 +466,7 @@ public class CouponServiceImpl implements CouponService {
 			
 			couponList.addAll(couponSet);
 			Comparator<Coupon> comparator = (c1, c2)-> (int)(c2.getAmount() - c1.getAmount());
-			Collections.sort(couponList, comparator);	//根据金额排序
+			couponList.sort(comparator);	//根据金额排序
 		}
         return couponList;
     }
@@ -560,9 +510,9 @@ public class CouponServiceImpl implements CouponService {
 
         /*可用商户校验*/
 		if(coupon.getMerchantId() != null && coupon.getMerchantId() != 0 ){
-		    Long merchantId = getMerchatId(new Long(itemType), serviceType, productId);
+		    Long merchantId = getMerchatId((long) itemType, serviceType, productId);
 		    log.error("merchantId:" + merchantId);
-		    if(merchantId == null || merchantId != coupon.getMerchantId()) {
+		    if(merchantId == null || !merchantId.equals(coupon.getMerchantId())) {
                 log.warn("不可用（商户正向验证）");
                 return false;
 		    }
@@ -570,9 +520,9 @@ public class CouponServiceImpl implements CouponService {
 		
 		/*不可用商户校验*/
 		if(coupon.getuMerchantId() != null && coupon.getuMerchantId() != 0 ){
-		    Long merchantId = getMerchatId(new Long(itemType), serviceType, productId);
+		    Long merchantId = getMerchatId((long) itemType, serviceType, productId);
 		    log.error("merchantId:" + merchantId);
-		    if(merchantId == coupon.getuMerchantId()) {
+		    if(merchantId.equals(coupon.getuMerchantId())) {
                 log.warn("不可用（商户逆向验证）");
                 return false;
 		    }
@@ -582,32 +532,19 @@ public class CouponServiceImpl implements CouponService {
 		return true;
 	}
 	
-	
-	
-	/**
-	 * 根据卡库指定策略 TODO
-	 * @param payType
-	 * @return
-	 */
-	@Override
-	public boolean isAvaible(String appId, String payType) {
-		//TODO
-		return true;
-	}
-
 	//itemType:1, serviceType:-0, productId:10
 	public Long getMerchatId(Long mainType, Long subType, Long itemId) {
 		
 		log.error("mainType:"+mainType+",subType:"+subType+",itemId:"+itemId);
         if(new Long(PromotionConstant.COUPON_ITEM_TYPE_MARKET).equals(mainType) && itemId != null && itemId != 0){
-            Product product = productRepository.findById(itemId).get();
-            return product == null ? 0 : product.getMerchantId();
+            Product product = productRepository.findById(itemId.longValue());
+            return product.getMerchantId();
         }
         if(new Long(PromotionConstant.COUPON_ITEM_TYPE_SERVICE).equals(mainType) && subType != null && subType!=0) {
             ServiceType type = homeItemService.queryTypeById(subType);
             return type == null ? 0 : type.getMerchantId();
         }
-        return 0l;
+        return 0L;
 	}
 
 	@Override//FIXME 如果特卖类型是0，如何处理
@@ -618,7 +555,7 @@ public class CouponServiceImpl implements CouponService {
 	        amount = coll.getSatisfyAmount() <= cart.getTotalAmount() ? cart.getTotalAmount() - coll.getDiscountAmount() : cart.getTotalAmount();
         }
 	    for(long productId : cart.getProductIds()) {
-	        if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_MARKET,new Long(ModelConstant.ORDER_TYPE_ONSALE), 0l, 
+	        if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_MARKET, (long) ModelConstant.ORDER_TYPE_ONSALE, 0L,
 	            productId, 
 	            amount, coupon,false)){
 	            return true;
@@ -632,23 +569,6 @@ public class CouponServiceImpl implements CouponService {
         return isAvaible(PromotionConstant.COUPON_ITEM_TYPE_SERVICE, cart.getBaseType(),
             cart.getItemType(),  cart.getItems().get(0).getServiceId(), cart.getAmount().floatValue(), coupon, false);
     }
-	@Override
-    public boolean isAvaible(String feePrice, Coupon coupon) {
-	    if(coupon.getItemType() != PromotionConstant.COUPON_ITEM_TYPE_ALL 
-                && coupon.getItemType() != PromotionConstant.COUPON_ITEM_TYPE_WUYE){
-            return false;
-        }
-    	if(coupon.getStatus() != ModelConstant.COUPON_STATUS_AVAILABLE){
-    		return false;
-    	}
-    	if (new BigDecimal(feePrice).compareTo(new BigDecimal("0.01"))<0){
-    		return false;
-    	}
-    	if(coupon.isAvailableForAll()){
-    		return true;
-    	}
-    	return true;
-    }
 
     @Override
     public boolean isAvaible(ServiceOrder order, Coupon coupon, boolean withLocked) {
@@ -659,12 +579,12 @@ public class CouponServiceImpl implements CouponService {
     	}
     	if(order.getItems() != null) {
     	    for(OrderItem item : order.getItems()) {
-    	        Integer onsaleType = 0;
+    	        int onsaleType = 0;
     	        if(item.getOrderType() == ModelConstant.ORDER_TYPE_ONSALE) {
-    	            OnSaleRule plan = onSaleRuleRepository.findById(item.getRuleId()).get();
+    	            OnSaleRule plan = onSaleRuleRepository.findById(item.getRuleId().longValue());
     	            onsaleType = plan.getProductType();
     	        }
-                if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_MARKET, new Long(item.getOrderType()),new Long(onsaleType),item.getProductId(), 
+                if(isAvaible(PromotionConstant.COUPON_ITEM_TYPE_MARKET, (long) item.getOrderType(), (long) onsaleType,item.getProductId(),
                      order.getTotalAmount(), coupon,withLocked)){
                     return true;
                 }
@@ -676,11 +596,11 @@ public class CouponServiceImpl implements CouponService {
 
     @Override
 	public List<Coupon> findAvaibleCoupon(ServiceOrder order) {
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(order.getUserId(),status, PageRequest.of(0,200));
 		
-		List<Coupon> result = new ArrayList<Coupon>();
+		List<Coupon> result = new ArrayList<>();
 		for(Coupon coupon : coupons) {
 			if(isAvaible(order, coupon,false)){
 				result.add(coupon);
@@ -692,7 +612,7 @@ public class CouponServiceImpl implements CouponService {
 	private static final int COUPON_PAGE_SIZE = 20;
 	@Override
 	public List<Coupon> findInvalidCoupons(long userId,int page){
-		List<Integer> invalidStatus = new ArrayList<Integer>();
+		List<Integer> invalidStatus = new ArrayList<>();
 		invalidStatus.add(ModelConstant.COUPON_STATUS_USED);
 		invalidStatus.add(ModelConstant.COUPON_STATUS_TIMEOUT);
 		return couponRepository.findByUserIdAndStatusIn(userId, invalidStatus, PageRequest.of(page, COUPON_PAGE_SIZE));
@@ -701,12 +621,12 @@ public class CouponServiceImpl implements CouponService {
 	@Override
     public CouponsSummary findCouponSummary(long userId){
         CouponsSummary r = new CouponsSummary();
-        List<Integer> validStatus = new ArrayList<Integer>();
+        List<Integer> validStatus = new ArrayList<>();
         validStatus.add(ModelConstant.COUPON_STATUS_AVAILABLE);
         validStatus.add(ModelConstant.COUPON_STATUS_LOCKED);
         int validNum = couponRepository.countByUserIdAndStatusIn(userId,validStatus);
         
-        List<Integer> invalidStatus = new ArrayList<Integer>();
+        List<Integer> invalidStatus = new ArrayList<>();
         invalidStatus.add(ModelConstant.COUPON_STATUS_USED);
         invalidStatus.add(ModelConstant.COUPON_STATUS_TIMEOUT);
         int invalidNum = couponRepository.countByUserIdAndStatusIn(userId,invalidStatus);
@@ -714,7 +634,7 @@ public class CouponServiceImpl implements CouponService {
         r.setInvalidCount(invalidNum);
         r.setValidCount(validNum);
         r.setValidCoupons(couponRepository.findByUserIdAndStatusIn(userId, validStatus, PageRequest.of(0, 40)));
-        r.setInvalidCoupons(couponRepository.findByUserIdAndStatusIn(userId, invalidStatus, PageRequest.of(0, 2)));;
+        r.setInvalidCoupons(couponRepository.findByUserIdAndStatusIn(userId, invalidStatus, PageRequest.of(0, 2)));
         
         return r;
     }
@@ -723,7 +643,7 @@ public class CouponServiceImpl implements CouponService {
 	public void lock(ServiceOrder order, Coupon coupon){
 
 		log.warn("lock红包["+order.getId()+"]Coupon["+coupon.getId()+"]");
-		boolean canUse = false;
+		boolean canUse;
 		if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
 			canUse = checkAvailable4Service(order, coupon, false);
 		}else {
@@ -739,7 +659,7 @@ public class CouponServiceImpl implements CouponService {
 	public boolean lock(BaseO2OService bill, Coupon coupon){
         log.warn("lock红包["+bill.getId()+"]Coupon["+bill.getId()+"]");
         if(!isAvaible(PromotionConstant.COUPON_ITEM_TYPE_SERVICE,
-            new Long(bill.getOrderType()), bill.getItemType(), bill.getItemId(),bill.getAmount().floatValue(), coupon, true)){
+				(long) bill.getOrderType(), bill.getItemType(), bill.getItemId(),bill.getAmount().floatValue(), coupon, true)){
             return false;
         }
         coupon.lock(bill.getId());
@@ -752,8 +672,8 @@ public class CouponServiceImpl implements CouponService {
         if(order.getCouponId() == null || order.getCouponId() == 0){
             return;
         }
-        Coupon coupon = couponRepository.findById(order.getCouponId()).get();
-        boolean canConsume = false;
+        Coupon coupon = couponRepository.findById(order.getCouponId().longValue());
+        boolean canConsume;
         if (ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
         	canConsume = checkAvailable4Service(order, coupon, false);	//服务类交易不锁券，所以这里传false
 		}else {
@@ -777,16 +697,16 @@ public class CouponServiceImpl implements CouponService {
     }
 	
 	@Override
-	public boolean comsume(BaseO2OService bill) {
+	public void comsume(BaseO2OService bill) {
 	    if(bill.getCouponId() == null || bill.getCouponId() == 0){
-            return true;
+            return;
         }
         log.warn("comsume红包Bill[BEG]["+bill.getId()+"]Coupon["+bill.getId()+"]");
-	    Coupon coupon = couponRepository.findById(bill.getCouponId()).get();
+	    Coupon coupon = couponRepository.findById(bill.getCouponId().longValue());
 		if(!isAvaible(PromotionConstant.COUPON_ITEM_TYPE_SERVICE,
-            new Long(bill.getOrderType()), bill.getItemType(), bill.getItemId(), bill.getAmount().floatValue(), coupon, true)){
+				(long) bill.getOrderType(), bill.getItemType(), bill.getItemId(), bill.getAmount().floatValue(), coupon, true)){
 			//throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_COUPON,coupon.getId(),"该现金券不可用于本订单");
-		    return false;
+		    return;
 		}
         log.warn("comsume红包Bill[END]["+bill.getId()+"]Coupon["+bill.getId()+"]");
 		coupon.cousume(bill.getId());
@@ -799,7 +719,6 @@ public class CouponServiceImpl implements CouponService {
 		}
 		
 		updateSeedAndRuleForCouponUse(coupon);
-		return true;
 	}
 
 	@Override
@@ -808,7 +727,7 @@ public class CouponServiceImpl implements CouponService {
 	    if(couponId ==null || couponId == 0) {
 	        return;
 	    }
-	    Coupon coupon = couponRepository.findById(couponId).get();
+	    Coupon coupon = couponRepository.findById(couponId.longValue());
 	    if(coupon == null) {
 	        return;
 	    }
@@ -824,7 +743,7 @@ public class CouponServiceImpl implements CouponService {
 	
 	@Override
 	public Coupon findOne(long id) {
-	    return couponRepository.findById(id).get();
+	    return couponRepository.findById(id);
 	}
 	@Override
 	public void timeout(Coupon coupon){
@@ -850,13 +769,13 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public List<Coupon> findAvaibleCouponForWuye(User user, String payType, String amount, String agentNo) {
 		
-		List<Coupon> result = new ArrayList<Coupon>();
-        List<Integer> status = new ArrayList<Integer>();
+		List<Coupon> result = new ArrayList<>();
+        List<Integer> status = new ArrayList<>();
         status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
         List<Coupon> coupons = couponRepository.findByUserIdAndStatusIn(user.getId(), status, PageRequest.of(0,200));
         
         Product wuyePayProduct = new Product();
-        wuyePayProduct.setId(0l);
+        wuyePayProduct.setId(0L);
         
         Float payAmount = null;
         if (!StringUtils.isEmpty(amount)) {
@@ -870,7 +789,7 @@ public class CouponServiceImpl implements CouponService {
 			}
 		}
         if (wuyePayProduct.getAgentId() == 0) {
-        	wuyePayProduct.setAgentId(1l);
+        	wuyePayProduct.setAgentId(1L);
 		}
         
         for(Coupon coupon : coupons) {
@@ -929,16 +848,6 @@ public class CouponServiceImpl implements CouponService {
 	}
 	
 	/**
-	 * 根据orderId查找优惠券
-	 * @param orderId
-	 * @return
-	 */
-	@Override
-	public Coupon findByOrderId(long orderId) {
-		return couponRepository.findByOrderId(orderId);
-	}
-	
-	/**
 	 * 获取红包种子列表
 	 * @param user
 	 * @return
@@ -961,14 +870,14 @@ public class CouponServiceImpl implements CouponService {
 			CouponCfg couponCfg = redisRepository.getCouponCfg(ruleKey);
 			String supportSects = couponCfg.getSectIds();	//支持的小区
 			if (!StringUtils.isEmpty(supportSects)) {
-				if (supportSects.indexOf(user.getSectId()) > -1) {
+				if (supportSects.contains(user.getSectId())) {
 					CouponView couponView = new CouponView(couponCfg);
 					String stockKey = ModelConstant.KEY_COUPON_TOTAL + couponView.getId();
 					String stock = redisTemplate.opsForValue().get(stockKey);	//这里只是粗略判断一下，可能存在多个用户同时显示可领，但真正领的时候其实只有一个红包，在领取的方法里会校验
-					if (!StringUtils.isEmpty(stock) && Integer.valueOf(stock) <= 0) {
+					if (!StringUtils.isEmpty(stock) && Integer.parseInt(stock) <= 0) {
 						couponView.setUsedup(true);	//已领完
 					}
-					if (!StringUtils.isEmpty(gainedSeedStr) && gainedSeedStr.indexOf(couponCfg.getSeedStr())>-1) {
+					if (!StringUtils.isEmpty(gainedSeedStr) && gainedSeedStr.contains(couponCfg.getSeedStr())) {
 						couponView.setGained(true);
 					}
 					Date startDate = couponCfg.getStartDate();
@@ -1001,13 +910,13 @@ public class CouponServiceImpl implements CouponService {
 		Assert.hasText(seedStr, "种子不能为空。");
 		
 		GainCouponDTO dto = new GainCouponDTO();
-		String errMsg = "";
+		String errMsg;
 		
 		log.info("当前用户:" + user.getId() + ", 拥有红包：" + user.getCouponCount());
 		String couponKey = ModelConstant.KEY_USER_COUPON_SEED + user.getId();
 		String gainedSeeds = redisTemplate.opsForValue().get(couponKey);
 		if (!StringUtils.isEmpty(gainedSeeds)) {
-			if (gainedSeeds.indexOf(seedStr) > -1) {
+			if (gainedSeeds.contains(seedStr)) {
 				errMsg = "已经领过红包啦。";
 				log.info(errMsg);
 				dto.setErrMsg(errMsg);
@@ -1042,7 +951,7 @@ public class CouponServiceImpl implements CouponService {
 		
 		String stockKey = ModelConstant.KEY_COUPON_TOTAL + ruleId;
 		Long stock = redisTemplate.opsForValue().decrement(stockKey);	//直接减，不要用get获取一遍值，非原子性操作，有脏读
-		if (stock < 0) {
+		if (stock != null && stock < 0) {
 			errMsg = "红包已领完, ruleId : " + ruleId;
 			log.info(errMsg);
 			dto.setErrMsg(errMsg);
@@ -1056,13 +965,10 @@ public class CouponServiceImpl implements CouponService {
 		BeanUtils.copyProperties(couponCfg, rule);
 		
 		Coupon coupon = new Coupon(seed, rule, user);
-		Optional<Agent> optional = agentRepository.findById(coupon.getAgentId());
-		if (optional.isPresent()) {
-			Agent agent = optional.get();
-			if (agent != null) {
-				coupon.setAgentName(agent.getName());
-				coupon.setAgentNo(agent.getAgentNo());
-			}
+		Agent agent = agentRepository.findById(coupon.getAgentId());
+		if (agent != null) {
+			coupon.setAgentName(agent.getName());
+			coupon.setAgentNo(agent.getAgentNo());
 		}
 		
 		//更新数据库。放到队列，以免多人同时领取时脏读
@@ -1084,16 +990,15 @@ public class CouponServiceImpl implements CouponService {
 		
 		//1.更新couponRule
 		Optional<CouponRule> optional = couponRuleRepository.findById(Long.valueOf(coupon.getRuleId()));
-		CouponRule couponRule  = null;
+		CouponRule couponRule;
 		if (optional.isPresent()) {
 			couponRule = optional.get();
 			couponRule.addReceived();
 			couponRuleRepository.save(couponRule);
 			
 			//2.更新couponSeed
-			Optional<CouponSeed> seedOptional = couponSeedRepository.findById(couponRule.getSeedId());
-			if (seedOptional.isPresent()) {
-				CouponSeed couponSeed = seedOptional.get();
+			CouponSeed couponSeed = couponSeedRepository.findById(couponRule.getSeedId());
+			if (couponSeed != null) {
 				couponSeed.setReceivedCount(couponRule.getReceivedCount());
 				couponSeed.getSeedStr();
 				couponSeedRepository.save(couponSeed);
@@ -1108,7 +1013,7 @@ public class CouponServiceImpl implements CouponService {
 		User user = userRepository.findById(coupon.getUserId());
 		log.info("当前用户:" + user.getId() + ", db中拥有红包：" + user.getCouponCount());
 		
-		List<Integer> status = new ArrayList<Integer>();
+		List<Integer> status = new ArrayList<>();
 		status.add(ModelConstant.COUPON_STATUS_AVAILABLE);
 		status.add(ModelConstant.COUPON_STATUS_LOCKED);
 		int validNum = couponRepository.countByUserIdAndStatusIn(user.getId(),status);
@@ -1174,11 +1079,10 @@ public class CouponServiceImpl implements CouponService {
 	/**
 	 * 验证红包是否可用
 	 * @param itemType	0全部，1特卖团购商品，2电子核销券,3服务，4物业缴费
-	 * @param productId	需要验证的产品ID，如果是服务传serviceId
+	 * @param product	需要验证的产品
 	 * @param amount	此次购买金额
 	 * @param coupon	此次使用的红包
 	 * @param locked	是否锁
-	 * @param type	0商品 1服务
 	 * @return
 	 */
 	@Override
@@ -1240,16 +1144,15 @@ public class CouponServiceImpl implements CouponService {
         //5.支持(或不支持)的商品验证
 	    if(PromotionConstant.COUPON_ITEM_TYPE_ALL != coupon.getItemType()&& productId > 0) {
 	    	if (coupon.getSupportType() == 1) {	//0全部支持，1部分支持，2部分不支持
-    			if (!StringUtils.isEmpty(coupon.getProductId()) && coupon.getProductId().indexOf(String.valueOf(productId))>-1) {
-    				//do nothings
-    			} else {
+    			if (!(!StringUtils.isEmpty(coupon.getProductId())
+						&& coupon.getProductId().contains(String.valueOf(productId)))) {
 					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 不在支持的列表中。");
 					dto.setErrMsg("优惠券：" + coupon.getId() + ", 当前商品不可用。");
 					return dto;
     			}
 			}
     		if (coupon.getSupportType() == 2) {
-    			if (!StringUtils.isEmpty(coupon.getuProductId()) && coupon.getuProductId().indexOf(String.valueOf(productId)) >-1) {
+    			if (!StringUtils.isEmpty(coupon.getuProductId()) && coupon.getuProductId().contains(String.valueOf(productId))) {
 					log.warn("coupon " + coupon.getId() + ", 商品productId : " + productId + ", 在不支持的列表中。");
 					dto.setErrMsg("优惠券：" + coupon.getId() + ", 当前商品不可用。");
 					return dto;
@@ -1276,7 +1179,6 @@ public class CouponServiceImpl implements CouponService {
 	 * 校验金额是否可用
 	 * @param amount
 	 * @param coupon
-	 * @param dto
 	 */
 	@Override
 	public boolean checkCouponUsageCondition(Float amount, Coupon coupon) {
@@ -1293,11 +1195,9 @@ public class CouponServiceImpl implements CouponService {
 	/**
 	 * 验证红包是否可用（购物车种商品，一般是多个，也有可能单个）
 	 * @param itemType	0全部，1特卖团购商品，2电子核销券,3服务，4物业缴费
-	 * @param proList	需要验证的产品ID的list
-	 * @param amount	此次购买金额
+	 * @param itemList	需要验证的产品ID的list
 	 * @param coupon	此次使用的红包
 	 * @param locked	是否锁
-	 * @param type	0商品 1服务
 	 * @return
 	 */
 	@Override

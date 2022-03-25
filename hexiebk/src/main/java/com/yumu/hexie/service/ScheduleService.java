@@ -28,5 +28,7 @@ public interface ScheduleService {
 	void executeEvoucherTimeoutJob();
 	//13.刷新缓存中的库存
 	void initStockAndFreeze();
+	//14.更新团购发货状态
+	void executeRGroupDeliveryJob();
 	
 }

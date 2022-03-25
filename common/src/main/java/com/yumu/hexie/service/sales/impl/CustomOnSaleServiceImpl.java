@@ -1,7 +1,6 @@
 package com.yumu.hexie.service.sales.impl;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -26,7 +25,7 @@ import com.yumu.hexie.service.sales.ProductService;
 @Service("customOnSaleService")
 public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
 	
-	private static Logger logger = LoggerFactory.getLogger(CustomOnSaleServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(CustomOnSaleServiceImpl.class);
 	
 	@Inject
 	private OnSaleRuleRepository onSaleRuleRepository;
@@ -67,9 +66,9 @@ public class CustomOnSaleServiceImpl extends CustomOrderServiceImpl {
 
 	@Override
 	public SalePlan findSalePlan(long ruleId) {
-		Optional<OnSaleRule> optional = onSaleRuleRepository.findById(ruleId);
-		if (optional.isPresent()) {
-			return optional.get();
+		SalePlan salePlan = onSaleRuleRepository.findById(ruleId);
+		if (salePlan != null) {
+			return salePlan;
 		}
 		return new OnSaleRule();
 	}

@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.common.impl;
 
 import java.util.ArrayList;
@@ -33,7 +29,6 @@ import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wechat.service.SubscribeMsgService;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
-import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
@@ -83,7 +78,7 @@ public class GotongServiceImpl implements GotongService {
     
     @Async
     @Override
-    public void sendRepairAssignMsg(long opId,RepairOrder order,int distance){
+    public void sendRepairAssignMsg(long opId,RepairOrder order){
         ServiceOperator op = serviceOperatorRepository.findById(opId).get();
         User opUser = userRepository.findById(op.getUserId());
         if (opUser == null) {
@@ -121,7 +116,7 @@ public class GotongServiceImpl implements GotongService {
         
     	User user = userRepository.findById(order.getUserId());
         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_WEIXIU_DETAIL) + order.getId();
-        News news = new News(new ArrayList<Article>());
+        News news = new News(new ArrayList<>());
         Article article = new Article();
         article.setTitle("您的维修单已被受理");
         article.setDescription("点击查看详情");
@@ -140,7 +135,7 @@ public class GotongServiceImpl implements GotongService {
     @Override
 	public boolean sendSubscribeMsg(EventSubscribeDTO subscribeVO) {
     	
-    	TextMessage textmsg = null;
+    	TextMessage textmsg;
     	boolean flag = false;
     	User user = subscribeVO.getUser();
     	
@@ -181,7 +176,7 @@ public class GotongServiceImpl implements GotongService {
          String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SUBSCRIBE_DETAIL);
          article.setPicurl(picUrl);
          article.setUrl(url);
-         News news = new News(new ArrayList<Article>());
+         News news = new News(new ArrayList<>());
          news.getArticles().add(article);
          NewsMessage msg = new NewsMessage(news);
          msg.setTouser(user.getOpenid());
@@ -203,11 +198,10 @@ public class GotongServiceImpl implements GotongService {
     	User user = userRepository.findById(op.getUserId());
         String url = wechatMsgService.getMsgUrl(MsgCfg.URL_XIYI_NOTICE) + bill.getId();
         
-        News news = new News(new ArrayList<Article>());
+        News news = new News(new ArrayList<>());
         Article article = new Article();
         article.setTitle(op.getName()+":您有新的洗衣订单！");
         article.setDescription("有新的维修单"+bill.getProjectName()+"快来抢单吧");
-        //article.setPicurl(so.getProductPic());
         article.setUrl(url);
         news.getArticles().add(article);
         NewsMessage msg = new NewsMessage(news);
@@ -278,30 +272,8 @@ public class GotongServiceImpl implements GotongService {
 		} else {
 			templateMsgService.sendPayNotification(accountNotify, accessToken);
 		}
-		
 	}
-	
-	/**
-	 * 自定义服务通知
-	 */
-	@Override
-	public void sendServiceNotification(User sendUser, ServiceOrder serviceOrder) {
 
-		LOG.info("发送自定义服务通知！ sendUser : " + sendUser);
-		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
-		
-		String templateId = wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_SUBSCRIBE_ORDER_NOTIFY, sendUser.getAppId());
-		UserSubscribeMsg userSubscribeMsg = userSubscribeMsgRepository.findByOpenidAndTemplateId(sendUser.getOpenid(), templateId);
-		
-		LOG.info("userSubscribeMsg : " + userSubscribeMsg);
-		if (userSubscribeMsg != null) {
-			subscribeMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
-		}else {
-			templateMsgService.sendServiceNotification(sendUser, serviceOrder, accessToken);
-		}
-	}
-	
-	
 	@Async
     @Override
     public void sendCustomServiceAssignedMsg(ServiceOrder serviceOrder){
@@ -324,17 +296,6 @@ public class GotongServiceImpl implements GotongService {
         CustomService.sendCustomerMessage(msg, accessToken);
     }
 	
-	/**
-	 * 自定义服务通知
-	 */
-	@Override
-	public void sendDeliveryNotification(User sendUser, ServiceOrder serviceOrder) {
-
-		LOG.info("发送自定义服务通知！ sendUser : " + sendUser);
-		String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
-		templateMsgService.sendDeliveryNotification(sendUser, serviceOrder, accessToken);
-	}
-
 	@Override
 	public void sendResetPasswordMsg(User user, String password) {
 
@@ -353,25 +314,7 @@ public class GotongServiceImpl implements GotongService {
 		String accessToken = systemConfigService.queryWXAToken(user.getAppId());
 		templateMsgService.sendCustomerDeliveryMessage(user, serviceOrder, accessToken);
 	}
-	
-    @Override
-    public void sendPostingReplyMsg(Thread thread){
-        
-    	User user = userRepository.findById(thread.getUserId());
-        String url = wechatMsgService.getMsgUrl(MsgCfg.URL_SERVICE_RESV) + thread.getThreadId();
-        News news = new News(new ArrayList<Article>());
-        Article article = new Article();
-        article.setTitle("您有新的回复消息");
-        article.setDescription("点击查看详情");
-        article.setUrl(url);
-        news.getArticles().add(article);
-        NewsMessage msg = new NewsMessage(news);
-        msg.setTouser(user.getOpenid());
-        msg.setMsgtype(ConstantWeChat.RESP_MESSAGE_TYPE_NEWS);
-        String accessToken = systemConfigService.queryWXAToken(user.getAppId());
-        CustomService.sendCustomerMessage(msg, accessToken);
-    }
-    
+
     /**
 	 * 交易到账通知(发送给房屋绑定者)
 	 */

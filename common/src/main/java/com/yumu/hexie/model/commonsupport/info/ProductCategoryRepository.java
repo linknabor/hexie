@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
-	
-	
+
+	ProductCategory findById(long id);
 	/**
 	 * 按业主绑定的房屋查询可以购买的商品
 	 * @param status
@@ -25,7 +25,7 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 			+ "and r.sectId = ?4 "
 			+ "order by pc.sort ", 
 			nativeQuery = true)
-	public List<ProductCategory> findCategoryByBindedSect(int status, int type ,long current, String sectId);
+	List<ProductCategory> findCategoryByBindedSect(int status, int type, long current, String sectId);
 	
 	/**
 	 * 样板查询
@@ -43,7 +43,7 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 			+ "and p.demo = 1 "
 			+ "order by pc.sort ", 
 			nativeQuery = true)
-	public List<ProductCategory> findCategoryDemo(int status, int type ,long current);
+	List<ProductCategory> findCategoryDemo(int status, int type, long current);
 
 	
 }

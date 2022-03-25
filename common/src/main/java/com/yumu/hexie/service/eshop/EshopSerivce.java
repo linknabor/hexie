@@ -4,18 +4,7 @@ import java.util.Map;
 
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
-import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
-import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
-import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
-import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
-import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
+import com.yumu.hexie.integration.eshop.vo.*;
 
 public interface EshopSerivce {
 	
@@ -30,6 +19,8 @@ public interface EshopSerivce {
 	void updateDemo(SaveProductVO saveProductVO);
 
 	CommonResponse<Object> getOper(QueryOperVO queryOperVO);
+	
+	CommonResponse<Object> getRgroupLeader(QueryOperVO queryOperVO);
 
 	void saveOper(SaveOperVO saveOperVO);
 	
@@ -47,6 +38,8 @@ public interface EshopSerivce {
 	
 	CommonResponse<Object> getOrder(QueryOrderVO queryOrderVO);
 
+	String getOrderSummary(OrderSummaryVO orderSummaryVO);
+
 	OrderDetailResp getOrderDetail(String orderId);
 
 	void saveLogistics(SaveLogisticsVO saveLogisticsVO);
@@ -62,5 +55,13 @@ public interface EshopSerivce {
 	CommonResponse<Object> getCouponList(QueryCouponVO queryCouponVO);
 
 	CommonResponse<Object> saveCoupon(SaveCouponVO saveCouponVO);
+
+	void saveRgroupLeader(SaveOperVO saveOperVO);
+
+	CommonResponse<Object> getRgroupOrders(QueryOrderVO queryOrderVO);
+
+	CommonResponse<Object> getRgroups(QueryRgroupsVO queryRgroupsVO);
+
+	CommonResponse<Object> getRroupDetail(QueryRgroupsVO queryRgroupsVO);
 
 }
