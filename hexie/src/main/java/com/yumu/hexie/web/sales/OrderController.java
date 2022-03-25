@@ -212,6 +212,7 @@ public class OrderController extends BaseController{
 				address = addrList.get(0);
 			}
 		}
+		
 		vo.setAddress(address);
 		
 		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
