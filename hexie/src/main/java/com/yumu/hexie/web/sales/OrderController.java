@@ -196,20 +196,25 @@ public class OrderController extends BaseController{
 	@ResponseBody
 	public BaseResult<BuyInfoVO> queryBuyInfo(@ModelAttribute(Constants.USER)User user,@PathVariable int type,@PathVariable long ruleId) throws Exception {
 		
-		User currUser = userService.getById(user.getId());
+		User currUser = null;
+		if(user != null) {
+			currUser = userService.getById(user.getId());
+		}
 		SalePlan sp = salePlanService.getService(type).findSalePlan(ruleId);
 		BuyInfoVO vo = new BuyInfoVO();
 		vo.setRule(sp);
 		vo.setProduct(productService.getProduct(sp.getProductId()));
 		
 		Address address = new Address();
-		if (!StringUtils.isEmpty(currUser.getSectId())&& !"0".equals(currUser.getSectId())) {	//绑定房屋的业主
-			List<Address> addrList = addressService.getAddressByMain(currUser.getId(), true);
-			if (addrList==null || addrList.size() ==0) {
-				addrList = addressService.queryBindedAddressByUser(currUser.getId());
-			}
-			if (addrList!=null && addrList.size() > 0) {
-				address = addrList.get(0);
+		if (currUser != null) {
+			if (!StringUtils.isEmpty(currUser.getSectId())&& !"0".equals(currUser.getSectId())) {	//绑定房屋的业主
+				List<Address> addrList = addressService.getAddressByMain(currUser.getId(), true);
+				if (addrList==null || addrList.size() ==0) {
+					addrList = addressService.queryBindedAddressByUser(currUser.getId());
+				}
+				if (addrList!=null && addrList.size() > 0) {
+					address = addrList.get(0);
+				}
 			}
 		}
 		
@@ -230,8 +235,10 @@ public class OrderController extends BaseController{
 			vo.setRgroupAreaItem(areaItem);
 		}
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == type) {
-			if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
-				vo.setAddress(new Address());
+			if (currUser != null) {
+				if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
+					vo.setAddress(new Address());
+				}
 			}
 		}
 		return new BaseResult<BuyInfoVO>().success(vo);
