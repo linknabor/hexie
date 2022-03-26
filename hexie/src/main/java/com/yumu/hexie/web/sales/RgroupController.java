@@ -42,7 +42,7 @@ public class RgroupController extends BaseController{
 	
 	@RequestMapping(value = "/getRgroupRule/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<RgroupAreaItem> getRgroupRule(@PathVariable long ruleId,@ModelAttribute(Constants.USER)User user) throws Exception {
+	public BaseResult<RgroupAreaItem> getRgroupRule(@PathVariable long ruleId) throws Exception {
 		return BaseResult.successResult(customRgroupService.findSalePlan(ruleId));
     }
 	
