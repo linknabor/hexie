@@ -64,4 +64,6 @@ public interface EshopSerivce {
 
 	CommonResponse<Object> getRroupDetail(QueryRgroupsVO queryRgroupsVO);
 
+	void saveCopyRgroup(SaveCopyRgroupVo saveCopyRgroupVo) throws Exception;
+
 }

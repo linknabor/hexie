@@ -423,5 +423,26 @@ public class EshopController extends BaseController {
 		logger.info("queryRgroupsVO : " + queryRgroupsVO);
 		return eshopSerivce.getRroupDetail(queryRgroupsVO);
 	}
+	
+	/**
+	 * 复制团购
+	 * @param saveProductVO
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/copyRgroup", method = RequestMethod.POST)
+	public CommonResponse<String> saveCopyRgroup(@RequestBody SaveCopyRgroupVo saveCopyRgroupVo) throws Exception{
+		
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		try {
+			logger.info("saveCopyRgroupVo : " + saveCopyRgroupVo);
+			eshopSerivce.saveCopyRgroup(saveCopyRgroupVo);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
+		return commonResponse;
+	}
 
 }
