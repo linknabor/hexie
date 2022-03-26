@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -194,41 +195,50 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/queryBuyInfo/{type}/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<BuyInfoVO> queryBuyInfo(@ModelAttribute(Constants.USER)User user,@PathVariable int type,@PathVariable long ruleId) throws Exception {
+		
+		User currUser = null;
+		if(user != null) {
+			currUser = userService.getById(user.getId());
+		}
 		SalePlan sp = salePlanService.getService(type).findSalePlan(ruleId);
 		BuyInfoVO vo = new BuyInfoVO();
 		vo.setRule(sp);
 		vo.setProduct(productService.getProduct(sp.getProductId()));
 		
-		List<Address> addrList = addressService.getAddressByMain(user.getId(), true);
 		Address address = new Address();
-		if (addrList == null || addrList.size() == 0) {
-			addrList = addressService.queryAddressByUser(user.getId());
-		}
-		if (addrList!=null && addrList.size()>0) {
-			for (Address currAddr : addrList) {
-				long currXiaoquId = currAddr.getXiaoquId();
-				if (currXiaoquId != user.getXiaoquId()) {
-					continue;
+		if (currUser != null) {
+			if (!StringUtils.isEmpty(currUser.getSectId())&& !"0".equals(currUser.getSectId())) {	//绑定房屋的业主
+				List<Address> addrList = addressService.getAddressByMain(currUser.getId(), true);
+				if (addrList==null || addrList.size() ==0) {
+					addrList = addressService.queryBindedAddressByUser(currUser.getId());
 				}
-				if (currXiaoquId == 0l) {
-					continue;
+				if (addrList!=null && addrList.size() > 0) {
+					address = addrList.get(0);
 				}
-				address = currAddr;
-				break;
 			}
 		}
+		
 		vo.setAddress(address);
 		
 		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
 			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(sp.getProductId(), address.getXiaoquId());
+			RgroupAreaItem areaItem = new RgroupAreaItem();
 			if (areaList!=null && areaList.size()>0) {
-				vo.setRgroupAreaItem(areaList.get(0));
+				areaItem = areaList.get(0);
+				
+			} else {
+				areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
+				if (areaList!=null && areaList.size()>0) {
+					areaItem = areaList.get(0);
+				}
 			}
+			vo.setRgroupAreaItem(areaItem);
 		}
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == type) {
-			User currUser = userService.getById(user.getId());
-			if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
-				vo.setAddress(new Address());
+			if (currUser != null) {
+				if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {
+					vo.setAddress(new Address());
+				}
 			}
 		}
 		return new BaseResult<BuyInfoVO>().success(vo);

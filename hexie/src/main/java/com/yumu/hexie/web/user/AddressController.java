@@ -88,7 +88,7 @@ public class AddressController extends BaseController{
 		if ("repair".equals(module)) {
 			addresses = addressService.queryBindedAddressByUser(user.getId());
 		} else if ("rgroup".equals(module)) {
-			addresses = addressService.queryBindedAddressByUserAndRegion(user);
+			addresses = addressService.queryBindedAddressByUser(user.getId());
 		} else {
 			addresses = addressService.queryAddressByUser(user.getId());
 		}
