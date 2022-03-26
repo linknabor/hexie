@@ -217,6 +217,7 @@ public class OrderController extends BaseController{
 				}
 			}
 		}
+		
 		vo.setAddress(address);
 		
 		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
