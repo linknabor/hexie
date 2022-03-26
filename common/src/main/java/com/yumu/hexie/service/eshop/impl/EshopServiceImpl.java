@@ -64,6 +64,7 @@ import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
 import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
 import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
+import com.yumu.hexie.integration.eshop.vo.SaveCopyRgroupVo;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
 import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
 import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
@@ -2032,4 +2033,96 @@ public class EshopServiceImpl implements EshopSerivce {
 
 		return commonResponse;
 	}
+	
+	/**
+	 * 保存商品上架内容
+	 */
+	@Override
+	@Transactional
+	public void saveCopyRgroup(SaveCopyRgroupVo saveCopyRgroupVo) throws Exception {
+	
+		Product srcProduct = new Product();
+		srcProduct = productRepository.findById(Long.parseLong(saveCopyRgroupVo.getSrcProductId()));
+		if (srcProduct == null) {
+			throw new BizValidateException("未查询到被复制商品，id : " + saveCopyRgroupVo.getSrcProductId());
+		}
+		
+		Product product = new Product();
+		BeanUtils.copyProperties(srcProduct, product, "id", "createDate", "updateDate", "updateUser");
+		product.setName(saveCopyRgroupVo.getDestName());
+		product.setStatus(ModelConstant.PRODUCT_OFF);
+		Date startDate = DateUtil.parse(saveCopyRgroupVo.getStartDate(), DateUtil.dttmSimple);
+		product.setStartDate(startDate);
+		Date endDate = DateUtil.parse(saveCopyRgroupVo.getEndDate(), DateUtil.dttmSimple);
+		product.setEndDate(endDate);
+		product.setShortName(saveCopyRgroupVo.getDestName());
+		product.setTitleName(saveCopyRgroupVo.getDestName());
+		product = productRepository.save(product);
+		
+		/*保存团购规则*/
+		List<RgroupRule> ruleList = rgroupRuleRepository.findAllByProductId(srcProduct.getId());
+		if (ruleList == null || ruleList.isEmpty()) {
+			throw new BizValidateException("未查询到被复制商品上架规则，product id : " + srcProduct.getId());
+		}
+		RgroupRule srcRule = ruleList.get(0);
+		RgroupRule rgroupRule = new RgroupRule();
+		BeanUtils.copyProperties(srcRule, rgroupRule, "id", "groupStatus", "currentNum", "groupFinishDate");
+		
+		rgroupRule.setProductName(product.getName());
+		rgroupRule.setCreateDate(product.getCreateDate());
+		rgroupRule.setProductId(product.getId());
+		rgroupRule.setName(product.getName());
+		rgroupRule.setStartDate(product.getStartDate());
+		rgroupRule.setEndDate(product.getEndDate());
+		rgroupRule.setCurrentNum(0);	//当前团人数置为0
+		if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
+			rgroupRule.setStatus(ModelConstant.RULE_STATUS_ON);
+		}else {
+			rgroupRule.setStatus(ModelConstant.RULE_STATUS_OFF);
+		}
+		rgroupRule = rgroupRuleRepository.save(rgroupRule);
+		
+		/*保存团购上架区域*/
+		List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(srcRule.getId());
+		if (areaList == null || areaList.isEmpty()) {
+			throw new BizValidateException("未查询到被复制商品上架区域，product id : " + srcProduct.getId());
+		}
+		
+		for (RgroupAreaItem srcAreaItem : areaList) {
+			
+			RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
+			BeanUtils.copyProperties(srcAreaItem, rgroupAreaItem, "id");
+			rgroupAreaItem.setRuleId(rgroupRule.getId());
+			long ruleCloseTime = rgroupRule.getEndDate().getTime();
+			rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
+			rgroupAreaItem.setRuleName(rgroupRule.getName());
+			rgroupAreaItem.setProductId(product.getId());
+			rgroupAreaItem.setProductName(product.getName());
+			if (ModelConstant.PRODUCT_ONSALE == product.getStatus()) {
+				rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
+			}else {
+				rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+			}
+			rgroupAreaItemRepository.save(rgroupAreaItem);
+		}
+		
+		ProductPlat productPlat = new ProductPlat();
+		productPlat.setAppId("");
+		productPlat.setProductId(product.getId());
+		productPlatRepository.save(productPlat);
+		
+		ProductRule productRule = new ProductRule(product, rgroupRule);
+		String key = ModelConstant.KEY_PRO_RULE_INFO + productRule.getId();
+		redisRepository.setProdcutRule(key, productRule);
+		
+		redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+		
+		//只有第一次新增时才将冻结商品数量置0
+		String freezeCount = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + product.getId());
+		if (StringUtils.isEmpty(freezeCount)) {
+			redisTemplate.opsForValue().set(ModelConstant.KEY_PRO_FREEZE + product.getId(), "0");	//初始化冻结数量
+		}
+		
+	}
+	
 }
