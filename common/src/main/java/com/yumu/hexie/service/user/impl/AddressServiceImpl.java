@@ -23,8 +23,11 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.amap.AmapUtil;
 import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
+import com.yumu.hexie.integration.eshop.resp.RgroupRegionsVO;
+import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddressRepository;
 import com.yumu.hexie.model.distribution.region.City;
@@ -67,6 +70,9 @@ public class AddressServiceImpl implements AddressService {
     private CityRepository cityRepository;
     @Autowired
     private CountyRepository countyRepository;
+    @Autowired
+    private EshopUtil eshopUtil;
+    
     @Value("${mainServer}")
     private Boolean mainServer;
     
@@ -133,6 +139,58 @@ public class AddressServiceImpl implements AddressService {
             throw new BizValidateException("地址所在小区信息未填写！");
         }
 
+        return address;
+    }
+    
+    /**
+     * 团购添加地址
+     */
+    @Override
+    @Transactional
+    public Address addAddress4Rgroup(User user, AddressReq addressReq) {
+
+    	log.info("addAddress4Rgroup : " + addressReq);
+    	Address address = new Address();
+    	
+    	Region xiaoqu = null;
+        List<Region> xiaoqus = regionRepository.findAllBySectId(addressReq.getSectId());
+        if(xiaoqus == null||xiaoqus.size()== 0 ){
+        	throw new BizValidateException("未查询到团购所在小区：" + addressReq.getXiaoquName() + "，请确认小区是否开通了团购服务。");
+        } else {
+            xiaoqu = xiaoqus.get(0);
+        }
+        
+        BeanUtils.copyProperties(addressReq, address);
+        address.setXiaoquId(xiaoqu.getId());
+        address.setCountyId(0l);
+        address.setCityId(0l);
+        address.setProvinceId(0l);
+        address.setSectId(Long.valueOf(addressReq.getSectId()));
+        address.setXiaoquAddress(addressReq.getSectAddr());
+        address.setUserName(addressReq.getReceiveName());
+        List<Address> addrs = addressRepository.findAllByUserId(address.getUserId());
+        if(getDefaultAddr(addrs) == null) {
+            address.setMain(true);
+        }
+        addressRepository.save(address);
+        
+        user.setCurrentAddrId(address.getId());
+        user.setProvinceId(address.getProvinceId());
+        user.setProvince(address.getProvince());
+        user.setCity(address.getCity());
+        user.setCityId(address.getCityId());
+        user.setCounty(address.getCounty());
+        user.setCountyId(address.getCountyId());
+        user.setXiaoquId(address.getXiaoquId());
+        user.setXiaoquName(address.getXiaoquName());
+        user.setLatitude(address.getLatitude());
+        user.setLongitude(address.getLongitude());
+        user.setSectId(addressReq.getSectId());
+        user.setCspId(addressReq.getCspId());
+        
+        log.info("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
+        userService.save(user);
+        log.info("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
         return address;
     }
     
@@ -450,5 +508,22 @@ public class AddressServiceImpl implements AddressService {
 		return addressRepository.findByUserIdAndXiaoquId(user.getId(), user.getXiaoquId());
 	}
 	
-	
+	/**
+	 * 获取团购的小区信息和物业信息
+	 * @param user
+	 * @param rgroupAreas
+	 * @return
+	 * @throws Exception 
+	 */
+	@Override
+	public List<RgroupRegionsVO> querySectInfo(User user, List<RgroupAreaItem> rgroupAreas) throws Exception {
+		
+		StringBuffer bf = new StringBuffer();
+		for (RgroupAreaItem rgroupAreaItem : rgroupAreas) {
+			Region region = regionService.getRegionInfoById(rgroupAreaItem.getRegionId());
+			bf.append(region.getSectId()).append(",");
+		}
+		bf.deleteCharAt(bf.length()-1);
+		return eshopUtil.querySectInfo(user, bf.toString());
+	}
 }

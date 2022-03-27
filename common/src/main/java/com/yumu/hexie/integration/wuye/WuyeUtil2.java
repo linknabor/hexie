@@ -780,5 +780,31 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
+	
+	
+	/**
+	 * 根据收据ID获取电子收据
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<Receipt>> getSectInfo(User user, String page) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_RECEIPT_LIST_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("user_id", user.getWuyeId());
+		map.put("openid", user.getOpenid());
+		map.put("curr_page", page);
+		map.put("total_count", "1000");
+		
+		TypeReference<CommonResponse<List<Receipt>>> typeReference = new TypeReference<CommonResponse<List<Receipt>>>(){};
+		CommonResponse<List<Receipt>> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<List<Receipt>> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+		
+	}
 
 }

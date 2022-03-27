@@ -29,6 +29,12 @@ public class AddressReq implements Serializable {
     private String detailAddress;
     private String tel;
     private boolean main;//是否是默认地址
+    
+    private String sectId;
+    private String sectAddr;
+    private String cspId;
+    private String cspName;
+    
     public Long getAmapId() {
         return amapId;
     }
@@ -96,5 +102,37 @@ public class AddressReq implements Serializable {
     public void setMain(boolean main) {
         this.main = main;
     }
+	public String getSectId() {
+		return sectId;
+	}
+	public void setSectId(String sectId) {
+		this.sectId = sectId;
+	}
+	public String getSectAddr() {
+		return sectAddr;
+	}
+	public void setSectAddr(String sectAddr) {
+		this.sectAddr = sectAddr;
+	}
+	public String getCspId() {
+		return cspId;
+	}
+	public void setCspId(String cspId) {
+		this.cspId = cspId;
+	}
+	public String getCspName() {
+		return cspName;
+	}
+	public void setCspName(String cspName) {
+		this.cspName = cspName;
+	}
+	@Override
+	public String toString() {
+		return "AddressReq [amapId=" + amapId + ", amapDetailAddr=" + amapDetailAddr + ", id=" + id + ", countyId="
+				+ countyId + ", xiaoquId=" + xiaoquId + ", xiaoquName=" + xiaoquName + ", userId=" + userId
+				+ ", receiveName=" + receiveName + ", detailAddress=" + detailAddress + ", tel=" + tel + ", main="
+				+ main + ", sectId=" + sectId + ", sectAddr=" + sectAddr + ", cspId=" + cspId + ", cspName=" + cspName
+				+ "]";
+	}
     
 }

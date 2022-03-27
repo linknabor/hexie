@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.eshop.resp.RgroupRegionsVO;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.comment.Comment;
@@ -49,6 +50,7 @@ import com.yumu.hexie.vo.SingleItemOrder;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.sales.resp.BuyInfoVO;
+import com.yumu.hexie.web.user.resp.UserInfo;
 
 import io.swagger.annotations.ApiOperation;
 
@@ -216,23 +218,22 @@ public class OrderController extends BaseController{
 					address = addrList.get(0);
 				}
 			}
+			vo.setUserInfo(new UserInfo(currUser));
 		}
 		
 		vo.setAddress(address);
-		
 		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
 			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(sp.getProductId(), address.getXiaoquId());
 			RgroupAreaItem areaItem = new RgroupAreaItem();
 			if (areaList!=null && areaList.size()>0) {
 				areaItem = areaList.get(0);
 				
-			} else {
-				areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
-				if (areaList!=null && areaList.size()>0) {
-					areaItem = areaList.get(0);
-				}
 			}
 			vo.setRgroupAreaItem(areaItem);
+			
+			areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
+			vo.setAreaItems(areaList);
+			
 		}
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == type) {
 			if (currUser != null) {
@@ -242,6 +243,22 @@ public class OrderController extends BaseController{
 			}
 		}
 		return new BaseResult<BuyInfoVO>().success(vo);
+    }
+	
+	/**
+	 * 获取可以参加团购的小区和物业信息
+	 * @param user
+	 * @param ruleId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroup/sect/{ruleId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RgroupRegionsVO>> queryRgroupSects(@ModelAttribute(Constants.USER)User user, @PathVariable long ruleId) throws Exception {
+		
+		List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
+		List<RgroupRegionsVO> list = addressService.querySectInfo(user, areaList);
+		return new BaseResult<List<RgroupRegionsVO>>().success(list);
     }
 	
 	@RequestMapping(value = "/getOrder/{orderId}", method = RequestMethod.GET)

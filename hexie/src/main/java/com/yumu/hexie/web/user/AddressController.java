@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -103,7 +104,7 @@ public class AddressController extends BaseController{
 			return new BaseResult<Address>().failMsg("请重新选择所在区域");
 		}
 		if(StringUtil.isEmpty(address.getXiaoquName()) || StringUtil.isEmpty(address.getDetailAddress())){
-			return new BaseResult<Address>().failMsg("请重新填写小区和详细地址");
+			return new BaseResult<Address>().failMsg("请填写小区和详细地址");
 		}
 		if (StringUtil.isEmpty(address.getReceiveName()) || StringUtil.isEmpty(address.getTel())) {
 			return new BaseResult<Address>().failMsg("请检查真实姓名和手机号码是否正确");
@@ -115,13 +116,40 @@ public class AddressController extends BaseController{
 		Address addr = addressService.addAddress(address);
 		//本方法内调用无法异步
 		addressService.fillAmapInfo(addr);
-		user = userService.getById(user.getId());
+		userService.getById(user.getId());
 		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
 		}
 		session.setAttribute(Constants.USER, user);
 		return new BaseResult<Address>().success(addr);
     }
+	
+	@RequestMapping(value = "/addAddress4Rgroup", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<Address> save4Rgroup(HttpSession session,@ModelAttribute(Constants.USER)User user,@RequestBody AddressReq address) throws Exception {
+
+		if(StringUtil.isEmpty(address.getXiaoquName()) || 
+				StringUtil.isEmpty(address.getSectId()) ||
+				StringUtil.isEmpty(address.getDetailAddress())){
+			return new BaseResult<Address>().failMsg("请填写小区和详细地址");
+		}
+		if (StringUtil.isEmpty(address.getReceiveName()) || StringUtil.isEmpty(address.getTel())) {
+			return new BaseResult<Address>().failMsg("请检查真实姓名和手机号码是否正确");
+		}
+		address.setUserId(user.getId());
+		if (StringUtil.isEmpty(address.getAmapId())) {
+			address.setAmapId(0l);
+		}
+		User currUser = userService.getById(user.getId());
+		Address addr = addressService.addAddress4Rgroup(currUser, address);
+		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+			pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
+		}
+		BeanUtils.copyProperties(currUser, user);
+		session.setAttribute(Constants.USER, user);
+		return new BaseResult<Address>().success(addr);
+    }
+	
     @RequestMapping(value = "/regions/{type}/{parentId}", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<Region>> queryRegions(@PathVariable int type,@PathVariable long parentId){
