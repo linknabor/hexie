@@ -1908,6 +1908,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			}
 			
 			List<Integer> allStatus = new ArrayList<>();
+			allStatus.add(ModelConstant.RGROUP_STAUS_GROUPING);	//进行中的
 			allStatus.add(ModelConstant.RGROUP_STAUS_FINISH);	//已成团
 			allStatus.add(ModelConstant.RGROUP_STAUS_DELIVERING);	//发货中
 			allStatus.add(ModelConstant.RGROUP_STAUS_DELIVERED);	//发货完成
