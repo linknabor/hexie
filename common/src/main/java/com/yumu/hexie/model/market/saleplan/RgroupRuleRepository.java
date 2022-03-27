@@ -82,6 +82,6 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 					+ " group by rule.id "
 					, nativeQuery = true)
 	Page<Object[]> findByMultiCondRgroup(String productType, String ruleId, String ruleName, List<Integer>groupStatus, 
-			String startDate, String endDate, String agentId, String isDemo, String leaderId, List<String>sectList, Date offDate, Pageable pageable);
+			String startDate, String endDate, String agentId, String isDemo, String leaderId, List<String>sectList, Pageable pageable);
 
 }

@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.eshop.service;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,8 @@ import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.common.ServiceOrderRequest;
 import com.yumu.hexie.integration.eshop.req.EshopServiceRequest;
 import com.yumu.hexie.integration.eshop.req.NotifyConsumeRequest;
+import com.yumu.hexie.integration.eshop.req.QueryRgroupSect;
+import com.yumu.hexie.integration.eshop.resp.RgroupRegionsVO;
 import com.yumu.hexie.model.user.User;
 
 @Component
@@ -26,6 +29,7 @@ public class EshopUtil {
 	private static final String NOTIFY_CONSUME_URL = "/eshop/notifyConsumeSDO.do";	//通知卡券消费
 	private static final String REQUEST_REFUND_URL = "/eshop/doRefundSDO.do";	//退款
 	private static final String RESET_PASSWORD_URL = "resetPwdSDO.do";	//重置密码
+	private static final String QUERY_SECT_URL = "/eshop/getSectInfoSDO.do";		//查询小区信息
 	
 	@Autowired
 	private RequestUtil requestUtil;
@@ -116,6 +120,26 @@ public class EshopUtil {
 		
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		CommonResponse<String> commonResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
+		return commonResponse.getData();
+	}
+	
+	/**
+	 * 申请退款
+	 * @param user
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public List<RgroupRegionsVO> querySectInfo(User user, String sectIds) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_SECT_URL;
+		
+		QueryRgroupSect queryRgroupSect = new QueryRgroupSect();
+		queryRgroupSect.setSectIds(sectIds);
+		
+		TypeReference<CommonResponse<List<RgroupRegionsVO>>> typeReference = new TypeReference<CommonResponse<List<RgroupRegionsVO>>>(){};
+		CommonResponse<List<RgroupRegionsVO>> commonResponse = restUtil.exchangeOnUri(requestUrl, queryRgroupSect, typeReference);
 		return commonResponse.getData();
 	}
 	

@@ -2,7 +2,9 @@ package com.yumu.hexie.service.user;
 
 import java.util.List;
 
+import com.yumu.hexie.integration.eshop.resp.RgroupRegionsVO;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.City;
 import com.yumu.hexie.model.distribution.region.County;
@@ -55,5 +57,10 @@ public interface AddressService {
 
 	List<Address> queryBindedAddressByUserAndRegion(User user);
 
+	List<RgroupRegionsVO> querySectInfo(User user, List<RgroupAreaItem> rgroupAreas) throws Exception;
+
+	Address addAddress4Rgroup(User user, AddressReq addressReq);
+
+	List<Address> queryRgroupAddressByUser(long userId, String ruleId);
 
 }
