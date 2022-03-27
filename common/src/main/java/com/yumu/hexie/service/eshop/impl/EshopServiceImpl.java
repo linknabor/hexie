@@ -1924,7 +1924,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			String productType = "1002";
 			Page<Object[]> page = rgroupRuleRepository.findByMultiCondRgroup(productType, queryRgroupsVO.getRuleId(), queryRgroupsVO.getRuleName(), 
 					statusList, queryRgroupsVO.getStartDate(), queryRgroupsVO.getEndDate(), queryRgroupsVO.getAgentNo(), Boolean.FALSE.toString(), 
-					queryRgroupsVO.getUserid(), sectList, new Date(), pageable);
+					queryRgroupsVO.getUserid(), sectList, pageable);
 			
 
 			List<QueryRgroupMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupMapper.class);
@@ -1941,7 +1941,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			Pageable sumamryPage = PageRequest.of(0, 10000, sort);
 			page = rgroupRuleRepository.findByMultiCondRgroup(productType, queryRgroupsVO.getRuleId(), queryRgroupsVO.getRuleName(), 
 					allStatus, queryRgroupsVO.getStartDate(), queryRgroupsVO.getEndDate(), queryRgroupsVO.getAgentNo(), Boolean.FALSE.toString(), 
-					queryRgroupsVO.getUserid(), sectList, new Date(), sumamryPage);
+					queryRgroupsVO.getUserid(), sectList, sumamryPage);
 			
 			List<QueryRgroupMapper> summarylist = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupMapper.class);
 			int grouping = 0;
@@ -2002,7 +2002,7 @@ public class EshopServiceImpl implements EshopSerivce {
 			String productType = "1002";
 			Page<Object[]> page = rgroupRuleRepository.findByMultiCondRgroup(productType, queryRgroupsVO.getRuleId(), "", 
 					statusList, "", "", "", Boolean.FALSE.toString(), 
-					queryRgroupsVO.getUserid(), null, new Date(), pageable);
+					queryRgroupsVO.getUserid(), null, pageable);
 			
 
 			List<QueryRgroupMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupMapper.class);

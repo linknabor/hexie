@@ -61,7 +61,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "and IF (?8!='', p.demo = ?8, 1=1) "
 			+ "and IF (?9!='', item.areaLeaderId = ?9, 1=1) "
 			+ "and (COALESCE(?10) IS NULL OR (item.regionId IN (?10) )) "
-			+ "and rule.endDate <= ?11 "
+			+ "and rule.status = " + ModelConstant.RULE_STATUS_ON
 			+ "group by rule.id "
 			, countQuery = "select rule.id, count(1) from rgrouprule rule "
 					+ "join product p on rule.productId = p.id "
@@ -78,10 +78,10 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 					+ "and IF (?8!='', p.demo = ?8, 1=1) "
 					+ "and IF (?9!='', item.areaLeaderId = ?9, 1=1) "
 					+ "and (COALESCE(?10) IS NULL OR (item.regionId IN (?10) )) "
-					+ "and rule.endDate <= ?11 "
+					+ "and rule.status = " + ModelConstant.RULE_STATUS_ON
 					+ "group by rule.id "
 					, nativeQuery = true)
 	Page<Object[]> findByMultiCondRgroup(String productType, String ruleId, String ruleName, List<Integer>groupStatus, 
-			String startDate, String endDate, String agentId, String isDemo, String leaderId, List<String>sectList, Date offDate, Pageable pageable);
+			String startDate, String endDate, String agentId, String isDemo, String leaderId, List<String>sectList, Pageable pageable);
 
 }
