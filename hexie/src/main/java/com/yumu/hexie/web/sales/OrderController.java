@@ -210,7 +210,7 @@ public class OrderController extends BaseController{
 		Address address = new Address();
 		if (currUser != null) {
 			if (!StringUtils.isEmpty(currUser.getSectId())&& !"0".equals(currUser.getSectId())) {	//绑定房屋的业主
-				List<Address> addrList = addressService.getAddressByMain(currUser.getId(), true);
+				List<Address> addrList = addressService.queryRgroupAddressByUser(currUser.getId(), String.valueOf(ruleId));
 				if (addrList==null || addrList.size() ==0) {
 					addrList = addressService.queryBindedAddressByUser(currUser.getId());
 				}
@@ -222,19 +222,19 @@ public class OrderController extends BaseController{
 		}
 		
 		vo.setAddress(address);
-		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
-			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(sp.getProductId(), address.getXiaoquId());
-			RgroupAreaItem areaItem = new RgroupAreaItem();
-			if (areaList!=null && areaList.size()>0) {
-				areaItem = areaList.get(0);
-				
-			}
-			vo.setRgroupAreaItem(areaItem);
-			
-			areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
-			vo.setAreaItems(areaList);
-			
-		}
+//		if (ModelConstant.ORDER_TYPE_RGROUP == type) {
+//			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(sp.getProductId(), address.getXiaoquId());
+//			RgroupAreaItem areaItem = new RgroupAreaItem();
+//			if (areaList!=null && areaList.size()>0) {
+//				areaItem = areaList.get(0);
+//				
+//			}
+//			vo.setRgroupAreaItem(areaItem);
+//			
+//			areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
+//			vo.setAreaItems(areaList);
+//			
+//		}
 		if (ModelConstant.ORDER_TYPE_EVOUCHER == type) {
 			if (currUser != null) {
 				if (StringUtil.isEmpty(currUser.getSectId()) || "0".equals(currUser.getSectId())) {

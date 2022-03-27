@@ -97,6 +97,15 @@ public class AddressController extends BaseController{
 		return r;
     }
 	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/rgroupAddresses/{ruleId}", method = RequestMethod.GET)
+	@ResponseBody
+    public BaseResult<List<Address>> queryRgroupAddressList(@ModelAttribute(Constants.USER)User user,
+    		@PathVariable(name="ruleId") String ruleId) throws Exception {
+		List<Address> addresses = addressService.queryRgroupAddressByUser(user.getId(), ruleId);
+		return BaseResult.successResult(addresses);
+    }
+	
 	@RequestMapping(value = "/addAddress", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<Address> save(HttpSession session,@ModelAttribute(Constants.USER)User user,@RequestBody AddressReq address) throws Exception {

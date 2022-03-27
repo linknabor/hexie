@@ -28,6 +28,7 @@ import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddressRepository;
 import com.yumu.hexie.model.distribution.region.City;
@@ -70,6 +71,8 @@ public class AddressServiceImpl implements AddressService {
     private CityRepository cityRepository;
     @Autowired
     private CountyRepository countyRepository;
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
     @Autowired
     private EshopUtil eshopUtil;
     
@@ -479,6 +482,27 @@ public class AddressServiceImpl implements AddressService {
 	@Override
 	public List<Address> queryBindedAddressByUser(long userId) {
 		return addressRepository.findByUserIdAndBind(userId, true);
+	}
+	
+	/**
+	 * 获取用户当前团购可用的地址
+	 */
+	@Override
+	public List<Address> queryRgroupAddressByUser(long userId, String ruleId) {
+		
+		List<Long> supportRegions = new ArrayList<>();
+		List<RgroupAreaItem> areaItems = rgroupAreaItemRepository.findByRuleId(Long.valueOf(ruleId));
+		for (RgroupAreaItem rgroupAreaItem : areaItems) {
+			supportRegions.add(rgroupAreaItem.getRegionId());
+		}
+		List<Address> availalbe = new ArrayList<>();
+		List<Address> allAddr = addressRepository.findAllByUserId(userId);
+		for (Address address : allAddr) {
+			if (supportRegions.contains(address.getXiaoquId())) {
+				availalbe.add(address);
+			}
+		}
+		return availalbe;
 	}
 
 	@Override

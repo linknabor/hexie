@@ -61,5 +61,6 @@ public interface AddressService {
 
 	Address addAddress4Rgroup(User user, AddressReq addressReq);
 
+	List<Address> queryRgroupAddressByUser(long userId, String ruleId);
 
 }
