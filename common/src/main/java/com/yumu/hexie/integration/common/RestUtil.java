@@ -167,7 +167,9 @@ public class RestUtil {
 		if (destMap == null) {
 			return;
 		}
-		
+		if (fromObject == null) {
+			return;
+		}
 		if (fromObject instanceof Map) {
 			
 			Map map = (Map)fromObject;

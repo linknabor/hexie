@@ -30,6 +30,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
@@ -43,6 +44,9 @@ import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.redis.RedisRepository;
+import com.yumu.hexie.model.user.MiniUserPageAccess;
+import com.yumu.hexie.model.user.OrgOperator;
+import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -50,6 +54,7 @@ import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.coupon.CouponStrategy;
 import com.yumu.hexie.service.coupon.CouponStrategyFactory;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
@@ -83,9 +88,16 @@ public class UserServiceImpl implements UserService {
 	private AlipayClient alipayClient;
 	@Autowired
 	private RegionService regionService;
-		
+	@Autowired
+	private PageConfigService pageConfigService;
+	
+	private OrgOperatorRepository orgOperatorRepository;
+	
 	@Value("${mainServer}")
 	private Boolean mainServer;
+	
+	@Value("${wechat.miniprogramAppId}")
+    private String miniprogramAppid;
 	
 	@Override
 	public User getById(long uId) {
@@ -499,6 +511,110 @@ public class UserServiceImpl implements UserService {
 		return dbUser;
 		
 	}
+	
+	@Override
+    public UserMiniprogram getWechatMiniUserSessionKey(String code) throws Exception {
+        Assert.hasText(code, "code不能为空。");
+        return wechatCoreService.getMiniUserSessionKey(code);
+    }
 
+    @Override
+    @Transactional
+    public User saveMiniUserSessionKey(UserMiniprogram miniUser) {
+        String unionid = miniUser.getUnionid();
+        User userAccount = getByUnionid(unionid);
+
+        if (userAccount == null) {
+            userAccount = new User();
+            userAccount.setOpenid("0");    //TODO
+            userAccount.setUnionid(miniUser.getUnionid());
+            userAccount.setMiniopenid(miniUser.getOpenid());
+            userAccount.setMiniAppId(miniprogramAppid);
+            userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
+        } else {
+            userAccount.setUnionid(miniUser.getUnionid());
+            userAccount.setMiniopenid(miniUser.getOpenid());
+            userAccount.setMiniAppId(miniprogramAppid);
+        }
+        String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getUnionid();
+        String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(miniUser.getSessionKey())) {
+            redisTemplate.opsForValue().set(key, miniUser.getSessionKey(), 71, TimeUnit.HOURS);    //官方3天失效，也就是72小时
+        }
+        userRepository.save(userAccount);
+        return userAccount;
+    }
+
+    /**
+	 * 重新缓存user，如果用户在建立小程序用户之前，已经有了公众号用户
+	 * @param user
+	 * @return
+	 */
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	public void recacheMiniUser(User user) {
+		
+	}
+
+
+    @Override
+    public User getByUnionid(String unionid) {
+        return userRepository.findByUnionid(unionid);
+    }
+
+    /**
+	 * 校验小程序用户页面访问权限
+	 * 分两部分权限：1普通物业用户，2机构用户
+	 * @param user
+	 * @param page
+	 */
+	@Override
+	public boolean validateMiniPageAccess(User user, String page) {
+		
+		logger.info("validateMiniPageAccess, user: " + user + ", page : " + page);
+		
+		boolean isValid = true;
+		if (StringUtils.isEmpty(page)) {
+			return isValid;
+		}
+		if(StringUtils.isEmpty(user.getRoleId()) && "pages/index/index".equals(page)) {
+			return isValid;
+		}
+		if(StringUtils.isEmpty(user.getRoleId()) && "pages/rgroup/index".equals(page)) {
+			return isValid;
+		}
+		if (StringUtils.isEmpty(user.getRoleId())) {
+			isValid = false;
+			return isValid;
+		}
+		if (!StringUtils.isEmpty(page)) {
+			MiniUserPageAccess pageAccess = pageConfigService.getMiniPageAccess(page, user.getRoleId());
+			if (pageAccess == null) {
+				isValid = false;
+			}
+		}
+		logger.info("validateMiniPageAccess, isValid 1: " + isValid + ", page : " + page);
+		if (!isValid) {
+			MiniUserPageAccess pageAccess = pageConfigService.getMiniPageAccess(page, user.getRoleId());
+			if (pageAccess != null) {
+				isValid = true;
+			}
+		}
+		logger.info("validateMiniPageAccess, isValid 2: " + isValid + ", page : " + page);
+		return isValid;
+		
+	}
+
+	/**
+	 * 根据用户id查询所在的机构信息，只有roleId不为空的用户去查。因为B端用户相对C端用户是极少数，数量级不在一个级别。没必要每个用户都查一遍
+	 */
+	@Override
+	public OrgOperator getOrgOperator(User user) {
+		if (!StringUtil.isEmpty(user.getRoleId())) {
+			return orgOperatorRepository.findByUserId(user.getId());
+		}
+		return null;
+		
+	}
 
 }
