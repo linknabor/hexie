@@ -2,6 +2,7 @@ package com.yumu.hexie.service.page;
 
 import java.util.List;
 
+import com.yumu.hexie.model.user.MiniUserPageAccess;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.Banner;
 import com.yumu.hexie.model.view.BgImage;
@@ -10,6 +11,7 @@ import com.yumu.hexie.model.view.CsHotline;
 import com.yumu.hexie.model.view.Menu;
 import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.WuyePayTabs;
+import com.yumu.hexie.vo.menu.GroupMenuInfo;
 
 public interface PageConfigService {
 	
@@ -40,6 +42,10 @@ public interface PageConfigService {
 	List<Menu> getMenuBySectId(String sectId);
 
 	String getSwtichSectTips(User user, String page);
+
+	MiniUserPageAccess getMiniPageAccess(String page, String roleId);
+
+	List<GroupMenuInfo> getOrgMenu(String orgRoleId, String orgType);
 
 
 }

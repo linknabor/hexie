@@ -21,7 +21,6 @@ public class User extends BaseModel{
 	private String name;
 	private String tel;
 	
-	
 	/** 来自默认地址，用于服务支持 */
 	private long provinceId;
 	private long cityId;
@@ -82,6 +81,11 @@ public class User extends BaseModel{
 	private Long oriUserId = 0l;	//源用户ID,迁移过来的数据有这个字段
 	
 	private int point;	//用户积分
+	
+	private String roleId;
+	private String unionid;
+	private String miniopenid;
+	private String miniAppId;
 	
 	public String getSectId() {
 		return sectId;
@@ -455,21 +459,42 @@ public class User extends BaseModel{
 		this.unsubscribeDate = unsubscribeDate;
 	}
 
-	@Override
-	public String toString() {
-		return "User [realName=" + realName + ", name=" + name + ", tel=" + tel + ", provinceId=" + provinceId
-				+ ", cityId=" + cityId + ", countyId=" + countyId + ", xiaoquId=" + xiaoquId + ", county=" + county
-				+ ", xiaoquName=" + xiaoquName + ", longitude=" + longitude + ", latitude=" + latitude
-				+ ", currentAddrId=" + currentAddrId + ", wuyeId=" + wuyeId + ", openid=" + openid + ", memo=" + memo
-				+ ", subscribe=" + subscribe + ", status=" + status + ", nickname=" + nickname + ", sex=" + sex
-				+ ", age=" + age + ", city=" + city + ", country=" + country + ", province=" + province + ", language="
-				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", unsubscribeDate="
-				+ unsubscribeDate + ", registerDate=" + registerDate + ", identityCard=" + identityCard + ", zhima="
-				+ zhima + ", lvdou=" + lvdou + ", couponCount=" + couponCount + ", shareCode=" + shareCode
-				+ ", newRegiste=" + newRegiste + ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId
-				+ ", totalBind=" + totalBind + ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId
-				+ ", point=" + point + "]";
+	public String getRoleId() {
+		return roleId;
 	}
 
+	public void setRoleId(String roleId) {
+		this.roleId = roleId;
+	}
+
+	public String getUnionid() {
+		return unionid;
+	}
+
+	public void setUnionid(String unionid) {
+		this.unionid = unionid;
+	}
+
+	public String getMiniopenid() {
+		return miniopenid;
+	}
+
+	public void setMiniopenid(String miniopenid) {
+		this.miniopenid = miniopenid;
+	}
+
+	public void setCouponCount(Integer couponCount) {
+		this.couponCount = couponCount;
+	}
+
+	public String getMiniAppId() {
+		return miniAppId;
+	}
+
+	public void setMiniAppId(String miniAppId) {
+		this.miniAppId = miniAppId;
+	}
+
+	
 		
 }

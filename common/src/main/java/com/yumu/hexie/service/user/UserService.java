@@ -5,7 +5,9 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
@@ -71,5 +73,48 @@ public interface UserService {
 	 * @return 
 	 */
 	User switchSect(User user, SwitchSectReq switchSectReq);
+	
+	/**
+	 * 获取微信小程序用户登陆key
+	 * @param code
+	 * @return
+	 * @throws Exception
+	 */
+	UserMiniprogram getWechatMiniUserSessionKey(String code) throws Exception;
+	
+	/**
+	 * 通过unionid获取用户信息
+	 * @param unionid
+	 * @return
+	 */
+	User getByUnionid(String unionid);
+	
+	/**
+	 * 保存小程序用户sessionKey
+	 * @param miniUser
+	 * @return
+	 */
+	User saveMiniUserSessionKey(UserMiniprogram miniUser);
+	
+	/**
+	 * 缓存小程序用户
+	 * @param user
+	 */
+	void recacheMiniUser(User user);
+	
+	/**
+	 * 验证小程序菜单访问权限
+	 * @param user
+	 * @param page
+	 * @return
+	 */
+	boolean validateMiniPageAccess(User user, String page);
+	
+	/**
+	 * 获取用户机构信息
+	 * @param userId
+	 * @return
+	 */
+	OrgOperator getOrgOperator(User user);
 
 }

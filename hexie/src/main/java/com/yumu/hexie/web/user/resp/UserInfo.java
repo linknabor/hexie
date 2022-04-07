@@ -12,12 +12,14 @@ import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 
+import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
 import com.yumu.hexie.model.view.Menu;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.o2o.OperatorDefinition;
+import com.yumu.hexie.vo.menu.GroupMenuInfo;
 
 /**
  * <pre>
@@ -85,7 +87,66 @@ public class UserInfo implements Serializable {
  	private ServeRole serveRole;
  	private List<String> subscribeTemplateIds;	//未订阅需要弹窗提示的模板列表
  	private List<Menu> menuList;
+ 	private List<GroupMenuInfo> orgMenuList = new ArrayList<>();
  	private boolean repairService;	//新版工单是否开通
+ 	
+ 	private String roleId;	//用户角色
+ 	private boolean permission; //是否有访问权限
+	private String reqPath; //访问的地址
+	private OrgInfo orgInfo;
+	
+	public static class OrgInfo {
+		
+	 	private String orgName;	//机构名称，机构操作员有这个字段
+		private String orgId;	//机构ID，同上
+		private String orgType; //机构类型 01:运营商 04:服务商 06:区域运营商
+		private String orgTypeName; //机构类型名称
+		private String orgOperName;	//机构操作员名称
+		private String orgOperId;	//机构操作员ID
+		
+		public String getOrgName() {
+			return orgName;
+		}
+		public void setOrgName(String orgName) {
+			this.orgName = orgName;
+		}
+		public String getOrgId() {
+			return orgId;
+		}
+		public void setOrgId(String orgId) {
+			this.orgId = orgId;
+		}
+		public String getOrgType() {
+			return orgType;
+		}
+		public void setOrgType(String orgType) {
+			this.orgType = orgType;
+		}
+		public String getOrgTypeName() {
+			return orgTypeName;
+		}
+		public void setOrgTypeName(String orgTypeName) {
+			this.orgTypeName = orgTypeName;
+		}
+		public String getOrgOperName() {
+			return orgOperName;
+		}
+		public void setOrgOperName(String orgOperName) {
+			this.orgOperName = orgOperName;
+		}
+		public String getOrgOperId() {
+			return orgOperId;
+		}
+		public void setOrgOperId(String orgOperId) {
+			this.orgOperId = orgOperId;
+		}
+		@Override
+		public String toString() {
+			return "orgRole [orgName=" + orgName + ", orgId=" + orgId + ", orgType=" + orgType + ", orgTypeName="
+					+ orgTypeName + ", orgOperName=" + orgOperName + ", orgOperId=" + orgOperId + "]";
+		}
+		
+	}
 
  	public static class ServeRole{
  		
@@ -125,7 +186,6 @@ public class UserInfo implements Serializable {
  		public void setMsgSender(boolean isMsgSender) {
  			this.isMsgSender = isMsgSender;
  		}
- 		
  	}
 
     public String getAppId() {
@@ -158,6 +218,12 @@ public class UserInfo implements Serializable {
 	
     public UserInfo(User user){
         BeanUtils.copyProperties(user, this);
+    }
+    public UserInfo(User user, OrgOperator orgOperator){
+        BeanUtils.copyProperties(user, this);
+        if (orgOperator != null) {
+        	BeanUtils.copyProperties(orgOperator, this.orgInfo);
+		}
     }
     
     public UserInfo(User user, OperatorDefinition odDefinition, List<String> subscribeTemplateIds){
@@ -427,14 +493,52 @@ public class UserInfo implements Serializable {
 	public void setMenuList(List<Menu> menuList) {
 		this.menuList = menuList;
 	}
-
 	public boolean isRepairService() {
 		return repairService;
 	}
-
 	public void setRepairService(boolean repairService) {
 		this.repairService = repairService;
 	}
-	
+
+	public boolean isPermission() {
+		return permission;
+	}
+
+	public void setPermission(boolean permission) {
+		this.permission = permission;
+	}
+
+	public String getReqPath() {
+		return reqPath;
+	}
+
+	public void setReqPath(String reqPath) {
+		this.reqPath = reqPath;
+	}
+
+	public String getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(String roleId) {
+		this.roleId = roleId;
+	}
+
+	public OrgInfo getOrgInfo() {
+		return orgInfo;
+	}
+
+	public void setOrgInfo(OrgInfo orgInfo) {
+		this.orgInfo = orgInfo;
+	}
+
+	public List<GroupMenuInfo> getOrgMenuList() {
+		return orgMenuList;
+	}
+
+	public void setOrgMenuList(List<GroupMenuInfo> orgMenuList) {
+		this.orgMenuList = orgMenuList;
+	}
+
 	
 }

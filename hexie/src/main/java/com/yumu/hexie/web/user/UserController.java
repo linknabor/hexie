@@ -30,10 +30,12 @@ import com.yumu.hexie.common.util.RequestUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
+import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
@@ -52,6 +54,7 @@ import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
+import com.yumu.hexie.vo.menu.GroupMenuInfo;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.req.MobileYzm;
@@ -604,5 +607,61 @@ public class UserController extends BaseController{
 		
 	    return new BaseResult<UserInfo>().success(userInfo);
 	}
+	
+	
+	/**
+     * 小程序登录
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/login/{code}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> miniLogin(HttpSession session, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        User user = null;
+        if (!StringUtils.isEmpty(code)) {
+            if (user == null) {
+                if (userService.checkDuplicateLogin(session, code)) {
+                    throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+                }
+                UserMiniprogram miniUser = userService.getWechatMiniUserSessionKey(code);
+
+                user = userService.saveMiniUserSessionKey(miniUser);
+                if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+                	userService.recacheMiniUser(user);
+                }
+            }
+            session.setAttribute(Constants.USER, user);
+        }
+        if (user == null) {
+            return new BaseResult<UserInfo>().failMsg("用户不存在！");
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "login，耗时：" + ((endTime - beginTime) / 1000));
+
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setReqPath(reqPath);
+        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
+        userInfo.setPermission(true);
+        if (!isValid) {
+            throw new BizValidateException("没有访问权限");
+        }
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
     
 }

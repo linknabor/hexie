@@ -363,6 +363,7 @@ public class ModelConstant {
 	public static final String KEY_TYPE_MENU_SECT = "cfg:page:menu:sect";	//公众号菜单
 	public static final String KEY_TYPE_MENU_DEFAULT = "cfg:page:menu:default";	//公众号菜单
 	public static final String KEY_TYPE_MENU_APP_BINDED = "cfg:page:menu:app:default";	//公众号菜单-绑定了房屋的
+	public static final String KEY_TYPE_MINI_ROLE_PAGE = "cfg:page:miniRolePage";	//小程序访问控制
 
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
@@ -499,4 +500,9 @@ public class ModelConstant {
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送
 	public static final String KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE = "queue:notify:rgroup:groupSuccess"; //成团提醒。发给团长
 	public static final String KEY_RGROUP_ARRIVAL_NOTICE_QUEUE = "queue:notify:rgroup:arriavalNotice";	//团购到货提醒。发给客户
+
+	public static final String KEY_USER_SESSION_KEY = "user:org:sessionKey:";	//小程序的sessionkey
+	
+	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
+
 }		
