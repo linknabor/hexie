@@ -60,12 +60,16 @@ public class UserWeiXin {
 	 */
 	private Date subscribe_time;
 	
-	
 	/**
 	 * 微信特权
 	 * @return
 	 */
 	private List<String> privilege;
+	
+	/**
+	 * 关联id
+	 */
+	private String unionid;
 	
 	
 
@@ -156,23 +160,13 @@ public class UserWeiXin {
 	public void setSubscribe_time(Date subscribe_time) {
 		this.subscribe_time = subscribe_time;
 	}
+	
+	public String getUnionid() {
+		return unionid;
+	}
 
-	public UserWeiXin(Integer subscribe, String openid, String nickname,
-			Integer sex, String city, String country, String province,
-			String language, String headimgurl, Date subscribe_time,
-			List<String> privilege) {
-		super();
-		this.subscribe = subscribe;
-		this.openid = openid;
-		this.nickname = nickname;
-		this.sex = sex;
-		this.city = city;
-		this.country = country;
-		this.province = province;
-		this.language = language;
-		this.headimgurl = headimgurl;
-		this.subscribe_time = subscribe_time;
-		this.privilege = privilege;
+	public void setUnionid(String unionid) {
+		this.unionid = unionid;
 	}
 
 	public UserWeiXin() {
@@ -184,8 +178,7 @@ public class UserWeiXin {
 		return "UserWeiXin [subscribe=" + subscribe + ", openid=" + openid + ", nickname=" + nickname + ", sex=" + sex
 				+ ", city=" + city + ", country=" + country + ", province=" + province + ", language=" + language
 				+ ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", privilege=" + privilege
-				+ "]";
+				+ ", unionid=" + unionid + "]";
 	}
-	
 
 }

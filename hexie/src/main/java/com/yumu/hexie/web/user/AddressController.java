@@ -55,6 +55,7 @@ public class AddressController extends BaseController{
 	@Autowired
 	private SystemConfigService systemConfigService;
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/address/delete/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<String> deleteAddress(@ModelAttribute(Constants.USER)User user,@PathVariable long addressId) throws Exception {
@@ -62,6 +63,7 @@ public class AddressController extends BaseController{
         return BaseResult.successResult("删除地址成功");
     }
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/address/query/{addressId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Address> queryAddressById(@ModelAttribute(Constants.USER)User user,@PathVariable long addressId) throws Exception {
@@ -159,7 +161,8 @@ public class AddressController extends BaseController{
 		return new BaseResult<Address>().success(addr);
     }
 	
-    @RequestMapping(value = "/regions/{type}/{parentId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/{type}/{parentId}", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<Region>> queryRegions(@PathVariable int type,@PathVariable long parentId){
         List<Region> regions = addressService.queryRegions(type, parentId);
@@ -178,18 +181,21 @@ public class AddressController extends BaseController{
     }
     
 	//add by zhangxiaonan for amap
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/amap/{city}/{keyword}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAmapYuntuLocal(@PathVariable String city,@PathVariable String keyword){
 		return BaseResult.successResult(addressService.queryAmapYuntuLocal(city, keyword));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/amap/{longitude}/{latitude}/around/", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAround(@PathVariable double longitude, @PathVariable double latitude){
 		return BaseResult.successResult(addressService.queryAroundByCoordinate(longitude, latitude));
 	}
 	
+	@SuppressWarnings({ "unchecked", "static-access" })
 	@RequestMapping(value = "/getRegionByRuleId/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<SharedVo> queryAddrByShareCode(HttpSession session, @ModelAttribute(Constants.USER)User user,@PathVariable String ruleId) {
@@ -252,9 +258,31 @@ public class AddressController extends BaseController{
 		return BaseResult.successResult(addressService.queryCounty(cityId));
 	}
 	
-	public static void main(String[] args) {
-		
-		System.out.println(System.currentTimeMillis());
-	}
+	/**
+	 * 团长选取小区列表
+	 * @param user
+	 * @param regionName
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroup", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<List<Region>> queryRegions(@ModelAttribute(Constants.USER)User user,
+    		@RequestParam(required = false) String regionName){
+        List<Region> regions = regionService.findByNameLikeAndType(regionName);
+        return BaseResult.successResult(regions);
+    }
 	
+	/**
+	 * 团长添加过的小区列表展示
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroupowner", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<List<Region>> queryRgroupOwnerRegions(@ModelAttribute(Constants.USER)User user){
+        List<Region> regions = regionService.findByRgroupOwner(user);
+        return BaseResult.successResult(regions);
+    }
 }

@@ -550,4 +550,5 @@ public class AddressServiceImpl implements AddressService {
 		bf.deleteCharAt(bf.length()-1);
 		return eshopUtil.querySectInfo(user, bf.toString());
 	}
+	
 }

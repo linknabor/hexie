@@ -3,6 +3,7 @@ package com.yumu.hexie.service.user;
 import java.util.List;
 
 import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.user.User;
 
 public interface RegionService {
 	
@@ -16,4 +17,8 @@ public interface RegionService {
 	
 	public List<Region> findAllBySectId(String sectId);
 
+	public List<Region> findByNameLikeAndType(String name);
+
+	List<Region> findByRgroupOwner(User user);
+	
 }

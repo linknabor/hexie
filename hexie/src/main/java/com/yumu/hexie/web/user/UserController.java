@@ -30,6 +30,7 @@ import com.yumu.hexie.common.util.RequestUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
@@ -661,6 +662,44 @@ public class UserController extends BaseController{
         if (!isValid) {
             throw new BizValidateException("没有访问权限");
         }
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 小程序获取用户手机
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/phoneNumber/{code}", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<UserInfo> getMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @PathVariable String code) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(code);
+        User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
+        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+        	userService.recacheMiniUser(user);
+        }
+        BeanUtils.copyProperties(savedUser, user);
+        request.getSession().setAttribute(Constants.USER, user);
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "getPhoneNumber，耗时：" + ((endTime - beginTime) / 1000));
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setPermission(true);
         return new BaseResult<UserInfo>().success(userInfo);
     }
     

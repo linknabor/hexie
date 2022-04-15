@@ -2,6 +2,7 @@ package com.yumu.hexie.model.distribution.region;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,6 +15,8 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 	List<Region> findAllByParentIdAndName(long countyId, String xiaoquName);
 
     List<Region> findByNameAndRegionType(String name, int regionType);
+    
+    List<Region> findByNameLikeAndRegionType(String name, int regionType, Pageable pageable);
     
     @Query(" from Region  where regionType < 4")
 	List<Region> findNeedRegion();

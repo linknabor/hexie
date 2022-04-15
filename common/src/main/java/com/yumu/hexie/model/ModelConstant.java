@@ -504,5 +504,9 @@ public class ModelConstant {
 	public static final String KEY_USER_SESSION_KEY = "user:org:sessionKey:";	//小程序的sessionkey
 	
 	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
+	
+	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId
+	
+	public static final String KEY_MINI_ACCESS_TOKEN = "miniprogram:accessToken:";	//后面接小程序appid
 
 }		

@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.common;
 
+import com.yumu.hexie.integration.wechat.entity.MiniAccessToken;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.common.CloseOrderResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
@@ -28,5 +30,9 @@ public interface WechatCoreService {
 	public WxRefundOrder refundQuery(String outTradeNo);
 
 	UserMiniprogram getMiniUserSessionKey(String code) throws Exception;
+
+	MiniAccessToken getMiniAccessToken() throws Exception;
+
+	MiniUserPhone getMiniUserPhone(String code) throws Exception;
 	
 }
