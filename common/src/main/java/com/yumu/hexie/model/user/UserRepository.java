@@ -80,6 +80,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query(value = "update user set zhima = zhima + ?1 where id = ?2 ", nativeQuery = true)
 	public int updateUserZhima(int increase, long id);
 	
-	public User findByUnionid(String unionid);
+	public List<User> findByUnionid(String unionid);
 	
 }

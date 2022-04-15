@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.user.OrgOperator;
@@ -116,5 +117,20 @@ public interface UserService {
 	 * @return
 	 */
 	OrgOperator getOrgOperator(User user);
+	
+	/**
+	 * 获取小程序用户手机号
+	 * @param code
+	 * @return
+	 */
+	MiniUserPhone getMiniUserPhone(String code);
+	
+	/**
+	 * 保存小程序用户手机
+	 * @param user
+	 * @param miniUserPhone
+	 * @return
+	 */
+	User saveMiniUserPhone(User user, MiniUserPhone miniUserPhone);
 
 }

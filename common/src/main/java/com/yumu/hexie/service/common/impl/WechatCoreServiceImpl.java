@@ -11,6 +11,8 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniAccessToken;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.common.CloseOrderResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
@@ -162,6 +164,27 @@ public class WechatCoreServiceImpl implements WechatCoreService {
     @Override
     public UserMiniprogram getMiniUserSessionKey(String code) throws Exception {
         return miniprogramAuthService.getMiniUserSessionKey(code);
+    }
+    
+    /**
+     * 通过code获取微信小程序accessToken
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public MiniAccessToken getMiniAccessToken() throws Exception {
+        return miniprogramAuthService.getMiniAccessToken();
+    }
+    
+    /**
+     * 通过code获取微信小程序用户手机号，此code跟login的code不是同一个
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public MiniUserPhone getMiniUserPhone(String code) throws Exception {
+        return miniprogramAuthService.getPhoneNumber(code);
     }
 
 }

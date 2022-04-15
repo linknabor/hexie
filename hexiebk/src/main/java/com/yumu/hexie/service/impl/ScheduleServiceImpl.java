@@ -28,6 +28,8 @@ import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.localservice.bill.BaojieBill;
 import com.yumu.hexie.model.localservice.bill.BaojieBillRepository;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
@@ -117,6 +119,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 	private ProductRepository productRepository;
 	@Autowired
 	private EvoucherRepository evoucherRepository;
+	@Autowired
+	private RgroupAreaItemRepository rgroupAreaItemRepository;
 	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
@@ -553,6 +557,26 @@ public class ScheduleServiceImpl implements ScheduleService {
 				onSaleAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_OFF, areaItem.getId());
 			}
 			Product product = productRepository.findById(onSaleRule.getProductId());
+			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
+		}
+	
+	}
+	
+	/**
+	 * 团购商品超时下架
+	 */
+	@Scheduled(cron = "0 */20 * * * ?")
+	@Override
+	public void executeRgroupRuleTimeoutJob() {
+		
+		List<RgroupRule> ruleList = rgroupRuleRepository.findTimeoutGroup(new Date());
+		for (RgroupRule rGroupRule : ruleList) {
+			rgroupRuleRepository.updateStatus(ModelConstant.RULE_STATUS_OFF, rGroupRule.getId());
+			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rGroupRule.getId());
+			for (RgroupAreaItem areaItem : areaList) {
+				rgroupAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_OFF, areaItem.getId());
+			}
+			Product product = productRepository.findById(rGroupRule.getProductId());
 			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
 		}
 	

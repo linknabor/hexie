@@ -30,6 +30,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
@@ -160,6 +161,9 @@ public class UserServiceImpl implements UserService {
 
 		String openId = weixinUser.getOpenid();
 		User userAccount = multiFindByOpenId(openId);
+		if (userAccount == null) {	//如果是空，根据unionid再差一遍
+			userAccount = getByUnionid(weixinUser.getUnionid());	
+		}
 
 		if (userAccount == null) {
 			userAccount = new User();
@@ -174,6 +178,7 @@ public class UserServiceImpl implements UserService {
 			userAccount.setCity(weixinUser.getCity());
 			userAccount.setLanguage(weixinUser.getLanguage());
 			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
+			userAccount.setUnionid(weixinUser.getUnionid());
 			//这时候新用户还没有生成user，ID是空值,uid取uuid打MD5。
 			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 
@@ -190,9 +195,14 @@ public class UserServiceImpl implements UserService {
 					userAccount.setCity(weixinUser.getCity());
 				}
 				userAccount.setLanguage(weixinUser.getLanguage());
+				userAccount.setUnionid(weixinUser.getUnionid());
+				
 				// 从网页进入时下面两个值为空
 				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 				userAccount.setSubscribe(weixinUser.getSubscribe());
+				if (StringUtils.isEmpty(userAccount.getOpenid())) {
+					userAccount.setOpenid(weixinUser.getOpenid());	//如果小程序用户先创建，这个用户是没有openid的，后续从公众号登陆进来要更新openid
+				}
 
 			} else if (weixinUser.getSubscribe() != null && weixinUser.getSubscribe() != userAccount.getSubscribe()) {
 				userAccount.setSubscribe(weixinUser.getSubscribe());
@@ -532,9 +542,11 @@ public class UserServiceImpl implements UserService {
             userAccount.setMiniAppId(miniprogramAppid);
             userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
         } else {
-            userAccount.setUnionid(miniUser.getUnionid());
-            userAccount.setMiniopenid(miniUser.getOpenid());
-            userAccount.setMiniAppId(miniprogramAppid);
+        	if(StringUtils.isEmpty(userAccount.getOpenid())) {
+        		userAccount.setUnionid(miniUser.getUnionid());
+                userAccount.setMiniopenid(miniUser.getOpenid());
+                userAccount.setMiniAppId(miniprogramAppid);
+        	}
         }
         String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getUnionid();
         String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
@@ -559,7 +571,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getByUnionid(String unionid) {
-        return userRepository.findByUnionid(unionid);
+    	List<User> list = userRepository.findByUnionid(unionid);
+    	User user = null;
+    	if (list!=null && list.size()>0) {
+    		user = list.get(0);
+		}
+        return user;
     }
 
     /**
@@ -616,5 +633,69 @@ public class UserServiceImpl implements UserService {
 		return null;
 		
 	}
+	
+	/**
+	 * 获取小程序用户的手机号
+	 * @param code
+	 * @return
+	 */
+	@Override
+	public MiniUserPhone getMiniUserPhone(String code) {
+		
+		Assert.hasText(code, "授权码不能为空。");
+		MiniUserPhone miniUserPhone = null;
+		try {
+			miniUserPhone = wechatCoreService.getMiniUserPhone(code);
+			if (!StringUtils.isEmpty(miniUserPhone.getErrorcode())) {
+				throw new BizValidateException(miniUserPhone.getErrmsg());
+			}
+			return miniUserPhone;
+			
+		} catch (Exception e) {
+			throw new BizValidateException(e.getMessage(), e);
+		}
+		
+	}
+	
+	@Override
+    @Transactional
+    public User saveMiniUserPhone(User user, MiniUserPhone miniUserPhone) {
+        
+		String phone = miniUserPhone.getPhone_info().getPhoneNumber();
+		String purePhone = miniUserPhone.getPhone_info().getPurePhoneNumber();	//不带区号的手机号
+		User miniUser = getById(user.getId());
+        List<User> userList = getByTel(phone);	//根据手机号关联现有用户
+        if (userList == null) {
+        	userList = getByTel(purePhone);	//根据手机号关联现有用户
+		}
+        User userAccount = null;
+        if (userList != null && userList.size() > 0) {	//用手机号将小程序用户和公众号用户关联起来。如果存在一对多的情况，优先关联合协的用户。
+			if (userList.size() == 1) {
+				userAccount = userList.get(0);
+			} else {
+				for (User dbUser : userList) {
+					if (ConstantWeChat.APPID.equals(dbUser.getAppId())) {
+						userAccount = dbUser;
+						break;
+					}
+				}
+			}
+		}
+
+        if (userAccount == null) {	//如果数据库中没有关联的用户，能直接更新手机号
+        	userAccount = miniUser;
+        	userAccount.setTel(phone);
+        } else {	//如果数据库中有关联的用户，需要合并老记录
+            userAccount.setUnionid(miniUser.getUnionid());
+            userAccount.setMiniopenid(miniUser.getOpenid());
+            userAccount.setMiniAppId(miniUser.getMiniAppId());
+            userAccount.setTel(phone);
+            
+            //删除已经登陆形成的新用户
+            userRepository.deleteById(user.getId());
+        }
+        userRepository.save(userAccount);
+        return userAccount;
+    }
 
 }
