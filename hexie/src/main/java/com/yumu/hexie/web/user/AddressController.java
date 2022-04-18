@@ -265,7 +265,7 @@ public class AddressController extends BaseController{
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/regions/rgroup", method = RequestMethod.GET)
+	@RequestMapping(value = "/regions/rgroup/query", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<Region>> queryRegions(@ModelAttribute(Constants.USER)User user,
     		@RequestParam(required = false) String regionName){
@@ -279,10 +279,36 @@ public class AddressController extends BaseController{
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/regions/rgroupowner", method = RequestMethod.GET)
+	@RequestMapping(value = "/regions/rgroupowner/query", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<Region>> queryRgroupOwnerRegions(@ModelAttribute(Constants.USER)User user){
         List<Region> regions = regionService.findByRgroupOwner(user);
         return BaseResult.successResult(regions);
+    }
+	
+	/**
+	 * 缓存团长添加的小区
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroupowner/save", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<String> saveOwnerServiceArea(@ModelAttribute(Constants.USER)User user, @RequestBody Region region){
+		regionService.saveOwnerServiceArea(user, region);
+        return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 缓存团长添加的小区
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroupowner/del/{regionId}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<String> delOwnerServiceArea(@ModelAttribute(Constants.USER)User user, @PathVariable long regionId){
+		regionService.delOwnerServiceArea(user, regionId);
+        return BaseResult.successResult(Constants.PAGE_SUCCESS);
     }
 }

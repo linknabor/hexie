@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.RegionService;
 
 @Service("regionService")
@@ -67,8 +69,9 @@ public class RegionServiceImpl implements RegionService{
     	Order order = new Order(Direction.DESC, "id");
     	orderList.add(order);
     	Sort sort = Sort.by(orderList);
-		Pageable pageable = PageRequest.of(1, 30, sort);
-		return regionRepository.findByNameLikeAndRegionType(name, ModelConstant.REGION_XIAOQU, pageable);
+		Pageable pageable = PageRequest.of(0, 30, sort);
+		List<Region> regionList = regionRepository.findByRegionTypeAndNameLike(ModelConstant.REGION_XIAOQU, name, pageable);
+		return regionList;
 	}
 	
 	@Override
@@ -86,6 +89,86 @@ public class RegionServiceImpl implements RegionService{
 			regionList = new ArrayList<>();
 		}
 		return regionList;
+	}
+	
+	/**
+	 * 缓存团长的服务小区
+	 * @param user
+	 * @return
+	 */
+	@Override
+	public void saveOwnerServiceArea(User user, Region region) {
+		
+		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getId();
+		String regionStr = stringRedisTemplate.opsForValue().get(key);
+		TypeReference<List<Region>> typeReference = new TypeReference<List<Region>>() {};
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		List<Region> regionList = null;
+		try {
+			if (!StringUtils.isEmpty(regionStr)) {
+				regionList = objectMapper.readValue(regionStr, typeReference);
+			}
+			if (regionList == null) {
+				regionList = new ArrayList<>();
+			}
+			boolean cached = false;
+			for (Region cachedRegion : regionList) {
+				if (cachedRegion.getId() == region.getId()) {
+					cached = true;
+					break;
+				}
+			}
+			if (!cached) {
+				regionList.add(region);
+			}
+			String updatedStr = objectMapper.writeValueAsString(regionList);
+			stringRedisTemplate.opsForValue().set(key, updatedStr);
+			
+		} catch (Exception e) {
+			throw new BizValidateException(e.getMessage(), e);
+		}
+		
+	}
+	
+	/**
+	 * 缓存团长的服务小区
+	 * @param user
+	 * @return
+	 */
+	@Override
+	public void delOwnerServiceArea(User user, long regionId) {
+		
+		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getId();
+		String regionStr = stringRedisTemplate.opsForValue().get(key);
+		TypeReference<List<Region>> typeReference = new TypeReference<List<Region>>() {};
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		if (regionId == 0l) {
+			return;
+		}
+		if (StringUtils.isEmpty(regionStr)) {
+			return;
+		}
+		try {
+			int index = -1;
+			List<Region> regionList = objectMapper.readValue(regionStr, typeReference);
+			for (int i = 0; i < regionList.size(); i++) {
+				Region region = regionList.get(i);
+				if (regionId == region.getId()) {
+					index = i;
+					break;
+				}
+			}
+			if (index == -1) {
+				return;
+			}
+			regionList.remove(index);
+			String updatedStr = objectMapper.writeValueAsString(regionList);
+			stringRedisTemplate.opsForValue().set(key, updatedStr);
+			
+		} catch (Exception e) {
+			throw new BizValidateException(e.getMessage(), e);
+		}
+		
 	}
 
 }
