@@ -509,10 +509,12 @@ public class UserController extends BaseController{
 		}
 		return new BaseResult<Map<String, String>>().success(map);
     }
-    
-    /**
+
+	/**
 	 * 切换小区
-	 * @param queryFeeSmsBillReq
+	 * @param request
+	 * @param user
+	 * @param switchSectReq
 	 * @return
 	 * @throws Exception
 	 */

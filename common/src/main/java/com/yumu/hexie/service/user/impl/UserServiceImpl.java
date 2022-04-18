@@ -91,7 +91,8 @@ public class UserServiceImpl implements UserService {
 	private RegionService regionService;
 	@Autowired
 	private PageConfigService pageConfigService;
-	
+
+	@Autowired
 	private OrgOperatorRepository orgOperatorRepository;
 	
 	@Value("${mainServer}")
