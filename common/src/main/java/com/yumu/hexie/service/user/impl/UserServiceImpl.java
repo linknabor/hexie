@@ -627,10 +627,11 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public OrgOperator getOrgOperator(User user) {
+		OrgOperator operator = null;
 		if (!StringUtil.isEmpty(user.getRoleId())) {
-			return orgOperatorRepository.findByUserId(user.getId());
+			operator = orgOperatorRepository.findByUserIdAndRoleId(user.getId(), user.getRoleId());
 		}
-		return null;
+		return operator;
 		
 	}
 	

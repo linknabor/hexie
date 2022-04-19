@@ -10,7 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.redis.Keys;
@@ -37,7 +37,7 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public int add2cart(User user, OrderItem orderItem){
 		
-		ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
+		ProductRuleCache productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
 		if (productRule == null) {
 			throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
 		}
@@ -62,7 +62,7 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public int delFromCart(User user, OrderItem orderItem){
 		
-		ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
+		ProductRuleCache productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
 		if (productRule == null) {
 			throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
 		}
@@ -116,7 +116,7 @@ public class CartServiceImpl implements CartService {
 		}
 		
 		for (OrderItem orderItem : itemList) {
-			ProductRule productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
+			ProductRuleCache productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId());
 			if (productRule == null) {
 				logger.info("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
 			}else {

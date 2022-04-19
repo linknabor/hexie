@@ -75,13 +75,13 @@ import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
+import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductCategory;
 import com.yumu.hexie.model.commonsupport.info.ProductCategoryRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductPlat;
 import com.yumu.hexie.model.commonsupport.info.ProductPlatRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.distribution.OnSaleAreaItem;
 import com.yumu.hexie.model.distribution.OnSaleAreaItemRepository;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
@@ -607,11 +607,11 @@ public class EshopServiceImpl implements EshopSerivce {
 		productPlat.setProductId(product.getId());
 		productPlatRepository.save(productPlat);
 		
-		ProductRule productRule;
+		ProductRuleCache productRule;
 		if (onSaleRule != null) {
-			productRule = new ProductRule(product, onSaleRule);
+			productRule = new ProductRuleCache(product, onSaleRule);
 		}else {
-			productRule = new ProductRule(product, rgroupRule);
+			productRule = new ProductRuleCache(product, rgroupRule);
 		}
 		String key = ModelConstant.KEY_PRO_RULE_INFO + productRule.getId();
 		redisRepository.setProdcutRule(key, productRule);
@@ -2112,7 +2112,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		productPlat.setProductId(product.getId());
 		productPlatRepository.save(productPlat);
 		
-		ProductRule productRule = new ProductRule(product, rgroupRule);
+		ProductRuleCache productRule = new ProductRuleCache(product, rgroupRule);
 		String key = ModelConstant.KEY_PRO_RULE_INFO + productRule.getId();
 		redisRepository.setProdcutRule(key, productRule);
 		

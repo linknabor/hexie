@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +19,10 @@ import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.DistributionService;
+import com.yumu.hexie.service.common.PublishService;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
+import com.yumu.hexie.vo.CreateRgroupReq;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
@@ -32,6 +35,8 @@ public class RgroupController extends BaseController{
     private CustomOrderService customRgroupService;
     @Inject
     private DistributionService distributionService;
+    @Autowired
+    private PublishService publishService;
 
 	@RequestMapping(value = "/rgroups/{page}", method = RequestMethod.GET)
 	@ResponseBody
@@ -79,7 +84,14 @@ public class RgroupController extends BaseController{
         return commonResponse;
     }
 	
-	
+	@RequestMapping(value = "/rgroups/save", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> saveRgroups(@ModelAttribute(Constants.USER)User user,
+				@RequestBody CreateRgroupReq createRgroupReq) throws Exception {
+		
+		publishService.saveRgroup(createRgroupReq);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
 	
 	
 }

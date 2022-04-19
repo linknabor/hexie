@@ -500,13 +500,11 @@ public class ModelConstant {
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送
 	public static final String KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE = "queue:notify:rgroup:groupSuccess"; //成团提醒。发给团长
 	public static final String KEY_RGROUP_ARRIVAL_NOTICE_QUEUE = "queue:notify:rgroup:arriavalNotice";	//团购到货提醒。发给客户
-
 	public static final String KEY_USER_SESSION_KEY = "user:org:sessionKey:";	//小程序的sessionkey
-	
 	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
-	
-	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId
-	
-	public static final String KEY_MINI_ACCESS_TOKEN = "miniprogram:accessToken:";	//后面接小程序appid
 
+	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId
+	public static final String KEY_MINI_ACCESS_TOKEN = "miniprogram:accessToken:";	//后面接小程序appid
+	
+	public static final String USER_ROLE_RGROUPOWNER = "01";	//01团长
 }		
