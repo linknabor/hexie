@@ -3,7 +3,6 @@ package com.yumu.hexie.service.community.impl;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.CommunityUtil;
 import com.yumu.hexie.integration.community.req.BankVO;
-import com.yumu.hexie.integration.community.req.EditOrderReq;
 import com.yumu.hexie.integration.community.req.QueryWaterVO;
 import com.yumu.hexie.integration.community.req.SurplusVO;
 import com.yumu.hexie.integration.community.resp.*;
@@ -90,10 +89,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<GroupInfoListResp> queryGroupList(User user, String queryName, String groupStatus) {
-        List<GroupInfoListResp> list = new ArrayList<>();
+    public List<GroupInfoVo> queryGroupList(User user, String queryName, String groupStatus) {
+        List<GroupInfoVo> list = new ArrayList<>();
         //TODO
-        GroupInfoListResp resp = new GroupInfoListResp();
+        GroupInfoVo resp = new GroupInfoVo();
         resp.setGroupId("1");
         resp.setGroupName("水果套餐A");
         resp.setGroupPrice("108.00");
@@ -107,7 +106,7 @@ public class AccountServiceImpl implements AccountService {
         resp.setQueryNum("10");
         list.add(resp);
 
-        resp = new GroupInfoListResp();
+        resp = new GroupInfoVo();
         resp.setGroupId("2");
         resp.setGroupName("水果套餐B");
         resp.setGroupPrice("199.00");
@@ -121,7 +120,7 @@ public class AccountServiceImpl implements AccountService {
         resp.setQueryNum("10000");
         list.add(resp);
 
-        resp = new GroupInfoListResp();
+        resp = new GroupInfoVo();
         resp.setGroupId("3");
         resp.setGroupName("水果套餐C");
         resp.setGroupPrice("199.00");
@@ -135,51 +134,9 @@ public class AccountServiceImpl implements AccountService {
         resp.setQueryNum("10000");
         list.add(resp);
 
-        resp = new GroupInfoListResp();
+        resp = new GroupInfoVo();
         resp.setGroupId("4");
         resp.setGroupName("水果套餐D");
-        resp.setGroupPrice("199.00");
-        resp.setGroupDate("10分钟前");
-        resp.setGroupStatus("9");
-        resp.setGroupStatusCn("已结束");
-        resp.setRealityAmt("398.00");
-        resp.setRefundAmt("398.00");
-        resp.setFollowNum("2");
-        resp.setCancelNum("2");
-        resp.setQueryNum("10000");
-        list.add(resp);
-
-        resp = new GroupInfoListResp();
-        resp.setGroupId("5");
-        resp.setGroupName("水果套餐E");
-        resp.setGroupPrice("199.00");
-        resp.setGroupDate("10分钟前");
-        resp.setGroupStatus("9");
-        resp.setGroupStatusCn("已结束");
-        resp.setRealityAmt("398.00");
-        resp.setRefundAmt("398.00");
-        resp.setFollowNum("2");
-        resp.setCancelNum("2");
-        resp.setQueryNum("10000");
-        list.add(resp);
-
-        resp = new GroupInfoListResp();
-        resp.setGroupId("6");
-        resp.setGroupName("水果套餐F");
-        resp.setGroupPrice("199.00");
-        resp.setGroupDate("10分钟前");
-        resp.setGroupStatus("9");
-        resp.setGroupStatusCn("已结束");
-        resp.setRealityAmt("398.00");
-        resp.setRefundAmt("398.00");
-        resp.setFollowNum("2");
-        resp.setCancelNum("2");
-        resp.setQueryNum("10000");
-        list.add(resp);
-
-        resp = new GroupInfoListResp();
-        resp.setGroupId("7");
-        resp.setGroupName("水果套餐G");
         resp.setGroupPrice("199.00");
         resp.setGroupDate("10分钟前");
         resp.setGroupStatus("9");
@@ -216,7 +173,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public GroupSumResp queryGroupTotal(User user, String groupId) {
+    public GroupSumResp queryGroupSum(User user, String groupId) {
         Assert.hasText(groupId, "团购ID不能为空");
 
         //汇总当前团购的有效订单，总金额和退款金额
@@ -226,18 +183,21 @@ public class AccountServiceImpl implements AccountService {
         GroupSumResp.SearchVo searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("有效订单");
         searchVo.setNum("12");
+        searchVo.setMessage("有效订单：全部订单-已取消订单");
         searchVoList.add(searchVo);
 
         //总金额 全部订单的金额，包括取消的订单
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("订单总金额");
         searchVo.setNum("1200.2");
+        searchVo.setMessage("订单总金额：所有订单金额的加总（包含已取消订单）");
         searchVoList.add(searchVo);
 
         //退款金额 全部订单的退款金额
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("退款金额");
         searchVo.setNum("12.00");
+        searchVo.setMessage("退款金额：所有订单的退款金额（包含已取消订单）");
         searchVoList.add(searchVo);
         resp.setSearchVoList(searchVoList);
 
@@ -260,16 +220,15 @@ public class AccountServiceImpl implements AccountService {
         productVo.setProducts(products);
         productVo.setTotalNum(totalNum);
         productVo.setVerifyNum(totalVerify);
-
         resp.setProductVo(productVo);
         return resp;
     }
 
     @Override
-    public List<GroupOrderResp> queryGroupOrder(User user, String groupId, String orderStatus, String searchValue, String type) {
-        List<GroupOrderResp> groupOrders = new ArrayList<>();
+    public List<GroupOrderVo> queryGroupOrder(User user, String groupId, String orderStatus, String searchValue) {
+        List<GroupOrderVo> groupOrders = new ArrayList<>();
         for(int i=0; i<2; i++) {
-            GroupOrderResp groupOrder = new GroupOrderResp();
+            GroupOrderVo groupOrder = new GroupOrderVo();
             groupOrder.setGroupNum(i+1 +"");
             groupOrder.setOrderId("123");
             groupOrder.setOrderStatus("已支付");
@@ -289,17 +248,16 @@ public class AccountServiceImpl implements AccountService {
                 groupOrder.setGroupDesc("");
             }
 
-            List<GroupOrderResp.BuyVo> buyVos = new ArrayList<>();
+            List<BuyGoodsVo> buyVos = new ArrayList<>();
             for(int k=0; k<2; k++) {
                 //订单里购买的商品
-                GroupOrderResp.BuyVo buyVo = new GroupOrderResp.BuyVo();
-                buyVo.setProductName("水果"+k);
-                buyVo.setProductNum(1);
-                buyVo.setProductAmt(new BigDecimal(10));
+                BuyGoodsVo buyVo = new BuyGoodsVo();
+                buyVo.setGoodsName("水果"+k);
+                buyVo.setGoodsNum(1);
+                buyVo.setGoodsAmt(new BigDecimal(10));
                 buyVos.add(buyVo);
             }
-            groupOrder.setBuyList(buyVos);
-
+            groupOrder.setBuyGoodsVoList(buyVos);
             groupOrders.add(groupOrder);
         }
 
@@ -307,8 +265,34 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Boolean editOrder(User user, EditOrderReq editOrderReq) {
+    public GroupOrderVo queryGroupOrderDetail(User user, String orderId) {
+        GroupOrderVo groupOrder = new GroupOrderVo();
+        groupOrder.setGroupNum(1 +"");
+        groupOrder.setOrderId("123");
+        groupOrder.setOrderStatus("已支付");
+        groupOrder.setUserName("张三");
+        groupOrder.setUserHead("https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTK2dBo1ovGPzBEW8N5IibJTbgsy6ic317Cj8VhzlPBstaI1fWJ6vVg4nudNK2IxZ4mXPjxwMoUQQOug/132");
+        groupOrder.setOrderDate("2022-12-25 12:25:45");
+        groupOrder.setOrderNum(1);
+        groupOrder.setTotalAmt(new BigDecimal("54152.24"));
+        groupOrder.setReceiverName("刘仲杰");
+        groupOrder.setReceiverTel("17349778859");
+        groupOrder.setReceiverAddr("上海市闵行区浦涛路510弄15号1201");
+        groupOrder.setLogistics("客户自提");
+        groupOrder.setGroupDesc("这里是备注");
 
-        return null;
+        List<BuyGoodsVo> buyVos = new ArrayList<>();
+        for(int k=0; k<2; k++) {
+            //订单里购买的商品
+            BuyGoodsVo buyVo = new BuyGoodsVo();
+            buyVo.setGoodsName("水果"+k);
+            buyVo.setGoodsNum(1);
+            buyVo.setGoodsAmt(new BigDecimal(10));
+            buyVo.setGoodsImage("");
+            buyVos.add(buyVo);
+        }
+        groupOrder.setBuyGoodsVoList(buyVos);
+
+        return groupOrder;
     }
 }

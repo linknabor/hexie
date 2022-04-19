@@ -5,12 +5,11 @@ import java.util.List;
 
 /**
  * 描述:
- *
+ * 团购订单对象
  * @author jackie
- * @create 2022-04-18 16:54
+ * @create 2022-04-19 15:40
  */
-public class GroupOrderResp {
-
+public class GroupOrderVo {
     private String groupNum; //团购号
     private String orderId; //订单ID
     private String orderStatus; //订单状态
@@ -23,10 +22,9 @@ public class GroupOrderResp {
     private String receiverName; //收货人
     private String receiverTel; //收货人电话
     private String receiverAddr; //收货地址
-    private String groupDesc; //团长备注
+    private String groupDesc; //团购备注
     private String logistics; //物流
-
-    private List<BuyVo> buyList; //购买的商品列表
+    private List<BuyGoodsVo> buyGoodsVoList; //商品列表
 
     public String getGroupNum() {
         return groupNum;
@@ -92,14 +90,6 @@ public class GroupOrderResp {
         this.totalAmt = totalAmt;
     }
 
-    public List<BuyVo> getBuyList() {
-        return buyList;
-    }
-
-    public void setBuyList(List<BuyVo> buyList) {
-        this.buyList = buyList;
-    }
-
     public String getReceiverName() {
         return receiverName;
     }
@@ -140,9 +130,17 @@ public class GroupOrderResp {
         this.logistics = logistics;
     }
 
+    public List<BuyGoodsVo> getBuyGoodsVoList() {
+        return buyGoodsVoList;
+    }
+
+    public void setBuyGoodsVoList(List<BuyGoodsVo> buyGoodsVoList) {
+        this.buyGoodsVoList = buyGoodsVoList;
+    }
+
     @Override
     public String toString() {
-        return "GroupOrderResp{" +
+        return "GroupOrderVo{" +
                 "groupNum='" + groupNum + '\'' +
                 ", orderId='" + orderId + '\'' +
                 ", orderStatus='" + orderStatus + '\'' +
@@ -156,46 +154,7 @@ public class GroupOrderResp {
                 ", receiverAddr='" + receiverAddr + '\'' +
                 ", groupDesc='" + groupDesc + '\'' +
                 ", logistics='" + logistics + '\'' +
-                ", buyList=" + buyList +
+                ", buyGoodsVoList=" + buyGoodsVoList +
                 '}';
-    }
-
-    public static class BuyVo {
-        private String productName;
-        private int productNum;
-        private BigDecimal productAmt;
-
-        public String getProductName() {
-            return productName;
-        }
-
-        public void setProductName(String productName) {
-            this.productName = productName;
-        }
-
-        public int getProductNum() {
-            return productNum;
-        }
-
-        public void setProductNum(int productNum) {
-            this.productNum = productNum;
-        }
-
-        public BigDecimal getProductAmt() {
-            return productAmt;
-        }
-
-        public void setProductAmt(BigDecimal productAmt) {
-            this.productAmt = productAmt;
-        }
-
-        @Override
-        public String toString() {
-            return "BuyVo{" +
-                    "productName='" + productName + '\'' +
-                    ", productNum='" + productNum + '\'' +
-                    ", productAmt='" + productAmt + '\'' +
-                    '}';
-        }
     }
 }

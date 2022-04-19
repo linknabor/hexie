@@ -4,9 +4,9 @@ package com.yumu.hexie.integration.community.resp;
  * 描述:
  *
  * @author jackie
- * @create 2022-04-12 14:03
+ * @create 2022-04-19 15:37
  */
-public class GroupInfoListResp {
+public class GroupInfoVo {
     private String groupId; //团购ID
     private String groupName; //团购名称
     private String groupPrice; //团购金额

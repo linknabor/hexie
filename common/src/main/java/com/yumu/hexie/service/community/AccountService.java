@@ -1,7 +1,6 @@
 package com.yumu.hexie.service.community;
 
 import com.yumu.hexie.integration.community.req.BankVO;
-import com.yumu.hexie.integration.community.req.EditOrderReq;
 import com.yumu.hexie.integration.community.req.QueryWaterVO;
 import com.yumu.hexie.integration.community.req.SurplusVO;
 import com.yumu.hexie.integration.community.resp.*;
@@ -27,17 +26,17 @@ public interface AccountService {
     boolean saveBank(User user, BankVO bankVO) throws Exception;
 
     //查询团购列表
-    List<GroupInfoListResp> queryGroupList(User user, String queryName, String groupStatus);
+    List<GroupInfoVo> queryGroupList(User user, String queryName, String groupStatus);
 
     //更新团购状态
     Boolean updateGroupInfo(User user, String groupId, String operType);
 
     //查询团购汇总信息
-    GroupSumResp queryGroupTotal(User user, String groupId);
+    GroupSumResp queryGroupSum(User user, String groupId);
 
     //查询团购订单列表
-    List<GroupOrderResp> queryGroupOrder(User user, String groupId, String orderStatus, String searchValue, String type);
+    List<GroupOrderVo> queryGroupOrder(User user, String groupId, String orderStatus, String searchValue);
 
-    //修改订单信息
-    Boolean editOrder(User user, EditOrderReq editOrderReq);
+    //根据订单ID查询订单详情
+    GroupOrderVo queryGroupOrderDetail(User user, String orderId);
 }

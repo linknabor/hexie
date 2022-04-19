@@ -2,7 +2,6 @@ package com.yumu.hexie.web.community;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.community.req.BankVO;
-import com.yumu.hexie.integration.community.req.EditOrderReq;
 import com.yumu.hexie.integration.community.req.QueryWaterVO;
 import com.yumu.hexie.integration.community.req.SurplusVO;
 import com.yumu.hexie.integration.community.resp.*;
@@ -104,8 +103,8 @@ public class AccountController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(value = "/getGroupList", method = RequestMethod.GET)
-    public BaseResult<List<GroupInfoListResp>> getGroupList(@ModelAttribute(Constants.USER) User user, @RequestParam String  queryName, @RequestParam String groupStatus) throws Exception{
-        List<GroupInfoListResp> list = accountService.queryGroupList(user, queryName, groupStatus);
+    public BaseResult<List<GroupInfoVo>> getGroupList(@ModelAttribute(Constants.USER) User user, @RequestParam String  queryName, @RequestParam String groupStatus) throws Exception{
+        List<GroupInfoVo> list = accountService.queryGroupList(user, queryName, groupStatus);
         return BaseResult.successResult(list);
     }
 
@@ -129,9 +128,9 @@ public class AccountController extends BaseController {
      * @param groupId
      * @return
      */
-    @RequestMapping(value = "/getGroupOrderList", method = RequestMethod.GET)
-    public BaseResult<GroupSumResp> getGroupOrderList(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId) {
-        GroupSumResp resp = accountService.queryGroupTotal(user, groupId);
+    @RequestMapping(value = "/queryGroupSum", method = RequestMethod.GET)
+    public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId) {
+        GroupSumResp resp = accountService.queryGroupSum(user, groupId);
         return BaseResult.successResult(resp);
     }
 
@@ -141,25 +140,24 @@ public class AccountController extends BaseController {
      * @param groupId
      * @param orderStatus
      * @param searchValue
-     * @param type
      * @return
      */
     @RequestMapping(value = "/queryGroupOrder", method = RequestMethod.GET)
-    public BaseResult<List<GroupOrderResp>> queryGroupOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId,
-                                                      @RequestParam String orderStatus, @RequestParam String searchValue, @RequestParam String type) {
-        List<GroupOrderResp> list = accountService.queryGroupOrder(user, groupId, orderStatus, searchValue, type);
+    public BaseResult<List<GroupOrderVo>> queryGroupOrder(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId,
+                                                      @RequestParam String orderStatus, @RequestParam String searchValue) {
+        List<GroupOrderVo> list = accountService.queryGroupOrder(user, groupId, orderStatus, searchValue);
         return BaseResult.successResult(list);
     }
 
     /**
-     * 修改团购订单信息
+     * 根据订单ID查询订单详情
      * @param user
-     * @param editOrderReq
+     * @param orderId
      * @return
      */
-    @RequestMapping(value = "/editOrder", method = RequestMethod.POST)
-    public BaseResult<Boolean> editOrder(@ModelAttribute(Constants.USER) User user, @RequestBody EditOrderReq editOrderReq) {
-        Boolean flag = accountService.editOrder(user, editOrderReq);
-        return BaseResult.successResult(flag);
+    @RequestMapping(value = "/queryGroupOrderDetail", method = RequestMethod.GET)
+    public BaseResult<GroupOrderVo> queryGroupOrderDetail(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) {
+        GroupOrderVo groupOrderVo = accountService.queryGroupOrderDetail(user, orderId);
+        return BaseResult.successResult(groupOrderVo);
     }
 }

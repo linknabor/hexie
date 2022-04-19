@@ -31,7 +31,7 @@ public class GroupSumResp {
 
     @Override
     public String toString() {
-        return "GroupOrderResp{" +
+        return "GroupSumResp{" +
                 "searchVoList=" + searchVoList +
                 ", productVo=" + productVo +
                 '}';
@@ -76,6 +76,7 @@ public class GroupSumResp {
         }
     }
 
+    //汇总团购商品
     public static class Product {
         private String id; //商品ID
         private String name; //商品名称
@@ -125,9 +126,11 @@ public class GroupSumResp {
         }
     }
 
+    //汇总筛选项
     public static class SearchVo {
         private String name; //名称
         private String num; //值
+        private String message; //提示内容
 
         public String getName() {
             return name;
@@ -145,11 +148,20 @@ public class GroupSumResp {
             this.num = num;
         }
 
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
         @Override
         public String toString() {
-            return "searchVo{" +
+            return "SearchVo{" +
                     "name='" + name + '\'' +
                     ", num='" + num + '\'' +
+                    ", message='" + message + '\'' +
                     '}';
         }
     }
