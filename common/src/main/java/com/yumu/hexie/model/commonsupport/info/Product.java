@@ -69,10 +69,10 @@ public class Product extends BaseModel {
 	private float postageFee = 0;//快递费
 	
 	private int demo = 0;	//0false 1true;
-	
 	private long productCategoryId;	//分类ID
-	
+
 	private int userLimitCount;	//单个用户购买限制	
+	private String tags;	//商品标签
 	
 	@Transient
 	private boolean isService = false;
@@ -357,5 +357,12 @@ public class Product extends BaseModel {
 	public void setUserLimitCount(int userLimitCount) {
 		this.userLimitCount = userLimitCount;
 	}
+	public String getTags() {
+		return tags;
+	}
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+	
 	
 }

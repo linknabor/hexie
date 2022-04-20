@@ -108,6 +108,30 @@ public class CreateRgroupReq implements Serializable {
 		
 	}
 	
+	public static class Tag {
+		
+		private String name;
+		private String color;
+		
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public String getColor() {
+			return color;
+		}
+		public void setColor(String color) {
+			this.color = color;
+		}
+		@Override
+		public String toString() {
+			return "Tag [name=" + name + ", color=" + color + "]";
+		}
+		
+	}
+	
 	public static class Thumbnail {
 	
 		private String url;	//缩略图链接
@@ -140,7 +164,7 @@ public class CreateRgroupReq implements Serializable {
 		private String userLimitCount;	
 		private String description;
 		private Thumbnail[]images;
-		private String[]tags;
+		private Tag[]tags;
 		
 		public String getName() {
 			return name;
@@ -159,12 +183,6 @@ public class CreateRgroupReq implements Serializable {
 		}
 		public void setImages(Thumbnail[] images) {
 			this.images = images;
-		}
-		public String[] getTags() {
-			return tags;
-		}
-		public void setTags(String[] tags) {
-			this.tags = tags;
 		}
 		public String getSinglePrice() {
 			return singlePrice;
@@ -196,12 +214,19 @@ public class CreateRgroupReq implements Serializable {
 		public void setUserLimitCount(String userLimitCount) {
 			this.userLimitCount = userLimitCount;
 		}
+		public Tag[] getTags() {
+			return tags;
+		}
+		public void setTags(Tag[] tags) {
+			this.tags = tags;
+		}
 		@Override
 		public String toString() {
 			return "Product [name=" + name + ", singlePrice=" + singlePrice + ", miniPrice=" + miniPrice + ", oriPrice="
 					+ oriPrice + ", totalCount=" + totalCount + ", userLimitCount=" + userLimitCount + ", description="
 					+ description + ", images=" + Arrays.toString(images) + ", tags=" + Arrays.toString(tags) + "]";
 		}
+		
 		
 	}
 

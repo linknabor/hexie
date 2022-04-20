@@ -702,7 +702,7 @@ public class UserServiceImpl implements UserService {
 			}
             
             //删除已经登陆形成的新用户
-            userRepository.deleteById(user.getId());
+            userRepository.deleteById(miniUser.getId());
         }
         userRepository.flush();
         userRepository.save(userAccount);

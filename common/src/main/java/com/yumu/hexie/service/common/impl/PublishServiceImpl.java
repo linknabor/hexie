@@ -147,8 +147,12 @@ public class PublishServiceImpl implements PublishService {
 				String proEndDateStr = "2099-12-31 23:59:59";
 				Date proEndDate = DateUtil.parse(proEndDateStr, DateUtil.dttmSimple);
 				product.setEndDate(proEndDate);
-				product.setMiniPrice(Float.valueOf(productView.getMiniPrice()));
-				product.setOriPrice(Float.valueOf(productView.getOriPrice()));
+				if (!StringUtils.isEmpty(productView.getMiniPrice())) {
+					product.setMiniPrice(Float.valueOf(productView.getMiniPrice()));
+				}
+				if (!StringUtils.isEmpty(productView.getOriPrice())) {
+					product.setMiniPrice(Float.valueOf(productView.getOriPrice()));
+				}
 				product.setSinglePrice(Float.valueOf(productView.getSinglePrice()));
 				product.setOtherDesc(productView.getDescription());
 				
@@ -176,6 +180,12 @@ public class PublishServiceImpl implements PublishService {
 					userLimitCount = Integer.parseInt(limitStr);
 				}
 				product.setUserLimitCount(userLimitCount);
+				
+				if (productView.getTags() != null && productView.getTags().length > 0) {
+					String tagStr = objectMapper.writeValueAsString(productView.getTags());
+					product.setTags(tagStr.toString());
+				}
+				
 				productRepository.save(product);
 				
 				ProductRule productRule = new ProductRule();
@@ -208,6 +218,7 @@ public class PublishServiceImpl implements PublishService {
 			/*4.保存rgroupAreaItem 当前版本只支持单个小区 end*/
 			
 		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 			throw new BizValidateException("保存团购内容失败。");
 		}
 		
