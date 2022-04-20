@@ -86,8 +86,7 @@ public class RgroupController extends BaseController{
 	
 	@RequestMapping(value = "/rgroups/save", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<String> saveRgroups(@ModelAttribute(Constants.USER)User user,
-				@RequestBody CreateRgroupReq createRgroupReq) throws Exception {
+	public BaseResult<String> saveRgroups(@RequestBody CreateRgroupReq createRgroupReq) throws Exception {
 		
 		publishService.saveRgroup(createRgroupReq);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);

@@ -61,6 +61,7 @@ public class PublishServiceImpl implements PublishService {
 	public void saveRgroup(CreateRgroupReq createRgroupReq) {
 	
 		logger.info("saveRgroup : " + createRgroupReq);
+		Assert.hasText(createRgroupReq.getRgroupOwner().getOwnerTel(), "团长联系方式不能为空");
 		Assert.hasText(createRgroupReq.getType(), "保存类型不能为空");
 		Assert.hasText(createRgroupReq.getDescription(), "团购标题不能为空");
 		Assert.noNullElements(createRgroupReq.getDescriptionMore(), "团购活动内容不能为空");

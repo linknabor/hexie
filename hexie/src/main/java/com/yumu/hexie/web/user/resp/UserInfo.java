@@ -94,6 +94,7 @@ public class UserInfo implements Serializable {
  	private boolean permission; //是否有访问权限
 	private String reqPath; //访问的地址
 	private OrgInfo orgInfo;
+	private String miniopenid;	//小程序openid
 	
 	public static class OrgInfo {
 		
@@ -538,6 +539,14 @@ public class UserInfo implements Serializable {
 
 	public void setOrgMenuList(List<GroupMenuInfo> orgMenuList) {
 		this.orgMenuList = orgMenuList;
+	}
+
+	public String getMiniopenid() {
+		return miniopenid;
+	}
+
+	public void setMiniopenid(String miniopenid) {
+		this.miniopenid = miniopenid;
 	}
 
 	

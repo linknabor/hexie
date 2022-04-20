@@ -703,4 +703,22 @@ public class UserController extends BaseController{
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
+    /**
+     * 更新小程序用户头像和昵称
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/userInfo/update", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<String> updateUserInfo(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> map) throws Exception {
+        
+    	User dbuser = userService.updateUserInfo(user, map);
+        BeanUtils.copyProperties(dbuser, user);
+        request.getSession().setAttribute(Constants.USER, user);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+    
 }

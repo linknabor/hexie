@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -683,20 +684,43 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 
-        if (userAccount == null) {	//如果数据库中没有关联的用户，能直接更新手机号
+        if (userAccount == null) {	//如果数据库中没有关联的用户，直接更新手机号
         	userAccount = miniUser;
         	userAccount.setTel(phone);
         } else {	//如果数据库中有关联的用户，需要合并老记录
             userAccount.setUnionid(miniUser.getUnionid());
-            userAccount.setMiniopenid(miniUser.getOpenid());
+            userAccount.setMiniopenid(miniUser.getMiniopenid());
             userAccount.setMiniAppId(miniUser.getMiniAppId());
             userAccount.setTel(phone);
+            if (!StringUtils.isEmpty(miniUser.getHeadimgurl())) {
+				userAccount.setHeadimgurl(miniUser.getHeadimgurl());
+			}
+            if (!StringUtils.isEmpty(miniUser.getNickname())) {
+				userAccount.setNickname(miniUser.getNickname());
+				userAccount.setName(miniUser.getNickname());
+			}
             
             //删除已经登陆形成的新用户
             userRepository.deleteById(user.getId());
         }
+        userRepository.flush();
         userRepository.save(userAccount);
         return userAccount;
     }
+	
+	@Override
+    @Transactional
+    public User updateUserInfo(User user, Map<String, String> map) {
+		
+		User dbUser = userRepository.findById(user.getId());
+		String avatarUrl  = map.get("avatarUrl");
+		String nickName = map.get("nickName");
+		dbUser.setHeadimgurl(avatarUrl);
+		dbUser.setNickname(nickName);
+		dbUser.setName(nickName);
+		userRepository.save(dbUser);
+		return dbUser;
+		
+	}
 
 }

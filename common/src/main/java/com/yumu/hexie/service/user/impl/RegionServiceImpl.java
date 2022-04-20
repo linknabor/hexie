@@ -77,7 +77,7 @@ public class RegionServiceImpl implements RegionService{
 	@Override
 	public List<Region> findByRgroupOwner(User user) {
 		
-		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getId();
+		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getMiniopenid();	//这里用小程序的openid。如果小程序没有绑定公众号，则unionid可能是空的
 		String regionStr = stringRedisTemplate.opsForValue().get(key);
 		TypeReference<List<Region>> typeReference = new TypeReference<List<Region>>() {};
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
@@ -99,7 +99,7 @@ public class RegionServiceImpl implements RegionService{
 	@Override
 	public void saveOwnerServiceArea(User user, Region region) {
 		
-		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getId();
+		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getMiniopenid();
 		String regionStr = stringRedisTemplate.opsForValue().get(key);
 		TypeReference<List<Region>> typeReference = new TypeReference<List<Region>>() {};
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
@@ -138,7 +138,7 @@ public class RegionServiceImpl implements RegionService{
 	@Override
 	public void delOwnerServiceArea(User user, long regionId) {
 		
-		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getId();
+		String key = ModelConstant.KEY_RGROUP_OWNER_REGION + user.getMiniopenid();
 		String regionStr = stringRedisTemplate.opsForValue().get(key);
 		TypeReference<List<Region>> typeReference = new TypeReference<List<Region>>() {};
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
