@@ -33,9 +33,9 @@ import com.yumu.hexie.common.util.RedisUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
+import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.localservice.ServiceType;
 import com.yumu.hexie.model.localservice.basemodel.BaseO2OService;
@@ -1212,7 +1212,7 @@ public class CouponServiceImpl implements CouponService {
 		BigDecimal totalAmount = BigDecimal.ZERO;
 		for (OrderItem orderItem : itemList) {
 			String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
-			ProductRule productRule = redisRepository.getProdcutRule(key);
+			ProductRuleCache productRule = redisRepository.getProdcutRule(key);
 			if (productRule == null) {
 				throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
 			}

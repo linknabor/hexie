@@ -72,6 +72,8 @@ public class Product extends BaseModel {
 	
 	private long productCategoryId;	//分类ID
 	
+	private int userLimitCount;	//单个用户购买限制	
+	
 	@Transient
 	private boolean isService = false;
 	
@@ -348,6 +350,12 @@ public class Product extends BaseModel {
 	}
 	public void setService(boolean isService) {
 		this.isService = isService;
+	}
+	public int getUserLimitCount() {
+		return userLimitCount;
+	}
+	public void setUserLimitCount(int userLimitCount) {
+		this.userLimitCount = userLimitCount;
 	}
 	
 }

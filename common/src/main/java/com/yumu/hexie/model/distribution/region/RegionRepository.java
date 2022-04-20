@@ -16,7 +16,10 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 
     List<Region> findByNameAndRegionType(String name, int regionType);
     
-    List<Region> findByNameLikeAndRegionType(String name, int regionType, Pageable pageable);
+    @Query(value="select * from region where regionType = ?1 "
+    + "and if(?2!='', name like %?2%, 1=1) ", 
+    	nativeQuery = true)
+    List<Region> findByRegionTypeAndNameLike(int regionType, String name, Pageable pageable);
     
     @Query(" from Region  where regionType < 4")
 	List<Region> findNeedRegion();

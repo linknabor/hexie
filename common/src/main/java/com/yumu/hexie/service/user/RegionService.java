@@ -20,5 +20,9 @@ public interface RegionService {
 	public List<Region> findByNameLikeAndType(String name);
 
 	List<Region> findByRgroupOwner(User user);
+
+	void saveOwnerServiceArea(User user, Region region);
+
+	void delOwnerServiceArea(User user, long regionId);
 	
 }

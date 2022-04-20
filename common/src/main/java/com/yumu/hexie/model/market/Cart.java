@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
@@ -34,7 +34,7 @@ public class Cart extends BaseModel {
 	 * 添加商品
 	 * @param goods
 	 */
-	public void add(OrderItem orderItem, ProductRule productRule, int stock) {
+	public void add(OrderItem orderItem, ProductRuleCache productRule, int stock) {
 		
 		BigDecimal unitPrice = new BigDecimal(String.valueOf(productRule.getPrice()));	//前端传上来的价格不可信，全部采用后端计算
 		BigDecimal count = new BigDecimal(orderItem.getCount());	//数量采用前端传的
@@ -85,7 +85,7 @@ public class Cart extends BaseModel {
 	 * @param orderItem
 	 * @param productRule
 	 */
-	private void fillRuleInfo(OrderItem orderItem, ProductRule productRule) {
+	private void fillRuleInfo(OrderItem orderItem, ProductRuleCache productRule) {
 		
 		orderItem.setRuleName(productRule.getName());
 		orderItem.setPrice(productRule.getPrice());	//前端传上来的价格不可信，全部采用后端计算
@@ -107,7 +107,7 @@ public class Cart extends BaseModel {
 	 * 删除商品
 	 * @param delGoods
 	 */
-	public void del(OrderItem orderItem, ProductRule productRule) {
+	public void del(OrderItem orderItem, ProductRuleCache productRule) {
 		
 		if (this.items == null || this.items.isEmpty()) {
 			return;

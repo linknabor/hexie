@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.user;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -132,5 +133,13 @@ public interface UserService {
 	 * @return
 	 */
 	User saveMiniUserPhone(User user, MiniUserPhone miniUserPhone);
+	
+	/**
+	 * 更新用户信息
+	 * @param user
+	 * @param map
+	 * @return
+	 */
+	User updateUserInfo(User user, Map<String, String> map);
 
 }

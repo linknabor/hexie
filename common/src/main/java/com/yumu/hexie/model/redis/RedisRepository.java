@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.car.OrderCarInfo;
@@ -36,7 +36,7 @@ public class RedisRepository {
 	private RedisTemplate<String, Object> authRedisTemplate;
     @Autowired
     @Qualifier("redisTemplate")
-    private RedisTemplate<String, ProductRule> proRedisTemplate;
+    private RedisTemplate<String, ProductRuleCache> proRedisTemplate;
     @Autowired
     @Qualifier("redisTemplate")
     private RedisTemplate<String, CouponCfg> couponRuleRedisTemplate;
@@ -105,14 +105,14 @@ public class RedisRepository {
     	return (String) authRedisTemplate.opsForValue().get(key);
     }
     
-    public void setProdcutRule(String key, ProductRule value) {
+    public void setProdcutRule(String key, ProductRuleCache value) {
     	
     	Date start = value.getStartDate();
     	Date end = value.getEndDate();
     	long expire = end.getTime() - start.getTime();
     	proRedisTemplate.opsForValue().set(key, value, expire, TimeUnit.MILLISECONDS);
     }
-    public ProductRule getProdcutRule(String key) {
+    public ProductRuleCache getProdcutRule(String key) {
         return proRedisTemplate.opsForValue().get(key);
     }
     
