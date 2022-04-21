@@ -19,10 +19,10 @@ import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.DistributionService;
-import com.yumu.hexie.service.common.PublishService;
+import com.yumu.hexie.service.common.RgroupV3Service;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
-import com.yumu.hexie.vo.CreateRgroupReq;
+import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
@@ -36,7 +36,7 @@ public class RgroupController extends BaseController{
     @Inject
     private DistributionService distributionService;
     @Autowired
-    private PublishService publishService;
+    private RgroupV3Service rgroupV3Service;
 
 	@RequestMapping(value = "/rgroups/{page}", method = RequestMethod.GET)
 	@ResponseBody
@@ -84,13 +84,29 @@ public class RgroupController extends BaseController{
         return commonResponse;
     }
 	
-	@RequestMapping(value = "/rgroups/save", method = RequestMethod.POST)
+	@RequestMapping(value = "/rgroups/v3/save", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<String> saveRgroups(@RequestBody CreateRgroupReq createRgroupReq) throws Exception {
+	public BaseResult<String> saveRgroups(@RequestBody RgroupVO createRgroupReq) throws Exception {
 		
-		publishService.saveRgroup(createRgroupReq);
+		rgroupV3Service.saveRgroup(createRgroupReq);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
 	
+	@RequestMapping(value = "/rgroups/v3/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RgroupAreaItem>> getRgroupsV3(@ModelAttribute(Constants.USER)User user,
+				@PathVariable int page) throws Exception {
+		
+		List<RgroupAreaItem> items = distributionService.queryRgroupsV2(user, page);
+        return new BaseResult<List<RgroupAreaItem>>().success(rgroupService.addProcessStatus(items));
+    }
+	
+	@RequestMapping(value = "/rgroups/v3/queryByRule/{ruleId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<RgroupVO> getRgroupsByRuleV3(@PathVariable String ruleId) throws Exception {
+		
+		RgroupVO vo = rgroupV3Service.queryRgroupByRule(ruleId);
+        return new BaseResult<RgroupVO>().success(vo);
+    }
 	
 }

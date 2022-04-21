@@ -6,7 +6,7 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.distribution.region.Region;
 
-public class CreateRgroupReq implements Serializable {
+public class RgroupVO implements Serializable {
 
 	/**
 	 * 
@@ -14,23 +14,30 @@ public class CreateRgroupReq implements Serializable {
 	private static final long serialVersionUID = 1464110493231846128L;
 	
 	private String type;	//创建类型，0保存预览，1保存发布
+	private String createDate;	//团购创建事件
 	private String description;	//团购title，
 	private DescriptionMore[]descriptionMore;	//团购内容
 	private String startDate;	//团购起始日期,页面的格式是yyyy/MM/dd HH:mm
 	private String endDate;		//团购结束日期,同上
 	private int logisticType = 1;//0商户派送 1用户自提 2第三方配送
 	private int groupMinNum;	//最小成团份数
-	private Product[]productList;
+	private ProductVO[]productList;
 	private Region region;	//团购地区
-	private RgroupOwner rgroupOwner;
+	private RgroupOwnerVO rgroupOwner;
 	
-	public static class RgroupOwner {
+	public static class RgroupOwnerVO {
 
-		private long ownerId;
+		private long ownerId;		//这个ownerid是user表的id
 		private String ownerName;
 		private String ownerAddr;
 		private String ownerImg;
 		private String ownerTel;
+		
+		/*下面这些展示用*/
+		private int followers;	//TODO 关注人数  这个不知道有什么用？
+		private int members;	//订阅人数,成员数
+		private int attendees;		//跟团人次
+		private String consultRate;
 		
 		public long getOwnerId() {
 			return ownerId;
@@ -62,10 +69,35 @@ public class CreateRgroupReq implements Serializable {
 		public void setOwnerTel(String ownerTel) {
 			this.ownerTel = ownerTel;
 		}
+		public int getFollowers() {
+			return followers;
+		}
+		public void setFollowers(int followers) {
+			this.followers = followers;
+		}
+		public int getMembers() {
+			return members;
+		}
+		public void setMembers(int members) {
+			this.members = members;
+		}
+		public int getAttendees() {
+			return attendees;
+		}
+		public void setAttendees(int attendees) {
+			this.attendees = attendees;
+		}
+		public String getConsultRate() {
+			return consultRate;
+		}
+		public void setConsultRate(String consultRate) {
+			this.consultRate = consultRate;
+		}
 		@Override
 		public String toString() {
-			return "RgroupOwner [ownerId=" + ownerId + ", ownerName=" + ownerName + ", ownerAddr=" + ownerAddr
-					+ ", ownerImg=" + ownerImg + ", ownerTel=" + ownerTel + "]";
+			return "RgroupOwnerVO [ownerId=" + ownerId + ", ownerName=" + ownerName + ", ownerAddr=" + ownerAddr
+					+ ", ownerImg=" + ownerImg + ", ownerTel=" + ownerTel + ", followers=" + followers + ", members="
+					+ members + ", attendees=" + attendees + ", consultRate=" + consultRate + "]";
 		}
 		
 	}
@@ -151,7 +183,7 @@ public class CreateRgroupReq implements Serializable {
 		
 	}
 	
-	public static class Product {
+	public static class ProductVO {
 		
 		private String name;
 		@JsonProperty("price")
@@ -278,11 +310,11 @@ public class CreateRgroupReq implements Serializable {
 		this.groupMinNum = groupMinNum;
 	}
 
-	public Product[] getProductList() {
+	public ProductVO[] getProductList() {
 		return productList;
 	}
 
-	public void setProductList(Product[] productList) {
+	public void setProductList(ProductVO[] productList) {
 		this.productList = productList;
 	}
 
@@ -302,20 +334,29 @@ public class CreateRgroupReq implements Serializable {
 		this.region = region;
 	}
 
-	public RgroupOwner getRgroupOwner() {
+	public RgroupOwnerVO getRgroupOwner() {
 		return rgroupOwner;
 	}
 
-	public void setRgroupOwner(RgroupOwner rgroupOwner) {
+	public void setRgroupOwner(RgroupOwnerVO rgroupOwner) {
 		this.rgroupOwner = rgroupOwner;
+	}
+
+	public String getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(String createDate) {
+		this.createDate = createDate;
 	}
 
 	@Override
 	public String toString() {
-		return "CreateRgroupReq [type=" + type + ", description=" + description + ", descriptionMore="
-				+ Arrays.toString(descriptionMore) + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", logisticType=" + logisticType + ", groupMinNum=" + groupMinNum + ", productList="
+		return "RgroupVO [type=" + type + ", createDate=" + createDate + ", description=" + description
+				+ ", descriptionMore=" + Arrays.toString(descriptionMore) + ", startDate=" + startDate + ", endDate="
+				+ endDate + ", logisticType=" + logisticType + ", groupMinNum=" + groupMinNum + ", productList="
 				+ Arrays.toString(productList) + ", region=" + region + ", rgroupOwner=" + rgroupOwner + "]";
 	}
 
+	
 }
