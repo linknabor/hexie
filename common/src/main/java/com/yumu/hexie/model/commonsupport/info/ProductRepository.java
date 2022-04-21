@@ -156,4 +156,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 //	@Query(value = "update product set totalCount = totalCount - ?1 where id = ?2 ", nativeQuery = true)
 //	void updateStock(int count, long id);
 	
+	@Query(value = "select p.* from product p join productRule pr on p.id = pr.productId where pr.ruleId = ?1 "
+			, nativeQuery = true)
+	List<Product> findMultiByRuleId(long ruleId);
+	
+	
 }

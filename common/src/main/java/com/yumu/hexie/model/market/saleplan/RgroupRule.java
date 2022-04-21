@@ -28,6 +28,7 @@ public class RgroupRule extends SalePlan {
 	private String ownerTel;
 	/** 售卖情况 */
 	
+	private long agentId;	//团购所在机构，取开团时团长的机构
 	private long groupFinishDate;	//成团日期
 
 	@Transient
@@ -141,5 +142,13 @@ public class RgroupRule extends SalePlan {
 		this.ownerTel = ownerTel;
 	}
 
+	public long getAgentId() {
+		return agentId;
+	}
 
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+
+	
 }
