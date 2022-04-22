@@ -122,9 +122,18 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			/*1.保存团长信息 end */
 
-			
 			/*2.保存rGroupRule start */
-			RgroupRule rule = new RgroupRule();
+			String ruleIdStr = rgroupVo.getRuleId();
+			Long ruleId = 0L;
+			RgroupRule rule = null;
+			if (!StringUtils.isEmpty(ruleIdStr)) {
+				ruleId = Long.valueOf(ruleIdStr);
+				Optional<RgroupRule> optional = rgroupRuleRepository.findById(ruleId);
+				rule = optional.get();
+			}
+			if (rule == null) {	//新增
+				rule = new RgroupRule();
+			}
 			rule.setDescription(rgroupVo.getDescription());
 			DescriptionMore[]descMore = rgroupVo.getDescriptionMore();
 			String descStr = objectMapper.writeValueAsString(descMore);
@@ -172,7 +181,17 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			
 			/*3.保存product start */
 			for (ProductVO productView : productList) {
-				com.yumu.hexie.model.commonsupport.info.Product product = new com.yumu.hexie.model.commonsupport.info.Product();
+				String productIdStr = productView.getId();
+				Product product = null;
+				Long productId = 0L;
+				if (!StringUtils.isEmpty(productIdStr)) {
+					productId = Long.valueOf(productIdStr);
+					Optional<Product> proOptional = productRepository.findById(productId);
+					product = proOptional.get();
+				}
+				if (product == null) {
+					product = new Product();
+				}
 				product.setName(productView.getName());
 				product.setStartDate(new Date());
 				String proEndDateStr = "2099-12-31 23:59:59";
@@ -218,7 +237,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				}
 				productRepository.save(product);
 				
-				ProductRule productRule = new ProductRule();
+				
+				ProductRule productRule = productRuleRepository.findByRuleIdAndProductId(rule.getId(), product.getId());
+				if (productRule == null) {
+					productRule = new ProductRule();
+				}
 				productRule.setProductId(product.getId());
 				productRule.setRuleId(rule.getId());
 				productRuleRepository.save(productRule);
@@ -227,12 +250,18 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				ProductRuleCache productRuleCache = new ProductRuleCache(product, rule);
 				String key = ModelConstant.KEY_PRO_RULE_INFO + productRuleCache.getId()+ "_" + product.getId();
 				redisRepository.setProdcutRule(key, productRuleCache);
-				stringRedisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));
+				stringRedisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));	//TODO 编辑是否要改库存？
 			
 			}
 			/*3.保存product end */
 			
 			/*4.保存rgroupAreaItem 当前版本只支持单个小区 start*/
+			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+			if (areaList != null && areaList.size() > 0) {
+				for (RgroupAreaItem areaItem : areaList) {
+					rgroupAreaItemRepository.deleteById(areaItem.getId());
+				}
+			}
 			RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
 			rgroupAreaItem.setRegionId(region.getId());
 			rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
@@ -278,13 +307,35 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			if (optional != null) {
 				rule = optional.get();
 			}
-
+			if (rule == null) {
+				throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
+			}
+			vo.setRuleId(String.valueOf(rule.getId()));
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 			String descMoreStr = rule.getDescriptionMore();
 			TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
 			DescriptionMore[]descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
 			vo.setDescription(rule.getDescription());
 			vo.setDescriptionMore(descriptionMore);
+			vo.setStatus(String.valueOf(rule.getStatus()));
+			
+			List<String> descMoreImages = new ArrayList<>();
+			for (DescriptionMore descM : descriptionMore) {
+				String imageUrl = descM.getImage();
+				if (!StringUtils.isEmpty(imageUrl)) {
+					descMoreImages.add(imageUrl);
+				}
+				Thumbnail[]thumbnails = descM.getThumbnail();
+				if (thumbnails!=null && thumbnails.length>0) {
+					for (Thumbnail thumbnail : thumbnails) {
+						if (!StringUtils.isEmpty(thumbnail.getUrl())) {
+							descMoreImages.add(thumbnail.getUrl());
+						}
+					}
+				}
+			}
+			vo.setDescMoreImages(descMoreImages);
+			
 			int ruleStatus = rule.getStatus();
 			String type = "0";
 			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
@@ -292,11 +343,14 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			vo.setType(type);
 			Date startDate = rule.getStartDate();
-			String startDateStr = DateUtil.dtFormat(startDate, DateUtil.dttmSimple);
+			String dtFormat = "yyyy/MM/dd HH:mm";
+			String startDateStr = DateUtil.dtFormat(startDate, dtFormat);
 			vo.setStartDate(startDateStr);
+			vo.setStartDateMills(startDate.getTime());
 			Date endDate = rule.getEndDate();
-			String endDateStr = DateUtil.dtFormat(endDate, DateUtil.dttmSimple);
+			String endDateStr = DateUtil.dtFormat(endDate, dtFormat);
 			vo.setEndDate(endDateStr);
+			vo.setEndDateMills(endDate.getTime());
 			vo.setGroupMinNum(rule.getGroupMinNum());
 			long createDate = rule.getCreateDate();
 			vo.setCreateDate(DateUtil.getSendTime(createDate));
@@ -307,11 +361,14 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			TypeReference<Tag[]> tagRefer = new TypeReference<Tag[]>() {};
 			for (Product product : productList) {
 				ProductVO proVo = new ProductVO();
+				proVo.setId(String.valueOf(product.getId()));
 				proVo.setDescription(product.getOtherDesc());
 				String picsStr = product.getPictures();
 				List<Thumbnail> thumbnailList = new ArrayList<>();
+				String[]imageList = null;
 				if (!StringUtils.isEmpty(picsStr)) {
 					String[]pics = picsStr.split(",");
+					imageList= pics;
 					for (String imgUrl : pics) {
 						Thumbnail thumbnail = new Thumbnail();
 						thumbnail.setUrl(imgUrl);
@@ -319,13 +376,33 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					}
 					
 				}
+				proVo.setImageList(imageList);
 				proVo.setImages(thumbnailList.toArray(new Thumbnail[0]));
-				proVo.setMiniPrice(String.valueOf(product.getMiniPrice()));
 				proVo.setName(product.getName());
-				proVo.setOriPrice(String.valueOf(product.getOriPrice()));
+				
 				proVo.setSinglePrice(String.valueOf(product.getSinglePrice()));
-				proVo.setTotalCount(String.valueOf(product.getTotalCount()));
-				proVo.setUserLimitCount(String.valueOf(product.getUserLimitCount()));
+				String miniPriceStr = "";
+				if (product.getMiniPrice() > 0f) {
+					miniPriceStr = String.valueOf(product.getMiniPrice());
+				}
+				proVo.setMiniPrice(miniPriceStr);
+				
+				String oriPriceStr = "";
+				if (product.getOriPrice() > 0f) {
+					oriPriceStr = String.valueOf(product.getOriPrice());
+				}
+				proVo.setOriPrice(oriPriceStr);
+				
+				String stockStr = String.valueOf(product.getTotalCount());
+				if (product.getTotalCount() > 1000000) {
+					stockStr = "";
+				}
+				proVo.setTotalCount(stockStr);
+				String userLimitCount = String.valueOf(product.getUserLimitCount());
+				if (product.getUserLimitCount() == 9999) {
+					userLimitCount = "";
+				}
+				proVo.setUserLimitCount(userLimitCount);
 				String tagStr = product.getTags();
 				if (!StringUtils.isEmpty(tagStr)) {
 					Tag[]tags = objectMapper.readValue(tagStr, tagRefer);

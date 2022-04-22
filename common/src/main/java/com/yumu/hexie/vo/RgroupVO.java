@@ -2,6 +2,7 @@ package com.yumu.hexie.vo;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -13,17 +14,23 @@ public class RgroupVO implements Serializable {
 	 */
 	private static final long serialVersionUID = 1464110493231846128L;
 	
+	private String ruleId;	//团购id，编辑保存时有此项
 	private String type;	//创建类型，0保存预览，1保存发布
+	private String status;	//团购状态
 	private String createDate;	//团购创建事件
 	private String description;	//团购title，
 	private DescriptionMore[]descriptionMore;	//团购内容
 	private String startDate;	//团购起始日期,页面的格式是yyyy/MM/dd HH:mm
 	private String endDate;		//团购结束日期,同上
+	private long startDateMills;	//前端展示用
+	private long endDateMills;	//前端展示用
 	private int logisticType = 1;//0商户派送 1用户自提 2第三方配送
 	private int groupMinNum;	//最小成团份数
 	private ProductVO[]productList;
 	private Region region;	//团购地区
 	private RgroupOwnerVO rgroupOwner;
+	
+	private List<String> descMoreImages;
 	
 	public static class RgroupOwnerVO {
 
@@ -185,6 +192,7 @@ public class RgroupVO implements Serializable {
 	
 	public static class ProductVO {
 		
+		private String id;	//产品ID，如果是导入商品，由此项
 		private String name;
 		@JsonProperty("price")
 		private String singlePrice;	//售卖价
@@ -197,6 +205,7 @@ public class RgroupVO implements Serializable {
 		private String description;
 		private Thumbnail[]images;
 		private Tag[]tags;
+		private String[]imageList;
 		
 		public String getName() {
 			return name;
@@ -252,13 +261,25 @@ public class RgroupVO implements Serializable {
 		public void setTags(Tag[] tags) {
 			this.tags = tags;
 		}
+		public String[] getImageList() {
+			return imageList;
+		}
+		public void setImageList(String[] imageList) {
+			this.imageList = imageList;
+		}
+		public String getId() {
+			return id;
+		}
+		public void setId(String id) {
+			this.id = id;
+		}
 		@Override
 		public String toString() {
-			return "Product [name=" + name + ", singlePrice=" + singlePrice + ", miniPrice=" + miniPrice + ", oriPrice="
-					+ oriPrice + ", totalCount=" + totalCount + ", userLimitCount=" + userLimitCount + ", description="
-					+ description + ", images=" + Arrays.toString(images) + ", tags=" + Arrays.toString(tags) + "]";
+			return "ProductVO [id=" + id + ", name=" + name + ", singlePrice=" + singlePrice + ", miniPrice="
+					+ miniPrice + ", oriPrice=" + oriPrice + ", totalCount=" + totalCount + ", userLimitCount="
+					+ userLimitCount + ", description=" + description + ", images=" + Arrays.toString(images)
+					+ ", tags=" + Arrays.toString(tags) + ", imageList=" + Arrays.toString(imageList) + "]";
 		}
-		
 		
 	}
 
@@ -350,12 +371,54 @@ public class RgroupVO implements Serializable {
 		this.createDate = createDate;
 	}
 
+	public List<String> getDescMoreImages() {
+		return descMoreImages;	
+	}
+
+	public void setDescMoreImages(List<String> descMoreImages) {
+		this.descMoreImages = descMoreImages;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getRuleId() {
+		return ruleId;
+	}
+
+	public void setRuleId(String ruleId) {
+		this.ruleId = ruleId;
+	}
+
+	public long getStartDateMills() {
+		return startDateMills;
+	}
+
+	public void setStartDateMills(long startDateMills) {
+		this.startDateMills = startDateMills;
+	}
+
+	public long getEndDateMills() {
+		return endDateMills;
+	}
+
+	public void setEndDateMills(long endDateMills) {
+		this.endDateMills = endDateMills;
+	}
+
 	@Override
 	public String toString() {
-		return "RgroupVO [type=" + type + ", createDate=" + createDate + ", description=" + description
-				+ ", descriptionMore=" + Arrays.toString(descriptionMore) + ", startDate=" + startDate + ", endDate="
-				+ endDate + ", logisticType=" + logisticType + ", groupMinNum=" + groupMinNum + ", productList="
-				+ Arrays.toString(productList) + ", region=" + region + ", rgroupOwner=" + rgroupOwner + "]";
+		return "RgroupVO [ruleId=" + ruleId + ", type=" + type + ", status=" + status + ", createDate=" + createDate
+				+ ", description=" + description + ", descriptionMore=" + Arrays.toString(descriptionMore)
+				+ ", startDate=" + startDate + ", endDate=" + endDate + ", startDateMills=" + startDateMills
+				+ ", endDateMills=" + endDateMills + ", logisticType=" + logisticType + ", groupMinNum=" + groupMinNum
+				+ ", productList=" + Arrays.toString(productList) + ", region=" + region + ", rgroupOwner="
+				+ rgroupOwner + ", descMoreImages=" + descMoreImages + "]";
 	}
 
 	
