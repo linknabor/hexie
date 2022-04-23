@@ -3,6 +3,8 @@ package com.yumu.hexie.service.user.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,10 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -24,6 +28,7 @@ import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.RegionService;
+import com.yumu.hexie.vo.QQMapVO;
 
 @Service("regionService")
 public class RegionServiceImpl implements RegionService{
@@ -168,6 +173,58 @@ public class RegionServiceImpl implements RegionService{
 		} catch (Exception e) {
 			throw new BizValidateException(e.getMessage(), e);
 		}
+		
+	}
+	
+	/**
+	 * 团长新建小区
+	 * @param user
+	 * @param map
+	 */
+	@Transactional
+	@Override
+	public Region createSect(User user, QQMapVO mapVO) {
+		
+		logger.info("createSect : " + mapVO);
+		
+		Assert.hasText(mapVO.getName(), "小区名称不能为空");
+		Assert.hasText(mapVO.getAddress(), "小区地址不能为空");
+		
+		Region region = new Region();
+		region.setName(mapVO.getName());
+		region.setParentName(mapVO.getDistrict());
+		region.setRegionType(ModelConstant.REGION_XIAOQU);
+		region.setLatitude(Double.valueOf(mapVO.getLatitude()));
+		region.setLongitude(Double.valueOf(mapVO.getLongitude()));
+		region.setXiaoquAddress(mapVO.getAddress());
+		region.setDescription("created by " + user.getId());
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		String regionStr;
+		try {
+			regionStr = objectMapper.writeValueAsString(region);
+		} catch (JsonProcessingException e) {
+			logger.info(e.getMessage(), e);
+			throw new BizValidateException(e.getMessage());
+		}
+		Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent(region.getName(), regionStr);
+		if(absent) {
+			regionRepository.save(region);
+		} else {
+			List<Region> regionList = regionRepository.findByNameAndRegionType(region.getName(), ModelConstant.REGION_XIAOQU);
+			if (regionList == null || regionList.size() == 0) {
+				throw new BizValidateException("前方拥挤，请稍后再试。");
+			}
+			if (regionList.size()>0) {
+				for (Region currRegion : regionList) {
+					if (!StringUtils.isEmpty(currRegion.getDescription())) {
+						region = currRegion;
+						break;
+					}
+				}
+			}
+		}
+		saveOwnerServiceArea(user, region);
+		return region;
 		
 	}
 
