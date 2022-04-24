@@ -84,4 +84,34 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	Page<Object[]> findByMultiCondRgroup(String productType, String ruleId, String ruleName, List<Integer>groupStatus, 
 			String startDate, String endDate, String agentId, String isDemo, String leaderId, List<String>sectList, Pageable pageable);
 
+
+
+	//查询团购列表(团长端)
+	String sqlColumn2 = " rule.id, rule.createDate, rule.description, rule.startDate, rule.endDate, rule.price, rule.status, rule.groupStatus ";
+	@Query(value = "select " + sqlColumn2
+			+ "from rgrouprule rule "
+			+ "where rule.ownerId = ?1 "
+			+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3='1', rule.status = '1' "
+			+ "and rule.startDate >= CURRENT_TIMESTAMP() "
+			+ "and rule.endDate <= CURRENT_TIMESTAMP(), "
+			+ "IF(?3='2', rule.status = '0', "
+			+ "IF(?3='3', rule.status = '1' "
+			+ "and rule.endDate < CURRENT_TIMESTAMP() , "
+			+ "IF(?3='4', rule.status = '1' "
+			+ "and rule.startDate > CURRENT_TIMESTAMP(), 1=1) ))) "
+			, countQuery = "select count(1) from rgrouprule rule "
+			+ "where rule.ownerId = ?1 "
+			+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3='1', rule.status = '1' "
+			+ "and rule.startDate >= CURRENT_TIMESTAMP() "
+			+ "and rule.endDate <= CURRENT_TIMESTAMP(), "
+			+ "IF(?3='2', rule.status = '0', "
+			+ "IF(?3='3', rule.status = '1' "
+			+ "and rule.endDate < CURRENT_TIMESTAMP() , "
+			+ "IF(?3='4', rule.status = '1' "
+			+ "and rule.startDate > CURRENT_TIMESTAMP(), 1=1) ))) "
+			, nativeQuery = true)
+	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
+
 }

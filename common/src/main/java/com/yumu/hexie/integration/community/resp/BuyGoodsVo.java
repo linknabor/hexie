@@ -9,10 +9,19 @@ import java.math.BigDecimal;
  * @create 2022-04-19 15:42
  */
 public class BuyGoodsVo {
+    private Long goodsId;
     private String goodsName;
     private int goodsNum;
-    private BigDecimal goodsAmt;
+    private Float goodsAmt;
     private String goodsImage;
+
+    public Long getGoodsId() {
+        return goodsId;
+    }
+
+    public void setGoodsId(Long goodsId) {
+        this.goodsId = goodsId;
+    }
 
     public String getGoodsName() {
         return goodsName;
@@ -30,11 +39,11 @@ public class BuyGoodsVo {
         this.goodsNum = goodsNum;
     }
 
-    public BigDecimal getGoodsAmt() {
+    public Float getGoodsAmt() {
         return goodsAmt;
     }
 
-    public void setGoodsAmt(BigDecimal goodsAmt) {
+    public void setGoodsAmt(Float goodsAmt) {
         this.goodsAmt = goodsAmt;
     }
 
@@ -49,7 +58,8 @@ public class BuyGoodsVo {
     @Override
     public String toString() {
         return "BuyGoodsVo{" +
-                "goodsName='" + goodsName + '\'' +
+                "goodsId='" + goodsId + '\'' +
+                ", goodsName='" + goodsName + '\'' +
                 ", goodsNum=" + goodsNum +
                 ", goodsAmt=" + goodsAmt +
                 ", goodsImage='" + goodsImage + '\'' +

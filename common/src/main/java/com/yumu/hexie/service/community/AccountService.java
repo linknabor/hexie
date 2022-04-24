@@ -1,8 +1,6 @@
 package com.yumu.hexie.service.community;
 
-import com.yumu.hexie.integration.community.req.BankVO;
-import com.yumu.hexie.integration.community.req.QueryWaterVO;
-import com.yumu.hexie.integration.community.req.SurplusVO;
+import com.yumu.hexie.integration.community.req.*;
 import com.yumu.hexie.integration.community.resp.*;
 import com.yumu.hexie.model.user.User;
 
@@ -26,17 +24,29 @@ public interface AccountService {
     boolean saveBank(User user, BankVO bankVO) throws Exception;
 
     //查询团购列表
-    List<GroupInfoVo> queryGroupList(User user, String queryName, String groupStatus);
+    List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq);
 
     //更新团购状态
     Boolean updateGroupInfo(User user, String groupId, String operType);
 
     //查询团购汇总信息
-    GroupSumResp queryGroupSum(User user, String groupId);
+    GroupSumResp queryGroupSum(User user, String groupId) throws Exception;
 
     //查询团购订单列表
-    List<GroupOrderVo> queryGroupOrder(User user, String groupId, String orderStatus, String searchValue);
+    List<GroupOrderVo> queryGroupOrder(User user, QueryGroupReq queryGroupReq) throws Exception;
 
     //根据订单ID查询订单详情
     GroupOrderVo queryGroupOrderDetail(User user, String orderId);
+
+    //订单核销
+    Boolean handleVerifyCode(User user, String orderId, String code);
+
+    //取消订单
+    Boolean cancelOrder(User user, String orderId) throws Exception;
+
+    //订单退款
+    Boolean refundOrder(User user, RefundInfoReq refundInfoReq) throws Exception;
+
+    //未提货通知
+    Boolean noticeReceiving(User user, String groupId);
 }

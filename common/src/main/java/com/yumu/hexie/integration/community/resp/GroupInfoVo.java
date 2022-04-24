@@ -1,61 +1,105 @@
 package com.yumu.hexie.integration.community.resp;
 
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+
 /**
  * 描述:
  *
  * @author jackie
  * @create 2022-04-19 15:37
  */
-public class GroupInfoVo {
-    private String groupId; //团购ID
-    private String groupName; //团购名称
-    private String groupPrice; //团购金额
-    private String groupDate; //发布时间
-    private String groupStatus; //团购状态
+public class GroupInfoVo implements Serializable {
+    private BigInteger id; //团购ID
+    private BigInteger createDate; //创建时间
+    private String description; //团购名称
+    private Timestamp startDate;
+    private Timestamp endDate;
+    private Float price; //团购金额
+    private Integer status; //上下架状态
+    private Integer groupStatus; //团购状态
+
     private String groupStatusCn; //团购状态
-    private String realityAmt; //已支付金额
-    private String refundAmt; //退款金额
-    private String followNum; //跟团人数
-    private String cancelNum; //取消人数
-    private String queryNum; //查看人数
+    private String groupDate; //团购创建日期转换
+    private Float realityAmt; //已支付金额
+    private Float refundAmt; //退款金额
+    private int followNum; //跟团人数
+    private int cancelNum; //取消人数
+    private int queryNum; //查看人数
 
-    public String getGroupId() {
-        return groupId;
+    public GroupInfoVo(BigInteger id, BigInteger createDate, String description, Timestamp startDate, Timestamp endDate, Float price, Integer status, Integer groupStatus) {
+        this.id = id;
+        this.createDate = createDate;
+        this.description = description;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.price = price;
+        this.status = status;
+        this.groupStatus = groupStatus;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public BigInteger getId() {
+        return id;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public void setId(BigInteger id) {
+        this.id = id;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public BigInteger getCreateDate() {
+        return createDate;
     }
 
-    public String getGroupPrice() {
-        return groupPrice;
+    public void setCreateDate(BigInteger createDate) {
+        this.createDate = createDate;
     }
 
-    public void setGroupPrice(String groupPrice) {
-        this.groupPrice = groupPrice;
+    public String getDescription() {
+        return description;
     }
 
-    public String getGroupDate() {
-        return groupDate;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public void setGroupDate(String groupDate) {
-        this.groupDate = groupDate;
+    public Timestamp getStartDate() {
+        return startDate;
     }
 
-    public String getGroupStatus() {
+    public void setStartDate(Timestamp startDate) {
+        this.startDate = startDate;
+    }
+
+    public Timestamp getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Timestamp endDate) {
+        this.endDate = endDate;
+    }
+
+    public Float getPrice() {
+        return price;
+    }
+
+    public void setPrice(Float price) {
+        this.price = price;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getGroupStatus() {
         return groupStatus;
     }
 
-    public void setGroupStatus(String groupStatus) {
+    public void setGroupStatus(Integer groupStatus) {
         this.groupStatus = groupStatus;
     }
 
@@ -67,60 +111,72 @@ public class GroupInfoVo {
         this.groupStatusCn = groupStatusCn;
     }
 
-    public String getRealityAmt() {
+    public String getGroupDate() {
+        return groupDate;
+    }
+
+    public void setGroupDate(String groupDate) {
+        this.groupDate = groupDate;
+    }
+
+    public Float getRealityAmt() {
         return realityAmt;
     }
 
-    public void setRealityAmt(String realityAmt) {
+    public void setRealityAmt(Float realityAmt) {
         this.realityAmt = realityAmt;
     }
 
-    public String getRefundAmt() {
+    public Float getRefundAmt() {
         return refundAmt;
     }
 
-    public void setRefundAmt(String refundAmt) {
+    public void setRefundAmt(Float refundAmt) {
         this.refundAmt = refundAmt;
     }
 
-    public String getFollowNum() {
+    public int getFollowNum() {
         return followNum;
     }
 
-    public void setFollowNum(String followNum) {
+    public void setFollowNum(int followNum) {
         this.followNum = followNum;
     }
 
-    public String getCancelNum() {
+    public int getCancelNum() {
         return cancelNum;
     }
 
-    public void setCancelNum(String cancelNum) {
+    public void setCancelNum(int cancelNum) {
         this.cancelNum = cancelNum;
     }
 
-    public String getQueryNum() {
+    public int getQueryNum() {
         return queryNum;
     }
 
-    public void setQueryNum(String queryNum) {
+    public void setQueryNum(int queryNum) {
         this.queryNum = queryNum;
     }
 
     @Override
     public String toString() {
-        return "GroupInfoListResp{" +
-                "groupId='" + groupId + '\'' +
-                ", groupName='" + groupName + '\'' +
-                ", groupPrice='" + groupPrice + '\'' +
-                ", groupDate='" + groupDate + '\'' +
-                ", groupStatus='" + groupStatus + '\'' +
+        return "GroupInfoVo{" +
+                "id=" + id +
+                ", createDate=" + createDate +
+                ", description='" + description + '\'' +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", price=" + price +
+                ", status=" + status +
+                ", groupStatus=" + groupStatus +
                 ", groupStatusCn='" + groupStatusCn + '\'' +
-                ", realityAmt='" + realityAmt + '\'' +
-                ", refundAmt='" + refundAmt + '\'' +
-                ", followNum='" + followNum + '\'' +
-                ", cancelNum='" + cancelNum + '\'' +
-                ", queryNum='" + queryNum + '\'' +
+                ", groupDate='" + groupDate + '\'' +
+                ", realityAmt=" + realityAmt +
+                ", refundAmt=" + refundAmt +
+                ", followNum=" + followNum +
+                ", cancelNum=" + cancelNum +
+                ", queryNum=" + queryNum +
                 '}';
     }
 }

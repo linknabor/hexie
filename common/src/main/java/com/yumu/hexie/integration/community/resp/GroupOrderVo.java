@@ -1,6 +1,8 @@
 package com.yumu.hexie.integration.community.resp;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -10,44 +12,158 @@ import java.util.List;
  * @create 2022-04-19 15:40
  */
 public class GroupOrderVo {
-    private String groupNum; //团购号
-    private String orderId; //订单ID
-    private String orderStatus; //订单状态
+    private Integer groupNum; //团购号
+    private BigInteger id; //订单ID
+    private String orderNo; //订单编号
+    private Integer status; //订单状态
+    private Timestamp payDate; //支付日期
+    private Integer count; //购买件数
+    private Float price; //订单金额
+    private String receiverName; //收货人
+    private String tel; //收货人电话
+    private String address; //收货地址
+    private Integer logisticType; //物流类型
+    private String memo; //团购备注
+    private BigInteger userId; //用户ID
+
+    private String statusCn;
     private String userName; //用户名称
     private String userHead; //用户头像
-    private String orderDate; //订单日期
-    private int orderNum; //购买件数
-    private BigDecimal totalAmt; //订单金额
+    private String logisticTypeCn;
+    private String orderDate;
 
-    private String receiverName; //收货人
-    private String receiverTel; //收货人电话
-    private String receiverAddr; //收货地址
-    private String groupDesc; //团购备注
-    private String logistics; //物流
     private List<BuyGoodsVo> buyGoodsVoList; //商品列表
 
-    public String getGroupNum() {
+    public GroupOrderVo() {
+
+    }
+
+    public GroupOrderVo(Integer groupNum, BigInteger id, String orderNo, Integer status, Timestamp payDate, Integer count, Float price, String receiverName, String tel, String address, Integer logisticType, String memo, BigInteger userId) {
+        this.groupNum = groupNum;
+        this.id = id;
+        this.orderNo = orderNo;
+        this.status = status;
+        this.payDate = payDate;
+        this.count = count;
+        this.price = price;
+        this.receiverName = receiverName;
+        this.tel = tel;
+        this.address = address;
+        this.logisticType = logisticType;
+        this.memo = memo;
+        this.userId = userId;
+    }
+
+    public Integer getGroupNum() {
         return groupNum;
     }
 
-    public void setGroupNum(String groupNum) {
+    public void setGroupNum(Integer groupNum) {
         this.groupNum = groupNum;
     }
 
-    public String getOrderId() {
-        return orderId;
+    public BigInteger getId() {
+        return id;
     }
 
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
+    public void setId(BigInteger id) {
+        this.id = id;
     }
 
-    public String getOrderStatus() {
-        return orderStatus;
+    public String getOrderNo() {
+        return orderNo;
     }
 
-    public void setOrderStatus(String orderStatus) {
-        this.orderStatus = orderStatus;
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Timestamp getPayDate() {
+        return payDate;
+    }
+
+    public void setPayDate(Timestamp payDate) {
+        this.payDate = payDate;
+    }
+
+    public Integer getCount() {
+        return count;
+    }
+
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public Float getPrice() {
+        return price;
+    }
+
+    public void setPrice(Float price) {
+        this.price = price;
+    }
+
+    public String getReceiverName() {
+        return receiverName;
+    }
+
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
+    }
+
+    public String getTel() {
+        return tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Integer getLogisticType() {
+        return logisticType;
+    }
+
+    public void setLogisticType(Integer logisticType) {
+        this.logisticType = logisticType;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
+    }
+
+    public BigInteger getUserId() {
+        return userId;
+    }
+
+    public void setUserId(BigInteger userId) {
+        this.userId = userId;
+    }
+
+    public String getStatusCn() {
+        return statusCn;
+    }
+
+    public void setStatusCn(String statusCn) {
+        this.statusCn = statusCn;
     }
 
     public String getUserName() {
@@ -66,68 +182,20 @@ public class GroupOrderVo {
         this.userHead = userHead;
     }
 
+    public String getLogisticTypeCn() {
+        return logisticTypeCn;
+    }
+
+    public void setLogisticTypeCn(String logisticTypeCn) {
+        this.logisticTypeCn = logisticTypeCn;
+    }
+
     public String getOrderDate() {
         return orderDate;
     }
 
     public void setOrderDate(String orderDate) {
         this.orderDate = orderDate;
-    }
-
-    public int getOrderNum() {
-        return orderNum;
-    }
-
-    public void setOrderNum(int orderNum) {
-        this.orderNum = orderNum;
-    }
-
-    public BigDecimal getTotalAmt() {
-        return totalAmt;
-    }
-
-    public void setTotalAmt(BigDecimal totalAmt) {
-        this.totalAmt = totalAmt;
-    }
-
-    public String getReceiverName() {
-        return receiverName;
-    }
-
-    public void setReceiverName(String receiverName) {
-        this.receiverName = receiverName;
-    }
-
-    public String getReceiverTel() {
-        return receiverTel;
-    }
-
-    public void setReceiverTel(String receiverTel) {
-        this.receiverTel = receiverTel;
-    }
-
-    public String getReceiverAddr() {
-        return receiverAddr;
-    }
-
-    public void setReceiverAddr(String receiverAddr) {
-        this.receiverAddr = receiverAddr;
-    }
-
-    public String getGroupDesc() {
-        return groupDesc;
-    }
-
-    public void setGroupDesc(String groupDesc) {
-        this.groupDesc = groupDesc;
-    }
-
-    public String getLogistics() {
-        return logistics;
-    }
-
-    public void setLogistics(String logistics) {
-        this.logistics = logistics;
     }
 
     public List<BuyGoodsVo> getBuyGoodsVoList() {
@@ -141,19 +209,24 @@ public class GroupOrderVo {
     @Override
     public String toString() {
         return "GroupOrderVo{" +
-                "groupNum='" + groupNum + '\'' +
-                ", orderId='" + orderId + '\'' +
-                ", orderStatus='" + orderStatus + '\'' +
+                "groupNum=" + groupNum +
+                ", id=" + id +
+                ", orderNo='" + orderNo + '\'' +
+                ", status=" + status +
+                ", payDate=" + payDate +
+                ", count=" + count +
+                ", price=" + price +
+                ", receiverName='" + receiverName + '\'' +
+                ", tel='" + tel + '\'' +
+                ", address='" + address + '\'' +
+                ", logisticType=" + logisticType +
+                ", memo='" + memo + '\'' +
+                ", userId=" + userId +
+                ", statusCn='" + statusCn + '\'' +
                 ", userName='" + userName + '\'' +
                 ", userHead='" + userHead + '\'' +
+                ", logisticTypeCn='" + logisticTypeCn + '\'' +
                 ", orderDate='" + orderDate + '\'' +
-                ", orderNum=" + orderNum +
-                ", totalAmt=" + totalAmt +
-                ", receiverName='" + receiverName + '\'' +
-                ", receiverTel='" + receiverTel + '\'' +
-                ", receiverAddr='" + receiverAddr + '\'' +
-                ", groupDesc='" + groupDesc + '\'' +
-                ", logistics='" + logistics + '\'' +
                 ", buyGoodsVoList=" + buyGoodsVoList +
                 '}';
     }

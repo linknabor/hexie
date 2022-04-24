@@ -40,7 +40,7 @@ public class GroupSumResp {
     public static class ProductVo{
         private int totalNum; //总商品数
         private int verifyNum; //未核销数
-        private List<Product> products; //商品列表
+        private List<GroupProductSumVo> products; //商品列表
 
         public int getTotalNum() {
             return totalNum;
@@ -58,11 +58,11 @@ public class GroupSumResp {
             this.verifyNum = verifyNum;
         }
 
-        public List<Product> getProducts() {
+        public List<GroupProductSumVo> getProducts() {
             return products;
         }
 
-        public void setProducts(List<Product> products) {
+        public void setProducts(List<GroupProductSumVo> products) {
             this.products = products;
         }
 
@@ -72,56 +72,6 @@ public class GroupSumResp {
                     "totalNum='" + totalNum + '\'' +
                     ", verifyNum='" + verifyNum + '\'' +
                     ", products=" + products +
-                    '}';
-        }
-    }
-
-    //汇总团购商品
-    public static class Product {
-        private String id; //商品ID
-        private String name; //商品名称
-        private int num; //商品数量
-        private int verify; //未核销数
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getNum() {
-            return num;
-        }
-
-        public void setNum(int num) {
-            this.num = num;
-        }
-
-        public int getVerify() {
-            return verify;
-        }
-
-        public void setVerify(int verify) {
-            this.verify = verify;
-        }
-
-        @Override
-        public String toString() {
-            return "Product{" +
-                    "id='" + id + '\'' +
-                    ", name='" + name + '\'' +
-                    ", num=" + num +
-                    ", verify=" + verify +
                     '}';
         }
     }

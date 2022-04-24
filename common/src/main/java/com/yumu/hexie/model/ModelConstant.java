@@ -83,7 +83,7 @@ public class ModelConstant {
 	public static final int ORDER_STATUS_SENDED = 5; 
 	public static final int ORDER_STATUS_RECEIVED = 6; 
 	public static final int ORDER_STATUS_CANCEL_BACKEND = 7; 
-	public static final int ORDER_STATUS_CANCEL_MERCHANT = 8;  //暂时不使用
+	public static final int ORDER_STATUS_CANCEL_MERCHANT = 8;
 	public static final int ORDER_STATUS_CONFIRM = 9;
 	public static final int ORDER_STATUS_RETURNED = 10;
 	public static final int ORDER_STATUS_REFUNDED = 11;
