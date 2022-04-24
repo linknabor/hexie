@@ -190,9 +190,67 @@ public class RegionServiceImpl implements RegionService{
 		Assert.hasText(mapVO.getName(), "小区名称不能为空");
 		Assert.hasText(mapVO.getAddress(), "小区地址不能为空");
 		
+		String provinceName = mapVO.getProvince();
+		Region province = null;
+		if (provinceName.contains("上海")) {
+			provinceName = "上海";
+		}
+		if (provinceName.contains("北京")) {
+			provinceName = "北京";
+		}
+		if (provinceName.contains("天津")) {
+			provinceName = "天津";
+		}
+		if (provinceName.contains("重庆")) {
+			provinceName = "重庆";
+		}
+		List<Region> provinceList = regionRepository.findByNameAndRegionType(provinceName, ModelConstant.REGION_PROVINCE);
+		if (provinceList == null || provinceList.isEmpty()) {
+			province = new Region();
+			province.setName(provinceName);
+			province.setParentName("中国");
+			province.setParentId(1);
+			province.setRegionType(ModelConstant.REGION_PROVINCE);
+			province.setDescription("created by " + user.getId());
+			regionRepository.save(province);
+		} else {
+			province = provinceList.get(0);
+		}
+		
+		String cityName = mapVO.getCity();
+		Region city = null;
+		List<Region> cityList = regionRepository.findByNameAndRegionType(cityName, ModelConstant.REGION_CITY);
+		if (cityList == null || cityList.isEmpty()) {
+			city = new Region();
+			city.setName(cityName);
+			city.setParentName(province.getName());
+			city.setParentId(province.getId());
+			city.setRegionType(ModelConstant.REGION_CITY);
+			city.setDescription("created by " + user.getId());
+			regionRepository.save(city);
+		} else {
+			city = cityList.get(0);
+		}
+		
+		String distName = mapVO.getDistrict();
+		Region dist = null;
+		List<Region> distList = regionRepository.findByNameAndRegionType(distName, ModelConstant.REGION_COUNTY);
+		if (distList == null || distList.isEmpty()) {
+			dist = new Region();
+			dist.setName(cityName);
+			dist.setParentName(city.getName());
+			dist.setParentId(city.getId());
+			dist.setRegionType(ModelConstant.REGION_COUNTY);
+			dist.setDescription("created by " + user.getId());
+			regionRepository.save(dist);
+		} else {
+			dist = distList.get(0);
+		}
+		
 		Region region = new Region();
 		region.setName(mapVO.getName());
 		region.setParentName(mapVO.getDistrict());
+		region.setParentId(dist.getId());
 		region.setRegionType(ModelConstant.REGION_XIAOQU);
 		region.setLatitude(Double.valueOf(mapVO.getLatitude()));
 		region.setLongitude(Double.valueOf(mapVO.getLongitude()));

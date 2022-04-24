@@ -18,6 +18,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest;
+import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.GroupOwnerInfo;
+import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.Sect;
+import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
@@ -74,11 +78,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	private RgroupOwnerRepository rgroupOwnerRepository;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private EshopUtil eshopUtil;
 	
 	
 	@Override
 	@Transactional
-	public void saveRgroup(RgroupVO rgroupVo) {
+	public long saveRgroup(RgroupVO rgroupVo) {
 	
 		logger.info("saveRgroup : " + rgroupVo);
 		Assert.hasText(rgroupVo.getRgroupOwner().getOwnerTel(), "团长联系方式不能为空");
@@ -92,11 +98,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		
 		try {
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+			CreateRgroupRequest createRgroupRequest = new CreateRgroupRequest();
 			
 			/*1.保存团长信息 start */
 			RgroupOwnerVO owner = rgroupVo.getRgroupOwner();
 			OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(owner.getOwnerId(), ModelConstant.USER_ROLE_RGROUPOWNER);
 			Agent agent = null;
+			
 			if (orgOperator == null) {
 				agent = agentRepository.findByAgentNo("000000000000");
 				orgOperator = new OrgOperator();
@@ -108,18 +116,32 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				orgOperator.setOrgOperId("");		//TODO 联动backmng后回调
 				orgOperator.setOrgType("");	//联动后回调
 				orgOperatorRepository.save(orgOperator);
+				
 			} else {
 				agent = agentRepository.findByAgentNo(orgOperator.getOrgId());
 			}
 			
+			User ownerUser = userService.getById(owner.getOwnerId());;
 			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(owner.getOwnerId());
 			if (rgroupOwner == null) {
 				rgroupOwner = new RgroupOwner();
-				User user = userService.getById(owner.getOwnerId());
+				
 				rgroupOwner.setUserId(owner.getOwnerId());
-				rgroupOwner.setMiniopenid(user.getMiniopenid());
+				rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
 				rgroupOwnerRepository.save(rgroupOwner);
+				
 			}
+			
+			if (StringUtils.isEmpty(orgOperator.getOrgOperId())) {
+				GroupOwnerInfo ownerInfo = new GroupOwnerInfo();
+				ownerInfo.setMiniopenid(ownerUser.getMiniopenid());
+				ownerInfo.setName(ownerUser.getName());
+				ownerInfo.setOpenid(ownerUser.getOpenid());	//可能为空
+				ownerInfo.setTel(ownerUser.getTel());
+				createRgroupRequest.setCreateOwner(Boolean.TRUE);
+				createRgroupRequest.setOwner(ownerInfo);
+			}
+			
 			/*1.保存团长信息 end */
 
 			/*2.保存rGroupRule start */
@@ -167,7 +189,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rule.setTimeoutForPay(30*60*1000l);	//半小时支付超市
 			rule.setGroupMaxNum(2000);
 			rule.setGroupMinNum(rgroupVo.getGroupMinNum());
-			rule.setGroupStatus(ModelConstant.GROUP_STAUS_INIT);
+//			rule.setGroupStatus(ModelConstant.GROUP_STAUS_INIT);
 			
 			Region region = rgroupVo.getRegion();
 			rule.setOwnerId(owner.getOwnerId());
@@ -207,12 +229,15 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				product.setOtherDesc(productView.getDescription());
 				
 				Thumbnail[]images = productView.getImages();
-				StringBuffer bf = new StringBuffer();
-				for (Thumbnail image : images) {
-					bf.append(image.getUrl()).append(",");
+				if (images != null && images.length > 0) {
+					StringBuffer bf = new StringBuffer();
+					for (Thumbnail image : images) {
+						bf.append(image.getUrl()).append(",");
+					}
+					bf.deleteCharAt(bf.length()-1);
+					product.setPictures(bf.toString());
 				}
-				bf.deleteCharAt(bf.length()-1);
-				product.setPictures(bf.toString());
+				
 				product.setStatus(ModelConstant.PRODUCT_ONSALE);
 				String totalStr = productView.getTotalCount();
 				int totalCount = Integer.MAX_VALUE - 1;
@@ -276,7 +301,52 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rgroupAreaItem.setSortNo(10);	
 			rgroupAreaItem.setRuleName(rule.getName());
 			rgroupAreaItemRepository.save(rgroupAreaItem);
+			
+			Region dbSect = regionRepository.findById(region.getId());
+			String regionName = "";
+			if (StringUtils.isEmpty(dbSect.getSectId())) {
+				List<Region> distList = regionRepository.findByNameAndRegionType(dbSect.getParentName(), ModelConstant.REGION_COUNTY);
+				Region dist = distList.get(0);
+				List<Region> cityList = regionRepository.findByNameAndRegionType(dist.getParentName(), ModelConstant.REGION_CITY);
+				Region city = cityList.get(0);
+				createRgroupRequest.setCreateSect(Boolean.TRUE);
+				List<Sect> sectList = new ArrayList<>();
+				Sect sect = new Sect();
+				sect.setProvince(city.getParentName());
+				sect.setCity(dist.getParentName());
+				sect.setDistrict(dbSect.getParentName());
+				sect.setSectName(dbSect.getName());
+				sect.setSectAddr(dbSect.getXiaoquAddress());
+				sectList.add(sect);
+				createRgroupRequest.setSects(sectList);
+				regionName = sect.getProvince();
+			}
+			
+			if (createRgroupRequest.getCreateOwner() || createRgroupRequest.getCreateSect()) {
+				CreateRgroupRequest response = eshopUtil.createRgroup(regionName, createRgroupRequest);
+				List<Sect> sectList = response.getSects();
+				
+				if (createRgroupRequest.getCreateSect() && sectList != null && !sectList.isEmpty()) {
+					dbSect.setSectId(sectList.get(0).getSectId());
+					regionRepository.save(dbSect);
+					if (StringUtils.isEmpty(ownerUser.getSectId())) {
+						ownerUser.setSectId(dbSect.getSectId());
+						ownerUser.setCspId(sectList.get(0).getCspId());
+						ownerUser.setXiaoquName(dbSect.getName());
+						userService.save(ownerUser);
+					}
+				}
+				GroupOwnerInfo groupOwner = response.getOwner();
+				if (createRgroupRequest.getCreateOwner() && groupOwner!=null) {
+					orgOperator.setOrgOperId(groupOwner.getOrgOperId());
+					orgOperator.setOrgType(groupOwner.getOrgType());
+					orgOperatorRepository.save(orgOperator);
+				}
+				
+			}
 			/*4.保存rgroupAreaItem 当前版本只支持单个小区 end*/
+			
+			return rule.getId();
 			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

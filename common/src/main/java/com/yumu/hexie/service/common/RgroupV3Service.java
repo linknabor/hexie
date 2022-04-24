@@ -5,7 +5,7 @@ import com.yumu.hexie.vo.RgroupVO;
 public interface RgroupV3Service {
 
 
-	void saveRgroup(RgroupVO createRgroupReq);
+	long saveRgroup(RgroupVO createRgroupReq);
 	
 	void pubRgroup(String rgroupRuleId);
 

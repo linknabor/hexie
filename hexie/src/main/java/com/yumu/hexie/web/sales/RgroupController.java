@@ -1,6 +1,8 @@
 package com.yumu.hexie.web.sales;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -86,10 +88,12 @@ public class RgroupController extends BaseController{
 	
 	@RequestMapping(value = "/rgroups/v3/save", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<String> saveRgroups(@RequestBody RgroupVO createRgroupReq) throws Exception {
+	public BaseResult<Map<String, String>> saveRgroups(@RequestBody RgroupVO createRgroupReq) throws Exception {
 		
-		rgroupV3Service.saveRgroup(createRgroupReq);
-        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+		long ruleId = rgroupV3Service.saveRgroup(createRgroupReq);
+		Map<String, String> map = new HashMap<>();
+		map.put("ruleId", String.valueOf(ruleId));
+        return new BaseResult<Map<String, String>>().success(map);
     }
 	
 	@RequestMapping(value = "/rgroups/v3/{page}", method = RequestMethod.GET)
