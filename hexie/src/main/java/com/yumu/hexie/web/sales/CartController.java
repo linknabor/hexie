@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -78,6 +79,36 @@ public class CartController extends BaseController {
 	@RequestMapping(value = "/get", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Cart> getItems(@ModelAttribute(Constants.USER)User user) throws Exception {
+		
+		Cart cart = cartService.getCart(user);
+		return new BaseResult<Cart>().success(cart);
+	}
+	
+	/**
+	 * 添加商品至购物车
+	 * @param user
+	 * @param orderItem
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroup/add", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Integer> add2RgroupCart(@ModelAttribute(Constants.USER)User user, @RequestBody OrderItem orderItem) throws Exception {
+		
+		int updated = cartService.add2RgroupCart(user, orderItem);
+		return new BaseResult<Integer>().success(updated);
+	}
+	
+	/**
+	 * 清空购物车
+	 * @param user
+	 * @param goods
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/v2/getByRule", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Cart> getCartItemsByRule(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) long ruleId) throws Exception {
 		
 		Cart cart = cartService.getCart(user);
 		return new BaseResult<Cart>().success(cart);

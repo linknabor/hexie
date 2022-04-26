@@ -8,17 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.RgroupCart;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CartService;
-import org.springframework.util.StringUtils;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -126,6 +127,37 @@ public class CartServiceImpl implements CartService {
 		}
 		redisRepository.setCart(cartKey, cart);
 	}
+	
+	/**
+	 * 添加商品至购物车
+	 */
+	@Override
+	public int add2RgroupCart(User user, OrderItem orderItem){
+		
+		String key = orderItem.getRuleId() + "_" + orderItem.getProductId();
+		ProductRuleCache productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + key);
+		if (productRule == null) {
+			throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
+		}
+		String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + productRule.getProductId());
+		String cartKey = Keys.uidRgroupCartKey(user.getId());
+		RgroupCart cart = redisRepository.getRgroupCart(cartKey);
+		if (cart == null) {
+			cart = new RgroupCart();
+		}
+		Integer updated = cart.add(orderItem, productRule, Integer.parseInt(stock));
+		redisRepository.setRgroupCart(cartKey, cart);
+		return updated;
+	
+	}
+	
+//	@Override
+//	public Map<Long, > getCartItemsByRule(User user, long ruleId){
+//		
+//		String cartKey = Keys.uidRgroupCartKey(user.getId());
+//		RgroupCart cart = redisRepository.getRgroupCart(cartKey);
+//		cart.getItemsMap();
+//	}
 
 	
 	

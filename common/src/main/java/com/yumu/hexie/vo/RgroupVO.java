@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Transient;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.distribution.region.Region;
 
@@ -411,6 +413,14 @@ public class RgroupVO implements Serializable {
 		this.endDateMills = endDateMills;
 	}
 
+	@Transient
+	public long getLeftSeconds(){
+		if(endDateMills == 0){
+			return 3600*24*7;
+		}
+		return (endDateMills - System.currentTimeMillis())/1000;
+	}
+	
 	@Override
 	public String toString() {
 		return "RgroupVO [ruleId=" + ruleId + ", type=" + type + ", status=" + status + ", createDate=" + createDate

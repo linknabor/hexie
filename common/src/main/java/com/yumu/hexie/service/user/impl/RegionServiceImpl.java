@@ -264,10 +264,12 @@ public class RegionServiceImpl implements RegionService{
 			logger.info(e.getMessage(), e);
 			throw new BizValidateException(e.getMessage());
 		}
-		Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent(region.getName(), regionStr);
+		String regionKey = ModelConstant.KEY_CREATE_NEW_REGION_LOCK + region.getName();
+		Boolean absent = stringRedisTemplate.opsForValue().setIfAbsent(regionKey, regionStr);
 		if(absent) {
 			regionRepository.save(region);
 		} else {
+			
 			List<Region> regionList = regionRepository.findByNameAndRegionType(region.getName(), ModelConstant.REGION_XIAOQU);
 			if (regionList == null || regionList.size() == 0) {
 				throw new BizValidateException("前方拥挤，请稍后再试。");

@@ -21,4 +21,8 @@ public interface CartService {
 
 	void delFromCart(Long userId, List<OrderItem> itemList);
 
+	//添加团购购物车
+	int add2RgroupCart(User user, OrderItem orderItem);
+
+//	Cart getCartItemsByRule(User user, long ruleId);
 }
