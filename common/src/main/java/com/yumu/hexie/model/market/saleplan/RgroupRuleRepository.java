@@ -108,10 +108,9 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "and rule.endDate <= CURRENT_TIMESTAMP(), "
 			+ "IF(?3='2', rule.status = '0', "
 			+ "IF(?3='3', rule.status = '1' "
-			+ "and rule.endDate < CURRENT_TIMESTAMP() , "
+			+ "and rule.startDate > CURRENT_TIMESTAMP() , "
 			+ "IF(?3='4', rule.status = '1' "
-			+ "and rule.startDate > CURRENT_TIMESTAMP(), 1=1) ))) "
+			+ "and rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
 			, nativeQuery = true)
 	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
-
 }

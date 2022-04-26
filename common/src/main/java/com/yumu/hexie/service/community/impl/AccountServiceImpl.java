@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.community.impl;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
@@ -7,6 +9,10 @@ import com.yumu.hexie.integration.community.CommunityUtil;
 import com.yumu.hexie.integration.community.req.*;
 import com.yumu.hexie.integration.community.resp.*;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.commonsupport.info.ProductDepot;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -33,10 +39,7 @@ import org.springframework.util.ObjectUtils;
 
 import javax.inject.Inject;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 描述:
@@ -70,6 +73,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private UserNoticeService userNoticeService;
+
+    @Autowired
+    private ProductDepotRepository productDepotRepository;
+
+    @Autowired
+    private ProductDepotTagsRepository productDepotTagsRepository;
 
     @Override
     public AccountInfoVO getAccountInfo(User user) throws Exception {
@@ -142,11 +151,11 @@ public class AccountServiceImpl implements AccountService {
                 if (info.getStatus() == 1) {
                     Date date = new Date();
                     if (info.getStartDate().getTime() <= date.getTime()
-                            && info.getEndDate().getTime() <= date.getTime()) { //跟团中
+                            && info.getEndDate().getTime() >= date.getTime()) { //跟团中
                         info.setGroupStatusCn("正在跟团中");
-                    } else if (info.getEndDate().getTime() > date.getTime()) {
-                        info.setGroupStatusCn("已结束");
                     } else if (info.getEndDate().getTime() < date.getTime()) {
+                        info.setGroupStatusCn("已结束");
+                    } else if (info.getStartDate().getTime() > date.getTime()) {
                         info.setGroupStatusCn("未开始");
                     }
                 } else {
@@ -198,11 +207,18 @@ public class AccountServiceImpl implements AccountService {
             RgroupRule rgroupRule = optional.get();
             if ("1".equals(operType)) {
                 //修改团购结束日期
-                rgroupRule.setEndDate(new Date());
+                rgroupRule.setStatus(1);
+                Date date = new Date();
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                calendar.add(Calendar.SECOND, -1);
+                date = calendar.getTime();
+                rgroupRule.setEndDate(date);
             } else {
                 //下架团购
                 rgroupRule.setStatus(0);
             }
+        } else {
             throw new BizValidateException("为查到团购信息，请刷新重试");
         }
         return true;
@@ -259,9 +275,13 @@ public class AccountServiceImpl implements AccountService {
 
         List<Integer> status = new ArrayList<>();
         status.add(ModelConstant.ORDER_STATUS_PAYED);
+        status.add(ModelConstant.ORDER_STATUS_CANCEL);
+        status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_SENDED);
         status.add(ModelConstant.ORDER_STATUS_RECEIVED);
-
+        status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
+        status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+        status.add(ModelConstant.ORDER_STATUS_REFUNDED);
         List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(Long.parseLong(groupId), status);
         List<GroupProductSumVo> vos = ObjectToBeanUtils.objectToBean(groupProductSumVos, GroupProductSumVo.class);
         int totalNum = 0;
@@ -281,50 +301,72 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<GroupOrderVo> queryGroupOrder(User user, QueryGroupReq queryGroupReq) throws Exception {
+        List<Integer> status = new ArrayList<>();
+        String verifyStatus = ""; //是否核销
+        if ("0".equals(queryGroupReq.getOrderStatus())) { //查全部
+            status.add(ModelConstant.ORDER_STATUS_PAYED);
+            status.add(ModelConstant.ORDER_STATUS_CANCEL);
+            status.add(ModelConstant.ORDER_STATUS_REFUNDING);
+            status.add(ModelConstant.ORDER_STATUS_SENDED);
+            status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+            status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
+            status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+            status.add(ModelConstant.ORDER_STATUS_REFUNDED);
+        } else if ("1".equals(queryGroupReq.getOrderStatus())) { //查待核销的
+            status.add(ModelConstant.ORDER_STATUS_PAYED);
+            verifyStatus = "0";
+        } else if ("2".equals(queryGroupReq.getOrderStatus())) { //查退款申请
+            status.add(ModelConstant.ORDER_STATUS_CANCEL);
+        } else {
+            throw new BizValidateException("不合法的参数类型");
+        }
+
         List<Sort.Order> sortList = new ArrayList<>();
         Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
         sortList.add(order);
         Sort sort = Sort.by(sortList);
         Pageable pageable = PageRequest.of(queryGroupReq.getCurrentPage(), 10, sort);
 
-        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(Long.parseLong(queryGroupReq.getGroupId()), pageable);
+        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(Long.parseLong(queryGroupReq.getGroupId()), status, verifyStatus, pageable);
         List<GroupOrderVo> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOrderVo.class);
+        if (list != null) {
+            for (GroupOrderVo vo : list) {
+                vo.setStatusCn(ServiceOrder.getStatusStr(vo.getStatus()));
+                vo.setOrderDate(DateUtil.dttmFormat(vo.getPayDate()));
 
-        for (GroupOrderVo vo : list) {
-            vo.setStatusCn(ServiceOrder.getStatusStr(vo.getStatus()));
-            vo.setOrderDate(DateUtil.dttmFormat(vo.getPayDate()));
+                //0商户派送 1用户自提 2第三方配送
+                String logisticType = "商户派送";
+                if (vo.getLogisticType() == 1) {
+                    logisticType = "用户自提";
+                } else if (vo.getLogisticType() == 2) {
+                    logisticType = "第三方配送";
+                }
+                vo.setLogisticTypeCn(logisticType);
 
-            //0商户派送 1用户自提 2第三方配送
-            String logisticType = "商户派送";
-            if (vo.getLogisticType() == 1) {
-                logisticType = "用户自提";
-            } else if (vo.getLogisticType() == 2) {
-                logisticType = "第三方配送";
+                //获取用户昵称和头像
+                User userInfo = userRepository.findById(vo.getUserId().longValue());
+                if (userInfo != null) {
+                    vo.setUserName(userInfo.getNickname());
+                    vo.setUserHead(userInfo.getHeadimgurl());
+                }
+
+                List<BuyGoodsVo> buyVos = new ArrayList<>();
+                //查询订单下的商品
+                ServiceOrder serviceOrder = new ServiceOrder();
+                serviceOrder.setId(vo.getId().longValue());
+                List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
+                for (OrderItem item : items) {
+                    //订单里购买的商品
+                    BuyGoodsVo buyVo = new BuyGoodsVo();
+                    buyVo.setGoodsName(item.getProductName());
+                    buyVo.setGoodsNum(item.getCount());
+                    buyVo.setGoodsAmt(item.getPrice());
+                    buyVos.add(buyVo);
+                }
+                vo.setBuyGoodsVoList(buyVos);
             }
-            vo.setLogisticTypeCn(logisticType);
-
-            //获取用户昵称和头像
-            User userInfo = userRepository.findById(vo.getUserId().longValue());
-            if (userInfo != null) {
-                vo.setUserName(userInfo.getNickname());
-                vo.setUserHead(userInfo.getHeadimgurl());
-            }
-
-            List<BuyGoodsVo> buyVos = new ArrayList<>();
-            //查询订单下的商品
-            ServiceOrder serviceOrder = new ServiceOrder();
-            serviceOrder.setId(vo.getId().longValue());
-            List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
-            for (OrderItem item : items) {
-                //订单里购买的商品
-                BuyGoodsVo buyVo = new BuyGoodsVo();
-                buyVo.setGoodsName(item.getProductName());
-                buyVo.setGoodsNum(item.getCount());
-                buyVo.setGoodsAmt(item.getPrice());
-                buyVos.add(buyVo);
-            }
-            vo.setBuyGoodsVoList(buyVos);
         }
+
         return list;
     }
 
@@ -391,9 +433,12 @@ public class AccountServiceImpl implements AccountService {
         List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
         boolean flag = false;
         for (OrderItem item : items) {
-            if (item.getVerifyStatus() == '0' && item.getCode().equals(code)) {
+            if (item.getVerifyStatus() == 0 && item.getCode().equals(code)) {
                 item.setVerifyStatus(1);
                 orderItemRepository.save(item);
+                //修改订单状态为已签收
+                serviceOrder.setStatus(ModelConstant.ORDER_STATUS_RECEIVED);
+                serviceOrderRepository.save(serviceOrder);
                 flag = true;
             }
         }
@@ -466,4 +511,114 @@ public class AccountServiceImpl implements AccountService {
         }
         return true;
     }
+
+    @Override
+    public List<ProductDepot> queryProductDepotList(User user, String searchValue, int currentPage) {
+        User userInfo = userRepository.findById(user.getId());
+        if(userInfo == null) {
+            throw new BizValidateException("用户不存在");
+        }
+        if(!"03".equals(user.getRoleId())) {
+            throw new BizValidateException("当前用户不是团长，无法操作");
+        }
+
+        List<Sort.Order> sortList = new ArrayList<>();
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
+        sortList.add(order);
+        Sort sort = Sort.by(sortList);
+        Pageable pageable = PageRequest.of(currentPage, 10, sort);
+
+        return productDepotRepository.findByOwnerIdAndNameContaining(user.getId(), searchValue, pageable);
+    }
+
+    @Override
+    public Boolean delProductDepot(User user, String productId) {
+        if(ObjectUtils.isEmpty(productId)) {
+            throw new BizValidateException("商品编号不能为空");
+        }
+        User userInfo = userRepository.findById(user.getId());
+        if(userInfo == null) {
+            throw new BizValidateException("用户不存在");
+        }
+        if(!"03".equals(user.getRoleId())) {
+            throw new BizValidateException("当前用户不是团长，无法操作");
+        }
+        productDepotRepository.deleteById(Long.parseLong(productId));
+        return true;
+    }
+
+    @Override
+    public Boolean operProductDepot(User user, ProductDepotReq productDepotReq) {
+        ProductDepot depot = new ProductDepot();
+        if(!ObjectUtils.isEmpty(productDepotReq.getProductId())) { //编辑
+            depot = productDepotRepository.findById(Long.parseLong(productDepotReq.getProductId())).get();
+        }
+
+        BeanUtils.copyProperties(productDepotReq, depot);
+        if(!ObjectUtils.isEmpty(productDepotReq.getPictures())) {
+            String[] strs = productDepotReq.getPictures().split(",");
+            depot.setMainPicture(strs[0]);
+            depot.setSmallPicture(strs[0]);
+        }
+
+        if(ObjectUtils.isEmpty(productDepotReq.getTotalCount())) {
+            depot.setTotalCount(9999999);
+        }
+        if(!ObjectUtils.isEmpty(productDepotReq.getTags())) {
+            JSONArray jsonArray = new JSONArray();
+            String[] strs = productDepotReq.getTags().split(",");
+            for(String key : strs) {
+                if(!ObjectUtils.isEmpty(key)) {
+                    ProductDepotTags tag = productDepotTagsRepository.findById(Long.parseLong(key)).get();
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("id", tag.getId());
+                    jsonObject.put("name", tag.getName());
+                    jsonObject.put("color", "#FF9333");
+                    jsonArray.add(jsonObject);
+                }
+            }
+            if(jsonArray.size() > 0) {
+                depot.setTags(jsonArray.toJSONString());
+            }
+        }
+        depot.setOwnerId(user.getId());
+        productDepotRepository.save(depot);
+        return true;
+    }
+
+    @Override
+    public ProductDepot queryProductDepotDetail(User user, String productId) {
+        return productDepotRepository.findById(Long.parseLong(productId)).get();
+    }
+
+    @Override
+    public Map<String, List<ProductDepotTags>> queryProductDepotTags(User user) {
+        List<ProductDepotTags> ownerList = productDepotTagsRepository.findByOwnerId(user.getId());
+        List<ProductDepotTags> pubList = productDepotTagsRepository.findByOwnerId(0);
+        Map<String, List<ProductDepotTags>> map = new HashMap<>();
+        map.put("owner", ownerList);
+        map.put("public", pubList);
+        return map;
+    }
+
+    @Override
+    public Boolean saveDepotTag(User user, String tagName) {
+        ProductDepotTags tags = new ProductDepotTags();
+        tags.setName(tagName);
+        tags.setOwnerId(user.getId());
+        productDepotTagsRepository.save(tags);
+        return true;
+    }
+
+    @Override
+    public Boolean delDepotTag(User user, String tagId) {
+        ProductDepotTags tag = productDepotTagsRepository.findById(Long.parseLong(tagId)).get();
+        if(user.getId() != tag.getOwnerId()) {
+            throw new BizValidateException("只能操作当前用户的标签");
+        }
+        productDepotTagsRepository.delete(tag);
+        return true;
+    }
+
+
 }

@@ -236,12 +236,14 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     //分页查询团购订单
     String sqlCol = "o.groupNum, o.id as orderId, o.orderNo, o.status, o.payDate, o.count, o.price, o.receiverName, " +
             "o.tel, o.address, o.logisticType, o.memo, o.userId ";
-    @Query(value = "select " + sqlCol + " from serviceorder o "
-            + "where o.groupRuleId = ?1 "
+    @Query(value = "select distinct " + sqlCol + " from serviceorder o "
+            + "join orderItem i on o.id = i.orderId "
+            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
             , countQuery = "select count(1) from serviceorder o "
-            + "where o.groupRuleId = ?1 "
+            + "join orderItem i on o.id = i.orderId "
+            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
             , nativeQuery = true)
-    Page<Object[]> findByGroupRuleIdPage(long ruleId, Pageable pageable);
+    Page<Object[]> findByGroupRuleIdPage(long ruleId, List<Integer> status, String verifyStatus, Pageable pageable);
 
     //根据订单和团长ID查询订单
     ServiceOrder findByIdAndGroupLeaderId(long orderId, long groupLeaderId);

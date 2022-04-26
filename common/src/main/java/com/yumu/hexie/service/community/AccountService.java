@@ -2,9 +2,12 @@ package com.yumu.hexie.service.community;
 
 import com.yumu.hexie.integration.community.req.*;
 import com.yumu.hexie.integration.community.resp.*;
+import com.yumu.hexie.model.commonsupport.info.ProductDepot;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
 import com.yumu.hexie.model.user.User;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AccountService {
 
@@ -49,4 +52,24 @@ public interface AccountService {
 
     //未提货通知
     Boolean noticeReceiving(User user, String groupId);
+
+    //查询商品列表
+    List<ProductDepot> queryProductDepotList(User user, String searchValue, int currentPage);
+
+    //删除商品
+    Boolean delProductDepot(User user, String productId);
+
+    //新增编辑商品
+    Boolean operProductDepot(User user, ProductDepotReq productDepotReq);
+
+    //根据商品ID查询商品库
+    ProductDepot queryProductDepotDetail(User user, String productId);
+
+    Map<String, List<ProductDepotTags>> queryProductDepotTags(User user);
+
+    //添加自定义标签
+    Boolean saveDepotTag(User user, String tagName);
+
+    //删除自定义标签
+    Boolean delDepotTag(User user, String tagId);
 }
