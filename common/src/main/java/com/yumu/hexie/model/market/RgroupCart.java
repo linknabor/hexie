@@ -1,15 +1,14 @@
 package com.yumu.hexie.model.market;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
+import com.yumu.hexie.model.market.vo.RgroupCartVO;
 import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
@@ -22,20 +21,18 @@ public class RgroupCart extends BaseModel {
 
 	private static final long serialVersionUID = 8850980148126766715L;
 	
-	private List<OrderItem> items;
 	private Map<Long, Map<Long, OrderItem>> itemsMap;	//key:ruleId, value:Map<productId, orderItem>
-	private BigDecimal totalAmount = BigDecimal.ZERO;	//不含运费
-	private BigDecimal totalShipFee = BigDecimal.ZERO;	//运费，需要计算几件包邮
-	private BigDecimal totalPrice = BigDecimal.ZERO;	//商品费用 + 运费
-	private int totalCount = 0;
+	private Map<Long, BigDecimal> itemsAmount;	//key:ruleId, value: totalAmount 
+	private Map<Long, Integer> itemsCount; //key:ruleId, value: totalCount
 	
 	/**
 	 * 添加商品
 	 * @param goods
 	 */
-	public Integer add(OrderItem orderItem, ProductRuleCache productRule, int stock) {
+	public RgroupCartVO add(OrderItem orderItem, ProductRuleCache productRule, int stock) {
 		
-		Integer itemCount = 0;	//返回值，现有购物车里，该类商品的总数
+		Integer currentCount = 0;
+		BigDecimal currentAmount = BigDecimal.ZERO;
 		BigDecimal unitPrice = new BigDecimal(String.valueOf(productRule.getSinglePrice()));	//前端传上来的价格不可信，全部采用后端计算
 		BigDecimal count = new BigDecimal(orderItem.getCount());	//数量采用前端传的
 		BigDecimal amount = unitPrice.multiply(count);
@@ -54,7 +51,6 @@ public class RgroupCart extends BaseModel {
 			orderItem.setAmount(amount.floatValue());
 			productMap.put(orderItem.getProductId(), orderItem);
 			itemsMap.put(orderItem.getRuleId(), productMap);
-			itemCount = orderItem.getCount();
 			
 		}else {
 			Map<Long, OrderItem> exitItemMap = itemsMap.get(orderItem.getRuleId());
@@ -70,7 +66,6 @@ public class RgroupCart extends BaseModel {
 				orderItem.setAmount(amount.floatValue());
 				exitItemMap.put(orderItem.getProductId(), orderItem);
 				itemsMap.put(orderItem.getRuleId(), exitItemMap);
-				itemCount = orderItem.getCount();
 				
 			} else {
 				
@@ -82,16 +77,38 @@ public class RgroupCart extends BaseModel {
 				BigDecimal existAmount = new BigDecimal(String.valueOf(existItem.getAmount()));
 				existItem.setAmount(existAmount.add(amount).floatValue());
 				fillRuleInfo(existItem, productRule);
-				
-				itemCount = existItem.getCount();
 			}
 			
 		}
-		this.totalAmount = this.totalAmount.add(amount);
-		this.totalCount += orderItem.getCount();
+		if (itemsAmount == null) {
+			itemsAmount = new HashMap<>();
+		}
+		if (!itemsAmount.containsKey(orderItem.getRuleId())) {
+			itemsAmount.put(orderItem.getRuleId(), amount);
+			currentAmount = amount;
+		} else {
+			BigDecimal existAmount = itemsAmount.get(orderItem.getRuleId());
+			existAmount = existAmount.add(amount);
+			itemsAmount.put(orderItem.getRuleId(), existAmount);
+			currentAmount = existAmount;
+		}
+		if (itemsCount == null) {
+			itemsCount = new HashMap<>();
+		}
+		if (!itemsCount.containsKey(orderItem.getRuleId())) {
+			itemsCount.put(orderItem.getRuleId(), orderItem.getCount());
+			currentCount = orderItem.getCount();
+		} else {
+			Integer existCount = itemsCount.get(orderItem.getRuleId());
+			existCount += orderItem.getCount();
+			itemsCount.put(orderItem.getRuleId(), existCount);
+			currentCount = existCount;
+		}
 		resizeItemList();
-		
-		return itemCount;
+		RgroupCartVO vo = new RgroupCartVO();
+		vo.setTotalCount(currentCount);
+		vo.setTotalAmount(currentAmount);
+		return vo;
 		
 	}
 	
@@ -122,48 +139,65 @@ public class RgroupCart extends BaseModel {
 	 * 删除商品
 	 * @param delGoods
 	 */
-	public void del(OrderItem orderItem, ProductRuleCache productRule) {
+	public RgroupCartVO del(OrderItem orderItem, ProductRuleCache productRule) {
 		
-		if (this.items == null || this.items.isEmpty()) {
-			return;
+		RgroupCartVO vo = new RgroupCartVO();
+		if (this.itemsMap == null || this.itemsMap.isEmpty()) {
+			return vo;
 		}
-		BigDecimal unitPrice = new BigDecimal(String.valueOf(productRule.getPrice()));	//前端传上来的价格不可信，全部采用后端计算
-		BigDecimal count = new BigDecimal(orderItem.getCount());	//数量采用前端传的
-		BigDecimal amount = unitPrice.multiply(count);
+		if (!this.itemsMap.containsKey(orderItem.getRuleId())) {
+			return vo;
+		}
+		if (this.itemsAmount == null || this.itemsAmount.isEmpty() || this.itemsCount == null || this.itemsCount.isEmpty()) {
+			return vo;
+		}
 		
-		if (!itemsMap.containsKey(orderItem.getRuleId())) {
-			return;
-		}
 		Map<Long, OrderItem> existItemMap = itemsMap.get(orderItem.getRuleId());
 		OrderItem existItem = existItemMap.get(orderItem.getProductId());
 		if (existItem == null) {
-			return;
+			return vo;
 		}
 		
-		if (existItem != null) {
-			
-			fillRuleInfo(existItem, productRule);
-			
-			int reduceCount = orderItem.getCount();
-			if (existItem.getCount() - orderItem.getCount() < 1) {
-				amount = new BigDecimal(String.valueOf(existItem.getAmount()));
-				reduceCount = existItem.getCount();
-			}
-			
-			if (reduceCount == existItem.getCount()) {	//如果本次清空当前类商品，即减为0了，则：
-				itemsMap.remove(orderItem.getRuleId());
-			}else {	//本次减去商品之后，仍有商品在购物车里，则：
-				existItem.setCount(existItem.getCount() - reduceCount);
-				BigDecimal newAmount = new BigDecimal(String.valueOf(existItem.getAmount())).subtract(amount);
-				existItem.setAmount(newAmount.floatValue());
-				
-			}
-			this.totalAmount = this.totalAmount.subtract(amount);
-			this.totalCount -= reduceCount;
-			
-			resizeItemList();
+		BigDecimal unitPrice = new BigDecimal(String.valueOf(productRule.getSinglePrice()));	//前端传上来的价格不可信，全部采用后端计算
+		BigDecimal count = new BigDecimal(orderItem.getCount());	//数量采用前端传的
+		BigDecimal amount = unitPrice.multiply(count);
+		
+		fillRuleInfo(existItem, productRule);
+		
+		int reduceCount = orderItem.getCount();
+		if (existItem.getCount() - orderItem.getCount() < 1) {
+			amount = new BigDecimal(String.valueOf(existItem.getAmount()));
+			reduceCount = existItem.getCount();
 		}
 		
+		if (reduceCount == existItem.getCount()) {	//如果本次清空当前类商品，即减为0了，则：
+			existItemMap.remove(orderItem.getProductId());
+		}else {	//本次减去商品之后，仍有商品在购物车里，则：
+			existItem.setCount(existItem.getCount() - reduceCount);
+			BigDecimal newAmount = new BigDecimal(String.valueOf(existItem.getAmount())).subtract(amount);
+			existItem.setAmount(newAmount.floatValue());
+		}
+		if (existItemMap.isEmpty()) {
+			itemsMap.remove(orderItem.getRuleId());
+		}
+		BigDecimal currAmount = itemsAmount.get(orderItem.getRuleId());
+		currAmount = currAmount.subtract(amount);
+		if (currAmount.compareTo(BigDecimal.ZERO) < 0) {
+			currAmount = BigDecimal.ZERO;
+		}
+		itemsAmount.put(orderItem.getRuleId(), currAmount);
+		
+		Integer currCount = itemsCount.get(orderItem.getRuleId());
+		currCount = currCount - orderItem.getCount();
+		if (currCount < 0) {
+			currCount = 0;
+		}
+		itemsCount.put(orderItem.getRuleId(), currCount);
+		resizeItemList();
+
+		vo.setTotalAmount(currAmount);
+		vo.setTotalCount(currCount);
+		return vo;
 		
 	}
 	
@@ -173,12 +207,8 @@ public class RgroupCart extends BaseModel {
 	public void clear() {
 		
 		this.itemsMap = null;
-		this.items = null;
-		this.totalAmount = BigDecimal.ZERO;
-		this.totalShipFee = BigDecimal.ZERO;
-		this.totalPrice = BigDecimal.ZERO;
-		this.totalCount = 0;
-		
+		this.itemsAmount = null;
+		this.itemsCount = null;
 	}
 	
 	/**
@@ -207,100 +237,28 @@ public class RgroupCart extends BaseModel {
 
 	}
 	
-	
-	public void setTotalAmount(BigDecimal totalAmount) {
-		this.totalAmount = totalAmount;
+	public Map<Long, Map<Long, OrderItem>> getItemsMap() {
+		return itemsMap;
 	}
-	public int getTotalCount() {
-		return totalCount;
-	}
-	public void setTotalCount(int totalCount) {
-		this.totalCount = totalCount;
-	}
-	public List<OrderItem> getItems() {
-		return items;
-	}
-	public void setItems(List<OrderItem> items) {
-		this.items = items;
-	}
-	public BigDecimal getTotalShipFee() {
-		return totalShipFee;
-	}
-	public void setTotalShipFee(BigDecimal totalShipFee) {
-		this.totalShipFee = totalShipFee;
-	}
-	public BigDecimal getTotalPrice() {
-		return totalPrice;
+	public void setItemsMap(Map<Long, Map<Long, OrderItem>> itemsMap) {
+		this.itemsMap = itemsMap;
 	}
 
-	public void setTotalPrice(BigDecimal totalPrice) {
-		this.totalPrice = totalPrice;
+	public Map<Long, BigDecimal> getItemsAmount() {
+		return itemsAmount;
 	}
 
-	@JsonIgnore
-	public List<Long> getProductIds(){
-		List<Long> ids = new ArrayList<Long>();
-		if(items == null) {
-			return ids;
-		}
-		for(OrderItem item : items) {
-			ids.add(item.getProductId());
-		}
-		return ids;
+	public void setItemsAmount(Map<Long, BigDecimal> itemsAmount) {
+		this.itemsAmount = itemsAmount;
 	}
 
-	@JsonIgnore
-	public List<Long> getMerchantIds(){
-		List<Long> ids = new ArrayList<Long>();
-		if(items == null) {
-			return ids;
-		}
-		for(OrderItem item : items) {
-			ids.add(item.getMerchantId());
-		}
-		return ids;
+	public Map<Long, Integer> getItemsCount() {
+		return itemsCount;
 	}
 
-	/**
-	 * 由于存在满减优惠，实际金额通常小于该金额
-	 * @return
-	 */
-	@JsonIgnore
-	public Float getTotalAmount() {
-		Float totalAmount = 0f;
-		for(OrderItem item : items) {
-			totalAmount+=item.getAmount();
-		}
-		return totalAmount;
-	}
-
-	//如果是0，则不存在订单项或者为混合购物车，混合购物车暂时不做处理
-	@JsonIgnore
-	public int getOrderType(){
-		int orderType = -1;
-		for(OrderItem item : items) {
-			if(orderType == -1){
-				orderType = item.getOrderType();
-			}else if(orderType != item.getOrderType()){
-				return -1;
-			}
-		}
-		return orderType;
+	public void setItemsCount(Map<Long, Integer> itemsCount) {
+		this.itemsCount = itemsCount;
 	}
 	
-	//只考虑一个组合的问题
-	@JsonIgnore
-	public long getCollocationId(){
-		long result = 0l;
-		for(OrderItem item : items) {
-			if(result == 0){
-				result = item.getCollocationId();
-			}else if(result != item.getCollocationId()){
-				return 0l;
-			}
-		}
-		return result;
-	}
-
 	
 }

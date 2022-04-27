@@ -1,5 +1,7 @@
 package com.yumu.hexie.web.sales;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.vo.RgroupCartVO;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.sales.CartService;
 import com.yumu.hexie.web.BaseController;
@@ -93,25 +96,40 @@ public class CartController extends BaseController {
 	 */
 	@RequestMapping(value = "/rgroup/add", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<Integer> add2RgroupCart(@ModelAttribute(Constants.USER)User user, @RequestBody OrderItem orderItem) throws Exception {
+	public BaseResult<RgroupCartVO> add2RgroupCart(@ModelAttribute(Constants.USER)User user, @RequestBody OrderItem orderItem) throws Exception {
 		
-		int updated = cartService.add2RgroupCart(user, orderItem);
-		return new BaseResult<Integer>().success(updated);
+		RgroupCartVO vo = cartService.add2RgroupCart(user, orderItem);
+		return new BaseResult<RgroupCartVO>().success(vo);
 	}
 	
 	/**
-	 * 清空购物车
+	 * 根据团购id获取购物车中的商品
 	 * @param user
 	 * @param goods
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/v2/getByRule", method = RequestMethod.GET)
+	@RequestMapping(value = "/rgroup/items", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<Cart> getCartItemsByRule(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) long ruleId) throws Exception {
+	public BaseResult<Map<Long, OrderItem>> getCartItemsByRule(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) long ruleId) throws Exception {
 		
-		Cart cart = cartService.getCart(user);
-		return new BaseResult<Cart>().success(cart);
+		Map<Long, OrderItem> cartItems = cartService.getRgroupCartItems(user, ruleId);
+		return new BaseResult<Map<Long, OrderItem>>().success(cartItems);
+	}
+	
+	/**
+	 * 根据团购id获取购物车中的商品
+	 * @param user
+	 * @param goods
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroup/del", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<RgroupCartVO> delFromRgroupCart(@ModelAttribute(Constants.USER)User user, @RequestBody OrderItem orderItem) throws Exception {
+		
+		RgroupCartVO vo = cartService.delFromRgroupCart(user, orderItem);
+		return new BaseResult<RgroupCartVO>().success(vo);
 	}
 	
 }
