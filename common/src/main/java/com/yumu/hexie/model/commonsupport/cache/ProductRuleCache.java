@@ -45,7 +45,8 @@ public class ProductRuleCache implements Serializable {
 
 	private int salePlanType;
 	private Float price;	//页面显示的原价
-	private int limitNumOnce; // 限购数
+	private int limitNumOnce; // 单次限购数，v3版本不用这个字段，因为这个字段在rule上，而新版本在商品上
+	private int userLimitCount;	//用户限购数
 	private Float postageFee; // 运费
 	private int freeShippingNum; // 包邮件数
 	private long productCategoryId; // 商品分类ID
@@ -269,6 +270,14 @@ public class ProductRuleCache implements Serializable {
 	public void setMerchantId(long merchantId) {
 		this.merchantId = merchantId;
 	}
-	
 
+	public int getUserLimitCount() {
+		return userLimitCount;
+	}
+
+	public void setUserLimitCount(int userLimitCount) {
+		this.userLimitCount = userLimitCount;
+	}
+	
+	
 }
