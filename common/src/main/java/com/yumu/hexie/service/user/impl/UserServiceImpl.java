@@ -45,6 +45,8 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.market.RgroupCart;
+import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.MiniUserPageAccess;
 import com.yumu.hexie.model.user.OrgOperator;
@@ -702,6 +704,15 @@ public class UserServiceImpl implements UserService {
             
             //删除已经登陆形成的新用户
             userRepository.deleteById(miniUser.getId());
+            
+            //合并用户购物车的商品
+            String cartKey = Keys.uidRgroupCartKey(miniUser.getId());	//根据被合并用户的id，获取购物车
+    		RgroupCart cart = redisRepository.getRgroupCart(cartKey);
+    		if (cart != null) {
+    			cartKey = Keys.uidRgroupCartKey(userAccount.getId());	//更换cartKey
+    			redisRepository.setRgroupCart(cartKey, cart);
+    		}
+            
         }
         userRepository.flush();
         userRepository.save(userAccount);

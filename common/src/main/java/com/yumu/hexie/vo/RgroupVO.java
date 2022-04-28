@@ -209,6 +209,7 @@ public class RgroupVO implements Serializable {
 		private Tag[]tags;
 		private String[]imageList;
 		private int cartNum = 0;	//在购物车里的数量
+		private int saledNum = 0;	//已团数量
 		
 		public String getName() {
 			return name;
@@ -282,14 +283,21 @@ public class RgroupVO implements Serializable {
 		public void setCartNum(int cartNum) {
 			this.cartNum = cartNum;
 		}
+		public int getSaledNum() {
+			return saledNum;
+		}
+		public void setSaledNum(int saledNum) {
+			this.saledNum = saledNum;
+		}
 		@Override
 		public String toString() {
 			return "ProductVO [id=" + id + ", name=" + name + ", singlePrice=" + singlePrice + ", miniPrice="
 					+ miniPrice + ", oriPrice=" + oriPrice + ", totalCount=" + totalCount + ", userLimitCount="
 					+ userLimitCount + ", description=" + description + ", images=" + Arrays.toString(images)
 					+ ", tags=" + Arrays.toString(tags) + ", imageList=" + Arrays.toString(imageList) + ", cartNum="
-					+ cartNum + "]";
+					+ cartNum + ", saledNum=" + saledNum + "]";
 		}
+		
 		
 	}
 

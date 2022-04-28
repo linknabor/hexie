@@ -182,6 +182,9 @@ public class CartServiceImpl implements CartService {
 		
 		String cartKey = Keys.uidRgroupCartKey(user.getId());
 		RgroupCart cart = redisRepository.getRgroupCart(cartKey);
+		if (cart == null) {
+			return null;
+		}
 		Map<Long, Map<Long, OrderItem>> itemsMap = cart.getItemsMap();
 		if (itemsMap == null) {
 			return null;
