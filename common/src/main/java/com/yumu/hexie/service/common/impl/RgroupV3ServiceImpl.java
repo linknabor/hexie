@@ -341,6 +341,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					orgOperator.setOrgOperId(groupOwner.getOrgOperId());
 					orgOperator.setOrgType(groupOwner.getOrgType());
 					orgOperatorRepository.save(orgOperator);
+					
+					rgroupOwner.setFeeRate(groupOwner.getFeeRate());
+					rgroupOwnerRepository.save(rgroupOwner);
 				}
 				
 			}

@@ -406,9 +406,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             Product pro = new Product();
             pro.setId(orderItem.getProductId());
             productService.freezeCount(pro, orderItem.getCount());
-            //6.清空购物车中已购买的商品
-            cartService.delFromCart(user.getId(), itemList);
         }
+        //6.清空购物车中已购买的商品
+        cartService.delFromCart(user.getId(), itemList);
         return newOrder;
 
     }
@@ -1562,4 +1562,97 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
         }
     }
+    
+    /**
+     * 根据购物车创建订单
+     */
+    @Override
+    @Transactional
+    public ServiceOrder createOrder4Rgoup(User user, CreateOrderReq req) {
+
+        Map<Long, List<OrderItem>> itemsMap = new HashMap<>();
+        //重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
+        List<OrderItem> itemList = req.getItemList();
+        for (OrderItem orderItem : itemList) {
+            String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
+            ProductRuleCache productRule = redisRepository.getProdcutRule(key);
+            if (productRule == null) {
+                throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
+            }
+
+            //只设置单价和免邮件数这些基本属性，以保证后面计算的正确性
+            BigDecimal amt = new BigDecimal(String.valueOf(productRule.getPrice())).multiply(new BigDecimal(String.valueOf(orderItem.getCount())));
+            orderItem.setAmount(amt.floatValue());
+            orderItem.setOriPrice(productRule.getOriPrice());
+            orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
+            orderItem.setPostageFee(productRule.getPostageFee());
+            orderItem.setPrice(productRule.getPrice());
+
+            Long agentId = productRule.getAgentId();
+            orderItem.setAgentId(productRule.getAgentId());
+
+            if (!itemsMap.containsKey(agentId)) {
+                List<OrderItem> oList = new ArrayList<>();
+                oList.add(orderItem);
+                itemsMap.put(agentId, oList);
+            } else {
+                List<OrderItem> oList = itemsMap.get(agentId);
+                oList.add(orderItem);
+            }
+
+        }
+
+        BigDecimal totalOrderAmount = BigDecimal.ZERO;
+        Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
+        for (Entry<Long, List<OrderItem>> entry : itemsMap.entrySet()) {
+            CreateOrderReq orderRequest = new CreateOrderReq();
+            BeanUtils.copyProperties(req, orderRequest);
+            orderRequest.setItemList(entry.getValue());
+
+            ServiceOrder o = new ServiceOrder(user, orderRequest);
+            o.setGroupOrderId(groupId);
+
+            //1. 填充地址信息
+            Address address = fillAddressInfo(o);
+            //2. 填充订单信息并校验规则,设置价格信息
+            preOrderCreate(o, address);
+            //3. 先保存order，产生一个orderId
+            serviceOrderRepository.save(o);
+
+            totalOrderAmount = totalOrderAmount.add(new BigDecimal(String.valueOf(o.getPrice())));    //这里面含运费
+
+            log.info("generated order id : " + o.getId());
+            List<OrderItem> items = o.getItems();
+            log.info("items : " + items);
+
+            //4. 保存orderItem
+            for (OrderItem item : items) {
+                item.setServiceOrder(o);
+                item.setUserId(o.getUserId());
+                orderItemRepository.save(item);
+            }
+            //5. 订单后处理
+            commonPostProcess(ModelConstant.ORDER_OP_CREATE, o);
+
+        }
+
+        //6.红包分摊
+        computeCoupon4GroupOrders(groupId);
+
+        ServiceOrder newOrder = new ServiceOrder();
+        newOrder.setId(groupId);
+
+        //7.冻结库存。这步必须放最后，因为redis没法跟随数据库一起回滚
+        for (OrderItem orderItem : itemList) {
+            Product pro = new Product();
+            pro.setId(orderItem.getProductId());
+            productService.freezeCount(pro, orderItem.getCount());
+        }
+        //6.清空购物车中已购买的商品
+        cartService.delFromCart(user.getId(), itemList);
+        return newOrder;
+
+    }
+    
+    
 }

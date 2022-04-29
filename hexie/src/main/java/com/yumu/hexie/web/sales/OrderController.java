@@ -487,4 +487,23 @@ public class OrderController extends BaseController{
 		return new BaseResult<List<OrderItem>>().success(itemList);
     }
 	
+	/**
+	 * 购物车支付页面创建订单
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@ApiOperation(value = "团购创建订单")
+	@RequestMapping(value = "/rgroup/v3/order/create", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<ServiceOrder> createOrder4Rgroup(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req) throws Exception {
+		
+		ServiceOrder o = baseOrderService.createOrder4Rgoup(user, req);
+		if(o == null) {
+			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
+		}
+		return new BaseResult<ServiceOrder>().success(o);
+	}
+	
 }
