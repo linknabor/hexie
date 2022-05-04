@@ -109,7 +109,15 @@ public class RgroupController extends BaseController{
 	@ResponseBody
 	public BaseResult<RgroupVO> getRgroupsByRuleV3(@PathVariable String ruleId) throws Exception {
 		
-		RgroupVO vo = rgroupV3Service.queryRgroupByRule(ruleId);
+		RgroupVO vo = rgroupV3Service.queryRgroupByRule(ruleId, false);
+        return new BaseResult<RgroupVO>().success(vo);
+    }
+	
+	@RequestMapping(value = "/rgroups/v3/queryOnSales/{ruleId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<RgroupVO> getRgroupsOnSales(@PathVariable String ruleId) throws Exception {
+		
+		RgroupVO vo = rgroupV3Service.queryRgroupByRule(ruleId, true);
         return new BaseResult<RgroupVO>().success(vo);
     }
 	

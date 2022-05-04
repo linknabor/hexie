@@ -135,7 +135,7 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public RgroupCartVO add2RgroupCart(User user, OrderItem orderItem){
 		
-		String key = orderItem.getRuleId() + "_" + orderItem.getProductId();
+		String key = orderItem.getRuleId() + ":" + orderItem.getProductId();
 		ProductRuleCache productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + key);
 		if (productRule == null) {
 			throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());
@@ -158,7 +158,7 @@ public class CartServiceImpl implements CartService {
 	@Override
 	public RgroupCartVO delFromRgroupCart(User user, OrderItem orderItem){
 		
-		String key = orderItem.getRuleId() + "_" + orderItem.getProductId();
+		String key = orderItem.getRuleId() + ":" + orderItem.getProductId();
 		ProductRuleCache productRule = redisRepository.getProdcutRule(ModelConstant.KEY_PRO_RULE_INFO + key);
 		if (productRule == null) {
 			throw new BizValidateException("未找到当前商品规则配置，ruleId: " + orderItem.getRuleId());

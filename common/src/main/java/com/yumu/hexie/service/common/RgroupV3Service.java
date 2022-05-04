@@ -9,6 +9,6 @@ public interface RgroupV3Service {
 	
 	void pubRgroup(String rgroupRuleId);
 
-	RgroupVO queryRgroupByRule(String rgroupRuleId);
+	RgroupVO queryRgroupByRule(String rgroupRuleId, boolean isOnsale);
 	
 }
