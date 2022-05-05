@@ -154,17 +154,34 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     private RgroupAreaItemRepository rgroupAreaItemRepository;
 
 
-    private void preOrderCreate(ServiceOrder order, Address address) {
+    private List<String> preOrderCreate(ServiceOrder order, Address address) {
         log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
+        List<String> messageList = new ArrayList<>();	//这里校验报错，如果缺货或者商品下架，不能直接返回到页面，能成功购买的商品还是要下单的
         for (OrderItem item : order.getItems()) {
             SalePlan plan = findSalePlan(order.getOrderType(), item.getRuleId());
             //校验规则
-            salePlanService.getService(order.getOrderType()).validateRule(order, plan, item, address);
+            try {
+				salePlanService.getService(order.getOrderType()).validateRule(order, plan, item, address);
+			} catch (Exception e) {
+				String errMsg = "当前团购["+item.getRuleId()+"]"; 
+				errMsg += e.getMessage();
+				log.error(errMsg, e);
+				messageList.add(errMsg);	//记录下错误原因，跳过
+				continue;
+			}
             //校验商品
-            Product product = productService.getProduct(plan.getProductId());
-            productService.checkSalable(product, item.getCount());
+            Product product = productService.getProduct(item.getProductId());
+            try {
+				productService.checkSalable(product, item.getCount());
+			} catch (Exception e) {
+				String errMsg = "当前商品["+item.getProductId()+"]"; 
+				errMsg += e.getMessage();
+				log.error(errMsg, e);
+				messageList.add(errMsg);	//记录下错误原因，跳过
+				continue;
+			}
             //填充信息
-            item.fillDetail(plan, product);
+            item.fillDetailV3(plan, product);
 
             long agentId = product.getAgentId();
             if (ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
@@ -193,16 +210,27 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             	List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(product.getId(), address.getXiaoquId());
             	if(areaList!=null && areaList.size()>0) {
             		RgroupAreaItem areaItem = areaList.get(0);
-            		order.setGroupLeader(areaItem.getAreaLeader());
-            		order.setGroupLeaderAddr(areaItem.getAreaLeaderAddr());
-            		order.setGroupLeaderId(areaItem.getAreaLeaderId());
-            		order.setGroupLeaderTel(areaItem.getAreaLeaderTel());
+            		if (!StringUtils.isEmpty(areaItem.getAreaLeader())) {
+            			order.setGroupLeader(areaItem.getAreaLeader());
+                		order.setGroupLeaderAddr(areaItem.getAreaLeaderAddr());
+                		order.setGroupLeaderId(areaItem.getAreaLeaderId());
+                		order.setGroupLeaderTel(areaItem.getAreaLeaderTel());
+					}
+            	} else {
+            		RgroupRule rgroupRule = cacheableService.findRgroupRule(plan.getId());
+					order.setGroupLeader(rgroupRule.getOwnerName());
+            		order.setGroupLeaderId(rgroupRule.getOwnerId());
+            		order.setGroupLeaderTel(rgroupRule.getOwnerTel());
             	}
             	
             }
         }
+        if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType() && messageList.size() > 0) {
+			throw new BizValidateException(messageList.get(0));
+		}
         computePrice(order);
         log.warn("[Create]创建订单OrderNo:" + order.getOrderNo() + "|" + order.getProductName() + "|" + order.getPrice());
+		return messageList;
     }
 
     @Override
@@ -252,7 +280,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         ServiceOrder o = new ServiceOrder(order);
         Address address = fillAddressInfo(o);
         //2. 填充订单信息并校验规则,设置价格信息
-        preOrderCreate(o, address);
+        List<String> messageList = preOrderCreate(o, address);
+        if (messageList.size() > 0) {
+			throw new BizValidateException(messageList.get(0));
+		}
         //3. 订单创建
         o = serviceOrderRepository.save(o);
 
@@ -437,7 +468,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
     @Override
     @Transactional
-    public JsSign requestOrderPay(User user, long orderId) throws Exception {
+    public JsSign requestOrderPay(User user, long orderId, String payMethod) throws Exception {
 
         JsSign jsSign;
         ServiceOrder order = findOne(orderId);
@@ -447,7 +478,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
             jsSign = requestPay(order);
         } else {
-            jsSign = requestGroupPay(orderId);
+            jsSign = requestGroupPay(orderId, payMethod);
         }
         return jsSign;
 
@@ -582,7 +613,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
     @Override
     @Transactional
-    public JsSign requestGroupPay(long orderId) throws Exception {
+    public JsSign requestGroupPay(long orderId, String payMethod) throws Exception {
 
         List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(orderId);
         if (orderList.isEmpty()) {
@@ -666,6 +697,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         }
         request.setServiceAddr(address);
         request.setOpenid(o.getOpenId());
+        request.setMiniappid(o.getMiniappid());
+        request.setMiniopenid(o.getMiniopenid());
+        
         request.setTranAmt(totalPrice.toString());
 
         String productName = o.getProductName();
@@ -688,6 +722,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             request.setAgentName(agentName);
         }
         request.setCount(String.valueOf(totalCount));
+        request.setPayMethod(payMethod);
 
         CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
 
@@ -1569,12 +1604,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     @Override
     @Transactional
     public ServiceOrder createOrder4Rgoup(User user, CreateOrderReq req) {
-
+    	
+    	long regionId = req.getServiceAddressId();
+    	if (regionId == 0l) {
+			throw new BizValidateException("请选择所在小区");
+		}
         Map<Long, List<OrderItem>> itemsMap = new HashMap<>();
         //重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
         List<OrderItem> itemList = req.getItemList();
         for (OrderItem orderItem : itemList) {
-            String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId();
+            String key = ModelConstant.KEY_PRO_RULE_INFO + orderItem.getRuleId() + ":" + orderItem.getProductId();
             ProductRuleCache productRule = redisRepository.getProdcutRule(key);
             if (productRule == null) {
                 throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
@@ -1615,8 +1654,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             //1. 填充地址信息
             Address address = fillAddressInfo(o);
             //2. 填充订单信息并校验规则,设置价格信息
-            preOrderCreate(o, address);
+            List<String> messageList = preOrderCreate(o, address);
             //3. 先保存order，产生一个orderId
+            if (messageList.size() > 0 && o.getTotalAmount() == 0f && o.getCount() == 0) {
+				log.warn("no items has set into order, will skip ");
+				continue;
+			}
             serviceOrderRepository.save(o);
 
             totalOrderAmount = totalOrderAmount.add(new BigDecimal(String.valueOf(o.getPrice())));    //这里面含运费
@@ -1647,9 +1690,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             Product pro = new Product();
             pro.setId(orderItem.getProductId());
             productService.freezeCount(pro, orderItem.getCount());
+            
+          //6.清空购物车中已购买的商品
+            cartService.delFromRgroupCart(user, orderItem);
         }
-        //6.清空购物车中已购买的商品
-        cartService.delFromCart(user.getId(), itemList);
         return newOrder;
 
     }

@@ -86,6 +86,12 @@ public class RgroupController extends BaseController{
         return commonResponse;
     }
 	
+	/**
+	 * 3版团购新增、编辑
+	 * @param createRgroupReq
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/rgroups/v3/save", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<Map<String, String>> saveRgroups(@RequestBody RgroupVO createRgroupReq) throws Exception {
@@ -96,6 +102,29 @@ public class RgroupController extends BaseController{
         return new BaseResult<Map<String, String>>().success(map);
     }
 	
+	/**
+	 * 3版团购发布上架
+	 * @param createRgroupReq
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/pub/{ruleId}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Map<String, String>> pubRgroups(@ModelAttribute(Constants.USER)User user, @PathVariable long ruleId) throws Exception {
+		
+		rgroupV3Service.updateRgroupStatus(ruleId, true);
+		Map<String, String> map = new HashMap<>();
+		map.put("ruleId", String.valueOf(ruleId));
+        return new BaseResult<Map<String, String>>().success(map);
+    }
+	
+	/**
+	 * 3版团购查询列表
+	 * @param user
+	 * @param page
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/rgroups/v3/{page}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<RgroupAreaItem>> getRgroupsV3(@ModelAttribute(Constants.USER)User user,
@@ -105,6 +134,12 @@ public class RgroupController extends BaseController{
         return new BaseResult<List<RgroupAreaItem>>().success(rgroupService.addProcessStatus(items));
     }
 	
+	/**
+	 * 3版团购根据团购id查询
+	 * @param ruleId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/rgroups/v3/queryByRule/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<RgroupVO> getRgroupsByRuleV3(@PathVariable String ruleId) throws Exception {
@@ -113,6 +148,12 @@ public class RgroupController extends BaseController{
         return new BaseResult<RgroupVO>().success(vo);
     }
 	
+	/**
+	 * 3版本团购根据id查询已发布的团购
+	 * @param ruleId
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/rgroups/v3/queryOnSales/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<RgroupVO> getRgroupsOnSales(@PathVariable String ruleId) throws Exception {

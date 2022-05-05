@@ -526,5 +526,42 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		
 		return vo;
 	}
+	
+	/**
+	 * 更新团购状态
+	 * @param ruleId
+	 */
+	@Override
+	@Transactional
+	public void updateRgroupStatus(long ruleId, boolean isPub) {
+		
+		int ruleStatus = ModelConstant.RULE_STATUS_ON;
+		int distributionStatus = ModelConstant.DISTRIBUTION_STATUS_ON;
+		if (!isPub) {
+			ruleStatus = ModelConstant.RULE_STATUS_OFF;
+			distributionStatus = ModelConstant.DISTRIBUTION_STATUS_OFF;
+		}
+		
+		if (ruleId == 0l) {
+			throw new BizValidateException("团购id不能为空");
+		}
+		Optional<RgroupRule> ruleOptional = rgroupRuleRepository.findById(ruleId); 
+		if (ruleOptional == null) {
+			throw new BizValidateException("未查询到团购, id: " + ruleId);
+		}
+		RgroupRule rule = ruleOptional.get();
+		if (rule == null) {
+			throw new BizValidateException("未查询到团购, id: " + ruleId);
+		}
+		
+		rule.setStatus(ruleStatus);
+		rgroupRuleRepository.save(rule);
+		
+		List<RgroupAreaItem> itemList = rgroupAreaItemRepository.findByRuleId(ruleId);
+		for (RgroupAreaItem rgroupAreaItem : itemList) {
+			rgroupAreaItem.setStatus(distributionStatus);
+		}
+		rgroupAreaItemRepository.saveAll(itemList);
+	}
 
 }

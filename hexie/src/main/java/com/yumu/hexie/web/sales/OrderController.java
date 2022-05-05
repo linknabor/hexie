@@ -273,7 +273,7 @@ public class OrderController extends BaseController{
 	@ResponseBody
 	public BaseResult<JsSign> requestPay(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
 		
-		return new BaseResult<JsSign>().success(baseOrderService.requestOrderPay(user, orderId));
+		return new BaseResult<JsSign>().success(baseOrderService.requestOrderPay(user, orderId, ""));
 	}
 	
 	@RequestMapping(value = "/notifyPayed/{orderId}", method = RequestMethod.GET)
@@ -503,6 +503,8 @@ public class OrderController extends BaseController{
 		if(o == null) {
 			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
 		}
+		String payMethod = "12";	//小程序支付
+		baseOrderService.requestOrderPay(user, o.getGroupOrderId(), payMethod);
 		return new BaseResult<ServiceOrder>().success(o);
 	}
 	

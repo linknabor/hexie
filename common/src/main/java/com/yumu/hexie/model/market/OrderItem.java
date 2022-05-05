@@ -74,6 +74,23 @@ public class OrderItem  extends BaseModel {
 		productThumbPic = product.getSmallPicture();
 		productCategoryId = product.getProductCategoryId();
 	}
+	
+	@Transient
+	public void fillDetailV3(SalePlan plan,Product product){
+		orderType = plan.getSalePlanType();
+		price = product.getSinglePrice();
+		amount = product.getSinglePrice() * count;
+		ruleName = plan.getName();
+		
+		productId = product.getId();
+		oriPrice = product.getOriPrice();
+		merchantId = product.getMerchantId();
+		productName = product.getName();
+		productPic = product.getMainPicture();
+		productThumbPic = product.getSmallPicture();
+		productCategoryId = product.getProductCategoryId();
+	}
+	
 	public Long getProductId() {
 		return productId;
 	}

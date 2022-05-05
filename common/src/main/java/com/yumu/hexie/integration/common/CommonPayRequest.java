@@ -54,6 +54,10 @@ public class CommonPayRequest extends CommonRequest {
 	private String shipFee;
 	private String memo; //客户描述
 	private String imgUrls; //客户上传图片地址
+	@JsonProperty("pay_method")
+	private String payMethod;
+	private String miniopenid;
+	private String miniappid;
 	
 	public CommonPayRequest() {
 		super();
@@ -318,30 +322,41 @@ public class CommonPayRequest extends CommonRequest {
 		this.imgUrls = imgUrls;
 	}
 
+	public String getPayMethod() {
+		return payMethod;
+	}
+
+	public void setPayMethod(String payMethod) {
+		this.payMethod = payMethod;
+	}
+
+	public String getMiniopenid() {
+		return miniopenid;
+	}
+
+	public void setMiniopenid(String miniopenid) {
+		this.miniopenid = miniopenid;
+	}
+
+	public String getMiniappid() {
+		return miniappid;
+	}
+
+	public void setMiniappid(String miniappid) {
+		this.miniappid = miniappid;
+	}
+
 	@Override
 	public String toString() {
-		return "CommonPayRequest{" +
-				"userId='" + userId + '\'' +
-				", serviceId='" + serviceId + '\'' +
-				", sectId='" + sectId + '\'' +
-				", linkman='" + linkman + '\'' +
-				", linktel='" + linktel + '\'' +
-				", serviceAddr='" + serviceAddr + '\'' +
-				", appid='" + appid + '\'' +
-				", openid='" + openid + '\'' +
-				", tranAmt='" + tranAmt + '\'' +
-				", tradeWaterId='" + tradeWaterId + '\'' +
-				", orderType='" + orderType + '\'' +
-				", serviceName='" + serviceName + '\'' +
-				", agentName='" + agentName + '\'' +
-				", agentNo='" + agentNo + '\'' +
-				", count='" + count + '\'' +
-				", subOrders=" + subOrders +
-				", couponId='" + couponId + '\'' +
-				", couponAmt='" + couponAmt + '\'' +
-				", shipFee='" + shipFee + '\'' +
-				", memo='" + memo + '\'' +
-				", imgUrls='" + imgUrls + '\'' +
-				'}';
+		return "CommonPayRequest [userId=" + userId + ", serviceId=" + serviceId + ", sectId=" + sectId + ", linkman="
+				+ linkman + ", linktel=" + linktel + ", serviceAddr=" + serviceAddr + ", appid=" + appid + ", openid="
+				+ openid + ", tranAmt=" + tranAmt + ", tradeWaterId=" + tradeWaterId + ", orderType=" + orderType
+				+ ", serviceName=" + serviceName + ", agentName=" + agentName + ", agentNo=" + agentNo + ", count="
+				+ count + ", subOrders=" + subOrders + ", couponId=" + couponId + ", couponAmt=" + couponAmt
+				+ ", shipFee=" + shipFee + ", memo=" + memo + ", imgUrls=" + imgUrls + ", payMethod=" + payMethod
+				+ ", miniopenid=" + miniopenid + ", miniappid=" + miniappid + "]";
 	}
+
+	
+	
 }

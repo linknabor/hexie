@@ -74,10 +74,10 @@ public interface BaseOrderService {
     List<OrderItem> getOrderDetail(User user, long orderId);
 
     //拆单支付
-    JsSign requestGroupPay(long orderId) throws Exception;
+    JsSign requestGroupPay(long orderId, String payMethod) throws Exception;
 
     //订单支付
-    JsSign requestOrderPay(User user, long orderId) throws Exception;
+    JsSign requestOrderPay(User user, long orderId, String payMethod) throws Exception;
 
     //查询订单（兼容拆分的交易）
     ServiceOrder getOrder(User user, long orderId);
@@ -93,5 +93,5 @@ public interface BaseOrderService {
 
 	ServiceOrder createOrder4Rgoup(User user, CreateOrderReq req);
 
-
+	
 }

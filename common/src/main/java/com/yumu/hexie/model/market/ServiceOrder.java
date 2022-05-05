@@ -57,7 +57,7 @@ public class ServiceOrder  extends BaseModel {
 	private float shipFee;//运费
 	private String seedStr;//订单对应的现金券
 	
-	private int status = ModelConstant.ORDER_STATUS_INIT;;//0. 创建完成 1. 已支付 2. 已用户取消 3. 待退款 4. 已退款  5. 已使用/已发货 6.已签收 7. 已后台取消 8. 商户取消
+	private int status = ModelConstant.ORDER_STATUS_INIT;//0. 创建完成 1. 已支付 2. 已用户取消 3. 待退款 4. 已退款  5. 已使用/已发货 6.已签收 7. 已后台取消 8. 商户取消
 
 	private int asyncStatus;//同步给商户 0 未同步，1已同步
 	private int pingjiaStatus = ModelConstant.ORDER_PINGJIA_TYPE_N;//0 未评价 1 已评价
@@ -69,6 +69,9 @@ public class ServiceOrder  extends BaseModel {
 	/**用户信息**/
 	private String openId;
 	private String appid;
+	
+	private String miniopenid;
+	private String miniappid;
 	
 	/**地址信息**/
 	private long serviceAddressId;//FIXME 服务地址
@@ -153,7 +156,7 @@ public class ServiceOrder  extends BaseModel {
     private String subTypeName;	//子类中文名称
     
     private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
-
+    
 	@JsonIgnore
     @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
     @Fetch(FetchMode.SUBSELECT)
@@ -226,6 +229,7 @@ public class ServiceOrder  extends BaseModel {
 		
 		this.userId = user.getId();
 		this.openId = user.getOpenid();
+		this.appid = user.getAppId();
 		this.items = cart.getItems();
 	}
 	
@@ -244,6 +248,9 @@ public class ServiceOrder  extends BaseModel {
 		
 		this.userId = user.getId();
 		this.openId = user.getOpenid();
+		this.appid = user.getAppId();
+		this.miniopenid = user.getMiniopenid();
+		this.miniappid = user.getMiniAppId();
 		this.items = req.getItemList();
 	}
 	
@@ -1039,6 +1046,18 @@ public class ServiceOrder  extends BaseModel {
     	return showStatus;
     	
     }
+	public String getMiniopenid() {
+		return miniopenid;
+	}
+	public void setMiniopenid(String miniopenid) {
+		this.miniopenid = miniopenid;
+	}
+	public String getMiniappid() {
+		return miniappid;
+	}
+	public void setMiniappid(String miniappid) {
+		this.miniappid = miniappid;
+	}
     
     
 }
