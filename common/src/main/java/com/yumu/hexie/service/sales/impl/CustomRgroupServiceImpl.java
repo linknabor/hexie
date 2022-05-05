@@ -56,7 +56,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     public void validateRule(ServiceOrder order, SalePlan plan, OrderItem item, Address address) {
         //校验
         if (!plan.valid(item.getCount())) {
-            throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_RGROUP, plan.getId(), "商品信息已过期，请重新下单！")
+            throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_RGROUP, plan.getId(), "团购已过期或者团购已下架！")
                 .setError();
         }
         //校验规则限制每个用户的数量

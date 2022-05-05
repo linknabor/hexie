@@ -248,7 +248,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				product.setProductType("1002");
 				product.setShortName(productView.getName());
 				product.setTitleName(productView.getName());
-//				product.setAgentId(agent.getId());	//写到rgroupRule上，这里都填0
+				product.setAgentId(agent.getId());
 				int userLimitCount = 9999;
 				String limitStr = productView.getUserLimitCount();
 				if (!StringUtils.isEmpty(limitStr)) {
@@ -273,7 +273,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				
 				//缓存库存和商品规则
 				ProductRuleCache productRuleCache = new ProductRuleCache(product, rule);
-				String key = ModelConstant.KEY_PRO_RULE_INFO + productRuleCache.getId()+ "_" + product.getId();
+				String key = ModelConstant.KEY_PRO_RULE_INFO + productRuleCache.getId()+ ":" + product.getId();
 				redisRepository.setProdcutRule(key, productRuleCache);
 				stringRedisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));	//TODO 编辑是否要改库存？
 			
@@ -341,6 +341,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					orgOperator.setOrgOperId(groupOwner.getOrgOperId());
 					orgOperator.setOrgType(groupOwner.getOrgType());
 					orgOperatorRepository.save(orgOperator);
+					
+					rgroupOwner.setFeeRate(groupOwner.getFeeRate());
+					rgroupOwnerRepository.save(rgroupOwner);
 				}
 				
 			}
@@ -366,19 +369,28 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	 * @param rgroupRuleId
 	 */
 	@Override
-	public RgroupVO queryRgroupByRule(String rgroupRuleId) {
+	public RgroupVO queryRgroupByRule(String rgroupRuleId, boolean isOnsale) {
 		
 		Assert.hasText(rgroupRuleId, "团购id不能为空。");
 		RgroupVO vo = new RgroupVO();
 		try {
 			Long ruleId = Long.valueOf(rgroupRuleId);
-			RgroupRule rule = null;
-			Optional<RgroupRule> optional = rgroupRuleRepository.findById(ruleId);
-			if (optional != null) {
-				rule = optional.get();
+			
+			List<Integer> statusList = new ArrayList<>();
+			if (isOnsale) {
+				statusList.add(ModelConstant.RULE_STATUS_ON);
+			} else {
+				statusList.add(ModelConstant.RULE_STATUS_ON);
+				statusList.add(ModelConstant.RULE_STATUS_OFF);
 			}
+			
+			RgroupRule rule = rgroupRuleRepository.findByIdAndStatusIn(ruleId, statusList);
 			if (rule == null) {
-				throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
+				if (isOnsale) {
+					throw new BizValidateException("团购已下架");
+				} else {
+					throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
+				}
 			}
 			vo.setRuleId(String.valueOf(rule.getId()));
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
@@ -387,7 +399,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			DescriptionMore[]descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
 			vo.setDescription(rule.getDescription());
 			vo.setDescriptionMore(descriptionMore);
-			vo.setStatus(String.valueOf(rule.getStatus()));
+			vo.setStatus(rule.getStatus());
 			
 			List<String> descMoreImages = new ArrayList<>();
 			for (DescriptionMore descM : descriptionMore) {
@@ -421,6 +433,12 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			String endDateStr = DateUtil.dtFormat(endDate, dtFormat);
 			vo.setEndDate(endDateStr);
 			vo.setEndDateMills(endDate.getTime());
+			if (isOnsale) {	//如果只查询上架的商品，需要判断团购结束的时间
+				if (endDate.getTime() - System.currentTimeMillis() <= 0) {
+					throw new BizValidateException("团购已结束");
+				}
+			}
+			
 			vo.setGroupMinNum(rule.getGroupMinNum());
 			long createDate = rule.getCreateDate();
 			vo.setCreateDate(DateUtil.getSendTime(createDate));
@@ -432,6 +450,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			for (Product product : productList) {
 				ProductVO proVo = new ProductVO();
 				proVo.setId(String.valueOf(product.getId()));
+				proVo.setStatus(product.getStatus());
 				proVo.setDescription(product.getOtherDesc());
 				String picsStr = product.getPictures();
 				List<Thumbnail> thumbnailList = new ArrayList<>();
@@ -506,6 +525,43 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		}
 		
 		return vo;
+	}
+	
+	/**
+	 * 更新团购状态
+	 * @param ruleId
+	 */
+	@Override
+	@Transactional
+	public void updateRgroupStatus(long ruleId, boolean isPub) {
+		
+		int ruleStatus = ModelConstant.RULE_STATUS_ON;
+		int distributionStatus = ModelConstant.DISTRIBUTION_STATUS_ON;
+		if (!isPub) {
+			ruleStatus = ModelConstant.RULE_STATUS_OFF;
+			distributionStatus = ModelConstant.DISTRIBUTION_STATUS_OFF;
+		}
+		
+		if (ruleId == 0l) {
+			throw new BizValidateException("团购id不能为空");
+		}
+		Optional<RgroupRule> ruleOptional = rgroupRuleRepository.findById(ruleId); 
+		if (ruleOptional == null) {
+			throw new BizValidateException("未查询到团购, id: " + ruleId);
+		}
+		RgroupRule rule = ruleOptional.get();
+		if (rule == null) {
+			throw new BizValidateException("未查询到团购, id: " + ruleId);
+		}
+		
+		rule.setStatus(ruleStatus);
+		rgroupRuleRepository.save(rule);
+		
+		List<RgroupAreaItem> itemList = rgroupAreaItemRepository.findByRuleId(ruleId);
+		for (RgroupAreaItem rgroupAreaItem : itemList) {
+			rgroupAreaItem.setStatus(distributionStatus);
+		}
+		rgroupAreaItemRepository.saveAll(itemList);
 	}
 
 }

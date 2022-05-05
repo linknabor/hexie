@@ -18,7 +18,8 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	@Query("from RgroupRule p where p.status = "+ModelConstant.RULE_STATUS_ON+" and p.endDate<=?1 and p.groupStatus="+ModelConstant.RGROUP_STAUS_GROUPING)
 	public List<RgroupRule> findTimeoutGroup(Date date);
 	
-
+	public RgroupRule findByIdAndStatusIn(long ruleId, List<Integer> statusList);
+	
 	public List<RgroupRule> findAllByProductId(long productId);
 	
 	public List<RgroupRule> findByGroupStatus(int groupStatus);

@@ -53,7 +53,7 @@ public class SalePlan extends BaseModel {
 	public boolean valid(int count) {
 	    if(getStatus() == ModelConstant.RULE_STATUS_OFF) {
 	        return false;
-        } else if(getLimitNumOnce() < count){
+        } else if(getLimitNumOnce() > 0 && getLimitNumOnce() < count){
             return false;
         } else if(getEndDate() != null && getEndDate().getTime() < System.currentTimeMillis()){
             return false;

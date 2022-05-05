@@ -20,7 +20,7 @@ public class RgroupOwner extends BaseModel {
 	private int followers;	//TODO 关注人数  这个不知道有什么用？
 	private int members;	//订阅人数,成员数
 	private int attendees;		//跟团人次
-	private String consultRate;
+	private String feeRate;
 	
 	public long getUserId() {
 		return userId;
@@ -52,16 +52,16 @@ public class RgroupOwner extends BaseModel {
 	public void setAttendees(int attendees) {
 		this.attendees = attendees;
 	}
-	public String getConsultRate() {
-		return consultRate;
+	public String getFeeRate() {
+		return feeRate;
 	}
-	public void setConsultRate(String consultRate) {
-		this.consultRate = consultRate;
+	public void setFeeRate(String feeRate) {
+		this.feeRate = feeRate;
 	}
 	@Override
 	public String toString() {
 		return "RgroupOwner [userId=" + userId + ", miniopenid=" + miniopenid + ", followers=" + followers
-				+ ", members=" + members + ", attendees=" + attendees + ", consultRate=" + consultRate + "]";
+				+ ", members=" + members + ", attendees=" + attendees + ", feeRate=" + feeRate + "]";
 	}
 	
 

@@ -55,6 +55,7 @@ public class CreateRgroupRequest implements Serializable {
 		private String miniopenid;
 		private String orgOperId;
 		private String orgType;
+		private String feeRate;
 		
 		public String getName() {
 			return name;
@@ -92,10 +93,16 @@ public class CreateRgroupRequest implements Serializable {
 		public void setOrgType(String orgType) {
 			this.orgType = orgType;
 		}
+		public String getFeeRate() {
+			return feeRate;
+		}
+		public void setFeeRate(String feeRate) {
+			this.feeRate = feeRate;
+		}
 		@Override
 		public String toString() {
 			return "GroupOwnerInfo [name=" + name + ", tel=" + tel + ", openid=" + openid + ", miniopenid=" + miniopenid
-					+ ", orgOperId=" + orgOperId + ", orgType=" + orgType + "]";
+					+ ", orgOperId=" + orgOperId + ", orgType=" + orgType + ", feeRate=" + feeRate + "]";
 		}
 		
 	}

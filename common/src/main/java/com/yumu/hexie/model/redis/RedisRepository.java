@@ -121,9 +121,9 @@ public class RedisRepository {
     
     public void setProdcutRule(String key, ProductRuleCache value) {
     	
-    	Date start = value.getStartDate();
+//    	Date start = value.getStartDate();
     	Date end = value.getEndDate();
-    	long expire = end.getTime() - start.getTime();
+    	long expire = end.getTime() - System.currentTimeMillis();
     	proRedisTemplate.opsForValue().set(key, value, expire, TimeUnit.MILLISECONDS);
     }
     public ProductRuleCache getProdcutRule(String key) {
