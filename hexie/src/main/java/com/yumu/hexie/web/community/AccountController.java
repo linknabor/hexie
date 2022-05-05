@@ -6,10 +6,12 @@ import com.yumu.hexie.integration.community.resp.*;
 import com.yumu.hexie.model.commonsupport.info.ProductDepot;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.community.AccountService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +29,9 @@ public class AccountController extends BaseController {
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private WechatCoreService wechatCoreService;
 
     @RequestMapping(value = "/getAccount", method = RequestMethod.POST)
     public BaseResult<AccountInfoVO> getOrderList(@ModelAttribute(Constants.USER) User user) throws Exception {
@@ -299,5 +304,11 @@ public class AccountController extends BaseController {
     public BaseResult<Boolean> delDepotTag(@ModelAttribute(Constants.USER) User user, @PathVariable String tagId) {
         Boolean flag = accountService.delDepotTag(user, tagId);
         return BaseResult.successResult(flag);
+    }
+
+    @RequestMapping(value = "/getMiniQrCode", method = {RequestMethod.GET}, produces = MediaType.IMAGE_JPEG_VALUE)
+    @ResponseBody
+    public String getMiniQrCode(@ModelAttribute(Constants.USER) User user, @RequestParam() String path, @RequestParam() String param) throws Exception {
+        return wechatCoreService.getUnlimitedQrcode(path, param);
     }
 }

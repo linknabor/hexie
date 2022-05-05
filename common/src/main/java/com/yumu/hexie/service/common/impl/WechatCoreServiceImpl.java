@@ -34,6 +34,8 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.WechatException;
 
+import java.io.BufferedInputStream;
+
 @Service(value = "wechatCoreService")
 public class WechatCoreServiceImpl implements WechatCoreService {
 
@@ -186,5 +188,11 @@ public class WechatCoreServiceImpl implements WechatCoreService {
     public MiniUserPhone getMiniUserPhone(String code) throws Exception {
         return miniprogramAuthService.getPhoneNumber(code);
     }
+
+	@Override
+	public String getUnlimitedQrcode(String path, String param) throws Exception {
+		return miniprogramAuthService.getUnlimitedQrcode(path, param);
+	}
+
 
 }

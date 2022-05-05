@@ -13,6 +13,8 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.payment.RefundOrder;
 
+import java.io.BufferedInputStream;
+
 public interface WechatCoreService {
 
 	public JsSign getJsSign(String url, String appId);
@@ -34,5 +36,6 @@ public interface WechatCoreService {
 	MiniAccessToken getMiniAccessToken() throws Exception;
 
 	MiniUserPhone getMiniUserPhone(String code) throws Exception;
-	
+
+	String getUnlimitedQrcode(String path, String param) throws Exception;
 }

@@ -87,7 +87,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 
 
 	//查询团购列表(团长端)
-	String sqlColumn2 = " rule.id, rule.createDate, rule.description, rule.startDate, rule.endDate, rule.price, rule.status, rule.groupStatus ";
+	String sqlColumn2 = " rule.id, rule.createDate, rule.description, rule.descriptionMore, rule.startDate, rule.endDate, rule.price, rule.status, rule.groupStatus ";
 	@Query(value = "select " + sqlColumn2
 			+ "from rgrouprule rule "
 			+ "where rule.ownerId = ?1 "

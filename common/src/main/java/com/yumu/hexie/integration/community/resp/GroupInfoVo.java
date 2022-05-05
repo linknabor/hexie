@@ -14,8 +14,10 @@ public class GroupInfoVo implements Serializable {
     private BigInteger id; //团购ID
     private BigInteger createDate; //创建时间
     private String description; //团购名称
-    private Timestamp startDate;
-    private Timestamp endDate;
+    private String descriptionMore; //团描述
+
+    private Timestamp startDate; //团开始时间
+    private Timestamp endDate; //团结束时间
     private Float price; //团购金额
     private Integer status; //上下架状态
     private Integer groupStatus; //团购状态
@@ -28,10 +30,14 @@ public class GroupInfoVo implements Serializable {
     private int cancelNum; //取消人数
     private int queryNum; //查看人数
 
-    public GroupInfoVo(BigInteger id, BigInteger createDate, String description, Timestamp startDate, Timestamp endDate, Float price, Integer status, Integer groupStatus) {
+    private String desc; //描述文字
+    private String productImg; //团里面的图片地址
+
+    public GroupInfoVo(BigInteger id, BigInteger createDate, String description, String descriptionMore, Timestamp startDate, Timestamp endDate, Float price, Integer status, Integer groupStatus) {
         this.id = id;
         this.createDate = createDate;
         this.description = description;
+        this.descriptionMore = descriptionMore;
         this.startDate = startDate;
         this.endDate = endDate;
         this.price = price;
@@ -159,12 +165,37 @@ public class GroupInfoVo implements Serializable {
         this.queryNum = queryNum;
     }
 
+    public String getDescriptionMore() {
+        return descriptionMore;
+    }
+
+    public void setDescriptionMore(String descriptionMore) {
+        this.descriptionMore = descriptionMore;
+    }
+
+    public String getProductImg() {
+        return productImg;
+    }
+
+    public void setProductImg(String productImg) {
+        this.productImg = productImg;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     @Override
     public String toString() {
         return "GroupInfoVo{" +
                 "id=" + id +
                 ", createDate=" + createDate +
                 ", description='" + description + '\'' +
+                ", descriptionMore='" + descriptionMore + '\'' +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", price=" + price +
@@ -177,6 +208,8 @@ public class GroupInfoVo implements Serializable {
                 ", followNum=" + followNum +
                 ", cancelNum=" + cancelNum +
                 ", queryNum=" + queryNum +
+                ", desc='" + desc + '\'' +
+                ", productImg='" + productImg + '\'' +
                 '}';
     }
 }

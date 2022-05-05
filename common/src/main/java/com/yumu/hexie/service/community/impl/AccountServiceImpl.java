@@ -27,6 +27,7 @@ import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.RgroupVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -161,6 +162,37 @@ public class AccountServiceImpl implements AccountService {
                 } else {
                     info.setGroupStatusCn("预览中");
                 }
+
+                //获取团购的图片
+                List<RgroupVO.DescriptionMore> listDesc = JSONArray.parseArray(info.getDescriptionMore(), RgroupVO.DescriptionMore.class);
+                //是否有图片
+                String descCn = "";
+                String descImg = "";
+                if(listDesc != null) {
+                    for(RgroupVO.DescriptionMore desc : listDesc) {
+                        if("1".equals(desc.getType()) && ObjectUtils.isEmpty(descCn)) { //只是文字
+                            descCn = desc.getText();
+                        }
+                        if(("2".equals(desc.getType())
+                                || "3".equals(desc.getType()))
+                                && ObjectUtils.isEmpty(descImg)) { //有图
+                            //有无大图
+                            descImg = desc.getImage();
+                            if(ObjectUtils.isEmpty(descImg)) {
+                                RgroupVO.Thumbnail[] thumb = desc.getThumbnail();
+                                if(thumb != null) {
+                                    descImg = thumb[0].getUrl();
+                                }
+                            }
+                            if(ObjectUtils.isEmpty(descCn)) {
+                                descCn = desc.getText();
+                            }
+                        }
+                    }
+                }
+
+                info.setDesc(descCn);
+                info.setProductImg(descImg);
 
                 //统计支付的，退款的，取消的，预览的
                 float realityAmt = 0;

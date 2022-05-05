@@ -722,5 +722,7 @@ public class UserController extends BaseController{
         request.getSession().setAttribute(Constants.USER, user);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
+
+
     
 }
