@@ -12,6 +12,7 @@ public class AccountInfoVO {
 
     private String tipsDesc; //底部提示语
     private String amount; //账户余额
+    private String totalAmt; //账户总金额
     private List<String> tipsContent; //底部提示语
 
     public String getTipsDesc() {
@@ -36,5 +37,13 @@ public class AccountInfoVO {
 
     public void setTipsContent(List<String> tipsContent) {
         this.tipsContent = tipsContent;
+    }
+
+    public String getTotalAmt() {
+        return totalAmt;
+    }
+
+    public void setTotalAmt(String totalAmt) {
+        this.totalAmt = totalAmt;
     }
 }

@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.commonsupport.info;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,5 +10,7 @@ public interface ProductDepotRepository extends JpaRepository<ProductDepot, Long
 
     //查询团长的商品
     List<ProductDepot> findByOwnerIdAndNameContaining(long ownerId, String name, Pageable pageable);
+
+    Page<ProductDepot> findAllByNameContaining(String name, Pageable pageable);
 
 }
