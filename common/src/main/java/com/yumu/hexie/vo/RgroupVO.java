@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Transient;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.distribution.region.Region;
 
@@ -206,6 +208,7 @@ public class RgroupVO implements Serializable {
 		private Thumbnail[]images;
 		private Tag[]tags;
 		private String[]imageList;
+		private int cartNum = 0;	//在购物车里的数量
 		
 		public String getName() {
 			return name;
@@ -273,12 +276,19 @@ public class RgroupVO implements Serializable {
 		public void setId(String id) {
 			this.id = id;
 		}
+		public int getCartNum() {
+			return cartNum;
+		}
+		public void setCartNum(int cartNum) {
+			this.cartNum = cartNum;
+		}
 		@Override
 		public String toString() {
 			return "ProductVO [id=" + id + ", name=" + name + ", singlePrice=" + singlePrice + ", miniPrice="
 					+ miniPrice + ", oriPrice=" + oriPrice + ", totalCount=" + totalCount + ", userLimitCount="
 					+ userLimitCount + ", description=" + description + ", images=" + Arrays.toString(images)
-					+ ", tags=" + Arrays.toString(tags) + ", imageList=" + Arrays.toString(imageList) + "]";
+					+ ", tags=" + Arrays.toString(tags) + ", imageList=" + Arrays.toString(imageList) + ", cartNum="
+					+ cartNum + "]";
 		}
 		
 	}
@@ -411,6 +421,14 @@ public class RgroupVO implements Serializable {
 		this.endDateMills = endDateMills;
 	}
 
+	@Transient
+	public long getLeftSeconds(){
+		if(endDateMills == 0){
+			return 3600*24*7;
+		}
+		return (endDateMills - System.currentTimeMillis())/1000;
+	}
+	
 	@Override
 	public String toString() {
 		return "RgroupVO [ruleId=" + ruleId + ", type=" + type + ", status=" + status + ", createDate=" + createDate

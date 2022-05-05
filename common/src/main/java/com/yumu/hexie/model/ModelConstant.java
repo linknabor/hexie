@@ -506,5 +506,6 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId
 	public static final String KEY_MINI_ACCESS_TOKEN = "miniprogram:accessToken:";	//后面接小程序appid
 
-	public static final String USER_ROLE_RGROUPOWNER = "01";	//01团长
+	public static final String USER_ROLE_RGROUPOWNER = "03";	//01团长
+	public static final String KEY_CREATE_NEW_REGION_LOCK = "lock:createRegion:";	//后面接小区名字
 }		

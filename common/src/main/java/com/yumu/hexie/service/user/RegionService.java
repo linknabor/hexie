@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.vo.QQMapVO;
 
 public interface RegionService {
 	
@@ -24,5 +25,7 @@ public interface RegionService {
 	void saveOwnerServiceArea(User user, Region region);
 
 	void delOwnerServiceArea(User user, long regionId);
+
+	Region createSect(User user, QQMapVO mapVO);
 	
 }

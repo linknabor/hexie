@@ -34,6 +34,7 @@ import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
+import com.yumu.hexie.vo.QQMapVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.RegionInfo;
@@ -310,5 +311,18 @@ public class AddressController extends BaseController{
     public BaseResult<String> delOwnerServiceArea(@ModelAttribute(Constants.USER)User user, @PathVariable long regionId){
 		regionService.delOwnerServiceArea(user, regionId);
         return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 缓存团长添加的小区
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroup/sect/save", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<Region> createSect(@ModelAttribute(Constants.USER)User user, @RequestBody QQMapVO mapVO){
+		Region region = regionService.createSect(user, mapVO);
+        return BaseResult.successResult(region);
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.RgroupCart;
 import com.yumu.hexie.model.market.car.OrderCarInfo;
 import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.share.ShareAccessRecord;
@@ -40,6 +41,8 @@ public class RedisRepository {
     @Autowired
     @Qualifier("redisTemplate")
     private RedisTemplate<String, CouponCfg> couponRuleRedisTemplate;
+    @Autowired
+    private RedisTemplate<String, RgroupCart> rgroupCartRedisTemplate;
     
     /**
      * 获取订单车辆信息 
@@ -79,6 +82,17 @@ public class RedisRepository {
     
     public void removeCart(String key) {
     	cartRedisTemplate.delete(key);
+    }
+    
+    public void setRgroupCart(String key, RgroupCart value) {
+        rgroupCartRedisTemplate.opsForValue().set(key, value, 60, TimeUnit.DAYS);
+    }
+    public RgroupCart getRgroupCart(String key) {
+        return rgroupCartRedisTemplate.opsForValue().get(key);
+    }
+    
+    public void removeRgroupCart(String key) {
+    	rgroupCartRedisTemplate.delete(key);
     }
     
     //分享信息保存1天
