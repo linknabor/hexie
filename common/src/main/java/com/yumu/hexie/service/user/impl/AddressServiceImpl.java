@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
@@ -158,18 +159,41 @@ public class AddressServiceImpl implements AddressService {
     	Region xiaoqu = null;
         List<Region> xiaoqus = regionRepository.findAllBySectId(addressReq.getSectId());
         if(xiaoqus == null||xiaoqus.size()== 0 ){
-        	throw new BizValidateException("未查询到团购所在小区：" + addressReq.getXiaoquName() + "，请确认小区是否开通了团购服务。");
+        	xiaoqu = regionRepository.findById(addressReq.getXiaoquId());
         } else {
-            xiaoqu = xiaoqus.get(0);
+        	xiaoqu = xiaoqus.get(0);
         }
+        if(xiaoqu == null){
+        	throw new BizValidateException("未查询到团购所在小区：" + addressReq.getXiaoquName() + "，请确认小区是否开通了团购服务。");
+        }
+        
+        Region county = regionRepository.findById(xiaoqu.getParentId());	//所在区县
+        Region city = regionRepository.findById(county.getParentId());	//所在城市
+        Region province = regionRepository.findById(city.getParentId());	//所在省市
         
         BeanUtils.copyProperties(addressReq, address);
         address.setXiaoquId(xiaoqu.getId());
-        address.setCountyId(0l);
-        address.setCityId(0l);
-        address.setProvinceId(0l);
+        address.setCountyId(xiaoqu.getParentId());
+        address.setCounty(xiaoqu.getParentName());
+        address.setCityId(city.getId());
+        address.setCity(city.getName());
+        address.setProvinceId(province.getId());
+        address.setProvince(province.getName());
+        address.setLongitude(xiaoqu.getLongitude());
+        address.setLatitude(xiaoqu.getLatitude());
         address.setSectId(Long.valueOf(addressReq.getSectId()));
-        address.setXiaoquAddress(addressReq.getSectAddr());
+        address.setXiaoquName(xiaoqu.getName());
+        String xiaoquAddress = xiaoqu.getXiaoquAddress();
+        if (!xiaoquAddress.contains(county.getName())) {
+        	xiaoquAddress = county.getName() + xiaoquAddress;
+		}
+        if (!xiaoquAddress.contains(city.getName())) {
+			//TODO 理论上不拼城市
+		}
+        address.setXiaoquAddress(xiaoquAddress);
+        
+        String detailAddress = xiaoquAddress + addressReq.getDetailAddress();
+        address.setDetailAddress(detailAddress);
         address.setUserName(addressReq.getReceiveName());
         List<Address> addrs = addressRepository.findAllByUserId(address.getUserId());
         if(getDefaultAddr(addrs) == null) {
@@ -177,23 +201,25 @@ public class AddressServiceImpl implements AddressService {
         }
         addressRepository.save(address);
         
-        user.setCurrentAddrId(address.getId());
-        user.setProvinceId(address.getProvinceId());
-        user.setProvince(address.getProvince());
-        user.setCity(address.getCity());
-        user.setCityId(address.getCityId());
-        user.setCounty(address.getCounty());
-        user.setCountyId(address.getCountyId());
-        user.setXiaoquId(address.getXiaoquId());
-        user.setXiaoquName(address.getXiaoquName());
-        user.setLatitude(address.getLatitude());
-        user.setLongitude(address.getLongitude());
-        user.setSectId(addressReq.getSectId());
-        user.setCspId(addressReq.getCspId());
-        
-        log.info("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
-        userService.save(user);
-        log.info("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
+        if (StringUtils.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) {
+        	user.setCurrentAddrId(address.getId());
+            user.setProvinceId(address.getProvinceId());
+            user.setProvince(address.getProvince());
+            user.setCity(address.getCity());
+            user.setCityId(address.getCityId());
+            user.setCounty(address.getCounty());
+            user.setCountyId(address.getCountyId());
+            user.setXiaoquId(address.getXiaoquId());
+            user.setXiaoquName(address.getXiaoquName());
+            user.setLatitude(address.getLatitude());
+            user.setLongitude(address.getLongitude());
+            user.setSectId(addressReq.getSectId());
+            user.setCspId(addressReq.getCspId());
+            
+            log.info("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
+            userService.save(user);
+            log.info("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
+		}
         return address;
     }
     
@@ -302,9 +328,9 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public void deleteAddress(long id, long userId) {
         Address addr = addressRepository.findById(id);
-        if(addr.isMain()) {
-            throw new BizValidateException("无法删除默认地址！");
-        }
+//        if(addr.isMain()) {
+//            throw new BizValidateException("无法删除默认地址！");
+//        }
         if(addr.getUserId() != userId) {
             throw new BizValidateException("无法删除该地址！");
         }

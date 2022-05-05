@@ -18,7 +18,7 @@ public class RgroupVO implements Serializable {
 	
 	private String ruleId;	//团购id，编辑保存时有此项
 	private String type;	//创建类型，0保存预览，1保存发布
-	private String status;	//团购状态
+	private int status;	//团购状态
 	private String createDate;	//团购创建事件
 	private String description;	//团购title，
 	private DescriptionMore[]descriptionMore;	//团购内容
@@ -209,6 +209,8 @@ public class RgroupVO implements Serializable {
 		private Tag[]tags;
 		private String[]imageList;
 		private int cartNum = 0;	//在购物车里的数量
+		private int saledNum = 0;	//已团数量
+		private int status;	//商品状态,1上架，2下架
 		
 		public String getName() {
 			return name;
@@ -282,14 +284,27 @@ public class RgroupVO implements Serializable {
 		public void setCartNum(int cartNum) {
 			this.cartNum = cartNum;
 		}
+		public int getSaledNum() {
+			return saledNum;
+		}
+		public void setSaledNum(int saledNum) {
+			this.saledNum = saledNum;
+		}
+		public int getStatus() {
+			return status;
+		}
+		public void setStatus(int status) {
+			this.status = status;
+		}
 		@Override
 		public String toString() {
 			return "ProductVO [id=" + id + ", name=" + name + ", singlePrice=" + singlePrice + ", miniPrice="
 					+ miniPrice + ", oriPrice=" + oriPrice + ", totalCount=" + totalCount + ", userLimitCount="
 					+ userLimitCount + ", description=" + description + ", images=" + Arrays.toString(images)
 					+ ", tags=" + Arrays.toString(tags) + ", imageList=" + Arrays.toString(imageList) + ", cartNum="
-					+ cartNum + "]";
+					+ cartNum + ", saledNum=" + saledNum + ", status=" + status + "]";
 		}
+		
 		
 	}
 
@@ -389,11 +404,11 @@ public class RgroupVO implements Serializable {
 		this.descMoreImages = descMoreImages;
 	}
 
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 

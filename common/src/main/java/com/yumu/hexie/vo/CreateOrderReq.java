@@ -58,6 +58,12 @@ public class CreateOrderReq implements Serializable{
 	public void setOrderType(int orderType) {
 		this.orderType = orderType;
 	}
+	@Override
+	public String toString() {
+		return "CreateOrderReq [couponId=" + couponId + ", serviceAddressId=" + serviceAddressId + ", receiveTimeType="
+				+ receiveTimeType + ", memo=" + memo + ", payType=" + payType + ", orderType=" + orderType
+				+ ", itemList=" + itemList + "]";
+	}
 	
 	
 }

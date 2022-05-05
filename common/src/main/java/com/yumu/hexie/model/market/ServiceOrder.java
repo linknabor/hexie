@@ -71,6 +71,9 @@ public class ServiceOrder  extends BaseModel {
 	private String openId;
 	private String appid;
 
+	private String miniopenid;
+	private String miniappid;
+	
 	/**地址信息**/
 	private long serviceAddressId;//FIXME 服务地址
 	private int receiveTimeType;//周一至周五、周六周日、全周
@@ -229,6 +232,7 @@ public class ServiceOrder  extends BaseModel {
 
 		this.userId = user.getId();
 		this.openId = user.getOpenid();
+		this.appid = user.getAppId();
 		this.items = cart.getItems();
 	}
 
@@ -247,6 +251,9 @@ public class ServiceOrder  extends BaseModel {
 
 		this.userId = user.getId();
 		this.openId = user.getOpenid();
+		this.appid = user.getAppId();
+		this.miniopenid = user.getMiniopenid();
+		this.miniappid = user.getMiniAppId();
 		this.items = req.getItemList();
 	}
 
@@ -1049,6 +1056,18 @@ public class ServiceOrder  extends BaseModel {
 		}
 		return showStatus;
 
+	}
+	public String getMiniopenid() {
+		return miniopenid;
+	}
+	public void setMiniopenid(String miniopenid) {
+		this.miniopenid = miniopenid;
+	}
+	public String getMiniappid() {
+		return miniappid;
+	}
+	public void setMiniappid(String miniappid) {
+		this.miniappid = miniappid;
 	}
 
 
