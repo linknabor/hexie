@@ -157,18 +157,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     private List<String> preOrderCreate(ServiceOrder order, Address address) {
         log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
         List<String> messageList = new ArrayList<>();	//这里校验报错，如果缺货或者商品下架，不能直接返回到页面，能成功购买的商品还是要下单的
+        List<OrderItem> removeItems = new ArrayList<>();	//库存不够或者下架的商品，需要剔除
+        String productName = "";
         for (OrderItem item : order.getItems()) {
             SalePlan plan = findSalePlan(order.getOrderType(), item.getRuleId());
             //校验规则
-            try {
-				salePlanService.getService(order.getOrderType()).validateRule(order, plan, item, address);
-			} catch (Exception e) {
-				String errMsg = "当前团购["+item.getRuleId()+"]"; 
-				errMsg += e.getMessage();
-				log.error(errMsg, e);
-				messageList.add(errMsg);	//记录下错误原因，跳过
-				continue;
-			}
+            salePlanService.getService(order.getOrderType()).validateRule(order, plan, item, address);
             //校验商品
             Product product = productService.getProduct(item.getProductId());
             try {
@@ -178,11 +172,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				errMsg += e.getMessage();
 				log.error(errMsg, e);
 				messageList.add(errMsg);	//记录下错误原因，跳过
+				removeItems.add(item);	//记录下要移除的商品，到最后一起移除
 				continue;
 			}
+            productName = product.getName();	//商品名称可能多个商品，库存不够或下架的商品跳过
             //填充信息
-            item.fillDetailV3(plan, product);
-
+            if(ModelConstant.ORDER_TYPE_RGROUP != order.getOrderType()) {
+            	item.fillDetail(plan, product);
+            } else {
+            	item.fillDetailV3(plan, product);
+            }
             long agentId = product.getAgentId();
             if (ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()) {
                 agentId = order.getAgentId();
@@ -225,10 +224,17 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             	
             }
         }
-        if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType() && messageList.size() > 0) {
+        if (ModelConstant.ORDER_TYPE_RGROUP != order.getOrderType() && messageList.size() > 0) {
 			throw new BizValidateException(messageList.get(0));
 		}
         computePrice(order);
+        //移除已售罄或者已下架的商品
+        for (OrderItem orderItem : removeItems) {
+        	order.getItems().remove(orderItem);
+		}
+        if(order.getItems().size() > 1){
+        	order.setProductName(productName+"等"+order.getItems().size()+"种商品");
+		}
         log.warn("[Create]创建订单OrderNo:" + order.getOrderNo() + "|" + order.getProductName() + "|" + order.getPrice());
 		return messageList;
     }
