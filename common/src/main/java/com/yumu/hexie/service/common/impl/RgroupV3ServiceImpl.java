@@ -130,6 +130,8 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
 				rgroupOwnerRepository.save(rgroupOwner);
 				
+				ownerUser.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
+				userService.save(ownerUser);
 			}
 			
 			if (StringUtils.isEmpty(orgOperator.getOrgOperId())) {

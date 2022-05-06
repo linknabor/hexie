@@ -39,7 +39,7 @@ public class RgroupController extends BaseController{
     private DistributionService distributionService;
     @Autowired
     private RgroupV3Service rgroupV3Service;
-
+    
 	@RequestMapping(value = "/rgroups/{page}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<RgroupAreaItem>> rgroups(@ModelAttribute(Constants.USER)User user,@PathVariable int page) throws Exception {
