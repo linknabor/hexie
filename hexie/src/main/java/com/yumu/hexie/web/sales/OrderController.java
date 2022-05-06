@@ -504,7 +504,7 @@ public class OrderController extends BaseController{
 			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
 		}
 		String payMethod = "12";	//小程序支付
-		baseOrderService.requestOrderPay(user, o.getGroupOrderId(), payMethod);
+		baseOrderService.requestOrderPay(user, o.getId(), payMethod);
 		return new BaseResult<ServiceOrder>().success(o);
 	}
 	

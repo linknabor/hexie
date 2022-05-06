@@ -238,11 +238,6 @@ public class UserInfo implements Serializable {
 	public void setOfficeTel(String officeTel) {
 		this.officeTel = officeTel;
 	}
-
-	private OrgInfo getOrgInfoInstance() {
-		return new OrgInfo();
-	}
-
 	public UserInfo(){}
 	
     public UserInfo(User user){
@@ -251,8 +246,8 @@ public class UserInfo implements Serializable {
     public UserInfo(User user, OrgOperator orgOperator){
         BeanUtils.copyProperties(user, this);
         if (orgOperator != null) {
-        	if(this.orgInfo == null) {
-        		this.orgInfo = getOrgInfoInstance();
+        	if (this.orgInfo == null) {
+        		this.orgInfo = new OrgInfo();
 			}
         	BeanUtils.copyProperties(orgOperator, this.orgInfo);
 		}

@@ -332,9 +332,9 @@ public class ServiceOrder  extends BaseModel {
 		setMerchantId(product.getMerchantId());
 		if(items != null) {
 			setProductName(product.getName()); //改为规则的名字
-			if(items.size() > 1){
-				setProductName(getProductName()+"等"+items.size()+"种商品");
-			}
+//			if(items.size() > 1){
+//				setProductName(getProductName()+"等"+items.size()+"种商品");
+//			}
 		}
 		setProductPic(product.getMainPicture());
 		setProductThumbPic(product.getSmallPicture());
