@@ -11,14 +11,8 @@ import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
 import com.yumu.hexie.integration.community.req.RefundInfoReq;
 import com.yumu.hexie.integration.community.resp.*;
-import com.yumu.hexie.integration.eshop.mapper.QueryProductMapper;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.agent.Agent;
-import com.yumu.hexie.model.commonsupport.info.ProductDepot;
-import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
-import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
-import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
-import com.yumu.hexie.model.localservice.ServiceOperator;
+import com.yumu.hexie.model.commonsupport.info.*;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -41,7 +35,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
 import java.math.BigInteger;
@@ -58,6 +51,9 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Autowired
     private RgroupRuleRepository rgroupRuleRepository;
+
+    @Autowired
+    private ProductRuleRepository productRuleRepository;
 
     @Autowired
     private ServiceOrderRepository serviceOrderRepository;
@@ -186,7 +182,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         Optional<RgroupRule> optional = rgroupRuleRepository.findById(Long.parseLong(groupId));
         if (optional.isPresent()) {
             RgroupRule rgroupRule = optional.get();
-            if ("1".equals(operType)) {
+            if ("1".equals(operType)) { //结束操作
                 //修改团购结束日期
                 rgroupRule.setStatus(1);
                 Date date = new Date();
@@ -215,12 +211,13 @@ public class GroupMngServiceImpl implements GroupMngService {
             Sort sort = Sort.by(orderList);
 
             Pageable pageable = PageRequest.of(outSidProductDepotReq.getCurrentPage(), outSidProductDepotReq.getPageSize(), sort);
-            Page<ProductDepot> page = productDepotRepository.findAllByNameContaining(outSidProductDepotReq.getProductName(), pageable);
+            Page<Object[]> page = productDepotRepository.getDepotListPage(outSidProductDepotReq.getProductName(), outSidProductDepotReq.getOwnerName(), pageable);
+            List<OutSidDepotResp> list = ObjectToBeanUtils.objectToBean(page.getContent(), OutSidDepotResp.class);
 
-            QueryListDTO<List<ProductDepot>> responsePage = new QueryListDTO<>();
+            QueryListDTO<List<OutSidDepotResp>> responsePage = new QueryListDTO<>();
             responsePage.setTotalPages(page.getTotalPages());
             responsePage.setTotalSize(page.getTotalElements());
-            responsePage.setContent(page.getContent());
+            responsePage.setContent(list);
 
             commonResponse.setData(responsePage);
             commonResponse.setResult("00");
@@ -231,6 +228,120 @@ public class GroupMngServiceImpl implements GroupMngService {
             commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
         }
         return commonResponse;
+    }
+
+    @Override
+    public CommonResponse<Object> queryRelateGroup(String depotId) {
+        CommonResponse<Object> commonResponse = new CommonResponse<>();
+        try {
+
+            List<Object[]> rgroupRules = rgroupRuleRepository.queryGroupByDepotId(depotId);
+            List<OutSidRelateGroupResp> list = ObjectToBeanUtils.objectToBean(rgroupRules, OutSidRelateGroupResp.class);
+
+            for(OutSidRelateGroupResp resp : list) {
+                if (resp.getStatus() == 1) {
+                    Date date = new Date();
+                    if (resp.getStartDate().getTime() <= date.getTime()
+                            && resp.getEndDate().getTime() >= date.getTime()) { //跟团中
+                        resp.setStatus_cn("正在跟团中");
+                    } else if (resp.getEndDate().getTime() < date.getTime()) {
+                        resp.setStatus_cn("已结束");
+                    } else if (resp.getStartDate().getTime() > date.getTime()) {
+                        resp.setStatus_cn("未开始");
+                    }
+                } else {
+                    resp.setStatus_cn("预览中");
+                }
+            }
+            QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
+            responsePage.setContent(list);
+            commonResponse.setData(responsePage);
+            commonResponse.setResult("00");
+
+        } catch (Exception e) {
+
+            commonResponse.setErrMsg(e.getMessage());
+            commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+        }
+        return commonResponse;
+    }
+
+    @Override
+    public String delDepotById(String depotId) {
+        productDepotRepository.deleteById(Long.parseLong(depotId));
+        return "SUCCESS";
+    }
+
+    @Override
+    public CommonResponse<Object> queryGroupListPage(OutSidProductDepotReq outSidProductDepotReq) {
+        CommonResponse<Object> commonResponse = new CommonResponse<>();
+        try {
+            List<Sort.Order> orderList = new ArrayList<>();
+            Sort.Order order = new Sort.Order(Sort.Direction.DESC, "id");
+            orderList.add(order);
+            Sort sort = Sort.by(orderList);
+
+            Pageable pageable = PageRequest.of(outSidProductDepotReq.getCurrentPage(), outSidProductDepotReq.getPageSize(), sort);
+            Page<Object[]> page = rgroupRuleRepository.queryGroupByOutSid(outSidProductDepotReq.getProductName(), outSidProductDepotReq.getOwnerName(), pageable);
+            List<OutSidRelateGroupResp> list = ObjectToBeanUtils.objectToBean(page.getContent(), OutSidRelateGroupResp.class);
+
+            for(OutSidRelateGroupResp resp : list) {
+                if (resp.getStatus() == 1) {
+                    Date date = new Date();
+                    if (resp.getStartDate().getTime() <= date.getTime()
+                            && resp.getEndDate().getTime() >= date.getTime()) { //跟团中
+                        resp.setStatus_cn("正在跟团中");
+                    } else if (resp.getEndDate().getTime() < date.getTime()) {
+                        resp.setStatus_cn("已结束");
+                    } else if (resp.getStartDate().getTime() > date.getTime()) {
+                        resp.setStatus_cn("未开始");
+                    }
+                } else {
+                    resp.setStatus_cn("预览中");
+                }
+            }
+            QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
+            responsePage.setTotalPages(page.getTotalPages());
+            responsePage.setTotalSize(page.getTotalElements());
+            responsePage.setContent(list);
+            commonResponse.setData(responsePage);
+            commonResponse.setResult("00");
+
+        } catch (Exception e) {
+
+            commonResponse.setErrMsg(e.getMessage());
+            commonResponse.setResult("99");		//TODO 写一个公共handler统一做异常处理
+        }
+        return commonResponse;
+    }
+
+    @Override
+    public String operGroupByOutSid(String groupId, String operType) {
+        if (ObjectUtils.isEmpty(groupId)) {
+            throw new BizValidateException("团购编号为空，请刷新重试");
+        }
+        if (ObjectUtils.isEmpty(operType)) {
+            throw new BizValidateException("操作类型为空，请刷新重试");
+        }
+
+        Optional<RgroupRule> optional = rgroupRuleRepository.findById(Long.parseLong(groupId));
+        if (optional.isPresent()) {
+            RgroupRule rgroupRule = optional.get();
+            if ("0".equals(operType)) { //下架
+                rgroupRule.setStatus(0);
+            } else if("1".equals(operType)) {
+                rgroupRuleRepository.delete(rgroupRule);
+                List<ProductRule> productRules = productRuleRepository.findByRuleId(rgroupRule.getId());
+                for(ProductRule rule : productRules) {
+                    productRuleRepository.delete(rule);
+                }
+            } else {
+                throw new BizValidateException("操作类型为空，请刷新重试");
+            }
+        } else {
+            throw new BizValidateException("为查到团购信息，请刷新重试");
+        }
+        return "SUCCESS";
     }
 
     @Override

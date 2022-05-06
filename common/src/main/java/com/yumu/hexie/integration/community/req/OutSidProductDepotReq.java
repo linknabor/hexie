@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 public class OutSidProductDepotReq implements Serializable {
     private String productName;
+    private String ownerName;
     private int currentPage;
     private int pageSize;
 
@@ -19,6 +20,14 @@ public class OutSidProductDepotReq implements Serializable {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
     }
 
     public int getCurrentPage() {

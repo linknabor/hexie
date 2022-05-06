@@ -65,4 +65,16 @@ public interface GroupMngService {
 
     //后台访问，查询商品库列表
     CommonResponse<Object> queryProductDepotListPage(OutSidProductDepotReq outSidProductDepotReq);
+
+    //关联商品库商品关联的团购
+    CommonResponse<Object> queryRelateGroup(String depotId);
+
+    //根据商品ID删除商品库商品
+    String delDepotById(String depotId);
+
+    //后台查询团购列表
+    CommonResponse<Object> queryGroupListPage(OutSidProductDepotReq outSidProductDepotReq);
+
+    //后台操作团
+    String operGroupByOutSid(String groupId, String operType);
 }

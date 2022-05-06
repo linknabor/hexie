@@ -114,4 +114,32 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "and rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
 			, nativeQuery = true)
 	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
+
+	String sqlColumn3 = "a.id,a.ownerId,a.ownerName,a.ownerAddr,a.ownerImg,a.ownerTel,a.price,a.description,a.status,a.groupStatus,a.startDate,a.endDate, a.descriptionMore, count( distinct b.id) productNum ";
+	@Query(value = "select DISTINCT " + sqlColumn3
+			+ "from rgrouprule a "
+			+ "join ProductRule b on a.id = b.ruleId "
+			+ "where b.depotId = ?1 "
+			+ "group by a.id "
+			, nativeQuery = true)
+	List<Object[]> queryGroupByDepotId(String depotId);
+
+
+	@Query(value = "select " + sqlColumn3
+			+ "from rgrouprule a "
+			+ "join ProductRule b on a.id = b.ruleId "
+			+ "join user d on a.ownerId = d.id  "
+			+ "where 1 = 1 "
+			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
+			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "group by a.id "
+			, countQuery = "select count(1) from rgrouprule a "
+			+ "join ProductRule b on a.id = b.ruleId "
+			+ "join user d on a.ownerId = d.id  "
+			+ "where 1 = 1 "
+			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
+			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "group by a.id "
+			, nativeQuery = true)
+	Page<Object[]> queryGroupByOutSid(String name, String ownerName, Pageable pageable);
 }

@@ -265,4 +265,47 @@ public class GroupMngController extends BaseController {
     public CommonResponse<Object> getProduct(@RequestBody OutSidProductDepotReq outSidProductDepotReq) {
         return groupMngService.queryProductDepotListPage(outSidProductDepotReq);
     }
+
+    /**
+     * 后台查询商品库商品关联的团购
+     * @param map
+     * @return
+     */
+    @RequestMapping(value = "/outside/getRelateGroup", method = RequestMethod.POST)
+    public CommonResponse<Object> getRelateGroupa(@RequestBody Map<String, String> map) {
+        return groupMngService.queryRelateGroup(map.get("depotId"));
+    }
+
+    @RequestMapping(value = "/outside/delDepot", method = RequestMethod.POST)
+    public CommonResponse<String> delDepot(@RequestBody Map<String, String> map) {
+        String str = groupMngService.delDepotById(map.get("depotId"));
+        CommonResponse<String> commonResponse = new CommonResponse<>();
+        commonResponse.setResult("00");
+        commonResponse.setData(str);
+        return commonResponse;
+    }
+
+    /**
+     * 后台查询团购列表
+     * @param outSidProductDepotReq
+     * @return
+     */
+    @RequestMapping(value = "/outside/groupList", method = RequestMethod.POST)
+    public CommonResponse<Object> groupList(@RequestBody OutSidProductDepotReq outSidProductDepotReq) {
+        return groupMngService.queryGroupListPage(outSidProductDepotReq);
+    }
+
+    /**
+     * 后台，操作团购
+     * @param map
+     * @return
+     */
+    @RequestMapping(value = "/outside/operGroup", method = RequestMethod.POST)
+    public CommonResponse<String> operGroup(@RequestBody Map<String, String> map) {
+        String str =  groupMngService.operGroupByOutSid(map.get("groupId"), map.get("operType"));
+        CommonResponse<String> commonResponse = new CommonResponse<>();
+        commonResponse.setResult("00");
+        commonResponse.setData(str);
+        return commonResponse;
+    }
 }
