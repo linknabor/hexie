@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
@@ -127,12 +128,12 @@ public class RgroupController extends BaseController{
 	 */
 	@RequestMapping(value = "/rgroups/v3/{page}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<List<RgroupAreaItem>> getRgroupsV3(@ModelAttribute(Constants.USER)User user,
+	public BaseResult<List<RgroupVO>> getRgroupsV3(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String title,
 				@PathVariable int page) throws Exception {
 		
-		List<RgroupAreaItem> items = distributionService.queryRgroupsV2(user, page);
-        return new BaseResult<List<RgroupAreaItem>>().success(rgroupService.addProcessStatus(items));
-    }
+		List<RgroupVO> voList = rgroupV3Service.queryOwnerRgroups(user, title, page);
+        return new BaseResult<List<RgroupVO>>().success(voList);
+	}
 	
 	/**
 	 * 3版团购根据团购id查询

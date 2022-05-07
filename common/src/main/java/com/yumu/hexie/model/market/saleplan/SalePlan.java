@@ -49,6 +49,8 @@ public class SalePlan extends BaseModel {
 	private String tagUrl;//左上角标签URL
 	private int status = ModelConstant.RULE_STATUS_ON;//1 有效 0无效
 	
+	private Date updateDate;
+	
 	@Transient
 	public boolean valid(int count) {
 	    if(getStatus() == ModelConstant.RULE_STATUS_OFF) {
@@ -235,6 +237,12 @@ public class SalePlan extends BaseModel {
 	public void setTagUrl(String tagUrl) {
 		this.tagUrl = tagUrl;
 	}
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
+	}
 	
-
+	
 }

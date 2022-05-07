@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
 
 public class RgroupVO implements Serializable {
@@ -16,6 +17,7 @@ public class RgroupVO implements Serializable {
 	 */
 	private static final long serialVersionUID = 1464110493231846128L;
 	
+	private String action;	//如果是copy代表复制开团，默认为空
 	private String ruleId;	//团购id，编辑保存时有此项
 	private String type;	//创建类型，0保存预览，1保存发布
 	private int status;	//团购状态
@@ -28,11 +30,12 @@ public class RgroupVO implements Serializable {
 	private long endDateMills;	//前端展示用
 	private int logisticType = 1;//0商户派送 1用户自提 2第三方配送
 	private int groupMinNum;	//最小成团份数
+	private String updateDate;	//更新日期
 	private ProductVO[]productList;
 	private Region region;	//团购地区
 	private RgroupOwnerVO rgroupOwner;
-	
 	private List<String> descMoreImages;
+	private String pricePeriod;	//价格区间
 	
 	public static class RgroupOwnerVO {
 
@@ -435,7 +438,15 @@ public class RgroupVO implements Serializable {
 	public void setEndDateMills(long endDateMills) {
 		this.endDateMills = endDateMills;
 	}
+	
+	public String getUpdateDate() {
+		return updateDate;
+	}
 
+	public void setUpdateDate(String updateDate) {
+		this.updateDate = updateDate;
+	}
+	
 	@Transient
 	public long getLeftSeconds(){
 		if(endDateMills == 0){
@@ -444,15 +455,52 @@ public class RgroupVO implements Serializable {
 		return (endDateMills - System.currentTimeMillis())/1000;
 	}
 	
-	@Override
-	public String toString() {
-		return "RgroupVO [ruleId=" + ruleId + ", type=" + type + ", status=" + status + ", createDate=" + createDate
-				+ ", description=" + description + ", descriptionMore=" + Arrays.toString(descriptionMore)
-				+ ", startDate=" + startDate + ", endDate=" + endDate + ", startDateMills=" + startDateMills
-				+ ", endDateMills=" + endDateMills + ", logisticType=" + logisticType + ", groupMinNum=" + groupMinNum
-				+ ", productList=" + Arrays.toString(productList) + ", region=" + region + ", rgroupOwner="
-				+ rgroupOwner + ", descMoreImages=" + descMoreImages + "]";
+	@Transient
+	public String getStatusCn() {
+		
+		String statusCn = "";
+		long currentMills = System.currentTimeMillis();
+		if (ModelConstant.RULE_STATUS_OFF == status) {
+			statusCn = "未发布";
+		} else {
+			if (startDateMills < currentMills && currentMills < endDateMills) {
+				statusCn = "正在跟团中";
+			} else if (startDateMills >= currentMills){
+				statusCn = "未开始";
+			} else if (endDateMills <= currentMills) {
+				statusCn = "已结束";
+			}
+		}
+		return statusCn;
 	}
 
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
+
+	public String getPricePeriod() {
+		return pricePeriod;
+	}
+
+	public void setPricePeriod(String pricePeriod) {
+		this.pricePeriod = pricePeriod;
+	}
+
+	@Override
+	public String toString() {
+		return "RgroupVO [action=" + action + ", ruleId=" + ruleId + ", type=" + type + ", status=" + status
+				+ ", createDate=" + createDate + ", description=" + description + ", descriptionMore="
+				+ Arrays.toString(descriptionMore) + ", startDate=" + startDate + ", endDate=" + endDate
+				+ ", startDateMills=" + startDateMills + ", endDateMills=" + endDateMills + ", logisticType="
+				+ logisticType + ", groupMinNum=" + groupMinNum + ", updateDate=" + updateDate + ", productList="
+				+ Arrays.toString(productList) + ", region=" + region + ", rgroupOwner=" + rgroupOwner
+				+ ", descMoreImages=" + descMoreImages + ", pricePeriod=" + pricePeriod + "]";
+	}
+
+	
 	
 }

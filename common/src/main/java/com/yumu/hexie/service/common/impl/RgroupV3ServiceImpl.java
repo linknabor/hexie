@@ -10,6 +10,12 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -97,6 +103,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		Assert.notNull(rgroupVo.getRegion(), "团购区域不能为空");
 		
 		try {
+			
+			boolean isCopy = false;	//是否拷贝开团
+			if ("copy".equals(rgroupVo.getAction())) {
+				isCopy = true;
+			}
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 			CreateRgroupRequest createRgroupRequest = new CreateRgroupRequest();
 			
@@ -148,6 +159,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 
 			/*2.保存rGroupRule start */
 			String ruleIdStr = rgroupVo.getRuleId();
+			if (isCopy) {
+				ruleIdStr = "";
+			}
 			Long ruleId = 0L;
 			RgroupRule rule = null;
 			if (!StringUtils.isEmpty(ruleIdStr)) {
@@ -191,8 +205,12 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rule.setTimeoutForPay(30*60*1000l);	//半小时支付超市
 			rule.setGroupMaxNum(2000);
 			rule.setGroupMinNum(rgroupVo.getGroupMinNum());
-//			rule.setGroupStatus(ModelConstant.GROUP_STAUS_INIT);
 			
+			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
+				rule.setGroupStatus(ModelConstant.GROUP_STAUS_GROUPING);
+			} else {
+				rule.setGroupStatus(ModelConstant.GROUP_STAUS_INIT);
+			}
 			Region region = rgroupVo.getRegion();
 			rule.setOwnerId(owner.getOwnerId());
 			rule.setOwnerName(owner.getOwnerName());
@@ -200,12 +218,16 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rule.setOwnerAddr(region.getName() + region.getXiaoquAddress());
 			rule.setOwnerTel(owner.getOwnerTel());
 			rule.setAgentId(agent.getId());
+			rule.setUpdateDate(new Date());
 			rgroupRuleRepository.save(rule);
 			/*2.保存rGroupRule end */
 			
 			/*3.保存product start */
 			for (ProductVO productView : productList) {
 				String productIdStr = productView.getId();
+				if (isCopy) {
+					productIdStr = "";
+				}
 				Product product = null;
 				Long productId = 0L;
 				if (!StringUtils.isEmpty(productIdStr)) {
@@ -360,12 +382,6 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		
 	}
 	
-	@Override
-	public void pubRgroup(String rgroupRuleId) {
-		// TODO Auto-generated method stub
-		
-	}
-
 	/**
 	 * 获取团购信息
 	 * @param rgroupRuleId
@@ -539,11 +555,12 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		
 		int ruleStatus = ModelConstant.RULE_STATUS_ON;
 		int distributionStatus = ModelConstant.DISTRIBUTION_STATUS_ON;
+		int groupStatus = ModelConstant.GROUP_STAUS_GROUPING; 
 		if (!isPub) {
 			ruleStatus = ModelConstant.RULE_STATUS_OFF;
 			distributionStatus = ModelConstant.DISTRIBUTION_STATUS_OFF;
+			groupStatus = ModelConstant.GROUP_STAUS_INIT;
 		}
-		
 		if (ruleId == 0l) {
 			throw new BizValidateException("团购id不能为空");
 		}
@@ -557,6 +574,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		}
 		
 		rule.setStatus(ruleStatus);
+		rule.setGroupStatus(groupStatus);
 		rgroupRuleRepository.save(rule);
 		
 		List<RgroupAreaItem> itemList = rgroupAreaItemRepository.findByRuleId(ruleId);
@@ -565,5 +583,116 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		}
 		rgroupAreaItemRepository.saveAll(itemList);
 	}
-
+	
+	/**
+	 * 获取团长下面的所有团购里里列表
+	 * @param rgroupRuleId
+	 */
+	@Override
+	public List<RgroupVO> queryOwnerRgroups(User user, String title, int currentPage) {
+		
+		List<RgroupVO> voList = new ArrayList<>();
+		try {
+			List<Order> orderList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "updateDate");
+	    	orderList.add(order);
+	    	Sort sort = Sort.by(orderList);
+			Pageable pageable = PageRequest.of(currentPage, 10, sort);
+			Page<RgroupRule> pages = rgroupRuleRepository.findByOwnerIdAndDescriptionLike(user.getId(), title, pageable);
+			List<RgroupRule> ruleList = pages.getContent();
+			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+			long currentMills = System.currentTimeMillis();
+			for (RgroupRule rgroupRule : ruleList) {
+				RgroupVO vo = new RgroupVO();
+				String descMoreStr = rgroupRule.getDescriptionMore();
+				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+				DescriptionMore[]descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				
+				List<String> descMoreImages = new ArrayList<>();
+				for (DescriptionMore descMore : descriptionMore) {
+					if ("0".equals(descMore.getType())) {
+						continue;
+					} else if ("1".equals(descMore.getType())) {
+						Thumbnail[]thumbnails = descMore.getThumbnail();
+						if (thumbnails == null || thumbnails.length == 0) {
+							continue;
+						}
+						for (Thumbnail thumbnail : thumbnails) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(thumbnail.getUrl());
+							}
+						}
+					} else if ("2".equals(descMore.getType())) {
+						if (!StringUtils.isEmpty(descMore.getImage())) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(descMore.getImage());
+							}
+						}
+					}
+				}
+				
+				List<Product> productList = productRepository.findMultiByRuleId(rgroupRule.getId());
+				float miniPrice = 0f;
+				float maxPrice = 0f;
+				for (int i = 0; i < productList.size(); i++) {
+					Product product = productList.get(i);
+					if (descMoreImages.size() < 3) {
+						String[]pics = product.getPictureList();
+						for (String pic : pics) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(pic);
+							}
+						}
+					}
+					float singlePrice = product.getSinglePrice();
+					if (i == 0) {
+						miniPrice = singlePrice;
+					} else {
+						if (singlePrice < miniPrice) {
+							miniPrice = singlePrice;
+						}
+					}
+					if (singlePrice > maxPrice) {
+						maxPrice = singlePrice;
+					}
+				}
+				String pricePeriod = miniPrice + "~" + maxPrice;
+				if (miniPrice == 0f || miniPrice == maxPrice) {
+					pricePeriod = String.valueOf(maxPrice);
+				}
+				vo.setPricePeriod(pricePeriod);
+				vo.setRuleId(String.valueOf(rgroupRule.getId()));
+				vo.setDescMoreImages(descMoreImages);
+				vo.setDescription(rgroupRule.getDescription());
+				Date updateDate = rgroupRule.getUpdateDate();
+				String updateDateStr = "";
+				if (updateDate != null) {
+					if ((currentMills - updateDate.getTime()) > (3600 * 24 * 1000l)) {
+						updateDateStr = DateUtil.dtFormat(updateDate, "MM-dd");
+						if (!StringUtils.isEmpty(updateDateStr)) {
+							String[]dateArr = updateDateStr.split("-");
+							updateDateStr = dateArr[0] + "月" + dateArr[1] + "日";
+						}
+					} else {
+						updateDateStr = DateUtil.getSendTime(updateDate.getTime());
+						
+					}
+					vo.setUpdateDate(updateDateStr);
+				}
+				Date startDate = rgroupRule.getStartDate();
+				Date endDate = rgroupRule.getEndDate();
+				vo.setStartDateMills(startDate.getTime());
+				vo.setEndDateMills(endDate.getTime());
+				vo.setStatus(rgroupRule.getStatus());
+				voList.add(vo);
+			}
+			
+		} catch (Exception e) {
+			logger.info(e.getMessage(), e);
+			throw new BizValidateException(e.getMessage());
+		}
+		
+		return voList;
+	}
+	
 }
