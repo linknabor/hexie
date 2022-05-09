@@ -25,6 +25,7 @@ import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.common.RgroupV3Service;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
+import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -161,6 +162,20 @@ public class RgroupController extends BaseController{
 		
 		RgroupVO vo = rgroupV3Service.queryRgroupByRule(ruleId, true);
         return new BaseResult<RgroupVO>().success(vo);
+    }
+	
+	/**
+	 * 3版本团购根据id查询已发布的团购
+	 * @param ruleId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/orderRecords/{ruleId}/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<RgroupRecordsVO> getOrderRecords(@PathVariable String ruleId, @PathVariable int page) throws Exception {
+		
+		RgroupRecordsVO vo = rgroupV3Service.queryOrderRecords(ruleId, page);
+        return new BaseResult<RgroupRecordsVO>().success(vo);
     }
 	
 }

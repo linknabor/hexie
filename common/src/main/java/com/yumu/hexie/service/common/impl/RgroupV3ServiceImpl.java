@@ -40,6 +40,10 @@ import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.OrderItemRepository;
+import com.yumu.hexie.model.market.rgroup.RgroupUser;
+import com.yumu.hexie.model.market.rgroup.RgroupUserRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.redis.RedisRepository;
@@ -51,6 +55,8 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.RgroupV3Service;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.RgroupOrderRecordVO;
+import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.DescriptionMore;
 import com.yumu.hexie.vo.RgroupVO.ProductVO;
@@ -82,6 +88,10 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	private RegionRepository regionRepository;
 	@Autowired
 	private RgroupOwnerRepository rgroupOwnerRepository;
+	@Autowired
+	private RgroupUserRepository rgroupUserRepository;
+	@Autowired 
+	private OrderItemRepository orderItemRepository;
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -693,6 +703,44 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		}
 		
 		return voList;
+	}
+	
+	/**
+	 * 团购记录
+	 */
+	@Override
+	public RgroupRecordsVO queryOrderRecords(String ruleIdStr, int currentPage) {
+		
+		RgroupRecordsVO vo = new RgroupRecordsVO();
+		List<RgroupOrderRecordVO> orderRecords = new ArrayList<>();
+		if (StringUtils.isEmpty(ruleIdStr)) {
+			return vo;
+		}
+		Long ruleId = Long.valueOf(ruleIdStr);
+		
+		List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.DESC, "createDate");
+    	orderList.add(order);
+    	Sort sort = Sort.by(orderList);
+		Pageable pageable = PageRequest.of(currentPage, 10, sort);
+		Page<RgroupUser> rgroupUsers = rgroupUserRepository.findAllByRuleId(ruleId, pageable);
+		
+		for (RgroupUser rgroupUser : rgroupUsers) {
+			RgroupOrderRecordVO record = new RgroupOrderRecordVO();
+			String recordDate = DateUtil.getSendTime(rgroupUser.getCreateDate());
+			record.setRecordDate(recordDate);
+			record.setUserId(rgroupUser.getUserId());
+			record.setUserName(rgroupUser.getUserName());
+			record.setHeadUrl(rgroupUser.getHeadUrl());
+			record.setRuleId(ruleId);
+			record.setTel(rgroupUser.getTel());
+			List<OrderItem> items = orderItemRepository.findByRuleIdAndUserIdAndOrderId(ruleId, rgroupUser.getUserId(), rgroupUser.getOrderId());
+			record.setItems(items);
+			orderRecords.add(record);
+		}
+		vo.setRecords(orderRecords);
+		vo.setTotalSize(rgroupUsers.getTotalElements());
+		return vo;
 	}
 	
 }

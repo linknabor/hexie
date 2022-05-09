@@ -25,4 +25,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long>  {
 			+ ModelConstant.ORDER_STATUS_INIT
 			+ ")")
 	public int countBuyedOrderItem(long userId, long ruleId, int orderType);
+	
+	@Query(value = "select * from orderItem where ruleId = ?1 and userId = ?2 and orderId = ?3 ", nativeQuery = true)
+	public List<OrderItem> findByRuleIdAndUserIdAndOrderId(long ruleId, long userId, long orderId);
 }
