@@ -26,6 +26,7 @@ public class RgroupRule extends SalePlan {
 	private String ownerAddr;
 	private String ownerImg;
 	private String ownerTel;
+	private String ownerSect;
 	/** 售卖情况 */
 	
 	private long agentId;	//团购所在机构，取开团时团长的机构
@@ -150,5 +151,13 @@ public class RgroupRule extends SalePlan {
 		this.agentId = agentId;
 	}
 
+	public String getOwnerSect() {
+		return ownerSect;
+	}
+
+	public void setOwnerSect(String ownerSect) {
+		this.ownerSect = ownerSect;
+	}
+	
 	
 }

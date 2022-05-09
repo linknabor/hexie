@@ -27,8 +27,11 @@ import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
+import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.market.rgroup.RgroupUser;
+import com.yumu.hexie.model.market.rgroup.RgroupUserRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -39,6 +42,7 @@ import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.RgroupOrder;
+import com.yumu.hexie.vo.RgroupOrdersVO;
 
 @Service("rgroupService")
 public class RgroupServiceImpl implements RgroupService {
@@ -64,6 +68,10 @@ public class RgroupServiceImpl implements RgroupService {
     @Autowired
     @Qualifier(value = "staffclientStringRedisTemplate")
     private RedisTemplate<String, String> staffclientStringRedisTemplate;
+    @Autowired
+    private RgroupUserRepository rgroupUserRepository;
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
 	/**
 	 * 前端显示进度和限制库存
@@ -242,6 +250,23 @@ public class RgroupServiceImpl implements RgroupService {
 		List<RgroupOrder> result = new ArrayList<>();
 		for(ServiceOrder so : orders) {
 			result.add(new RgroupOrder(cacheableService.findRgroupRule(so.getGroupRuleId()), so));
+		}
+		return result;
+	}
+	
+	@Override
+	public List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId,List<Integer> status, String productName) {
+		List<ServiceOrder> orders = serviceOrderRepository.findByUserAndStatusAndTypeV3(userId, status, ModelConstant.ORDER_TYPE_RGROUP, productName);
+		List<RgroupOrdersVO> result = new ArrayList<>();
+		for(ServiceOrder so : orders) {
+			RgroupRule rule = cacheableService.findRgroupRule(so.getGroupRuleId());
+			List<RgroupUser> userList = rgroupUserRepository.findAllByUserIdAndRuleId(userId, rule.getId());
+			so.setOrderItems(orderItemRepository.findByServiceOrder(so));
+			RgroupOrdersVO vo = new RgroupOrdersVO();
+			vo.setOrder(so);
+			vo.setRule(rule);
+			vo.setRgroupUser(userList.get(0));
+			result.add(vo);
 		}
 		return result;
 	}

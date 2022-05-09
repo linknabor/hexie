@@ -3,8 +3,6 @@ package com.yumu.hexie.model.market;
 import java.util.Date;
 import java.util.List;
 
-import com.yumu.hexie.integration.community.resp.GroupProductSumVo;
-import com.yumu.hexie.integration.community.resp.GroupSumResp;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,6 +24,13 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     @Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 order by id desc", nativeQuery = true)
     List<ServiceOrder> findByUserAndStatusAndType(long userId, List<Integer> statuses, int orderType);
+    
+    @Query(value = "select distinct p.* from ServiceOrder p "
+    		+ "join orderItem o on o.orderId = p.id "
+    		+ "where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 "
+    		+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+    		+ "and p.groupOrderId is not null order by id desc", nativeQuery = true)
+    List<ServiceOrder> findByUserAndStatusAndTypeV3(long userId, List<Integer> statuses, int orderType, String productName);
 
     @Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.orderType in ?2 order by id desc", nativeQuery = true)
     List<ServiceOrder> findByUserIdAndOrderType(long userId, List<Integer> types);

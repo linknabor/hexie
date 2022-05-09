@@ -225,7 +225,8 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rule.setOwnerId(owner.getOwnerId());
 			rule.setOwnerName(owner.getOwnerName());
 			rule.setOwnerImg(owner.getOwnerImg());
-			rule.setOwnerAddr(region.getName() + region.getXiaoquAddress());
+			rule.setOwnerSect(region.getName());
+			rule.setOwnerAddr(region.getXiaoquAddress());
 			rule.setOwnerTel(owner.getOwnerTel());
 			rule.setAgentId(agent.getId());
 			rule.setUpdateDate(new Date());

@@ -276,6 +276,12 @@ public class ServiceOrder  extends BaseModel {
 	public String getCreateDateStr(){
 		return DateUtil.dtFormat(new Date(getCreateDate()), "MM-dd HH:mm");
 	}
+	
+	@Transient
+	public String getCreateDateStrV3(){
+		return DateUtil.dtFormat(new Date(getCreateDate()), "yyyy/MM/dd HH:mm");
+	}
+	
 	private static Map<Integer,String> STATUSMAP = new HashMap<Integer,String>();
 	static{
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"待付款");

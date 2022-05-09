@@ -46,6 +46,7 @@ import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.RgroupOrder;
+import com.yumu.hexie.vo.RgroupOrdersVO;
 import com.yumu.hexie.vo.SingleItemOrder;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -507,5 +508,46 @@ public class OrderController extends BaseController{
 		baseOrderService.requestOrderPay(user, o.getId(), payMethod);
 		return new BaseResult<ServiceOrder>().success(o);
 	}
+	
+	/**
+	 * 我的订单
+	 * @param user
+	 * @param statusType
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroup/v3/orders/{statusType}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RgroupOrdersVO>> groupOrdersV3(@ModelAttribute(Constants.USER)User user,
+			@PathVariable String statusType, @RequestParam(required = false) String searchName) throws Exception {
+		
+		List<Integer> status = new ArrayList<>();
+		if("1".equalsIgnoreCase(statusType)){
+			status.add(ModelConstant.ORDER_STATUS_INIT);
+		}else if("2".equalsIgnoreCase(statusType)){
+			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+		}else if("3".equalsIgnoreCase(statusType)){
+			status.add(ModelConstant.ORDER_STATUS_REFUNDING);
+			status.add(ModelConstant.ORDER_STATUS_RETURNED);
+			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
+			status.add(ModelConstant.ORDER_STATUS_CANCEL);
+		}else if("0".equalsIgnoreCase(statusType)){
+			status.add(ModelConstant.ORDER_STATUS_INIT);
+			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_CANCEL);
+			status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
+			status.add(ModelConstant.ORDER_STATUS_REFUNDING);
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
+			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			status.add(ModelConstant.ORDER_STATUS_RETURNED);
+			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
+		} 
+		
+		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName));
+    }
 	
 }

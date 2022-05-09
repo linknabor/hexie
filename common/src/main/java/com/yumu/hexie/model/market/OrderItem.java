@@ -7,6 +7,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
+import org.springframework.util.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
 import com.yumu.hexie.model.commonsupport.info.Product;
@@ -89,8 +91,11 @@ public class OrderItem  extends BaseModel {
 		oriPrice = product.getOriPrice();
 		merchantId = product.getMerchantId();
 		productName = product.getName();
-		productPic = product.getMainPicture();
-		productThumbPic = product.getSmallPicture();
+		if (!StringUtils.isEmpty(product.getPictures())) {
+			String[]tempArr = product.getPictures().split(",");
+			productPic = tempArr[0];
+			productThumbPic = tempArr[0];
+		}
 		productCategoryId = product.getProductCategoryId();
 	}
 	
