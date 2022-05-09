@@ -56,7 +56,10 @@ public class OrderItem  extends BaseModel {
 	
 	@Transient
 	private long totalCount;	//总库存 
-	
+
+	private String code; //核销码
+	private int verifyStatus; //1核销 0未核销
+
 	public OrderItem(){}
 	@Transient
 	public void fillDetail(SalePlan plan,Product product){
@@ -242,6 +245,20 @@ public class OrderItem  extends BaseModel {
 	public void setAgentId(Long agentId) {
 		this.agentId = agentId;
 	}
-	
-	
+
+	public int getVerifyStatus() {
+		return verifyStatus;
+	}
+
+	public void setVerifyStatus(int verifyStatus) {
+		this.verifyStatus = verifyStatus;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
 }

@@ -20,6 +20,7 @@ import com.yumu.hexie.model.view.Menu;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.vo.menu.GroupMenuInfo;
+import org.springframework.util.StringUtils;
 
 /**
  * <pre>
@@ -91,6 +92,7 @@ public class UserInfo implements Serializable {
  	private boolean repairService;	//新版工单是否开通
  	
  	private String roleId;	//用户角色
+	private String roleName; //角色名称
  	private boolean permission; //是否有访问权限
 	private String reqPath; //访问的地址
 	private OrgInfo orgInfo;
@@ -121,6 +123,21 @@ public class UserInfo implements Serializable {
 			return orgType;
 		}
 		public void setOrgType(String orgType) {
+			if (!StringUtils.isEmpty(orgType)) {
+				switch (orgType) {
+					case "01":
+						setOrgTypeName("平台");
+						break;
+					case "04":
+						setOrgTypeName("服务商");
+						break;
+					case "06":
+						setOrgTypeName("区域运营商");
+						break;
+					default:
+						break;
+				}
+			}
 			this.orgType = orgType;
 		}
 		public String getOrgTypeName() {
@@ -141,12 +158,18 @@ public class UserInfo implements Serializable {
 		public void setOrgOperId(String orgOperId) {
 			this.orgOperId = orgOperId;
 		}
+
 		@Override
 		public String toString() {
-			return "orgRole [orgName=" + orgName + ", orgId=" + orgId + ", orgType=" + orgType + ", orgTypeName="
-					+ orgTypeName + ", orgOperName=" + orgOperName + ", orgOperId=" + orgOperId + "]";
+			return "OrgInfo{" +
+					"orgName='" + orgName + '\'' +
+					", orgId='" + orgId + '\'' +
+					", orgType='" + orgType + '\'' +
+					", orgTypeName='" + orgTypeName + '\'' +
+					", orgOperName='" + orgOperName + '\'' +
+					", orgOperId='" + orgOperId + '\'' +
+					'}';
 		}
-		
 	}
 
  	public static class ServeRole{
@@ -525,7 +548,33 @@ public class UserInfo implements Serializable {
 	}
 
 	public void setRoleId(String roleId) {
+		if (!StringUtils.isEmpty(roleId)) {
+			switch (roleId) {
+				case "00":
+					setRoleName("平台运营");
+					break;
+				case "01":
+					setRoleName("运营管理");
+					break;
+				case "02":
+					setRoleName("商户");
+					break;
+				case "03":
+					setRoleName("团长");
+					break;
+				default:
+					break;
+			}
+		}
 		this.roleId = roleId;
+	}
+
+	public String getRoleName() {
+		return roleName;
+	}
+
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
 	}
 
 	public OrgInfo getOrgInfo() {

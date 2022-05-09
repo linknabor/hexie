@@ -35,11 +35,12 @@ import com.yumu.hexie.vo.CreateOrderReq;
 import com.yumu.hexie.vo.SingleItemOrder;
 
 //订单
+
 @Entity
 public class ServiceOrder  extends BaseModel {
 
 	private static final long serialVersionUID = 4808669460780339640L;
-	
+
 	/** 商品相关 **/
 	//主商品ID
 	private int orderType;//0.拼单单 1.单个订单 2.预约单 3. 特卖单 4.团购单
@@ -56,20 +57,20 @@ public class ServiceOrder  extends BaseModel {
 	private int count;//个数
 	private float shipFee;//运费
 	private String seedStr;//订单对应的现金券
-	
+
 	private int status = ModelConstant.ORDER_STATUS_INIT;//0. 创建完成 1. 已支付 2. 已用户取消 3. 待退款 4. 已退款  5. 已使用/已发货 6.已签收 7. 已后台取消 8. 商户取消
 
 	private int asyncStatus;//同步给商户 0 未同步，1已同步
 	private int pingjiaStatus = ModelConstant.ORDER_PINGJIA_TYPE_N;//0 未评价 1 已评价
-	
+
 	//现金券
 	private Long couponId;
 	private Float couponAmount;
-	
+
 	/**用户信息**/
 	private String openId;
 	private String appid;
-	
+
 	private String miniopenid;
 	private String miniappid;
 	
@@ -79,7 +80,7 @@ public class ServiceOrder  extends BaseModel {
 	private String memo;
 	@Column(length=1023)
 	private String imgUrls;	//上传图片链接，服务内容链接
-	
+
 	private String address;
 	private String tel;
 	private String receiverName;
@@ -87,20 +88,20 @@ public class ServiceOrder  extends BaseModel {
 	private double lng;
 	private long xiaoquId;
 	private String xiaoquName;
-	
+
 	/**操作员信息*/
 	private long operatorId;
 	private String operatorName;
 	private long operatorUserId;
 	private String operatorTel;
 	private String operatorOpenId;
-	
+
 	private String confirmer;		//确认完工人
-	
+
 	/**团购状态*/
 	private int groupStatus = ModelConstant.GROUP_STAUS_GROUPING;//拼单状态
 	/**团购状态*/
-	
+
 	//团长信息
 	private long groupLeaderId;	//团长id，运营端人员id
 	private String groupLeader;	//团长名字
@@ -114,13 +115,13 @@ public class ServiceOrder  extends BaseModel {
 	private String productPic;
 	private String productThumbPic;
 	private String groupRuleName;
-	
+
 	private long agentId;
 	private String agentName;
 	private String agentNo;
-	
+
 	private String gongzhonghao;
-	
+
 	/**物流信息**/
 	private int logisticType;//0商户派送 1用户自提 2第三方配送
 	private String logisticName;
@@ -142,26 +143,28 @@ public class ServiceOrder  extends BaseModel {
 	private Date cancelDate;
 	private Date closeDate;
 	private Date asyncDate;
-	
+
 	//评论相关
 	private String comment;
 	private int commentQuality;
-    private int commentAttitude;
-    private int commentService;
-    @Column(length=1023)
-    private String commentImgUrls;
-    private Date commentDate;
-    
-    private long subType;	//子类，对于自定义服务列说，有子类
-    private String subTypeName;	//子类中文名称
-    
-    private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
-    
+	private int commentAttitude;
+	private int commentService;
+	@Column(length=1023)
+	private String commentImgUrls;
+	private Date commentDate;
+
+	private long subType;	//子类，对于自定义服务列说，有子类
+	private String subTypeName;	//子类中文名称
+
+	private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
+
+	private int groupNum; //团购号，以团购为单位，每个团购的顺序号
+
 	@JsonIgnore
-    @OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
-    @Fetch(FetchMode.SUBSELECT)
+	@OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
+	@Fetch(FetchMode.SUBSELECT)
 	private List<OrderItem> items = new ArrayList<OrderItem>();
-	
+
 	@Transient
 	private List<OrderItem> orderItems = new ArrayList<OrderItem>();
 
@@ -189,33 +192,33 @@ public class ServiceOrder  extends BaseModel {
 	}
 	//维修单订单
 	public ServiceOrder(RepairOrder sOrder,float amount) {
-        orderNo = OrderNoUtil.generateServiceOrderNo();
-        this.memo = sOrder.getMemo();
-        this.count = 1;
-        this.orderType = ModelConstant.ORDER_TYPE_REPAIR;
-        this.receiveTimeType = 1;
-        this.groupRuleId = 1;
-        this.serviceAddressId = sOrder.getAddressId();
-        this.userId = sOrder.getUserId();
-        this.openId = sOrder.getOpenId();
-        this.couponId = 0l;
-        this.productName = sOrder.getProjectName();
-        
-        OrderItem item = new OrderItem();
-        item.setRuleId(1l);
-        item.setCount(1);
-        item.setOrderType(ModelConstant.ORDER_TYPE_REPAIR);
-        item.setPrice(amount);
-        item.setAmount(amount);
-        item.setRuleName("维修项目");
+		orderNo = OrderNoUtil.generateServiceOrderNo();
+		this.memo = sOrder.getMemo();
+		this.count = 1;
+		this.orderType = ModelConstant.ORDER_TYPE_REPAIR;
+		this.receiveTimeType = 1;
+		this.groupRuleId = 1;
+		this.serviceAddressId = sOrder.getAddressId();
+		this.userId = sOrder.getUserId();
+		this.openId = sOrder.getOpenId();
+		this.couponId = 0l;
+		this.productName = sOrder.getProjectName();
 
-        item.setProductId(1l);
-        item.setMerchantId(1l);
-        item.setProductName("维修项目");
-        item.setOriPrice(0f);
-        items.add(item);
-    }
-	
+		OrderItem item = new OrderItem();
+		item.setRuleId(1l);
+		item.setCount(1);
+		item.setOrderType(ModelConstant.ORDER_TYPE_REPAIR);
+		item.setPrice(amount);
+		item.setAmount(amount);
+		item.setRuleName("维修项目");
+
+		item.setProductId(1l);
+		item.setMerchantId(1l);
+		item.setProductName("维修项目");
+		item.setOriPrice(0f);
+		items.add(item);
+	}
+
 	public ServiceOrder(User user, CreateOrderReq req, Cart cart) {
 		if (!"2".equals(req.getPayType())) {
 			orderNo = OrderNoUtil.generateServiceOrderNo();
@@ -226,16 +229,16 @@ public class ServiceOrder  extends BaseModel {
 		this.couponId = req.getCouponId();
 
 		this.orderType = cart.getOrderType();
-		
+
 		this.userId = user.getId();
 		this.openId = user.getOpenid();
 		this.appid = user.getAppId();
 		this.items = cart.getItems();
 	}
-	
-	
+
+
 	public ServiceOrder(User user, CreateOrderReq req) {
-		
+
 		if (!"2".equals(req.getPayType())) {
 			orderNo = OrderNoUtil.generateServiceOrderNo();
 		}
@@ -245,7 +248,7 @@ public class ServiceOrder  extends BaseModel {
 		this.couponId = req.getCouponId();
 
 		this.orderType = req.getOrderType();
-		
+
 		this.userId = user.getId();
 		this.openId = user.getOpenid();
 		this.appid = user.getAppId();
@@ -253,7 +256,7 @@ public class ServiceOrder  extends BaseModel {
 		this.miniappid = user.getMiniAppId();
 		this.items = req.getItemList();
 	}
-	
+
 	@JsonIgnore
 	@Transient
 	public long getCollocationId(){
@@ -275,41 +278,41 @@ public class ServiceOrder  extends BaseModel {
 	}
 	private static Map<Integer,String> STATUSMAP = new HashMap<Integer,String>();
 	static{
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"待付款");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT,"已取消");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"配货中");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");    
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");        
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"待付款");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT,"已取消");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"配货中");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");
 	}
-	
+
 	private static Map<Integer,String> SERVICE_ORDER_STATUSMAP = new HashMap<Integer,String>();
 	static{
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"未接单");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT,"已取消");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"已完工");    
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"未接单");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT,"已取消");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CONFIRM ,"已完工");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RETURNED,"已退货");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDED  ,"已退款");
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_ACCEPTED  ,"已接单");    
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_ACCEPTED  ,"已接单");
 	}
-	
-	
+
+
 	@Transient
 	public String getStatusStr(){
-		
+
 		String statusStr = "";
 		if (ModelConstant.ORDER_TYPE_SERVICE == this.orderType) {
 			statusStr = SERVICE_ORDER_STATUSMAP.get(status);
@@ -317,7 +320,7 @@ public class ServiceOrder  extends BaseModel {
 			statusStr = STATUSMAP.get(status);
 		}
 		return statusStr;
-		
+
 	}
 	@Transient
 	public static String getStatusStr(int status) {
@@ -338,7 +341,7 @@ public class ServiceOrder  extends BaseModel {
 	}
 	@Transient
 	public void fillAddressInfo(Address address) {
-		
+
 		String regionStr = StringUtils.isEmpty(address.getRegionStr())?"":address.getRegionStr();
 		String detailAddress = StringUtils.isEmpty(address.getDetailAddress())?"":address.getDetailAddress();
 		setAddress(regionStr + detailAddress);
@@ -517,7 +520,7 @@ public class ServiceOrder  extends BaseModel {
 	public void setGroupRuleName(String groupRuleName) {
 		this.groupRuleName = groupRuleName;
 	}
-	
+
 	public long getUserId() {
 		return userId;
 	}
@@ -807,7 +810,7 @@ public class ServiceOrder  extends BaseModel {
 	public void setItems(List<OrderItem> items) {
 		this.items = items;
 	}
-	
+
 	public long getOperatorId() {
 		return operatorId;
 	}
@@ -996,37 +999,45 @@ public class ServiceOrder  extends BaseModel {
 		this.orderItems = orderItems;
 	}
 	public boolean payable() {
-        return ModelConstant.ORDER_STATUS_INIT==getStatus();
-    }
+		return ModelConstant.ORDER_STATUS_INIT==getStatus();
+	}
 
 	public boolean cancelable() {
-        return ModelConstant.ORDER_STATUS_INIT==getStatus();
-    }
-    public boolean asyncable() {
-        return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
-    }
-    public boolean sendable() {
-        return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
-    }
-    public boolean signable() {
-        return (ModelConstant.ORDER_STATUS_SENDED == getStatus()
-            || ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
-            || ModelConstant.ORDER_STATUS_CONFIRM == getStatus());
-    }
-    public boolean returnable() {
-        return ModelConstant.ORDER_STATUS_RECEIVED == getStatus();
-    }
-    public boolean refundable() {
-        return (ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
-                || ModelConstant.ORDER_STATUS_RETURNED == getStatus()
-                | ModelConstant.ORDER_STATUS_PAYED == getStatus());
-    }
-    
-    @Transient
-    public String getShowStatus() {
-    	
-    	String showStatus = "";
-    	if (ModelConstant.ORDER_STATUS_INIT == this.status) {
+		return ModelConstant.ORDER_STATUS_INIT==getStatus();
+	}
+	public boolean asyncable() {
+		return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
+	}
+	public boolean sendable() {
+		return ModelConstant.ORDER_STATUS_CONFIRM==getStatus();
+	}
+	public boolean signable() {
+		return (ModelConstant.ORDER_STATUS_SENDED == getStatus()
+				|| ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
+				|| ModelConstant.ORDER_STATUS_CONFIRM == getStatus());
+	}
+	public boolean returnable() {
+		return ModelConstant.ORDER_STATUS_RECEIVED == getStatus();
+	}
+	public boolean refundable() {
+		return (ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
+				|| ModelConstant.ORDER_STATUS_RETURNED == getStatus()
+				| ModelConstant.ORDER_STATUS_PAYED == getStatus());
+	}
+
+	public int getGroupNum() {
+		return groupNum;
+	}
+
+	public void setGroupNum(int groupNum) {
+		this.groupNum = groupNum;
+	}
+
+	@Transient
+	public String getShowStatus() {
+
+		String showStatus = "";
+		if (ModelConstant.ORDER_STATUS_INIT == this.status) {
 			showStatus = "1";
 		}else if (ModelConstant.ORDER_STATUS_ACCEPTED == this.status) {
 			showStatus = "2";
@@ -1043,9 +1054,9 @@ public class ServiceOrder  extends BaseModel {
 				showStatus = "4";
 			}
 		}
-    	return showStatus;
-    	
-    }
+		return showStatus;
+
+	}
 	public String getMiniopenid() {
 		return miniopenid;
 	}
@@ -1058,6 +1069,6 @@ public class ServiceOrder  extends BaseModel {
 	public void setMiniappid(String miniappid) {
 		this.miniappid = miniappid;
 	}
-    
-    
+
+
 }

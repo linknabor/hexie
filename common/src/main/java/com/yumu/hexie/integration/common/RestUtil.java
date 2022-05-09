@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -293,5 +294,22 @@ public class RestUtil {
 		hexieResponse.setResult("00");
 		return hexieResponse;
 	}
-	
+
+	public <T> String exchange4Base64StrOnUri(String requestUrl, T jsonObject) {
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		HttpEntity<Object> httpEntity = new HttpEntity<>(jsonObject, headers);
+
+		logger.info("requestUrl : " + requestUrl + ", param : " + jsonObject);
+		ResponseEntity<byte[]> respEntity = restTemplate.exchange(requestUrl, HttpMethod.POST, httpEntity, byte[].class);
+		logger.info("response : " + respEntity);
+
+		if (!HttpStatus.OK.equals(respEntity.getStatusCode())) {
+			throw new BizValidateException("请求失败！ code : " + respEntity.getStatusCodeValue());
+		}
+		byte[] result = respEntity.getBody();
+		return Base64.getEncoder().encodeToString(result);
+	}
+
 }

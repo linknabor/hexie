@@ -64,7 +64,7 @@ public class OrgOperator extends BaseModel {
 	}
 	@Override
 	public String toString() {
-		return "OrgUser [userId=" + userId + ", roleId=" + roleId + ", orgName=" + orgName + ", orgId=" + orgId
+		return "OrgOperator [userId=" + userId + ", roleId=" + roleId + ", orgName=" + orgName + ", orgId=" + orgId
 				+ ", orgType=" + orgType + ", orgOperName=" + orgOperName + ", orgOperId=" + orgOperId + "]";
 	}
     

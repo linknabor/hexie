@@ -73,11 +73,10 @@ public class Product extends BaseModel {
 
 	private int userLimitCount;	//单个用户购买限制	
 	private String tags;	//商品标签
-	
+
 	@Transient
 	private boolean isService = false;
-	
-	
+
 	public long getMerchantId() {
 		return merchantId;
 	}
