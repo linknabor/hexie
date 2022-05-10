@@ -25,6 +25,7 @@ import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.common.RgroupV3Service;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
+import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.web.BaseController;
@@ -177,5 +178,17 @@ public class RgroupController extends BaseController{
 		RgroupRecordsVO vo = rgroupV3Service.queryOrderRecords(ruleId, page);
         return new BaseResult<RgroupRecordsVO>().success(vo);
     }
+	
+	/**
+	 * 获取退款原因
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/refund/reason", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<Map<String, String>>> getRefundReason() throws Exception {
+        return new BaseResult<List<Map<String, String>>>().success(rgroupV3Service.getRefundReason());
+    }
+	
 	
 }

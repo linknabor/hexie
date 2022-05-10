@@ -13,6 +13,7 @@ import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.vo.CreateOrderReq;
+import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.SingleItemOrder;
 
 public interface BaseOrderService {
@@ -74,6 +75,9 @@ public interface BaseOrderService {
     List<OrderItem> getOrderDetail(User user, long orderId);
 
     //拆单支付
+    JsSign requestGroupPay(long orderId) throws Exception;
+    
+    //3版团购拆单支付
     JsSign requestGroupPay(long orderId, String payMethod) throws Exception;
 
     //订单支付
@@ -92,6 +96,9 @@ public interface BaseOrderService {
     void finishOrder(String tradeWaterId);
 
 	ServiceOrder createOrder4Rgoup(User user, CreateOrderReq req);
+
+	void requestRefund(User user, RefundVO refundVO) throws Exception;
+
 
 	
 }

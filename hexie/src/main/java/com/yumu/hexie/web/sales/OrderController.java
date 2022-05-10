@@ -45,6 +45,7 @@ import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
+import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.RgroupOrder;
 import com.yumu.hexie.vo.RgroupOrdersVO;
 import com.yumu.hexie.vo.SingleItemOrder;
@@ -533,7 +534,7 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_REFUNDING);
 			status.add(ModelConstant.ORDER_STATUS_RETURNED);
 			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
-			status.add(ModelConstant.ORDER_STATUS_CANCEL);
+//			status.add(ModelConstant.ORDER_STATUS_CANCEL);
 		}else if("0".equalsIgnoreCase(statusType)){
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
@@ -548,6 +549,19 @@ public class OrderController extends BaseController{
 		} 
 		
 		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName));
+    }
+	
+	/**
+	 * 获取退款原因
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/order/refund", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> requestRefund(@ModelAttribute(Constants.USER)User user, @RequestBody RefundVO refundVO) throws Exception {
+		
+		baseOrderService.requestRefund(user, refundVO);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
 	
 }

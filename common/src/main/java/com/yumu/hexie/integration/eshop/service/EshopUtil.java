@@ -104,6 +104,22 @@ public class EshopUtil {
 		restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
 	}
 	
+	/**
+	 * 申请退款
+	 * @param user
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public void requestPartRefund(User user, ServiceOrderRequest serviceOrderRequest) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += REQUEST_REFUND_URL;
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		restUtil.exchangeOnUri(requestUrl, serviceOrderRequest, typeReference);
+	}
+	
 	
 	/**
 	 * 申请退款

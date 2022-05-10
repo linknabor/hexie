@@ -28,6 +28,7 @@ import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.integration.common.CommonPayRequest;
 import com.yumu.hexie.integration.common.CommonPayRequest.SubOrder;
 import com.yumu.hexie.integration.common.CommonPayResponse;
+import com.yumu.hexie.integration.common.ServiceOrderRequest;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
@@ -87,6 +88,7 @@ import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.dto.GainCouponDTO;
 import com.yumu.hexie.vo.CreateOrderReq;
+import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.SingleItemOrder;
 
 @Service("baseOrderService")
@@ -220,6 +222,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					order.setGroupLeader(rgroupRule.getOwnerName());
             		order.setGroupLeaderId(rgroupRule.getOwnerId());
             		order.setGroupLeaderTel(rgroupRule.getOwnerTel());
+            		order.setGroupLeaderAddr(rgroupRule.getOwnerAddr());
             	}
             	
             }
@@ -484,7 +487,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
             jsSign = requestPay(order);
         } else {
-            jsSign = requestGroupPay(orderId, payMethod);
+        	if (StringUtils.isEmpty(payMethod)) {
+        		jsSign = requestGroupPay(orderId);
+			} else {
+				jsSign = requestGroupPay(orderId, payMethod);
+			}
+            
         }
         return jsSign;
 
@@ -619,7 +627,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
     @Override
     @Transactional
-    public JsSign requestGroupPay(long orderId, String payMethod) throws Exception {
+    public JsSign requestGroupPay(long orderId) throws Exception {
 
         List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(orderId);
         if (orderList.isEmpty()) {
@@ -635,7 +643,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
         CommonPayRequest request = new CommonPayRequest();
         List<SubOrder> subOrderList = new ArrayList<>(orderList.size());
-
+        
         Long couponId = 0L;
         Float couponAmt = 0f;
         BigDecimal totalPrice = BigDecimal.ZERO;
@@ -728,7 +736,177 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             request.setAgentName(agentName);
         }
         request.setCount(String.valueOf(totalCount));
+        request.setRuleId(String.valueOf(o.getGroupRuleId()));	//团id
+        request.setOwnerId(String.valueOf(o.getGroupLeaderId()));	//团长
+        
+        String ownerName = o.getGroupLeader();
+        if (!StringUtils.isEmpty(ownerName)) {
+        	ownerName = URLEncoder.encode(ownerName, "GBK");
+        }
+        request.setOwnerName(ownerName);
+        request.setOwnerTel(o.getGroupLeaderTel());
+        
+        RgroupRule rule = cacheableService.findRgroupRule(o.getGroupRuleId());
+        String ruleName = rule.getDescription();
+        if (!StringUtils.isEmpty(ruleName)) {
+        	if (ruleName.length()>40) {
+        		ruleName = ruleName.substring(0, 40);
+			}
+			ruleName = URLEncoder.encode(ruleName, "GBK");
+		}
+        request.setRuleDescription(ruleName);
+
+        CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
+
+        JsSign sign = new JsSign();
+        sign.setAppId(responseVo.getAppid());
+        sign.setNonceStr(responseVo.getNoncestr());
+        sign.setPkgStr(responseVo.getPack());
+        sign.setSignature(responseVo.getPaysign());
+        sign.setSignType(responseVo.getSigntype());
+        sign.setTimestamp(responseVo.getTimestamp());
+        sign.setOrderId(String.valueOf(orderId));
+
+        o.setOrderNo(responseVo.getTradeWaterId());    //如果是拼单，只记其中一条的orderNo
+        commonPostProcess(ModelConstant.ORDER_OP_REQPAY, o);    //记录分享记录，也不循环，拼多视为一单。
+        return sign;
+    }
+    
+    
+    @Override
+    @Transactional
+    public JsSign requestGroupPay(long orderId, String payMethod) throws Exception {
+
+        List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(orderId);
+        if (orderList.isEmpty()) {
+            throw new BizValidateException("未查询倒订单：" + orderId);
+        }
+        log.info("[requestPay]OrderId:" + orderId);
+
+        ServiceOrder o = orderList.get(0);
+        //校验订单状态
+        if (!o.payable()) {
+            throw new BizValidateException(orderId, "订单状态不可支付，请重新查询确认订单状态！").setError();
+        }
+        
+        List<OrderItem> itemList = orderItemRepository.findByServiceOrder(o);
+
+        CommonPayRequest request = new CommonPayRequest();
+        List<SubOrder> subOrderList = new ArrayList<>(orderList.size());
+        
+        Long couponId = 0L;
+        Float couponAmt = 0f;
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        int totalCount = 0;
+        for (OrderItem orderItem : itemList) {
+            SubOrder subOrder = new SubOrder();
+            String subAgentName = orderItem.getAgentName();
+            if (!StringUtils.isEmpty(subAgentName)) {
+                subAgentName = URLEncoder.encode(subAgentName, "GBK");
+            }
+            subOrder.setAgentName(subAgentName);
+            subOrder.setAgentNo(orderItem.getAgentNo());
+            subOrder.setAmount(orderItem.getAmount());
+            subOrder.setCount(orderItem.getCount());
+
+            String subProductName = orderItem.getProductName();
+            if (!StringUtils.isEmpty(subProductName)) {
+                subProductName = URLEncoder.encode(subProductName, "GBK");
+            }
+            subOrder.setProductName(subProductName);
+            subOrder.setProductId(orderItem.getProductId());
+
+            if (orderItem.getCouponId() != null && orderItem.getCouponId() > 0) {
+                subOrder.setSubCouponId(orderItem.getCouponId());
+                couponId = orderItem.getCouponId();
+            }
+            if (orderItem.getCouponAmount() != null) {    //拆单交易，多个订单只有一个couponId，只记录再一个serivceOrder中，其他子订单不记录couponId，但记录订单金额
+                subOrder.setSubCouponAmt(orderItem.getCouponAmount());
+                couponAmt += orderItem.getCouponAmount();
+            }
+            subOrder.setSubPic(orderItem.getProductThumbPic());
+            subOrderList.add(subOrder);
+
+            totalPrice = totalPrice.add(new BigDecimal(String.valueOf(orderItem.getAmount())));
+            totalCount += orderItem.getCount();
+        }
+        request.setSubOrders(subOrderList);
+        if (couponId > 0) {
+            request.setCouponId(String.valueOf(couponId));
+            request.setCouponAmt(String.valueOf(couponAmt));
+        }
+
+        User user = userService.getById(o.getUserId());
+        request.setUserId(user.getWuyeId());
+        request.setAppid(user.getAppId());
+        Region region = regionRepository.findById(o.getXiaoquId());
+        if (region != null) {
+            request.setSectId(region.getSectId());
+        }
+        if (StringUtils.isEmpty(request.getSectId())) {
+            throw new BizValidateException("未查询地址所对应的小区ID， addressId : " + o.getServiceAddressId());
+        }
+
+        request.setServiceId(String.valueOf(o.getProductId()));
+        String linkman = o.getReceiverName();
+        if (!StringUtils.isEmpty(linkman)) {
+            linkman = URLEncoder.encode(linkman, "GBK");
+        }
+        request.setLinkman(linkman);
+        request.setLinktel(o.getTel());
+
+        String address = o.getAddress();
+        if (!StringUtils.isEmpty(address)) {
+            address = URLEncoder.encode(address, "GBK");
+        }
+        request.setServiceAddr(address);
+        request.setOpenid(o.getOpenId());
+        request.setMiniappid(o.getMiniappid());
+        request.setMiniopenid(o.getMiniopenid());
+        
+        request.setTranAmt(totalPrice.toString());
+
+        String productName = o.getProductName();
+        if (orderList.size() > 1) {
+            productName = productName + "等" + orderList.size() + "种商品";
+        }
+        if (!StringUtils.isEmpty(productName)) {
+            productName = URLEncoder.encode(productName, "GBK");
+        }
+        request.setServiceName(productName);
+        request.setOrderType(String.valueOf(o.getOrderType()));
+
+        Agent agent = agentRepository.findById(o.getAgentId());
+        if (agent != null) {
+            request.setAgentNo(agent.getAgentNo());
+            String agentName = agent.getName();
+            if (!StringUtils.isEmpty(agentName)) {
+                agentName = URLEncoder.encode(agentName, "GBK");
+            }
+            request.setAgentName(agentName);
+        }
+        request.setCount(String.valueOf(totalCount));
         request.setPayMethod(payMethod);
+        
+        request.setRuleId(String.valueOf(o.getGroupRuleId()));	//团id
+        request.setOwnerId(String.valueOf(o.getGroupLeaderId()));	//团长
+        
+        String ownerName = o.getGroupLeader();
+        if (!StringUtils.isEmpty(ownerName)) {
+        	ownerName = URLEncoder.encode(ownerName, "GBK");
+        }
+        request.setOwnerName(ownerName);
+        request.setOwnerTel(o.getGroupLeaderTel());
+        
+        RgroupRule rule = cacheableService.findRgroupRule(o.getGroupRuleId());
+        String ruleName = rule.getDescription();
+        if (!StringUtils.isEmpty(ruleName)) {
+        	if (ruleName.length()>40) {
+        		ruleName = ruleName.substring(0, 40);
+			}
+			ruleName = URLEncoder.encode(ruleName, "GBK");
+		}
+        request.setRuleDescription(ruleName);
 
         CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
 
@@ -1615,6 +1793,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	if (regionId == 0l) {
 			throw new BizValidateException("请选择所在小区");
 		}
+    	
         Map<Long, List<OrderItem>> itemsMap = new HashMap<>();
         //重新设置页面传上来的商品价格，因为前端传值可以被篡改。除了规则id和件数采用前端上传的
         List<OrderItem> itemList = req.getItemList();
@@ -1624,7 +1803,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             if (productRule == null) {
                 throw new BizValidateException("未查询到商品规则：" + orderItem.getRuleId());
             }
-
             //只设置单价和免邮件数这些基本属性，以保证后面计算的正确性
             BigDecimal amt = new BigDecimal(String.valueOf(productRule.getPrice())).multiply(new BigDecimal(String.valueOf(orderItem.getCount())));
             orderItem.setAmount(amt.floatValue());
@@ -1646,7 +1824,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
 
         }
-
+        
+        long ruleId = 0;
+    	long ownerId = 0;
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
         Long groupId = Long.valueOf(OrderNoUtil.generateServiceNo());
         for (Entry<Long, List<OrderItem>> entry : itemsMap.entrySet()) {
@@ -1656,6 +1836,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
             ServiceOrder o = new ServiceOrder(user, orderRequest);
             o.setGroupOrderId(groupId);
+            
+            //生成跟团号
+            int groupNum = genGroupNum(o.getGroupRuleId());
+            o.setGroupNum(groupNum);
 
             //1. 填充地址信息
             Address address = fillAddressInfo(o);
@@ -1666,6 +1850,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				log.warn("no items has set into order, will skip ");
 				continue;
 			}
+            
+            ruleId = o.getGroupRuleId();
+            ownerId = o.getGroupLeaderId();
             serviceOrderRepository.save(o);
 
             totalOrderAmount = totalOrderAmount.add(new BigDecimal(String.valueOf(o.getPrice())));    //这里面含运费
@@ -1700,9 +1887,85 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
           //6.清空购物车中已购买的商品
             cartService.delFromRgroupCart(user, orderItem);
         }
+        
+        //8.添加团长被下单次数和团下单次数
+        if (ruleId > 0) {
+        	redisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ORDERED + ruleId);
+		}
+        if (ownerId > 0) {
+        	redisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_OWNER_ORDERED + ownerId);
+		}
         return newOrder;
 
     }
+    
+    /**
+     * 生成跟团号
+     * @param ruleId
+     * @return
+     */
+    private int genGroupNum(long ruleId) {
+    	
+    	String key = ModelConstant.KEY_RGROUP_NUM_GENERATOR + ruleId;
+    	Long value = redisTemplate.opsForValue().increment(key);
+    	return value.intValue();
+    }
+    
+    /**
+	 * 申请退款
+	 * @param user
+	 * @param refundVO
+	 * @throws Exception 
+	 */
+    @Override
+    @Transactional
+	public void requestRefund(User user, RefundVO refundVO) throws Exception {
+    	
+    	log.info("requestRefund : " + refundVO);
+    	
+    	Assert.hasText(refundVO.getRefundType(), "请选择退款类型");
+    	Assert.hasText(refundVO.getRefundReason(), "请选择退款原因。");
+    	Assert.hasText(refundVO.getMemo(), "请填写退款描述");
+    	
+		ServiceOrder o = findOne(refundVO.getOrderId());
+		if (user.getId() != o.getUserId()) {
+			throw new BizValidateException("用户 无法进行当前操作");
+		}
+		
+		BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());
+		BigDecimal refunded = new BigDecimal(o.getRefundAmt());
+		BigDecimal total = new BigDecimal(o.getPrice());
+		if (refund.compareTo(total) > 0) {
+			throw new BizValidateException("退款超出订单总金额");
+		}
+		if ((refund.add(refunded)).compareTo(total) > 0) {
+			throw new BizValidateException("退款超出订单总金额");
+		}
+		String memo = refundVO.getRefundReason();
+		memo += ";";
+		memo += refundVO.getMemo();
+		o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
+		
+        if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
+        	throw new BizValidateException("当前订单状态不能进行退款操作");
+        }
+        ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
+        serviceOrderRequest.setMemo(memo);
+        serviceOrderRequest.setRefundAmt(refund.toString());
+        serviceOrderRequest.setTradeWaterId(o.getOrderNo());
+        
+        StringBuffer bf = new StringBuffer();
+        for (String itemId : refundVO.getItemList()) {
+			bf.append(itemId).append(",");
+		}
+        serviceOrderRequest.setItems(bf.toString());
+        eshopUtil.requestPartRefund(user, serviceOrderRequest);
+        
+        o.refunding(true, memo);
+        o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
+        serviceOrderRepository.save(o);
+        commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
+	}
     
     
 }

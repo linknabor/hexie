@@ -97,6 +97,7 @@ public class ModelConstant {
 	
 	public static final int REFUND_REASON_GROUP_CANCEL = 1;
 	public static final int REFUND_REASON_GROUP_BACKEND = 2;
+	public static final int REFUND_REASON_GROUP_USER_REFUND = 3;
 	
 	//0商户派送 1用户自提 2第三方配送 3上门服务 4用户到店
 	public static final int LOGISTIC_TYPE_MERCHANT = 0;
@@ -508,4 +509,9 @@ public class ModelConstant {
 
 	public static final String USER_ROLE_RGROUPOWNER = "03";	//01团长
 	public static final String KEY_CREATE_NEW_REGION_LOCK = "lock:createRegion:";	//后面接小区名字
+	public static final String KEY_RGROUP_NUM_GENERATOR = "rgroup:groupNum:";	//跟团号生成器，后面接ruleId
+	public static final String KEY_RGROUP_OWNER_ACCESSED = "rgroup:accessed:owner:";	//后面接团长id,团长被访问次数
+	public static final String KEY_RGROUP_OWNER_ORDERED = "rgroup:ordered:owner:";	//后面接团长id,团长被跟团次数
+	public static final String KEY_RGROUP_GROUP_ACCESSED = "rgroup:accessed:group:";	//后面接团id,团被访问次数
+	public static final String KEY_RGROUP_GROUP_ORDERED = "rgroup:ordered:group:";	//后面接团id，团被下单次数
 }		

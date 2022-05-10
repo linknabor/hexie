@@ -58,6 +58,16 @@ public class CommonPayRequest extends CommonRequest {
 	private String payMethod;
 	private String miniopenid;
 	private String miniappid;
+	@JsonProperty("group_owner_id")
+	private String ownerId;
+	@JsonProperty("group_owner_name")
+	private String ownerName;	//团长
+	@JsonProperty("group_owner_tel")
+	private String ownerTel;	//团长手机
+	@JsonProperty("group_rule_id")
+	private String ruleId;	//团id
+	@JsonProperty("group_rule_name")
+	private String ruleDescription;	//团名
 	
 	public CommonPayRequest() {
 		super();
@@ -346,6 +356,46 @@ public class CommonPayRequest extends CommonRequest {
 		this.miniappid = miniappid;
 	}
 
+	public String getRuleId() {
+		return ruleId;
+	}
+
+	public void setRuleId(String ruleId) {
+		this.ruleId = ruleId;
+	}
+
+	public String getOwnerName() {
+		return ownerName;
+	}
+
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
+	}
+
+	public String getOwnerTel() {
+		return ownerTel;
+	}
+
+	public void setOwnerTel(String ownerTel) {
+		this.ownerTel = ownerTel;
+	}
+
+	public String getRuleDescription() {
+		return ruleDescription;
+	}
+
+	public void setRuleDescription(String ruleDescription) {
+		this.ruleDescription = ruleDescription;
+	}
+
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+
 	@Override
 	public String toString() {
 		return "CommonPayRequest [userId=" + userId + ", serviceId=" + serviceId + ", sectId=" + sectId + ", linkman="
@@ -354,9 +404,10 @@ public class CommonPayRequest extends CommonRequest {
 				+ ", serviceName=" + serviceName + ", agentName=" + agentName + ", agentNo=" + agentNo + ", count="
 				+ count + ", subOrders=" + subOrders + ", couponId=" + couponId + ", couponAmt=" + couponAmt
 				+ ", shipFee=" + shipFee + ", memo=" + memo + ", imgUrls=" + imgUrls + ", payMethod=" + payMethod
-				+ ", miniopenid=" + miniopenid + ", miniappid=" + miniappid + "]";
+				+ ", miniopenid=" + miniopenid + ", miniappid=" + miniappid + ", ownerId=" + ownerId + ", ownerName="
+				+ ownerName + ", ownerTel=" + ownerTel + ", ruleId=" + ruleId + ", ruleDescription=" + ruleDescription
+				+ "]";
 	}
 
-	
 	
 }

@@ -18,7 +18,7 @@ public class RgroupOwner extends BaseModel {
 	private long userId;
 	private String miniopenid;
 	private int followers;	//TODO 关注人数  这个不知道有什么用？
-	private int members;	//订阅人数,成员数
+	private int members;	//成员数，即访问数
 	private int attendees;		//跟团人次
 	private String feeRate;
 	

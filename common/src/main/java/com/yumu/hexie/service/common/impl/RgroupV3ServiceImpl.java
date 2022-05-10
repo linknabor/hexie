@@ -2,7 +2,9 @@ package com.yumu.hexie.service.common.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -537,16 +539,42 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				vo.setRegion(region);
 			}
 			
-			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(rule.getOwnerId());
+			if (isOnsale) {
+				stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rule.getId());
+				stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rule.getOwnerId());
+			}
+			
 			RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
-			rgroupOwnerVO.setAttendees(rgroupOwner.getAttendees());
-			rgroupOwnerVO.setFollowers(rgroupOwner.getFollowers());
-			rgroupOwnerVO.setMembers(rgroupOwner.getMembers());
+			int attendees = 0;
+			String attendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rule.getOwnerId());
+			if (!StringUtils.isEmpty(attendeesStr)) {
+				attendees = Integer.parseInt(attendeesStr);
+			}
+			rgroupOwnerVO.setAttendees(attendees);
+			int members = 0;
+			String membersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rule.getOwnerId());
+			if (!StringUtils.isEmpty(membersStr)) {
+				members = Integer.parseInt(membersStr);
+			}
+			rgroupOwnerVO.setMembers(members);
 			rgroupOwnerVO.setOwnerId(rule.getOwnerId());
 			rgroupOwnerVO.setOwnerName(rule.getOwnerName());
 			rgroupOwnerVO.setOwnerImg(rule.getOwnerImg());
 			rgroupOwnerVO.setOwnerTel(rule.getOwnerTel());
 			vo.setRgroupOwner(rgroupOwnerVO);
+			
+			int groupAccessed = 0;
+			String groupAccessedStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rule.getId());
+			if (!StringUtils.isEmpty(groupAccessedStr)) {
+				groupAccessed = Integer.parseInt(groupAccessedStr);
+			}
+			vo.setAccessed(groupAccessed);
+			int groupOrdered = 0;
+			String groupOrderedStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ORDERED + rule.getId());
+			if (!StringUtils.isEmpty(groupOrderedStr)) {
+				groupOrdered = Integer.parseInt(groupOrderedStr);
+			}
+			vo.setOrdered(groupOrdered);
 			
 		} catch (Exception e) {
 			logger.info(e.getMessage(), e);
@@ -743,5 +771,53 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		vo.setTotalSize(rgroupUsers.getTotalElements());
 		return vo;
 	}
+	
+	@Override
+	public List<Map<String, String>> getRefundReason () {
+		
+		List<Map<String, String>> reasonList = new ArrayList<>();
+		Map<String, String> reason = new HashMap<>();
+		reason.put("name", "多拍、错拍、不想要");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "没时间去拿");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "大小尺寸与商品描述不符");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "收到商品少见件、破损或污渍");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "团长未发货");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "团长缺货");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "不喜欢、效果不好");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "材质、面料与商品描述不符合");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "质量问题");
+		reasonList.add(reason);
+		
+		reason = new HashMap<>();
+		reason.put("name", "其他");
+		reasonList.add(reason);
+		
+		return reasonList;
+	}
+	
 	
 }

@@ -159,6 +159,8 @@ public class ServiceOrder  extends BaseModel {
 	private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
 
 	private int groupNum; //团购号，以团购为单位，每个团购的顺序号
+	private String refundMemo;	//退款备注
+	private Float refundAmt;	//已退金额
 
 	@JsonIgnore
 	@OneToMany(targetEntity = OrderItem.class, fetch = FetchType.LAZY, cascade = {CascadeType.REFRESH}, mappedBy = "serviceOrder")
@@ -441,6 +443,16 @@ public class ServiceOrder  extends BaseModel {
 		setRefundType(groupCancel ? ModelConstant.REFUND_REASON_GROUP_CANCEL:ModelConstant.REFUND_REASON_GROUP_BACKEND);
 		setUpdateDate(System.currentTimeMillis());
 	}
+	
+	@Transient
+	public void refunding(boolean userRequest, String memo) {
+		setRefundDate(new Date());
+		setStatus(ModelConstant.ORDER_STATUS_REFUNDING);
+		setRefundType(ModelConstant.REFUND_REASON_GROUP_USER_REFUND);
+		setRefundMemo(memo);
+		setUpdateDate(System.currentTimeMillis());
+	}
+	
 	@Transient
 	public void refunding() {
 		setRefundDate(new Date());
@@ -1075,6 +1087,18 @@ public class ServiceOrder  extends BaseModel {
 	public void setMiniappid(String miniappid) {
 		this.miniappid = miniappid;
 	}
-
+	public String getRefundMemo() {
+		return refundMemo;
+	}
+	public void setRefundMemo(String refundMemo) {
+		this.refundMemo = refundMemo;
+	}
+	public Float getRefundAmt() {
+		return refundAmt;
+	}
+	public void setRefundAmt(Float refundAmt) {
+		this.refundAmt = refundAmt;
+	}
+	
 
 }

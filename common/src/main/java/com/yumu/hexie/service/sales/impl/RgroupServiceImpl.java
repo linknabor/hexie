@@ -265,7 +265,9 @@ public class RgroupServiceImpl implements RgroupService {
 			RgroupOrdersVO vo = new RgroupOrdersVO();
 			vo.setOrder(so);
 			vo.setRule(rule);
-			vo.setRgroupUser(userList.get(0));
+			if (userList != null && userList.size() > 0) {
+				vo.setRgroupUser(userList.get(0));
+			}
 			result.add(vo);
 		}
 		return result;

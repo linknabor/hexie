@@ -31,6 +31,8 @@ public class RgroupVO implements Serializable {
 	private int logisticType = 1;//0商户派送 1用户自提 2第三方配送
 	private int groupMinNum;	//最小成团份数
 	private String updateDate;	//更新日期
+	private int accessed = 0;	//被访问次数
+	private int ordered = 0;	//被下单次数
 	private ProductVO[]productList;
 	private Region region;	//团购地区
 	private RgroupOwnerVO rgroupOwner;
@@ -47,8 +49,8 @@ public class RgroupVO implements Serializable {
 		
 		/*下面这些展示用*/
 		private int followers;	//TODO 关注人数  这个不知道有什么用？
-		private int members;	//订阅人数,成员数
-		private int attendees;		//跟团人次
+		private int members = 0;	//成员数，即访问数
+		private int attendees = 0;		//跟团人次
 		private String consultRate;
 		
 		public long getOwnerId() {
@@ -105,6 +107,28 @@ public class RgroupVO implements Serializable {
 		public void setConsultRate(String consultRate) {
 			this.consultRate = consultRate;
 		}
+		
+		public String getAttendeesView() {
+			if (attendees > 1000) {
+				attendees = attendees/1000*1000;
+			}
+			String attendeesView = String.valueOf(attendees);
+			if (attendees >= 1000) {
+				attendeesView += "+";
+			}
+			return attendeesView;
+		}
+		public String getMembersView() {
+			if (members > 1000) {
+				members = members/1000*1000;
+			}
+			String membersView = String.valueOf(members);
+			if (members >= 1000) {
+				membersView += "+";
+			}
+			return membersView;
+		}
+		
 		@Override
 		public String toString() {
 			return "RgroupOwnerVO [ownerId=" + ownerId + ", ownerName=" + ownerName + ", ownerAddr=" + ownerAddr
@@ -490,17 +514,33 @@ public class RgroupVO implements Serializable {
 		this.pricePeriod = pricePeriod;
 	}
 
+	public int getAccessed() {
+		return accessed;
+	}
+
+	public void setAccessed(int accessed) {
+		this.accessed = accessed;
+	}
+
+	public int getOrdered() {
+		return ordered;
+	}
+
+	public void setOrdered(int ordered) {
+		this.ordered = ordered;
+	}
+	
 	@Override
 	public String toString() {
 		return "RgroupVO [action=" + action + ", ruleId=" + ruleId + ", type=" + type + ", status=" + status
 				+ ", createDate=" + createDate + ", description=" + description + ", descriptionMore="
 				+ Arrays.toString(descriptionMore) + ", startDate=" + startDate + ", endDate=" + endDate
 				+ ", startDateMills=" + startDateMills + ", endDateMills=" + endDateMills + ", logisticType="
-				+ logisticType + ", groupMinNum=" + groupMinNum + ", updateDate=" + updateDate + ", productList="
-				+ Arrays.toString(productList) + ", region=" + region + ", rgroupOwner=" + rgroupOwner
-				+ ", descMoreImages=" + descMoreImages + ", pricePeriod=" + pricePeriod + "]";
+				+ logisticType + ", groupMinNum=" + groupMinNum + ", updateDate=" + updateDate + ", accessed="
+				+ accessed + ", ordered=" + ordered + ", productList=" + Arrays.toString(productList) + ", region="
+				+ region + ", rgroupOwner=" + rgroupOwner + ", descMoreImages=" + descMoreImages + ", pricePeriod="
+				+ pricePeriod + "]";
 	}
 
-	
 	
 }
