@@ -122,11 +122,13 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			, nativeQuery = true)
 	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
 
-	String sqlColumn3 = "a.id,a.ownerId,a.ownerName,a.ownerAddr,a.ownerImg,a.ownerTel,a.price,a.description,a.status,a.groupStatus,a.startDate,a.endDate, a.descriptionMore, count( distinct b.id) productNum ";
+	String sqlColumn3 = "a.id,a.ownerId,a.ownerName,a.ownerAddr,a.ownerImg,a.ownerTel,a.price,a.description,a.status,a.groupStatus,a.startDate,a.endDate, a.descriptionMore, count( distinct b.id) productNum, d.name as userName ";
 	@Query(value = "select DISTINCT " + sqlColumn3
 			+ "from rgrouprule a "
 			+ "join ProductRule b on a.id = b.ruleId "
-			+ "where b.depotId = ?1 "
+			+ "join Product c on b.productId = c.id "
+			+ "join user d on a.ownerId = d.id "
+			+ "where c.depotId = ?1 "
 			+ "group by a.id "
 			, nativeQuery = true)
 	List<Object[]> queryGroupByDepotId(String depotId);

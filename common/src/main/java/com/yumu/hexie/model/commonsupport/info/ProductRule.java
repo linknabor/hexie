@@ -14,7 +14,6 @@ public class ProductRule extends BaseModel {
 	
 	private long productId;
 	private long ruleId;
-	private long depotId; //商品对应商品库的ID
 	
 	public long getProductId() {
 		return productId;
@@ -27,13 +26,5 @@ public class ProductRule extends BaseModel {
 	}
 	public void setRuleId(long ruleId) {
 		this.ruleId = ruleId;
-	}
-
-	public long getDepotId() {
-		return depotId;
-	}
-
-	public void setDepotId(long depotId) {
-		this.depotId = depotId;
 	}
 }

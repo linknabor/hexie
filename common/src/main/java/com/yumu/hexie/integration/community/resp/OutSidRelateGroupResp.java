@@ -38,10 +38,12 @@ public class OutSidRelateGroupResp implements Serializable {
     private String descriptionMore;
     @JsonProperty("product_num")
     private BigInteger productNum;
+    @JsonProperty("user_name")
+    private String userName;
 
     private String status_cn;
 
-    public OutSidRelateGroupResp(BigInteger id, BigInteger ownerId, String ownerName, String ownerAddr, String ownerImg, String ownerTel, Float price, String description, Integer status, Integer groupStatus, Timestamp startDate, Timestamp endDate, String descriptionMore, BigInteger productNum) {
+    public OutSidRelateGroupResp(BigInteger id, BigInteger ownerId, String ownerName, String ownerAddr, String ownerImg, String ownerTel, Float price, String description, Integer status, Integer groupStatus, Timestamp startDate, Timestamp endDate, String descriptionMore, BigInteger productNum, String userName) {
         this.id = id;
         this.ownerId = ownerId;
         this.ownerName = ownerName;
@@ -56,6 +58,7 @@ public class OutSidRelateGroupResp implements Serializable {
         this.endDate = endDate;
         this.descriptionMore = descriptionMore;
         this.productNum = productNum;
+        this.userName = userName;
     }
 
     public BigInteger getId() {
@@ -168,6 +171,14 @@ public class OutSidRelateGroupResp implements Serializable {
 
     public void setProductNum(BigInteger productNum) {
         this.productNum = productNum;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getStatus_cn() {
