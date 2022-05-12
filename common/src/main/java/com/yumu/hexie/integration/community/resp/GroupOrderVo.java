@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.community.resp;
 
-import java.math.BigDecimal;
+import com.yumu.hexie.model.market.OrderItem;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
@@ -32,7 +33,7 @@ public class GroupOrderVo {
     private String logisticTypeCn;
     private String orderDate;
 
-    private List<BuyGoodsVo> buyGoodsVoList; //商品列表
+    private List<OrderItem> orderItems; //商品列表
 
     public GroupOrderVo() {
 
@@ -198,12 +199,12 @@ public class GroupOrderVo {
         this.orderDate = orderDate;
     }
 
-    public List<BuyGoodsVo> getBuyGoodsVoList() {
-        return buyGoodsVoList;
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
     }
 
-    public void setBuyGoodsVoList(List<BuyGoodsVo> buyGoodsVoList) {
-        this.buyGoodsVoList = buyGoodsVoList;
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
     }
 
     @Override
@@ -227,7 +228,7 @@ public class GroupOrderVo {
                 ", userHead='" + userHead + '\'' +
                 ", logisticTypeCn='" + logisticTypeCn + '\'' +
                 ", orderDate='" + orderDate + '\'' +
-                ", buyGoodsVoList=" + buyGoodsVoList +
+                ", orderItems=" + orderItems +
                 '}';
     }
 }

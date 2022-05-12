@@ -62,6 +62,8 @@ public class OrderItem  extends BaseModel {
 	private String code; //核销码
 	private int verifyStatus; //1核销 0未核销
 
+	private int isRefund = 0; //0未退款 1已退款
+
 	public OrderItem(){}
 	@Transient
 	public void fillDetail(SalePlan plan,Product product){
@@ -265,5 +267,13 @@ public class OrderItem  extends BaseModel {
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+
+	public int getIsRefund() {
+		return isRefund;
+	}
+
+	public void setIsRefund(int isRefund) {
+		this.isRefund = isRefund;
 	}
 }

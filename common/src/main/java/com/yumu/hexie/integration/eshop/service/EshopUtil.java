@@ -107,7 +107,7 @@ public class EshopUtil {
 	/**
 	 * 申请退款
 	 * @param user
-	 * @param request
+	 * @param serviceOrderRequest
 	 * @return
 	 * @throws Exception
 	 */

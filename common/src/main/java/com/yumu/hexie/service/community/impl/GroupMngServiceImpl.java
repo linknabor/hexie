@@ -9,7 +9,6 @@ import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
-import com.yumu.hexie.integration.community.req.RefundInfoReq;
 import com.yumu.hexie.integration.community.resp.*;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.*;
@@ -23,7 +22,6 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.community.GroupMngService;
 import com.yumu.hexie.service.exception.BizValidateException;
-import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.vo.RgroupVO;
 import org.springframework.beans.BeanUtils;
@@ -36,7 +34,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
-import javax.inject.Inject;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -63,9 +60,6 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Inject
-    private BaseOrderService baseOrderService;
 
     @Autowired
     private UserNoticeService userNoticeService;
@@ -475,15 +469,7 @@ public class GroupMngServiceImpl implements GroupMngService {
                 ServiceOrder serviceOrder = new ServiceOrder();
                 serviceOrder.setId(vo.getId().longValue());
                 List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
-                for (OrderItem item : items) {
-                    //订单里购买的商品
-                    BuyGoodsVo buyVo = new BuyGoodsVo();
-                    buyVo.setGoodsName(item.getProductName());
-                    buyVo.setGoodsNum(item.getCount());
-                    buyVo.setGoodsAmt(item.getPrice());
-                    buyVos.add(buyVo);
-                }
-                vo.setBuyGoodsVoList(buyVos);
+                vo.setOrderItems(items);
             }
         }
 
@@ -522,20 +508,9 @@ public class GroupMngServiceImpl implements GroupMngService {
             groupOrder.setUserHead(userInfo.getHeadimgurl());
         }
 
-        List<BuyGoodsVo> buyVos = new ArrayList<>();
         //查询订单下的商品
         List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
-        for (OrderItem item : items) {
-            //订单里购买的商品
-            BuyGoodsVo buyVo = new BuyGoodsVo();
-            buyVo.setGoodsId(item.getProductId());
-            buyVo.setGoodsName(item.getProductName());
-            buyVo.setGoodsNum(item.getCount());
-            buyVo.setGoodsAmt(item.getPrice());
-            buyVo.setGoodsImage(item.getProductPic());
-            buyVos.add(buyVo);
-        }
-        groupOrder.setBuyGoodsVoList(buyVos);
+        groupOrder.setOrderItems(items);
         return groupOrder;
     }
 
@@ -575,31 +550,11 @@ public class GroupMngServiceImpl implements GroupMngService {
         if (serviceOrder == null) {
             throw new BizValidateException("未查到订单，请刷新重试");
         }
-        //TODO 取消订单 在快团团上是分为2步，取消订单和退款，可以只先取消订单，也可以取消订单并退款
-        reFunding(serviceOrder);
+        //取消订单并退款
+//        reFunding(serviceOrder);
 //        serviceOrder.setStatus(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
 //        serviceOrderRepository.save(serviceOrder);
         return true;
-    }
-
-    @Override
-    @Transactional
-    public Boolean refundOrder(User user, RefundInfoReq refundInfoReq) throws Exception {
-        ServiceOrder serviceOrder = serviceOrderRepository.findByIdAndGroupLeaderId(Long.parseLong(refundInfoReq.getOrderId()), user.getId());
-        if (serviceOrder == null) {
-            throw new BizValidateException("未查到订单，请刷新重试");
-        }
-        reFunding(serviceOrder);
-        return true;
-    }
-
-    private void reFunding(ServiceOrder o) throws Exception {
-        o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
-        if (ModelConstant.ORDER_STATUS_PAYED == o.getStatus()) {
-            baseOrderService.refund(o);
-        } else {
-            baseOrderService.cancelOrder(o);
-        }
     }
 
     @Override

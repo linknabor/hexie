@@ -4,7 +4,6 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
-import com.yumu.hexie.integration.community.req.RefundInfoReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
 import com.yumu.hexie.integration.community.resp.GroupSumResp;
@@ -53,9 +52,6 @@ public interface GroupMngService {
 
     //根据订单ID查询订单详情
     GroupOrderVo queryGroupOrderDetail(User user, String orderId);
-
-    //订单退款
-    Boolean refundOrder(User user, RefundInfoReq refundInfoReq) throws Exception;
 
     //未提货通知
     Boolean noticeReceiving(User user, String groupId);

@@ -2,16 +2,13 @@ package com.yumu.hexie.service.sales.impl;
 
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
+import org.hibernate.criterion.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -1102,30 +1099,51 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
      */
     @Transactional
     @Override
-    public void finishRefund(ServiceOrder serviceOrder) {
+    public void finishRefund(ServiceOrder serviceOrder, String productIds) {
 
         log.warn("[finishRefund]refund-begin:" + serviceOrder.getId());
         if (ModelConstant.ORDER_STATUS_REFUNDING == serviceOrder.getStatus() || ModelConstant.ORDER_STATUS_CONFIRM == serviceOrder.getStatus() ||
                 ModelConstant.ORDER_STATUS_PAYED == serviceOrder.getStatus() || ModelConstant.ORDER_STATUS_SENDED == serviceOrder.getStatus()) {
 
             /*1.团购订单处理*/
+            //团购支持部分退款，所以这个需要进行判断；没没全部退主订单的状态不变，只改子订单的状态
+            boolean isAllUpdate = true;
+            int count = serviceOrder.getCount();
             if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
                 RgroupRule rule = (RgroupRule) salePlanService.getService(serviceOrder.getOrderType()).findSalePlan(serviceOrder.getGroupRuleId());
+
+                //根据商品ID查询退的的数量
+                List<String> list = Arrays.asList(productIds.split(","));
+                List<OrderItem> orderItems = orderItemRepository.findByServiceOrderAndProductIdIn(serviceOrder, list);
+                count = 0;
+                for(OrderItem item : orderItems) {
+                    count += item.getCount();
+                    item.setIsRefund(1);
+                    orderItemRepository.save(item);
+                }
                 if (ModelConstant.RGROUP_STAUS_GROUPING == rule.getGroupStatus()) {
-                    rule.setCurrentNum(rule.getCurrentNum() - serviceOrder.getCount());
+                    rule.setCurrentNum(rule.getCurrentNum() - count);
                     cacheableService.save(rule);
+                }
+
+                //这个判断订单是否全部已退
+                List<OrderItem> listNoRefund = orderItemRepository.findByServiceOrderAndIsRefund(serviceOrder, 0);
+                if(listNoRefund.size() > 0) {
+                    isAllUpdate = false;
                 }
             }
             /*2.修改订单状态为已退款*/
-            serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
-            serviceOrder.setRefundDate(new Date());
-            serviceOrderRepository.save(serviceOrder);
+            if(isAllUpdate) {
+                serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
+                serviceOrder.setRefundDate(new Date());
+                serviceOrderRepository.save(serviceOrder);
+            }
 
             /*3.修改已售份数*/
             if (ModelConstant.ORDER_TYPE_SERVICE != serviceOrder.getOrderType()) {
-                productService.saledCount(serviceOrder.getProductId(), serviceOrder.getCount() * -1);
+                productService.saledCount(serviceOrder.getProductId(), count * -1);
                 /*4.修改库存*/
-                redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
+                redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), count);
             }
 
             log.warn("[finishRefund]refund-saved:" + serviceOrder.getId());
@@ -1912,7 +1930,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     }
     
     /**
-	 * 申请退款
+	 * 申请退款(用户使用，只做申请，不做实际退款操作)
 	 * @param user
 	 * @param refundVO
 	 * @throws Exception 
@@ -1929,12 +1947,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	
 		ServiceOrder o = findOne(refundVO.getOrderId());
 		if (user.getId() != o.getUserId()) {
-			throw new BizValidateException("用户 无法进行当前操作");
+			throw new BizValidateException("用户无法进行当前操作");
 		}
 		
 		BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());
-		BigDecimal refunded = new BigDecimal(o.getRefundAmt());
-		BigDecimal total = new BigDecimal(o.getPrice());
+		BigDecimal refunded = BigDecimal.valueOf(o.getRefundAmt());
+		BigDecimal total = BigDecimal.valueOf(o.getPrice());
 		if (refund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
 		}
@@ -1949,23 +1967,74 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
         	throw new BizValidateException("当前订单状态不能进行退款操作");
         }
-        ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
-        serviceOrderRequest.setMemo(memo);
-        serviceOrderRequest.setRefundAmt(refund.toString());
-        serviceOrderRequest.setTradeWaterId(o.getOrderNo());
-        
-        StringBuffer bf = new StringBuffer();
-        for (String itemId : refundVO.getItemList()) {
-			bf.append(itemId).append(",");
-		}
-        serviceOrderRequest.setItems(bf.toString());
-        eshopUtil.requestPartRefund(user, serviceOrderRequest);
+//        ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
+//        serviceOrderRequest.setMemo(memo);
+//        serviceOrderRequest.setRefundAmt(refund.toString());
+//        serviceOrderRequest.setTradeWaterId(o.getOrderNo());
+//
+//        StringBuffer bf = new StringBuffer();
+//        for (String itemId : refundVO.getItemList()) {
+//			bf.append(itemId).append(",");
+//		}
+//        serviceOrderRequest.setItems(bf.toString());
+//        eshopUtil.requestPartRefund(user, serviceOrderRequest);
         
         o.refunding(true, memo);
         o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
         serviceOrderRepository.save(o);
-        commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
+//        commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
 	}
-    
-    
+
+    @Override
+    public void requestRefundByOwner(User user, RefundVO refundVO) throws Exception {
+        log.info("requestRefund : " + refundVO);
+        Assert.hasText(refundVO.getMemo(), "请填写退款描述");
+        ServiceOrder o = findOne(refundVO.getOrderId());
+
+        //退款分为部分退款和全部退款，这个要区分一下，如果全部退款，就不传子订单号
+        StringBuilder bf = new StringBuilder();
+        List<OrderItem> itemListAll = orderItemRepository.findByServiceOrder(o);
+        if(itemListAll.size() != refundVO.getItemList().size()) {
+            //部分退
+            List<OrderItem> itemList = orderItemRepository.findByServiceOrderAndIdIn(o, refundVO.getItemList());
+            for(OrderItem item : itemList) {
+                bf.append(item.getProductId()).append(",");
+            }
+        }
+
+        o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
+
+        if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
+            throw new BizValidateException("当前订单状态不能进行退款操作");
+        }
+
+        BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());
+        BigDecimal refunded = BigDecimal.valueOf(o.getRefundAmt());
+        BigDecimal total = BigDecimal.valueOf(o.getPrice());
+        if (refund.compareTo(total) > 0) {
+            throw new BizValidateException("退款超出订单总金额");
+        }
+        if ((refund.add(refunded)).compareTo(total) > 0) {
+            throw new BizValidateException("退款超出订单总金额");
+        }
+
+        String memo = refundVO.getRefundReason();
+        memo += ";";
+        memo += refundVO.getMemo();
+
+        ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
+        serviceOrderRequest.setMemo(memo);
+        serviceOrderRequest.setRefundAmt(refund.toString());
+        serviceOrderRequest.setTradeWaterId(o.getOrderNo());
+
+        serviceOrderRequest.setItems(bf.toString());
+        eshopUtil.requestPartRefund(user, serviceOrderRequest);
+
+        o.refunding(true, memo);
+        o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
+        serviceOrderRepository.save(o);
+        commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
+    }
+
+
 }
