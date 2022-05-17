@@ -499,15 +499,15 @@ public class OrderController extends BaseController{
 	@ApiOperation(value = "团购创建订单")
 	@RequestMapping(value = "/rgroup/v3/order/create", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<ServiceOrder> createOrder4Rgroup(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req) throws Exception {
+	public BaseResult<JsSign> createOrder4Rgroup(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req) throws Exception {
 		
 		ServiceOrder o = baseOrderService.createOrder4Rgoup(user, req);
 		if(o == null) {
-			return new BaseResult<ServiceOrder>().failMsg("订单提交失败，请稍后重试！");
+			return new BaseResult<JsSign>().failMsg("订单提交失败，请稍后重试！");
 		}
-		String payMethod = "12";	//小程序支付
-		baseOrderService.requestOrderPay(user, o.getId(), payMethod);
-		return new BaseResult<ServiceOrder>().success(o);
+		String payMethod = "14";	//小程序支付
+		JsSign jsSign = baseOrderService.requestOrderPay(user, o.getId(), payMethod);
+		return new BaseResult<JsSign>().success(jsSign);
 	}
 	
 	/**
