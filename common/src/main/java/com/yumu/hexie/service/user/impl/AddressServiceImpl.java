@@ -23,8 +23,12 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.amap.AmapUtil;
 import com.yumu.hexie.integration.amap.req.DataCreateReq;
 import com.yumu.hexie.integration.amap.resp.DataCreateResp;
+import com.yumu.hexie.integration.eshop.resp.RgroupRegionsVO;
+import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.AmapAddress;
 import com.yumu.hexie.model.distribution.region.AmapAddressRepository;
 import com.yumu.hexie.model.distribution.region.City;
@@ -67,6 +71,11 @@ public class AddressServiceImpl implements AddressService {
     private CityRepository cityRepository;
     @Autowired
     private CountyRepository countyRepository;
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
+    @Autowired
+    private EshopUtil eshopUtil;
+    
     @Value("${mainServer}")
     private Boolean mainServer;
     
@@ -97,12 +106,12 @@ public class AddressServiceImpl implements AddressService {
         log.info("添加地址");
         Region xiaoqu;
         Address address = addressReq.getId() == null ||  addressReq.getId()==0 
-                ? new Address() : addressRepository.findById(addressReq.getId()).get();
+                ? new Address() : addressRepository.findById(addressReq.getId().longValue());
         if(StringUtil.isNotEmpty(addressReq.getXiaoquName())) {
             List<Region> xiaoqus = regionRepository.findAllByParentIdAndName(addressReq.getCountyId(),addressReq.getXiaoquName());
             //FIXME 以小区名为准而非小区ID
             if(xiaoqus == null||xiaoqus.size()== 0 ){
-                Region county = regionRepository.findById(addressReq.getCountyId()).get();
+                Region county = regionRepository.findById(addressReq.getCountyId());
                 xiaoqu = new Region(county.getId(), county.getName(), addressReq.getXiaoquName());
                 xiaoqu.setLatitude(0d);
                 xiaoqu.setLongitude(0d);
@@ -112,9 +121,9 @@ public class AddressServiceImpl implements AddressService {
             }
             BeanUtils.copyProperties(addressReq, address);
             address.setXiaoquId(xiaoqu.getId());
-            Region county = regionRepository.findById(address.getCountyId()).get();
-            Region city = regionRepository.findById(county.getParentId()).get();
-            Region province = regionRepository.findById(city.getParentId()).get();
+            Region county = regionRepository.findById(address.getCountyId());
+            Region city = regionRepository.findById(county.getParentId());
+            Region province = regionRepository.findById(city.getParentId());
             address.setCountyId(county.getId());
             address.setCounty(county.getName());
             address.setCity(city.getName());
@@ -133,6 +142,58 @@ public class AddressServiceImpl implements AddressService {
             throw new BizValidateException("地址所在小区信息未填写！");
         }
 
+        return address;
+    }
+    
+    /**
+     * 团购添加地址
+     */
+    @Override
+    @Transactional
+    public Address addAddress4Rgroup(User user, AddressReq addressReq) {
+
+    	log.info("addAddress4Rgroup : " + addressReq);
+    	Address address = new Address();
+    	
+    	Region xiaoqu = null;
+        List<Region> xiaoqus = regionRepository.findAllBySectId(addressReq.getSectId());
+        if(xiaoqus == null||xiaoqus.size()== 0 ){
+        	throw new BizValidateException("未查询到团购所在小区：" + addressReq.getXiaoquName() + "，请确认小区是否开通了团购服务。");
+        } else {
+            xiaoqu = xiaoqus.get(0);
+        }
+        
+        BeanUtils.copyProperties(addressReq, address);
+        address.setXiaoquId(xiaoqu.getId());
+        address.setCountyId(0l);
+        address.setCityId(0l);
+        address.setProvinceId(0l);
+        address.setSectId(Long.valueOf(addressReq.getSectId()));
+        address.setXiaoquAddress(addressReq.getSectAddr());
+        address.setUserName(addressReq.getReceiveName());
+        List<Address> addrs = addressRepository.findAllByUserId(address.getUserId());
+        if(getDefaultAddr(addrs) == null) {
+            address.setMain(true);
+        }
+        addressRepository.save(address);
+        
+        user.setCurrentAddrId(address.getId());
+        user.setProvinceId(address.getProvinceId());
+        user.setProvince(address.getProvince());
+        user.setCity(address.getCity());
+        user.setCityId(address.getCityId());
+        user.setCounty(address.getCounty());
+        user.setCountyId(address.getCountyId());
+        user.setXiaoquId(address.getXiaoquId());
+        user.setXiaoquName(address.getXiaoquName());
+        user.setLatitude(address.getLatitude());
+        user.setLongitude(address.getLongitude());
+        user.setSectId(addressReq.getSectId());
+        user.setCspId(addressReq.getCspId());
+        
+        log.info("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
+        userService.save(user);
+        log.info("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
         return address;
     }
     
@@ -159,7 +220,7 @@ public class AddressServiceImpl implements AddressService {
                     address.getCity()+address.getCounty()+address.getAmapDetailAddr(),
                     address.getCity(), address.getCounty(),address.getAmapDetailAddr());
             DataCreateResp resp = AmapUtil.dataManageDataCreate(req);
-            if(!resp.isSuccess()){
+            if(resp == null || !resp.isSuccess()){
                 String errorMsg = "";
                 try {
                     errorMsg = "req:"+JacksonJsonUtil.beanToJson(req) + "\n\n";
@@ -176,16 +237,18 @@ public class AddressServiceImpl implements AddressService {
                 e.printStackTrace();
             }
             amapAddr = AmapUtil.dataSearchId(resp.get_id());
-            amapAddressRepository.save(amapAddr);
+            if(amapAddr != null) {
+                amapAddressRepository.save(amapAddr);
+            }
         }
         
         if(amapAddr!=null && amapAddr.getLocation()!=null){
-            address = addressRepository.findById(address.getId()).get();
+            address = addressRepository.findById(address.getId());
             address.initAmapInfo(amapAddr);
 
             addressRepository.save(address);
             
-            Region xiaoqu = regionRepository.findById(address.getXiaoquId()).get();
+            Region xiaoqu = regionRepository.findById(address.getXiaoquId());
             if(xiaoqu != null && Math.abs(xiaoqu.getLatitude()) < 0.1) {
                 xiaoqu.setLongitude(address.getLongitude());
                 xiaoqu.setLatitude(address.getLatitude());
@@ -200,7 +263,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public Address configDefaultAddress(User user, long addressId) {
         log.error("设置用户默认地址[0]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + addressId);
-        Address currentAddr = addressRepository.findById(addressId).get();
+        Address currentAddr = addressRepository.findById(addressId);
         if(currentAddr == null) {
             return null;
         }
@@ -238,7 +301,7 @@ public class AddressServiceImpl implements AddressService {
     }
     @Override
     public void deleteAddress(long id, long userId) {
-        Address addr = addressRepository.findById(id).get();
+        Address addr = addressRepository.findById(id);
         if(addr.isMain()) {
             throw new BizValidateException("无法删除默认地址！");
         }
@@ -264,7 +327,7 @@ public class AddressServiceImpl implements AddressService {
     }
     @Override
     public Address queryAddressById(long id) {
-        return addressRepository.findById(id).get();
+        return addressRepository.findById(id);
     }
     
     /** 
@@ -420,6 +483,27 @@ public class AddressServiceImpl implements AddressService {
 	public List<Address> queryBindedAddressByUser(long userId) {
 		return addressRepository.findByUserIdAndBind(userId, true);
 	}
+	
+	/**
+	 * 获取用户当前团购可用的地址
+	 */
+	@Override
+	public List<Address> queryRgroupAddressByUser(long userId, String ruleId) {
+		
+		List<Long> supportRegions = new ArrayList<>();
+		List<RgroupAreaItem> areaItems = rgroupAreaItemRepository.findByRuleId(Long.valueOf(ruleId));
+		for (RgroupAreaItem rgroupAreaItem : areaItems) {
+			supportRegions.add(rgroupAreaItem.getRegionId());
+		}
+		List<Address> availalbe = new ArrayList<>();
+		List<Address> allAddr = addressRepository.findAllByUserId(userId);
+		for (Address address : allAddr) {
+			if (supportRegions.contains(address.getXiaoquId())) {
+				availalbe.add(address);
+			}
+		}
+		return availalbe;
+	}
 
 	@Override
 	public List<Province> queryProvince() {
@@ -440,5 +524,30 @@ public class AddressServiceImpl implements AddressService {
 		return countyRepository.findByCityIdAndStatus(cityId, 0);
 	}
 	
+	/**
+	 * 获取用户当前所在小区的地址
+	 */
+	@Override
+	public List<Address> queryBindedAddressByUserAndRegion(User user) {
+		return addressRepository.findByUserIdAndXiaoquId(user.getId(), user.getXiaoquId());
+	}
 	
+	/**
+	 * 获取团购的小区信息和物业信息
+	 * @param user
+	 * @param rgroupAreas
+	 * @return
+	 * @throws Exception 
+	 */
+	@Override
+	public List<RgroupRegionsVO> querySectInfo(User user, List<RgroupAreaItem> rgroupAreas) throws Exception {
+		
+		StringBuffer bf = new StringBuffer();
+		for (RgroupAreaItem rgroupAreaItem : rgroupAreas) {
+			Region region = regionService.getRegionInfoById(rgroupAreaItem.getRegionId());
+			bf.append(region.getSectId()).append(",");
+		}
+		bf.deleteCharAt(bf.length()-1);
+		return eshopUtil.querySectInfo(user, bf.toString());
+	}
 }

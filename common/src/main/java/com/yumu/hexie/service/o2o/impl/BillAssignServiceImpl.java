@@ -66,9 +66,7 @@ public class BillAssignServiceImpl implements BillAssignService {
             assignRecordRepository.save(rs);
             //FIXME 发送消息
             seeds.add(rs);
-            gotongService.sendRepairAssignMsg(rs.getOperatorId(),order,
-                (int)DistanceUtil.distanceBetween(address.getLatitude(), op.getLatitude(),
-                    address.getLongitude(), op.getLongitude()));
+            gotongService.sendRepairAssignMsg(rs.getOperatorId(),order);
         }
     }
 
@@ -96,11 +94,10 @@ public class BillAssignServiceImpl implements BillAssignService {
     public void deleteAssignedOrder(int type, long orderId) {
         assignRecordRepository.deleteByOrderTypeAndId(type, orderId);
     }
+
     /** 
-     * @param type
-     * @param orderId
+     * @param operatorId
      * @return
-     * @see com.yumu.hexie.service.o2o.BillAssignService#queryAssignItem(int, long)
      */
     @Override
     public List<AssignRecord> queryByOperatorId(long operatorId) {

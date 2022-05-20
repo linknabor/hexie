@@ -13,6 +13,8 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import com.yumu.hexie.service.shequ.NoticeService;
@@ -31,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
+import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 
@@ -49,12 +52,14 @@ import com.yumu.hexie.model.system.BizErrorRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
+import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.CouponService;
+import com.yumu.hexie.service.user.UserNoticeService;
 
 @Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
@@ -91,7 +96,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     private CommunityService communityService;
     @Autowired
     private BizErrorRepository bizErrorRepository;
-
+    @Autowired
+    private RegionRepository regionRepository;
+    @Autowired
+    private UserNoticeService userNoticeService;
+    
     /**
      * 异步发送到账模板消息
      */
@@ -249,8 +258,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         continue;
                     }
 
+                    Region region = regionRepository.findById(serviceOrder.getXiaoquId());
+
                     //给操作员发送发货模板消息
                     NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+                    noticeServiceOperator.setSectId(region.getSectId());
                     noticeServiceOperator.setAddress(serviceOrder.getAddress());
                     noticeServiceOperator.setCreateDate(serviceOrder.getCreateDate());
                     noticeServiceOperator.setReceiverName(serviceOrder.getReceiverName());
@@ -491,8 +503,10 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                         for (ServiceOrder o : orderList) {
 
+                            Region region = regionRepository.findById(o.getXiaoquId());
                             //给操作员发送发货模板消息
                             NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
+                            noticeServiceOperator.setSectId(region.getSectId());
                             noticeServiceOperator.setAddress(o.getAddress());
                             noticeServiceOperator.setCreateDate(o.getCreateDate());
                             noticeServiceOperator.setReceiverName(o.getReceiverName());
@@ -518,12 +532,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                             long agentId = o.getAgentId();
                             logger.info("agentId is : " + agentId);
-                            List<ServiceOperator> opList;
-                            if (agentId > 1) {    //1是默认奈博的，所以跳过
-                                opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
-                            } else {
-                                opList = serviceOperatorRepository.findByType(operType);
-                            }
+                            List<ServiceOperator> opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
+//                            if (agentId > 1) {    //1是默认奈博的，所以跳过
+//                                opList = serviceOperatorRepository.findByTypeAndProductIdAndAgentId(operType, serviceOrder.getProductId(), agentId);
+//                            } else {
+//                                opList = serviceOperatorRepository.findByTypeAndProductId(operType, serviceOrder.getProductId());
+//                            }
                             logger.info("oper list size : " + opList.size());
                             List<Long> list = new ArrayList<>();
                             for (ServiceOperator serviceOperator : opList) {
@@ -597,7 +611,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
 
                 if (!isSuccess) {
-                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_DELIVERY_QUEUE, queue);
+                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_PARTNER_REFUND_QUEUE, queue);
                 }
 
             } catch (Exception e) {
@@ -1039,6 +1053,30 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 ReceiptNotification in = objectMapper.readValue(queue, new TypeReference<ReceiptNotification>() {});
+                String orderId = in.getTradeWaterId();	//交易流水号
+                String appid = in.getAppid();	//判断贵州还是上海
+                
+                String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
+        		String sysSource = "_sh";
+        		if ("_guizhou".equals(userSysCode)) {
+        			sysSource = "_guizhou";
+        		}
+                
+                //查看用户有没有在移动端申请，如果没有，不推送模板消息
+                String key = ModelConstant.KEY_RECEIPT_APPLICATIONF_FLAG + sysSource + ":" +orderId;
+                String pageApplied = redisTemplate.opsForValue().get(key);    //页面申请
+                String applied = in.getApplied();    //公众号是1交易无须申请.其他交易0
+                if (!"1".equals(pageApplied) && !"1".equals(applied)) {    //表示用户没有在移动端申请。扔回队列继续轮，直到用户在移动端申请位置
+
+                    if (System.currentTimeMillis() - Long.parseLong(in.getTimestamp()) > 3600l * 24 * 10 * 1000) {    //超过10天没申请，出队;电子收据理论上不会有这种情况
+                        logger.info("user does not apply 4 invoice .. more than 10 days. will remove from the queue! orderId : " + orderId);
+                    } else {
+                        redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+//							logger.info("user does not apply 4 invoice .. will loop again. orderId: " + orderId);
+                    }
+                    continue;
+                }
+
                 logger.info("start to consume receipt msg queue : " + in);
                 String openid = in.getOpenid();
                 if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
@@ -1086,4 +1124,66 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
             }
         }
     }
+    
+    /**
+     * 团购到货通知
+     */
+    @Override
+    @Async("taskExecutor")
+    public void noticeRgroupArrial() {
+
+        while (true) {
+            try {
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String str = redisTemplate.opsForList().leftPop(ModelConstant.KEY_RGROUP_ARRIVAL_NOTICE_QUEUE, 30, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(str)) {
+                    logger.info("queue str is empty, will skip !");
+                    continue;
+                }
+                
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                QueryRgroupsVO queryRgroupsVO = objectMapper.readValue(str, new TypeReference<QueryRgroupsVO>() {});
+                String ruleId = queryRgroupsVO.getRuleId();		//团购规则id
+                String leaderId = queryRgroupsVO.getUserid();	//团长id
+                
+                logger.info("start to consume noticeRgroupArrial queue : " + queryRgroupsVO);
+                if (StringUtils.isEmpty(ruleId)) {
+                    logger.info("ruleId is null, will skip !");
+                    continue;
+                }
+
+                try {
+            		List<Integer> groupStatus = new ArrayList<>();
+            		groupStatus.add(ModelConstant.RGROUP_STAUS_FINISH);
+            		
+            		List<ServiceOrder> orderList = serviceOrderRepository.findByRGroupAndGroupStatusAndLeaderId(ruleId, leaderId, groupStatus);
+            		if (orderList == null || orderList.isEmpty()) {
+						logger.info("can't find orders, will skip . ruleId : " + ruleId);
+					}
+            		for (ServiceOrder serviceOrder : orderList) {
+//            			if (ModelConstant.ORDER_STATUS_SENDED == serviceOrder.getStatus()) {
+//            				logger.info("order sended, will skip !");
+//            				continue;
+//						}
+            			if (ModelConstant.ORDER_STATUS_RECEIVED == serviceOrder.getStatus()) {
+            				logger.info("order received, will skip !");
+            				continue;
+						}
+            			userNoticeService.groupArriaval(serviceOrder);
+            			
+            		}
+
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
 }

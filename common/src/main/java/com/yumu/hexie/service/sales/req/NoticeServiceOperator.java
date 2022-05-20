@@ -28,6 +28,7 @@ public class NoticeServiceOperator implements Serializable {
     private long subType;	//子类，对于自定义服务列说，有子类
     private String subTypeName;	//子类中文名称
 
+    private String sectId;
     public NoticeServiceOperator() {
 
     }
@@ -120,6 +121,14 @@ public class NoticeServiceOperator implements Serializable {
         this.orderNo = orderNo;
     }
 
+    public String getSectId() {
+        return sectId;
+    }
+
+    public void setSectId(String sectId) {
+        this.sectId = sectId;
+    }
+
     @Override
     public String toString() {
         return "NoticeServiceOperator{" +
@@ -134,6 +143,7 @@ public class NoticeServiceOperator implements Serializable {
                 ", tel='" + tel + '\'' +
                 ", subType=" + subType +
                 ", subTypeName='" + subTypeName + '\'' +
+                ", sectId='" + sectId + '\'' +
                 '}';
     }
 }

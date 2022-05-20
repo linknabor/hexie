@@ -72,6 +72,22 @@
 				<profileActive>prod</profileActive>
 			</properties>
 		</profile>
+
+		<!-- 腾讯云测试环境 -->
+		<profile>
+			<id>ttest</id>
+			<properties>
+				<profileActive>ttest</profileActive>
+			</properties>
+		</profile>
+
+		<!-- 腾讯云环境 -->
+		<profile>
+			<id>tprod</id>
+			<properties>
+				<profileActive>tprod</profileActive>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>

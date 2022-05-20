@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
-import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.service.sales.CacheableService;
@@ -23,9 +22,6 @@ public class CacheableServiceImpl implements CacheableService {
 	@Inject
 	protected ProductRepository productRepository;
 	
-	@Inject
-	protected RgroupAreaItemRepository rgroupAreaItemRepository;
-	
 	//@Cacheable(value = "rgroupRule", key = "#ruleId.toString()")
 	public RgroupRule findRgroupRule(long ruleId) {
 		log.error("RgroupServiceImpl#findSalePlan#"+ruleId);
@@ -35,7 +31,7 @@ public class CacheableServiceImpl implements CacheableService {
 	public RgroupRule save(RgroupRule rgroupRule){
 		log.error("RgroupServiceImpl#save#"+rgroupRule.getId());
 		if(rgroupRule.getOriPrice()<=0){
-			Product p = productRepository.findById(rgroupRule.getProductId()).get();
+			Product p = productRepository.findById(rgroupRule.getProductId());
 			rgroupRule.fillProductInfo(p);
 		}
 		rgroupRule = rgroupRuleRepository.save(rgroupRule);

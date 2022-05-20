@@ -18,11 +18,12 @@ import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CartService;
+import org.springframework.util.StringUtils;
 
 @Service
 public class CartServiceImpl implements CartService {
 	
-	private static Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
+	private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
 	
 	@Autowired
 	private RedisRepository redisRepository;
@@ -46,7 +47,10 @@ public class CartServiceImpl implements CartService {
 		if (cart == null) {
 			cart = new Cart();
 		}
-		cart.add(orderItem, productRule, Integer.valueOf(stock));
+		if(StringUtils.isEmpty(stock)) {
+			throw new BizValidateException("商品库存为空，productId：" + productRule.getProductId());
+		}
+		cart.add(orderItem, productRule, Integer.parseInt(stock));
 		redisRepository.setCart(cartKey, cart);
 		return cart.getTotalCount();
 	
@@ -83,8 +87,7 @@ public class CartServiceImpl implements CartService {
 		
 		String cartKey = Keys.uidCardKey(user.getId());
 		Cart cart = redisRepository.getCart(cartKey);
-		if (cart == null) {
-		}else {
+		if (cart != null) {
 			cart.clear();
 			redisRepository.setCart(cartKey, cart);
 		}
@@ -95,8 +98,7 @@ public class CartServiceImpl implements CartService {
 	public Cart getCart(User user){
 		
 		String cartKey = Keys.uidCardKey(user.getId());
-		Cart cart = redisRepository.getCart(cartKey);
-		return cart;
+		return redisRepository.getCart(cartKey);
 	}
 
 	

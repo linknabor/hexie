@@ -16,47 +16,24 @@ public class SaveOperVO implements Serializable {
 	private Long serviceId;
 	private List<Oper> opers;
 	private String agentNo;
+	private String agentName;
 
 	public static class Oper {
 		
-		private long id;
 		private String name;
-		@JsonProperty("openid")
-		private String openId;
-		private String tel;
-		private int type;
 		@JsonProperty("userid")
 		private long userId;
-		
-		public long getId() {
-			return id;
-		}
-		public void setId(long id) {
-			this.id = id;
-		}
+		private long regionId;
+		@JsonProperty("groupAddr")
+		private String leaderAddr;
+		private String leaderOpenid;
+		private String mobile;
+
 		public String getName() {
 			return name;
 		}
 		public void setName(String name) {
 			this.name = name;
-		}
-		public String getOpenId() {
-			return openId;
-		}
-		public void setOpenId(String openId) {
-			this.openId = openId;
-		}
-		public String getTel() {
-			return tel;
-		}
-		public void setTel(String tel) {
-			this.tel = tel;
-		}
-		public int getType() {
-			return type;
-		}
-		public void setType(int type) {
-			this.type = type;
 		}
 		public long getUserId() {
 			return userId;
@@ -64,12 +41,35 @@ public class SaveOperVO implements Serializable {
 		public void setUserId(long userId) {
 			this.userId = userId;
 		}
+		public long getRegionId() {
+			return regionId;
+		}
+		public void setRegionId(long regionId) {
+			this.regionId = regionId;
+		}
+		public String getMobile() {
+			return mobile;
+		}
+		public void setMobile(String mobile) {
+			this.mobile = mobile;
+		}
+		public String getLeaderAddr() {
+			return leaderAddr;
+		}
+		public void setLeaderAddr(String leaderAddr) {
+			this.leaderAddr = leaderAddr;
+		}
+		public String getLeaderOpenid() {
+			return leaderOpenid;
+		}
+		public void setLeaderOpenid(String leaderOpenid) {
+			this.leaderOpenid = leaderOpenid;
+		}
 		@Override
 		public String toString() {
-			return "Oper [id=" + id + ", name=" + name + ", openId=" + openId + ", tel=" + tel + ", type=" + type
-					+ ", userId=" + userId;
+			return "Oper [name=" + name + ", userId=" + userId + ", regionId=" + regionId + ", leaderAddr=" + leaderAddr
+					+ ", leaderOpenid=" + leaderOpenid + ", mobile=" + mobile + "]";
 		}
-		
 		
 	}
 	
@@ -97,10 +97,18 @@ public class SaveOperVO implements Serializable {
 	public void setAgentNo(String agentNo) {
 		this.agentNo = agentNo;
 	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
 	@Override
 	public String toString() {
 		return "SaveOperVO [operatorType=" + operatorType + ", serviceId=" + serviceId + ", opers=" + opers
-				+ ", agentNo=" + agentNo + "]";
+				+ ", agentNo=" + agentNo + ", agentName=" + agentName + "]";
 	}
 	
 	

@@ -59,7 +59,15 @@ public class Address  extends BaseModel{
 				||province.indexOf("天津")>=0){
 			province = "";
 		}
-		return province+getCity()+ getCounty()+getXiaoquName();
+		String city = getCity();
+		if (StringUtil.isEmpty(city)) {
+			city = "";
+		}
+		String county = getCounty();
+		if (StringUtil.isEmpty(county)) {
+			county = "";
+		}
+		return province + city + county + getXiaoquName();
 	}
 	public long getUserId() {
 		return userId;

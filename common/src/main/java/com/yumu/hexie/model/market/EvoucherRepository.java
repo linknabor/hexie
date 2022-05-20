@@ -34,21 +34,31 @@ public interface EvoucherRepository extends JpaRepository<Evoucher, Long> {
 	
 	List<Evoucher> findByOrderIdAndStatus(long orderId, int status);
 	
-	@Query(value = "select e.* from evoucher e where productId > 0 and status > 0 "
+	@Query(value = "select distinct e.* from evoucher e "
+			+ "left join serviceOperatorItem s on e.productId = s.serviceId "
+			+ "left join onSaleAreaItem o on e.productId = o.productId "
+			+ "where e.productId > 0 and e.status > 0 "
 			+ "and IF (?1!='', e.status = ?1, 1=1) "
 			+ "and IF (?2!='', e.tel = ?2, 1=1) "
 			+ "and IF (?3!='', e.agentNo = ?3, 1=1) "
 			+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) "
 			+ "and IF (?5!='', e.type = ?5, 1=1) "
+			+ "and IF (?6!='', s.operatorId = ?6, 1=1) "
+			+ "and IF (?7 is not null, o.regionId in (?7), 1=1) "
 			, nativeQuery = true
-			, countQuery = "select count(1) as counts from evoucher e where productId >0 and status >0 "
+			, countQuery = "select count(distinct e.id) as counts from evoucher e "
+				+ "left join serviceOperatorItem s on e.productId = s.serviceId "
+				+ "left join onSaleAreaItem o on e.productId = o.productId "
+				+"where productId >0 and status >0 "
 				+ "and IF (?1!='', e.status = ?1, 1=1) "
 				+ "and IF (?2!='', e.tel = ?2, 1=1) "
 				+ "and IF (?3!='', e.agentNo = ?3, 1=1) "
 				+ "and IF (?4!='', e.agentName like CONCAT('%',?4,'%'), 1=1) " 
 				+ "and IF (?5!='', e.type = ?5, 1=1) "
+				+ "and IF (?6!='', s.operatorId = ?6, 1=1) "
+				+ "and IF (?7 is not null, o.regionId in (?7), 1=1) "
 			)
-	Page<Evoucher> findByMultipleConditions(String status, String tel, String agentNo, String agentName, String type, Pageable pageable);
+	Page<Evoucher> findByMultipleConditions(String status, String tel, String agentNo, String agentName, String type, String userId, List<String> listSect, Pageable pageable);
 	
 	@Query(value = "select e.* from evoucher e where UNIX_TIMESTAMP(endDate) < ?1 and status = ?2 ", nativeQuery = true)
 	List<Evoucher> findTimeoutEvouchers(long current, int status);

@@ -10,10 +10,10 @@ import org.springframework.data.jpa.repository.Query;
 import com.yumu.hexie.model.localservice.HomeServiceConstant;
 
 public interface YunXiyiBillRepository extends JpaRepository<YunXiyiBill, Long> {
-
-    public Page<YunXiyiBill> findByUserId(long userId, Pageable page);
+    YunXiyiBill findById(long id);
+    Page<YunXiyiBill> findByUserId(long userId, Pageable page);
     
     @Query("From YunXiyiBill b where b.status = " + HomeServiceConstant.ORDER_STATUS_CREATE
         +" AND b.createDate < ?1")
-    public List<YunXiyiBill> findTimeoutBill(long latestTime);
+    List<YunXiyiBill> findTimeoutBill(long latestTime);
 }

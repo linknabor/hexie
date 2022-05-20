@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -39,6 +38,8 @@ import com.yumu.hexie.model.commonsupport.comment.Comment;
 import com.yumu.hexie.model.commonsupport.comment.CommentConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.City;
 import com.yumu.hexie.model.distribution.region.CityRepository;
 import com.yumu.hexie.model.distribution.region.County;
@@ -149,6 +150,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     private CacheableService cacheableService;
     @Autowired
     private PartnerService partnerService;
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
 
 
     private void preOrderCreate(ServiceOrder order, Address address) {
@@ -170,10 +173,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     agentId = product.getAgentId();
                 }
             }
-            Agent agent = new Agent();
-            Optional<Agent> optional = agentRepository.findById(agentId);
-            if (optional.isPresent()) {
-                agent = optional.get();
+            Agent agent = agentRepository.findById(agentId);
+            if (agent != null) {
                 item.setAgentId(agent.getId());
                 item.setAgentName(agent.getName());
                 item.setAgentNo(agent.getAgentNo());
@@ -181,8 +182,23 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
             if (StringUtils.isEmpty(order.getProductName())) {
                 order.fillProductInfo(product);
-                order.fillAgentInfo(agent);
+                if(agent != null) {
+                    order.fillAgentInfo(agent);
+                }
                 order.setGroupRuleId(plan.getId());
+            }
+            
+            //填充团长信息
+            if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+            	List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByProductIdAndRegionId(product.getId(), address.getXiaoquId());
+            	if(areaList!=null && areaList.size()>0) {
+            		RgroupAreaItem areaItem = areaList.get(0);
+            		order.setGroupLeader(areaItem.getAreaLeader());
+            		order.setGroupLeaderAddr(areaItem.getAreaLeaderAddr());
+            		order.setGroupLeaderId(areaItem.getAreaLeaderId());
+            		order.setGroupLeaderTel(areaItem.getAreaLeaderTel());
+            	}
+            	
             }
         }
         computePrice(order);
@@ -491,9 +507,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 request.setCouponAmt(String.valueOf(order.getCouponAmount()));
             }
 
-            Optional<Agent> optional = agentRepository.findById(order.getAgentId());
-            if (optional.isPresent()) {
-                Agent agent = optional.get();
+            Agent agent = agentRepository.findById(order.getAgentId());
+            if (agent != null) {
                 request.setAgentNo(agent.getAgentNo());
                 String agentName = agent.getName();
                 if (!StringUtils.isEmpty(agentName)) {
@@ -505,7 +520,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
             List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
             List<SubOrder> subOrderList = new ArrayList<>(itemList.size());
-            log.error("itemList ::::::" + itemList);
             for (OrderItem orderItem : itemList) {
                 SubOrder subOrder = new SubOrder();
                 String subAgentName = orderItem.getAgentName();
@@ -527,8 +541,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 subOrderList.add(subOrder);
             }
 
-            log.error("subOrderList ::::::" + subOrderList);
-
             if (order.getCouponId() != null && order.getCouponId() > 0) {
                 SubOrder subOrder = subOrderList.get(0);
                 if (subOrder != null) {
@@ -538,8 +550,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
 
             request.setSubOrders(subOrderList);
-
-            log.error("request ::::::" + request);
 
             CommonPayResponse responseVo = eshopUtil.requestPay(user, request);
             sign = new JsSign();
@@ -634,10 +644,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         User user = userService.getById(o.getUserId());
         request.setUserId(user.getWuyeId());
         request.setAppid(user.getAppId());
-        Optional<Region> optional = regionRepository.findById(o.getXiaoquId());
-        Region region;
-        if (optional.isPresent()) {
-            region = optional.get();
+        Region region = regionRepository.findById(o.getXiaoquId());
+        if (region != null) {
             request.setSectId(region.getSectId());
         }
         if (StringUtils.isEmpty(request.getSectId())) {
@@ -670,9 +678,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         request.setServiceName(productName);
         request.setOrderType(String.valueOf(o.getOrderType()));
 
-        Optional<Agent> opAgent = agentRepository.findById(o.getAgentId());
-        if (optional.isPresent()) {
-            Agent agent = opAgent.get();
+        Agent agent = agentRepository.findById(o.getAgentId());
+        if (agent != null) {
             request.setAgentNo(agent.getAgentNo());
             String agentName = agent.getName();
             if (!StringUtils.isEmpty(agentName)) {
@@ -780,11 +787,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             throw new BizValidateException(order.getId(), "该订单不能取消！").setError();
         }
         //2. 取消支付单
-        if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() || ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()
-                || ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType() || ModelConstant.ORDER_TYPE_SAASSALE == order.getOrderType()
-                || ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() || ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
-            //do nothing
-        } else {
+        if (!(ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_SAASSALE == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType())) {
             paymentService.cancelPayment(PaymentConstant.TYPE_MARKET_ORDER, order.getId());
             log.warn("[cancelOrder]payment:" + order.getId());
         }
@@ -849,12 +857,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             User user = userService.getById(order.getUserId());
             eshopUtil.requestRefund(user, order.getOrderNo());
             order.refunding(true);
-        } else if (ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType() ||
-                ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType() ||
-                ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType() ||
-                ModelConstant.ORDER_TYPE_SAASSALE == order.getOrderType() ||
-                ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType()) {
-        } else {
+        } else if (!(ModelConstant.ORDER_TYPE_EVOUCHER == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_PROMOTION == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_SAASSALE == order.getOrderType()
+                || ModelConstant.ORDER_TYPE_SERVICE == order.getOrderType())) {
             PaymentOrder po = paymentService.fetchPaymentOrder(order);
             if (paymentService.refundApply(po)) {
                 //FIXME 支付单直接从支付成功到已退款状态  po.setStatus(ModelConstant.PAYMENT_STATUS_REFUND);
@@ -1001,7 +1008,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
         OperatorDefinition operatorDefinition = operatorService.defineOperator(user);
         log.info("getOrderDetail op : " + operatorDefinition);
-        if (user.getId() != order.getUserId()) {
+        if (order != null && user.getId() != order.getUserId()) {
             if (ModelConstant.ORDER_TYPE_ONSALE == order.getOrderType()) {
                 if (!operatorDefinition.isOnsaleTaker()) {
                     throw new BizValidateException("当前用户没有权限查看此订单。");
@@ -1011,7 +1018,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     throw new BizValidateException("当前用户没有权限查看此订单。");
                 }
             }
-
         }
         return itemList;
 
@@ -1100,6 +1106,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             singleItemOrder.setServiceAddressId(address.getId());
             singleItemOrder.setUserId(user.getId());
             serviceOrder = createOrder(singleItemOrder);
+        }
+        if(serviceOrder == null) {
+            throw new BizValidateException("订单不存在。");
         }
         return requestPay(serviceOrder);
 
@@ -1284,7 +1293,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
         User currUser = userService.getById(user.getId());
         List<ServiceOrder> orderList = queryPromotionOrder(currUser, statusList, typeList);
-        Long addressId = null;
+        long addressId = 0;
         if (!orderList.isEmpty()) {
             ServiceOrder paidOrder = orderList.get(0);
             addressId = paidOrder.getServiceAddressId();
@@ -1370,10 +1379,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 oList.add(orderItem);
             }
 
-
             String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + productRule.getProductId());
             String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + productRule.getProductId());
-
+            if(StringUtils.isEmpty(stock) || StringUtils.isEmpty(freeze)) {
+                throw new BizValidateException("抱歉，商品[" + productRule.getName() + "]没有库存啦。");
+            }
             int canSale = Integer.parseInt(stock) - Integer.parseInt(freeze);
             if (canSale <= 0) {
                 throw new BizValidateException("抱歉，商品[" + productRule.getName() + "]没有库存啦。");
@@ -1381,7 +1391,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             if (canSale < orderItem.getCount()) {
                 throw new BizValidateException("抱歉，商品[" + productRule.getName() + "]仅剩" + canSale + "件，请减少购买件数。");
             }
-
         }
 
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -1441,13 +1450,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     order.setStatus(ModelConstant.ORDER_STATUS_PAYED);
                     order.setConfirmDate(date);
                     order.setPayDate(date);
-//					serviceOrderRepository.save(order);
                     salePlanService.getService(order.getOrderType()).postPaySuccess(order);    //修改orderItems
 
-                    //发送模板消息和短信
-//                    userNoticeService.orderSuccess(order.getUserId(), order.getTel(),
-//                            order.getId(), order.getOrderNo(), order.getProductName(), order.getPrice());
-
+                    //发送模板消息
                     String token = systemconfigservice.queryWXAToken(user.getAppId());
                     templateMsgService.sendOrderSuccessMsg(user, order, token);
 
@@ -1482,10 +1487,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 }
 
                 if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
-                    //发送模板消息和短信
-//                    userNoticeService.orderSuccess(serviceOrder.getUserId(), serviceOrder.getTel(),
-//                            serviceOrder.getId(), serviceOrder.getOrderNo(), serviceOrder.getProductName(), serviceOrder.getPrice());
-
+                    //发送模板消息
                     String token = systemconfigservice.queryWXAToken(user.getAppId());
                     templateMsgService.sendOrderSuccessMsg(user, serviceOrder, token);
 
@@ -1519,9 +1521,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         if (ModelConstant.ORDER_TYPE_SERVICE == serviceOrder.getOrderType()) {
 
             if (StringUtils.isEmpty(serviceOrder.getPayDate())) {
-                if (ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
-                    //do nothing
-                } else if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
+                if (ModelConstant.ORDER_STATUS_ACCEPTED == serviceOrder.getStatus()) {
                     serviceOrder.setStatus(ModelConstant.ORDER_STATUS_PAYED);
                 }
                 serviceOrder.setPayDate(new Date());
@@ -1562,6 +1562,4 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
         }
     }
-
-
 }

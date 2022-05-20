@@ -27,6 +27,7 @@ public class RgroupRule extends SalePlan {
 	private String ownerImg;
 	/** 售卖情况 */
 	
+	private long groupFinishDate;	//成团日期
 
 	@Transient
 	@JsonIgnore
@@ -121,7 +122,16 @@ public class RgroupRule extends SalePlan {
 
 	public void setProductType(int productType) {
 		this.productType = productType;
-}
+	}
+
+	public long getGroupFinishDate() {
+		return groupFinishDate;
+	}
+
+	public void setGroupFinishDate(long groupFinishDate) {
+		this.groupFinishDate = groupFinishDate;
+	}
+
 	
 
 }

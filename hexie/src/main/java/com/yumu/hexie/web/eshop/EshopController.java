@@ -3,25 +3,15 @@ package com.yumu.hexie.web.eshop;
 import java.util.Map;
 
 import com.yumu.hexie.integration.eshop.resp.OrderDetailResp;
+import com.yumu.hexie.integration.eshop.vo.*;
 import com.yumu.hexie.service.eshop.EvoucherService;
+import com.yumu.hexie.web.BaseResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.yumu.hexie.integration.common.CommonResponse;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.QueryCouponVO;
-import com.yumu.hexie.integration.eshop.vo.QueryEvoucherVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOperVO;
-import com.yumu.hexie.integration.eshop.vo.QueryOrderVO;
-import com.yumu.hexie.integration.eshop.vo.QueryProductVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCategoryVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponCfgVO;
-import com.yumu.hexie.integration.eshop.vo.SaveCouponVO;
-import com.yumu.hexie.integration.eshop.vo.SaveLogisticsVO;
-import com.yumu.hexie.integration.eshop.vo.SaveOperVO;
-import com.yumu.hexie.integration.eshop.vo.SaveProductVO;
 import com.yumu.hexie.service.eshop.EshopSerivce;
 import com.yumu.hexie.web.BaseController;
 
@@ -29,13 +19,12 @@ import com.yumu.hexie.web.BaseController;
  * 商城
  * @author david
  *
- * @param <T>
  */
 @RestController
 @RequestMapping(value = "/eshop")
-public class EshopController<T> extends BaseController {
+public class EshopController extends BaseController {
 
-	private static Logger logger = LoggerFactory.getLogger(EshopController.class);
+	private static final Logger logger = LoggerFactory.getLogger(EshopController.class);
 
 	@Autowired
 	private EshopSerivce eshopSerivce;
@@ -58,24 +47,34 @@ public class EshopController<T> extends BaseController {
 		return eshopSerivce.getProductById(queryProductVO);
 		
 	}
-	
+
 	@RequestMapping(value = "/product/save", method = RequestMethod.POST)
 	public CommonResponse<String> saveProduct(@RequestBody SaveProductVO saveProductVO) throws Exception{
 		
-		logger.info("saveProductVO : " + saveProductVO);
-		eshopSerivce.saveProduct(saveProductVO);
 		CommonResponse<String> commonResponse = new CommonResponse<>();
-		commonResponse.setResult("00");
+		try {
+			logger.info("saveProductVO : " + saveProductVO);
+			eshopSerivce.saveProduct(saveProductVO);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
 		return commonResponse;
 	}
 	
 	@RequestMapping(value = "/product/updateStatus", method = RequestMethod.POST)
 	public CommonResponse<String> updateStatus(@RequestBody SaveProductVO saveProductVO) throws Exception{
 		
-		logger.info("updateStatus : " + saveProductVO);
-		eshopSerivce.updateStatus(saveProductVO);
 		CommonResponse<String> commonResponse = new CommonResponse<>();
-		commonResponse.setResult("00");
+		try {
+			logger.info("updateStatus : " + saveProductVO);
+			eshopSerivce.updateStatus(saveProductVO);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
 		return commonResponse;
 	}
 	
@@ -101,6 +100,19 @@ public class EshopController<T> extends BaseController {
 		return eshopSerivce.getOper(queryOperVO);
 		
 	}
+	
+	/**
+	 * 查询团购商品涉及的小区和团长
+	 * @param queryProductVO
+	 * @return
+	 */
+	@RequestMapping(value = "/operator/rGroupLeader", method = RequestMethod.POST)
+	public CommonResponse<Object> getRgroupLeader(@RequestBody QueryOperVO queryOperVO) {
+
+		logger.info("getRgroupLeader : " + queryOperVO);
+		return eshopSerivce.getRgroupLeader(queryOperVO);
+
+	}
 
 	/**
 	 * 保存服务人员信息
@@ -112,6 +124,22 @@ public class EshopController<T> extends BaseController {
 		
 		logger.info("saveOperVO : " + saveOperVO);
 		eshopSerivce.saveOper(saveOperVO);
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		commonResponse.setResult("00");
+		return commonResponse;
+		
+	}
+	
+	/**
+	 * 保存服务人员信息
+	 * @param saveOperVO
+	 * @return
+	 */
+	@RequestMapping(value = "/rGroupLeader/save", method = RequestMethod.POST)
+	public CommonResponse<String> saveRgroupLeader(@RequestBody SaveOperVO saveOperVO){
+		
+		logger.info("saveRgroupLeader : " + saveOperVO);
+		eshopSerivce.saveRgroupLeader(saveOperVO);
 		CommonResponse<String> commonResponse = new CommonResponse<>();
 		commonResponse.setResult("00");
 		return commonResponse;
@@ -184,8 +212,7 @@ public class EshopController<T> extends BaseController {
 	public CommonResponse<Object> getCategory(@RequestBody(required = false) Map<String, String> map){
 		
 		logger.info("getCategory, id : " + map);
-		CommonResponse<Object> commonResponse = eshopSerivce.getCategory(map.get("id"));
-		return commonResponse;
+		return eshopSerivce.getCategory(map.get("id"));
 	}
 	
 	/**
@@ -212,7 +239,18 @@ public class EshopController<T> extends BaseController {
 		logger.info("genQrCode, id : " + map);
 		return eshopSerivce.genPromotionQrCode(map);
 	}
-	
+
+	/**
+	 * 查询当日订单数
+	 * @return
+	 */
+	@RequestMapping(value = "/order/summary", method = RequestMethod.POST)
+	public BaseResult<String> getOrderSummary(@RequestBody OrderSummaryVO orderSummaryVO){
+
+		logger.info("orderSummaryVO : " + orderSummaryVO);
+		String str = eshopSerivce.getOrderSummary(orderSummaryVO);
+		return new BaseResult<String>().success(str);
+	}
 	/**
 	 * 查询订单
 	 * @return
@@ -288,8 +326,7 @@ public class EshopController<T> extends BaseController {
 	public CommonResponse<Object> getSupportProduct(@RequestBody QueryProductVO queryProductVO){
 		
 		logger.info("getSupportProduct : " + queryProductVO);
-		CommonResponse<Object> commonResponse = eshopSerivce.getSupportProduct(queryProductVO);
-		return commonResponse;
+		return eshopSerivce.getSupportProduct(queryProductVO);
 	
 	}
 	
@@ -330,8 +367,7 @@ public class EshopController<T> extends BaseController {
 	public CommonResponse<Object> saveCoupon(@RequestBody SaveCouponVO saveCouponVO){
 		
 		logger.info("saveCouponVO : " + saveCouponVO);
-		CommonResponse<Object> commonResponse = eshopSerivce.saveCoupon(saveCouponVO);
-		return commonResponse;
+		return eshopSerivce.saveCoupon(saveCouponVO);
 	}
 
 	/**
@@ -351,6 +387,60 @@ public class EshopController<T> extends BaseController {
 		} catch (Exception e) {
 			commonResponse.setErrMsg(e.getMessage());
 			commonResponse.setResult("99");
+		}
+		return commonResponse;
+	}
+	
+	/**
+	 * 团购发货和未发货的订单
+	 * @return
+	 */
+	@RequestMapping(value = "/order/rgroups/delivery", method = RequestMethod.POST)
+	public CommonResponse<Object> getRgroupOrders(@RequestBody QueryOrderVO queryOrderVO){
+		
+		logger.info("queryOrderVO : " + queryOrderVO);
+		return eshopSerivce.getRgroupOrders(queryOrderVO);
+	}
+	
+	/**
+	 * 团购发货和未发货的订单
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups", method = RequestMethod.POST)
+	public CommonResponse<Object> getRgroups(@RequestBody QueryRgroupsVO queryRgroupsVO){
+		
+		logger.info("queryRgroupsVO : " + queryRgroupsVO);
+		return eshopSerivce.getRgroups(queryRgroupsVO);
+	}
+	
+	/**
+	 * 团购发货和未发货的订单
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/detail", method = RequestMethod.POST)
+	public CommonResponse<Object> getRgroupDetail(@RequestBody QueryRgroupsVO queryRgroupsVO){
+		
+		logger.info("queryRgroupsVO : " + queryRgroupsVO);
+		return eshopSerivce.getRroupDetail(queryRgroupsVO);
+	}
+	
+	/**
+	 * 复制团购
+	 * @param saveProductVO
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/copyRgroup", method = RequestMethod.POST)
+	public CommonResponse<String> saveCopyRgroup(@RequestBody SaveCopyRgroupVo saveCopyRgroupVo) throws Exception{
+		
+		CommonResponse<String> commonResponse = new CommonResponse<>();
+		try {
+			logger.info("saveCopyRgroupVo : " + saveCopyRgroupVo);
+			eshopSerivce.saveCopyRgroup(saveCopyRgroupVo);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
 		}
 		return commonResponse;
 	}

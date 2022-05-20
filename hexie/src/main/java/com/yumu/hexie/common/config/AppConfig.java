@@ -51,7 +51,7 @@ public class AppConfig {
 		factory.setPort(86);
 		factory.addConnectorCustomizers(new AppTomcatConnectorCustomizer());
 		if (!Boolean.TRUE.equals(testMode)) {
-        	factory.addAdditionalTomcatConnectors(createSslConnector());
+        	//factory.addAdditionalTomcatConnectors(createSslConnector());
 		}
 		return factory;
 	}

@@ -84,7 +84,7 @@ public class EvoucherServiceImpl implements EvoucherService {
 		if (ModelConstant.ORDER_TYPE_EVOUCHER != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType()) {
 			return;
 		}
-		Product product = productRepository.findById(serviceOrder.getProductId()).get();
+		Product product = productRepository.findById(serviceOrder.getProductId());
 		for (int i = 0; i < serviceOrder.getCount(); i++) {
 			
 			Evoucher evoucher = new Evoucher();
@@ -188,19 +188,17 @@ public class EvoucherServiceImpl implements EvoucherService {
 		Evoucher e = evoucherRepository.findByCode(code);
 		long agentId = e.getAgentId();
 		
-		List<ServiceOperator> opList;
+		ServiceOperator serviceOperator = null;
 		if (agentId == 1) {	//奈博自己发的核销券
-			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
+			serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId());
 		}else {	//代理商、合伙人发的和小小去按
-			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId(), agentId);
+			serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, operator.getId(), agentId);
 		}
 		
-		if (opList == null || opList.isEmpty()) {
+		if (serviceOperator == null ) {
 			logger.warn("用户不能进行当前操作。用户id: " + operator.getId());
 			throw new BizValidateException("您没有权限核销该券码，请确认该券码详细信息。");
 		}
-		
-		ServiceOperator serviceOperator = opList.get(0);
 		ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), e.getProductId());
 		if (serviceOperatorItem == null) {
 			logger.warn("用户不能进行当前操作。用户id: " + operator.getId());
@@ -258,19 +256,17 @@ public class EvoucherServiceImpl implements EvoucherService {
 		Evoucher e = evoucherRepository.findByCode(code);
 		long agentId = e.getAgentId();
 
-		List<ServiceOperator> opList;
+		ServiceOperator serviceOperator = null;
 		if (agentId == 1) {	//奈博自己发的核销券
-			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, Long.parseLong(userId));
+			serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentIdIsNull(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, Long.parseLong(userId));
 		}else {	//代理商、合伙人发的和小小去按
-			opList = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, Long.parseLong(userId), agentId);
+			serviceOperator = serviceOperatorRepository.findByTypeAndUserIdAndAgentId(ModelConstant.SERVICE_OPER_TYPE_EVOUCHER, Long.parseLong(userId), agentId);
 		}
 
-		if (opList == null || opList.isEmpty()) {
+		if (serviceOperator == null) {
 			logger.warn("用户不能进行当前操作。用户id: " + userId);
 			throw new BizValidateException("您没有权限核销该券码，请确认该券码详细信息。");
 		}
-
-		ServiceOperator serviceOperator = opList.get(0);
 		ServiceOperatorItem serviceOperatorItem = serviceOperatorItemRepository.findByOperatorIdAndServiceId(serviceOperator.getId(), e.getProductId());
 		if (serviceOperatorItem == null) {
 			logger.warn("用户不能进行当前操作。用户id: " + userId);
@@ -320,10 +316,11 @@ public class EvoucherServiceImpl implements EvoucherService {
 		Assert.hasText(code, "核销券码不能为空。");
 		logger.info("code is : " + code);
 		Evoucher evoucher =  evoucherRepository.findByCode(code);
-		List<Evoucher> list = new ArrayList<>();
-		if (evoucher!=null) {
-			list = evoucherRepository.findByOrderId(evoucher.getOrderId());
+		if(evoucher == null) {
+			throw new BizValidateException("核销券码不正确。");
 		}
+		List<Evoucher> list = evoucherRepository.findByOrderId(evoucher.getOrderId());
+
 		String qrCodeUrl = EVOUCHER_QRCODE_URL;
 		if (ModelConstant.EVOUCHER_TYPE_PROMOTION == evoucher.getType()) {
 			

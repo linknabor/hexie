@@ -118,6 +118,9 @@ public class ModelConstant {
 	public static final int RGROUP_STAUS_GROUPING = 1;
 	public static final int RGROUP_STAUS_FINISH = 2;
 	public static final int RGROUP_STAUS_CANCEL = 3;
+	public static final int RGROUP_STAUS_DELIVERING = 4;	//发货中
+	public static final int RGROUP_STAUS_DELIVERED = 5;	//发货完成
+	
 	//用户状态
 	//0.初始化  1.绑定手机 2.设定小区 3.绑定房产 4.禁止
 	public static final int USER_STATUS_INIT = 0;
@@ -311,6 +314,7 @@ public class ModelConstant {
 	public static final int NOTICE_SUB_TYPE_GROUPSUCCESS = 1;
 	public static final int NOTICE_SUB_TYPE_GROUPFAIL = 2;
 	public static final int NOTICE_SUB_TYPE_GROUPNOTIFY = 3;
+	public static final int NOTICE_SUB_TYPE_GROUPARRIVAL = 4;
 	
 	
 	/***********现金券************** 1:订单分裂（支付成功通过分享产生红包）|2:用户注册|3:关注红包|4:活动发布|5:订单分裂模板(详见1)|6:会员注册|7.订单分裂2（支付成功直接塞红包） 8.订单分裂模板2（(详见7)）  */
@@ -493,4 +497,6 @@ public class ModelConstant {
 
 	public static final String KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:deliveryReceiver"; //电商接单人推送
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送
+	public static final String KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE = "queue:notify:rgroup:groupSuccess"; //成团提醒。发给团长
+	public static final String KEY_RGROUP_ARRIVAL_NOTICE_QUEUE = "queue:notify:rgroup:arriavalNotice";	//团购到货提醒。发给客户
 }		

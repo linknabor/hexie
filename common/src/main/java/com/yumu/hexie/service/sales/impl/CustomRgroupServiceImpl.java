@@ -1,13 +1,9 @@
 package com.yumu.hexie.service.sales.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +12,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.localservice.ServiceOperator;
-import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -53,8 +47,6 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private UserNoticeService      userNoticeService;
     @Autowired
     private OrderItemRepository orderItemRepository;
-    @Autowired
-    private ServiceOperatorRepository serviceOperatorRepository;
 
     @Autowired
     @Qualifier(value = "staffclientStringRedisTemplate")
@@ -128,45 +120,6 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         logger.info("groupSuccess, ruleId : " + rule.getId());
         userNoticeService.groupSuccess(u, u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
             rule.getProductName(), rule.getName());
-        
-        //给操作员发送发货模板消息
-        NoticeServiceOperator noticeServiceOperator = new NoticeServiceOperator();
-        noticeServiceOperator.setAddress(o.getAddress());
-        noticeServiceOperator.setCreateDate(o.getCreateDate());
-        noticeServiceOperator.setReceiverName(o.getReceiverName());
-        noticeServiceOperator.setId(o.getId());
-        noticeServiceOperator.setProductName(o.getProductName());
-        noticeServiceOperator.setOrderNo(o.getOrderNo());
-        noticeServiceOperator.setSubTypeName(o.getSubTypeName());
-        noticeServiceOperator.setSubType(o.getSubType());
-        noticeServiceOperator.setTel(o.getTel());
-
-		int operType = ModelConstant.SERVICE_OPER_TYPE_RGROUP_TAKER;
-		long agentId = o.getAgentId();
-		logger.info("agentId is : " + agentId);
-		List<ServiceOperator> opList;
-		if (agentId > 1) {	//1是默认奈博的，奈博的操作员都是null
-			opList = serviceOperatorRepository.findByTypeAndAgentId(operType, agentId);
-		}else {
-			opList = serviceOperatorRepository.findByTypeAndAgentIdIsNull(operType);
-		}
-		logger.info("oper list size : " + opList.size());
-		List<Long> list = new ArrayList<>();
-		for (ServiceOperator serviceOperator : opList) {
-            list.add(serviceOperator.getUserId());
-		}
-        noticeServiceOperator.setOpers(list);
-
-		try {
-            ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-            String value = objectMapper.writeValueAsString(noticeServiceOperator);
-            //放入合协管家的redis中
-            staffclientStringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE, value);
-        } catch (Exception e) {
-		    logger.error("custom push redis error", e);
-        }
-
-
 
     }
 

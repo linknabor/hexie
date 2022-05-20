@@ -1,7 +1,3 @@
-/**
- * Yumu.com Inc.
- * Copyright (c) 2014-2016 All Rights Reserved.
- */
 package com.yumu.hexie.service.sales.impl;
 
 import java.util.List;
@@ -32,9 +28,7 @@ public class CustomRepairServiceImpl extends CustomOrderServiceImpl {
     @Inject
     private RepairOrderRepository repairOrderRepository;
     /** 
-     * @param po
      * @param so
-     * @see com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl#postPaySuccess(com.yumu.hexie.model.payment.PaymentOrder, com.yumu.hexie.model.market.ServiceOrder)
      */
     @Override
     public void postPaySuccess(ServiceOrder so) {
@@ -50,7 +44,6 @@ public class CustomRepairServiceImpl extends CustomOrderServiceImpl {
 
     /** 
      * @param order
-     * @see com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl#postOrderConfirm(com.yumu.hexie.model.market.ServiceOrder)
      */
     @Override
     public void postOrderConfirm(ServiceOrder order) {
@@ -59,17 +52,16 @@ public class CustomRepairServiceImpl extends CustomOrderServiceImpl {
     /** 
      * @param ruleId
      * @return
-     * @see com.yumu.hexie.service.sales.impl.BaseOrderProcessor#findSalePlan(long)
      */
     @Override
     public SalePlan findSalePlan(long ruleId) {
         RepairSaleRule r = new RepairSaleRule();
         r.setFreeShippingNum(0);
-        r.setId(1l);
+        r.setId(1L);
         r.setName("维修项目");
         r.setFreeShippingNum(1);
         r.setPrice(1);
-        r.setTimeoutForPay(3600000000l);
+        r.setTimeoutForPay(3600000000L);
         return r;
     }
 
@@ -78,7 +70,6 @@ public class CustomRepairServiceImpl extends CustomOrderServiceImpl {
      * @param rule
      * @param item
      * @param address
-     * @see com.yumu.hexie.service.sales.impl.BaseOrderValidator#validateRule(com.yumu.hexie.model.market.ServiceOrder, com.yumu.hexie.model.market.saleplan.SalePlan, com.yumu.hexie.model.market.OrderItem, com.yumu.hexie.model.user.Address)
      */
     @Override
     public void validateRule(ServiceOrder order, SalePlan rule, OrderItem item, Address address) {

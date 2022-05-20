@@ -36,7 +36,7 @@ import com.yumu.hexie.service.user.dto.CheckCouponDTO;
 
 public abstract class BaseOrderProcessor {
 	
-	private static Logger logger = LoggerFactory.getLogger(BaseOrderProcessor.class);
+	private static final Logger logger = LoggerFactory.getLogger(BaseOrderProcessor.class);
 	
 	@Inject
 	protected CollocationService collocationService;
@@ -75,8 +75,7 @@ public abstract class BaseOrderProcessor {
 			}
 			price = price.add(totalAmount);
 			Collocation c = collocationService.findOne(order.getCollocationId());
-			BigDecimal discountTimes = price.divide(new BigDecimal(String.valueOf(c.getSatisfyAmount())));
-			discountTimes = discount.setScale(0, RoundingMode.DOWN);
+			BigDecimal discountTimes = discount.setScale(0, RoundingMode.DOWN);
 			
 			// 算优惠
 			discount = new BigDecimal(String.valueOf(c.getDiscountAmount())).multiply(discountTimes);
@@ -107,21 +106,19 @@ public abstract class BaseOrderProcessor {
 		} else {
 			//3.没有优惠组合的情况下，多件商品一起购买
 			// 算总价
-			long minTimeout = 0l;
-			BigDecimal itemShipFee = BigDecimal.ZERO;
+			long minTimeout = 0L;
+			BigDecimal itemShipFee;
 			for (OrderItem item : order.getItems()) {
 				totalAmount = totalAmount.add(new BigDecimal(String.valueOf(item.getAmount())));
 				count += item.getCount();
 				SalePlan plan = findSalePlan(order.getOrderType(), item.getRuleId());
-				if (minTimeout == 0l) {
+				if (minTimeout == 0L) {
 					minTimeout = plan.getTimeoutForPay();
 				}else if (minTimeout > plan.getTimeoutForPay()) {
 					minTimeout = plan.getTimeoutForPay();
 				}
 				if (item.getCount() < plan.getFreeShippingNum()) {
-					BigDecimal unitShipFee = new BigDecimal(String.valueOf(plan.getPostageFee()));
-//					itemShipFee = unitShipFee.multiply(new BigDecimal(item.getCount()));
-					itemShipFee = unitShipFee;
+					itemShipFee = new BigDecimal(String.valueOf(plan.getPostageFee()));
 				}else {
 					itemShipFee = BigDecimal.ZERO;
 				}
@@ -166,9 +163,8 @@ public abstract class BaseOrderProcessor {
 	/**
 	 * 拆分订单的操作
 	 * @param groupOrderId
-	 * @return
 	 */
-	protected boolean computeCoupon4GroupOrders(long groupOrderId) {
+	protected void computeCoupon4GroupOrders(long groupOrderId) {
 		
 		List<ServiceOrder> orderList = serviceOrderRepository.findByGroupOrderId(groupOrderId);
 		
@@ -177,26 +173,24 @@ public abstract class BaseOrderProcessor {
 			couponId = orderList.get(0).getCouponId();
 		}
 		if (couponId == null || couponId == 0) {
-			return false;
+			return;
 		}
 		Coupon coupon = couponService.findById(couponId);
 		if (coupon == null) {
-			return false;
+			return;
 		}
 		
 		BigDecimal couponAmount = new BigDecimal(String.valueOf(coupon.getAmount()));	//红包总金额
 		BigDecimal couponUsedItemAmount = BigDecimal.ZERO;	//使用了红包的商品总金额 （不含运费）
 		
 		Map<Long, OrderItem> couponUsedItemMap = new HashMap<>();	//用了红包的item, key:item的id,value: item
-		Map<Long, ServiceOrder> orderMap = new HashMap<>();	//key: orderId, value: serviceOrder
 		Map<Long, ServiceOrder> itemOrderMap = new HashMap<>();	//key:itemId, value: orderId
 		List<Long> couponUsedList = new ArrayList<>();
 		for (ServiceOrder serviceOrder : orderList) {	//这里的order已经按代理商分过组了。相同代理商的商品在一个order下
 			
 			List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
 			serviceOrder.setItems(itemList);
-			orderMap.put(serviceOrder.getId(), serviceOrder);
-			
+
 			for (OrderItem orderItem : itemList) {
 				Product product = new Product();
 				product.setId(orderItem.getProductId());
@@ -220,7 +214,7 @@ public abstract class BaseOrderProcessor {
 		}
 		if (!amountCheckFlag) {
 			logger.error("groupOrderId : " + groupOrderId + ", 金额不可用。");
-			return false;
+			return;
 		}
 		
 		BigDecimal remaiderCouponAmount = couponAmount;	//剩余未分摊的红包
@@ -241,10 +235,6 @@ public abstract class BaseOrderProcessor {
 			if (couponUsedItemMap.entrySet().size()-1 == seq && remaiderCouponAmount.compareTo(BigDecimal.ZERO) != 0) {
 				unitCouponAmount = unitCouponAmount.add(remaiderCouponAmount);	//最后一个item，所有余额都分摊进去
 			}
-//			BigDecimal unitItemAmount = itemAmount.subtract(unitCouponAmount);
-//			if (unitItemAmount.compareTo(BigDecimal.ZERO) <=0) {
-//				unitItemAmount = BigDecimal.ZERO;
-//			}
 			orderItem.setCouponId(couponId);
 			orderItem.setCouponAmount(unitCouponAmount.floatValue());
 			
@@ -284,12 +274,13 @@ public abstract class BaseOrderProcessor {
 			ServiceOrder lastOrder = orderList.get(orderList.size()-1);
 			lastOrder.setPrice(totalPrice.floatValue());
 			serviceOrderRepository.save(lastOrder);
-			
-			lastItem.setPrice(totalPrice.floatValue());
-			orderItemRepository.save(lastItem);
+
+			if(lastItem != null) {
+				lastItem.setPrice(totalPrice.floatValue());
+				orderItemRepository.save(lastItem);
+			}
 		}
 		coupon.lock(couponUsedList.get(0));
-		return true;
 	}
 	
 	protected Address fillAddressInfo(ServiceOrder o) {
