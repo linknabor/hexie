@@ -28,4 +28,10 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long>  {
 	
 	@Query(value = "select * from orderItem where ruleId = ?1 and userId = ?2 and orderId = ?3 ", nativeQuery = true)
 	public List<OrderItem> findByRuleIdAndUserIdAndOrderId(long ruleId, long userId, long orderId);
+
+	public List<OrderItem> findByServiceOrderAndIdIn(ServiceOrder order, List<String> ids);
+
+	public List<OrderItem> findByServiceOrderAndProductIdIn(ServiceOrder order, List<String> productId);
+
+	List<OrderItem> findByServiceOrderAndIsRefund(ServiceOrder order, int isRefund);
 }

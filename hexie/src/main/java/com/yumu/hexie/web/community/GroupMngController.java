@@ -14,6 +14,8 @@ import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.community.GroupMngService;
+import com.yumu.hexie.service.sales.BaseOrderService;
+import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class GroupMngController extends BaseController {
     private GroupMngService groupMngService;
     @Autowired
     private WechatCoreService wechatCoreService;
+
+    @Autowired
+    private BaseOrderService baseOrderService;
 
     /**
      * 查询团购列表
@@ -137,13 +142,13 @@ public class GroupMngController extends BaseController {
      * 订单退款
      *
      * @param user
-     * @param refundInfoReq
+     * @param refundVO
      * @return
      */
     @RequestMapping(value = "/refundOrder", method = RequestMethod.POST)
-    public BaseResult<Boolean> refundOrder(@ModelAttribute(Constants.USER) User user, @RequestBody RefundInfoReq refundInfoReq) throws Exception {
-        Boolean flag = groupMngService.refundOrder(user, refundInfoReq);
-        return BaseResult.successResult(flag);
+    public BaseResult<Boolean> refundOrder(@ModelAttribute(Constants.USER) User user, @RequestBody RefundVO refundVO) throws Exception {
+        baseOrderService.requestRefundByOwner(user, refundVO);
+        return BaseResult.successResult(true);
     }
 
     /**

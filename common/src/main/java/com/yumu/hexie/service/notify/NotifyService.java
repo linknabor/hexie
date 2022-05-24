@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.notify;
 
 import java.util.List;
+import java.util.Map;
 
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification;
@@ -25,7 +26,7 @@ public interface NotifyService {
 	
 	void updatePartner(List<PartnerNotification> list);
 
-	void notifyEshopRefund(String orderId);
+	void notifyEshopRefund(Map<String, Object> map);
 
 	void notifyWuyeCouponConsumeAsync(String orderId, String couponId);
 

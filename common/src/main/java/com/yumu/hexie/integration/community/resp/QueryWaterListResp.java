@@ -19,8 +19,6 @@ public class QueryWaterListResp {
         private String waterId; //流水号
         private String subjectName; //科目名称
         private String loanFlag; //借贷标志
-        private String waterType; //流水类型
-        private String orderId; //关联订单号
         private String acctDate; //入账日期
         private String acctTime; //入账时间
         private String tranAmt; //金额
@@ -47,22 +45,6 @@ public class QueryWaterListResp {
 
         public void setLoanFlag(String loanFlag) {
             this.loanFlag = loanFlag;
-        }
-
-        public String getWaterType() {
-            return waterType;
-        }
-
-        public void setWaterType(String waterType) {
-            this.waterType = waterType;
-        }
-
-        public String getOrderId() {
-            return orderId;
-        }
-
-        public void setOrderId(String orderId) {
-            this.orderId = orderId;
         }
 
         public String getAcctDate() {
@@ -95,8 +77,6 @@ public class QueryWaterListResp {
                     "waterId='" + waterId + '\'' +
                     ", subjectName='" + subjectName + '\'' +
                     ", loanFlag='" + loanFlag + '\'' +
-                    ", waterType='" + waterType + '\'' +
-                    ", orderId='" + orderId + '\'' +
                     ", acctDate='" + acctDate + '\'' +
                     ", acctTime='" + acctTime + '\'' +
                     ", tranAmt='" + tranAmt + '\'' +

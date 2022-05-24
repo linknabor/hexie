@@ -10,6 +10,8 @@ import com.yumu.hexie.web.BaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 描述:
  *
@@ -75,6 +77,30 @@ public class AccountController extends BaseController {
     }
 
     /**
+     * 获取支付流水列表
+     *
+     * @param user
+     * @param queryWaterVO
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getPayWaterList", method = RequestMethod.POST)
+    public BaseResult<QueryWaterListResp> getPayWaterList(@ModelAttribute(Constants.USER) User user, @RequestBody QueryWaterVO queryWaterVO) throws Exception {
+        QueryWaterListResp resp = accountService.queryPayWaterList(user, queryWaterVO);
+        return BaseResult.successResult(resp);
+    }
+
+    /**
+     * 查询银行卡信息
+     * @param user
+     * @return
+     */
+    @RequestMapping(value = "/getBankList", method = RequestMethod.GET)
+    public BaseResult<List<AccountBankResp>> getBankList(@ModelAttribute(Constants.USER) User user) throws Exception {
+        List<AccountBankResp> list = accountService.queryBankList(user);
+        return BaseResult.successResult(list);
+    }
+    /**
      * 绑定银行卡
      *
      * @param user
@@ -89,6 +115,23 @@ public class AccountController extends BaseController {
             return BaseResult.successResult(null);
         } else {
             return BaseResult.fail("绑定银行卡失败，请刷新重试");
+        }
+    }
+
+    /**
+     * 删除银行卡信息
+     * @param user
+     * @param bankNo
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/delBankInfo/{bankNo}", method = RequestMethod.POST)
+    public BaseResult<Object> delBankInfo(@ModelAttribute(Constants.USER) User user, @PathVariable String bankNo) throws Exception {
+        boolean flag = accountService.delBankInfo(user, bankNo);
+        if (flag) {
+            return BaseResult.successResult(true);
+        } else {
+            return BaseResult.fail("删除银行卡失败，请刷新重试");
         }
     }
 

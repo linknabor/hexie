@@ -77,10 +77,10 @@ public class NotifyController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/eshop/notifyRefund", method = RequestMethod.POST )
-	public String notifyRefund(@RequestBody Map<String, String> map) throws Exception {
+	public String notifyRefund(@RequestBody Map<String, Object> map) throws Exception {
 		
 		log.info("notifyRefund :" + map);
-		notifyService.notifyEshopRefund(map.get("trade_water_id"));
+		notifyService.notifyEshopRefund(map);
 		return "SUCCESS";
 	}
 	

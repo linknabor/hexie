@@ -12,6 +12,8 @@ import com.yumu.hexie.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 描述:
  *
@@ -68,6 +70,29 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public QueryWaterListResp queryPayWaterList(User user, QueryWaterVO queryWaterVO) throws Exception {
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        CommonResponse<QueryWaterListResp> commonResponse = communityUtil.queryPayWaterList(user, orgOperator, queryWaterVO);
+        if (!"00".equals(commonResponse.getResult())) {
+            throw new BizValidateException("获取账户支付流水失败, errMsg : " + commonResponse.getErrMsg());
+        }
+        return commonResponse.getData();
+    }
+
+    @Override
+    public List<AccountBankResp> queryBankList(User user) throws Exception {
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        if(orgOperator == null) {
+            throw new BizValidateException("未找到用户信息");
+        }
+        CommonResponse<List<AccountBankResp>> commonResponse = communityUtil.getBankList(user, orgOperator);
+        if (!"00".equals(commonResponse.getResult())) {
+            throw new BizValidateException("获取银行卡列表失败, errMsg : " + commonResponse.getErrMsg());
+        }
+        return commonResponse.getData();
+    }
+
+    @Override
     public boolean saveBank(User user, BankVO bankVO) throws Exception {
         OrgOperator orgOperator = userService.getOrgOperator(user);
         CommonResponse<Boolean> commonResponse = communityUtil.saveBank(user, orgOperator, bankVO);
@@ -77,7 +102,15 @@ public class AccountServiceImpl implements AccountService {
         return commonResponse.getData();
     }
 
-
+    @Override
+    public boolean delBankInfo(User user, String bankNo) throws Exception {
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        CommonResponse<Boolean> commonResponse = communityUtil.delBank(user, orgOperator, bankNo);
+        if (!"00".equals(commonResponse.getResult())) {
+            throw new BizValidateException("删除银行卡失败, errMsg : " + commonResponse.getErrMsg());
+        }
+        return commonResponse.getData();
+    }
 
 
 }

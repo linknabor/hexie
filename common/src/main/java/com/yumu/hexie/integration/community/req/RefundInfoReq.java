@@ -1,7 +1,5 @@
 package com.yumu.hexie.integration.community.req;
 
-import sun.nio.cs.ext.Big5;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -15,7 +13,8 @@ public class RefundInfoReq {
     private String groupId;
     private String orderId;
     private BigDecimal refundAmt;
-    private List<String> goodsIds;
+    private String refundTxt;
+    private List<String> itemList; //orderItem的id
 
     public String getGroupId() {
         return groupId;
@@ -41,12 +40,20 @@ public class RefundInfoReq {
         this.refundAmt = refundAmt;
     }
 
-    public List<String> getGoodsIds() {
-        return goodsIds;
+    public List<String> getItemList() {
+        return itemList;
     }
 
-    public void setGoodsIds(List<String> goodsIds) {
-        this.goodsIds = goodsIds;
+    public void setItemList(List<String> itemList) {
+        this.itemList = itemList;
+    }
+
+    public String getRefundTxt() {
+        return refundTxt;
+    }
+
+    public void setRefundTxt(String refundTxt) {
+        this.refundTxt = refundTxt;
     }
 
     @Override
@@ -55,7 +62,8 @@ public class RefundInfoReq {
                 "groupId='" + groupId + '\'' +
                 ", orderId='" + orderId + '\'' +
                 ", refundAmt=" + refundAmt +
-                ", goodsIds=" + goodsIds +
+                ", refundTxt='" + refundTxt + '\'' +
+                ", itemList=" + itemList +
                 '}';
     }
 }

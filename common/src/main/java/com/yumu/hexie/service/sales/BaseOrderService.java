@@ -87,7 +87,7 @@ public interface BaseOrderService {
     ServiceOrder getOrder(User user, long orderId);
 
     //退款处理
-    void finishRefund(ServiceOrder serviceOrder);
+    void finishRefund(ServiceOrder serviceOrder, String productIds);
 
     //退款完成
     public void finishRefund(WxRefundOrder wxRefundOrder);
@@ -99,6 +99,7 @@ public interface BaseOrderService {
 
 	void requestRefund(User user, RefundVO refundVO) throws Exception;
 
-
+	//团购退款，包含直接退款和用户退款审核后退款
+    void requestRefundByOwner(User user, RefundVO refundVO) throws Exception;
 	
 }
