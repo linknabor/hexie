@@ -1,11 +1,8 @@
 package com.yumu.hexie.integration.wechat.service;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.yumu.hexie.integration.common.CommonResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
