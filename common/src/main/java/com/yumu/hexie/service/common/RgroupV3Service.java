@@ -3,6 +3,7 @@ package com.yumu.hexie.service.common;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
@@ -21,5 +22,7 @@ public interface RgroupV3Service {
 	RgroupRecordsVO queryOrderRecords(String ruleId, int currentPage);
 
 	List<Map<String, String>> getRefundReason();
+
+	List<Product> getProductFromSales(User user, String productName, List<String> excludDepotIds, int currentPage);
 	
 }

@@ -32,7 +32,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -69,6 +71,9 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Autowired
     private ProductDepotTagsRepository productDepotTagsRepository;
+    
+    @Autowired
+    private ProductRepository productRepository;
 
     @Override
     public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
@@ -464,7 +469,7 @@ public class GroupMngServiceImpl implements GroupMngService {
                     vo.setUserHead(userInfo.getHeadimgurl());
                 }
 
-                List<BuyGoodsVo> buyVos = new ArrayList<>();
+//                List<BuyGoodsVo> buyVos = new ArrayList<>();
                 //查询订单下的商品
                 ServiceOrder serviceOrder = new ServiceOrder();
                 serviceOrder.setId(vo.getId().longValue());
@@ -589,13 +594,13 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     public List<ProductDepot> queryProductDepotList(User user, String searchValue, int currentPage) {
-        User userInfo = userRepository.findById(user.getId());
-        if(userInfo == null) {
-            throw new BizValidateException("用户不存在");
-        }
-        if(!"03".equals(user.getRoleId())) {
-            throw new BizValidateException("当前用户不是团长，无法操作");
-        }
+//        User userInfo = userRepository.findById(user.getId());
+//        if(userInfo == null) {
+//            throw new BizValidateException("用户不存在");
+//        }
+//        if(!"03".equals(user.getRoleId())) {
+//            throw new BizValidateException("当前用户不是团长，无法操作");
+//        }
 
         List<Sort.Order> sortList = new ArrayList<>();
         Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
@@ -623,7 +628,7 @@ public class GroupMngServiceImpl implements GroupMngService {
     }
 
     @Override
-    public Boolean operProductDepot(User user, ProductDepotReq productDepotReq) {
+    public ProductDepot operProductDepot(User user, ProductDepotReq productDepotReq) {
         ProductDepot depot = new ProductDepot();
         if(!ObjectUtils.isEmpty(productDepotReq.getProductId())) { //编辑
             depot = productDepotRepository.findById(Long.parseLong(productDepotReq.getProductId())).get();
@@ -658,7 +663,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         }
         depot.setOwnerId(user.getId());
         productDepotRepository.save(depot);
-        return true;
+        return depot;
     }
 
     @Override
@@ -694,4 +699,38 @@ public class GroupMngServiceImpl implements GroupMngService {
         productDepotTagsRepository.delete(tag);
         return true;
     }
+    
+    @Override
+    @Transactional
+    public List<ProductDepot> saveDepotFromSales(User user, String productIds) {
+    	
+    	Assert.hasText(productIds, "请选择要导入的商品");
+    	
+    	String[]productArr = productIds.split(",");
+    	if (productArr == null) {
+			throw new BizValidateException("请选择要导入的商品");
+		}
+    	List<Long> products = new ArrayList<>();
+    	for (String productId : productArr) {
+    		if (StringUtils.isEmpty(productId)) {
+				continue;
+			}
+    		products.add(Long.valueOf(productId));
+		}
+    	List<Product> productList = productRepository.findAllById(products);
+    	List<ProductDepot> depotList = new ArrayList<>();
+    	for (Product product : productList) {
+    		ProductDepot depot = new ProductDepot();
+    		BeanUtils.copyProperties(product, depot);
+    		int totalCount = product.getTotalCount();
+    		if (totalCount == Integer.MAX_VALUE) {
+    			depot.setTotalCount(9999999);
+			}
+    		productDepotRepository.save(depot);
+    		depotList.add(depot);
+		}
+        return depotList;
+    }
+    
+    
 }
