@@ -616,13 +616,13 @@ public class GroupMngServiceImpl implements GroupMngService {
         if(ObjectUtils.isEmpty(productId)) {
             throw new BizValidateException("商品编号不能为空");
         }
-        User userInfo = userRepository.findById(user.getId());
-        if(userInfo == null) {
-            throw new BizValidateException("用户不存在");
-        }
-        if(!"03".equals(user.getRoleId())) {
-            throw new BizValidateException("当前用户不是团长，无法操作");
-        }
+//        User userInfo = userRepository.findById(user.getId());
+//        if(userInfo == null) {
+//            throw new BizValidateException("用户不存在");
+//        }
+//        if(!"03".equals(user.getRoleId())) {
+//            throw new BizValidateException("当前用户不是团长，无法操作");
+//        }
         productDepotRepository.deleteById(Long.parseLong(productId));
         return true;
     }
@@ -721,12 +721,18 @@ public class GroupMngServiceImpl implements GroupMngService {
     	List<ProductDepot> depotList = new ArrayList<>();
     	for (Product product : productList) {
     		ProductDepot depot = new ProductDepot();
-    		BeanUtils.copyProperties(product, depot);
+    		BeanUtils.copyProperties(product, depot, "id", "createDate", "startDate", "endDate");
     		int totalCount = product.getTotalCount();
     		if (totalCount == Integer.MAX_VALUE) {
     			depot.setTotalCount(9999999);
 			}
+    		depot.setAgentId(0l);
+    		depot.setOwnerId(user.getId());
     		productDepotRepository.save(depot);
+    		
+    		product.setDepotId(depot.getId());
+    		productRepository.save(product);
+    		
     		depotList.add(depot);
 		}
         return depotList;
