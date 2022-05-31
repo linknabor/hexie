@@ -1,5 +1,6 @@
 package com.yumu.hexie.web.sales;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,13 +21,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
+import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.common.RgroupV3Service;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
-import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.web.BaseController;
@@ -190,5 +192,23 @@ public class RgroupController extends BaseController{
         return new BaseResult<List<Map<String, String>>>().success(rgroupV3Service.getRefundReason());
     }
 	
+	/**
+	 * 获取退款原因
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/productFromsales", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<Product>> getProductFromSales(@ModelAttribute(Constants.USER)User user, @RequestParam int currentPage, 
+			@RequestParam String searchValue, @RequestParam String excludeDepotIds) throws Exception {
+		
+		List<String> excludeIdList = null;
+		if (!StringUtils.isEmpty(excludeDepotIds)) {
+			String[]excludeIds = new String[0];
+			excludeIds = excludeDepotIds.split(",");
+			excludeIdList = Arrays.asList(excludeIds);
+		}
+        return new BaseResult<List<Product>>().success(rgroupV3Service.getProductFromSales(user, searchValue, excludeIdList, currentPage));
+    }
 	
 }

@@ -238,6 +238,7 @@ public class RgroupVO implements Serializable {
 		private int cartNum = 0;	//在购物车里的数量
 		private int saledNum = 0;	//已团数量
 		private int status;	//商品状态,1上架，2下架
+		private String depotId;	//商品库id
 		
 		public String getName() {
 			return name;
@@ -323,13 +324,19 @@ public class RgroupVO implements Serializable {
 		public void setStatus(int status) {
 			this.status = status;
 		}
+		public String getDepotId() {
+			return depotId;
+		}
+		public void setDepotId(String depotId) {
+			this.depotId = depotId;
+		}
 		@Override
 		public String toString() {
 			return "ProductVO [id=" + id + ", name=" + name + ", singlePrice=" + singlePrice + ", miniPrice="
 					+ miniPrice + ", oriPrice=" + oriPrice + ", totalCount=" + totalCount + ", userLimitCount="
 					+ userLimitCount + ", description=" + description + ", images=" + Arrays.toString(images)
 					+ ", tags=" + Arrays.toString(tags) + ", imageList=" + Arrays.toString(imageList) + ", cartNum="
-					+ cartNum + ", saledNum=" + saledNum + ", status=" + status + "]";
+					+ cartNum + ", saledNum=" + saledNum + ", status=" + status + ", depotId=" + depotId + "]";
 		}
 		
 		

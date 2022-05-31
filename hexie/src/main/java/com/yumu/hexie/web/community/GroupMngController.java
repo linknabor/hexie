@@ -5,7 +5,6 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
-import com.yumu.hexie.integration.community.req.RefundInfoReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
 import com.yumu.hexie.integration.community.resp.GroupSumResp;
@@ -51,7 +50,8 @@ public class GroupMngController extends BaseController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/getGroupList", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/getGroupList", method = RequestMethod.GET)
     public BaseResult<List<GroupInfoVo>> getGroupList(@ModelAttribute(Constants.USER) User user, QueryGroupReq queryGroupReq) throws Exception {
         List<GroupInfoVo> list = groupMngService.queryGroupList(user, queryGroupReq);
         return BaseResult.successResult(list);
@@ -66,7 +66,8 @@ public class GroupMngController extends BaseController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/updateGroupInfo", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/updateGroupInfo", method = RequestMethod.GET)
     public BaseResult<Boolean> updateGroupInfo(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId, @RequestParam String operType) throws Exception {
         Boolean flag = groupMngService.updateGroupInfo(user, groupId, operType);
         return BaseResult.successResult(flag);
@@ -79,7 +80,8 @@ public class GroupMngController extends BaseController {
      * @param groupId
      * @return
      */
-    @RequestMapping(value = "/queryGroupSum", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryGroupSum", method = RequestMethod.GET)
     public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId) throws Exception {
         GroupSumResp resp = groupMngService.queryGroupSum(user, groupId);
         return BaseResult.successResult(resp);
@@ -93,7 +95,8 @@ public class GroupMngController extends BaseController {
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/queryGroupOrder", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryGroupOrder", method = RequestMethod.GET)
     public BaseResult<List<GroupOrderVo>> queryGroupOrder(@ModelAttribute(Constants.USER) User user, QueryGroupReq queryGroupReq) throws Exception {
         List<GroupOrderVo> list = groupMngService.queryGroupOrder(user, queryGroupReq);
         return BaseResult.successResult(list);
@@ -106,7 +109,8 @@ public class GroupMngController extends BaseController {
      * @param orderId
      * @return
      */
-    @RequestMapping(value = "/queryGroupOrderDetail/{orderId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryGroupOrderDetail/{orderId}", method = RequestMethod.GET)
     public BaseResult<GroupOrderVo> queryGroupOrderDetail(@ModelAttribute(Constants.USER) User user, @PathVariable String orderId) {
         GroupOrderVo groupOrderVo = groupMngService.queryGroupOrderDetail(user, orderId);
         return BaseResult.successResult(groupOrderVo);
@@ -119,7 +123,8 @@ public class GroupMngController extends BaseController {
      * @param code
      * @return
      */
-    @RequestMapping(value = "/verifyCode/{orderId}/{code}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/verifyCode/{orderId}/{code}", method = RequestMethod.GET)
     public BaseResult<Boolean> verifyCode(@ModelAttribute(Constants.USER) User user, @PathVariable String orderId, @PathVariable String code) {
         Boolean flag = groupMngService.handleVerifyCode(user, orderId, code);
         return BaseResult.successResult(flag);
@@ -132,7 +137,8 @@ public class GroupMngController extends BaseController {
      * @param orderId
      * @return
      */
-    @RequestMapping(value = "/cancelOrder/{orderId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/cancelOrder/{orderId}", method = RequestMethod.GET)
     public BaseResult<Boolean> cancelOrder(@ModelAttribute(Constants.USER) User user, @PathVariable String orderId) throws Exception {
         Boolean flag = groupMngService.cancelOrder(user, orderId);
         return BaseResult.successResult(flag);
@@ -145,7 +151,8 @@ public class GroupMngController extends BaseController {
      * @param refundVO
      * @return
      */
-    @RequestMapping(value = "/refundOrder", method = RequestMethod.POST)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/refundOrder", method = RequestMethod.POST)
     public BaseResult<Boolean> refundOrder(@ModelAttribute(Constants.USER) User user, @RequestBody RefundVO refundVO) throws Exception {
         baseOrderService.requestRefundByOwner(user, refundVO);
         return BaseResult.successResult(true);
@@ -158,7 +165,8 @@ public class GroupMngController extends BaseController {
      * @param groupId
      * @return
      */
-    @RequestMapping(value = "/noticeReceiving/{groupId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/noticeReceiving/{groupId}", method = RequestMethod.GET)
     public BaseResult<Boolean> noticeReceiving(@ModelAttribute(Constants.USER) User user, @PathVariable String groupId) {
         Boolean flag = groupMngService.noticeReceiving(user, groupId);
         return BaseResult.successResult(flag);
@@ -170,7 +178,8 @@ public class GroupMngController extends BaseController {
      * @param searchValue
      * @return
      */
-    @RequestMapping(value = "/queryProductDepotList", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryProductDepotList", method = RequestMethod.GET)
     public BaseResult<List<ProductDepot>> queryProductList(@ModelAttribute(Constants.USER) User user, @RequestParam String searchValue, @RequestParam int currentPage) {
         List<ProductDepot> list = groupMngService.queryProductDepotList(user, searchValue, currentPage);
         return BaseResult.successResult(list);
@@ -182,7 +191,8 @@ public class GroupMngController extends BaseController {
      * @param productId
      * @return
      */
-    @RequestMapping(value = "/delProductDepot/{productId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/delProductDepot/{productId}", method = RequestMethod.GET)
     public BaseResult<Boolean> delProduct(@ModelAttribute(Constants.USER) User user, @PathVariable String productId) {
         Boolean flag = groupMngService.delProductDepot(user, productId);
         return BaseResult.successResult(flag);
@@ -194,10 +204,11 @@ public class GroupMngController extends BaseController {
      * @param productDepotReq
      * @return
      */
-    @RequestMapping(value = "/operProductDepot", method = RequestMethod.POST)
-    public BaseResult<Boolean> operProductDepot(@ModelAttribute(Constants.USER) User user, @RequestBody ProductDepotReq productDepotReq) {
-        Boolean flag = groupMngService.operProductDepot(user, productDepotReq);
-        return BaseResult.successResult(flag);
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/operProductDepot", method = RequestMethod.POST)
+    public BaseResult<ProductDepot> operProductDepot(@ModelAttribute(Constants.USER) User user, @RequestBody ProductDepotReq productDepotReq) {
+        ProductDepot productDepot = groupMngService.operProductDepot(user, productDepotReq);
+        return BaseResult.successResult(productDepot);
     }
 
     /**
@@ -206,7 +217,8 @@ public class GroupMngController extends BaseController {
      * @param productId
      * @return
      */
-    @RequestMapping(value = "/queryProductDepotDetail/{productId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryProductDepotDetail/{productId}", method = RequestMethod.GET)
     public BaseResult<ProductDepot> queryProductDepotDetail(@ModelAttribute(Constants.USER) User user, @PathVariable String productId) {
         ProductDepot depot = groupMngService.queryProductDepotDetail(user, productId);
         return BaseResult.successResult(depot);
@@ -217,7 +229,8 @@ public class GroupMngController extends BaseController {
      * @param user
      * @return
      */
-    @RequestMapping(value = "/queryDepotTags", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryDepotTags", method = RequestMethod.GET)
     public BaseResult<Map<String, List<ProductDepotTags>>> queryDepotTags(@ModelAttribute(Constants.USER) User user) {
         Map<String, List<ProductDepotTags>> map = groupMngService.queryProductDepotTags(user);
         return BaseResult.successResult(map);
@@ -229,7 +242,8 @@ public class GroupMngController extends BaseController {
      * @param tagName
      * @return
      */
-    @RequestMapping(value = "/saveDepotTag", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/saveDepotTag", method = RequestMethod.GET)
     public BaseResult<Boolean> saveDepotTag(@ModelAttribute(Constants.USER) User user, @RequestParam String tagName) {
         Boolean flag = groupMngService.saveDepotTag(user, tagName);
         return BaseResult.successResult(flag);
@@ -241,7 +255,8 @@ public class GroupMngController extends BaseController {
      * @param tagId
      * @return
      */
-    @RequestMapping(value = "/delDepotTag/{tagId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/delDepotTag/{tagId}", method = RequestMethod.GET)
     public BaseResult<Boolean> delDepotTag(@ModelAttribute(Constants.USER) User user, @PathVariable String tagId) {
         Boolean flag = groupMngService.delDepotTag(user, tagId);
         return BaseResult.successResult(flag);
@@ -312,5 +327,18 @@ public class GroupMngController extends BaseController {
         commonResponse.setResult("00");
         commonResponse.setData(str);
         return commonResponse;
+    }
+    
+    /**
+     * 从已经发布的团购中导入商品
+     * @param user
+     * @param productDepotReq
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/saveDepotFromSales", method = RequestMethod.POST)
+    public BaseResult<List<ProductDepot>> saveDepotFromSales(@ModelAttribute(Constants.USER) User user, @RequestBody String productIds) {
+        List<ProductDepot> depotList = groupMngService.saveDepotFromSales(user, productIds);
+        return BaseResult.successResult(depotList);
     }
 }

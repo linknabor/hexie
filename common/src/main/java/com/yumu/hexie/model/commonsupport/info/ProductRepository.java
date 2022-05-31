@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.commonsupport.info;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -159,6 +160,22 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 	@Query(value = "select p.* from product p join productRule pr on p.id = pr.productId where pr.ruleId = ?1 "
 			, nativeQuery = true)
 	List<Product> findMultiByRuleId(long ruleId);
+	
+	
+	@Query(value = "select distinct p.* from product p join productRule pr on p.id = pr.productId "
+			+ "join rgroupRule r on r.id = pr.ruleId "
+			+ "where r.ownerId = ?1 "
+			+ "and r.createDate >= ?2 "
+			+ "and IF (?3!='', p.name like CONCAT('%',?3,'%'), 1=1) "
+			+ "and (COALESCE(?4) IS NULL OR (p.depotId not IN (?4) )) "
+			, countQuery = "select count(distinct p.id) from product p join productRule pr on p.id = pr.productId "
+					+ "join rgroupRule r on r.id = pr.ruleId "
+					+ "where r.ownerId = ?1 "
+					+ "and r.createDate >= ?2 "
+					+ "and IF (?3!='', p.name like CONCAT('%',?3,'%'), 1=1) "
+					+ "and (COALESCE(?4) IS NULL OR (p.depotId not IN (?4) )) "
+			, nativeQuery = true)
+	Page<Product> findProductFromSalesByOwner(long userId, Date createDate, String productName, List<String> excludeDepotIds, Pageable pageable);
 	
 	
 }

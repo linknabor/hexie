@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.common.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -263,7 +264,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					product.setMiniPrice(Float.valueOf(productView.getOriPrice()));
 				}
 				product.setSinglePrice(Float.valueOf(productView.getSinglePrice()));
-				product.setOtherDesc(productView.getDescription());
+				String desc = "";
+				if (!StringUtils.isEmpty(productView.getDescription())) {
+					desc = productView.getDescription();
+				}
+				product.setOtherDesc(desc);
 				
 				Thumbnail[]images = productView.getImages();
 				if (images != null && images.length > 0) {
@@ -297,8 +302,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					String tagStr = objectMapper.writeValueAsString(productView.getTags());
 					product.setTags(tagStr.toString());
 				}
+				product.setDepotId(0l);
+				if (!StringUtils.isEmpty(productView.getDepotId())) {
+					product.setDepotId(Long.valueOf(productView.getDepotId()));
+				}
 				productRepository.save(product);
-				
 				
 				ProductRule productRule = productRuleRepository.findByRuleIdAndProductId(rule.getId(), product.getId());
 				if (productRule == null) {
@@ -819,5 +827,22 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		return reasonList;
 	}
 	
-	
+	/**
+	 * 团购记录
+	 */
+	@Override
+	public List<Product> getProductFromSales(User user, String productName, List<String>excludeDepotIds, int currentPage) {
+		
+		List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.DESC, "createDate");
+    	orderList.add(order);
+    	Sort sort = Sort.by(orderList);
+		Pageable pageable = PageRequest.of(currentPage, 10, sort);
+		Calendar c = Calendar.getInstance();
+		c.setTime(new Date());
+		c.add(Calendar.MONTH, - 6);
+		Date createDate = c.getTime();
+		Page<Product> products = productRepository.findProductFromSalesByOwner(user.getId(), createDate, productName, excludeDepotIds, pageable);
+		return products.getContent();
+	}
 }

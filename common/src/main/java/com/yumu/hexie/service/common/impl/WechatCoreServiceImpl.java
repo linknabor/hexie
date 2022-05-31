@@ -34,8 +34,6 @@ import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.WechatException;
 
-import java.io.BufferedInputStream;
-
 @Service(value = "wechatCoreService")
 public class WechatCoreServiceImpl implements WechatCoreService {
 

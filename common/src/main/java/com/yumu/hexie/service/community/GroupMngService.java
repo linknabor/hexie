@@ -37,7 +37,7 @@ public interface GroupMngService {
     Boolean delProductDepot(User user, String productId);
 
     //新增编辑商品
-    Boolean operProductDepot(User user, ProductDepotReq productDepotReq);
+    ProductDepot operProductDepot(User user, ProductDepotReq productDepotReq);
 
     //根据商品ID查询商品库
     ProductDepot queryProductDepotDetail(User user, String productId);
@@ -73,4 +73,6 @@ public interface GroupMngService {
 
     //后台操作团
     String operGroupByOutSid(String groupId, String operType);
+
+	List<ProductDepot> saveDepotFromSales(User user, String productIds);
 }
