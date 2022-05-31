@@ -15,6 +15,8 @@ import com.yumu.hexie.model.ModelConstant;
 
 public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	
+	public RgroupRule findById(long ruleId);
+	
 	@Query("from RgroupRule p where p.status = "+ModelConstant.RULE_STATUS_ON+" and p.endDate<=?1 and p.groupStatus="+ModelConstant.RGROUP_STAUS_GROUPING)
 	public List<RgroupRule> findTimeoutGroup(Date date);
 	

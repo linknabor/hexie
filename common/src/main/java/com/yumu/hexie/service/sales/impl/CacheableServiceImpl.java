@@ -25,7 +25,7 @@ public class CacheableServiceImpl implements CacheableService {
 	//@Cacheable(value = "rgroupRule", key = "#ruleId.toString()")
 	public RgroupRule findRgroupRule(long ruleId) {
 		log.error("RgroupServiceImpl#findSalePlan#"+ruleId);
-		return rgroupRuleRepository.findById(ruleId).get();
+		return rgroupRuleRepository.findById(ruleId);
 	}
 	//@CachePut(value = "rgroupRule", key = "#rgroupRule.id.toString()")
 	public RgroupRule save(RgroupRule rgroupRule){
