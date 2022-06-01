@@ -178,9 +178,8 @@ public class GroupMngServiceImpl implements GroupMngService {
             throw new BizValidateException("团购编号为空，请刷新重试");
         }
 
-        Optional<RgroupRule> optional = rgroupRuleRepository.findById(Long.parseLong(groupId));
-        if (optional.isPresent()) {
-            RgroupRule rgroupRule = optional.get();
+        RgroupRule rgroupRule = rgroupRuleRepository.findById(Long.parseLong(groupId));
+        if (rgroupRule!=null) {
             if ("1".equals(operType)) { //结束操作
                 //修改团购结束日期
                 rgroupRule.setStatus(1);
@@ -323,9 +322,8 @@ public class GroupMngServiceImpl implements GroupMngService {
             throw new BizValidateException("操作类型为空，请刷新重试");
         }
 
-        Optional<RgroupRule> optional = rgroupRuleRepository.findById(Long.parseLong(groupId));
-        if (optional.isPresent()) {
-            RgroupRule rgroupRule = optional.get();
+        RgroupRule rgroupRule = rgroupRuleRepository.findById(Long.parseLong(groupId));
+        if (rgroupRule!=null) {
             if ("0".equals(operType)) { //下架
                 rgroupRule.setStatus(0);
             } else if("1".equals(operType)) {
@@ -569,9 +567,8 @@ public class GroupMngServiceImpl implements GroupMngService {
         }
         List<ServiceOrder> list = new ArrayList<>();
         //查询出未提货的订单，前提必须是已经成团
-        Optional<RgroupRule> optional = rgroupRuleRepository.findById(Long.parseLong(groupId));
-        if (optional.isPresent()) {
-            RgroupRule rgroupRule = optional.get();
+        RgroupRule rgroupRule = rgroupRuleRepository.findById(Long.parseLong(groupId));
+        if (rgroupRule!=null) {
             if (rgroupRule.getGroupStatus() == ModelConstant.RGROUP_STAUS_FINISH) {
                 List<ServiceOrder> serviceOrderList = serviceOrderRepository.findByGroupRuleId(Long.parseLong(groupId));
                 for (ServiceOrder order : serviceOrderList) {
