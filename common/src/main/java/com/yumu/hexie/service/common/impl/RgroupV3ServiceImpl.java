@@ -611,11 +611,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		if (ruleId == 0l) {
 			throw new BizValidateException("团购id不能为空");
 		}
-		Optional<RgroupRule> ruleOptional = rgroupRuleRepository.findById(ruleId); 
-		if (ruleOptional == null) {
-			throw new BizValidateException("未查询到团购, id: " + ruleId);
-		}
-		RgroupRule rule = ruleOptional.get();
+		RgroupRule rule = rgroupRuleRepository.findById(ruleId); 
 		if (rule == null) {
 			throw new BizValidateException("未查询到团购, id: " + ruleId);
 		}
