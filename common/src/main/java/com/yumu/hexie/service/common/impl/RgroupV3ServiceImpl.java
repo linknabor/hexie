@@ -263,7 +263,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					product.setMiniPrice(Float.valueOf(productView.getMiniPrice()));
 				}
 				if (!StringUtils.isEmpty(productView.getOriPrice())) {
-					product.setMiniPrice(Float.valueOf(productView.getOriPrice()));
+					product.setOriPrice(Float.valueOf(productView.getOriPrice()));
 				}
 				product.setSinglePrice(Float.valueOf(productView.getSinglePrice()));
 				String desc = "";
