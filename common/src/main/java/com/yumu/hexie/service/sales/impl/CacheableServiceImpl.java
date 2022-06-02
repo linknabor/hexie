@@ -32,7 +32,9 @@ public class CacheableServiceImpl implements CacheableService {
 		log.error("RgroupServiceImpl#save#"+rgroupRule.getId());
 		if(rgroupRule.getOriPrice()<=0){
 			Product p = productRepository.findById(rgroupRule.getProductId());
-			rgroupRule.fillProductInfo(p);
+			if (p != null) {
+				rgroupRule.fillProductInfo(p);
+			}
 		}
 		rgroupRule = rgroupRuleRepository.save(rgroupRule);
 		return rgroupRule;
