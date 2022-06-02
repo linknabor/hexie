@@ -16,16 +16,25 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 
     List<Region> findByNameAndRegionType(String name, int regionType);
     
-    @Query(value="select DISTINCT sect.name, sect.xiaoquAddress, cy.name countyName, city.name cityName from region sect "
-    		+ "join region cy on cy.id = sect.parentId "
-    		+ "join region city on cy.parentId = city.id "
-    		+ "where sect.sectId is not null "
-    		+ "and sect.regionType = ?1 "
-    		+ "and if(?2!='', sect.name like %?2%, 1=1) "
-    		+ "and sect.sectId is not null "
-    		+ "order by sect.xiaoquAddress desc, cy.name desc, city.name ", 
-    	nativeQuery = true)
-    List<Region> findByRegionTypeAndNameLike(int regionType, String name, Pageable pageable);
+//    @Query(value="select DISTINCT sect.id, sect.regionType, sect.name, sect.xiaoquAddress, "
+//    		+ "cy.name countyName, city.name cityName from region sect "
+//    		+ "join region cy on cy.id = sect.parentId "
+//    		+ "join region city on cy.parentId = city.id "
+//    		+ "where sect.sectId is not null "
+//    		+ "and sect.regionType = ?1 "
+//    		+ "and if(?2!='', sect.name like %?2%, 1=1) "
+//    		+ "and sect.sectId is not null "
+//    		+ "order by sect.xiaoquAddress desc, cy.name desc, city.name ", 
+//    	nativeQuery = true)
+//    List<Region> findByRegionTypeAndNameLike(int regionType, String name, Pageable pageable);
+    
+	  @Query(value="select DISTINCT sect.id, sect.regionType, sect.name, sect.xiaoquAddress, from region sect "
+		+ "where sect.sectId is not null "
+		+ "and sect.regionType = ?1 "
+		+ "and if(?2!='', sect.name like %?2%, 1=1) "
+		+ "order by sect.xiaoquAddress desc, sect.parentName desc ", 
+		nativeQuery = true)
+    List<Region> findByRegionTypeAndNameContaining(int regionType, String name, Pageable pageable);
     
     @Query(" from Region  where regionType < 4")
 	List<Region> findNeedRegion();
