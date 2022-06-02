@@ -19,7 +19,7 @@ public class RgroupVO implements Serializable {
 	
 	private String action;	//如果是copy代表复制开团，默认为空
 	private String ruleId;	//团购id，编辑保存时有此项
-	private String type;	//创建类型，0保存预览，1保存发布
+	private String type;	//创建类型，0保存预览，1保存发布，2发布状态中修改保存
 	private int status;	//团购状态
 	private String createDate;	//团购创建事件
 	private String description;	//团购title，

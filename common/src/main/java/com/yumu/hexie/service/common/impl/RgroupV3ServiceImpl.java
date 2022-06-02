@@ -212,6 +212,8 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			int ruleStatus = ModelConstant.RULE_STATUS_OFF;
 			if ("1".equals(rgroupVo.getType())) {
 				ruleStatus = ModelConstant.RULE_STATUS_ON;
+			} else if ("2".equals(rgroupVo.getType())) {
+				ruleStatus = ModelConstant.RULE_STATUS_ON;
 			}
 			rule.setStatus(ruleStatus);
 			rule.setSupportRegionType(ModelConstant.REGION_ALL);
