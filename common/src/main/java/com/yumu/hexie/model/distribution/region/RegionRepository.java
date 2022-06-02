@@ -28,7 +28,7 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 //    	nativeQuery = true)
 //    List<Region> findByRegionTypeAndNameLike(int regionType, String name, Pageable pageable);
     
-	  @Query(value="select DISTINCT sect.id, sect.regionType, sect.name, sect.xiaoquAddress, from region sect "
+	  @Query(value="select DISTINCT sect.id, sect.regionType, sect.name, sect.xiaoquAddress from region sect "
 		+ "where sect.sectId is not null "
 		+ "and sect.regionType = ?1 "
 		+ "and if(?2!='', sect.name like %?2%, 1=1) "
