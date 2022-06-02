@@ -75,7 +75,7 @@ public class RegionServiceImpl implements RegionService{
     	orderList.add(order);
     	Sort sort = Sort.by(orderList);
 		Pageable pageable = PageRequest.of(0, 30, sort);
-		List<Region> regionList = regionRepository.findByRegionTypeAndNameLike(ModelConstant.REGION_XIAOQU, name, pageable);
+		List<Region> regionList = regionRepository.findByRegionTypeAndNameContaining(ModelConstant.REGION_XIAOQU, name, pageable);
 		return regionList;
 	}
 	
