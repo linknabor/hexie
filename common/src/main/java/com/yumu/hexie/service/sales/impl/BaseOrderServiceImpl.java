@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
-import org.hibernate.criterion.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -55,6 +54,7 @@ import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
+import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
@@ -151,6 +151,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     private PartnerService partnerService;
     @Autowired
     private RgroupAreaItemRepository rgroupAreaItemRepository;
+    @Autowired
+    private RgroupRuleRepository rgroupRuleRepository;
 
 
     private List<String> preOrderCreate(ServiceOrder order, Address address) {
@@ -894,8 +896,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         }
         request.setOwnerName(ownerName);
         request.setOwnerTel(o.getGroupLeaderTel());
-        
-        RgroupRule rule = cacheableService.findRgroupRule(o.getGroupRuleId());
+        RgroupRule rule = rgroupRuleRepository.findById(o.getGroupRuleId());
         String ruleName = rule.getDescription();
         if (!StringUtils.isEmpty(ruleName)) {
         	if (ruleName.length()>40) {
