@@ -393,6 +393,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         List<Integer> status = new ArrayList<>();
         status.add(ModelConstant.ORDER_STATUS_PAYED);
         status.add(ModelConstant.ORDER_STATUS_CANCEL);
+        status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
         status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_SENDED);
         status.add(ModelConstant.ORDER_STATUS_RECEIVED);
@@ -400,14 +401,16 @@ public class GroupMngServiceImpl implements GroupMngService {
         status.add(ModelConstant.ORDER_STATUS_CONFIRM);
         status.add(ModelConstant.ORDER_STATUS_REFUNDED);
         List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(Long.parseLong(groupId), status);
-        List<GroupProductSumVo> vos = ObjectToBeanUtils.objectToBean(groupProductSumVos, GroupProductSumVo.class);
         int totalNum = 0;
         int totalVerify = 0;
-        for (GroupProductSumVo vo : vos) {
-
-            totalNum += vo.getCount().intValue();
-            totalVerify += vo.getVerifyNum().intValue();
-        }
+        List<GroupProductSumVo> vos = new ArrayList<>();
+        if (groupProductSumVos != null ) {
+        	vos = ObjectToBeanUtils.objectToBean(groupProductSumVos, GroupProductSumVo.class);
+            for (GroupProductSumVo vo : vos) {
+                totalNum += vo.getCount().intValue();
+                totalVerify += vo.getVerifyNum().intValue();
+            }
+		}
         productVo.setProducts(vos);
         productVo.setTotalNum(totalNum);
         productVo.setVerifyNum(totalVerify);
@@ -423,6 +426,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         if ("0".equals(queryGroupReq.getOrderStatus())) { //查全部
             status.add(ModelConstant.ORDER_STATUS_PAYED);
             status.add(ModelConstant.ORDER_STATUS_CANCEL);
+            status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
             status.add(ModelConstant.ORDER_STATUS_REFUNDING);
             status.add(ModelConstant.ORDER_STATUS_SENDED);
             status.add(ModelConstant.ORDER_STATUS_RECEIVED);
