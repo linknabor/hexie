@@ -1948,6 +1948,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	Assert.hasText(refundVO.getMemo(), "请填写退款描述");
     	
 		ServiceOrder o = findOne(refundVO.getOrderId());
+		if (o == null) {
+			throw new BizValidateException("未查询到订单, orderId: " + refundVO.getOrderId()); 
+		}
 		if (user.getId() != o.getUserId()) {
 			throw new BizValidateException("用户无法进行当前操作");
 		}
@@ -1972,7 +1975,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		memo += ";";
 		memo += refundVO.getMemo();
 		o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
-		
         if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
         	throw new BizValidateException("当前订单状态不能进行退款操作");
         }
@@ -2011,7 +2013,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
         BigDecimal refunded = new BigDecimal(String.valueOf(refundAmtF));
 		BigDecimal total = new BigDecimal(String.valueOf(o.getPrice()));
-		log.info("total : " + total + ", refund : " + refund);
         if (refund.compareTo(total) > 0) {
             throw new BizValidateException("退款超出订单总金额");
         }
