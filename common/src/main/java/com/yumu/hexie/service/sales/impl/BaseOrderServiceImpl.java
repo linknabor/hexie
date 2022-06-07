@@ -1964,7 +1964,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (refund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
 		}
-		if ((refund.add(refunded)).compareTo(total) > 0) {
+		BigDecimal totalRefund = refund.add(refunded);
+		if (totalRefund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
 		}
 		String memo = refundVO.getRefundReason();
@@ -1976,7 +1977,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         	throw new BizValidateException("当前订单状态不能进行退款操作");
         }
         o.refunding(true, memo);
-        o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
+        o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
 	}
 
@@ -2014,7 +2015,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         if (refund.compareTo(total) > 0) {
             throw new BizValidateException("退款超出订单总金额");
         }
-        if ((refund.add(refunded)).compareTo(total) > 0) {
+        BigDecimal totalRefund = refund.add(refunded);
+        if (totalRefund.compareTo(total) > 0) {
             throw new BizValidateException("退款超出订单总金额");
         }
 
@@ -2031,7 +2033,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         eshopUtil.requestPartRefund(user, serviceOrderRequest);
 
         o.refunding(true, memo);
-        o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
+        o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
         commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
     }
