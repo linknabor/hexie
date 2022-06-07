@@ -1958,8 +1958,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (refundAmtF == null) {
 			refundAmtF = 0F;
 		}
-		BigDecimal refunded = BigDecimal.valueOf(refundAmtF);
-		BigDecimal total = BigDecimal.valueOf(o.getPrice());
+		BigDecimal refunded = new BigDecimal(String.valueOf(refundAmtF));
+		BigDecimal total = new BigDecimal(String.valueOf(o.getPrice()));
 		log.info("total : " + total + ", refund : " + refund);
 		if (refund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
@@ -2004,8 +2004,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
         BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());	//页面取出来的是分
         refund = refund.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
-        BigDecimal refunded = BigDecimal.valueOf(o.getRefundAmt());
-        BigDecimal total = BigDecimal.valueOf(o.getPrice());
+        Float refundAmtF = o.getRefundAmt();
+		if (refundAmtF == null) {
+			refundAmtF = 0F;
+		}
+        BigDecimal refunded = new BigDecimal(String.valueOf(refundAmtF));
+		BigDecimal total = new BigDecimal(String.valueOf(o.getPrice()));
+		log.info("total : " + total + ", refund : " + refund);
         if (refund.compareTo(total) > 0) {
             throw new BizValidateException("退款超出订单总金额");
         }
