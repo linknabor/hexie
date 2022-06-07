@@ -134,6 +134,7 @@ public class ServiceOrder  extends BaseModel {
 	private long closeTime;//超时支付时间，超出则取消订单
 	private long updateDate;
 	private Date payDate;
+	private Date applyRefundDate;	//申请退款日期
 	private Date refundDate;
 	private Date returnDate;
 	private Date acceptedDate;	//接单日期
@@ -289,7 +290,7 @@ public class ServiceOrder  extends BaseModel {
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"待付款");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");
+		STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款申请中");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");
@@ -306,7 +307,7 @@ public class ServiceOrder  extends BaseModel {
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款申请中");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");
@@ -430,6 +431,14 @@ public class ServiceOrder  extends BaseModel {
 		setUpdateDate(System.currentTimeMillis());
 	}
 	@Transient
+	public void applyRefund(boolean userRequest, String memo) {
+		setApplyRefundDate(new Date());
+		setStatus(ModelConstant.ORDER_STATUS_APPLYREFUND);
+		setRefundType(userRequest?ModelConstant.REFUND_REASON_GROUP_USER_REFUND:ModelConstant.REFUND_REASON_GROUP_OWNER_REFUND);
+		setRefundMemo(memo);
+		setUpdateDate(System.currentTimeMillis());
+	}
+	@Transient
 	public void returnGood(String memo) {
 		setReturnDate(new Date());
 		setStatus(ModelConstant.ORDER_STATUS_RETURNED);
@@ -443,16 +452,6 @@ public class ServiceOrder  extends BaseModel {
 		setRefundType(groupCancel ? ModelConstant.REFUND_REASON_GROUP_CANCEL:ModelConstant.REFUND_REASON_GROUP_BACKEND);
 		setUpdateDate(System.currentTimeMillis());
 	}
-	
-	@Transient
-	public void refunding(boolean userRequest, String memo) {
-		setRefundDate(new Date());
-		setStatus(ModelConstant.ORDER_STATUS_REFUNDING);
-		setRefundType(ModelConstant.REFUND_REASON_GROUP_USER_REFUND);
-		setRefundMemo(memo);
-		setUpdateDate(System.currentTimeMillis());
-	}
-	
 	@Transient
 	public void refunding() {
 		setRefundDate(new Date());
@@ -1098,6 +1097,12 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public void setRefundAmt(Float refundAmt) {
 		this.refundAmt = refundAmt;
+	}
+	public Date getApplyRefundDate() {
+		return applyRefundDate;
+	}
+	public void setApplyRefundDate(Date applyRefundDate) {
+		this.applyRefundDate = applyRefundDate;
 	}
 	
 

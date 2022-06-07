@@ -98,6 +98,7 @@ public class ModelConstant {
 	public static final int REFUND_REASON_GROUP_CANCEL = 1;
 	public static final int REFUND_REASON_GROUP_BACKEND = 2;
 	public static final int REFUND_REASON_GROUP_USER_REFUND = 3;
+	public static final int REFUND_REASON_GROUP_OWNER_REFUND = 4;
 	
 	//0商户派送 1用户自提 2第三方配送 3上门服务 4用户到店
 	public static final int LOGISTIC_TYPE_MERCHANT = 0;

@@ -1974,21 +1974,26 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		String memo = refundVO.getRefundReason();
 		memo += ";";
 		memo += refundVO.getMemo();
-		o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
-        if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
-        	throw new BizValidateException("当前订单状态不能进行退款操作");
+//		o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
+		if (ModelConstant.ORDER_STATUS_PAYED!=o.getStatus() &&
+        		ModelConstant.ORDER_STATUS_CONFIRM!=o.getStatus()&& 
+        		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()) {
+            throw new BizValidateException("当前订单状态不能进行退款操作");
         }
-        o.refunding(true, memo);
+        o.applyRefund(true, memo);
         o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
 	}
 
     @Override
+    @Transactional
     public void requestRefundByOwner(User user, RefundVO refundVO) throws Exception {
         log.info("requestRefund : " + refundVO);
         Assert.hasText(refundVO.getMemo(), "请填写退款描述");
         ServiceOrder o = findOne(refundVO.getOrderId());
-
+        if (o == null) {
+        	throw new BizValidateException("未查询到订单, orderId: " + refundVO.getOrderId());
+		}
         //退款分为部分退款和全部退款，这个要区分一下，如果全部退款，就不传子订单号
         StringBuilder bf = new StringBuilder();
         List<OrderItem> itemListAll = orderItemRepository.findByServiceOrder(o);
@@ -1999,12 +2004,21 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 bf.append(item.getProductId()).append(",");
             }
         }
-
-        o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
-        if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
+        
+        
+        if (ModelConstant.ORDER_STATUS_PAYED!=o.getStatus() &&
+        		ModelConstant.ORDER_STATUS_CONFIRM!=o.getStatus()&& 
+        		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()&&
+        		ModelConstant.ORDER_STATUS_APPLYREFUND!=o.getStatus()) {
             throw new BizValidateException("当前订单状态不能进行退款操作");
         }
-
+        String memo = refundVO.getRefundReason();
+		memo += ";";
+		memo += refundVO.getMemo();
+		if (ModelConstant.ORDER_STATUS_APPLYREFUND!=o.getStatus()) {
+			o.applyRefund(false, memo);
+			serviceOrderRepository.save(o);	//修将状态修改为申请退款中
+		}
         BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());	//页面取出来的是分
         refund = refund.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
         Float refundAmtF = o.getRefundAmt();
@@ -2021,10 +2035,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             throw new BizValidateException("退款超出订单总金额");
         }
 
-        String memo = refundVO.getRefundReason();
-        memo += ";";
-        memo += refundVO.getMemo();
-
         ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
         serviceOrderRequest.setMemo(memo);
         serviceOrderRequest.setRefundAmt(refund.toString());
@@ -2033,7 +2043,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         serviceOrderRequest.setItems(bf.toString());
         eshopUtil.requestPartRefund(user, serviceOrderRequest);
 
-        o.refunding(true, memo);
+        o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
+        o.refunding();
         o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
         commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
