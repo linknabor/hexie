@@ -1983,6 +1983,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         o.applyRefund(true, memo);
         o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
+        
+        List<String> refundItemIds = refundVO.getItemList();
+        List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(o);
+        for (OrderItem orderItem : orderItems) {
+        	String itemId = orderItem.getId() + "";
+			if (refundItemIds.contains(itemId)) {
+				orderItem.setIsRefund(2);
+				orderItemRepository.save(orderItem);
+			}
+		}
 	}
 
     @Override
