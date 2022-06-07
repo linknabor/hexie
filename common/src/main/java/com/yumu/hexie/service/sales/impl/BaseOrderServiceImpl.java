@@ -1960,6 +1960,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		BigDecimal refunded = BigDecimal.valueOf(refundAmtF);
 		BigDecimal total = BigDecimal.valueOf(o.getPrice());
+		log.info("total : " + total + ", refund : " + refund);
 		if (refund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
 		}
