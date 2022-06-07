@@ -1948,6 +1948,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	Assert.hasText(refundVO.getMemo(), "请填写退款描述");
     	
 		ServiceOrder o = findOne(refundVO.getOrderId());
+		if (o == null) {
+			throw new BizValidateException("未查询到订单, orderId: " + refundVO.getOrderId()); 
+		}
 		if (user.getId() != o.getUserId()) {
 			throw new BizValidateException("用户无法进行当前操作");
 		}
@@ -1964,19 +1967,19 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (refund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
 		}
-		if ((refund.add(refunded)).compareTo(total) > 0) {
+		BigDecimal totalRefund = refund.add(refunded);
+		if (totalRefund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
 		}
 		String memo = refundVO.getRefundReason();
 		memo += ";";
 		memo += refundVO.getMemo();
 		o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
-		
         if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
         	throw new BizValidateException("当前订单状态不能进行退款操作");
         }
         o.refunding(true, memo);
-        o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
+        o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
 	}
 
@@ -2010,11 +2013,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
         BigDecimal refunded = new BigDecimal(String.valueOf(refundAmtF));
 		BigDecimal total = new BigDecimal(String.valueOf(o.getPrice()));
-		log.info("total : " + total + ", refund : " + refund);
         if (refund.compareTo(total) > 0) {
             throw new BizValidateException("退款超出订单总金额");
         }
-        if ((refund.add(refunded)).compareTo(total) > 0) {
+        BigDecimal totalRefund = refund.add(refunded);
+        if (totalRefund.compareTo(total) > 0) {
             throw new BizValidateException("退款超出订单总金额");
         }
 
@@ -2031,7 +2034,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         eshopUtil.requestPartRefund(user, serviceOrderRequest);
 
         o.refunding(true, memo);
-        o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
+        o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
         commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
     }
