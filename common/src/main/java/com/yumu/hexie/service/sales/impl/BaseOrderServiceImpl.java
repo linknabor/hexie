@@ -1952,7 +1952,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		}
 		
 		BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());
-		BigDecimal refunded = BigDecimal.valueOf(o.getRefundAmt());
+		Float refundAmtF = o.getRefundAmt();
+		if (refundAmtF == null) {
+			refundAmtF = 0F;
+		}
+		BigDecimal refunded = BigDecimal.valueOf(refundAmtF);
 		BigDecimal total = BigDecimal.valueOf(o.getPrice());
 		if (refund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
@@ -1968,22 +1972,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
         	throw new BizValidateException("当前订单状态不能进行退款操作");
         }
-//        ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
-//        serviceOrderRequest.setMemo(memo);
-//        serviceOrderRequest.setRefundAmt(refund.toString());
-//        serviceOrderRequest.setTradeWaterId(o.getOrderNo());
-//
-//        StringBuffer bf = new StringBuffer();
-//        for (String itemId : refundVO.getItemList()) {
-//			bf.append(itemId).append(",");
-//		}
-//        serviceOrderRequest.setItems(bf.toString());
-//        eshopUtil.requestPartRefund(user, serviceOrderRequest);
-        
         o.refunding(true, memo);
         o.setRefundAmt(refund.floatValue()+o.getRefundAmt() );
         serviceOrderRepository.save(o);
-//        commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
 	}
 
     @Override
@@ -2004,7 +1995,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         }
 
         o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
-
         if (ModelConstant.ORDER_STATUS_PAYED != o.getStatus()) {
             throw new BizValidateException("当前订单状态不能进行退款操作");
         }
