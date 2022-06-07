@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.sales.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.Map.Entry;
@@ -1951,7 +1952,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 			throw new BizValidateException("用户无法进行当前操作");
 		}
 		
-		BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());
+		BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());	//页面取出来的是分
+		refund = refund.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 		Float refundAmtF = o.getRefundAmt();
 		if (refundAmtF == null) {
 			refundAmtF = 0F;
@@ -1999,7 +2001,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             throw new BizValidateException("当前订单状态不能进行退款操作");
         }
 
-        BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());
+        BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());	//页面取出来的是分
+        refund = refund.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
         BigDecimal refunded = BigDecimal.valueOf(o.getRefundAmt());
         BigDecimal total = BigDecimal.valueOf(o.getPrice());
         if (refund.compareTo(total) > 0) {
