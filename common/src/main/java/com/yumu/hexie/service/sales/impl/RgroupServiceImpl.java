@@ -255,8 +255,8 @@ public class RgroupServiceImpl implements RgroupService {
 	}
 	
 	@Override
-	public List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId,List<Integer> status, String productName) {
-		List<ServiceOrder> orders = serviceOrderRepository.findByUserAndStatusAndTypeV3(userId, status, ModelConstant.ORDER_TYPE_RGROUP, productName);
+	public List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId, List<Integer> status, String productName, List<Integer> itemStatus) {
+		List<ServiceOrder> orders = serviceOrderRepository.findByUserAndStatusAndTypeV3(userId, status, ModelConstant.ORDER_TYPE_RGROUP, productName, itemStatus);
 		List<RgroupOrdersVO> result = new ArrayList<>();
 		for(ServiceOrder so : orders) {
 			RgroupRule rule = cacheableService.findRgroupRule(so.getGroupRuleId());

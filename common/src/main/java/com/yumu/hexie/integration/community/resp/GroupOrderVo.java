@@ -26,20 +26,22 @@ public class GroupOrderVo {
     private Integer logisticType; //物流类型
     private String memo; //团购备注
     private BigInteger userId; //用户ID
-
+    private Integer refundType;	//退款类型
+    
     private String statusCn;
     private String userName; //用户名称
     private String userHead; //用户头像
     private String logisticTypeCn;
     private String orderDate;
-
+    
     private List<OrderItem> orderItems; //商品列表
 
     public GroupOrderVo() {
 
     }
 
-    public GroupOrderVo(Integer groupNum, BigInteger id, String orderNo, Integer status, Timestamp payDate, Integer count, Float price, String receiverName, String tel, String address, Integer logisticType, String memo, BigInteger userId) {
+    public GroupOrderVo(Integer groupNum, BigInteger id, String orderNo, Integer status, Timestamp payDate, Integer count, Float price, 
+    		String receiverName, String tel, String address, Integer logisticType, String memo, BigInteger userId, Integer refundType) {
         this.groupNum = groupNum;
         this.id = id;
         this.orderNo = orderNo;
@@ -53,6 +55,7 @@ public class GroupOrderVo {
         this.logisticType = logisticType;
         this.memo = memo;
         this.userId = userId;
+        this.refundType = refundType;
     }
 
     public Integer getGroupNum() {
@@ -207,28 +210,23 @@ public class GroupOrderVo {
         this.orderItems = orderItems;
     }
 
-    @Override
-    public String toString() {
-        return "GroupOrderVo{" +
-                "groupNum=" + groupNum +
-                ", id=" + id +
-                ", orderNo='" + orderNo + '\'' +
-                ", status=" + status +
-                ", payDate=" + payDate +
-                ", count=" + count +
-                ", price=" + price +
-                ", receiverName='" + receiverName + '\'' +
-                ", tel='" + tel + '\'' +
-                ", address='" + address + '\'' +
-                ", logisticType=" + logisticType +
-                ", memo='" + memo + '\'' +
-                ", userId=" + userId +
-                ", statusCn='" + statusCn + '\'' +
-                ", userName='" + userName + '\'' +
-                ", userHead='" + userHead + '\'' +
-                ", logisticTypeCn='" + logisticTypeCn + '\'' +
-                ", orderDate='" + orderDate + '\'' +
-                ", orderItems=" + orderItems +
-                '}';
-    }
+	public Integer getRefundType() {
+		return refundType;
+	}
+
+	public void setRefundType(Integer refundType) {
+		this.refundType = refundType;
+	}
+
+	@Override
+	public String toString() {
+		return "GroupOrderVo [groupNum=" + groupNum + ", id=" + id + ", orderNo=" + orderNo + ", status=" + status
+				+ ", payDate=" + payDate + ", count=" + count + ", price=" + price + ", receiverName=" + receiverName
+				+ ", tel=" + tel + ", address=" + address + ", logisticType=" + logisticType + ", memo=" + memo
+				+ ", userId=" + userId + ", refundType=" + refundType + ", statusCn=" + statusCn + ", userName="
+				+ userName + ", userHead=" + userHead + ", logisticTypeCn=" + logisticTypeCn + ", orderDate="
+				+ orderDate + ", orderItems=" + orderItems + "]";
+	}
+    
+    
 }

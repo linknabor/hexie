@@ -16,7 +16,10 @@ public class RgroupOwner extends BaseModel {
 	private static final long serialVersionUID = -7728845122983998226L;
 	
 	private long userId;
+	private String openid;
+	private String appid;
 	private String miniopenid;
+	private String miniappid;
 	private int followers;	//TODO 关注人数  这个不知道有什么用？
 	private int members;	//成员数，即访问数
 	private int attendees;		//跟团人次
@@ -58,10 +61,29 @@ public class RgroupOwner extends BaseModel {
 	public void setFeeRate(String feeRate) {
 		this.feeRate = feeRate;
 	}
+	public String getMiniappid() {
+		return miniappid;
+	}
+	public void setMiniappid(String miniappid) {
+		this.miniappid = miniappid;
+	}
+	public String getOpenid() {
+		return openid;
+	}
+	public void setOpenid(String openid) {
+		this.openid = openid;
+	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
 	@Override
 	public String toString() {
-		return "RgroupOwner [userId=" + userId + ", miniopenid=" + miniopenid + ", followers=" + followers
-				+ ", members=" + members + ", attendees=" + attendees + ", feeRate=" + feeRate + "]";
+		return "RgroupOwner [userId=" + userId + ", openid=" + openid + ", appid=" + appid + ", miniopenid="
+				+ miniopenid + ", miniappid=" + miniappid + ", followers=" + followers + ", members=" + members
+				+ ", attendees=" + attendees + ", feeRate=" + feeRate + "]";
 	}
 	
 

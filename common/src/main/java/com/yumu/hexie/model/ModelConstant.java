@@ -515,4 +515,9 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_OWNER_ORDERED = "rgroup:ordered:owner:";	//后面接团长id,团长被跟团次数
 	public static final String KEY_RGROUP_GROUP_ACCESSED = "rgroup:accessed:group:";	//后面接团id,团被访问次数
 	public static final String KEY_RGROUP_GROUP_ORDERED = "rgroup:ordered:group:";	//后面接团id，团被下单次数
+	
+	public static final Integer ORDERITEM_REFUND_STATUS_PAID = 0;	//已支付
+	public static final Integer ORDERITEM_REFUND_STATUS_REFUNDED = 1;	//已退款
+	public static final Integer ORDERITEM_REFUND_STATUS_REFUNDING = 2;	//退款中
+	public static final Integer ORDERITEM_REFUND_STATUS_APPLYREFUND = 3;	//退款审核中
 }		

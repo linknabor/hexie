@@ -52,6 +52,8 @@ import com.yumu.hexie.model.market.Cart;
 import com.yumu.hexie.model.market.Evoucher;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
+import com.yumu.hexie.model.market.RefundRecord;
+import com.yumu.hexie.model.market.RefundRecordRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
@@ -154,6 +156,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     private RgroupAreaItemRepository rgroupAreaItemRepository;
     @Autowired
     private RgroupRuleRepository rgroupRuleRepository;
+    @Autowired
+    private RefundRecordRepository refundRecordRepository;
 
 
     private List<String> preOrderCreate(ServiceOrder order, Address address) {
@@ -1131,7 +1135,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 //这个判断订单是否全部已退
                 List<OrderItem> listNoRefund = orderItemRepository.findByServiceOrderAndIsRefund(serviceOrder, 0);
                 if(listNoRefund.size() > 0) {
-                    isAllUpdate = false;
+                	isAllUpdate = false;
                 }
             }
             /*2.修改订单状态为已退款*/
@@ -1855,6 +1859,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             orderRequest.setItemList(entry.getValue());
 
             ServiceOrder o = new ServiceOrder(user, orderRequest);
+            o.setLogisticType(ModelConstant.LOGISTIC_TYPE_USER);
             o.setGroupOrderId(groupId);
             
             //生成跟团号
@@ -1943,7 +1948,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	
     	log.info("requestRefund : " + refundVO);
     	
-    	Assert.hasText(refundVO.getRefundType(), "请选择退款类型");
+    	Assert.notNull(refundVO.getRefundType(), "请选择退款类型");
     	Assert.hasText(refundVO.getRefundReason(), "请选择退款原因。");
     	Assert.hasText(refundVO.getMemo(), "请填写退款描述");
     	
@@ -1971,28 +1976,55 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 		if (totalRefund.compareTo(total) > 0) {
 			throw new BizValidateException("退款超出订单总金额");
 		}
-		String memo = refundVO.getRefundReason();
-		memo += ";";
-		memo += refundVO.getMemo();
 //		o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
 		if (ModelConstant.ORDER_STATUS_PAYED!=o.getStatus() &&
         		ModelConstant.ORDER_STATUS_CONFIRM!=o.getStatus()&& 
         		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()) {
             throw new BizValidateException("当前订单状态不能进行退款操作");
         }
-        o.applyRefund(true, memo);
+        o.applyRefund(true);
         o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
         
         List<String> refundItemIds = refundVO.getItemList();
         List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(o);
+        int refundCount = 0;	//退款件数
         for (OrderItem orderItem : orderItems) {
         	String itemId = orderItem.getId() + "";
 			if (refundItemIds.contains(itemId)) {
-				orderItem.setIsRefund(2);
+				orderItem.setIsRefund(ModelConstant.ORDERITEM_REFUND_STATUS_APPLYREFUND);
+				orderItem.setRefundApplyType(refundVO.getRefundType());
+				orderItem.setRefundReason(refundVO.getRefundReason());
+				orderItem.setRefundMemo(refundVO.getMemo());
+				orderItem.setRefundApplyDate(new Date());
+				refundCount += orderItem.getCount();
 				orderItemRepository.save(orderItem);
 			}
 		}
+        
+        //保存退款记录
+        RefundRecord recorder = new RefundRecord();
+        recorder.setOrderId(o.getId());
+        recorder.setTotalCount(o.getCount());
+        recorder.setTotalAmt(o.getPrice());
+        recorder.setRefundAmt(refund.floatValue());	//本次退款金额
+        recorder.setRefundCount(refundCount);
+        recorder.setApplyType(refundVO.getRefundType());
+        recorder.setApplyReason(refundVO.getRefundReason());
+        recorder.setMemo(refundVO.getMemo());
+        recorder.setApplyDate(new Date());
+        Collections.sort(refundVO.getItemList());
+        StringBuffer bf = new StringBuffer();
+        for (String itemId : refundVO.getItemList()) {
+        	bf.append(itemId).append(",");
+		}
+        bf.deleteCharAt(bf.length()-1);
+        recorder.setItemIds(bf.toString());
+        recorder.setUserId(user.getId());
+        recorder.setOwnerId(o.getGroupLeaderId());
+        recorder.setRefundType(ModelConstant.REFUND_REASON_GROUP_USER_REFUND);
+        recorder.setRefundStatus(ModelConstant.ORDER_STATUS_APPLYREFUND);
+        refundRecordRepository.save(recorder);
 	}
 
     @Override
@@ -2022,11 +2054,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         		ModelConstant.ORDER_STATUS_APPLYREFUND!=o.getStatus()) {
             throw new BizValidateException("当前订单状态不能进行退款操作");
         }
-        String memo = refundVO.getRefundReason();
-		memo += ";";
-		memo += refundVO.getMemo();
 		if (ModelConstant.ORDER_STATUS_APPLYREFUND!=o.getStatus()) {
-			o.applyRefund(false, memo);
+			o.applyRefund(false);
 			serviceOrderRepository.save(o);	//修将状态修改为申请退款中
 		}
         BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());	//页面取出来的是分
@@ -2046,7 +2075,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         }
 
         ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
-        serviceOrderRequest.setMemo(memo);
+        serviceOrderRequest.setMemo(refundVO.getMemo());
         serviceOrderRequest.setRefundAmt(refund.toString());
         serviceOrderRequest.setTradeWaterId(o.getOrderNo());
 

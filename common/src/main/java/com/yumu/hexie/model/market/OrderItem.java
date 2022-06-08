@@ -1,5 +1,7 @@
 package com.yumu.hexie.model.market;
 
+import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -61,9 +63,14 @@ public class OrderItem  extends BaseModel {
 
 	private String code; //核销码
 	private int verifyStatus; //1核销 0未核销
-
-	private int isRefund = 0; //0未退款 1已退款
-
+	private int isRefund = 0; //0未退款 1已退款,2退款申请中
+	
+	private Date refundApplyDate;	//退款申请日期
+	private Integer refundApplyType;	//申请类型
+	private String refundReason;	//退款原因
+	private String refundMemo;	//退款补充说明
+	private String refundImages;	//逗号分割
+	
 	public OrderItem(){}
 	@Transient
 	public void fillDetail(SalePlan plan,Product product){
@@ -276,4 +283,36 @@ public class OrderItem  extends BaseModel {
 	public void setIsRefund(int isRefund) {
 		this.isRefund = isRefund;
 	}
+	public String getRefundMemo() {
+		return refundMemo;
+	}
+	public void setRefundMemo(String refundMemo) {
+		this.refundMemo = refundMemo;
+	}
+	public Integer getRefundApplyType() {
+		return refundApplyType;
+	}
+	public void setRefundApplyType(Integer refundApplyType) {
+		this.refundApplyType = refundApplyType;
+	}
+	public String getRefundReason() {
+		return refundReason;
+	}
+	public void setRefundReason(String refundReason) {
+		this.refundReason = refundReason;
+	}
+	public String getRefundImages() {
+		return refundImages;
+	}
+	public void setRefundImages(String refundImages) {
+		this.refundImages = refundImages;
+	}
+	public Date getRefundApplyDate() {
+		return refundApplyDate;
+	}
+	public void setRefundApplyDate(Date refundApplyDate) {
+		this.refundApplyDate = refundApplyDate;
+	}
+	
+	
 }

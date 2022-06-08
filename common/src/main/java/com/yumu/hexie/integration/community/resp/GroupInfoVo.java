@@ -11,7 +11,13 @@ import java.sql.Timestamp;
  * @create 2022-04-19 15:37
  */
 public class GroupInfoVo implements Serializable {
-    private BigInteger id; //团购ID
+	
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3204821576956366345L;
+	
+	private BigInteger id; //团购ID
     private BigInteger createDate; //创建时间
     private String description; //团购名称
     private String descriptionMore; //团描述
@@ -26,6 +32,8 @@ public class GroupInfoVo implements Serializable {
     private String groupDate; //团购创建日期转换
     private Float realityAmt; //已支付金额
     private Float refundAmt; //退款金额
+    private Integer currentNum;	//当前参团份数
+    
     private int followNum; //跟团人数
     private int cancelNum; //取消人数
     private int queryNum; //查看人数
@@ -33,7 +41,9 @@ public class GroupInfoVo implements Serializable {
     private String desc; //描述文字
     private String productImg; //团里面的图片地址
 
-    public GroupInfoVo(BigInteger id, BigInteger createDate, String description, String descriptionMore, Timestamp startDate, Timestamp endDate, Float price, Integer status, Integer groupStatus) {
+    public GroupInfoVo(BigInteger id, BigInteger createDate, String description, String descriptionMore, 
+    		Timestamp startDate, Timestamp endDate, Float price, Integer status, Integer groupStatus,
+    		Integer currentNum) {
         this.id = id;
         this.createDate = createDate;
         this.description = description;
@@ -43,6 +53,7 @@ public class GroupInfoVo implements Serializable {
         this.price = price;
         this.status = status;
         this.groupStatus = groupStatus;
+        this.currentNum = currentNum;
     }
 
     public BigInteger getId() {
@@ -189,27 +200,23 @@ public class GroupInfoVo implements Serializable {
         this.desc = desc;
     }
 
-    @Override
-    public String toString() {
-        return "GroupInfoVo{" +
-                "id=" + id +
-                ", createDate=" + createDate +
-                ", description='" + description + '\'' +
-                ", descriptionMore='" + descriptionMore + '\'' +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", price=" + price +
-                ", status=" + status +
-                ", groupStatus=" + groupStatus +
-                ", groupStatusCn='" + groupStatusCn + '\'' +
-                ", groupDate='" + groupDate + '\'' +
-                ", realityAmt=" + realityAmt +
-                ", refundAmt=" + refundAmt +
-                ", followNum=" + followNum +
-                ", cancelNum=" + cancelNum +
-                ", queryNum=" + queryNum +
-                ", desc='" + desc + '\'' +
-                ", productImg='" + productImg + '\'' +
-                '}';
-    }
+	public Integer getCurrentNum() {
+		return currentNum;
+	}
+
+	public void setCurrentNum(Integer currentNum) {
+		this.currentNum = currentNum;
+	}
+
+	@Override
+	public String toString() {
+		return "GroupInfoVo [id=" + id + ", createDate=" + createDate + ", description=" + description
+				+ ", descriptionMore=" + descriptionMore + ", startDate=" + startDate + ", endDate=" + endDate
+				+ ", price=" + price + ", status=" + status + ", groupStatus=" + groupStatus + ", groupStatusCn="
+				+ groupStatusCn + ", groupDate=" + groupDate + ", realityAmt=" + realityAmt + ", refundAmt=" + refundAmt
+				+ ", currentNum=" + currentNum + ", followNum=" + followNum + ", cancelNum=" + cancelNum + ", queryNum="
+				+ queryNum + ", desc=" + desc + ", productImg=" + productImg + "]";
+	}
+    
+    
 }

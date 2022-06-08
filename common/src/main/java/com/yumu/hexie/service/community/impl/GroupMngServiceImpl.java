@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -74,6 +75,9 @@ public class GroupMngServiceImpl implements GroupMngService {
     
     @Autowired
     private ProductRepository productRepository;
+    
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
@@ -147,19 +151,35 @@ public class GroupMngServiceImpl implements GroupMngService {
                             || serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_SENDED
                             || serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_RECEIVED
                             || serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_CONFIRM) {
-                        realityAmt += serviceOrder.getPrice();
-                    } else if (serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_REFUNDED) {
-                        refundAmt += serviceOrder.getPrice();
+                    	
+                    		realityAmt += serviceOrder.getPrice();
+                        
                     }
+	                if (serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_REFUNDED) {
+	                	Float refundedAmt = serviceOrder.getRefundAmt()==null?0F:serviceOrder.getRefundAmt();
+                		refundAmt += refundedAmt;
+	                }
                 }
 
                 info.setRealityAmt(realityAmt);
                 info.setRefundAmt(refundAmt);
 
-                //TODO 后面从缓存里取
-                info.setFollowNum(1);
-                info.setCancelNum(1);
-                info.setQueryNum(10);
+	            int totalOrdered = 0;	//被下单总次数
+	  			String totalOrderedStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ORDERED + info.getId());
+	  			if (!StringUtils.isEmpty(totalOrderedStr)) {
+	  				totalOrdered = Integer.parseInt(totalOrderedStr);
+	  			}
+	  			
+	  			int totalAccessed = 0;	//被下单总次数
+	  			String totalAccessedStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + info.getId());
+	  			if (!StringUtils.isEmpty(totalAccessedStr)) {
+	  				totalAccessed = Integer.parseInt(totalAccessedStr);
+	  			}
+	  			
+	  			info.setFollowNum(totalOrdered);
+	  			info.setCancelNum(info.getCurrentNum() - totalOrdered);
+	  			info.setQueryNum(totalAccessed);
+	  			
             }
             return list;
         } catch (Exception e) {
@@ -353,8 +373,8 @@ public class GroupMngServiceImpl implements GroupMngService {
 
         List<ServiceOrder> serviceOrderList = serviceOrderRepository.findByGroupRuleId(Long.parseLong(groupId));
         int validNum = serviceOrderList.size(); //有效订单数
-        float totalAmt = 0; //总金额
-        float refundAmt = 0; //退款金额
+        Float totalAmt = 0F; //总金额
+        Float refundAmt = 0F; //退款金额
         for (ServiceOrder serviceOrder : serviceOrderList) {
             if (serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_CANCEL) {
                 validNum = validNum - 1;
@@ -362,7 +382,8 @@ public class GroupMngServiceImpl implements GroupMngService {
             }
             totalAmt += serviceOrder.getPrice();
             if (serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_REFUNDED) {
-                refundAmt += serviceOrder.getPrice();
+            	Float refunded = serviceOrder.getRefundAmt()==null?0F:serviceOrder.getRefundAmt();
+                refundAmt += refunded;
             }
         }
         //有效订单 全部订单-取消的订单
@@ -393,18 +414,17 @@ public class GroupMngServiceImpl implements GroupMngService {
         List<Integer> status = new ArrayList<>();
         status.add(ModelConstant.ORDER_STATUS_PAYED);
         status.add(ModelConstant.ORDER_STATUS_CANCEL);
-        status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
-        status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_SENDED);
         status.add(ModelConstant.ORDER_STATUS_RECEIVED);
         status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
         status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+        status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_REFUNDED);
         List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(Long.parseLong(groupId), status);
         int totalNum = 0;
         int totalVerify = 0;
         List<GroupProductSumVo> vos = new ArrayList<>();
-        if (groupProductSumVos != null ) {
+        if (groupProductSumVos != null && groupProductSumVos.size() > 0) {
         	vos = ObjectToBeanUtils.objectToBean(groupProductSumVos, GroupProductSumVo.class);
             for (GroupProductSumVo vo : vos) {
                 totalNum += vo.getCount().intValue();
@@ -423,21 +443,36 @@ public class GroupMngServiceImpl implements GroupMngService {
     public List<GroupOrderVo> queryGroupOrder(User user, QueryGroupReq queryGroupReq) throws Exception {
         List<Integer> status = new ArrayList<>();
         String verifyStatus = ""; //是否核销
+        List<Integer> itemStatus = null;	//子项退款状态,默认0，未退款
         if ("0".equals(queryGroupReq.getOrderStatus())) { //查全部
             status.add(ModelConstant.ORDER_STATUS_PAYED);
             status.add(ModelConstant.ORDER_STATUS_CANCEL);
-            status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
-            status.add(ModelConstant.ORDER_STATUS_REFUNDING);
             status.add(ModelConstant.ORDER_STATUS_SENDED);
             status.add(ModelConstant.ORDER_STATUS_RECEIVED);
             status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
             status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+            status.add(ModelConstant.ORDER_STATUS_REFUNDING);
             status.add(ModelConstant.ORDER_STATUS_REFUNDED);
+            
         } else if ("1".equals(queryGroupReq.getOrderStatus())) { //查待核销的
             status.add(ModelConstant.ORDER_STATUS_PAYED);
             verifyStatus = "0";
+            
+            itemStatus = new ArrayList<>();
+            itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_PAID);
         } else if ("2".equals(queryGroupReq.getOrderStatus())) { //查退款申请
-            status.add(ModelConstant.ORDER_STATUS_CANCEL);
+//            status.add(ModelConstant.ORDER_STATUS_REFUNDING);
+//            status.add(ModelConstant.ORDER_STATUS_REFUNDED);
+        	
+        	status.add(ModelConstant.ORDER_STATUS_PAYED);
+        	status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+        	status.add(ModelConstant.ORDER_STATUS_SENDED);
+            status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+            
+            itemStatus = new ArrayList<>();
+            itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_APPLYREFUND);            
+            itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_REFUNDING);
+            itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_REFUNDED);
         } else {
             throw new BizValidateException("不合法的参数类型");
         }
@@ -448,7 +483,8 @@ public class GroupMngServiceImpl implements GroupMngService {
         Sort sort = Sort.by(sortList);
         Pageable pageable = PageRequest.of(queryGroupReq.getCurrentPage(), 10, sort);
 
-        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(Long.parseLong(queryGroupReq.getGroupId()), status, verifyStatus, pageable);
+        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(Long.parseLong(queryGroupReq.getGroupId()), status, verifyStatus, 
+        			itemStatus, pageable);
         List<GroupOrderVo> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOrderVo.class);
         if (list != null) {
             for (GroupOrderVo vo : list) {

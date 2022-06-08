@@ -29,8 +29,10 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     		+ "join orderItem o on o.orderId = p.id "
     		+ "where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 "
     		+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
-    		+ "and p.groupOrderId is not null order by id desc", nativeQuery = true)
-    List<ServiceOrder> findByUserAndStatusAndTypeV3(long userId, List<Integer> statuses, int orderType, String productName);
+    		+ "and (COALESCE(?5) IS NULL OR (o.isRefund IN (?5) )) "
+    		+ "and p.groupOrderId is not null order by id desc "
+    		, nativeQuery = true)
+    List<ServiceOrder> findByUserAndStatusAndTypeV3(long userId, List<Integer> status, int orderType, String productName, List<Integer> itemStatus);
 
     @Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.orderType in ?2 order by id desc", nativeQuery = true)
     List<ServiceOrder> findByUserIdAndOrderType(long userId, List<Integer> types);
@@ -240,15 +242,17 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     //分页查询团购订单
     String sqlCol = "o.groupNum, o.id as orderId, o.orderNo, o.status, o.payDate, o.count, o.price, o.receiverName, " +
-            "o.tel, o.address, o.logisticType, o.memo, o.userId ";
+            "o.tel, o.address, o.logisticType, o.memo, o.userId, o.refundType ";
     @Query(value = "select distinct " + sqlCol + " from serviceorder o "
             + "join orderItem i on o.id = i.orderId "
             + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
+            + "and (COALESCE(?4) IS NULL OR (i.isRefund IN (?4) )) "
             , countQuery = "select count(1) from serviceorder o "
             + "join orderItem i on o.id = i.orderId "
             + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
+            + "and (COALESCE(?4) IS NULL OR (i.isRefund IN (?4) )) "
             , nativeQuery = true)
-    Page<Object[]> findByGroupRuleIdPage(long ruleId, List<Integer> status, String verifyStatus, Pageable pageable);
+    Page<Object[]> findByGroupRuleIdPage(long ruleId, List<Integer> status, String verifyStatus, List<Integer> itemStatus, Pageable pageable);
 
     //根据订单和团长ID查询订单
     ServiceOrder findByIdAndGroupLeaderId(long orderId, long groupLeaderId);

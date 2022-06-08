@@ -523,23 +523,33 @@ public class OrderController extends BaseController{
 			@PathVariable String statusType, @RequestParam(required = false) String searchName) throws Exception {
 		
 		List<Integer> status = new ArrayList<>();
-		if("1".equalsIgnoreCase(statusType)){
+		List<Integer> itemStatus = null;
+		if("1".equalsIgnoreCase(statusType)){	//待支付
 			status.add(ModelConstant.ORDER_STATUS_INIT);
-		}else if("2".equalsIgnoreCase(statusType)){
+		}else if("2".equalsIgnoreCase(statusType)){	//发货
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
 			status.add(ModelConstant.ORDER_STATUS_SENDED);
 			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
 			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
-		}else if("3".equalsIgnoreCase(statusType)){
-			status.add(ModelConstant.ORDER_STATUS_REFUNDING);
-			status.add(ModelConstant.ORDER_STATUS_RETURNED);
-			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
-//			status.add(ModelConstant.ORDER_STATUS_CANCEL);
-		}else if("0".equalsIgnoreCase(statusType)){
+			
+			itemStatus = new ArrayList<>();
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_PAID);
+			
+		}else if("3".equalsIgnoreCase(statusType)){	//售后
+			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+			
+			itemStatus = new ArrayList<>();
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_APPLYREFUND);
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_REFUNDING);
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_REFUNDED);
+			
+		}else if("0".equalsIgnoreCase(statusType)){	//全部
 			status.add(ModelConstant.ORDER_STATUS_INIT);
 			status.add(ModelConstant.ORDER_STATUS_PAYED);
 			status.add(ModelConstant.ORDER_STATUS_CANCEL);
-			status.add(ModelConstant.ORDER_STATUS_APPLYREFUND);
 			status.add(ModelConstant.ORDER_STATUS_REFUNDING);
 			status.add(ModelConstant.ORDER_STATUS_SENDED);
 			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
@@ -548,7 +558,7 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
 		} 
 		
-		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName));
+		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName, itemStatus));
     }
 	
 	/**
@@ -560,6 +570,21 @@ public class OrderController extends BaseController{
 	@ResponseBody
 	public BaseResult<String> requestRefund(@ModelAttribute(Constants.USER)User user, @RequestBody RefundVO refundVO) throws Exception {
 		
+		baseOrderService.requestRefund(user, refundVO);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 获取退款原因
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/order/refund2", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> requestRefund(@RequestBody RefundVO refundVO) throws Exception {
+		
+		User user = new User();
+		user.setId(125417);
 		baseOrderService.requestRefund(user, refundVO);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
