@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.OrderNoUtil;
 import com.yumu.hexie.integration.common.CommonPayRequest;
 import com.yumu.hexie.integration.common.CommonPayRequest.SubOrder;
@@ -1988,6 +1990,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         
         List<String> refundItemIds = refundVO.getItemList();
         List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(o);
+        List<Map<String, String>> refundItems = new ArrayList<>();
         int refundCount = 0;	//退款件数
         for (OrderItem orderItem : orderItems) {
         	String itemId = orderItem.getId() + "";
@@ -1998,6 +2001,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 				orderItem.setRefundMemo(refundVO.getMemo());
 				orderItem.setRefundApplyDate(new Date());
 				refundCount += orderItem.getCount();
+				
+				String productName = orderItem.getProductName();
+				String unitRefundAmt = String.valueOf(orderItem.getPrice());
+				Map<String, String> detailMap = new HashMap<>();
+				detailMap.put("itemId", itemId);
+				detailMap.put("productName", productName);
+				detailMap.put("refundAmt", unitRefundAmt);
+				refundItems.add(detailMap);
 				orderItemRepository.save(orderItem);
 			}
 		}
@@ -2005,25 +2016,22 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         //保存退款记录
         RefundRecord recorder = new RefundRecord();
         recorder.setOrderId(o.getId());
-        recorder.setTotalCount(o.getCount());
-        recorder.setTotalAmt(o.getPrice());
         recorder.setRefundAmt(refund.floatValue());	//本次退款金额
         recorder.setRefundCount(refundCount);
         recorder.setApplyType(refundVO.getRefundType());
         recorder.setApplyReason(refundVO.getRefundReason());
         recorder.setMemo(refundVO.getMemo());
-        recorder.setApplyDate(new Date());
-        Collections.sort(refundVO.getItemList());
-        StringBuffer bf = new StringBuffer();
-        for (String itemId : refundVO.getItemList()) {
-        	bf.append(itemId).append(",");
-		}
-        bf.deleteCharAt(bf.length()-1);
-        recorder.setItemIds(bf.toString());
+        ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+        String itemStr = objectMapper.writeValueAsString(refundItems);
+        recorder.setItems(itemStr);
+        
         recorder.setUserId(user.getId());
         recorder.setOwnerId(o.getGroupLeaderId());
         recorder.setRefundType(ModelConstant.REFUND_REASON_GROUP_USER_REFUND);
-        recorder.setRefundStatus(ModelConstant.ORDER_STATUS_APPLYREFUND);
+        recorder.setStatus(ModelConstant.REFUND_STATUS_USER_INIT);
+        recorder.setOperatorName(user.getName());
+        recorder.setOperatorDate(new Date()); 
+        recorder.setOperation(ModelConstant.REFUND_OPERATION_OWNER_APPLY);
         refundRecordRepository.save(recorder);
 	}
 
@@ -2047,18 +2055,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
         }
         
-        
         if (ModelConstant.ORDER_STATUS_PAYED!=o.getStatus() &&
         		ModelConstant.ORDER_STATUS_CONFIRM!=o.getStatus()&& 
-        		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()&&
-        		ModelConstant.ORDER_STATUS_APPLYREFUND!=o.getStatus()) {
+        		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()) {
             throw new BizValidateException("当前订单状态不能进行退款操作");
         }
-		if (ModelConstant.ORDER_STATUS_APPLYREFUND!=o.getStatus()) {
-			o.applyRefund(false);
-			serviceOrderRepository.save(o);	//修将状态修改为申请退款中
-		}
-        BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());	//页面取出来的是分
+		BigDecimal refund = new BigDecimal(refundVO.getRefundAmt());	//页面取出来的是分
         refund = refund.divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
         Float refundAmtF = o.getRefundAmt();
 		if (refundAmtF == null) {
@@ -2078,15 +2080,68 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         serviceOrderRequest.setMemo(refundVO.getMemo());
         serviceOrderRequest.setRefundAmt(refund.toString());
         serviceOrderRequest.setTradeWaterId(o.getOrderNo());
-
         serviceOrderRequest.setItems(bf.toString());
         eshopUtil.requestPartRefund(user, serviceOrderRequest);
 
+        o.applyRefund(false);
         o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
-        o.refunding();
-        o.setRefundAmt(totalRefund.floatValue());
+//        o.refunding();
+//        o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
-        commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
+//        commonPostProcess(ModelConstant.ORDER_OP_REFUND_REQ, o);
+    }
+    
+    /**
+     * 退款审核通过
+     * @throws Exception 
+     */
+    @Transactional
+    @Override
+    public void passRefundAudit(User user, String recorderIdstr) throws Exception {
+    	
+    	Assert.hasText(recorderIdstr, "退款申请id不能为空。");
+    	
+    	long recorderId = Long.valueOf(recorderIdstr);
+    	
+    	RefundRecord record = refundRecordRepository.findById(recorderId);
+    	List<Map<String, String>> itemList = record.getItemList();
+    	List<String> itemIds = new ArrayList<>();
+    	for (Map<String, String> itemMap : itemList) {
+			String itemId = itemMap.get("itemId");
+			itemIds.add(itemId);
+		}
+    	
+    	ServiceOrder o = serviceOrderRepository.findById(record.getOrderId());
+    	if (ModelConstant.ORDER_STATUS_PAYED!=o.getStatus() &&
+        		ModelConstant.ORDER_STATUS_CONFIRM!=o.getStatus()&& 
+        		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()) {
+            throw new BizValidateException("当前订单状态不能进行退款操作");
+        }
+    	
+    	
+    	StringBuffer bf = new StringBuffer();
+    	List<OrderItem> orderItems = orderItemRepository.findByServiceOrderAndIdIn(o, itemIds);
+        for(OrderItem item : orderItems) {
+            bf.append(item.getProductId()).append(",");
+        }
+        
+        ServiceOrderRequest serviceOrderRequest = new ServiceOrderRequest();
+        serviceOrderRequest.setMemo(record.getMemo());
+        serviceOrderRequest.setRefundAmt(String.valueOf(record.getRefundAmt()));
+        serviceOrderRequest.setTradeWaterId(o.getOrderNo());
+        serviceOrderRequest.setItems(bf.toString());
+        eshopUtil.requestPartRefund(user, serviceOrderRequest);
+        
+        o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
+        serviceOrderRepository.save(o);
+        
+        RefundRecord latestRec = new RefundRecord();
+        BeanUtils.copyProperties(record, latestRec, "id", "createDate");
+        latestRec.setStatus(ModelConstant.REFUND_STATUS_AUDIT_PASSED);
+        latestRec.setOperatorName(user.getName());
+        latestRec.setOperatorDate(new Date());
+        latestRec.setOperation(ModelConstant.REFUND_OPERATION_PASS_AUDIT);
+        refundRecordRepository.save(latestRec);
     }
 
 

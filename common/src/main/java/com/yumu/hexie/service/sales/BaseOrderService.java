@@ -101,5 +101,8 @@ public interface BaseOrderService {
 
 	//团购退款，包含直接退款和用户退款审核后退款
     void requestRefundByOwner(User user, RefundVO refundVO) throws Exception;
+
+    //退款审核通过
+	void passRefundAudit(User user, String recorderIdstr) throws Exception;
 	
 }

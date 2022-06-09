@@ -10,6 +10,7 @@ import com.yumu.hexie.integration.community.resp.GroupOrderVo;
 import com.yumu.hexie.integration.community.resp.GroupSumResp;
 import com.yumu.hexie.model.commonsupport.info.ProductDepot;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
+import com.yumu.hexie.model.market.RefundRecord;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.community.GroupMngService;
@@ -340,5 +341,34 @@ public class GroupMngController extends BaseController {
     public BaseResult<List<ProductDepot>> saveDepotFromSales(@ModelAttribute(Constants.USER) User user, @RequestBody String productIds) {
         List<ProductDepot> depotList = groupMngService.saveDepotFromSales(user, productIds);
         return BaseResult.successResult(depotList);
+    }
+    
+    
+    /**
+     * 从已经发布的团购中导入商品
+     * @param user
+     * @param productDepotReq
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/refund/apply/{orderId}", method = RequestMethod.GET)
+    public BaseResult<List<RefundRecord>> getRefundApply(@ModelAttribute(Constants.USER) User user, @PathVariable String orderId) {
+        List<RefundRecord> refundRecords = groupMngService.getRefundApply(user, orderId);
+        return BaseResult.successResult(refundRecords);
+    }
+    
+    
+    /**
+     * 退款审核通过
+     * @param user
+     * @param productDepotReq
+     * @return
+     * @throws Exception 
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/refund/passaudit/{recorderId}", method = RequestMethod.POST)
+    public BaseResult<String> passRefundAudit(@ModelAttribute(Constants.USER) User user, @PathVariable String recorderId) throws Exception {
+        baseOrderService.passRefundAudit(user, recorderId);
+        return BaseResult.successResult(Constants.PAGE_SUCCESS);
     }
 }

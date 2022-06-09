@@ -9,6 +9,7 @@ import com.yumu.hexie.integration.community.resp.GroupOrderVo;
 import com.yumu.hexie.integration.community.resp.GroupSumResp;
 import com.yumu.hexie.model.commonsupport.info.ProductDepot;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
+import com.yumu.hexie.model.market.RefundRecord;
 import com.yumu.hexie.model.user.User;
 
 import java.util.List;
@@ -75,4 +76,6 @@ public interface GroupMngService {
     String operGroupByOutSid(String groupId, String operType);
 
 	List<ProductDepot> saveDepotFromSales(User user, String productIds);
+
+	List<RefundRecord> getRefundApply(User user, String oid);
 }

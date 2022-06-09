@@ -520,4 +520,25 @@ public class ModelConstant {
 	public static final Integer ORDERITEM_REFUND_STATUS_REFUNDED = 1;	//已退款
 	public static final Integer ORDERITEM_REFUND_STATUS_REFUNDING = 2;	//退款中
 	public static final Integer ORDERITEM_REFUND_STATUS_APPLYREFUND = 3;	//退款审核中
+	
+	public static final Integer REFUND_STATUS_CANCEL = 0;	//申请撤销
+	public static final Integer REFUND_STATUS_USER_INIT = 1;	//用户发起申请待团长审核
+	public static final Integer REFUND_STATUS_OWNER_INIT = 2;	//团长发起退款，不需要审核，直接跳到状态5
+	public static final Integer REFUND_STATUS_AUDIT_PASSED = 3;	//团长审核通过
+	public static final Integer REFUND_STATUS_AUDIT_REJECTED = 4;	//团长审核驳回
+	public static final Integer REFUND_STATUS_SYS_REFUNDING = 5;	//系统退款中,如果是团长发起退款，直接走到这步
+	public static final Integer REFUND_STATUS_REFUNDED = 6;	//退款成功
+	
+	public static final Integer REFUND_OPERATION_USER_APPLY = 0;	//用户申请
+	public static final Integer REFUND_OPERATION_OWNER_APPLY = 1;	//团长申请
+	public static final Integer REFUND_OPERATION_CANCEL = 2;	//撤销申请
+	public static final Integer REFUND_OPERATION_MODIFY = 3;	//修改申请
+	public static final Integer REFUND_OPERATION_PASS_AUDIT = 4;	//申请审核通过
+	public static final Integer REFUND_OPERATION_REJECT_AUDIT = 5;	//申请审核拒绝
+	public static final Integer REFUND_OPERATION_WITHDRAW_REFUND = 6;	//取消商品并退款？（快团团有这个）
+	public static final Integer REFUND_OPERATION_REFUNDED = 7;	//退款完成
+	
+	
+	
+
 }		

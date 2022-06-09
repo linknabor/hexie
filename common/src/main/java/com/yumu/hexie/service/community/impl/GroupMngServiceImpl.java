@@ -14,6 +14,8 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.*;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
+import com.yumu.hexie.model.market.RefundRecord;
+import com.yumu.hexie.model.market.RefundRecordRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
@@ -30,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +81,9 @@ public class GroupMngServiceImpl implements GroupMngService {
     
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    
+    @Autowired
+    private RefundRecordRepository refundRecordRepository;
 
     @Override
     public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
@@ -773,6 +779,23 @@ public class GroupMngServiceImpl implements GroupMngService {
     		depotList.add(depot);
 		}
         return depotList;
+    }
+    
+    /**
+     * 获取退款申请记录
+     * @param user
+     * @param productIds
+     * @return
+     */
+    @Override
+    public List<RefundRecord> getRefundApply(User user, String oid) {
+    	
+    	Assert.hasText(oid, "请选择要退款的商品");
+    	long orderId = Long.valueOf(oid);
+    	Sort sort = Sort.by(Direction.DESC, "id");
+    	List<RefundRecord> records = refundRecordRepository.findByOrderId(orderId, sort);
+    	return records;
+    	
     }
     
     
