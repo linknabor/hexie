@@ -1116,17 +1116,23 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             /*1.团购订单处理*/
             //团购支持部分退款，所以这个需要进行判断；没没全部退主订单的状态不变，只改子订单的状态
             boolean isAllUpdate = true;
+            Float totalRefundAmt = 0F;
             int count = serviceOrder.getCount();
             if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
                 RgroupRule rule = (RgroupRule) salePlanService.getService(serviceOrder.getOrderType()).findSalePlan(serviceOrder.getGroupRuleId());
 
                 //根据商品ID查询退的的数量
-                List<String> list = Arrays.asList(productIds.split(","));
-                List<OrderItem> orderItems = orderItemRepository.findByServiceOrderAndProductIdIn(serviceOrder, list);
+                List<Long> proids = new ArrayList<>();
+                String[]idArr = productIds.split(",");
+                for (String proid : idArr) {
+                	proids.add(Long.valueOf(proid));
+				}
+                List<OrderItem> orderItems = orderItemRepository.findByServiceOrderAndProductIdIn(serviceOrder, proids);
                 count = 0;
                 for(OrderItem item : orderItems) {
                     count += item.getCount();
-                    item.setIsRefund(1);
+                    totalRefundAmt += item.getPrice();
+                    item.setIsRefund(ModelConstant.ORDERITEM_REFUND_STATUS_REFUNDED);
                     orderItemRepository.save(item);
                 }
                 if (ModelConstant.RGROUP_STAUS_GROUPING == rule.getGroupStatus()) {
@@ -1142,6 +1148,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
             /*2.修改订单状态为已退款*/
             if(isAllUpdate) {
+            	Float refundAmt = serviceOrder.getRefundAmt();
+            	if (refundAmt == null) {
+            		serviceOrder.setRefundAmt(totalRefundAmt);
+				}
+            	serviceOrder.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
                 serviceOrder.setStatus(ModelConstant.ORDER_STATUS_REFUNDED);
                 serviceOrder.setRefundDate(new Date());
                 serviceOrderRepository.save(serviceOrder);
@@ -2049,7 +2060,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         List<OrderItem> itemListAll = orderItemRepository.findByServiceOrder(o);
         if(itemListAll.size() != refundVO.getItemList().size()) {
             //部分退
-            List<OrderItem> itemList = orderItemRepository.findByServiceOrderAndIdIn(o, refundVO.getItemList());
+        	List<Long>itemIds = new ArrayList<>();
+        	for (String itemId : refundVO.getItemList()) {
+        		itemIds.add(Long.valueOf(itemId));
+			}
+            List<OrderItem> itemList = orderItemRepository.findByServiceOrderAndIdIn(o, itemIds);
             for(OrderItem item : itemList) {
                 bf.append(item.getProductId()).append(",");
             }
@@ -2105,10 +2120,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	
     	RefundRecord record = refundRecordRepository.findById(recorderId);
     	List<Map<String, String>> itemList = record.getItemList();
-    	List<String> itemIds = new ArrayList<>();
+    	List<Long> itemIds = new ArrayList<>();
     	for (Map<String, String> itemMap : itemList) {
 			String itemId = itemMap.get("itemId");
-			itemIds.add(itemId);
+			itemIds.add(Long.valueOf(itemId));
 		}
     	
     	ServiceOrder o = serviceOrderRepository.findById(record.getOrderId());
@@ -2144,5 +2159,35 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         refundRecordRepository.save(latestRec);
     }
 
+    /**
+     * 退款审核拒绝
+     * @throws Exception 
+     */
+    @Transactional
+    @Override
+    public void rejectRefundAudit(User user, String recorderIdstr, String memo) throws Exception {
+    	
+    	Assert.hasText(recorderIdstr, "退款申请id不能为空。");
+    	
+    	long recorderId = Long.valueOf(recorderIdstr);
+    	
+    	RefundRecord record = refundRecordRepository.findById(recorderId);
+
+    	ServiceOrder o = serviceOrderRepository.findById(record.getOrderId());
+    	if (ModelConstant.ORDER_STATUS_PAYED!=o.getStatus() &&
+        		ModelConstant.ORDER_STATUS_CONFIRM!=o.getStatus()&& 
+        		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()) {
+            throw new BizValidateException("订单状态[]"+o.getStatus()+"不能进行当前操作");
+        }
+    	
+        RefundRecord latestRec = new RefundRecord();
+        BeanUtils.copyProperties(record, latestRec, "id", "createDate");
+        latestRec.setStatus(ModelConstant.REFUND_STATUS_AUDIT_REJECTED);
+        latestRec.setOperatorName(user.getName());
+        latestRec.setOperatorDate(new Date());
+        latestRec.setOperation(ModelConstant.REFUND_OPERATION_REJECT_AUDIT);
+        latestRec.setMemo(memo);
+        refundRecordRepository.save(latestRec);
+    }
 
 }

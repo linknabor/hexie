@@ -371,4 +371,19 @@ public class GroupMngController extends BaseController {
         baseOrderService.passRefundAudit(user, recorderId);
         return BaseResult.successResult(Constants.PAGE_SUCCESS);
     }
+    
+    /**
+     * 退款审核拒绝
+     * @param user
+     * @param productDepotReq
+     * @return
+     * @throws Exception 
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/refund/rejectaudit/{recorderId}", method = RequestMethod.POST)
+    public BaseResult<String> rejectRefundAudit(@ModelAttribute(Constants.USER) User user, @PathVariable String recorderId,
+    		@RequestBody String memo) throws Exception {
+        baseOrderService.rejectRefundAudit(user, recorderId, memo);
+        return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
 }

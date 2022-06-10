@@ -104,5 +104,8 @@ public interface BaseOrderService {
 
     //退款审核通过
 	void passRefundAudit(User user, String recorderIdstr) throws Exception;
+
+	//退款审核拒绝
+	void rejectRefundAudit(User user, String recorderIdstr, String memo) throws Exception;
 	
 }
