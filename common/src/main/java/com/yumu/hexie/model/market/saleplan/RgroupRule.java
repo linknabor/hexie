@@ -158,6 +158,6 @@ public class RgroupRule extends SalePlan {
 	public void setOwnerSect(String ownerSect) {
 		this.ownerSect = ownerSect;
 	}
-	
+
 	
 }

@@ -16,6 +16,7 @@ public class ProductDepotReq {
     private float oriPrice;//划线价
     private float singlePrice;//售卖价
     private String tags; //标签
+    private String specs;	//规格
 
     public String getProductId() {
         return productId;
@@ -89,18 +90,20 @@ public class ProductDepotReq {
         this.totalCount = totalCount;
     }
 
-    @Override
-    public String toString() {
-        return "ProductDepotReq{" +
-                "productId='" + productId + '\'' +
-                ", name='" + name + '\'' +
-                ", serviceDesc='" + serviceDesc + '\'' +
-                ", pictures='" + pictures + '\'' +
-                ", totalCount='" + totalCount + '\'' +
-                ", miniPrice=" + miniPrice +
-                ", oriPrice=" + oriPrice +
-                ", singlePrice=" + singlePrice +
-                ", tags='" + tags + '\'' +
-                '}';
-    }
+	public String getSpecs() {
+		return specs;
+	}
+
+	public void setSpecs(String specs) {
+		this.specs = specs;
+	}
+
+	@Override
+	public String toString() {
+		return "ProductDepotReq [productId=" + productId + ", name=" + name + ", serviceDesc=" + serviceDesc
+				+ ", pictures=" + pictures + ", totalCount=" + totalCount + ", miniPrice=" + miniPrice + ", oriPrice="
+				+ oriPrice + ", singlePrice=" + singlePrice + ", tags=" + tags + ", specs=" + specs + "]";
+	}
+    
+    
 }

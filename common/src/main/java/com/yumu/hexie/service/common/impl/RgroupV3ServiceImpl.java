@@ -152,6 +152,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				
 				rgroupOwner.setUserId(owner.getOwnerId());
 				rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
+				rgroupOwner.setMiniappid(ownerUser.getMiniAppId());
 				rgroupOwnerRepository.save(rgroupOwner);
 				
 				ownerUser.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
@@ -308,6 +309,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				if (!StringUtils.isEmpty(productView.getDepotId())) {
 					product.setDepotId(Long.valueOf(productView.getDepotId()));
 				}
+				product.setSpecs(productView.getSpecs());
 				productRepository.save(product);
 				
 				ProductRule productRule = productRuleRepository.findByRuleIdAndProductId(rule.getId(), product.getId());
@@ -538,6 +540,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					Tag[]tags = objectMapper.readValue(tagStr, tagRefer);
 					proVo.setTags(tags);
 				}
+				proVo.setSpecs(product.getSpecs());
 				proVoList.add(proVo);
 			}
 			vo.setProductList(proVoList.toArray(new ProductVO[0]));

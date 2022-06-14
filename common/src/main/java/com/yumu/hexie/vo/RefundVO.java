@@ -11,17 +11,17 @@ public class RefundVO implements Serializable {
 	private static final long serialVersionUID = 3848131415323164075L;
 	
 	private long orderId;
-	private String refundType;
+	private Integer refundType;
 	private String refundReason;
 	private String memo;
 	private String refundAmt;
 	private List<String> pictures;
 	private List<String> itemList;	//orderItem的id
 	
-	public String getRefundType() {
+	public Integer getRefundType() {
 		return refundType;
 	}
-	public void setRefundType(String refundType) {
+	public void setRefundType(Integer refundType) {
 		this.refundType = refundType;
 	}
 	public String getRefundReason() {

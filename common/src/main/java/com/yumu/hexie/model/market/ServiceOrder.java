@@ -103,10 +103,10 @@ public class ServiceOrder  extends BaseModel {
 	/**团购状态*/
 
 	//团长信息
-	private long groupLeaderId;	//团长id，运营端人员id
+	private long groupLeaderId;	//团长id
 	private String groupLeader;	//团长名字
 	private String groupLeaderAddr;	//团长地址
-	private String groupLeaderTel;	//团战电话
+	private String groupLeaderTel;	//团长电话
 
 	//产品冗余信息
 	private long merchantId;
@@ -134,7 +134,6 @@ public class ServiceOrder  extends BaseModel {
 	private long closeTime;//超时支付时间，超出则取消订单
 	private long updateDate;
 	private Date payDate;
-	private Date applyRefundDate;	//申请退款日期
 	private Date refundDate;
 	private Date returnDate;
 	private Date acceptedDate;	//接单日期
@@ -160,7 +159,6 @@ public class ServiceOrder  extends BaseModel {
 	private Long groupOrderId;	//拆单的情况下，这个作为支付订单关联的id
 
 	private int groupNum; //团购号，以团购为单位，每个团购的顺序号
-	private String refundMemo;	//退款备注
 	private Float refundAmt;	//已退金额
 
 	@JsonIgnore
@@ -290,7 +288,6 @@ public class ServiceOrder  extends BaseModel {
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"待付款");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");
-		STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款申请中");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");
 		STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");
@@ -306,8 +303,7 @@ public class ServiceOrder  extends BaseModel {
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_INIT,"未接单");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_PAYED,"已支付");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL ,"已取消");
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_APPLYREFUND,"退款中");
-		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款申请中");
+		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_REFUNDING ,"退款中");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_SENDED,"已发货");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_RECEIVED,"已签收");
 		SERVICE_ORDER_STATUSMAP.put(ModelConstant.ORDER_STATUS_CANCEL_BACKEND,"已取消");
@@ -431,11 +427,8 @@ public class ServiceOrder  extends BaseModel {
 		setUpdateDate(System.currentTimeMillis());
 	}
 	@Transient
-	public void applyRefund(boolean userRequest, String memo) {
-		setApplyRefundDate(new Date());
-		setStatus(ModelConstant.ORDER_STATUS_APPLYREFUND);
+	public void applyRefund(boolean userRequest) {
 		setRefundType(userRequest?ModelConstant.REFUND_REASON_GROUP_USER_REFUND:ModelConstant.REFUND_REASON_GROUP_OWNER_REFUND);
-		setRefundMemo(memo);
 		setUpdateDate(System.currentTimeMillis());
 	}
 	@Transient
@@ -1086,24 +1079,11 @@ public class ServiceOrder  extends BaseModel {
 	public void setMiniappid(String miniappid) {
 		this.miniappid = miniappid;
 	}
-	public String getRefundMemo() {
-		return refundMemo;
-	}
-	public void setRefundMemo(String refundMemo) {
-		this.refundMemo = refundMemo;
-	}
 	public Float getRefundAmt() {
 		return refundAmt;
 	}
 	public void setRefundAmt(Float refundAmt) {
 		this.refundAmt = refundAmt;
 	}
-	public Date getApplyRefundDate() {
-		return applyRefundDate;
-	}
-	public void setApplyRefundDate(Date applyRefundDate) {
-		this.applyRefundDate = applyRefundDate;
-	}
-	
 
 }
