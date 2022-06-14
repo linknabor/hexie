@@ -40,6 +40,7 @@ public class ProductRuleCache implements Serializable {
 	private String serviceDesc; // 描述
 	private int demo; // 是否样板，0否，1是
 	private int totalCount; // 库存
+	private String specs;	//规格
 	// 物业或代理商信息
 	private long agentId;
 
@@ -277,6 +278,14 @@ public class ProductRuleCache implements Serializable {
 
 	public void setUserLimitCount(int userLimitCount) {
 		this.userLimitCount = userLimitCount;
+	}
+
+	public String getSpecs() {
+		return specs;
+	}
+
+	public void setSpecs(String specs) {
+		this.specs = specs;
 	}
 	
 	

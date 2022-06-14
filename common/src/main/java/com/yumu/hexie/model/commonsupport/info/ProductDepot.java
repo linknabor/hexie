@@ -71,6 +71,7 @@ public class ProductDepot extends BaseModel {
 
 	private int userLimitCount;	//单个用户购买限制	
 	private String tags;	//商品标签
+	private String specs;	//商品规格
 	
 	@Transient
 	private boolean isService = false;
@@ -363,12 +364,17 @@ public class ProductDepot extends BaseModel {
 	public void setTags(String tags) {
 		this.tags = tags;
 	}
-
 	public long getOwnerId() {
 		return ownerId;
 	}
-
 	public void setOwnerId(long ownerId) {
 		this.ownerId = ownerId;
 	}
+	public String getSpecs() {
+		return specs;
+	}
+	public void setSpecs(String specs) {
+		this.specs = specs;
+	}
+	
 }
