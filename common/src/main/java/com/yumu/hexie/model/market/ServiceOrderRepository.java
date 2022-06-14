@@ -241,7 +241,7 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     List<Object[]> findProductSum(long groupRuleId, List<Integer> status);
 
     //分页查询团购订单
-    String sqlCol = "o.groupNum, o.id as orderId, o.orderNo, o.status, o.payDate, o.count, o.price, o.receiverName, " +
+    String sqlCol = "o.groupNum, o.id as orderId, o.orderNo, o.status, o.payDate, o.createDate, o.count, o.price, o.receiverName, " +
             "o.tel, o.address, o.logisticType, o.memo, o.userId, o.refundType ";
     @Query(value = "select distinct " + sqlCol + " from serviceorder o "
             + "join orderItem i on o.id = i.orderId "

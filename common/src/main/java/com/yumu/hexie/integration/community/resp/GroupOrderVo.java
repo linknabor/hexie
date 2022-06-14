@@ -18,6 +18,7 @@ public class GroupOrderVo {
     private String orderNo; //订单编号
     private Integer status; //订单状态
     private Timestamp payDate; //支付日期
+    private BigInteger createDate; //创建日期
     private Integer count; //购买件数
     private Float price; //订单金额
     private String receiverName; //收货人
@@ -40,13 +41,14 @@ public class GroupOrderVo {
 
     }
 
-    public GroupOrderVo(Integer groupNum, BigInteger id, String orderNo, Integer status, Timestamp payDate, Integer count, Float price, 
+    public GroupOrderVo(Integer groupNum, BigInteger id, String orderNo, Integer status, Timestamp payDate, BigInteger createDate, Integer count, Float price, 
     		String receiverName, String tel, String address, Integer logisticType, String memo, BigInteger userId, Integer refundType) {
         this.groupNum = groupNum;
         this.id = id;
         this.orderNo = orderNo;
         this.status = status;
         this.payDate = payDate;
+        this.createDate = createDate;
         this.count = count;
         this.price = price;
         this.receiverName = receiverName;
@@ -218,15 +220,24 @@ public class GroupOrderVo {
 		this.refundType = refundType;
 	}
 
+	public BigInteger getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(BigInteger createDate) {
+		this.createDate = createDate;
+	}
+
 	@Override
 	public String toString() {
 		return "GroupOrderVo [groupNum=" + groupNum + ", id=" + id + ", orderNo=" + orderNo + ", status=" + status
-				+ ", payDate=" + payDate + ", count=" + count + ", price=" + price + ", receiverName=" + receiverName
-				+ ", tel=" + tel + ", address=" + address + ", logisticType=" + logisticType + ", memo=" + memo
-				+ ", userId=" + userId + ", refundType=" + refundType + ", statusCn=" + statusCn + ", userName="
-				+ userName + ", userHead=" + userHead + ", logisticTypeCn=" + logisticTypeCn + ", orderDate="
-				+ orderDate + ", orderItems=" + orderItems + "]";
+				+ ", payDate=" + payDate + ", createDate=" + createDate + ", count=" + count + ", price=" + price
+				+ ", receiverName=" + receiverName + ", tel=" + tel + ", address=" + address + ", logisticType="
+				+ logisticType + ", memo=" + memo + ", userId=" + userId + ", refundType=" + refundType + ", statusCn="
+				+ statusCn + ", userName=" + userName + ", userHead=" + userHead + ", logisticTypeCn=" + logisticTypeCn
+				+ ", orderDate=" + orderDate + ", orderItems=" + orderItems + "]";
 	}
-    
+
+	
     
 }

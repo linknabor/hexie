@@ -41,6 +41,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -366,6 +367,14 @@ public class GroupMngServiceImpl implements GroupMngService {
         }
         return "SUCCESS";
     }
+    
+    public static void main(String[] args) {
+		
+    	Float f0 = 0.2F;
+    	Float f1 = 0.02F;
+    	Float f = f0 + f1;
+    	System.out.println(f);
+	}
 
     @Override
     public GroupSumResp queryGroupSum(User user, String groupId) throws Exception {
@@ -400,16 +409,19 @@ public class GroupMngServiceImpl implements GroupMngService {
         searchVoList.add(searchVo);
 
         //总金额 全部订单的金额，包括取消的订单
+        DecimalFormat decimalFormat=new DecimalFormat(".00");
+        String totalAmtStr = decimalFormat.format(totalAmt);
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("订单总金额");
-        searchVo.setNum("¥" + totalAmt);
+        searchVo.setNum("¥" + totalAmtStr);
         searchVo.setMessage("订单总金额：所有订单金额的加总（包含已取消订单）");
         searchVoList.add(searchVo);
 
         //退款金额 全部订单的退款金额
+        String refundAmtStr = decimalFormat.format(refundAmt);
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("退款金额");
-        searchVo.setNum("¥" + refundAmt);
+        searchVo.setNum("¥" + refundAmtStr);
         searchVo.setMessage("退款金额：所有订单的退款金额（包含已取消订单）");
         searchVoList.add(searchVo);
         resp.setSearchVoList(searchVoList);
@@ -495,7 +507,14 @@ public class GroupMngServiceImpl implements GroupMngService {
         if (list != null) {
             for (GroupOrderVo vo : list) {
                 vo.setStatusCn(ServiceOrder.getStatusStr(vo.getStatus()));
-                vo.setOrderDate(DateUtil.dttmFormat(vo.getPayDate()));
+                
+                String orderDate = "";
+                if (vo.getPayDate() != null) {
+                	orderDate = DateUtil.dttmFormat(vo.getPayDate());
+				} else {
+					orderDate = DateUtil.dtFormat(vo.getCreateDate().longValue(), DateUtil.dttmSimple);
+				}
+                vo.setOrderDate(orderDate);
 
                 //0商户派送 1用户自提 2第三方配送
                 String logisticType = "商户派送";
