@@ -14,6 +14,7 @@ public class QueryWaterVO {
     private String orderNo;
     private String curr_page;
     private String total_count = "9999";
+    private String ownerId;	//团长id
     private String orgOperId;
     private String orgId;
     private String roleId;
@@ -98,19 +99,20 @@ public class QueryWaterVO {
         this.roleId = roleId;
     }
 
-    @Override
-    public String toString() {
-        return "QueryWaterVO{" +
-                "queryDate='" + queryDate + '\'' +
-                ", minAmt='" + minAmt + '\'' +
-                ", maxAmt='" + maxAmt + '\'' +
-                ", loanFlag='" + loanFlag + '\'' +
-                ", orderNo='" + orderNo + '\'' +
-                ", curr_page='" + curr_page + '\'' +
-                ", total_count='" + total_count + '\'' +
-                ", orgOperId='" + orgOperId + '\'' +
-                ", orgId='" + orgId + '\'' +
-                ", roleId='" + roleId + '\'' +
-                '}';
-    }
+	public String getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(String ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	@Override
+	public String toString() {
+		return "QueryWaterVO [queryDate=" + queryDate + ", minAmt=" + minAmt + ", maxAmt=" + maxAmt + ", loanFlag="
+				+ loanFlag + ", orderNo=" + orderNo + ", curr_page=" + curr_page + ", total_count=" + total_count
+				+ ", ownerId=" + ownerId + ", orgOperId=" + orgOperId + ", orgId=" + orgId + ", roleId=" + roleId + "]";
+	}
+
+    
 }

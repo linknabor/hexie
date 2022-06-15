@@ -156,7 +156,7 @@ public class CommunityUtil {
         queryWaterVO.setOrgId(orgOperator.getOrgId());
         queryWaterVO.setRoleId(user.getRoleId());
         queryWaterVO.setOrgOperId(orgOperator.getOrgOperId());
-
+        queryWaterVO.setOwnerId(String.valueOf(user.getId()));
         if (!StringUtils.isEmpty(queryWaterVO.getQueryDate())) {
             String beginDate = DateUtil.dtFormat(Long.parseLong(queryWaterVO.getQueryDate()), DateUtil.dSimple);
             queryWaterVO.setQueryDate(beginDate);
