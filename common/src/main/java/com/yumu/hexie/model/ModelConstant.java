@@ -522,12 +522,10 @@ public class ModelConstant {
 	public static final Integer ORDERITEM_REFUND_STATUS_APPLYREFUND = 3;	//退款审核中
 	
 	public static final Integer REFUND_STATUS_CANCEL = 0;	//申请撤销
-	public static final Integer REFUND_STATUS_USER_INIT = 1;	//用户发起申请待团长审核
-	public static final Integer REFUND_STATUS_OWNER_INIT = 2;	//团长发起退款，不需要审核，直接跳到状态5
-	public static final Integer REFUND_STATUS_AUDIT_PASSED = 3;	//团长审核通过
-	public static final Integer REFUND_STATUS_AUDIT_REJECTED = 4;	//团长审核驳回
-	public static final Integer REFUND_STATUS_SYS_REFUNDING = 5;	//系统退款中,如果是团长发起退款，直接走到这步
-	public static final Integer REFUND_STATUS_REFUNDED = 6;	//退款成功
+	public static final Integer REFUND_STATUS_INIT = 1;		//申请退款
+	public static final Integer REFUND_STATUS_AUDIT_PASSED = 2;	//审核通过，如果审核拒绝，则退回状态1
+	public static final Integer REFUND_STATUS_SYS_REFUNDING = 3;	//系统退款中
+	public static final Integer REFUND_STATUS_REFUNDED = 4;	//退款成功
 	
 	public static final Integer REFUND_OPERATION_USER_APPLY = 0;	//用户申请
 	public static final Integer REFUND_OPERATION_OWNER_APPLY = 1;	//团长申请

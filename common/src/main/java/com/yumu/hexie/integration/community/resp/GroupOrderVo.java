@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.community.resp;
 
 import com.yumu.hexie.model.market.OrderItem;
+import com.yumu.hexie.model.market.RefundRecord;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -36,6 +37,8 @@ public class GroupOrderVo {
     private String orderDate;
     
     private List<OrderItem> orderItems; //商品列表
+    private RefundRecord latestRefund;	//退款处理
+    private List<RefundRecord> refundRecords;
 
     public GroupOrderVo() {
 
@@ -228,6 +231,22 @@ public class GroupOrderVo {
 		this.createDate = createDate;
 	}
 
+	public RefundRecord getLatestRefund() {
+		return latestRefund;
+	}
+
+	public void setLatestRefund(RefundRecord latestRefund) {
+		this.latestRefund = latestRefund;
+	}
+
+	public List<RefundRecord> getRefundRecords() {
+		return refundRecords;
+	}
+
+	public void setRefundRecords(List<RefundRecord> refundRecords) {
+		this.refundRecords = refundRecords;
+	}
+
 	@Override
 	public String toString() {
 		return "GroupOrderVo [groupNum=" + groupNum + ", id=" + id + ", orderNo=" + orderNo + ", status=" + status
@@ -235,7 +254,8 @@ public class GroupOrderVo {
 				+ ", receiverName=" + receiverName + ", tel=" + tel + ", address=" + address + ", logisticType="
 				+ logisticType + ", memo=" + memo + ", userId=" + userId + ", refundType=" + refundType + ", statusCn="
 				+ statusCn + ", userName=" + userName + ", userHead=" + userHead + ", logisticTypeCn=" + logisticTypeCn
-				+ ", orderDate=" + orderDate + ", orderItems=" + orderItems + "]";
+				+ ", orderDate=" + orderDate + ", orderItems=" + orderItems + ", latestRefund=" + latestRefund
+				+ ", refundRecords=" + refundRecords + "]";
 	}
 
 	

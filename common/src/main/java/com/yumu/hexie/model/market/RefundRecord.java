@@ -50,6 +50,15 @@ public class RefundRecord extends BaseModel {
 	private Integer operation;	//操作动作,0申请，1申请撤回，2申请修改,3团长审核通过，4团长审核拒绝,5团长取消商品并退款，6退款完成 
 	
 	@Transient
+	public boolean getCanRefund() {
+		/*可以退款的状态*/
+		if (ModelConstant.REFUND_STATUS_INIT == status) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Transient
 	public List<Map<String, String>> getItemList(){
 		String itemStr = items;
 		List<Map<String, String>> list = new ArrayList<>();
@@ -90,14 +99,10 @@ public class RefundRecord extends BaseModel {
 		String statusCn = "";
 		if (ModelConstant.REFUND_STATUS_CANCEL == status) {
 			statusCn = "申请已撤销";
-		} else if (ModelConstant.REFUND_STATUS_USER_INIT == status) {
+		} else if (ModelConstant.REFUND_STATUS_INIT == status) {
 			statusCn = "待团长处理";
-		} else if (ModelConstant.REFUND_STATUS_OWNER_INIT == status) {
-			statusCn = "团长发起退款";
 		} else if (ModelConstant.REFUND_STATUS_AUDIT_PASSED == status) {
-			statusCn = "团长审核通过";
-		} else if (ModelConstant.REFUND_STATUS_AUDIT_REJECTED == status) {
-			statusCn = "团长拒绝退款";
+			statusCn = "申请通过";
 		} else if (ModelConstant.REFUND_STATUS_SYS_REFUNDING == status) {
 			statusCn = "系统退款中";
 		} else if (ModelConstant.REFUND_STATUS_REFUNDED == status) {
@@ -110,17 +115,17 @@ public class RefundRecord extends BaseModel {
 	public String getOperationCn () {
 		String operationCn = "";
 		if (ModelConstant.REFUND_OPERATION_USER_APPLY == operation) {
-			operationCn = "团员申请退款";
+			operationCn = "申请退款";
 		} else if (ModelConstant.REFUND_OPERATION_OWNER_APPLY == operation) {
-			operationCn = "团长发起退款";
+			operationCn = "发起退款";
 		} else if (ModelConstant.REFUND_OPERATION_CANCEL == operation) {
-			operationCn = "撤销退款申请";
+			operationCn = "撤回退款申请";
 		} else if (ModelConstant.REFUND_OPERATION_MODIFY == operation) {
 			operationCn = "修改退款申请";
 		} else if (ModelConstant.REFUND_OPERATION_PASS_AUDIT == operation) {
-			operationCn = "退款申请通过";
+			operationCn = "通过退款申请";
 		} else if (ModelConstant.REFUND_OPERATION_REJECT_AUDIT == operation) {
-			operationCn = "退款申请拒绝";
+			operationCn = "拒绝退款申请";
 		} else if (ModelConstant.REFUND_OPERATION_WITHDRAW_REFUND == operation) {
 			operationCn = "取消商品并退款";
 		} else if (ModelConstant.REFUND_OPERATION_REFUNDED == operation) {
