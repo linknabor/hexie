@@ -21,6 +21,6 @@ public interface RgroupService {
 	void refreshGroupDeliveryStatus(RgroupRule rule);
 
 	List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId, List<Integer> status, String productName,
-			List<Integer> itemStatus);
+			List<Integer> itemStatus, int currentPage);
 
 }

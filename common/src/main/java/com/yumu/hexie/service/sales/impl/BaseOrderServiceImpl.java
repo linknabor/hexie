@@ -1996,7 +1996,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             throw new BizValidateException("当前订单状态不能进行退款操作");
         }
         o.applyRefund(true);
-        o.setRefundAmt(totalRefund.floatValue());
+//        o.setRefundAmt(totalRefund.floatValue());
         serviceOrderRepository.save(o);
         
         List<String> refundItemIds = refundVO.getItemList();
@@ -2039,7 +2039,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         recorder.setUserId(user.getId());
         recorder.setOwnerId(o.getGroupLeaderId());
         recorder.setRefundType(ModelConstant.REFUND_REASON_GROUP_USER_REFUND);
-        recorder.setStatus(ModelConstant.REFUND_STATUS_USER_INIT);
+        recorder.setStatus(ModelConstant.REFUND_STATUS_INIT);
         recorder.setOperatorName(user.getName());
         recorder.setOperatorDate(new Date()); 
         recorder.setOperation(ModelConstant.REFUND_OPERATION_OWNER_APPLY);
@@ -2153,7 +2153,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         RefundRecord latestRec = new RefundRecord();
         BeanUtils.copyProperties(record, latestRec, "id", "createDate");
         latestRec.setStatus(ModelConstant.REFUND_STATUS_AUDIT_PASSED);
-        latestRec.setOperatorName(user.getName());
+        latestRec.setOperatorName("团长");
         latestRec.setOperatorDate(new Date());
         latestRec.setOperation(ModelConstant.REFUND_OPERATION_PASS_AUDIT);
         refundRecordRepository.save(latestRec);
@@ -2182,12 +2182,61 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	
         RefundRecord latestRec = new RefundRecord();
         BeanUtils.copyProperties(record, latestRec, "id", "createDate");
-        latestRec.setStatus(ModelConstant.REFUND_STATUS_AUDIT_REJECTED);
-        latestRec.setOperatorName(user.getName());
+        latestRec.setStatus(ModelConstant.REFUND_STATUS_INIT);
+        latestRec.setOperatorName("团长");
         latestRec.setOperatorDate(new Date());
         latestRec.setOperation(ModelConstant.REFUND_OPERATION_REJECT_AUDIT);
         latestRec.setMemo(memo);
         refundRecordRepository.save(latestRec);
     }
 
+    /**
+     * 撤回退款申请
+     */
+    @Override
+    @Transactional
+    public void cancelRefund(User user, String recorderIdstr) {
+    	
+    	Assert.hasText(recorderIdstr, "退款申请id不能为空。");
+    	
+    	long recorderId = Long.valueOf(recorderIdstr);
+    	RefundRecord record = refundRecordRepository.findById(recorderId);
+
+    	ServiceOrder o = serviceOrderRepository.findById(record.getOrderId());
+    	if (ModelConstant.ORDER_STATUS_PAYED!=o.getStatus() &&
+        		ModelConstant.ORDER_STATUS_CONFIRM!=o.getStatus()&& 
+        		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()) {
+            throw new BizValidateException("订单状态[]"+o.getStatus()+"不能进行当前操作");
+        }
+    	
+    	if (user.getId() != o.getUserId()) {
+			throw new BizValidateException("用户无法进行当前操作");
+		}
+    	
+    	o.setRefundType(0);
+    	o.setUpdateDate(System.currentTimeMillis());
+    	serviceOrderRepository.save(o);
+    	
+    	List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(o);
+        for (OrderItem orderItem : orderItems) {
+			if (ModelConstant.ORDERITEM_REFUND_STATUS_APPLYREFUND == orderItem.getIsRefund()) {
+				orderItem.setIsRefund(ModelConstant.ORDERITEM_REFUND_STATUS_PAID);
+				orderItem.setRefundApplyType(0);
+				orderItem.setRefundReason(null);
+				orderItem.setRefundMemo(null);
+				orderItem.setRefundApplyDate(null);
+				orderItemRepository.save(orderItem);
+			}
+		}
+        
+        RefundRecord latestRec = new RefundRecord();
+        BeanUtils.copyProperties(record, latestRec, "id", "createDate");
+        latestRec.setStatus(ModelConstant.REFUND_STATUS_CANCEL);
+        latestRec.setOperatorName(user.getName());
+        latestRec.setOperatorDate(new Date());
+        latestRec.setOperation(ModelConstant.REFUND_OPERATION_CANCEL);
+        refundRecordRepository.save(latestRec);
+    	
+    }
+    
 }

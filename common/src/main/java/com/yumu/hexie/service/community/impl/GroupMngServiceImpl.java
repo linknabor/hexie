@@ -505,6 +505,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         			itemStatus, pageable);
         List<GroupOrderVo> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOrderVo.class);
         if (list != null) {
+        	Sort refundSort = Sort.by(Direction.DESC, "id");
             for (GroupOrderVo vo : list) {
                 vo.setStatusCn(ServiceOrder.getStatusStr(vo.getStatus()));
                 
@@ -538,6 +539,12 @@ public class GroupMngServiceImpl implements GroupMngService {
                 serviceOrder.setId(vo.getId().longValue());
                 List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
                 vo.setOrderItems(items);
+                
+                List<RefundRecord> refundRecords = refundRecordRepository.findByOrderId(serviceOrder.getId(), refundSort);
+                vo.setRefundRecords(refundRecords);
+                if (refundRecords!=null && refundRecords.size()>0) {
+					vo.setLatestRefund(refundRecords.get(0));
+				}
             }
         }
 
