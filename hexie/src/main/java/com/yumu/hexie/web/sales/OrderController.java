@@ -517,10 +517,10 @@ public class OrderController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/rgroup/v3/orders/{statusType}", method = RequestMethod.GET)
+	@RequestMapping(value = "/rgroup/v3/orders/{statusType}/{currentPage}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<RgroupOrdersVO>> groupOrdersV3(@ModelAttribute(Constants.USER)User user,
-			@PathVariable String statusType, @RequestParam(required = false) String searchName) throws Exception {
+			@PathVariable String statusType, @PathVariable int currentPage, @RequestParam(required = false) String searchName) throws Exception {
 		
 		List<Integer> status = new ArrayList<>();
 		List<Integer> itemStatus = null;
@@ -558,11 +558,11 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
 		} 
 		
-		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName, itemStatus));
+		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName, itemStatus, currentPage));
     }
 	
 	/**
-	 * 获取退款原因
+	 * 发起退款
 	 * @return
 	 * @throws Exception
 	 */
@@ -571,6 +571,19 @@ public class OrderController extends BaseController{
 	public BaseResult<String> requestRefund(@ModelAttribute(Constants.USER)User user, @RequestBody RefundVO refundVO) throws Exception {
 		
 		baseOrderService.requestRefund(user, refundVO);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 发起退款
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/order/refund/cancel/{recorderId}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> cancelRefund(@ModelAttribute(Constants.USER)User user, @PathVariable String recorderId) throws Exception {
+		
+		baseOrderService.cancelRefund(user, recorderId);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
 	
