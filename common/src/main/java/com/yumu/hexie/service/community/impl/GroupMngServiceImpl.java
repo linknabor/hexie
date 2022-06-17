@@ -371,9 +371,11 @@ public class GroupMngServiceImpl implements GroupMngService {
     public static void main(String[] args) {
 		
     	Float f0 = 0.2F;
-    	Float f1 = 0.02F;
+    	Float f1 = 0.3F;
     	Float f = f0 + f1;
-    	System.out.println(f);
+    	DecimalFormat decimalFormat=new DecimalFormat("#.##");
+    	String totalAmtStr = decimalFormat.format(f);
+    	System.out.println(totalAmtStr);
 	}
 
     @Override
@@ -409,7 +411,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         searchVoList.add(searchVo);
 
         //总金额 全部订单的金额，包括取消的订单
-        DecimalFormat decimalFormat=new DecimalFormat(".00");
+        DecimalFormat decimalFormat=new DecimalFormat("0.00");
         String totalAmtStr = decimalFormat.format(totalAmt);
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("订单总金额");
