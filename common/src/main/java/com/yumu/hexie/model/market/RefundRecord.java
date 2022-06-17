@@ -104,7 +104,7 @@ public class RefundRecord extends BaseModel {
 		} else if (ModelConstant.REFUND_STATUS_AUDIT_PASSED == status) {
 			statusCn = "申请通过";
 		} else if (ModelConstant.REFUND_STATUS_SYS_REFUNDING == status) {
-			statusCn = "系统退款中";
+			statusCn = "自动退款中";
 		} else if (ModelConstant.REFUND_STATUS_REFUNDED == status) {
 			statusCn = "退款成功";
 		}

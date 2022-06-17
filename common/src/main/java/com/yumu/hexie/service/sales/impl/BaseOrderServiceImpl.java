@@ -2157,6 +2157,15 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         latestRec.setOperatorDate(new Date());
         latestRec.setOperation(ModelConstant.REFUND_OPERATION_PASS_AUDIT);
         refundRecordRepository.save(latestRec);
+        
+        latestRec = new RefundRecord();
+        BeanUtils.copyProperties(record, latestRec, "id", "createDate");
+        latestRec.setStatus(ModelConstant.REFUND_STATUS_SYS_REFUNDING);
+        latestRec.setOperatorName("系统");
+        latestRec.setOperatorDate(new Date());
+        latestRec.setOperation(ModelConstant.REFUND_OPERATION_SYS_REFUNDING);
+        refundRecordRepository.save(latestRec);
+        
     }
 
     /**
