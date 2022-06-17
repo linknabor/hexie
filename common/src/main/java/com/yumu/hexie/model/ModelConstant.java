@@ -534,7 +534,8 @@ public class ModelConstant {
 	public static final Integer REFUND_OPERATION_PASS_AUDIT = 4;	//申请审核通过
 	public static final Integer REFUND_OPERATION_REJECT_AUDIT = 5;	//申请审核拒绝
 	public static final Integer REFUND_OPERATION_WITHDRAW_REFUND = 6;	//取消商品并退款？（快团团有这个）
-	public static final Integer REFUND_OPERATION_REFUNDED = 7;	//退款完成
+	public static final Integer REFUND_OPERATION_SYS_REFUNDING = 7;	//发起退款
+	public static final Integer REFUND_OPERATION_REFUNDED = 8;	//退款完成
 	
 	
 	
