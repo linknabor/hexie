@@ -520,7 +520,8 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/rgroup/v3/orders/{statusType}/{currentPage}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<RgroupOrdersVO>> groupOrdersV3(@ModelAttribute(Constants.USER)User user,
-			@PathVariable String statusType, @PathVariable int currentPage, @RequestParam(required = false) String searchName) throws Exception {
+			@PathVariable String statusType, @PathVariable int currentPage, @RequestParam(required = false) String searchName,
+			@RequestParam(required = false) String ruleId) throws Exception {
 		
 		List<Integer> status = new ArrayList<>();
 		List<Integer> itemStatus = null;
@@ -558,7 +559,7 @@ public class OrderController extends BaseController{
 			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
 		} 
 		
-		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName, itemStatus, currentPage));
+		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName, ruleId, itemStatus, currentPage));
     }
 	
 	/**
