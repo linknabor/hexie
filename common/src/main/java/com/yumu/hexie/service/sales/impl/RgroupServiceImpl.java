@@ -22,7 +22,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -264,13 +263,9 @@ public class RgroupServiceImpl implements RgroupService {
 	}
 	
 	@Override
-	public List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId, List<Integer> status, String productName, String ruleIdStr, List<Integer> itemStatus, int currentPage) {
+	public List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId, List<Integer> status, String productName, String ruleId, List<Integer> itemStatus, int currentPage) {
 		
 		Pageable pageable = PageRequest.of(currentPage, 10);
-		Long ruleId = null;
-		if (!StringUtils.isEmpty(ruleIdStr)) {
-			ruleId = Long.valueOf(ruleIdStr);
-		}
 		List<ServiceOrder> orders = serviceOrderRepository.findByUserAndStatusAndTypeV3(userId, status, 
 				ModelConstant.ORDER_TYPE_RGROUP, productName, ruleId, itemStatus, pageable);
 		List<RgroupOrdersVO> result = new ArrayList<>();
