@@ -184,7 +184,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 	  			}
 	  			
 	  			info.setFollowNum(totalOrdered);
-	  			info.setCancelNum(info.getCurrentNum() - totalOrdered);
+	  			info.setCancelNum(totalOrdered - info.getCurrentNum());
 	  			info.setQueryNum(totalAccessed);
 	  			
             }
