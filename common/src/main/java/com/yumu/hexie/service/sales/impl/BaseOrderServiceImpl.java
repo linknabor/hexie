@@ -2195,7 +2195,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         latestRec.setOperatorName("团长");
         latestRec.setOperatorDate(new Date());
         latestRec.setOperation(ModelConstant.REFUND_OPERATION_REJECT_AUDIT);
-        latestRec.setMemo(memo);
+        latestRec.setAuditMemo(memo);
         refundRecordRepository.save(latestRec);
     }
 

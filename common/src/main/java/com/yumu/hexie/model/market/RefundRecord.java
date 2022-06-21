@@ -47,7 +47,8 @@ public class RefundRecord extends BaseModel {
 	private Integer status;	//0撤销（撤回时变0），1待团长处理，2团长审核通过，3团长审核拒绝，4系统退款中，5退款成功
 	private String operatorName;	//操作发起人
 	private Date operatorDate;		//操作日期
-	private Integer operation;	//操作动作,0申请，1申请撤回，2申请修改,3团长审核通过，4团长审核拒绝,5团长取消商品并退款，6退款完成 
+	private Integer operation;	//操作动作,0申请，1申请撤回，2申请修改,3团长审核通过，4团长审核拒绝,5团长取消商品并退款，6退款完成
+	private String auditMemo;	//审核通过或者驳回时写的备注
 	
 	@Transient
 	public boolean getCanRefund() {
@@ -130,6 +131,8 @@ public class RefundRecord extends BaseModel {
 			operationCn = "取消商品并退款";
 		} else if (ModelConstant.REFUND_OPERATION_REFUNDED == operation) {
 			operationCn = "退款完成";
+		} else if (ModelConstant.REFUND_OPERATION_SYS_REFUNDING == operation) {
+			operationCn = "正在退款";
 		}
 		return operationCn;
 		
@@ -218,6 +221,14 @@ public class RefundRecord extends BaseModel {
 	}
 	public void setStatus(Integer status) {
 		this.status = status;
+	}
+
+	public String getAuditMemo() {
+		return auditMemo;
+	}
+
+	public void setAuditMemo(String auditMemo) {
+		this.auditMemo = auditMemo;
 	}
 	
 	
