@@ -192,7 +192,7 @@ public class AddressServiceImpl implements AddressService {
 		}
         address.setXiaoquAddress(xiaoquAddress);
         
-        String detailAddress = xiaoquAddress + addressReq.getDetailAddress();
+        String detailAddress = addressReq.getDetailAddress();
         address.setDetailAddress(detailAddress);
         address.setUserName(addressReq.getReceiveName());
         List<Address> addrs = addressRepository.findAllByUserId(address.getUserId());
