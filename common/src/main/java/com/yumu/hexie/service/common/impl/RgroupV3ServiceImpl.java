@@ -430,7 +430,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			RgroupRule rule = rgroupRuleRepository.findByIdAndStatusIn(ruleId, statusList);
 			if (rule == null) {
 				if (isOnsale) {
-					throw new BizValidateException("团购已下架");
+//					throw new BizValidateException("团购已下架");
 				} else {
 					throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
 				}
