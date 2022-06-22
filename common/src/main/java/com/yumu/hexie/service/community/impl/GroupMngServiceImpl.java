@@ -1,5 +1,27 @@
 package com.yumu.hexie.service.community.impl;
 
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yumu.hexie.common.util.DateUtil;
@@ -9,9 +31,21 @@ import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
-import com.yumu.hexie.integration.community.resp.*;
+import com.yumu.hexie.integration.community.resp.GroupInfoVo;
+import com.yumu.hexie.integration.community.resp.GroupOrderVo;
+import com.yumu.hexie.integration.community.resp.GroupProductSumVo;
+import com.yumu.hexie.integration.community.resp.GroupSumResp;
+import com.yumu.hexie.integration.community.resp.OutSidDepotResp;
+import com.yumu.hexie.integration.community.resp.OutSidRelateGroupResp;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.commonsupport.info.*;
+import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductDepot;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.commonsupport.info.ProductRuleRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.RefundRecord;
@@ -27,23 +61,6 @@ import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.Thumbnail;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
-import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.util.*;
 
 /**
  * 描述:
@@ -150,6 +167,22 @@ public class GroupMngServiceImpl implements GroupMngService {
                 info.setDesc(textList.size()==0?"":textList.get(0));
                 info.setProductImg(imagesList.size()==0?"":imagesList.get(0));
                 info.setImages(imagesList);
+                
+                if (imagesList.size() == 0) {
+                	List<Product> productList = productRepository.findMultiByRuleId(info.getId().longValue());
+                	for (Product product : productList) {
+                		String[]pics = product.getPictureList();
+                		if (pics!=null && pics.length > 0) {
+							for (String pic : pics) {
+								if (!StringUtils.isEmpty(pic)) {
+									imagesList.add(pic);
+								}
+								
+							}
+						}
+					}
+                	info.setImages(imagesList);
+				}
 
                 //统计支付的，退款的，取消的，预览的
                 float realityAmt = 0;
