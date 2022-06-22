@@ -52,6 +52,7 @@ public class UserService {
 				user = new UserWeiXin();
 				user.setSubscribe(jsonObject.getSubscribe());
 				user.setOpenid(jsonObject.getOpenid());
+				user.setUnionid(jsonObject.getUnionid());
 				user.setNickname(jsonObject.getNickname());
 				user.setSex(jsonObject.getSex());
 				user.setCity(jsonObject.getCity());
