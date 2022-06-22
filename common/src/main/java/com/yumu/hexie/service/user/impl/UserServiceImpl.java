@@ -45,6 +45,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.market.RgroupCart;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
@@ -734,6 +735,48 @@ public class UserServiceImpl implements UserService {
 		
 	}
 
+	/**
+	 * 通过微信关注事件，绑定小程序用户
+	 */
+	@Override
+	@Transactional
+	public boolean bindMiniUser(BaseEventDTO baseEventDTO) {
+		
+		String openid = baseEventDTO.getOpenid();
+		String appid = baseEventDTO.getAppId();
+		User user = multiFindByOpenId(openid);
+		if (user != null) {	
+			logger.warn("user already exists, will skip. openid : " + openid);
+			return true;
+		}
+		//未查询到用户存在两种情况：1.用户未没有产生小程序用户，2用户产生了小程序用户，但未和公众号openid关联上
+		UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
+		if (userWeiXin == null) {
+			logger.warn("can't find user from wechat, openid : " + openid);
+			return true;
+		}
+		String unionid = userWeiXin.getUnionid();
+		if (StringUtils.isEmpty(unionid)) {
+			logger.warn("user does not have unionid, openid : " + openid + ", appid : " + appid);
+			return true;
+		}
+		user = getByUnionid(unionid);
+		if (user == null) {
+			logger.warn("cant' find user by unionid in database, unionid : " + unionid);
+			return true;
+		}
+		String miniOpenid = user.getMiniopenid();
+		if (StringUtils.isEmpty(miniOpenid)) {
+			logger.warn("cant' find miniuser in database, unionid : " + unionid);
+			return true;
+		}
+		
+		//如果数据库中有关联的用户，更新该小程序用户的openid和appid
+		user.setOpenid(openid);
+		user.setAppId(appid);
+        userRepository.save(user);
+		return true;
+	}
 
 
 }

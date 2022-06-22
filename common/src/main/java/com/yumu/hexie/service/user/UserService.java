@@ -9,6 +9,7 @@ import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
@@ -141,5 +142,12 @@ public interface UserService {
 	 * @return
 	 */
 	User updateUserInfo(User user, Map<String, String> map);
+	
+	/**
+	 * 公众号关注事件绑定小程序用户
+	 * @param baseEventDTO
+	 * @return
+	 */
+	boolean bindMiniUser(BaseEventDTO baseEventDTO);
 
 }
