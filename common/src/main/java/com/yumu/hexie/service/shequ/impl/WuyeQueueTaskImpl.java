@@ -224,6 +224,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 						logger.info("event type : " + type + ", common subscribe . " );
 						try {
 							userService.bindMiniUser(baseEventDTO);
+							isSuccess = true;
 						} catch (Exception e) {
 							logger.error(e.getMessage(), e);
 						}
