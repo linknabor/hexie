@@ -63,6 +63,7 @@ import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
+import com.yumu.hexie.model.market.vo.RgroupCartVO;
 import com.yumu.hexie.model.payment.PaymentConstant;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.promotion.coupon.CouponSeed;
@@ -1120,6 +1121,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             boolean isAllUpdate = true;
             Float totalRefundAmt = 0F;
             int count = serviceOrder.getCount();
+            List<OrderItem> orderItems = new ArrayList<>();
             if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
                 RgroupRule rule = (RgroupRule) salePlanService.getService(serviceOrder.getOrderType()).findSalePlan(serviceOrder.getGroupRuleId());
 
@@ -1129,7 +1131,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 for (String proid : idArr) {
                 	proids.add(Long.valueOf(proid));
 				}
-                List<OrderItem> orderItems = orderItemRepository.findByServiceOrderAndProductIdIn(serviceOrder, proids);
+                orderItems = orderItemRepository.findByServiceOrderAndProductIdIn(serviceOrder, proids);
                 count = 0;
                 for(OrderItem item : orderItems) {
                     count += item.getCount();
@@ -1176,7 +1178,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             if (ModelConstant.ORDER_TYPE_SERVICE != serviceOrder.getOrderType()) {
                 productService.saledCount(serviceOrder.getProductId(), count * -1);
                 /*4.修改库存*/
-                redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), count);
+                if (ModelConstant.ORDER_TYPE_RGROUP != serviceOrder.getOrderType()) {
+                	redisTemplate.opsForValue().increment(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), count);
+				} else {
+					for (OrderItem orderItem : orderItems) {
+						redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + orderItem.getProductId(), orderItem.getCount());
+					}
+				}
             }
 
             log.warn("[finishRefund]refund-saved:" + serviceOrder.getId());
@@ -1751,11 +1759,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 serviceOrder.setPayDate(date);
                 salePlanService.getService(serviceOrder.getOrderType()).postPaySuccess(serviceOrder);    //修改orderItems
 
-                if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
-                    //减库存
-                    redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + serviceOrder.getProductId(), serviceOrder.getCount());
-                }
-
                 if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
                     //发送模板消息
                     String token = systemconfigservice.queryWXAToken(user.getAppId());
@@ -1766,11 +1769,16 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                         List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
                         cartService.delFromCart(serviceOrder.getUserId(), itemList);
                     }
-                  //清空购物车中已购买的商品
                     if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
                         List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
                         for (OrderItem orderItem : itemList) {
-                        	cartService.delFromRgroupCart(user, orderItem);
+                        	//1.清空购物车中已购买的商品
+                        	log.info("removing rgroup orderItem from cart, orderItem : " + orderItem.getId());
+                        	RgroupCartVO vo = cartService.delFromRgroupCart(user, orderItem);
+                        	log.info("orderItem : " + orderItem.getId() + ", count : " + vo.getTotalCount());
+                        	//2.减库存
+                        	log.info("decrement product stock, product : " + orderItem.getProductId());
+                            redisTemplate.opsForValue().decrement(ModelConstant.KEY_PRO_STOCK + orderItem.getProductId(), orderItem.getCount());
 						}
                     }
 
