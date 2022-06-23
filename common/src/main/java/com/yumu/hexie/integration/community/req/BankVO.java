@@ -1,5 +1,12 @@
 package com.yumu.hexie.integration.community.req;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
 /**
  * 描述:
  *
@@ -7,6 +14,9 @@ package com.yumu.hexie.integration.community.req;
  * @create 2022-04-11 15:54
  */
 public class BankVO {
+	
+	private static Logger logger = LoggerFactory.getLogger(BankVO.class);
+	
     private String ownerName;
     private String bankNo;
     private String bankName;
@@ -21,6 +31,13 @@ public class BankVO {
     }
 
     public void setOwnerName(String ownerName) {
+    	if (!StringUtils.isEmpty(ownerName)) {
+			try {
+				ownerName = URLEncoder.encode(ownerName, "gbk");
+			} catch (UnsupportedEncodingException e) {
+				logger.info(e.getMessage(), e);
+			}
+		}
         this.ownerName = ownerName;
     }
 
@@ -37,6 +54,13 @@ public class BankVO {
     }
 
     public void setBankName(String bankName) {
+    	if (!StringUtils.isEmpty(bankName)) {
+			try {
+				bankName = URLEncoder.encode(bankName, "gbk");
+			} catch (UnsupportedEncodingException e) {
+				logger.info(e.getMessage(), e);
+			}
+		}
         this.bankName = bankName;
     }
 
@@ -45,6 +69,13 @@ public class BankVO {
     }
 
     public void setBranchBank(String branchBank) {
+    	if (!StringUtils.isEmpty(branchBank)) {
+			try {
+				branchBank = URLEncoder.encode(branchBank, "gbk");
+			} catch (UnsupportedEncodingException e) {
+				logger.info(e.getMessage(), e);
+			}
+		}
         this.branchBank = branchBank;
     }
 
