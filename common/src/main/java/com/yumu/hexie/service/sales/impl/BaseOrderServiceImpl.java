@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -1139,6 +1141,18 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     rule.setCurrentNum(rule.getCurrentNum() - count);
                     cacheableService.save(rule);
                 }
+                Sort refundSort = Sort.by(Direction.DESC, "id");
+                List<RefundRecord> recList = refundRecordRepository.findByOrderId(serviceOrder.getId(), refundSort);
+                if (recList != null && recList.size() > 0) {
+                	RefundRecord latestRec = recList.get(0);
+                	RefundRecord currRec = new RefundRecord();
+                	BeanUtils.copyProperties(latestRec, currRec, "id", "createDate");
+                    latestRec.setStatus(ModelConstant.REFUND_STATUS_REFUNDED);
+                    latestRec.setOperatorName("系统");
+                    latestRec.setOperatorDate(new Date());
+                    latestRec.setOperation(ModelConstant.REFUND_OPERATION_REFUNDED);
+                    refundRecordRepository.save(currRec);
+				}
 
                 //这个判断订单是否全部已退
                 List<OrderItem> listNoRefund = orderItemRepository.findByServiceOrderAndIsRefund(serviceOrder, 0);
