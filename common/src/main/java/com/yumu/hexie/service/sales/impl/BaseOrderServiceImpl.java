@@ -1766,6 +1766,13 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                         List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
                         cartService.delFromCart(serviceOrder.getUserId(), itemList);
                     }
+                  //清空购物车中已购买的商品
+                    if (ModelConstant.ORDER_TYPE_RGROUP == serviceOrder.getOrderType()) {
+                        List<OrderItem> itemList = orderItemRepository.findByServiceOrder(serviceOrder);
+                        for (OrderItem orderItem : itemList) {
+                        	cartService.delFromRgroupCart(user, orderItem);
+						}
+                    }
 
                 }
 
@@ -1935,11 +1942,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             Product pro = new Product();
             pro.setId(orderItem.getProductId());
             productService.freezeCount(pro, orderItem.getCount());
-            
-          //6.清空购物车中已购买的商品
-            cartService.delFromRgroupCart(user, orderItem);
         }
-        
         //8.添加团长被下单次数和团下单次数
         if (ruleId > 0) {
         	redisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ORDERED + ruleId);
