@@ -3,7 +3,10 @@ package com.yumu.hexie.integration.community.resp;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
+
+import com.yumu.hexie.model.ModelConstant;
 
 /**
  * 描述:
@@ -123,6 +126,22 @@ public class GroupInfoVo implements Serializable {
     }
 
     public String getGroupStatusCn() {
+    	Date date = new Date();
+    	if (getStatus() == ModelConstant.RULE_STATUS_ON) {
+    		if(getStartDate().getTime() <= date.getTime() && getEndDate().getTime() >= date.getTime()) {
+    			groupStatusCn = "跟团中";
+    		}
+    		if (getStartDate().getTime() > date.getTime()) {
+    			groupStatusCn = "未开始";
+			}
+		} else if(getStatus() == ModelConstant.RULE_STATUS_OFF) {
+			if(getStartDate().getTime() <= date.getTime() && getEndDate().getTime() >= date.getTime()) {
+    			groupStatusCn = "预览中";
+    		}
+		}
+    	if (getEndDate().getTime() < date.getTime()) {
+    		groupStatusCn = "已结束";
+		}
         return groupStatusCn;
     }
 
