@@ -1932,6 +1932,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             for (OrderItem item : items) {
                 item.setServiceOrder(o);
                 item.setUserId(o.getUserId());
+                String code = OrderNoUtil.generateGroupCode(String.valueOf(groupNum));
+                item.setCode(code);
                 orderItemRepository.save(item);
             }
             //5. 订单后处理

@@ -23,4 +23,6 @@ public interface RgroupService {
 	List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId, List<Integer> status, String productName, String ruleIdStr,
 			List<Integer> itemStatus, int currentPage);
 
+	RgroupOrdersVO queryRgroupOrderDetailV3(long userId, String orderIdStr);
+
 }

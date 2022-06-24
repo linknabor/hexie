@@ -291,6 +291,31 @@ public class RgroupServiceImpl implements RgroupService {
 	}
 	
 	@Override
+	public RgroupOrdersVO queryRgroupOrderDetailV3(long userId, String orderIdStr) {
+		
+		Assert.hasLength(orderIdStr, "订单id不能为空");
+		
+		long orderId = Long.valueOf(orderIdStr);
+		ServiceOrder so = serviceOrderRepository.findById(orderId);
+		Sort sort = Sort.by(Direction.DESC, "id");
+		RgroupRule rule = cacheableService.findRgroupRule(so.getGroupRuleId());
+		List<RgroupUser> userList = rgroupUserRepository.findAllByUserIdAndRuleId(userId, rule.getId());
+		so.setOrderItems(orderItemRepository.findByServiceOrder(so));
+		RgroupOrdersVO vo = new RgroupOrdersVO();
+		vo.setOrder(so);
+		vo.setRule(rule);
+		if (userList != null && userList.size() > 0) {
+			vo.setRgroupUser(userList.get(0));
+		}
+		List<RefundRecord> records = refundRecordRepository.findByOrderId(so.getId(), sort);
+		vo.setRefundRecords(records);
+		if (records != null && records.size() > 0) {
+			vo.setLatestRefund(records.get(0));
+		}
+		return vo;
+	}
+	
+	@Override
 	@Transactional
 	public void noticeArrival(QueryRgroupsVO queryRgroupsVO) {
 	

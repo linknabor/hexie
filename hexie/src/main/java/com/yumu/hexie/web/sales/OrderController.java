@@ -563,6 +563,20 @@ public class OrderController extends BaseController{
     }
 	
 	/**
+	 * 我的订单明细
+	 * @param user
+	 * @param statusType
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroup/v3/orders/detail/{orderId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<RgroupOrdersVO> groupOrderDetailV3(@ModelAttribute(Constants.USER)User user, @PathVariable String orderId) throws Exception {
+		
+		return new BaseResult<RgroupOrdersVO>().success(rgroupService.queryRgroupOrderDetailV3(user.getId(), orderId));
+    }
+	
+	/**
 	 * 发起退款
 	 * @return
 	 * @throws Exception
