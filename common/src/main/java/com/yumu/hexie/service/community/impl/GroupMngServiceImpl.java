@@ -122,20 +122,6 @@ public class GroupMngServiceImpl implements GroupMngService {
 
             for (GroupInfoVo info : list) {
                 info.setGroupDate(DateUtil.getSendTime(info.getCreateDate().longValue()));
-                if (info.getStatus() == 1) {
-                    Date date = new Date();
-                    if (info.getStartDate().getTime() <= date.getTime()
-                            && info.getEndDate().getTime() >= date.getTime()) { //跟团中
-                        info.setGroupStatusCn("正在跟团中");
-                    } else if (info.getEndDate().getTime() < date.getTime()) {
-                        info.setGroupStatusCn("已结束");
-                    } else if (info.getStartDate().getTime() > date.getTime()) {
-                        info.setGroupStatusCn("未开始");
-                    }
-                } else {
-                    info.setGroupStatusCn("预览中");
-                }
-
                 //获取团购的图片
                 List<RgroupVO.DescriptionMore> listDesc = JSONArray.parseArray(info.getDescriptionMore(), RgroupVO.DescriptionMore.class);
                 //是否有图片
@@ -623,6 +609,13 @@ public class GroupMngServiceImpl implements GroupMngService {
         //查询订单下的商品
         List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
         groupOrder.setOrderItems(items);
+        
+        //查询商品退款记录
+        Sort sort = Sort.by(Direction.DESC, "id");
+    	List<RefundRecord> records = refundRecordRepository.findByOrderId(Long.valueOf(orderId), sort);
+    	if (records != null && records.size() > 0) {
+    		groupOrder.setLatestRefund(records.get(0));
+		}
         return groupOrder;
     }
 
