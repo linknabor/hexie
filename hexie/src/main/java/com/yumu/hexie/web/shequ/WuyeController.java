@@ -78,6 +78,7 @@ import com.yumu.hexie.web.shequ.vo.GetCellVO;
 import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.shequ.vo.SignInOutVO;
+import com.yumu.hexie.web.shequ.vo.UnbindHouseVO;
 import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
@@ -148,6 +149,27 @@ public class WuyeController extends BaseController {
 			return BaseResult.successResult("解绑房子成功！");
 		}else {
 			return BaseResult.fail("解绑房子失败！");
+		}
+	}
+	
+	/**
+	 * 物业工作人员进行房屋解绑,PC端操作
+	 * @param user
+	 * @param houseId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/hexiehouse/deleteByWuye", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> deleteHouseByWuye(@RequestBody UnbindHouseVO unbindHouseVO) throws Exception {
+		
+		User user = userService.findwuyeId(unbindHouseVO.getWuyeId());
+		boolean isSuccess = wuyeService.deleteHouse(user, unbindHouseVO.getCellId());
+		if (isSuccess) {
+			return BaseResult.successResult(Constants.SERVICE_SUCCESS);
+		} else {
+			return BaseResult.fail("解除绑定房屋失败。");
 		}
 	}
 
