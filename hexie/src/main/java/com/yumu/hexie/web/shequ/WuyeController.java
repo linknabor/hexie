@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -159,18 +160,20 @@ public class WuyeController extends BaseController {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/hexiehouse/deleteByWuye", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<String> deleteHouseByWuye(@RequestBody UnbindHouseVO unbindHouseVO) throws Exception {
+	public CommonResponse<Object> deleteHouseByWuye(@RequestBody UnbindHouseVO unbindHouseVO) throws Exception {
 		
 		User user = userService.findwuyeId(unbindHouseVO.getWuyeId());
 		boolean isSuccess = wuyeService.deleteHouse(user, unbindHouseVO.getCellId());
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		if (isSuccess) {
-			return BaseResult.successResult(Constants.SERVICE_SUCCESS);
+			commonResponse.setResult("00");
 		} else {
-			return BaseResult.fail("解除绑定房屋失败。");
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg("解除绑定房屋失败。");
 		}
+		return commonResponse;
 	}
 
 	/**
