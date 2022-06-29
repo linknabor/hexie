@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -78,6 +79,7 @@ import com.yumu.hexie.web.shequ.vo.GetCellVO;
 import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.shequ.vo.SignInOutVO;
+import com.yumu.hexie.web.shequ.vo.UnbindHouseVO;
 import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
@@ -149,6 +151,29 @@ public class WuyeController extends BaseController {
 		}else {
 			return BaseResult.fail("解绑房子失败！");
 		}
+	}
+	
+	/**
+	 * 物业工作人员进行房屋解绑,PC端操作
+	 * @param user
+	 * @param houseId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/hexiehouse/deleteByWuye", method = RequestMethod.POST)
+	@ResponseBody
+	public CommonResponse<Object> deleteHouseByWuye(@RequestBody UnbindHouseVO unbindHouseVO) throws Exception {
+		
+		User user = userService.findwuyeId(unbindHouseVO.getWuyeId());
+		boolean isSuccess = wuyeService.deleteHouse(user, unbindHouseVO.getCellId());
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		if (isSuccess) {
+			commonResponse.setResult("00");
+		} else {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg("解除绑定房屋失败。");
+		}
+		return commonResponse;
 	}
 
 	/**
