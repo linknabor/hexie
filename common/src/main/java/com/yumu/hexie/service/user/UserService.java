@@ -78,6 +78,13 @@ public interface UserService {
 	User switchSect(User user, SwitchSectReq switchSectReq);
 	
 	/**
+	 * 获取物业id
+	 * @param user
+	 * @return 
+	 */
+	String bindWuYeIdSync(User user);
+
+	/**
 	 * 获取微信小程序用户登陆key
 	 * @param code
 	 * @return

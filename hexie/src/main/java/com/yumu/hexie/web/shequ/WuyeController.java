@@ -1133,4 +1133,35 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(receiptList);
 	}
 	
+	/**
+	 * 获取用户物业id
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/wuyeId", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> getWuyeId(HttpServletRequest request, @ModelAttribute(Constants.USER) User user) {
+		
+		String wuyeId = user.getWuyeId();
+		if(StringUtils.isEmpty(wuyeId)) {
+			log.info("user:" + user.getId() + ", wuyeId in session is null .");
+			User dbUser = userService.getById(user.getId());
+			if (dbUser != null) {
+				wuyeId = dbUser.getWuyeId();
+				if (StringUtil.isEmpty(wuyeId)) {
+					log.info("user:" + user.getId() + ", wuyeId in db is null .");
+					wuyeId = userService.bindWuYeIdSync(dbUser);
+				}
+				if (!StringUtils.isEmpty(wuyeId)) {
+					dbUser.setWuyeId(wuyeId);
+					BeanUtils.copyProperties(dbUser, user);
+				    request.getSession().setAttribute(Constants.USER, user);
+				}
+			}
+		}
+		return BaseResult.successResult(wuyeId);
+	}
+	
+	
 }

@@ -281,6 +281,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Async
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public void bindWuYeId(User user) {
 		 //绑定物业信息
     	try {
@@ -299,6 +300,31 @@ public class UserServiceImpl implements UserService {
 			logger.error(e.getMessage(),e);
 		}
 	}
+	
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	public String bindWuYeIdSync(User user) {
+		 //绑定物业信息
+		String wuyeId = "";
+    	try {
+    		if(StringUtil.isEmpty(user.getWuyeId()) ){
+    			BaseResult<HexieUser> r = WuyeUtil.userLogin(user);
+        		if(r.isSuccess()) {
+        			User dbUser = userRepository.findById(user.getId());
+        			if (dbUser != null) {
+//        				dbUser.setWuyeId(r.getData().getUser_id());
+//                		userRepository.save(dbUser);
+        				userRepository.updateUserWuyeId(r.getData().getUser_id(), dbUser.getId());
+        				wuyeId = r.getData().getUser_id();
+					}
+        		}
+    		}
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+    	return wuyeId;
+	}
+	
 
 	@Override
 	public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid) {
