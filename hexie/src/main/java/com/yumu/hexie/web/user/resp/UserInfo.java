@@ -37,6 +37,7 @@ public class UserInfo implements Serializable {
     private String realName;
     private String name;
     private String tel;
+    private String openid;
     private String appId;
     private Double longitude;
     private Double latitude;
@@ -525,6 +526,14 @@ public class UserInfo implements Serializable {
 	}
 	public void setRepairService(boolean repairService) {
 		this.repairService = repairService;
+	}
+
+	public String getOpenid() {
+		return openid;
+	}
+
+	public void setOpenid(String openid) {
+		this.openid = openid;
 	}
 
 	public boolean isPermission() {
