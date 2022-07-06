@@ -281,7 +281,6 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Async
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public void bindWuYeId(User user) {
 		 //绑定物业信息
     	try {
