@@ -37,6 +37,7 @@ public class UserInfo implements Serializable {
     private String realName;
     private String name;
     private String tel;
+    private String openid;
     private String appId;
     private Double longitude;
     private Double latitude;
@@ -530,9 +531,14 @@ public class UserInfo implements Serializable {
 	public boolean isPermission() {
 		return permission;
 	}
+	public String getOpenid() {
+		return openid;
+	}
 
 	public void setPermission(boolean permission) {
 		this.permission = permission;
+	public void setOpenid(String openid) {
+		this.openid = openid;
 	}
 
 	public String getReqPath() {

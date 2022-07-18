@@ -543,7 +543,7 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public WechatPayInfo requestOtherPay(OtherPayDTO otherPayDTO) throws Exception {
 
-		//TODO create user 
+		log.info("otherPayDTO : " + otherPayDTO);
 		return wuyeUtil2.requestOtherPay(otherPayDTO).getData();
 	}
 
