@@ -521,9 +521,9 @@ public class ModelConstant {
 	public static final Integer ORDERITEM_REFUND_STATUS_REFUNDING = 2;	//退款中
 	public static final Integer ORDERITEM_REFUND_STATUS_APPLYREFUND = 3;	//退款审核中
 	
-	public static final Integer REFUND_STATUS_CANCEL = 0;	//申请撤销
+	public static final Integer REFUND_STATUS_CANCEL = 0;	//申请撤销或被驳回
 	public static final Integer REFUND_STATUS_INIT = 1;		//申请退款
-	public static final Integer REFUND_STATUS_AUDIT_PASSED = 2;	//审核通过，如果审核拒绝，则退回状态1
+	public static final Integer REFUND_STATUS_AUDIT_PASSED = 2;	//审核通过，如果审核拒绝，则退回状态0
 	public static final Integer REFUND_STATUS_SYS_REFUNDING = 3;	//系统退款中
 	public static final Integer REFUND_STATUS_REFUNDED = 4;	//退款成功
 	

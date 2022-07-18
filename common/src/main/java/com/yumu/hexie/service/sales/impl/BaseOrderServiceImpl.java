@@ -2218,7 +2218,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     	
         RefundRecord latestRec = new RefundRecord();
         BeanUtils.copyProperties(record, latestRec, "id", "createDate");
-        latestRec.setStatus(ModelConstant.REFUND_STATUS_INIT);
+        latestRec.setStatus(ModelConstant.REFUND_STATUS_CANCEL);
         latestRec.setOperatorName("团长");
         latestRec.setOperatorDate(new Date());
         latestRec.setOperation(ModelConstant.REFUND_OPERATION_REJECT_AUDIT);
