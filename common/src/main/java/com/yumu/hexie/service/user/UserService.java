@@ -149,5 +149,12 @@ public interface UserService {
 	 * @return
 	 */
 	boolean bindMiniUser(BaseEventDTO baseEventDTO);
+	
+	/**
+	 * 更新用户wuyeId
+	 * @param user
+	 * @return
+	 */
+	String bindWuYeIdSync(User user);
 
 }

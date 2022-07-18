@@ -53,7 +53,7 @@ public class RefundRecord extends BaseModel {
 	@Transient
 	public boolean getCanRefund() {
 		/*可以退款的状态*/
-		if (ModelConstant.REFUND_STATUS_INIT == status) {
+		if (ModelConstant.REFUND_STATUS_CANCEL == status) {
 			return true;
 		}
 		return false;
