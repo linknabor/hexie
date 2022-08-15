@@ -747,6 +747,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
     @Transactional
+    @CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
     public User updateUserInfo(User user, Map<String, String> map) {
 		
 		User dbUser = userRepository.findById(user.getId());
