@@ -571,7 +571,7 @@ public class UserServiceImpl implements UserService {
             userAccount.setMiniAppId(miniprogramAppid);
             userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
         } else {
-        	if(StringUtils.isEmpty(userAccount.getOpenid())) {
+        	if(StringUtils.isEmpty(userAccount.getMiniopenid())) {
         		userAccount.setUnionid(miniUser.getUnionid());
                 userAccount.setMiniopenid(miniUser.getOpenid());
                 userAccount.setMiniAppId(miniprogramAppid);
