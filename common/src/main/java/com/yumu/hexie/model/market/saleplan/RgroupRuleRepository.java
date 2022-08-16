@@ -15,10 +15,20 @@ import com.yumu.hexie.model.ModelConstant;
 
 public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	
+	public RgroupRule findById(long ruleId);
+	
 	@Query("from RgroupRule p where p.status = "+ModelConstant.RULE_STATUS_ON+" and p.endDate<=?1 and p.groupStatus="+ModelConstant.RGROUP_STAUS_GROUPING)
 	public List<RgroupRule> findTimeoutGroup(Date date);
 	
-
+	public RgroupRule findByIdAndStatusIn(long ruleId, List<Integer> statusList);
+	
+	@Query(value = "select * from RgroupRule where ownerId = ?1 "
+			+ "and if(?2!='', description like CONCAT('%',?2,'%'), 1=1) "
+			, countQuery = "select count(1) from RgroupRule where ownerId = ?1 "
+			+ "and if(?2!='', description like CONCAT('%',?2,'%'), 1=1) ",
+			nativeQuery = true)
+	public Page<RgroupRule> findByOwnerIdAndDescriptionLike(long ownerId, String description, Pageable pageable);
+	
 	public List<RgroupRule> findAllByProductId(long productId);
 	
 	public List<RgroupRule> findByGroupStatus(int groupStatus);
@@ -84,4 +94,66 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	Page<Object[]> findByMultiCondRgroup(String productType, String ruleId, String ruleName, List<Integer>groupStatus, 
 			String startDate, String endDate, String agentId, String isDemo, String leaderId, List<String>sectList, Pageable pageable);
 
+
+
+	//查询团购列表(团长端)
+	String sqlColumn2 = " rule.id, rule.createDate, rule.description, rule.descriptionMore, rule.startDate, rule.endDate, rule.price, rule.status, "
+			+ "rule.groupStatus, rule.currentNum ";
+	@Query(value = "select " + sqlColumn2
+			+ "from rgrouprule rule "
+			+ "where rule.ownerId = ?1 "
+			+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3='1', rule.status = '1' "
+			+ "and rule.startDate <= CURRENT_TIMESTAMP() "
+			+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
+			+ "IF(?3='2', rule.status = '0' "
+			+ "and rule.startDate <= CURRENT_TIMESTAMP() "
+			+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
+			+ "IF(?3='3', rule.status = '1' "
+			+ "and rule.startDate > CURRENT_TIMESTAMP() , "
+			+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
+			, countQuery = "select count(1) from rgrouprule rule "
+				+ "where rule.ownerId = ?1 "
+				+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
+				+ "and IF (?3='1', rule.status = '1' "
+				+ "and rule.startDate <= CURRENT_TIMESTAMP() "
+				+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
+				+ "IF(?3='2', rule.status = '0' "
+				+ "and rule.startDate <= CURRENT_TIMESTAMP() "
+				+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
+				+ "IF(?3='3', rule.status = '1' "
+				+ "and rule.startDate > CURRENT_TIMESTAMP() , "
+				+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
+			, nativeQuery = true)
+	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
+
+	String sqlColumn3 = "a.id,a.ownerId,a.ownerName,a.ownerAddr,a.ownerImg,a.ownerTel,a.price,a.description,a.status,a.groupStatus,a.startDate,a.endDate, a.descriptionMore, count( distinct b.id) productNum, d.name as userName ";
+	@Query(value = "select DISTINCT " + sqlColumn3
+			+ "from rgrouprule a "
+			+ "join ProductRule b on a.id = b.ruleId "
+			+ "join Product c on b.productId = c.id "
+			+ "join user d on a.ownerId = d.id "
+			+ "where c.depotId = ?1 "
+			+ "group by a.id "
+			, nativeQuery = true)
+	List<Object[]> queryGroupByDepotId(String depotId);
+
+
+	@Query(value = "select " + sqlColumn3
+			+ "from rgrouprule a "
+			+ "join ProductRule b on a.id = b.ruleId "
+			+ "join user d on a.ownerId = d.id  "
+			+ "where 1 = 1 "
+			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
+			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "group by a.id "
+			, countQuery = "select count(1) from rgrouprule a "
+			+ "join ProductRule b on a.id = b.ruleId "
+			+ "join user d on a.ownerId = d.id  "
+			+ "where 1 = 1 "
+			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
+			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "group by a.id "
+			, nativeQuery = true)
+	Page<Object[]> queryGroupByOutSid(String name, String ownerName, Pageable pageable);
 }

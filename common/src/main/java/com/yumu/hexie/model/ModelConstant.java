@@ -83,7 +83,7 @@ public class ModelConstant {
 	public static final int ORDER_STATUS_SENDED = 5; 
 	public static final int ORDER_STATUS_RECEIVED = 6; 
 	public static final int ORDER_STATUS_CANCEL_BACKEND = 7; 
-	public static final int ORDER_STATUS_CANCEL_MERCHANT = 8;  //暂时不使用
+	public static final int ORDER_STATUS_CANCEL_MERCHANT = 8;
 	public static final int ORDER_STATUS_CONFIRM = 9;
 	public static final int ORDER_STATUS_RETURNED = 10;
 	public static final int ORDER_STATUS_REFUNDED = 11;
@@ -97,6 +97,8 @@ public class ModelConstant {
 	
 	public static final int REFUND_REASON_GROUP_CANCEL = 1;
 	public static final int REFUND_REASON_GROUP_BACKEND = 2;
+	public static final int REFUND_REASON_GROUP_USER_REFUND = 3;
+	public static final int REFUND_REASON_GROUP_OWNER_REFUND = 4;
 	
 	//0商户派送 1用户自提 2第三方配送 3上门服务 4用户到店
 	public static final int LOGISTIC_TYPE_MERCHANT = 0;
@@ -363,6 +365,7 @@ public class ModelConstant {
 	public static final String KEY_TYPE_MENU_SECT = "cfg:page:menu:sect";	//公众号菜单
 	public static final String KEY_TYPE_MENU_DEFAULT = "cfg:page:menu:default";	//公众号菜单
 	public static final String KEY_TYPE_MENU_APP_BINDED = "cfg:page:menu:app:default";	//公众号菜单-绑定了房屋的
+	public static final String KEY_TYPE_MINI_ROLE_PAGE = "cfg:page:miniRolePage";	//小程序访问控制
 
 	public static final int WECHAT_CARD_TYPE_MEMBER = 1;	//微信会员卡
 	
@@ -491,12 +494,50 @@ public class ModelConstant {
 	public static final String KEY_RECEIPT_APPLICATIONF_FLAG = "receipt:application:";	//电子收据申请标记，后面接_sh:trade_water_id
 	
 	public static final String KEY_WORKORDER_CFG = "workorder:cfg:";	//工单配置，后面接city_db:sect_id
-	
-	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 
 
 	public static final String KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:deliveryReceiver"; //电商接单人推送
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送
 	public static final String KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE = "queue:notify:rgroup:groupSuccess"; //成团提醒。发给团长
 	public static final String KEY_RGROUP_ARRIVAL_NOTICE_QUEUE = "queue:notify:rgroup:arriavalNotice";	//团购到货提醒。发给客户
+	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
+
+	public static final String KEY_USER_SESSION_KEY = "user:org:sessionKey:";	//小程序的sessionkey
+	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
+	
+	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId
+	public static final String KEY_MINI_ACCESS_TOKEN = "miniprogram:accessToken:";	//后面接小程序appid
+
+	public static final String USER_ROLE_RGROUPOWNER = "03";	//01团长
+	public static final String KEY_CREATE_NEW_REGION_LOCK = "lock:createRegion:";	//后面接小区名字
+	public static final String KEY_RGROUP_NUM_GENERATOR = "rgroup:groupNum:";	//跟团号生成器，后面接ruleId
+	public static final String KEY_RGROUP_OWNER_ACCESSED = "rgroup:accessed:owner:";	//后面接团长id,团长被访问次数
+	public static final String KEY_RGROUP_OWNER_ORDERED = "rgroup:ordered:owner:";	//后面接团长id,团长被跟团次数
+	public static final String KEY_RGROUP_GROUP_ACCESSED = "rgroup:accessed:group:";	//后面接团id,团被访问次数
+	public static final String KEY_RGROUP_GROUP_ORDERED = "rgroup:ordered:group:";	//后面接团id，团被下单次数
+	
+	public static final Integer ORDERITEM_REFUND_STATUS_PAID = 0;	//已支付
+	public static final Integer ORDERITEM_REFUND_STATUS_REFUNDED = 1;	//已退款
+	public static final Integer ORDERITEM_REFUND_STATUS_REFUNDING = 2;	//退款中
+	public static final Integer ORDERITEM_REFUND_STATUS_APPLYREFUND = 3;	//退款审核中
+	
+	public static final Integer REFUND_STATUS_CANCEL = 0;	//申请撤销或被驳回
+	public static final Integer REFUND_STATUS_INIT = 1;		//申请退款
+	public static final Integer REFUND_STATUS_AUDIT_PASSED = 2;	//审核通过，如果审核拒绝，则退回状态0
+	public static final Integer REFUND_STATUS_SYS_REFUNDING = 3;	//系统退款中
+	public static final Integer REFUND_STATUS_REFUNDED = 4;	//退款成功
+	
+	public static final Integer REFUND_OPERATION_USER_APPLY = 0;	//用户申请
+	public static final Integer REFUND_OPERATION_OWNER_APPLY = 1;	//团长申请
+	public static final Integer REFUND_OPERATION_CANCEL = 2;	//撤销申请
+	public static final Integer REFUND_OPERATION_MODIFY = 3;	//修改申请
+	public static final Integer REFUND_OPERATION_PASS_AUDIT = 4;	//申请审核通过
+	public static final Integer REFUND_OPERATION_REJECT_AUDIT = 5;	//申请审核拒绝
+	public static final Integer REFUND_OPERATION_WITHDRAW_REFUND = 6;	//取消商品并退款？（快团团有这个）
+	public static final Integer REFUND_OPERATION_SYS_REFUNDING = 7;	//发起退款
+	public static final Integer REFUND_OPERATION_REFUNDED = 8;	//退款完成
+	
+	
+	
+
 }		

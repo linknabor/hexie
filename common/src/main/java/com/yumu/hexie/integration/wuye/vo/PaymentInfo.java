@@ -25,6 +25,7 @@ public class PaymentInfo implements Serializable {
 	private List<PaymentCellInfo> pay_cell;
 	private String support_card_pay;	//是否支持绑卡支付
 	private String is_create_qrcode;
+	private String is_default_invoice; //是否强制开票
 	private String total_fee_price;
 	
 	@Transient
@@ -121,6 +122,12 @@ public class PaymentInfo implements Serializable {
 	public void setOffice_tel(String office_tel) {
 		this.office_tel = office_tel;
 	}
-	
-	
+
+	public String getIs_default_invoice() {
+		return is_default_invoice;
+	}
+
+	public void setIs_default_invoice(String is_default_invoice) {
+		this.is_default_invoice = is_default_invoice;
+	}
 }

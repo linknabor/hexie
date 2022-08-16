@@ -168,7 +168,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				baseEventDTO.setUser(user);
 				
 				String type = "01";
-				if (eventKey.startsWith("01") || eventKey.startsWith("qrscene_01")) {
+				if (StringUtils.isEmpty(eventKey)) {
+					type = "99";
+				} else if (eventKey.startsWith("01") || eventKey.startsWith("qrscene_01")) {
 					//donothing
 				} else if (eventKey.startsWith("02") || eventKey.startsWith("qrscene_02")) {
 					type = "02";
@@ -218,6 +220,14 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							logger.error(e.getMessage(), e);
 						}
 				    	isSuccess = true;
+					} else if ("99".equals(type)) {
+						logger.info("event type : " + type + ", common subscribe . " );
+						try {
+							userService.bindMiniUser(baseEventDTO);
+							isSuccess = true;
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}
 					}
 					
 				} catch (Exception e) {

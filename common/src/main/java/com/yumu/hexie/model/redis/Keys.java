@@ -18,4 +18,7 @@ public final class Keys {
     public static String orderCarInfoKey(long uid) {
     	return String.format("uid:%d:orderCarInfo", uid);
     }
+    public static String uidRgroupCartKey(Long uid) {
+        return String.format("uid:%d:rgroupCart", uid);
+    }
 }

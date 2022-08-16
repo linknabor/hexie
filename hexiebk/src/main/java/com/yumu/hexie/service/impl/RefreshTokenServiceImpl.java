@@ -4,11 +4,15 @@
  */
 package com.yumu.hexie.service.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,11 +20,14 @@ import org.springframework.util.StringUtils;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
+import com.yumu.hexie.integration.wechat.entity.MiniAccessToken;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.system.SystemConfig;
 import com.yumu.hexie.service.RefreshTokenService;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.common.WechatCoreService;
 
 /**
  * <pre>
@@ -43,17 +50,18 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Autowired
     @Qualifier("systemConfigRedisTemplate")
     private RedisTemplate<String, SystemConfig> redisTemplate;
-    
-    public static void main(String[] args) {
-    	String sysKey = Keys.systemConfigKey(ACC_TOKEN);
-    	System.out.println(sysKey);
-	}
+    @Value("${wechat.miniprogramAppId}")
+	private String miniprogramAppid;
+    @Autowired
+    private WechatCoreService wechatCoreService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
     
     /**
      * 获取AccessToken
      * 大于等于1小时50分，更新token
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
+//    @Scheduled(cron = "0 0/10 * * * ?")
     public void refreshAccessTokenJob() {
         if(!Constants.MAIN_SERVER){
             return;
@@ -85,7 +93,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
      * 获取jstoken
      * 大于等于1小时50分，更新token
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
+//    @Scheduled(cron = "0 0/10 * * * ?")
     public void refreshJsTicketJob() {
         if(!Constants.MAIN_SERVER){
             return;
@@ -129,6 +137,43 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		}
         return updateFlag;
     	
+    }
+    
+    /**
+     * 获取小程序AccessToken
+     * 大于等于1小时50分，更新token
+     */
+    @Scheduled(cron = "0 0/10 * * * ?")
+    @Override
+    public void refreshMiniAccessTokenJob() {
+        if(!Constants.MAIN_SERVER){
+            return;
+        }
+        logger.error("--------------------refresh token[B]-------------------");
+        String sysKey = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniprogramAppid;
+        Long expire = stringRedisTemplate.opsForValue().getOperations().getExpire(sysKey);	//返回-1表示永久，返回-2表示没有值
+        boolean updateFlag = false;
+        if (expire <= 60*10l) {	//小于等于10分钟的，重新获取token
+        	updateFlag = true;
+		}
+        if (updateFlag) {
+			logger.info("will update miniprogram accessToken .");
+			MiniAccessToken miniAccessToken = null;
+			try {
+				miniAccessToken = wechatCoreService.getMiniAccessToken();
+				if (!StringUtils.isEmpty(miniAccessToken.getErrcode())) {
+					logger.info("get miniAccessToken failed, errcode : " + miniAccessToken.getErrcode() + ", errormsg: " + miniAccessToken.getErrmsg());
+					return;
+				}
+				stringRedisTemplate.opsForValue().set(sysKey, miniAccessToken.getAccess_token(), 7200, TimeUnit.SECONDS);
+				
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+		}
+        
+        logger.error("--------------------refresh token[E]-------------------");
     }
     
 }

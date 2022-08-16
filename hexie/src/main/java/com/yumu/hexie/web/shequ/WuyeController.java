@@ -621,7 +621,7 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(invoice);
 		
 	}
-	
+
 	/**
 	 * 申请电子收据页面获取交易信息
 	 * @param response
@@ -855,7 +855,7 @@ public class WuyeController extends BaseController {
 	
 	/**
 	 * 获取用户绑定的银行卡信息
-	 * @param user
+	 * @param otherPayVo
 	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
@@ -1037,7 +1037,7 @@ public class WuyeController extends BaseController {
 		Discounts discounts = wuyeService.getFeeSmsPayQrCode(user, queryFeeSmsBillReq);
 		return BaseResult.successResult(discounts);
 	}
-	
+
 	/**
 	 * 申请电子收据
 	 * 如果用户没有注册的，则直接注册。
@@ -1072,7 +1072,7 @@ public class WuyeController extends BaseController {
 			if (user != null) {
 				if (user.getTel()!=null && user.getTel().equals(mobile)) {
 					isCheck = true;
-				}
+}
 				if (StringUtils.isEmpty(user.getTel())) {
 					user.setTel(mobile);
 				}

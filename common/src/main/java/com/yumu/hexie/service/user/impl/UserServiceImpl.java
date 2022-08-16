@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.user.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +31,8 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
+import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateReq;
 import com.yumu.hexie.integration.wechat.entity.card.ActivateResp;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
@@ -42,7 +45,13 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
+import com.yumu.hexie.model.market.RgroupCart;
+import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
+import com.yumu.hexie.model.user.MiniUserPageAccess;
+import com.yumu.hexie.model.user.OrgOperator;
+import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -50,6 +59,7 @@ import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.coupon.CouponStrategy;
 import com.yumu.hexie.service.coupon.CouponStrategyFactory;
 import com.yumu.hexie.service.exception.BizValidateException;
+import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
@@ -83,9 +93,16 @@ public class UserServiceImpl implements UserService {
 	private AlipayClient alipayClient;
 	@Autowired
 	private RegionService regionService;
-		
+	@Autowired
+	private PageConfigService pageConfigService;
+	@Autowired
+	private OrgOperatorRepository orgOperatorRepository;
+	
 	@Value("${mainServer}")
 	private Boolean mainServer;
+	
+	@Value("${wechat.miniprogramAppId}")
+    private String miniprogramAppid;
 	
 	@Override
 	public User getById(long uId) {
@@ -148,6 +165,9 @@ public class UserServiceImpl implements UserService {
 
 		String openId = weixinUser.getOpenid();
 		User userAccount = multiFindByOpenId(openId);
+		if (userAccount == null) {	//如果是空，根据unionid再差一遍
+			userAccount = getByUnionid(weixinUser.getUnionid());	
+		}
 
 		if (userAccount == null) {
 			userAccount = new User();
@@ -162,6 +182,7 @@ public class UserServiceImpl implements UserService {
 			userAccount.setCity(weixinUser.getCity());
 			userAccount.setLanguage(weixinUser.getLanguage());
 			userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
+			userAccount.setUnionid(weixinUser.getUnionid());
 			//这时候新用户还没有生成user，ID是空值,uid取uuid打MD5。
 			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 
@@ -178,9 +199,14 @@ public class UserServiceImpl implements UserService {
 					userAccount.setCity(weixinUser.getCity());
 				}
 				userAccount.setLanguage(weixinUser.getLanguage());
+				userAccount.setUnionid(weixinUser.getUnionid());
+				
 				// 从网页进入时下面两个值为空
 				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 				userAccount.setSubscribe(weixinUser.getSubscribe());
+				if (StringUtils.isEmpty(userAccount.getOpenid())) {
+					userAccount.setOpenid(weixinUser.getOpenid());	//如果小程序用户先创建，这个用户是没有openid的，后续从公众号登陆进来要更新openid
+				}
 
 			} else if (weixinUser.getSubscribe() != null && weixinUser.getSubscribe() != userAccount.getSubscribe()) {
 				userAccount.setSubscribe(weixinUser.getSubscribe());
@@ -523,6 +549,259 @@ public class UserServiceImpl implements UserService {
 		}
 		return dbUser;
 		
+	}
+	
+	@Override
+    public UserMiniprogram getWechatMiniUserSessionKey(String code) throws Exception {
+        Assert.hasText(code, "code不能为空。");
+        return wechatCoreService.getMiniUserSessionKey(code);
+    }
+
+    @Override
+    @Transactional
+    public User saveMiniUserSessionKey(UserMiniprogram miniUser) {
+        String unionid = miniUser.getUnionid();
+        User userAccount = getByUnionid(unionid);
+
+        if (userAccount == null) {
+            userAccount = new User();
+            userAccount.setOpenid("0");    //TODO
+            userAccount.setUnionid(miniUser.getUnionid());
+            userAccount.setMiniopenid(miniUser.getOpenid());
+            userAccount.setMiniAppId(miniprogramAppid);
+            userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
+        } else {
+        	if(StringUtils.isEmpty(userAccount.getMiniopenid())) {
+        		userAccount.setUnionid(miniUser.getUnionid());
+                userAccount.setMiniopenid(miniUser.getOpenid());
+                userAccount.setMiniAppId(miniprogramAppid);
+        	}
+        }
+        String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getUnionid();
+        String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(miniUser.getSessionKey())) {
+            redisTemplate.opsForValue().set(key, miniUser.getSessionKey(), 71, TimeUnit.HOURS);    //官方3天失效，也就是72小时
+        }
+        userRepository.save(userAccount);
+        return userAccount;
+    }
+
+    /**
+	 * 重新缓存user，如果用户在建立小程序用户之前，已经有了公众号用户
+	 * @param user
+	 * @return
+	 */
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	public void recacheMiniUser(User user) {
+		
+	}
+
+
+    @Override
+    public User getByUnionid(String unionid) {
+    	List<User> list = userRepository.findByUnionid(unionid);
+    	User user = null;
+    	if (list!=null && list.size()>0) {
+    		user = list.get(0);
+		}
+        return user;
+    }
+
+    /**
+	 * 校验小程序用户页面访问权限
+	 * 分两部分权限：1普通物业用户，2机构用户
+	 * @param user
+	 * @param page
+	 */
+	@Override
+	public boolean validateMiniPageAccess(User user, String page) {
+		
+		logger.info("validateMiniPageAccess, user: " + user + ", page : " + page);
+		
+		boolean isValid = true;
+		if (StringUtils.isEmpty(page)) {
+			return isValid;
+		}
+		if(StringUtils.isEmpty(user.getRoleId()) && "pages/index/index".equals(page)) {
+			return isValid;
+		}
+		if(StringUtils.isEmpty(user.getRoleId()) && "pages/rgroup/index".equals(page)) {
+			return isValid;
+		}
+		if (StringUtils.isEmpty(user.getRoleId())) {
+			isValid = false;
+			return isValid;
+		}
+		if (!StringUtils.isEmpty(page)) {
+			MiniUserPageAccess pageAccess = pageConfigService.getMiniPageAccess(page, user.getRoleId());
+			if (pageAccess == null) {
+				isValid = false;
+			}
+		}
+		logger.info("validateMiniPageAccess, isValid 1: " + isValid + ", page : " + page);
+		if (!isValid) {
+			MiniUserPageAccess pageAccess = pageConfigService.getMiniPageAccess(page, user.getRoleId());
+			if (pageAccess != null) {
+				isValid = true;
+			}
+		}
+		logger.info("validateMiniPageAccess, isValid 2: " + isValid + ", page : " + page);
+		return isValid;
+		
+	}
+
+	/**
+	 * 根据用户id查询所在的机构信息，只有roleId不为空的用户去查。因为B端用户相对C端用户是极少数，数量级不在一个级别。没必要每个用户都查一遍
+	 */
+	@Override
+	public OrgOperator getOrgOperator(User user) {
+		OrgOperator operator = null;
+		if (!StringUtil.isEmpty(user.getRoleId())) {
+			operator = orgOperatorRepository.findByUserIdAndRoleId(user.getId(), user.getRoleId());
+		}
+		return operator;
+		
+	}
+	
+	/**
+	 * 获取小程序用户的手机号
+	 * @param code
+	 * @return
+	 */
+	@Override
+	public MiniUserPhone getMiniUserPhone(String code) {
+		
+		Assert.hasText(code, "授权码不能为空。");
+		MiniUserPhone miniUserPhone = null;
+		try {
+			miniUserPhone = wechatCoreService.getMiniUserPhone(code);
+			if (!StringUtils.isEmpty(miniUserPhone.getErrorcode())) {
+				throw new BizValidateException(miniUserPhone.getErrmsg());
+			}
+			return miniUserPhone;
+			
+		} catch (Exception e) {
+			throw new BizValidateException(e.getMessage(), e);
+		}
+		
+	}
+	
+	@Override
+    @Transactional
+    public User saveMiniUserPhone(User user, MiniUserPhone miniUserPhone) {
+        
+		String phone = miniUserPhone.getPhone_info().getPhoneNumber();
+		String purePhone = miniUserPhone.getPhone_info().getPurePhoneNumber();	//不带区号的手机号
+		User miniUser = getById(user.getId());
+        List<User> userList = getByTel(phone);	//根据手机号关联现有用户
+        if (userList == null) {
+        	userList = getByTel(purePhone);	//根据手机号关联现有用户
+		}
+        User userAccount = null;
+        if (userList != null && userList.size() > 0) {	//用手机号将小程序用户和公众号用户关联起来。如果存在一对多的情况，优先关联合协的用户。
+			if (userList.size() == 1) {
+				userAccount = userList.get(0);
+			} else {
+				for (User dbUser : userList) {
+					if (ConstantWeChat.APPID.equals(dbUser.getAppId())) {
+						userAccount = dbUser;
+						break;
+					}
+				}
+			}
+		}
+
+        if (userAccount == null) {	//如果数据库中没有关联的用户，直接更新手机号
+        	userAccount = miniUser;
+        	userAccount.setTel(phone);
+        } else {	//如果数据库中有关联的用户，需要合并老记录
+            userAccount.setUnionid(miniUser.getUnionid());
+            userAccount.setMiniopenid(miniUser.getMiniopenid());
+            userAccount.setMiniAppId(miniUser.getMiniAppId());
+            userAccount.setTel(phone);
+            if (!StringUtils.isEmpty(miniUser.getHeadimgurl())) {
+				userAccount.setHeadimgurl(miniUser.getHeadimgurl());
+			}
+            if (!StringUtils.isEmpty(miniUser.getNickname())) {
+				userAccount.setNickname(miniUser.getNickname());
+				userAccount.setName(miniUser.getNickname());
+			}
+            
+            //删除已经登陆形成的新用户
+            userRepository.deleteById(miniUser.getId());
+            
+            //合并用户购物车的商品
+            String cartKey = Keys.uidRgroupCartKey(miniUser.getId());	//根据被合并用户的id，获取购物车
+    		RgroupCart cart = redisRepository.getRgroupCart(cartKey);
+    		if (cart != null) {
+    			cartKey = Keys.uidRgroupCartKey(userAccount.getId());	//更换cartKey
+    			redisRepository.setRgroupCart(cartKey, cart);
+    		}
+            
+        }
+        userRepository.flush();
+        userRepository.save(userAccount);
+        return userAccount;
+    }
+	
+	@Override
+    @Transactional
+    @CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+    public User updateUserInfo(User user, Map<String, String> map) {
+		
+		User dbUser = userRepository.findById(user.getId());
+		String avatarUrl  = map.get("avatarUrl");
+		String nickName = map.get("nickName");
+		dbUser.setHeadimgurl(avatarUrl);
+		dbUser.setNickname(nickName);
+		dbUser.setName(nickName);
+		userRepository.save(dbUser);
+		return dbUser;
+		
+	}
+
+	/**
+	 * 通过微信关注事件，绑定小程序用户
+	 */
+	@Override
+	@Transactional
+	public boolean bindMiniUser(BaseEventDTO baseEventDTO) {
+		
+		String openid = baseEventDTO.getOpenid();
+		String appid = baseEventDTO.getAppId();
+		User user = multiFindByOpenId(openid);
+		if (user != null) {	
+			logger.warn("user already exists, will skip. openid : " + openid);
+			return true;
+		}
+		//未查询到用户存在两种情况：1.用户未没有产生小程序用户，2用户产生了小程序用户，但未和公众号openid关联上
+		UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
+		if (userWeiXin == null) {
+			logger.warn("can't find user from wechat, openid : " + openid);
+			return true;
+		}
+		String unionid = userWeiXin.getUnionid();
+		if (StringUtils.isEmpty(unionid)) {
+			logger.warn("user does not have unionid, openid : " + openid + ", appid : " + appid);
+			return true;
+		}
+		user = getByUnionid(unionid);
+		if (user == null) {
+			logger.warn("cant' find user by unionid in database, unionid : " + unionid);
+			return true;
+		}
+		String miniOpenid = user.getMiniopenid();
+		if (StringUtils.isEmpty(miniOpenid)) {
+			logger.warn("cant' find miniuser in database, unionid : " + unionid);
+			return true;
+		}
+		
+		//如果数据库中有关联的用户，更新该小程序用户的openid和appid
+		user.setOpenid(openid);
+		user.setAppId(appid);
+        userRepository.save(user);
+		return true;
 	}
 
 

@@ -34,6 +34,10 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void checkSalable(Product product, int count) {
+		
+		if (product.getUserLimitCount() < count) {
+			throw new BizValidateException("当前商品每用户限购"+count+"份！");
+		}
 		if(product.getStatus() != ModelConstant.PRODUCT_ONSALE){
 			throw new BizValidateException("您晚到了一步，商品已下架！");
 		} else if(product.getEndDate()!=null&&product.getEndDate().getTime()<System.currentTimeMillis()){

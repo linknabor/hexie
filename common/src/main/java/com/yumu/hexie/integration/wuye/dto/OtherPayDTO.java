@@ -98,5 +98,4 @@ public class OtherPayDTO {
 				+ invoice_type + ", smsBatch=" + smsBatch + "]";
 	}
 
-	
 }

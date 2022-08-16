@@ -707,7 +707,6 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 	}
-	
 	/**
 	 * 申请电子收据
 	 * @param user
@@ -731,7 +730,7 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		
-	}
+}
 	
 	/**
 	 * 根据收据ID获取电子收据

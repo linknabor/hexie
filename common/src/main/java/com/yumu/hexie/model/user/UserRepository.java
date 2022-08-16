@@ -81,6 +81,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	@Query(value = "update user set zhima = zhima + ?1 where id = ?2 ", nativeQuery = true)
 	public int updateUserZhima(int increase, long id);
 	
+	public List<User> findByUnionid(String unionid);
+	
 	@Query(value = "select * from user u where u.cspId is not null "
 			+ "and IF (?1!='', u.cspId = ?1, 1=1) "
 			+ "and IF (?2!='', u.tel = ?2, 1=1) " 

@@ -40,6 +40,7 @@ public class WechatResponse implements Serializable{
 	private String language;
 	private String headimgurl;
 	private long subscribe_time;
+	private String unionid;
 	
 	//获取openid列表
 	private Openids data;
@@ -235,5 +236,14 @@ public class WechatResponse implements Serializable{
 	public void setErrcode(int errcode) {
 		this.errcode = errcode;
 	}
+
+	public String getUnionid() {
+		return unionid;
+	}
+
+	public void setUnionid(String unionid) {
+		this.unionid = unionid;
+	}
+	
 	
 }

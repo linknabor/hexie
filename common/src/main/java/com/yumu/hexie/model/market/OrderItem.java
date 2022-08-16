@@ -1,11 +1,15 @@
 package com.yumu.hexie.model.market;
 
+import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
+
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.yumu.hexie.model.BaseModel;
@@ -56,6 +60,16 @@ public class OrderItem  extends BaseModel {
 	
 	@Transient
 	private long totalCount;	//总库存 
+
+	private String code; //核销码
+	private int verifyStatus; //1核销 0未核销
+	private int isRefund = 0; //0未退款 1已退款,2退款申请中
+	
+	private Date refundApplyDate;	//退款申请日期
+	private Integer refundApplyType;	//申请类型
+	private String refundReason;	//退款原因
+	private String refundMemo;	//退款补充说明
+	private String refundImages;	//逗号分割
 	
 	public OrderItem(){}
 	@Transient
@@ -74,6 +88,26 @@ public class OrderItem  extends BaseModel {
 		productThumbPic = product.getSmallPicture();
 		productCategoryId = product.getProductCategoryId();
 	}
+	
+	@Transient
+	public void fillDetailV3(SalePlan plan,Product product){
+		orderType = plan.getSalePlanType();
+		price = product.getSinglePrice();
+		amount = product.getSinglePrice() * count;
+		ruleName = plan.getName();
+		
+		productId = product.getId();
+		oriPrice = product.getOriPrice();
+		merchantId = product.getMerchantId();
+		productName = product.getName();
+		if (!StringUtils.isEmpty(product.getPictures())) {
+			String[]tempArr = product.getPictures().split(",");
+			productPic = tempArr[0];
+			productThumbPic = tempArr[0];
+		}
+		productCategoryId = product.getProductCategoryId();
+	}
+	
 	public Long getProductId() {
 		return productId;
 	}
@@ -224,6 +258,60 @@ public class OrderItem  extends BaseModel {
 	}
 	public void setAgentId(Long agentId) {
 		this.agentId = agentId;
+	}
+
+	public int getVerifyStatus() {
+		return verifyStatus;
+	}
+
+	public void setVerifyStatus(int verifyStatus) {
+		this.verifyStatus = verifyStatus;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public int getIsRefund() {
+		return isRefund;
+	}
+
+	public void setIsRefund(int isRefund) {
+		this.isRefund = isRefund;
+	}
+	public String getRefundMemo() {
+		return refundMemo;
+	}
+	public void setRefundMemo(String refundMemo) {
+		this.refundMemo = refundMemo;
+	}
+	public Integer getRefundApplyType() {
+		return refundApplyType;
+	}
+	public void setRefundApplyType(Integer refundApplyType) {
+		this.refundApplyType = refundApplyType;
+	}
+	public String getRefundReason() {
+		return refundReason;
+	}
+	public void setRefundReason(String refundReason) {
+		this.refundReason = refundReason;
+	}
+	public String getRefundImages() {
+		return refundImages;
+	}
+	public void setRefundImages(String refundImages) {
+		this.refundImages = refundImages;
+	}
+	public Date getRefundApplyDate() {
+		return refundApplyDate;
+	}
+	public void setRefundApplyDate(Date refundApplyDate) {
+		this.refundApplyDate = refundApplyDate;
 	}
 	
 	
