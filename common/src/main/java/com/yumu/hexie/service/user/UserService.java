@@ -151,9 +151,9 @@ public interface UserService {
 	boolean bindMiniUser(BaseEventDTO baseEventDTO);
 	
 	/**
-	 * 更新用户wuyeId
+	 * 获取物业id
 	 * @param user
-	 * @return
+	 * @return 
 	 */
 	String bindWuYeIdSync(User user);
 
