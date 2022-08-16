@@ -536,22 +536,14 @@ public class UserInfo implements Serializable {
 		this.openid = openid;
 	}
 	
-  public boolean isPermission() {
+	public boolean isPermission() {
 		return permission;
-  }
+	}
   
 	public void setPermission(boolean permission) {
 		this.permission = permission;
 	}
 	
-	public String getOpenid() {
-		return openid;
-	}
-	
-	public void setOpenid(String openid) {
-		this.openid = openid;
-	}
-
 	public String getReqPath() {
 		return reqPath;
 	}
