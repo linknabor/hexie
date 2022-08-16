@@ -527,11 +527,19 @@ public class UserInfo implements Serializable {
 	public void setRepairService(boolean repairService) {
 		this.repairService = repairService;
 	}
+  
+	public String getOpenid() {
+		return openid;
+	}
 
-	public boolean isPermission() {
-		return permission;
+	public void setOpenid(String openid) {
+		this.openid = openid;
 	}
 	
+  public boolean isPermission() {
+		return permission;
+  }
+  
 	public void setPermission(boolean permission) {
 		this.permission = permission;
 	}
