@@ -156,12 +156,3 @@ public interface UserService {
 	 * @return
 	 */
 	boolean bindMiniUser(BaseEventDTO baseEventDTO);
-
-	/**
-	 * 获取物业id
-	 * @param user
-	 * @return 
-	 */
-	String bindWuYeIdSync(User user);
-
-}
