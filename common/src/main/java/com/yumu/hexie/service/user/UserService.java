@@ -156,3 +156,5 @@ public interface UserService {
 	 * @return
 	 */
 	boolean bindMiniUser(BaseEventDTO baseEventDTO);
+
+}
