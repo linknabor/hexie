@@ -535,11 +535,11 @@ public class UserInfo implements Serializable {
 	public void setOpenid(String openid) {
 		this.openid = openid;
 	}
-
+	
 	public boolean isPermission() {
 		return permission;
 	}
-
+  
 	public void setPermission(boolean permission) {
 		this.permission = permission;
 	}
