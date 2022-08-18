@@ -160,7 +160,9 @@ public class UserController extends BaseController{
 			    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
 			    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
 			    	if (menuList.isEmpty()) {
-			    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			    		if (!StringUtils.isEmpty(user.getCspId())) {
+			    			menuList = pageConfigService.getMenuByCspId(user.getCspId());
+						}
 					}
 			    	if (menuList.isEmpty()) {
 			    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
