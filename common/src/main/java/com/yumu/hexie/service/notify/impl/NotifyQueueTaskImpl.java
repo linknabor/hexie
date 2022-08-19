@@ -1010,6 +1010,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                                 isSuccess = true;
                             } else if (wechatResponse.getErrcode() == 45009) {    //reach max api daily quota limit
                                 isSuccess = true;
+                            } else if (wechatResponse.getErrcode() == 40036) {		//invalid template_id size，没有配模板
+                            	isSuccess = true;
                             }
                             if (isSuccess) {
                                 try {
@@ -1101,6 +1103,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                             isSuccess = true;
                         } else if (wechatResponse.getErrcode() == 45009) {    //reach max api daily quota limit
                             isSuccess = true;
+                        } else if (wechatResponse.getErrcode() == 40036) {		//invalid template_id size，没有配模板
+                        	isSuccess = true;
                         }
                         if (isSuccess) {
                             try {
