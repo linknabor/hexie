@@ -27,6 +27,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.ObjectToBeanUtils;
+import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.GroupOwnerInfo;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.Sect;
@@ -845,5 +847,63 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		Date createDate = c.getTime();
 		Page<Product> products = productRepository.findProductFromSalesByOwner(user.getId(), createDate, productName, excludeDepotIds, pageable);
 		return products.getContent();
+	}
+	
+	/**
+	 * 团购记录
+	 * @throws Exception 
+	 */
+	@Override
+	public List<QueryRgroupSectsMapper> getGroupSects(User user, String sectName, int currentPage) throws Exception {
+		
+		List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.DESC, "createDate");
+    	orderList.add(order);
+    	Sort sort = Sort.by(orderList);
+		Pageable pageable = PageRequest.of(currentPage, 10, sort);
+		Date date = new Date();
+		Page<Object[]> page = rgroupRuleRepository.findGroupSects(ModelConstant.RULE_STATUS_ON, sectName, date.getTime(), pageable);
+		List<QueryRgroupSectsMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
+		if (list == null) {
+			list = new ArrayList<>();
+		}
+		for (QueryRgroupSectsMapper queryRgroupSectsMapper : list) {
+			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(ModelConstant.RULE_STATUS_ON, date.getTime(), queryRgroupSectsMapper.getId().longValue());
+			RgroupVO vo = new RgroupVO();
+			for (RgroupRule rule : rules) {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String descMoreStr = rule.getDescriptionMore();
+				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+				DescriptionMore[]descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				vo.setDescription(rule.getDescription());
+				vo.setDescriptionMore(descriptionMore);
+				vo.setStatus(rule.getStatus());
+				
+				List<String> descMoreImages = new ArrayList<>();
+				for (DescriptionMore descM : descriptionMore) {
+					String imageUrl = descM.getImage();
+					if (!StringUtils.isEmpty(imageUrl)) {
+						descMoreImages.add(imageUrl);
+					}
+					Thumbnail[]thumbnails = descM.getThumbnail();
+					if (thumbnails!=null && thumbnails.length>0) {
+						for (Thumbnail thumbnail : thumbnails) {
+							if (!StringUtils.isEmpty(thumbnail.getUrl())) {
+								descMoreImages.add(thumbnail.getUrl());
+							}
+						}
+					}
+				}
+				vo.setDescMoreImages(descMoreImages);
+			}
+			List<String> images = queryRgroupSectsMapper.getGroupImages();
+			if (images == null) {
+				images = new ArrayList<>();
+			}
+			images.addAll(vo.getDescMoreImages());
+			queryRgroupSectsMapper.setGroupImages(images);
+		}
+		
+		return list;
 	}
 }

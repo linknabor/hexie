@@ -3,6 +3,7 @@ package com.yumu.hexie.service.common;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.RgroupRecordsVO;
@@ -24,5 +25,7 @@ public interface RgroupV3Service {
 	List<Map<String, String>> getRefundReason();
 
 	List<Product> getProductFromSales(User user, String productName, List<String> excludDepotIds, int currentPage);
+
+	List<QueryRgroupSectsMapper> getGroupSects(User user, String sectName, int currentPage) throws Exception;
 	
 }

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
@@ -209,6 +210,19 @@ public class RgroupController extends BaseController{
 			excludeIdList = Arrays.asList(excludeIds);
 		}
         return new BaseResult<List<Product>>().success(rgroupV3Service.getProductFromSales(user, searchValue, excludeIdList, currentPage));
+    }
+	
+	/**
+	 * 获取有正在进行团购的小区列表
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/sects", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<QueryRgroupSectsMapper>> getGroupSects(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String sectName,
+			@RequestParam int page) throws Exception {
+		
+        return new BaseResult<List<QueryRgroupSectsMapper>>().success(rgroupV3Service.getGroupSects(user, sectName, page));
     }
 	
 }
