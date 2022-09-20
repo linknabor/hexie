@@ -29,6 +29,18 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			nativeQuery = true)
 	public Page<RgroupRule> findByOwnerIdAndDescriptionLike(long ownerId, String description, Pageable pageable);
 	
+	@Query(value = "select distinct rule.* from RgroupRule rule "
+			+ "join rgroupareaitem item on item.ruleId = rule.id "
+			+ "where rule.status = ?1 "
+			+ "and item.regionId = ?2 "
+			, countQuery = "select count(*) from ( select distinct rule.* from RgroupRule rule "
+					+ "join rgroupareaitem item on item.ruleId = rule.id "
+					+ "where rule.status = ?1 "
+					+ "and item.regionId = ?2 "
+					+ ") a "
+			, nativeQuery = true)
+	public Page<RgroupRule> findByRegionId(int status, long regionId, Pageable pageable);
+	
 	public List<RgroupRule> findAllByProductId(long productId);
 	
 	public List<RgroupRule> findByGroupStatus(int groupStatus);

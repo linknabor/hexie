@@ -38,6 +38,7 @@ public class RgroupVO implements Serializable {
 	private RgroupOwnerVO rgroupOwner;
 	private List<String> descMoreImages;
 	private String pricePeriod;	//价格区间
+	private RgroupRecordsVO rgroupRecords;	//跟团记录
 	
 	public static class RgroupOwnerVO {
 
@@ -544,7 +545,15 @@ public class RgroupVO implements Serializable {
 	public void setOrdered(int ordered) {
 		this.ordered = ordered;
 	}
-	
+
+	public RgroupRecordsVO getRgroupRecords() {
+		return rgroupRecords;
+	}
+
+	public void setRgroupRecords(RgroupRecordsVO rgroupRecords) {
+		this.rgroupRecords = rgroupRecords;
+	}
+
 	@Override
 	public String toString() {
 		return "RgroupVO [action=" + action + ", ruleId=" + ruleId + ", type=" + type + ", status=" + status
@@ -554,7 +563,7 @@ public class RgroupVO implements Serializable {
 				+ logisticType + ", groupMinNum=" + groupMinNum + ", updateDate=" + updateDate + ", accessed="
 				+ accessed + ", ordered=" + ordered + ", productList=" + Arrays.toString(productList) + ", region="
 				+ region + ", rgroupOwner=" + rgroupOwner + ", descMoreImages=" + descMoreImages + ", pricePeriod="
-				+ pricePeriod + "]";
+				+ pricePeriod + ", rgroupRecords=" + rgroupRecords + "]";
 	}
 
 	

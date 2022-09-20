@@ -27,5 +27,7 @@ public interface RgroupV3Service {
 	List<Product> getProductFromSales(User user, String productName, List<String> excludDepotIds, int currentPage);
 
 	List<QueryRgroupSectsMapper> getGroupSects(User user, String sectName, int currentPage) throws Exception;
+
+	List<RgroupVO> getSectGroups(User user, String regionId, int currentPage) throws Exception;
 	
 }

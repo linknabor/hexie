@@ -225,4 +225,17 @@ public class RgroupController extends BaseController{
         return new BaseResult<List<QueryRgroupSectsMapper>>().success(rgroupV3Service.getGroupSects(user, sectName, page));
     }
 	
+	/**
+	 * 获取当前小区的团购列表
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/sect/groups", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RgroupVO>> getSectGroups(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String regionId,
+			@RequestParam int page) throws Exception {
+		
+        return new BaseResult<List<RgroupVO>>().success(rgroupV3Service.getSectGroups(user, regionId, page));
+    }
+	
 }
