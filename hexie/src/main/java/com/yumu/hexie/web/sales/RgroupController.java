@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -22,6 +23,7 @@ import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.user.User;
@@ -29,6 +31,7 @@ import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.common.RgroupV3Service;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
+import com.yumu.hexie.service.search.SearchService;
 import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.web.BaseController;
@@ -45,6 +48,8 @@ public class RgroupController extends BaseController{
     private DistributionService distributionService;
     @Autowired
     private RgroupV3Service rgroupV3Service;
+    @Autowired
+    private SearchService searchService;
     
 	@RequestMapping(value = "/rgroups/{page}", method = RequestMethod.GET)
 	@ResponseBody
@@ -233,9 +238,27 @@ public class RgroupController extends BaseController{
 	@RequestMapping(value = "/rgroups/v3/sect/groups", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<RgroupVO>> getSectGroups(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String regionId,
-			@RequestParam int page) throws Exception {
+			@RequestParam(required = false) String title, @RequestParam int page) throws Exception {
 		
-        return new BaseResult<List<RgroupVO>>().success(rgroupV3Service.getSectGroups(user, regionId, page));
+		if (!StringUtils.isEmpty(title) && !StringUtils.isEmpty(title.trim())) {
+			String key = ModelConstant.KEY_RGROUP_TILE_SEARCH + user.getMiniopenid();
+			searchService.save(key, title);
+		}
+        return new BaseResult<List<RgroupVO>>().success(rgroupV3Service.getSectGroups(user, regionId, title, page));
+    }
+	
+	/**
+	 * 获取当前小区的团购列表
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/searchHistory", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Object> searchHistory(@ModelAttribute(Constants.USER)User user) throws Exception {
+		
+		String key = ModelConstant.KEY_RGROUP_TILE_SEARCH + user.getMiniopenid();
+		Set<String> set = searchService.get(key);
+        return new BaseResult<Object>().success(set);
     }
 	
 }

@@ -912,7 +912,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	 * @throws Exception 
 	 */
 	@Override
-	public List<RgroupVO> getSectGroups(User user, String regionId, int currentPage) throws Exception {
+	public List<RgroupVO> getSectGroups(User user, String regionId, String title, int currentPage) throws Exception {
 		
 		Assert.hasLength(regionId, "小区id不能为空。");
 		
@@ -923,7 +923,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	    	orderList.add(order);
 	    	Sort sort = Sort.by(orderList);
 			Pageable pageable = PageRequest.of(currentPage, 10, sort);
-			Page<RgroupRule> pages = rgroupRuleRepository.findByRegionId(ModelConstant.RULE_STATUS_ON, Long.valueOf(regionId), pageable);
+			
+			if (StringUtils.isEmpty(title)) {
+				title = "";
+			}
+			Page<RgroupRule> pages = rgroupRuleRepository.findByRegionId(ModelConstant.RULE_STATUS_ON, Long.valueOf(regionId), title, pageable);
 			List<RgroupRule> ruleList = pages.getContent();
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 			long currentMills = System.currentTimeMillis();

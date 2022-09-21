@@ -28,6 +28,6 @@ public interface RgroupV3Service {
 
 	List<QueryRgroupSectsMapper> getGroupSects(User user, String sectName, int currentPage) throws Exception;
 
-	List<RgroupVO> getSectGroups(User user, String regionId, int currentPage) throws Exception;
+	List<RgroupVO> getSectGroups(User user, String regionId, String title, int currentPage) throws Exception;
 	
 }

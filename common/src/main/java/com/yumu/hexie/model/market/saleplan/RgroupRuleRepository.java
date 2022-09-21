@@ -33,13 +33,15 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "join rgroupareaitem item on item.ruleId = rule.id "
 			+ "where rule.status = ?1 "
 			+ "and item.regionId = ?2 "
+			+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
 			, countQuery = "select count(*) from ( select distinct rule.* from RgroupRule rule "
 					+ "join rgroupareaitem item on item.ruleId = rule.id "
 					+ "where rule.status = ?1 "
 					+ "and item.regionId = ?2 "
+					+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
 					+ ") a "
 			, nativeQuery = true)
-	public Page<RgroupRule> findByRegionId(int status, long regionId, Pageable pageable);
+	public Page<RgroupRule> findByRegionId(int status, long regionId, String title, Pageable pageable);
 	
 	public List<RgroupRule> findAllByProductId(long productId);
 	
