@@ -166,7 +166,9 @@ public class UserServiceImpl implements UserService {
 		String openId = weixinUser.getOpenid();
 		User userAccount = multiFindByOpenId(openId);
 		if (userAccount == null) {	//如果是空，根据unionid再差一遍
-			userAccount = getByUnionid(weixinUser.getUnionid());	
+			if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
+				userAccount = getByUnionid(weixinUser.getUnionid());
+			}
 		}
 
 		if (userAccount == null) {
@@ -199,8 +201,9 @@ public class UserServiceImpl implements UserService {
 					userAccount.setCity(weixinUser.getCity());
 				}
 				userAccount.setLanguage(weixinUser.getLanguage());
-				userAccount.setUnionid(weixinUser.getUnionid());
-				
+				if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
+					userAccount.setUnionid(weixinUser.getUnionid());
+				}
 				// 从网页进入时下面两个值为空
 				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 				userAccount.setSubscribe(weixinUser.getSubscribe());
