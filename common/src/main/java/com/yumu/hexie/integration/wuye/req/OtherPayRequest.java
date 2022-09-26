@@ -37,6 +37,10 @@ public class OtherPayRequest extends WuyeRequest {
 	private String invoice_type;
 	@JsonProperty("sms_batch")
 	private String smsBatch;
+	@JsonProperty("start_date")
+	private String startDate;
+	@JsonProperty("end_date")
+	private String endDate;
 	
 	public OtherPayRequest(OtherPayDTO otherPayDTO) {
 		BeanUtils.copyProperties(otherPayDTO, this);
@@ -141,14 +145,40 @@ public class OtherPayRequest extends WuyeRequest {
 		this.appid = appid;
 	}
 
+	public String getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
 	@Override
 	public String toString() {
-		return "OtherPayRequest [appid=" + appid + ", openid=" + openid + ", money=" + money + ", sectId=" + sectId
-				+ ", feeId=" + feeId + ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId
-				+ ", payee_openid=" + payee_openid + ", orderId=" + orderId + ", orderDetail=" + orderDetail
-				+ ", invoice_type=" + invoice_type + ", smsBatch=" + smsBatch + "]";
+		return "OtherPayRequest{" +
+				"appid='" + appid + '\'' +
+				", openid='" + openid + '\'' +
+				", money='" + money + '\'' +
+				", sectId='" + sectId + '\'' +
+				", feeId='" + feeId + '\'' +
+				", remark='" + remark + '\'' +
+				", qrCodeId='" + qrCodeId + '\'' +
+				", mngCellId='" + mngCellId + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", orderId='" + orderId + '\'' +
+				", orderDetail='" + orderDetail + '\'' +
+				", invoice_type='" + invoice_type + '\'' +
+				", smsBatch='" + smsBatch + '\'' +
+				", startDate='" + startDate + '\'' +
+				", endDate='" + endDate + '\'' +
+				'}';
 	}
-	
-
-	
 }
