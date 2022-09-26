@@ -445,6 +445,15 @@ public class WuyeUtil {
 					throw new BizValidateException(err_code+", " +err_msg);
 				}
 			}
+			if (reqUrl.indexOf("getInvoiceInfoSDO.do")>=0) {
+				Map respMap = JacksonJsonUtil.json2map(resp);
+				String result = (String)respMap.get("result");
+				if (!"00".equals(result)) {
+					err_msg = (String)respMap.get("err_msg");
+					err_code = result;
+					throw new BizValidateException(err_code+", " +err_msg);
+				}
+			}
 			
 			Log.error("RESP:" + resp);
 			BaseResult v =jsonToBeanResult(resp, c);
