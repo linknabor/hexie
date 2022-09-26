@@ -29,10 +29,18 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
     		+ "join orderItem o on o.orderId = p.id "
     		+ "where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 "
     		+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
-    		+ "and (COALESCE(?5) IS NULL OR (o.isRefund IN (?5) )) "
-    		+ "and p.groupOrderId is not null order by id desc "
+    		+ "and if(?5!='', p.groupRuleId = ?5, 1=1) "
+    		+ "and (COALESCE(?6) IS NULL OR (o.isRefund IN (?6) )) "
+    		+ "and p.groupOrderId is not null order by p.id desc "
+    		, countQuery = "select count(distinct p.*) from ServiceOrder p "
+    				+ "join orderItem o on o.orderId = p.id "
+    	    		+ "where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 "
+    	    		+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+    	    		+ "and if(?5!='', p.groupRuleId = ?5, 1=1) "
+    	    		+ "and (COALESCE(?6) IS NULL OR (o.isRefund IN (?6) )) "
+    	    		+ "and p.groupOrderId is not null order by p.id desc "
     		, nativeQuery = true)
-    List<ServiceOrder> findByUserAndStatusAndTypeV3(long userId, List<Integer> status, int orderType, String productName, List<Integer> itemStatus);
+    List<ServiceOrder> findByUserAndStatusAndTypeV3(long userId, List<Integer> status, int orderType, String productName, String ruleId, List<Integer> itemStatus, Pageable page);
 
     @Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.orderType in ?2 order by id desc", nativeQuery = true)
     List<ServiceOrder> findByUserIdAndOrderType(long userId, List<Integer> types);

@@ -1,5 +1,27 @@
 package com.yumu.hexie.service.community.impl;
 
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.yumu.hexie.common.util.DateUtil;
@@ -9,9 +31,21 @@ import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
-import com.yumu.hexie.integration.community.resp.*;
+import com.yumu.hexie.integration.community.resp.GroupInfoVo;
+import com.yumu.hexie.integration.community.resp.GroupOrderVo;
+import com.yumu.hexie.integration.community.resp.GroupProductSumVo;
+import com.yumu.hexie.integration.community.resp.GroupSumResp;
+import com.yumu.hexie.integration.community.resp.OutSidDepotResp;
+import com.yumu.hexie.integration.community.resp.OutSidRelateGroupResp;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.commonsupport.info.*;
+import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductDepot;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductRepository;
+import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.commonsupport.info.ProductRuleRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.RefundRecord;
@@ -26,23 +60,7 @@ import com.yumu.hexie.service.community.GroupMngService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.vo.RgroupVO;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
-
-import java.math.BigInteger;
-import java.text.DecimalFormat;
-import java.util.*;
+import com.yumu.hexie.vo.RgroupVO.Thumbnail;
 
 /**
  * 描述:
@@ -104,50 +122,53 @@ public class GroupMngServiceImpl implements GroupMngService {
 
             for (GroupInfoVo info : list) {
                 info.setGroupDate(DateUtil.getSendTime(info.getCreateDate().longValue()));
-                if (info.getStatus() == 1) {
-                    Date date = new Date();
-                    if (info.getStartDate().getTime() <= date.getTime()
-                            && info.getEndDate().getTime() >= date.getTime()) { //跟团中
-                        info.setGroupStatusCn("正在跟团中");
-                    } else if (info.getEndDate().getTime() < date.getTime()) {
-                        info.setGroupStatusCn("已结束");
-                    } else if (info.getStartDate().getTime() > date.getTime()) {
-                        info.setGroupStatusCn("未开始");
-                    }
-                } else {
-                    info.setGroupStatusCn("预览中");
-                }
-
                 //获取团购的图片
                 List<RgroupVO.DescriptionMore> listDesc = JSONArray.parseArray(info.getDescriptionMore(), RgroupVO.DescriptionMore.class);
                 //是否有图片
-                String descCn = "";
-                String descImg = "";
+                List<String> textList = new ArrayList<>();
+                List<String> imagesList = new ArrayList<>();
                 if(listDesc != null) {
                     for(RgroupVO.DescriptionMore desc : listDesc) {
-                        if("1".equals(desc.getType()) && ObjectUtils.isEmpty(descCn)) { //只是文字
-                            descCn = desc.getText();
-                        }
-                        if(("2".equals(desc.getType())
-                                || "3".equals(desc.getType()))
-                                && ObjectUtils.isEmpty(descImg)) { //有图
-                            //有无大图
-                            descImg = desc.getImage();
-                            if(ObjectUtils.isEmpty(descImg)) {
-                                RgroupVO.Thumbnail[] thumb = desc.getThumbnail();
-                                if(thumb != null) {
-                                    descImg = thumb[0].getUrl();
-                                }
-                            }
-                            if(ObjectUtils.isEmpty(descCn)) {
-                                descCn = desc.getText();
-                            }
-                        }
+                    	if (!StringUtils.isEmpty(desc.getText())) {
+                    		textList.add(desc.getText());
+						}
+                    	if ("2".equals(desc.getType())) {
+							if (!StringUtils.isEmpty(desc.getImage())) {
+								imagesList.add(desc.getImage());
+							}
+						}
+                    	if ("1".equals(desc.getType())) {
+                    		Thumbnail[] thumbs = desc.getThumbnail();
+                    		if (thumbs != null && thumbs.length > 0) {
+								for (Thumbnail thumb : thumbs) {
+									if (thumb != null && !StringUtils.isEmpty(thumb.getUrl())) {
+										imagesList.add(thumb.getUrl());
+									}
+								}
+							}
+						}
                     }
                 }
 
-                info.setDesc(descCn);
-                info.setProductImg(descImg);
+                info.setDesc(textList.size()==0?"":textList.get(0));
+                info.setProductImg(imagesList.size()==0?"":imagesList.get(0));
+                info.setImages(imagesList);
+                
+                if (imagesList.size() == 0) {
+                	List<Product> productList = productRepository.findMultiByRuleId(info.getId().longValue());
+                	for (Product product : productList) {
+                		String[]pics = product.getPictureList();
+                		if (pics!=null && pics.length > 0) {
+							for (String pic : pics) {
+								if (!StringUtils.isEmpty(pic)) {
+									imagesList.add(pic);
+								}
+								
+							}
+						}
+					}
+                	info.setImages(imagesList);
+				}
 
                 //统计支付的，退款的，取消的，预览的
                 float realityAmt = 0;
@@ -184,13 +205,13 @@ public class GroupMngServiceImpl implements GroupMngService {
 	  			}
 	  			
 	  			info.setFollowNum(totalOrdered);
-	  			info.setCancelNum(info.getCurrentNum() - totalOrdered);
+	  			info.setCancelNum(totalOrdered - info.getCurrentNum());
 	  			info.setQueryNum(totalAccessed);
 	  			
             }
             return list;
         } catch (Exception e) {
-            throw new BizValidateException(e.getMessage());
+            throw new BizValidateException(e.getMessage(), e);
         }
     }
 
@@ -201,7 +222,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         if (!"1".equals(operType) && !"3".equals(operType)) {
             throw new BizValidateException("不合法的操作数据类型");
         }
-        if (ObjectUtils.isEmpty(groupId)) {
+        if (StringUtils.isEmpty(groupId)) {
             throw new BizValidateException("团购编号为空，请刷新重试");
         }
 
@@ -342,10 +363,10 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     public String operGroupByOutSid(String groupId, String operType) {
-        if (ObjectUtils.isEmpty(groupId)) {
+        if (StringUtils.isEmpty(groupId)) {
             throw new BizValidateException("团购编号为空，请刷新重试");
         }
-        if (ObjectUtils.isEmpty(operType)) {
+        if (StringUtils.isEmpty(operType)) {
             throw new BizValidateException("操作类型为空，请刷新重试");
         }
 
@@ -371,14 +392,16 @@ public class GroupMngServiceImpl implements GroupMngService {
     public static void main(String[] args) {
 		
     	Float f0 = 0.2F;
-    	Float f1 = 0.02F;
+    	Float f1 = 0.3F;
     	Float f = f0 + f1;
-    	System.out.println(f);
+    	DecimalFormat decimalFormat=new DecimalFormat("#.##");
+    	String totalAmtStr = decimalFormat.format(f);
+    	System.out.println(totalAmtStr);
 	}
 
     @Override
     public GroupSumResp queryGroupSum(User user, String groupId) throws Exception {
-        if (ObjectUtils.isEmpty(groupId)) {
+        if (StringUtils.isEmpty(groupId)) {
             throw new BizValidateException("团购ID不能为空，请刷新重试");
         }
 
@@ -409,7 +432,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         searchVoList.add(searchVo);
 
         //总金额 全部订单的金额，包括取消的订单
-        DecimalFormat decimalFormat=new DecimalFormat(".00");
+        DecimalFormat decimalFormat=new DecimalFormat("0.00");
         String totalAmtStr = decimalFormat.format(totalAmt);
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("订单总金额");
@@ -505,6 +528,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         			itemStatus, pageable);
         List<GroupOrderVo> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOrderVo.class);
         if (list != null) {
+        	Sort refundSort = Sort.by(Direction.DESC, "id");
             for (GroupOrderVo vo : list) {
                 vo.setStatusCn(ServiceOrder.getStatusStr(vo.getStatus()));
                 
@@ -538,6 +562,12 @@ public class GroupMngServiceImpl implements GroupMngService {
                 serviceOrder.setId(vo.getId().longValue());
                 List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
                 vo.setOrderItems(items);
+                
+                List<RefundRecord> refundRecords = refundRecordRepository.findByOrderId(serviceOrder.getId(), refundSort);
+                vo.setRefundRecords(refundRecords);
+                if (refundRecords!=null && refundRecords.size()>0) {
+					vo.setLatestRefund(refundRecords.get(0));
+				}
             }
         }
 
@@ -546,7 +576,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     public GroupOrderVo queryGroupOrderDetail(User user, String orderId) {
-        if (ObjectUtils.isEmpty(orderId)) {
+        if (StringUtils.isEmpty(orderId)) {
             throw new BizValidateException("订单号为空，请刷新重试");
         }
         ServiceOrder serviceOrder = serviceOrderRepository.findById(Long.parseLong(orderId));
@@ -579,13 +609,20 @@ public class GroupMngServiceImpl implements GroupMngService {
         //查询订单下的商品
         List<OrderItem> items = orderItemRepository.findByServiceOrder(serviceOrder);
         groupOrder.setOrderItems(items);
+        
+        //查询商品退款记录
+        Sort sort = Sort.by(Direction.DESC, "id");
+    	List<RefundRecord> records = refundRecordRepository.findByOrderId(Long.valueOf(orderId), sort);
+    	if (records != null && records.size() > 0) {
+    		groupOrder.setLatestRefund(records.get(0));
+		}
         return groupOrder;
     }
 
     @Override
     @Transactional
     public Boolean handleVerifyCode(User user, String orderId, String code) {
-        if (ObjectUtils.isEmpty(code)) {
+        if (StringUtils.isEmpty(code)) {
             throw new BizValidateException("核销码为空，请重新输入");
         }
 
@@ -627,7 +664,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     public Boolean noticeReceiving(User user, String groupId) {
-        if (ObjectUtils.isEmpty(groupId)) {
+        if (StringUtils.isEmpty(groupId)) {
             throw new BizValidateException("团购编号未知，请刷新重试");
         }
         List<ServiceOrder> list = new ArrayList<>();
@@ -675,7 +712,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     public Boolean delProductDepot(User user, String productId) {
-        if(ObjectUtils.isEmpty(productId)) {
+        if(StringUtils.isEmpty(productId)) {
             throw new BizValidateException("商品编号不能为空");
         }
 //        User userInfo = userRepository.findById(user.getId());
@@ -692,25 +729,25 @@ public class GroupMngServiceImpl implements GroupMngService {
     @Override
     public ProductDepot operProductDepot(User user, ProductDepotReq productDepotReq) {
         ProductDepot depot = new ProductDepot();
-        if(!ObjectUtils.isEmpty(productDepotReq.getProductId())) { //编辑
+        if(!StringUtils.isEmpty(productDepotReq.getProductId())) { //编辑
             depot = productDepotRepository.findById(Long.parseLong(productDepotReq.getProductId())).get();
         }
 
         BeanUtils.copyProperties(productDepotReq, depot);
-        if(!ObjectUtils.isEmpty(productDepotReq.getPictures())) {
+        if(!StringUtils.isEmpty(productDepotReq.getPictures())) {
             String[] strs = productDepotReq.getPictures().split(",");
             depot.setMainPicture(strs[0]);
             depot.setSmallPicture(strs[0]);
         }
 
-        if(ObjectUtils.isEmpty(productDepotReq.getTotalCount())) {
+        if(StringUtils.isEmpty(productDepotReq.getTotalCount())) {
             depot.setTotalCount(9999999);
         }
-        if(!ObjectUtils.isEmpty(productDepotReq.getTags())) {
+        if(!StringUtils.isEmpty(productDepotReq.getTags())) {
             JSONArray jsonArray = new JSONArray();
             String[] strs = productDepotReq.getTags().split(",");
             for(String key : strs) {
-                if(!ObjectUtils.isEmpty(key)) {
+                if(!StringUtils.isEmpty(key)) {
                     ProductDepotTags tag = productDepotTagsRepository.findById(Long.parseLong(key)).get();
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("id", tag.getId());

@@ -16,9 +16,6 @@ public class OtherPayDTO {
 	private String orderDetail;
 	private String invoice_type;
 	private String smsBatch;
-
-	private String startDate;
-	private String endDate;
 	
 	public User getUser() {
 		return user;
@@ -93,23 +90,6 @@ public class OtherPayDTO {
 	public void setInvoice_type(String invoice_type) {
 		this.invoice_type = invoice_type;
 	}
-
-	public String getStartDate() {
-		return startDate;
-	}
-
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-
-	public String getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
-	}
-
 	@Override
 	public String toString() {
 		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId

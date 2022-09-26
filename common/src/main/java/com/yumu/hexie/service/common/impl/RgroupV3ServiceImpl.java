@@ -430,7 +430,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			RgroupRule rule = rgroupRuleRepository.findByIdAndStatusIn(ruleId, statusList);
 			if (rule == null) {
 				if (isOnsale) {
-					throw new BizValidateException("团购已下架");
+//					throw new BizValidateException("团购已下架");
 				} else {
 					throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
 				}
@@ -476,11 +476,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			String endDateStr = DateUtil.dtFormat(endDate, dtFormat);
 			vo.setEndDate(endDateStr);
 			vo.setEndDateMills(endDate.getTime());
-			if (isOnsale) {	//如果只查询上架的商品，需要判断团购结束的时间
-				if (endDate.getTime() - System.currentTimeMillis() <= 0) {
-					throw new BizValidateException("团购已结束");
-				}
-			}
+//			if (isOnsale) {	//如果只查询上架的商品，需要判断团购结束的时间
+//				if (endDate.getTime() - System.currentTimeMillis() <= 0) {
+//					throw new BizValidateException("团购已结束");
+//				}
+//			}
 			
 			vo.setGroupMinNum(rule.getGroupMinNum());
 			long createDate = rule.getCreateDate();

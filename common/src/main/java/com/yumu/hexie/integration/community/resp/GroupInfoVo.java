@@ -3,6 +3,10 @@ package com.yumu.hexie.integration.community.resp;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+
+import com.yumu.hexie.model.ModelConstant;
 
 /**
  * 描述:
@@ -40,6 +44,7 @@ public class GroupInfoVo implements Serializable {
 
     private String desc; //描述文字
     private String productImg; //团里面的图片地址
+    private List<String> images;
 
     public GroupInfoVo(BigInteger id, BigInteger createDate, String description, String descriptionMore, 
     		Timestamp startDate, Timestamp endDate, Float price, Integer status, Integer groupStatus,
@@ -121,6 +126,22 @@ public class GroupInfoVo implements Serializable {
     }
 
     public String getGroupStatusCn() {
+    	Date date = new Date();
+    	if (getStatus() == ModelConstant.RULE_STATUS_ON) {
+    		if(getStartDate().getTime() <= date.getTime() && getEndDate().getTime() >= date.getTime()) {
+    			groupStatusCn = "跟团中";
+    		}
+    		if (getStartDate().getTime() > date.getTime()) {
+    			groupStatusCn = "未开始";
+			}
+		} else if(getStatus() == ModelConstant.RULE_STATUS_OFF) {
+			if(getStartDate().getTime() <= date.getTime() && getEndDate().getTime() >= date.getTime()) {
+    			groupStatusCn = "预览中";
+    		}
+		}
+    	if (getEndDate().getTime() < date.getTime()) {
+    		groupStatusCn = "已结束";
+		}
         return groupStatusCn;
     }
 
@@ -208,6 +229,14 @@ public class GroupInfoVo implements Serializable {
 		this.currentNum = currentNum;
 	}
 
+	public List<String> getImages() {
+		return images;
+	}
+
+	public void setImages(List<String> images) {
+		this.images = images;
+	}
+
 	@Override
 	public String toString() {
 		return "GroupInfoVo [id=" + id + ", createDate=" + createDate + ", description=" + description
@@ -215,8 +244,9 @@ public class GroupInfoVo implements Serializable {
 				+ ", price=" + price + ", status=" + status + ", groupStatus=" + groupStatus + ", groupStatusCn="
 				+ groupStatusCn + ", groupDate=" + groupDate + ", realityAmt=" + realityAmt + ", refundAmt=" + refundAmt
 				+ ", currentNum=" + currentNum + ", followNum=" + followNum + ", cancelNum=" + cancelNum + ", queryNum="
-				+ queryNum + ", desc=" + desc + ", productImg=" + productImg + "]";
+				+ queryNum + ", desc=" + desc + ", productImg=" + productImg + ", images=" + images + "]";
 	}
-    
+
+	
     
 }

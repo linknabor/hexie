@@ -20,7 +20,9 @@ public interface RgroupService {
 
 	void refreshGroupDeliveryStatus(RgroupRule rule);
 
-	List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId, List<Integer> status, String productName,
-			List<Integer> itemStatus);
+	List<RgroupOrdersVO> queryMyRgroupOrdersV3(long userId, List<Integer> status, String productName, String ruleIdStr,
+			List<Integer> itemStatus, int currentPage);
+
+	RgroupOrdersVO queryRgroupOrderDetailV3(long userId, String orderIdStr);
 
 }

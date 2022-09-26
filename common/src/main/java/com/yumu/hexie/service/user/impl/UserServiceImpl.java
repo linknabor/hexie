@@ -45,6 +45,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.card.WechatCardRepository;
 import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.market.RgroupCart;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
@@ -165,7 +166,9 @@ public class UserServiceImpl implements UserService {
 		String openId = weixinUser.getOpenid();
 		User userAccount = multiFindByOpenId(openId);
 		if (userAccount == null) {	//如果是空，根据unionid再差一遍
-			userAccount = getByUnionid(weixinUser.getUnionid());	
+			if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
+				userAccount = getByUnionid(weixinUser.getUnionid());
+			}
 		}
 
 		if (userAccount == null) {
@@ -198,8 +201,9 @@ public class UserServiceImpl implements UserService {
 					userAccount.setCity(weixinUser.getCity());
 				}
 				userAccount.setLanguage(weixinUser.getLanguage());
-				userAccount.setUnionid(weixinUser.getUnionid());
-				
+				if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
+					userAccount.setUnionid(weixinUser.getUnionid());
+				}
 				// 从网页进入时下面两个值为空
 				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 				userAccount.setSubscribe(weixinUser.getSubscribe());
@@ -298,6 +302,31 @@ public class UserServiceImpl implements UserService {
 			logger.error(e.getMessage(),e);
 		}
 	}
+	
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	public String bindWuYeIdSync(User user) {
+		 //绑定物业信息
+		String wuyeId = "";
+    	try {
+    		if(StringUtil.isEmpty(user.getWuyeId()) ){
+    			BaseResult<HexieUser> r = WuyeUtil.userLogin(user);
+        		if(r.isSuccess()) {
+        			User dbUser = userRepository.findById(user.getId());
+        			if (dbUser != null) {
+//        				dbUser.setWuyeId(r.getData().getUser_id());
+//                		userRepository.save(dbUser);
+        				userRepository.updateUserWuyeId(r.getData().getUser_id(), dbUser.getId());
+        				wuyeId = r.getData().getUser_id();
+					}
+        		}
+    		}
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
+    	return wuyeId;
+	}
+	
 
 	@Override
 	public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid) {
@@ -545,7 +574,7 @@ public class UserServiceImpl implements UserService {
             userAccount.setMiniAppId(miniprogramAppid);
             userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
         } else {
-        	if(StringUtils.isEmpty(userAccount.getOpenid())) {
+        	if(StringUtils.isEmpty(userAccount.getMiniopenid())) {
         		userAccount.setUnionid(miniUser.getUnionid());
                 userAccount.setMiniopenid(miniUser.getOpenid());
                 userAccount.setMiniAppId(miniprogramAppid);
@@ -721,6 +750,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
     @Transactional
+    @CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
     public User updateUserInfo(User user, Map<String, String> map) {
 		
 		User dbUser = userRepository.findById(user.getId());
@@ -734,6 +764,48 @@ public class UserServiceImpl implements UserService {
 		
 	}
 
+	/**
+	 * 通过微信关注事件，绑定小程序用户
+	 */
+	@Override
+	@Transactional
+	public boolean bindMiniUser(BaseEventDTO baseEventDTO) {
+		
+		String openid = baseEventDTO.getOpenid();
+		String appid = baseEventDTO.getAppId();
+		User user = multiFindByOpenId(openid);
+		if (user != null) {	
+			logger.warn("user already exists, will skip. openid : " + openid);
+			return true;
+		}
+		//未查询到用户存在两种情况：1.用户未没有产生小程序用户，2用户产生了小程序用户，但未和公众号openid关联上
+		UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
+		if (userWeiXin == null) {
+			logger.warn("can't find user from wechat, openid : " + openid);
+			return true;
+		}
+		String unionid = userWeiXin.getUnionid();
+		if (StringUtils.isEmpty(unionid)) {
+			logger.warn("user does not have unionid, openid : " + openid + ", appid : " + appid);
+			return true;
+		}
+		user = getByUnionid(unionid);
+		if (user == null) {
+			logger.warn("cant' find user by unionid in database, unionid : " + unionid);
+			return true;
+		}
+		String miniOpenid = user.getMiniopenid();
+		if (StringUtils.isEmpty(miniOpenid)) {
+			logger.warn("cant' find miniuser in database, unionid : " + unionid);
+			return true;
+		}
+		
+		//如果数据库中有关联的用户，更新该小程序用户的openid和appid
+		user.setOpenid(openid);
+		user.setAppId(appid);
+        userRepository.save(user);
+		return true;
+	}
 
 
 }

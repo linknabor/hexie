@@ -17,6 +17,7 @@ public class OtherPayRequest extends WuyeRequest {
 	 */
 	private static final long serialVersionUID = -7292708879420556618L;
 	
+	private String appid;
 	private String openid;
 	private String money;
 	@JsonProperty("sect_id")
@@ -36,15 +37,11 @@ public class OtherPayRequest extends WuyeRequest {
 	private String invoice_type;
 	@JsonProperty("sms_batch")
 	private String smsBatch;
-
-	@JsonProperty("start_date")
-	private String startDate;
-	@JsonProperty("end_date")
-	private String endDate;
 	
 	public OtherPayRequest(OtherPayDTO otherPayDTO) {
 		BeanUtils.copyProperties(otherPayDTO, this);
 		this.openid =  otherPayDTO.getUser().getOpenid();
+		this.appid = otherPayDTO.getUser().getAppId();
 		if (!StringUtils.isEmpty(otherPayDTO.getRemark())) {
 			try {
 				//中文打码
@@ -136,39 +133,22 @@ public class OtherPayRequest extends WuyeRequest {
 		this.invoice_type = invoice_type;
 	}
 
-	public String getStartDate() {
-		return startDate;
+	public String getAppid() {
+		return appid;
 	}
 
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-
-	public String getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
+	public void setAppid(String appid) {
+		this.appid = appid;
 	}
 
 	@Override
 	public String toString() {
-		return "OtherPayRequest{" +
-				"openid='" + openid + '\'' +
-				", money='" + money + '\'' +
-				", sectId='" + sectId + '\'' +
-				", feeId='" + feeId + '\'' +
-				", remark='" + remark + '\'' +
-				", qrCodeId='" + qrCodeId + '\'' +
-				", mngCellId='" + mngCellId + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				", orderId='" + orderId + '\'' +
-				", orderDetail='" + orderDetail + '\'' +
-				", invoice_type='" + invoice_type + '\'' +
-				", smsBatch='" + smsBatch + '\'' +
-				", startDate='" + startDate + '\'' +
-				", endDate='" + endDate + '\'' +
-				'}';
+		return "OtherPayRequest [appid=" + appid + ", openid=" + openid + ", money=" + money + ", sectId=" + sectId
+				+ ", feeId=" + feeId + ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId
+				+ ", payee_openid=" + payee_openid + ", orderId=" + orderId + ", orderDetail=" + orderDetail
+				+ ", invoice_type=" + invoice_type + ", smsBatch=" + smsBatch + "]";
 	}
+	
+
+	
 }

@@ -33,11 +33,6 @@ public class OtherPayVO implements Serializable {
 	@JsonProperty("sms_batch")
 	private String smsBatch;
 
-	@JsonProperty("start_date")
-	private String startDate;
-	@JsonProperty("end_date")
-	private String endDate;
-
 	private String invoice_type;
 
 	public String getMoney() {
@@ -131,42 +126,14 @@ public class OtherPayVO implements Serializable {
 	public void setSmsBatch(String smsBatch) {
 		this.smsBatch = smsBatch;
 	}
-
-	public String getStartDate() {
-		return startDate;
-	}
-
-	public void setStartDate(String startDate) {
-		this.startDate = startDate;
-	}
-
-	public String getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(String endDate) {
-		this.endDate = endDate;
-	}
-
 	@Override
 	public String toString() {
-		return "OtherPayVO{" +
-				"money='" + money + '\'' +
-				", sectId='" + sectId + '\'' +
-				", feeId='" + feeId + '\'' +
-				", openid='" + openid + '\'' +
-				", remark='" + remark + '\'' +
-				", appid='" + appid + '\'' +
-				", qrCodeId='" + qrCodeId + '\'' +
-				", mngCellId='" + mngCellId + '\'' +
-				", realAppid='" + realAppid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				", orderId='" + orderId + '\'' +
-				", orderDetail='" + orderDetail + '\'' +
-				", smsBatch='" + smsBatch + '\'' +
-				", startDate='" + startDate + '\'' +
-				", endDate='" + endDate + '\'' +
-				", invoice_type='" + invoice_type + '\'' +
-				'}';
+		return "OtherPayVO [money=" + money + ", sectId=" + sectId + ", feeId=" + feeId + ", openid=" + openid
+				+ ", remark=" + remark + ", appid=" + appid + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId
+				+ ", realAppid=" + realAppid + ", payee_openid=" + payee_openid + ", orderId=" + orderId
+				+ ", orderDetail=" + orderDetail + ", smsBatch=" + smsBatch + ", invoice_type=" + invoice_type + "]";
 	}
+	
+	
+
 }

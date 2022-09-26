@@ -2,6 +2,7 @@ package com.yumu.hexie.model.user;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -82,4 +83,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	public List<User> findByUnionid(String unionid);
 	
+	@Query(value = "select * from user u where u.cspId is not null "
+			+ "and IF (?1!='', u.cspId = ?1, 1=1) "
+			+ "and IF (?2!='', u.tel = ?2, 1=1) " 
+			+ "and IF (?3!='', u.name like CONCAT('%',?3,'%'), 1=1) "
+			+ "and (COALESCE(?4) IS NULL OR (u.sectId IN (?4) )) "
+			, countQuery = "select count(1) from user u where u.cspId is not null "
+					+ "and IF (?1!='', u.cspId = ?1, 1=1) "
+					+ "and IF (?2!='', u.tel = ?2, 1=1) " 
+					+ "and IF (?3!='', u.name like CONCAT('%',?3,'%'), 1=1) "
+					+ "and (COALESCE(?4) IS NULL OR (u.sectId IN (?4) )) "
+			, nativeQuery = true )
+	public Page<User> findByMultiCondition(String cspId, String tel, String name, List<String> sectId, Pageable pageable);
+	
+	
+	public List<User> findByCspIdAndWuyeIdIn(String cspId, List<String> wuyeIds);
 }
