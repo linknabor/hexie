@@ -3,14 +3,14 @@ package com.yumu.hexie.model.distribution;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 
+import com.yumu.hexie.model.ModelConstant;
+
 //团购上架管理
 @Entity
 public class RgroupAreaItem  extends RuleDistribution {
 	
 	private static final long serialVersionUID = 4808669460780339640L;
 
-	@Transient
-	private int process;//进度
 	@Transient
 	private int count;	//页面用
 	@Transient
@@ -19,13 +19,27 @@ public class RgroupAreaItem  extends RuleDistribution {
 	private boolean featured = false;
 	private int productType;
 	
-	private long areaLeaderId;	//运营端用户ID
-	private String areaLeader;	//区域leader(团长)
-	private String areaLeaderOpenid;	//团长openid
-	private String areaLeaderAddr;	//团长地址
-	private String areaLeaderTel;	//团长电话
-	private String areaLeaderImg;	//团长头像
+	private long areaLeaderId;	//运营端用户ID			//TODO delete after new pub
+	private String areaLeader;	//区域leader(团长)		//TODO delete after new pub
+	private String areaLeaderOpenid;	//团长openid	//TODO delete after new pub
+	private String areaLeaderAddr;	//团长地址			//TODO delete after new pub
+	private String areaLeaderTel;	//团长电话			//TODO delete after new pub
+	private String areaLeaderImg;	//团长头像			//TODO delete after new pub
+	
+	private int currentNum;	//售卖份数
+	private int groupMinNum;	//最小成团份数
+	private int groupStatus = ModelConstant.RGROUP_STAUS_GROUPING;//团购状态1 开始 2成功 3失败
+	
+	private String remark;
 
+	@Transient
+	public int getProcess() {
+    	if(groupMinNum<=0) {
+    		return 0;
+    	}
+    	return (100*currentNum/groupMinNum);
+	}
+	
 	public boolean isFeatured() {
 		return featured;
 	}
@@ -37,12 +51,6 @@ public class RgroupAreaItem  extends RuleDistribution {
 	}
 	public void setProductType(int productType) {
 		this.productType = productType;
-	}
-	public int getProcess() {
-		return process;
-	}
-	public void setProcess(int process) {
-		this.process = process;
 	}
 	public int getCount() {
 		return count;
@@ -91,6 +99,32 @@ public class RgroupAreaItem  extends RuleDistribution {
 	}
 	public void setAreaLeaderOpenid(String areaLeaderOpenid) {
 		this.areaLeaderOpenid = areaLeaderOpenid;
+	}
+	public int getGroupMinNum() {
+		return groupMinNum;
+	}
+	public void setGroupMinNum(int groupMinNum) {
+		this.groupMinNum = groupMinNum;
+	}
+	public int getGroupStatus() {
+		return groupStatus;
+	}
+	public void setGroupStatus(int groupStatus) {
+		this.groupStatus = groupStatus;
+	}
+	public int getCurrentNum() {
+		return currentNum;
+	}
+	public void setCurrentNum(int currentNum) {
+		this.currentNum = currentNum;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	
 }

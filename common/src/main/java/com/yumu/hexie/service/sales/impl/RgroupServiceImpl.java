@@ -87,14 +87,7 @@ public class RgroupServiceImpl implements RgroupService {
 	 * @return
 	 */
 	public List<RgroupAreaItem> addProcessStatus(List<RgroupAreaItem> result) {
-		//TODO
         for(RgroupAreaItem item : result){
-            RgroupRule rule = findSalePlan(item.getRuleId());
-            if(rule!=null) {
-                item.setProcess(rule.getProcess());
-            } else {
-                item.setProcess(0);
-            }
             String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
     		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
     		int canSale = Integer.parseInt(stock) - Integer.parseInt(freeze);

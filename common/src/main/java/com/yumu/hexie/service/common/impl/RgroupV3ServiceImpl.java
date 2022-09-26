@@ -65,6 +65,7 @@ import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.DescriptionMore;
 import com.yumu.hexie.vo.RgroupVO.ProductVO;
+import com.yumu.hexie.vo.RgroupVO.RegionVo;
 import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 import com.yumu.hexie.vo.RgroupVO.Tag;
 import com.yumu.hexie.vo.RgroupVO.Thumbnail;
@@ -115,7 +116,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		Assert.noNullElements(rgroupVo.getProductList(), "团购商品不能为空");
 		Assert.hasText(rgroupVo.getStartDate(), "团购起始日期不能为空");
 		Assert.hasText(rgroupVo.getEndDate(), "团购结束日期不能为空");
-		Assert.notNull(rgroupVo.getRegion(), "团购区域不能为空");
+		Assert.noNullElements(rgroupVo.getRegions(), "团购区域不能为空");
 		
 		try {
 			
@@ -229,12 +230,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			} else {
 				rule.setGroupStatus(ModelConstant.GROUP_STAUS_INIT);
 			}
-			Region region = rgroupVo.getRegion();
+			RegionVo region = rgroupVo.getRegions()[0];
 			rule.setOwnerId(owner.getOwnerId());
 			rule.setOwnerName(owner.getOwnerName());
 			rule.setOwnerImg(owner.getOwnerImg());
 			rule.setOwnerSect(region.getName());
-			rule.setOwnerAddr(region.getXiaoquAddress());
+			rule.setSectCount(rgroupVo.getRegions().length);
+//			rule.setOwnerAddr(region.getXiaoquAddress());
 			rule.setOwnerTel(owner.getOwnerTel());
 			rule.setAgentId(agent.getId());
 			rule.setUpdateDate(new Date());
@@ -331,62 +333,82 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			/*3.保存product end */
 			
-			/*4.保存rgroupAreaItem 当前版本只支持单个小区 start*/
+			/*4.保存rgroupAreaItem 20220926支持多小区 start*/
 			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
 			if (areaList != null && areaList.size() > 0) {
 				for (RgroupAreaItem areaItem : areaList) {
 					rgroupAreaItemRepository.deleteById(areaItem.getId());
 				}
 			}
-			RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
-			rgroupAreaItem.setRegionId(region.getId());
-			rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
-			if (ModelConstant.RULE_STATUS_ON == rule.getStatus()) {
-				rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
-			}else {
-				rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+			List<Sect> sectList = new ArrayList<>();
+			Map<Long, Region> dbSects = new HashMap<>();
+			for (int i = 0; i < rgroupVo.getRegions().length; i++) {
+				
+				RegionVo regionVo = rgroupVo.getRegions()[i];
+				RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
+				rgroupAreaItem.setRegionId(regionVo.getId());
+				rgroupAreaItem.setRegionName(regionVo.getName());
+				rgroupAreaItem.setXiaoquAddress(regionVo.getXiaoquAddress());
+				rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
+				if (ModelConstant.RULE_STATUS_ON == rule.getStatus()) {
+					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
+				}else {
+					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+				}
+				long ruleCloseTime = rule.getEndDate().getTime();
+				rgroupAreaItem.setRuleId(rule.getId());
+				rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
+				rgroupAreaItem.setSortNo(10);	
+				rgroupAreaItem.setRuleName(rule.getName());
+				Integer miniNum = 1;
+				if (!StringUtils.isEmpty(regionVo.getMiniNum())) {
+					miniNum = Integer.valueOf(regionVo.getMiniNum());
+				}
+				rgroupAreaItem.setGroupMinNum(miniNum);
+				rgroupAreaItem.setRemark(rgroupAreaItem.getRemark());
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+				
+				Region dbSect = regionRepository.findById(regionVo.getId());
+				if (StringUtils.isEmpty(dbSect.getSectId())) {
+					List<Region> distList = regionRepository.findByNameAndRegionType(dbSect.getParentName(), ModelConstant.REGION_COUNTY);
+					Region dist = distList.get(0);
+					List<Region> cityList = regionRepository.findByNameAndRegionType(dist.getParentName(), ModelConstant.REGION_CITY);
+					Region city = cityList.get(0);
+					createRgroupRequest.setCreateSect(Boolean.TRUE);
+					
+					Sect sect = new Sect();
+					sect.setRegionId(dbSect.getId());
+					sect.setProvince(city.getParentName());
+					sect.setCity(dist.getParentName());
+					sect.setDistrict(dbSect.getParentName());
+					sect.setSectName(dbSect.getName());
+					sect.setSectAddr(dbSect.getXiaoquAddress());
+					sectList.add(sect);
+				}
+				dbSects.put(dbSect.getId(), dbSect);
+				
 			}
-			long ruleCloseTime = rule.getEndDate().getTime();
-			rgroupAreaItem.setRuleId(rule.getId());
-			rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
-			rgroupAreaItem.setSortNo(10);	
-			rgroupAreaItem.setRuleName(rule.getName());
-			rgroupAreaItemRepository.save(rgroupAreaItem);
-			
-			Region dbSect = regionRepository.findById(region.getId());
-			String regionName = "";
-			if (StringUtils.isEmpty(dbSect.getSectId())) {
-				List<Region> distList = regionRepository.findByNameAndRegionType(dbSect.getParentName(), ModelConstant.REGION_COUNTY);
-				Region dist = distList.get(0);
-				List<Region> cityList = regionRepository.findByNameAndRegionType(dist.getParentName(), ModelConstant.REGION_CITY);
-				Region city = cityList.get(0);
-				createRgroupRequest.setCreateSect(Boolean.TRUE);
-				List<Sect> sectList = new ArrayList<>();
-				Sect sect = new Sect();
-				sect.setProvince(city.getParentName());
-				sect.setCity(dist.getParentName());
-				sect.setDistrict(dbSect.getParentName());
-				sect.setSectName(dbSect.getName());
-				sect.setSectAddr(dbSect.getXiaoquAddress());
-				sectList.add(sect);
-				createRgroupRequest.setSects(sectList);
-				regionName = sect.getProvince();
-			}
+			createRgroupRequest.setSects(sectList);
 			
 			if (createRgroupRequest.getCreateOwner() || createRgroupRequest.getCreateSect()) {
-				CreateRgroupRequest response = eshopUtil.createRgroup(regionName, createRgroupRequest);
-				List<Sect> sectList = response.getSects();
-				
-				if (createRgroupRequest.getCreateSect() && sectList != null && !sectList.isEmpty()) {
-					dbSect.setSectId(sectList.get(0).getSectId());
-					regionRepository.save(dbSect);
+				CreateRgroupRequest response = eshopUtil.createRgroup("", createRgroupRequest);
+				List<Sect> respSectList = response.getSects();
+				if (createRgroupRequest.getCreateSect() && respSectList != null && !respSectList.isEmpty()) {
+					for (Sect sect : respSectList) {
+						Region dbSect = dbSects.get(sect.getRegionId());
+						dbSect.setSectId(sect.getSectId());
+						regionRepository.save(dbSect);
+					}
+					
 					if (StringUtils.isEmpty(ownerUser.getSectId())) {
-						ownerUser.setSectId(dbSect.getSectId());
+						ownerUser.setSectId(respSectList.get(0).getSectId());
 						ownerUser.setCspId(sectList.get(0).getCspId());
-						ownerUser.setXiaoquName(dbSect.getName());
+						ownerUser.setXiaoquName(respSectList.get(0).getSectName());
 						userService.save(ownerUser);
 					}
 				}
+				
+				
 				GroupOwnerInfo groupOwner = response.getOwner();
 				if (createRgroupRequest.getCreateOwner() && groupOwner!=null) {
 					orgOperator.setOrgOperId(groupOwner.getOrgOperId());
@@ -549,9 +571,16 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			
 			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
 			if (areaList != null && areaList.size() > 0) {
-				RgroupAreaItem areaItem = areaList.get(0);
-				Region region = regionRepository.findById(areaItem.getRegionId());
-				vo.setRegion(region);
+				List<RegionVo> regionList = new ArrayList<>();
+				for (RgroupAreaItem rgroupAreaItem : areaList) {
+					RegionVo regionVo = new RegionVo();
+					regionVo.setId(rgroupAreaItem.getRegionId());
+					regionVo.setName(rgroupAreaItem.getRegionName());
+					regionVo.setXiaoquAddress(rgroupAreaItem.getXiaoquAddress());
+					regionVo.setMiniNum(String.valueOf(rgroupAreaItem.getGroupMinNum()));
+					regionVo.setRemark(rgroupAreaItem.getRemark());
+				}
+				vo.setRegions(regionList.toArray(new RegionVo[0]));
 			}
 			
 			if (isOnsale) {

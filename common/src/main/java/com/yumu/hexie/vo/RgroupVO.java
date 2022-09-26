@@ -8,7 +8,6 @@ import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.distribution.region.Region;
 
 public class RgroupVO implements Serializable {
 
@@ -34,11 +33,57 @@ public class RgroupVO implements Serializable {
 	private int accessed = 0;	//被访问次数
 	private int ordered = 0;	//被下单次数
 	private ProductVO[]productList;
-	private Region region;	//团购地区
+	private RegionVo[] regions;	//团购地区
 	private RgroupOwnerVO rgroupOwner;
 	private List<String> descMoreImages;
 	private String pricePeriod;	//价格区间
 	private RgroupRecordsVO rgroupRecords;	//跟团记录
+	
+	public static class RegionVo {
+		
+		private long id;
+		private String name;
+		private String xiaoquAddress;
+		private String miniNum;
+		private String remark;
+		
+		public long getId() {
+			return id;
+		}
+		public void setId(long id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public String getXiaoquAddress() {
+			return xiaoquAddress;
+		}
+		public void setXiaoquAddress(String xiaoquAddress) {
+			this.xiaoquAddress = xiaoquAddress;
+		}
+		public String getMiniNum() {
+			return miniNum;
+		}
+		public void setMiniNum(String miniNum) {
+			this.miniNum = miniNum;
+		}
+		public String getRemark() {
+			return remark;
+		}
+		public void setRemark(String remark) {
+			this.remark = remark;
+		}
+		@Override
+		public String toString() {
+			return "RegionVo [id=" + id + ", name=" + name + ", xiaoquAddress=" + xiaoquAddress + ", miniNum=" + miniNum
+					+ ", remark=" + remark + "]";
+		}
+		
+	}
 	
 	public static class RgroupOwnerVO {
 
@@ -414,13 +459,12 @@ public class RgroupVO implements Serializable {
 	public void setType(String type) {
 		this.type = type;
 	}
-
-	public Region getRegion() {
-		return region;
+	public RegionVo[] getRegions() {
+		return regions;
 	}
 
-	public void setRegion(Region region) {
-		this.region = region;
+	public void setRegions(RegionVo[] regions) {
+		this.regions = regions;
 	}
 
 	public RgroupOwnerVO getRgroupOwner() {
@@ -561,10 +605,9 @@ public class RgroupVO implements Serializable {
 				+ Arrays.toString(descriptionMore) + ", startDate=" + startDate + ", endDate=" + endDate
 				+ ", startDateMills=" + startDateMills + ", endDateMills=" + endDateMills + ", logisticType="
 				+ logisticType + ", groupMinNum=" + groupMinNum + ", updateDate=" + updateDate + ", accessed="
-				+ accessed + ", ordered=" + ordered + ", productList=" + Arrays.toString(productList) + ", region="
-				+ region + ", rgroupOwner=" + rgroupOwner + ", descMoreImages=" + descMoreImages + ", pricePeriod="
-				+ pricePeriod + ", rgroupRecords=" + rgroupRecords + "]";
+				+ accessed + ", ordered=" + ordered + ", productList=" + Arrays.toString(productList) + ", regions="
+				+ Arrays.toString(regions) + ", rgroupOwner=" + rgroupOwner + ", descMoreImages=" + descMoreImages
+				+ ", pricePeriod=" + pricePeriod + ", rgroupRecords=" + rgroupRecords + "]";
 	}
 
-	
 }

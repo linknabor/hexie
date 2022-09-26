@@ -7,6 +7,8 @@ import com.yumu.hexie.model.BaseModel;
 public class Distribution extends BaseModel{
 	private static final long serialVersionUID = 4808669460780339640L;
 	private long regionId;//区域
+	private String regionName;
+	private String xiaoquAddress;
 	private int regionType;//0 省 1 市 2县区  3全部
 	private long productId; //商品
 	private long productCategoryId;
@@ -80,6 +82,22 @@ public class Distribution extends BaseModel{
 
 	public void setProductCategoryId(long productCategoryId) {
 		this.productCategoryId = productCategoryId;
+	}
+
+	public String getRegionName() {
+		return regionName;
+	}
+
+	public void setRegionName(String regionName) {
+		this.regionName = regionName;
+	}
+
+	public String getXiaoquAddress() {
+		return xiaoquAddress;
+	}
+
+	public void setXiaoquAddress(String xiaoquAddress) {
+		this.xiaoquAddress = xiaoquAddress;
 	}
 	
 	
