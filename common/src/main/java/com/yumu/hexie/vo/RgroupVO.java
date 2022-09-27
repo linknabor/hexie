@@ -6,8 +6,11 @@ import java.util.List;
 
 import javax.persistence.Transient;
 
+import org.springframework.util.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.region.Region;
 
 public class RgroupVO implements Serializable {
 
@@ -33,6 +36,7 @@ public class RgroupVO implements Serializable {
 	private int accessed = 0;	//被访问次数
 	private int ordered = 0;	//被下单次数
 	private ProductVO[]productList;
+	private Region region;	//支持旧版本 TODO
 	private RegionVo[] regions;	//团购地区
 	private RgroupOwnerVO rgroupOwner;
 	private List<String> descMoreImages;
@@ -44,7 +48,11 @@ public class RgroupVO implements Serializable {
 		private long id;
 		private String name;
 		private String xiaoquAddress;
+		private String sectId;
 		private String miniNum;
+		private String currentNum;
+		private Double longitude = 0.00d;
+		private Double latitude = 0.00d;
 		private String remark;
 		
 		public long getId() {
@@ -71,16 +79,71 @@ public class RgroupVO implements Serializable {
 		public void setMiniNum(String miniNum) {
 			this.miniNum = miniNum;
 		}
+		public String getCurrentNum() {
+			return currentNum;
+		}
+		public void setCurrentNum(String currentNum) {
+			this.currentNum = currentNum;
+		}
 		public String getRemark() {
 			return remark;
 		}
 		public void setRemark(String remark) {
 			this.remark = remark;
 		}
+		public Double getLongitude() {
+			return longitude;
+		}
+		public void setLongitude(Double longitude) {
+			this.longitude = longitude;
+		}
+		public Double getLatitude() {
+			return latitude;
+		}
+		public void setLatitude(Double latitude) {
+			this.latitude = latitude;
+		}
+		public String getSectId() {
+			return sectId;
+		}
+		public void setSectId(String sectId) {
+			this.sectId = sectId;
+		}
+		public Integer getProcess() {
+			Integer minNum = 0;
+			if (!StringUtils.isEmpty(miniNum)) {
+				minNum = Integer.parseInt(miniNum);
+			}
+			if(minNum<=0) {
+	    		return 0;
+	    	}
+			Integer currNum = 0;
+			if (!StringUtils.isEmpty(currNum)) {
+				currNum = Integer.parseInt(currentNum);
+			}
+	    	return (100*currNum/minNum);
+		}
+		public Integer getLeftNum () {
+			
+			Integer minNum = 0;
+			if (!StringUtils.isEmpty(miniNum)) {
+				minNum = Integer.parseInt(miniNum);
+			}
+			if(minNum<=0) {
+	    		return 0;
+	    	}
+			Integer currNum = 0;
+			if (!StringUtils.isEmpty(currNum)) {
+				currNum = Integer.parseInt(currentNum);
+			}
+			return minNum - currNum;
+			
+		}
 		@Override
 		public String toString() {
-			return "RegionVo [id=" + id + ", name=" + name + ", xiaoquAddress=" + xiaoquAddress + ", miniNum=" + miniNum
-					+ ", remark=" + remark + "]";
+			return "RegionVo [id=" + id + ", name=" + name + ", xiaoquAddress=" + xiaoquAddress + ", sectId=" + sectId
+					+ ", miniNum=" + miniNum + ", currentNum=" + currentNum + ", longitude=" + longitude + ", latitude="
+					+ latitude + ", remark=" + remark + "]";
 		}
 		
 	}
@@ -598,6 +661,14 @@ public class RgroupVO implements Serializable {
 		this.rgroupRecords = rgroupRecords;
 	}
 
+	public Region getRegion() {
+		return region;
+	}
+
+	public void setRegion(Region region) {
+		this.region = region;
+	}
+
 	@Override
 	public String toString() {
 		return "RgroupVO [action=" + action + ", ruleId=" + ruleId + ", type=" + type + ", status=" + status
@@ -605,9 +676,11 @@ public class RgroupVO implements Serializable {
 				+ Arrays.toString(descriptionMore) + ", startDate=" + startDate + ", endDate=" + endDate
 				+ ", startDateMills=" + startDateMills + ", endDateMills=" + endDateMills + ", logisticType="
 				+ logisticType + ", groupMinNum=" + groupMinNum + ", updateDate=" + updateDate + ", accessed="
-				+ accessed + ", ordered=" + ordered + ", productList=" + Arrays.toString(productList) + ", regions="
-				+ Arrays.toString(regions) + ", rgroupOwner=" + rgroupOwner + ", descMoreImages=" + descMoreImages
-				+ ", pricePeriod=" + pricePeriod + ", rgroupRecords=" + rgroupRecords + "]";
+				+ accessed + ", ordered=" + ordered + ", productList=" + Arrays.toString(productList) + ", region="
+				+ region + ", regions=" + Arrays.toString(regions) + ", rgroupOwner=" + rgroupOwner
+				+ ", descMoreImages=" + descMoreImages + ", pricePeriod=" + pricePeriod + ", rgroupRecords="
+				+ rgroupRecords + "]";
 	}
 
+	
 }

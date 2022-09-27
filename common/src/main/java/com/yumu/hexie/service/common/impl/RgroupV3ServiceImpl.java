@@ -60,6 +60,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.RgroupV3Service;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.RgroupAreaRegionMapper;
 import com.yumu.hexie.vo.RgroupOrderRecordVO;
 import com.yumu.hexie.vo.RgroupRecordsVO;
 import com.yumu.hexie.vo.RgroupVO;
@@ -347,8 +348,6 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				RegionVo regionVo = rgroupVo.getRegions()[i];
 				RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
 				rgroupAreaItem.setRegionId(regionVo.getId());
-				rgroupAreaItem.setRegionName(regionVo.getName());
-				rgroupAreaItem.setXiaoquAddress(regionVo.getXiaoquAddress());
 				rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
 				if (ModelConstant.RULE_STATUS_ON == rule.getStatus()) {
 					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
@@ -365,7 +364,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					miniNum = Integer.valueOf(regionVo.getMiniNum());
 				}
 				rgroupAreaItem.setGroupMinNum(miniNum);
-				rgroupAreaItem.setRemark(rgroupAreaItem.getRemark());
+				rgroupAreaItem.setRemark(regionVo.getRemark());
 				rgroupAreaItemRepository.save(rgroupAreaItem);
 				
 				Region dbSect = regionRepository.findById(regionVo.getId());
@@ -569,19 +568,30 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			vo.setProductList(proVoList.toArray(new ProductVO[0]));
 			
-			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
-			if (areaList != null && areaList.size() > 0) {
-				List<RegionVo> regionList = new ArrayList<>();
-				for (RgroupAreaItem rgroupAreaItem : areaList) {
-					RegionVo regionVo = new RegionVo();
-					regionVo.setId(rgroupAreaItem.getRegionId());
-					regionVo.setName(rgroupAreaItem.getRegionName());
-					regionVo.setXiaoquAddress(rgroupAreaItem.getXiaoquAddress());
-					regionVo.setMiniNum(String.valueOf(rgroupAreaItem.getGroupMinNum()));
-					regionVo.setRemark(rgroupAreaItem.getRemark());
-				}
-				vo.setRegions(regionList.toArray(new RegionVo[0]));
+			List<Object[]> areaList = rgroupAreaItemRepository.findWithRegionByRuleId(ruleId);
+			List<RgroupAreaRegionMapper> regionList = ObjectToBeanUtils.objectToBean(areaList, RgroupAreaRegionMapper.class);
+			if (regionList == null) {
+				regionList = new ArrayList<>();
 			}
+			RegionVo[] regionVos = new RegionVo[regionList.size()];
+			for (int j = 0; j < regionList.size(); j++) {
+				RgroupAreaRegionMapper areaRegionMapper = regionList.get(j);
+				RegionVo regionVo = new RegionVo();
+				regionVo.setId(areaRegionMapper.getId().longValue());
+				regionVo.setName(areaRegionMapper.getName());
+				regionVo.setXiaoquAddress(areaRegionMapper.getXiaoquAddress());
+				regionVo.setMiniNum(String.valueOf(areaRegionMapper.getGroupMinNum()));
+				regionVo.setCurrentNum(String.valueOf(areaRegionMapper.getCurrentNum()));
+				regionVo.setRemark(areaRegionMapper.getRemark());
+				regionVo.setLatitude(areaRegionMapper.getLatitude());
+				regionVo.setLongitude(areaRegionMapper.getLongitude());
+				regionVo.setSectId(areaRegionMapper.getSectId());
+				regionVos[j] = regionVo;
+			}
+			vo.setRegions(regionVos);
+			
+			Region region = regionRepository.findById(regionVos[0].getId());	//TODO 兼容旧版本
+			vo.setRegion(region);	//TODO 兼容旧版本
 			
 			if (isOnsale) {
 				stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rule.getId());
