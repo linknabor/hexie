@@ -41,6 +41,7 @@ public class OtherPayRequest extends WuyeRequest {
 	private String startDate;
 	@JsonProperty("end_date")
 	private String endDate;
+	private String invoice_title_type;
 	
 	public OtherPayRequest(OtherPayDTO otherPayDTO) {
 		BeanUtils.copyProperties(otherPayDTO, this);
@@ -161,6 +162,14 @@ public class OtherPayRequest extends WuyeRequest {
 		this.endDate = endDate;
 	}
 
+	public String getInvoice_title_type() {
+		return invoice_title_type;
+	}
+
+	public void setInvoice_title_type(String invoice_title_type) {
+		this.invoice_title_type = invoice_title_type;
+	}
+
 	@Override
 	public String toString() {
 		return "OtherPayRequest{" +
@@ -179,6 +188,7 @@ public class OtherPayRequest extends WuyeRequest {
 				", smsBatch='" + smsBatch + '\'' +
 				", startDate='" + startDate + '\'' +
 				", endDate='" + endDate + '\'' +
+				", invoice_title_type='" + invoice_title_type + '\'' +
 				'}';
 	}
 }

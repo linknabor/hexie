@@ -39,6 +39,7 @@ public class OtherPayVO implements Serializable {
 	private String endDate;
 
 	private String invoice_type;
+	private String invoice_title_type;
 
 	public String getMoney() {
 		return money;
@@ -148,6 +149,14 @@ public class OtherPayVO implements Serializable {
 		this.endDate = endDate;
 	}
 
+	public String getInvoice_title_type() {
+		return invoice_title_type;
+	}
+
+	public void setInvoice_title_type(String invoice_title_type) {
+		this.invoice_title_type = invoice_title_type;
+	}
+
 	@Override
 	public String toString() {
 		return "OtherPayVO{" +
@@ -167,6 +176,7 @@ public class OtherPayVO implements Serializable {
 				", startDate='" + startDate + '\'' +
 				", endDate='" + endDate + '\'' +
 				", invoice_type='" + invoice_type + '\'' +
+				", invoice_title_type='" + invoice_title_type + '\'' +
 				'}';
 	}
 }

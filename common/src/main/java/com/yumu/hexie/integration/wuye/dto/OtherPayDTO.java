@@ -18,6 +18,7 @@ public class OtherPayDTO {
 	private String smsBatch;
 	private String startDate;
 	private String endDate;
+	private String invoice_title_type;
 	
 	public User getUser() {
 		return user;
@@ -109,6 +110,14 @@ public class OtherPayDTO {
 		this.endDate = endDate;
 	}
 
+	public String getInvoice_title_type() {
+		return invoice_title_type;
+	}
+
+	public void setInvoice_title_type(String invoice_title_type) {
+		this.invoice_title_type = invoice_title_type;
+	}
+
 	@Override
 	public String toString() {
 		return "OtherPayDTO{" +
@@ -126,6 +135,7 @@ public class OtherPayDTO {
 				", smsBatch='" + smsBatch + '\'' +
 				", startDate='" + startDate + '\'' +
 				", endDate='" + endDate + '\'' +
+				", invoice_title_type='" + invoice_title_type + '\'' +
 				'}';
 	}
 }
