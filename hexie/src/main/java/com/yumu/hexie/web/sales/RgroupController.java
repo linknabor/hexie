@@ -248,7 +248,7 @@ public class RgroupController extends BaseController{
     }
 	
 	/**
-	 * 获取当前小区的团购列表
+	 * 查询团购搜索历史记录
 	 * @return
 	 * @throws Exception
 	 */
@@ -261,4 +261,27 @@ public class RgroupController extends BaseController{
         return new BaseResult<Object>().success(set);
     }
 	
+	/**
+	 * 获取团长信息
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/leader/{leaderId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Object> getLeaderInfo(@PathVariable String leaderId) throws Exception {
+		
+        return new BaseResult<Object>().success(rgroupV3Service.getLeaderInfo(leaderId));
+    }
+	
+	/**
+	 * 获取团长下的团购
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/leader/groups", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Object> getLeaderInfo(@RequestParam(required = false) String leaderId, @RequestParam(required = false) int page) throws Exception {
+		
+        return new BaseResult<Object>().success(rgroupV3Service.getLeadGroups(leaderId, page));
+    }
 }

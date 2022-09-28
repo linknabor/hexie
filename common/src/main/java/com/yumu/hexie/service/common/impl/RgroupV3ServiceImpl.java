@@ -157,6 +157,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				rgroupOwner.setUserId(owner.getOwnerId());
 				rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
 				rgroupOwner.setMiniappid(ownerUser.getMiniAppId());
+				rgroupOwner.setName(ownerUser.getName());
+				rgroupOwner.setHeadImgUrl(ownerUser.getHeadimgurl());
+				rgroupOwner.setTel(ownerUser.getTel());
 				rgroupOwnerRepository.save(rgroupOwner);
 				
 				ownerUser.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
@@ -1072,7 +1075,188 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				Date startDate = rgroupRule.getStartDate();
 				String startDateStr = "";
 				if (startDate != null) {
-					if ((currentMills - startDate.getTime()) > (3600 * 24 * 1000l)) {
+					if ((currentMills - startDate.getTime()) < (3600 * 24 * 1000l)) {
+						startDateStr = DateUtil.dtFormat(startDate, "MM-dd");
+						if (!StringUtils.isEmpty(startDateStr)) {
+							String[]dateArr = startDateStr.split("-");
+							startDateStr = dateArr[0] + "月" + dateArr[1] + "日";
+						}
+					} else {
+						startDateStr = DateUtil.getSendTime(startDate.getTime());
+						
+					}
+					vo.setStartDate(startDateStr);
+				}
+				Date endDate = rgroupRule.getEndDate();
+				vo.setStartDateMills(startDate.getTime());
+				vo.setEndDateMills(endDate.getTime());
+				vo.setStatus(rgroupRule.getStatus());
+				
+				RgroupRecordsVO rgroupRecordsVO = queryOrderRecords(vo.getRuleId(), 0);
+				vo.setRgroupRecords(rgroupRecordsVO);
+				voList.add(vo);
+			}
+			
+		} catch (Exception e) {
+			logger.info(e.getMessage(), e);
+			throw new BizValidateException(e.getMessage());
+		}
+		
+		return voList;
+	}
+	
+	/**
+	 * 获取团购信息
+	 * @param rgroupRuleId
+	 */
+	@Override
+	public RgroupOwnerVO getLeaderInfo(String groupLeaderId) {
+		
+		Assert.hasText(groupLeaderId, "团长id不能为空。");
+		try {
+			long leaderId = Long.valueOf(groupLeaderId);
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findById(leaderId);
+			if(rgroupOwner == null) {
+				throw new BizValidateException("未查询到团长信息");
+			}
+			RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
+			int attendees = 0;
+			String attendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rgroupOwner.getUserId());
+			if (!StringUtils.isEmpty(attendeesStr)) {
+				attendees = Integer.parseInt(attendeesStr);
+			}
+			rgroupOwnerVO.setAttendees(attendees);
+			int members = 0;
+			String membersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rgroupOwner.getUserId());
+			if (!StringUtils.isEmpty(membersStr)) {
+				members = Integer.parseInt(membersStr);
+			}
+			rgroupOwnerVO.setMembers(members);
+			rgroupOwnerVO.setOwnerId(leaderId);
+			rgroupOwnerVO.setOwnerName(rgroupOwner.getName());
+			rgroupOwnerVO.setOwnerImg(rgroupOwner.getHeadImgUrl());
+			rgroupOwnerVO.setOwnerTel(rgroupOwner.getTel());
+			return rgroupOwnerVO;
+			
+		} catch (Exception e) {
+			logger.info(e.getMessage(), e);
+			throw new BizValidateException(e.getMessage());
+		}
+		
+	}
+	
+	/**
+	 * 获取某一小区小的团购列表
+	 * @throws Exception 
+	 */
+	@Override
+	public List<RgroupVO> getLeadGroups(String groupLeaderId, int currentPage) throws Exception {
+		
+		Assert.hasText(groupLeaderId, "团长id不能为空。");
+		
+		List<RgroupVO> voList = new ArrayList<>();
+		try {
+			long leaderId = Long.valueOf(groupLeaderId);
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findById(leaderId);
+			if(rgroupOwner == null) {
+				throw new BizValidateException("未查询到团长信息");
+			}
+			
+			List<Order> orderList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "updateDate");
+	    	orderList.add(order);
+	    	Sort sort = Sort.by(orderList);
+			Pageable pageable = PageRequest.of(currentPage, 10, sort);
+			
+			Page<RgroupRule> pages = rgroupRuleRepository.findByOwnerIdAndDescriptionLike(rgroupOwner.getUserId(), "", pageable);
+			List<RgroupRule> ruleList = pages.getContent();
+			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+			long currentMills = System.currentTimeMillis();
+			for (RgroupRule rgroupRule : ruleList) {
+				RgroupVO vo = new RgroupVO();
+				String descMoreStr = rgroupRule.getDescriptionMore();
+				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+				DescriptionMore[]descriptionMore = null;
+				if (!StringUtils.isEmpty(descMoreStr)) {
+					descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				} else {
+					descriptionMore = new DescriptionMore[0];
+				}
+				
+				int groupAttendees = 0;
+				String groupAttendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ORDERED + rgroupRule.getId());
+				if (!StringUtils.isEmpty(groupAttendeesStr)) {
+					groupAttendees = Integer.parseInt(groupAttendeesStr);
+				}
+				vo.setOrdered(groupAttendees);
+				
+				int groupMembers = 0;
+				String groupMembersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rgroupRule.getId());
+				if (!StringUtils.isEmpty(groupMembersStr)) {
+					groupMembers = Integer.parseInt(groupMembersStr);
+				}
+				vo.setAccessed(groupMembers);
+				
+				List<String> descMoreImages = new ArrayList<>();
+				for (DescriptionMore descMore : descriptionMore) {
+					if ("0".equals(descMore.getType())) {
+						continue;
+					} else if ("1".equals(descMore.getType())) {
+						Thumbnail[]thumbnails = descMore.getThumbnail();
+						if (thumbnails == null || thumbnails.length == 0) {
+							continue;
+						}
+						for (Thumbnail thumbnail : thumbnails) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(thumbnail.getUrl());
+							}
+						}
+					} else if ("2".equals(descMore.getType())) {
+						if (!StringUtils.isEmpty(descMore.getImage())) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(descMore.getImage());
+							}
+						}
+					}
+				}
+				
+				List<Product> productList = productRepository.findMultiByRuleId(rgroupRule.getId());
+				float miniPrice = 0f;
+				float maxPrice = 0f;
+				for (int i = 0; i < productList.size(); i++) {
+					Product product = productList.get(i);
+					if (descMoreImages.size() < 3) {
+						String[]pics = product.getPictureList();
+						for (String pic : pics) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(pic);
+							}
+						}
+					}
+					float singlePrice = product.getSinglePrice();
+					if (i == 0) {
+						miniPrice = singlePrice;
+					} else {
+						if (singlePrice < miniPrice) {
+							miniPrice = singlePrice;
+						}
+					}
+					if (singlePrice > maxPrice) {
+						maxPrice = singlePrice;
+					}
+				}
+				String pricePeriod = miniPrice + "~" + maxPrice;
+				if (miniPrice == 0f || miniPrice == maxPrice) {
+					pricePeriod = String.valueOf(maxPrice);
+				}
+				vo.setPricePeriod(pricePeriod);
+				vo.setRuleId(String.valueOf(rgroupRule.getId()));
+				vo.setDescMoreImages(descMoreImages);
+				vo.setDescription(rgroupRule.getDescription());
+				Date startDate = rgroupRule.getStartDate();
+				String startDateStr = "";
+				if (startDate != null) {
+					if ((currentMills - startDate.getTime()) < (3600 * 24 * 1000l)) {
 						startDateStr = DateUtil.dtFormat(startDate, "MM-dd");
 						if (!StringUtils.isEmpty(startDateStr)) {
 							String[]dateArr = startDateStr.split("-");
