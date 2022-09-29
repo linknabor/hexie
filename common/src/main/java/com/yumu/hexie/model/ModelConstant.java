@@ -537,7 +537,8 @@ public class ModelConstant {
 	public static final Integer REFUND_OPERATION_SYS_REFUNDING = 7;	//发起退款
 	public static final Integer REFUND_OPERATION_REFUNDED = 8;	//退款完成
 	
-	public static final String KEY_RGROUP_TILE_SEARCH = "rgroup:search:title:";	//后面接user的miniOpenid
+	public static final String KEY_RGROUP_SECT_TITLE_SEARCH = "rgroup:search:sect:title:";	//后面接user的miniOpenid
+	public static final String KEY_RGROUP_LEADER_TITLE_SEARCH = "rgroup:search:leader:title:";	//后面接user的miniOpenid
 	
 
 }		

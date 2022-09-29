@@ -29,6 +29,7 @@ import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.common.RgroupV3Service;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.search.SearchService;
@@ -241,7 +242,7 @@ public class RgroupController extends BaseController{
 			@RequestParam(required = false) String title, @RequestParam int page) throws Exception {
 		
 		if (!StringUtils.isEmpty(title) && !StringUtils.isEmpty(title.trim())) {
-			String key = ModelConstant.KEY_RGROUP_TILE_SEARCH + user.getMiniopenid();
+			String key = ModelConstant.KEY_RGROUP_SECT_TITLE_SEARCH + user.getMiniopenid();
 			searchService.save(key, title);
 		}
         return new BaseResult<List<RgroupVO>>().success(rgroupV3Service.getSectGroups(user, regionId, title, page));
@@ -252,13 +253,43 @@ public class RgroupController extends BaseController{
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/rgroups/v3/searchHistory", method = RequestMethod.GET)
+	@RequestMapping(value = "/rgroups/v3/searchHistory/{type}", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<Object> searchHistory(@ModelAttribute(Constants.USER)User user) throws Exception {
+	public BaseResult<Object> searchHistory(@ModelAttribute(Constants.USER)User user, @PathVariable(required = true) String type) throws Exception {
 		
-		String key = ModelConstant.KEY_RGROUP_TILE_SEARCH + user.getMiniopenid();
+		String keyType = "";
+		if ("0".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_SECT_TITLE_SEARCH;
+		} else if ("1".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_LEADER_TITLE_SEARCH;
+		} else {
+			throw new BizValidateException("unknow search type : " + type);
+		}
+		String key = keyType + user.getMiniopenid();
 		Set<String> set = searchService.get(key);
         return new BaseResult<Object>().success(set);
+    }
+	
+	/**
+	 * 删除团购搜索历史记录
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/delSearchHistory/{type}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> deleteSearchHistory(@ModelAttribute(Constants.USER)User user, @PathVariable(required = true) String type) throws Exception {
+
+		String keyType = "";
+		if ("0".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_SECT_TITLE_SEARCH;
+		} else if ("1".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_LEADER_TITLE_SEARCH;
+		} else {
+			throw new BizValidateException("unknow search type : " + type);
+		}
+		String key = keyType + user.getMiniopenid();
+		searchService.removeAll(key);
+        return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
     }
 	
 	/**
@@ -280,8 +311,14 @@ public class RgroupController extends BaseController{
 	 */
 	@RequestMapping(value = "/rgroups/v3/leader/groups", method = RequestMethod.GET)
 	@ResponseBody
-	public BaseResult<Object> getLeaderInfo(@RequestParam(required = false) String leaderId, @RequestParam(required = false) int page) throws Exception {
+	public BaseResult<Object> getLeaderInfo(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String leaderId, @RequestParam(required = false) String title, 
+			@RequestParam(required = false) int page) throws Exception {
 		
-        return new BaseResult<Object>().success(rgroupV3Service.getLeadGroups(leaderId, page));
+		if (!StringUtils.isEmpty(title) && !StringUtils.isEmpty(title.trim())) {
+			String key = ModelConstant.KEY_RGROUP_LEADER_TITLE_SEARCH + user.getMiniopenid();
+			searchService.save(key, title);
+		}
+		
+        return new BaseResult<Object>().success(rgroupV3Service.getLeadGroups(leaderId, title, page));
     }
 }

@@ -21,7 +21,7 @@ public class SearchServiceImpl implements SearchService {
 	
 	@Override
 	public Set<String> get(String searchKey) {
-		return stringRedisTemplate.opsForZSet().reverseRange(searchKey, 0, 5);
+		return stringRedisTemplate.opsForZSet().reverseRange(searchKey, 0, 30);
 	}
 	
 	@Override

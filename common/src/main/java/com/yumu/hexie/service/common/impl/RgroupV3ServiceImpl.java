@@ -1115,7 +1115,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		Assert.hasText(groupLeaderId, "团长id不能为空。");
 		try {
 			long leaderId = Long.valueOf(groupLeaderId);
-			RgroupOwner rgroupOwner = rgroupOwnerRepository.findById(leaderId);
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(leaderId);
 			if(rgroupOwner == null) {
 				throw new BizValidateException("未查询到团长信息");
 			}
@@ -1150,14 +1150,14 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	 * @throws Exception 
 	 */
 	@Override
-	public List<RgroupVO> getLeadGroups(String groupLeaderId, int currentPage) throws Exception {
+	public List<RgroupVO> getLeadGroups(String groupLeaderId, String title, int currentPage) throws Exception {
 		
 		Assert.hasText(groupLeaderId, "团长id不能为空。");
 		
 		List<RgroupVO> voList = new ArrayList<>();
 		try {
 			long leaderId = Long.valueOf(groupLeaderId);
-			RgroupOwner rgroupOwner = rgroupOwnerRepository.findById(leaderId);
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(leaderId);
 			if(rgroupOwner == null) {
 				throw new BizValidateException("未查询到团长信息");
 			}
@@ -1168,7 +1168,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	    	Sort sort = Sort.by(orderList);
 			Pageable pageable = PageRequest.of(currentPage, 10, sort);
 			
-			Page<RgroupRule> pages = rgroupRuleRepository.findByOwnerIdAndDescriptionLike(rgroupOwner.getUserId(), "", pageable);
+			if (StringUtils.isEmpty(title)) {
+				title = "";
+			}
+			
+			Page<RgroupRule> pages = rgroupRuleRepository.findByOwnerIdAndDescriptionLike(rgroupOwner.getUserId(), title, pageable);
 			List<RgroupRule> ruleList = pages.getContent();
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 			long currentMills = System.currentTimeMillis();
@@ -1182,6 +1186,25 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				} else {
 					descriptionMore = new DescriptionMore[0];
 				}
+				
+				RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
+				int attendees = 0;
+				String attendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rgroupRule.getOwnerId());
+				if (!StringUtils.isEmpty(attendeesStr)) {
+					attendees = Integer.parseInt(attendeesStr);
+				}
+				rgroupOwnerVO.setAttendees(attendees);
+				int members = 0;
+				String membersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rgroupRule.getOwnerId());
+				if (!StringUtils.isEmpty(membersStr)) {
+					members = Integer.parseInt(membersStr);
+				}
+				rgroupOwnerVO.setMembers(members);
+				rgroupOwnerVO.setOwnerId(rgroupRule.getOwnerId());
+				rgroupOwnerVO.setOwnerName(rgroupRule.getOwnerName());
+				rgroupOwnerVO.setOwnerImg(rgroupRule.getOwnerImg());
+				rgroupOwnerVO.setOwnerTel(rgroupRule.getOwnerTel());
+				vo.setRgroupOwner(rgroupOwnerVO);
 				
 				int groupAttendees = 0;
 				String groupAttendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ORDERED + rgroupRule.getId());
