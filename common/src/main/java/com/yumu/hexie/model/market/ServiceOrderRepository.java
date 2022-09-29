@@ -237,30 +237,41 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     //查询团购的订单列表
     List<ServiceOrder> findByGroupRuleId(long ruleId);
+    
+    //查询团购的订单列表
+    List<ServiceOrder> findByGroupLeaderId(long groupLeaderId);
 
     //汇总团购订单里包含的商品和购买数量
     @Query(value = "select p.id as productId, p.name as productName, sum(i.count) as count, sum(case when i.verifyStatus='0' then 1 else 0 end) as verifyNum "
             + "from serviceorder o "
             + "join orderItem i on o.id = i.orderId "
             + "join product p on i.productId = p.id "
-            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) "
+            + "where o.groupLeaderId = ?1 "
+            + "and if(?2!=0, o.groupRuleId = ?2, 1=1) "
+            + "and o.status in ( ?3 ) "
             + "group by p.id "
             , nativeQuery = true)
-    List<Object[]> findProductSum(long groupRuleId, List<Integer> status);
+    List<Object[]> findProductSum(long groupLeaderId, long groupRuleId, List<Integer> status);
 
     //分页查询团购订单
     String sqlCol = "o.groupNum, o.id as orderId, o.orderNo, o.status, o.payDate, o.createDate, o.count, o.price, o.receiverName, " +
             "o.tel, o.address, o.logisticType, o.memo, o.userId, o.refundType ";
     @Query(value = "select distinct " + sqlCol + " from serviceorder o "
             + "join orderItem i on o.id = i.orderId "
-            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
-            + "and (COALESCE(?4) IS NULL OR (i.isRefund IN (?4) )) "
+            + "where o.groupLeaderId = ?1 "
+            + "and IF(?2 !=0, o.groupRuleId = ?2, 1 = 1) "
+            + "and o.status in ( ?3 ) "
+            + "and IF(?4 !='', i.verifyStatus = ?4, 1 = 1) "
+            + "and (COALESCE(?5) IS NULL OR (i.isRefund IN (?5) )) "
             , countQuery = "select count(1) from serviceorder o "
             + "join orderItem i on o.id = i.orderId "
-            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
-            + "and (COALESCE(?4) IS NULL OR (i.isRefund IN (?4) )) "
+            + "where o.groupLeaderId = ?1 "
+            + "and IF(?2 !=0, o.groupRuleId = ?2, 1 = 1) "
+            + "and o.status in ( ?3 ) "
+            + "and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
+            + "and (COALESCE(?5) IS NULL OR (i.isRefund IN (?5) )) "
             , nativeQuery = true)
-    Page<Object[]> findByGroupRuleIdPage(long ruleId, List<Integer> status, String verifyStatus, List<Integer> itemStatus, Pageable pageable);
+    Page<Object[]> findByGroupRuleIdPage(long groupLeaderId, long ruleId, List<Integer> status, String verifyStatus, List<Integer> itemStatus, Pageable pageable);
 
     //根据订单和团长ID查询订单
     ServiceOrder findByIdAndGroupLeaderId(long orderId, long groupLeaderId);

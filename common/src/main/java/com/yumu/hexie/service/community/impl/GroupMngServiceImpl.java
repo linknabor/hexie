@@ -401,15 +401,22 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     public GroupSumResp queryGroupSum(User user, String groupId) throws Exception {
-        if (StringUtils.isEmpty(groupId)) {
-            throw new BizValidateException("团购ID不能为空，请刷新重试");
-        }
 
         //汇总当前团购的有效订单，总金额和退款金额
         GroupSumResp resp = new GroupSumResp();
         List<GroupSumResp.SearchVo> searchVoList = new ArrayList<>();
 
-        List<ServiceOrder> serviceOrderList = serviceOrderRepository.findByGroupRuleId(Long.parseLong(groupId));
+        List<ServiceOrder> serviceOrderList = null;
+        long ruleId = 0l;
+        if (!StringUtils.isEmpty(groupId)) {
+        	ruleId = Long.valueOf(groupId);
+        }        	
+        if (ruleId != 0l) {
+        	serviceOrderList = serviceOrderRepository.findByGroupRuleId(ruleId);
+		} else {
+			serviceOrderList = serviceOrderRepository.findByGroupLeaderId(user.getId());
+		} 
+        
         int validNum = serviceOrderList.size(); //有效订单数
         Float totalAmt = 0F; //总金额
         Float refundAmt = 0F; //退款金额
@@ -461,7 +468,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         status.add(ModelConstant.ORDER_STATUS_CONFIRM);
         status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_REFUNDED);
-        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(Long.parseLong(groupId), status);
+        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(ruleId, user.getId(), status);
         int totalNum = 0;
         int totalVerify = 0;
         List<GroupProductSumVo> vos = new ArrayList<>();
@@ -524,7 +531,11 @@ public class GroupMngServiceImpl implements GroupMngService {
         Sort sort = Sort.by(sortList);
         Pageable pageable = PageRequest.of(queryGroupReq.getCurrentPage(), 10, sort);
 
-        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(Long.parseLong(queryGroupReq.getGroupId()), status, verifyStatus, 
+        long ruleId = 0l;
+        if (!StringUtils.isEmpty(queryGroupReq.getGroupId())) {
+        	ruleId = Long.parseLong(queryGroupReq.getGroupId());
+		}
+        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(user.getId(), ruleId, status, verifyStatus, 
         			itemStatus, pageable);
         List<GroupOrderVo> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOrderVo.class);
         if (list != null) {

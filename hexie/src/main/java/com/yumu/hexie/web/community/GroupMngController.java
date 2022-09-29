@@ -83,7 +83,7 @@ public class GroupMngController extends BaseController {
      */
     @SuppressWarnings("unchecked")
 	@RequestMapping(value = "/queryGroupSum", method = RequestMethod.GET)
-    public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId) throws Exception {
+    public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String groupId) throws Exception {
         GroupSumResp resp = groupMngService.queryGroupSum(user, groupId);
         return BaseResult.successResult(resp);
     }
