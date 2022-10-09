@@ -260,18 +260,23 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
             + "join orderItem i on o.id = i.orderId "
             + "where o.groupLeaderId = ?1 "
             + "and IF(?2 !=0, o.groupRuleId = ?2, 1 = 1) "
-            + "and o.status in ( ?3 ) "
-            + "and IF(?4 !='', i.verifyStatus = ?4, 1 = 1) "
-            + "and (COALESCE(?5) IS NULL OR (i.isRefund IN (?5) )) "
+            + "and IF(?3 !=0, o.xiaoquId = ?3, 1 = 1) "
+            + "and o.status in ( ?4 ) "
+            + "and IF(?5 !='', i.verifyStatus = ?5, 1 = 1) "
+            + "and (COALESCE(?6) IS NULL OR (i.isRefund IN (?6) )) "
+            + "and IF(?7 != '', o.tel like CONCAT('%',?7,'%'), 1=1 )"
             , countQuery = "select count(1) from serviceorder o "
             + "join orderItem i on o.id = i.orderId "
             + "where o.groupLeaderId = ?1 "
             + "and IF(?2 !=0, o.groupRuleId = ?2, 1 = 1) "
-            + "and o.status in ( ?3 ) "
-            + "and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
-            + "and (COALESCE(?5) IS NULL OR (i.isRefund IN (?5) )) "
+            + "and IF(?3 !=0, o.xiaoquId = ?3, 1 = 1) "
+            + "and o.status in ( ?4 ) "
+            + "and IF(?5 !='', i.verifyStatus = ?5, 1 = 1) "
+            + "and (COALESCE(?6) IS NULL OR (i.isRefund IN (?6) )) "
+            + "and IF(?7 != '', o.tel like CONCAT('%',?7,'%'), 1=1 )"
             , nativeQuery = true)
-    Page<Object[]> findByGroupRuleIdPage(long groupLeaderId, long ruleId, List<Integer> status, String verifyStatus, List<Integer> itemStatus, Pageable pageable);
+    Page<Object[]> findByGroupRuleIdPage(long groupLeaderId, long ruleId, long regionId, List<Integer> status, String verifyStatus, 
+    		List<Integer> itemStatus, String tel, Pageable pageable);
 
     //根据订单和团长ID查询订单
     ServiceOrder findByIdAndGroupLeaderId(long orderId, long groupLeaderId);

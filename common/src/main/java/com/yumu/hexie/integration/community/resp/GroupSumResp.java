@@ -28,16 +28,16 @@ public class GroupSumResp {
     public void setProductVo(ProductVo productVo) {
         this.productVo = productVo;
     }
-
-    @Override
-    public String toString() {
+    
+	@Override
+	public String toString() {
         return "GroupSumResp{" +
                 "searchVoList=" + searchVoList +
                 ", productVo=" + productVo +
                 '}';
-    }
+	}
 
-    public static class ProductVo{
+	public static class ProductVo{
         private int totalNum; //总商品数
         private int verifyNum; //未核销数
         private List<GroupProductSumVo> products; //商品列表

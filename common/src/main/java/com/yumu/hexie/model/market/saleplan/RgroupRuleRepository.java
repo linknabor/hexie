@@ -210,5 +210,5 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "and item.ruleCloseTime > ?2 "
 			+ "and item.regionId = ?3"
 			, nativeQuery = true)
-	List<RgroupRule> findByAreaItem(int status, long currentDate, long itemId);
+	List<RgroupRule> findByAreaItem(int status, long currentDate, long regionId);
 }
