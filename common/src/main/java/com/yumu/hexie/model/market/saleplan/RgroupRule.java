@@ -23,14 +23,15 @@ public class RgroupRule extends SalePlan {
 	private int ruleLimitUserCount = 0;//每个用户根据规则限制购买的数量，当值为0时不做限制
 	
 	private String ownerName;
-	private String ownerAddr;
+	private String ownerAddr;		//TODO delete after new pub
 	private String ownerImg;
 	private String ownerTel;
-	private String ownerSect;
+	private String ownerSect;		//TODO delete after new pub
 	/** 售卖情况 */
 	
 	private long agentId;	//团购所在机构，取开团时团长的机构
 	private long groupFinishDate;	//成团日期
+	private int sectCount = 1;	//参与团购的小区数
 
 	@Transient
 	@JsonIgnore
@@ -157,6 +158,14 @@ public class RgroupRule extends SalePlan {
 
 	public void setOwnerSect(String ownerSect) {
 		this.ownerSect = ownerSect;
+	}
+
+	public int getSectCount() {
+		return sectCount;
+	}
+
+	public void setSectCount(int sectCount) {
+		this.sectCount = sectCount;
 	}
 
 	

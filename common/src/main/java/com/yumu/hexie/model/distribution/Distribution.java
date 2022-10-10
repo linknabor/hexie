@@ -81,6 +81,6 @@ public class Distribution extends BaseModel{
 	public void setProductCategoryId(long productCategoryId) {
 		this.productCategoryId = productCategoryId;
 	}
-	
+
 	
 }

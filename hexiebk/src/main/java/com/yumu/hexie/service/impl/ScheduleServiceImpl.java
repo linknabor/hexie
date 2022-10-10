@@ -165,7 +165,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     	for(RgroupRule rule : rules) {
     		try{
     	    	SCHEDULE_LOG.error("refreshGroupStatus:" + rule.getId());
-    	    	rgroupService.refreshGroupStatus(rule);
+    	    	if (rule.getSectCount() > 0) {	//新版本，支持多个小区
+    	    		rgroupService.refreshGroupStatus4MultiRegions(rule);
+				} else {
+					rgroupService.refreshGroupStatus(rule);	//老版本
+				}
+    	    	
     		} catch(Exception e){
     			SCHEDULE_LOG.error("超时订单更新失败"+ rule.getId(),e);
     			recordError(e);

@@ -13,6 +13,7 @@ import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.req.AddressReq;
+import com.yumu.hexie.vo.RgroupAddressVO;
 
 
 /**
@@ -61,6 +62,8 @@ public interface AddressService {
 
 	Address addAddress4Rgroup(User user, AddressReq addressReq);
 
-	List<Address> queryRgroupAddressByUser(long userId, String ruleId);
+	List<Address> queryRgroupAddressByUser(long userId, String ruleId, String regionId);
+
+	RgroupAddressVO queryRgroupDefaultAddress(long userId, String ruleId);
 
 }

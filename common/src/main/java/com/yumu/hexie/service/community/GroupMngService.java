@@ -11,6 +11,8 @@ import com.yumu.hexie.model.commonsupport.info.ProductDepot;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
 import com.yumu.hexie.model.market.RefundRecord;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.vo.RgroupVO;
+import com.yumu.hexie.vo.RgroupVO.RegionVo;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +23,7 @@ public interface GroupMngService {
 
     //查询团购汇总信息
     GroupSumResp queryGroupSum(User user, String groupId) throws Exception;
-
+    
     //查询团购订单列表
     List<GroupOrderVo> queryGroupOrder(User user, QueryGroupReq queryGroupReq) throws Exception;
 
@@ -78,4 +80,9 @@ public interface GroupMngService {
 	List<ProductDepot> saveDepotFromSales(User user, String productIds);
 
 	List<RefundRecord> getRefundApply(User user, String oid);
+
+	List<RgroupVO> queryGroupsByOwner(User user);
+
+	List<RegionVo> queryGroupRegionsByOwner(User user, String ruleId);
+
 }

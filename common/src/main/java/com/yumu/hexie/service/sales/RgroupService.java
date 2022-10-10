@@ -25,4 +25,6 @@ public interface RgroupService {
 
 	RgroupOrdersVO queryRgroupOrderDetailV3(long userId, String orderIdStr);
 
+	void refreshGroupStatus4MultiRegions(RgroupRule rule);
+
 }

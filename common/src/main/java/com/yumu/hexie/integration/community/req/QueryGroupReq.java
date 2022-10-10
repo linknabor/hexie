@@ -15,6 +15,8 @@ public class QueryGroupReq {
     private String groupId; //团购ID
     private String orderStatus; //订单状态
 
+    private String regionId;	//小区的regionId
+    
     private int currentPage;
 
     public String getQueryName() {
@@ -57,14 +59,18 @@ public class QueryGroupReq {
         this.orderStatus = orderStatus;
     }
 
-    @Override
-    public String toString() {
-        return "QueryGroupReq{" +
-                "queryName='" + queryName + '\'' +
-                ", groupStatus='" + groupStatus + '\'' +
-                ", groupId='" + groupId + '\'' +
-                ", orderStatus='" + orderStatus + '\'' +
-                ", currentPage=" + currentPage +
-                '}';
-    }
+	public String getRegionId() {
+		return regionId;
+	}
+
+	public void setRegionId(String regionId) {
+		this.regionId = regionId;
+	}
+
+	@Override
+	public String toString() {
+		return "QueryGroupReq [queryName=" + queryName + ", groupStatus=" + groupStatus + ", groupId=" + groupId
+				+ ", orderStatus=" + orderStatus + ", regionId=" + regionId + ", currentPage=" + currentPage + "]";
+	}
+
 }

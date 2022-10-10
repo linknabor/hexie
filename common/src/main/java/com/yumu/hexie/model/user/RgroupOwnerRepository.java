@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 public interface RgroupOwnerRepository extends JpaRepository<RgroupOwner, Long> {
 
 	RgroupOwner findByUserId(long userId);
+	
+	RgroupOwner findById(long id);
 }

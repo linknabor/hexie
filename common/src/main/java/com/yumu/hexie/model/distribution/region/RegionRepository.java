@@ -2,6 +2,7 @@ package com.yumu.hexie.model.distribution.region;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -75,5 +76,14 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 			+ "where item.productId = ?1 "
 			, nativeQuery = true)
 	List<Object[]> findRgroupLeaderByProduct(Long productId);
+	
+	
+	@Query(value = "select distinct r.* from region r "
+			+ "join rgroupareaitem item on r.id = item.regionId "
+			+ "join rgrouprule rule on rule.id = item.ruleId "
+			+ "where rule.ownerId = ?1 "
+			+ "and IF (?2!=0, rule.id = ?2, 1=1) "
+			, nativeQuery = true)
+	Page<Region> findByRgroupOwner(long ownerId, long ruleId, Pageable pageable);
 	
 }

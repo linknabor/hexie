@@ -3,6 +3,7 @@ package com.yumu.hexie.service.sales.impl;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -47,6 +50,8 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     private UserNoticeService      userNoticeService;
     @Autowired
     private OrderItemRepository orderItemRepository;
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
 
     @Autowired
     @Qualifier(value = "staffclientStringRedisTemplate")
@@ -76,6 +81,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
     }
 
     @Override
+    @Transactional
     public void postPaySuccess(ServiceOrder so) {
         //支付成功订单为配货中状态，改商品库存
         so.payed();
@@ -102,6 +108,13 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         }
         rule.setCurrentNum(rule.getCurrentNum() + so.getCount());
         cacheableService.save(rule);
+        
+        List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(so.getGroupRuleId());
+        for (RgroupAreaItem rgroupAreaItem : areaList) {
+        	if (rgroupAreaItem.getRegionId() == so.getXiaoquId()) {
+        		rgroupAreaItem.setCurrentNum(rgroupAreaItem.getCurrentNum() + so.getCount());
+			}
+		}
     }
 
 

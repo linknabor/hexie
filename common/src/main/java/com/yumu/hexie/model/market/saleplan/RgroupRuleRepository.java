@@ -29,6 +29,20 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			nativeQuery = true)
 	public Page<RgroupRule> findByOwnerIdAndDescriptionLike(long ownerId, String description, Pageable pageable);
 	
+	@Query(value = "select distinct rule.* from RgroupRule rule "
+			+ "join rgroupareaitem item on item.ruleId = rule.id "
+			+ "where rule.status = ?1 "
+			+ "and item.regionId = ?2 "
+			+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
+			, countQuery = "select count(*) from ( select distinct rule.* from RgroupRule rule "
+					+ "join rgroupareaitem item on item.ruleId = rule.id "
+					+ "where rule.status = ?1 "
+					+ "and item.regionId = ?2 "
+					+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
+					+ ") a "
+			, nativeQuery = true)
+	public Page<RgroupRule> findByRegionId(int status, long regionId, String title, Pageable pageable);
+	
 	public List<RgroupRule> findAllByProductId(long productId);
 	
 	public List<RgroupRule> findByGroupStatus(int groupStatus);
@@ -156,4 +170,45 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "group by a.id "
 			, nativeQuery = true)
 	Page<Object[]> queryGroupByOutSid(String name, String ownerName, Pageable pageable);
+	
+	
+	/**
+	 * 首页查询正在进行的团购小区列表
+	 * @param productType
+	 * @param ruleId
+	 * @param ruleName
+	 * @param groupStatus
+	 * @param agentId
+	 * @param isDemo
+	 * @param pageable
+	 * @return
+	 */
+	@Query(value = "select count(distinct rule.id) as groupCounts, region.id, region.name, region.xiaoquAddress "
+			+ "from rgrouprule rule "
+			+ "join rgroupareaitem item on item.ruleId = rule.id "
+			+ "join region on region.id = item.regionId "
+			+ "where rule.status = ?1 "
+			+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "and item.ruleCloseTime > ?3 "
+			+ "group by region.id, region.name, region.xiaoquAddress "
+			+ "order by rule.id desc "
+			, countQuery = "select count(*) from ( select count(distinct rule.id), region.id, region.name, region.xiaoquAddress "
+					+ "from rgrouprule rule "
+					+ "join rgroupareaitem item on item.ruleId = rule.id "
+					+ "join region on region.id = item.regionId "
+					+ "where rule.status = ?1 "
+					+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
+					+ "and item.ruleCloseTime > ?3 "
+					+ "group by region.id, region.name, region.xiaoquAddress "
+					+ "order by rule.id desc ) a "
+					, nativeQuery = true)
+	Page<Object[]> findGroupSects(int status, String sectName, long currentDate, Pageable pageable);
+	
+	@Query(value = "select distinct rule.* from rgroupRule rule "
+			+ "join rgroupareaitem item on item.ruleId = rule.id "
+			+ "where rule.status = ?1 "
+			+ "and item.ruleCloseTime > ?2 "
+			+ "and item.regionId = ?3"
+			, nativeQuery = true)
+	List<RgroupRule> findByAreaItem(int status, long currentDate, long regionId);
 }

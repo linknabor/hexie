@@ -15,7 +15,10 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.community.GroupMngService;
 import com.yumu.hexie.service.sales.BaseOrderService;
+import com.yumu.hexie.vo.OwnerGroupsVO;
 import com.yumu.hexie.vo.RefundVO;
+import com.yumu.hexie.vo.RgroupVO;
+import com.yumu.hexie.vo.RgroupVO.RegionVo;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,7 +86,8 @@ public class GroupMngController extends BaseController {
      */
     @SuppressWarnings("unchecked")
 	@RequestMapping(value = "/queryGroupSum", method = RequestMethod.GET)
-    public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId) throws Exception {
+    public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, 
+    		@RequestParam(required = false) String groupId) throws Exception {
         GroupSumResp resp = groupMngService.queryGroupSum(user, groupId);
         return BaseResult.successResult(resp);
     }
@@ -385,5 +389,24 @@ public class GroupMngController extends BaseController {
     		@RequestBody(required = false) String memo) throws Exception {
         baseOrderService.rejectRefundAudit(user, recorderId, memo);
         return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
+    
+    
+    /**
+     * 查询团长名下的团购信息
+     *
+     * @param user
+     * @param groupId
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryGroupsByOwner", method = RequestMethod.GET)
+    public BaseResult<OwnerGroupsVO> queryGroupsByOwner(@ModelAttribute(Constants.USER) User user, @RequestParam (required = false) String ruleId) {
+        List<RgroupVO> groupList = groupMngService.queryGroupsByOwner(user);
+        List<RegionVo> regionList = groupMngService.queryGroupRegionsByOwner(user, ruleId);
+        OwnerGroupsVO ownerGroupsVO = new OwnerGroupsVO();
+        ownerGroupsVO.setGroupList(groupList);
+        ownerGroupsVO.setRegionList(regionList);
+        return BaseResult.successResult(ownerGroupsVO);
     }
 }

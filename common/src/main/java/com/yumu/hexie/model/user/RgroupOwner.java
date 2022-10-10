@@ -24,6 +24,9 @@ public class RgroupOwner extends BaseModel {
 	private int members;	//成员数，即访问数
 	private int attendees;		//跟团人次
 	private String feeRate;
+	private String name;
+	private String headImgUrl;
+	private String tel;
 	
 	public long getUserId() {
 		return userId;
@@ -79,11 +82,23 @@ public class RgroupOwner extends BaseModel {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
-	@Override
-	public String toString() {
-		return "RgroupOwner [userId=" + userId + ", openid=" + openid + ", appid=" + appid + ", miniopenid="
-				+ miniopenid + ", miniappid=" + miniappid + ", followers=" + followers + ", members=" + members
-				+ ", attendees=" + attendees + ", feeRate=" + feeRate + "]";
+	public String getHeadImgUrl() {
+		return headImgUrl;
+	}
+	public void setHeadImgUrl(String headImgUrl) {
+		this.headImgUrl = headImgUrl;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getTel() {
+		return tel;
+	}
+	public void setTel(String tel) {
+		this.tel = tel;
 	}
 	
 

@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.persistence.Transient;
 
+import org.springframework.util.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -34,10 +36,117 @@ public class RgroupVO implements Serializable {
 	private int accessed = 0;	//被访问次数
 	private int ordered = 0;	//被下单次数
 	private ProductVO[]productList;
-	private Region region;	//团购地区
+	private Region region;	//支持旧版本 TODO
+	private RegionVo[] regions;	//团购地区
 	private RgroupOwnerVO rgroupOwner;
 	private List<String> descMoreImages;
 	private String pricePeriod;	//价格区间
+	private RgroupRecordsVO rgroupRecords;	//跟团记录
+	
+	public static class RegionVo {
+		
+		private long id;
+		private String name;
+		private String xiaoquAddress;
+		private String sectId;
+		private String miniNum;
+		private String currentNum;
+		private Double longitude = 0.00d;
+		private Double latitude = 0.00d;
+		private String remark;
+		
+		public long getId() {
+			return id;
+		}
+		public void setId(long id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public String getXiaoquAddress() {
+			return xiaoquAddress;
+		}
+		public void setXiaoquAddress(String xiaoquAddress) {
+			this.xiaoquAddress = xiaoquAddress;
+		}
+		public String getMiniNum() {
+			return miniNum;
+		}
+		public void setMiniNum(String miniNum) {
+			this.miniNum = miniNum;
+		}
+		public String getCurrentNum() {
+			return currentNum;
+		}
+		public void setCurrentNum(String currentNum) {
+			this.currentNum = currentNum;
+		}
+		public String getRemark() {
+			return remark;
+		}
+		public void setRemark(String remark) {
+			this.remark = remark;
+		}
+		public Double getLongitude() {
+			return longitude;
+		}
+		public void setLongitude(Double longitude) {
+			this.longitude = longitude;
+		}
+		public Double getLatitude() {
+			return latitude;
+		}
+		public void setLatitude(Double latitude) {
+			this.latitude = latitude;
+		}
+		public String getSectId() {
+			return sectId;
+		}
+		public void setSectId(String sectId) {
+			this.sectId = sectId;
+		}
+		public Integer getProcess() {
+			Integer minNum = 0;
+			if (!StringUtils.isEmpty(miniNum)) {
+				minNum = Integer.parseInt(miniNum);
+			}
+			if(minNum<=0) {
+	    		return 0;
+	    	}
+			Integer currNum = 0;
+			if (!StringUtils.isEmpty(currNum)) {
+				currNum = Integer.parseInt(currentNum);
+			}
+	    	return (100*currNum/minNum);
+		}
+		public Integer getLeftNum () {
+			
+			Integer minNum = 0;
+			if (!StringUtils.isEmpty(miniNum)) {
+				minNum = Integer.parseInt(miniNum);
+			}
+			if(minNum<=0) {
+	    		return 0;
+	    	}
+			Integer currNum = 0;
+			if (!StringUtils.isEmpty(currNum)) {
+				currNum = Integer.parseInt(currentNum);
+			}
+			return minNum - currNum;
+			
+		}
+		@Override
+		public String toString() {
+			return "RegionVo [id=" + id + ", name=" + name + ", xiaoquAddress=" + xiaoquAddress + ", sectId=" + sectId
+					+ ", miniNum=" + miniNum + ", currentNum=" + currentNum + ", longitude=" + longitude + ", latitude="
+					+ latitude + ", remark=" + remark + "]";
+		}
+		
+	}
 	
 	public static class RgroupOwnerVO {
 
@@ -413,13 +522,12 @@ public class RgroupVO implements Serializable {
 	public void setType(String type) {
 		this.type = type;
 	}
-
-	public Region getRegion() {
-		return region;
+	public RegionVo[] getRegions() {
+		return regions;
 	}
 
-	public void setRegion(Region region) {
-		this.region = region;
+	public void setRegions(RegionVo[] regions) {
+		this.regions = regions;
 	}
 
 	public RgroupOwnerVO getRgroupOwner() {
@@ -544,7 +652,23 @@ public class RgroupVO implements Serializable {
 	public void setOrdered(int ordered) {
 		this.ordered = ordered;
 	}
-	
+
+	public RgroupRecordsVO getRgroupRecords() {
+		return rgroupRecords;
+	}
+
+	public void setRgroupRecords(RgroupRecordsVO rgroupRecords) {
+		this.rgroupRecords = rgroupRecords;
+	}
+
+	public Region getRegion() {
+		return region;
+	}
+
+	public void setRegion(Region region) {
+		this.region = region;
+	}
+
 	@Override
 	public String toString() {
 		return "RgroupVO [action=" + action + ", ruleId=" + ruleId + ", type=" + type + ", status=" + status
@@ -553,8 +677,9 @@ public class RgroupVO implements Serializable {
 				+ ", startDateMills=" + startDateMills + ", endDateMills=" + endDateMills + ", logisticType="
 				+ logisticType + ", groupMinNum=" + groupMinNum + ", updateDate=" + updateDate + ", accessed="
 				+ accessed + ", ordered=" + ordered + ", productList=" + Arrays.toString(productList) + ", region="
-				+ region + ", rgroupOwner=" + rgroupOwner + ", descMoreImages=" + descMoreImages + ", pricePeriod="
-				+ pricePeriod + "]";
+				+ region + ", regions=" + Arrays.toString(regions) + ", rgroupOwner=" + rgroupOwner
+				+ ", descMoreImages=" + descMoreImages + ", pricePeriod=" + pricePeriod + ", rgroupRecords="
+				+ rgroupRecords + "]";
 	}
 
 	
