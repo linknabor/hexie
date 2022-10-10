@@ -188,7 +188,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "join rgroupareaitem item on item.ruleId = rule.id "
 			+ "join region on region.id = item.regionId "
 			+ "where rule.status = ?1 "
-			+ "and createDate >= 1659283200000"	//老版本不要查出来
+			+ "and createDate >= 1659283200000 "	//老版本不要查出来
 			+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
 			+ "and item.ruleCloseTime > ?3 "
 			+ "group by region.id, region.name, region.xiaoquAddress "
@@ -198,7 +198,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 					+ "join rgroupareaitem item on item.ruleId = rule.id "
 					+ "join region on region.id = item.regionId "
 					+ "where rule.status = ?1 "
-					+ "and createDate >= 1659283200000"	//老版本不要查出来
+					+ "and createDate >= 1659283200000 "	//老版本不要查出来
 					+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
 					+ "and item.ruleCloseTime > ?3 "
 					+ "group by region.id, region.name, region.xiaoquAddress "
