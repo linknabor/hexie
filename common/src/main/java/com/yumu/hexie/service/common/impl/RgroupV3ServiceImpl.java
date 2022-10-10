@@ -117,7 +117,27 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		Assert.noNullElements(rgroupVo.getProductList(), "团购商品不能为空");
 		Assert.hasText(rgroupVo.getStartDate(), "团购起始日期不能为空");
 		Assert.hasText(rgroupVo.getEndDate(), "团购结束日期不能为空");
-		Assert.noNullElements(rgroupVo.getRegions(), "团购区域不能为空");
+		
+		RegionVo[]regions = rgroupVo.getRegions();
+		if (regions == null) {	//兼容旧版本
+			Region formRegion = rgroupVo.getRegion();
+			if (formRegion == null) {
+				Assert.notNull(formRegion, "团购区域不能为空");
+			} else {
+				regions = new RegionVo[1];
+				RegionVo vo = new RegionVo();
+				vo.setId(formRegion.getId());
+				vo.setName(formRegion.getName());
+				vo.setSectId(formRegion.getSectId());
+				vo.setXiaoquAddress(formRegion.getXiaoquAddress());
+				vo.setLatitude(formRegion.getLatitude());
+				vo.setLongitude(formRegion.getLongitude());
+				regions[0] = vo;
+				rgroupVo.setRegions(regions);
+			}
+		} else {
+			Assert.noNullElements(rgroupVo.getRegions(), "团购区域不能为空");
+		}
 		
 		try {
 			
