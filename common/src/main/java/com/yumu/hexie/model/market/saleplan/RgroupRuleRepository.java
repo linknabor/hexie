@@ -34,11 +34,13 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "where rule.status = ?1 "
 			+ "and item.regionId = ?2 "
 			+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
+			+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 			, countQuery = "select count(*) from ( select distinct rule.* from RgroupRule rule "
 					+ "join rgroupareaitem item on item.ruleId = rule.id "
 					+ "where rule.status = ?1 "
 					+ "and item.regionId = ?2 "
 					+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
+					+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 					+ ") a "
 			, nativeQuery = true)
 	public Page<RgroupRule> findByRegionId(int status, long regionId, String title, Pageable pageable);
