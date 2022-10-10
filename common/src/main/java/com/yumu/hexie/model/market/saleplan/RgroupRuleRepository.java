@@ -190,7 +190,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "where rule.status = ?1 "
 			+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 			+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
-			+ "and item.ruleCloseTime > ?3 "
+//			+ "and item.ruleCloseTime > ?3 "
 			+ "group by region.id, region.name, region.xiaoquAddress "
 			+ "order by rule.id desc "
 			, countQuery = "select count(*) from ( select count(distinct rule.id), region.id, region.name, region.xiaoquAddress "
@@ -200,11 +200,11 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 					+ "where rule.status = ?1 "
 					+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 					+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
-					+ "and item.ruleCloseTime > ?3 "
+//					+ "and item.ruleCloseTime > ?3 "
 					+ "group by region.id, region.name, region.xiaoquAddress "
 					+ "order by rule.id desc ) a "
 					, nativeQuery = true)
-	Page<Object[]> findGroupSects(int status, String sectName, long currentDate, Pageable pageable);
+	Page<Object[]> findGroupSects(int status, String sectName, Pageable pageable);
 	
 	@Query(value = "select distinct rule.* from rgroupRule rule "
 			+ "join rgroupareaitem item on item.ruleId = rule.id "
