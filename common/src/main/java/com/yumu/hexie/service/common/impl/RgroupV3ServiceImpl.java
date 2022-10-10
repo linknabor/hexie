@@ -935,11 +935,14 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			for (RgroupRule rule : rules) {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String descMoreStr = rule.getDescriptionMore();
-				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
-				DescriptionMore[]descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
-				vo.setDescription(rule.getDescription());
-				vo.setDescriptionMore(descriptionMore);
-				vo.setStatus(rule.getStatus());
+				DescriptionMore[]descriptionMore = new DescriptionMore[0];
+				if (!StringUtils.isEmpty(descMoreStr)) {
+					TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+					descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+					vo.setDescription(rule.getDescription());
+					vo.setDescriptionMore(descriptionMore);
+					vo.setStatus(rule.getStatus());
+				}
 				
 				List<String> descMoreImages = new ArrayList<>();
 				for (DescriptionMore descM : descriptionMore) {
