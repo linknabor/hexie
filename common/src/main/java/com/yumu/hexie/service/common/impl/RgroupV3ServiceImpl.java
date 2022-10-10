@@ -924,7 +924,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
     	Sort sort = Sort.by(orderList);
 		Pageable pageable = PageRequest.of(currentPage, 10, sort);
 		Date date = new Date();
-		Page<Object[]> page = rgroupRuleRepository.findGroupSects(ModelConstant.RULE_STATUS_ON, sectName, date.getTime(), pageable);
+		Page<Object[]> page = rgroupRuleRepository.findGroupSects(ModelConstant.RULE_STATUS_ON, sectName, pageable);
 		List<QueryRgroupSectsMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
 		if (list == null) {
 			list = new ArrayList<>();
