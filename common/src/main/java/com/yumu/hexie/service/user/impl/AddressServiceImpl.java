@@ -566,6 +566,9 @@ public class AddressServiceImpl implements AddressService {
 				defaultAddressList.add(vo);
 			}
 		}
+		if (defaultAddressList.isEmpty()) {
+			defaultAddressList.add(new RgroupAddressVO());
+		}
 		return defaultAddressList.get(0);
 	}
 
