@@ -566,10 +566,11 @@ public class AddressServiceImpl implements AddressService {
 				defaultAddressList.add(vo);
 			}
 		}
-		if (defaultAddressList.isEmpty()) {
-			defaultAddressList.add(new RgroupAddressVO());
+		RgroupAddressVO returnVo = null;
+		if (!defaultAddressList.isEmpty()) {
+			returnVo = defaultAddressList.get(0);
 		}
-		return defaultAddressList.get(0);
+		return returnVo;
 	}
 
 	@Override
