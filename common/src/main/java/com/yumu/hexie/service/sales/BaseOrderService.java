@@ -13,6 +13,7 @@ import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.vo.CreateOrderReq;
+import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.SingleItemOrder;
 
 public interface BaseOrderService {
@@ -75,15 +76,18 @@ public interface BaseOrderService {
 
     //拆单支付
     JsSign requestGroupPay(long orderId) throws Exception;
+    
+    //3版团购拆单支付
+    JsSign requestGroupPay(long orderId, String payMethod) throws Exception;
 
     //订单支付
-    JsSign requestOrderPay(User user, long orderId) throws Exception;
+    JsSign requestOrderPay(User user, long orderId, String payMethod) throws Exception;
 
     //查询订单（兼容拆分的交易）
     ServiceOrder getOrder(User user, long orderId);
 
     //退款处理
-    void finishRefund(ServiceOrder serviceOrder);
+    void finishRefund(ServiceOrder serviceOrder, String productIds);
 
     //退款完成
     public void finishRefund(WxRefundOrder wxRefundOrder);
@@ -91,5 +95,20 @@ public interface BaseOrderService {
     //订单支付成功回调处理，包括消费红包，改状态等操作
     void finishOrder(String tradeWaterId);
 
+	ServiceOrder createOrder4Rgoup(User user, CreateOrderReq req);
 
+	void requestRefund(User user, RefundVO refundVO) throws Exception;
+
+	//团购退款，包含直接退款和用户退款审核后退款
+    void requestRefundByOwner(User user, RefundVO refundVO) throws Exception;
+
+    //退款审核通过
+	void passRefundAudit(User user, String recorderIdstr) throws Exception;
+
+	//退款审核拒绝
+	void rejectRefundAudit(User user, String recorderIdstr, String memo) throws Exception;
+
+	//退款申请撤回
+	void cancelRefund(User user, String recorderIdstr);
+	
 }

@@ -45,7 +45,9 @@ import com.yumu.hexie.service.sales.req.PromotionOrder;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.CreateOrderReq;
+import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.RgroupOrder;
+import com.yumu.hexie.vo.RgroupOrdersVO;
 import com.yumu.hexie.vo.SingleItemOrder;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -273,7 +275,7 @@ public class OrderController extends BaseController{
 	@ResponseBody
 	public BaseResult<JsSign> requestPay(@PathVariable long orderId,@ModelAttribute(Constants.USER)User user) throws Exception {
 		
-		return new BaseResult<JsSign>().success(baseOrderService.requestOrderPay(user, orderId));
+		return new BaseResult<JsSign>().success(baseOrderService.requestOrderPay(user, orderId, ""));
 	}
 	
 	@RequestMapping(value = "/notifyPayed/{orderId}", method = RequestMethod.GET)
@@ -485,6 +487,134 @@ public class OrderController extends BaseController{
 		
 		List<OrderItem> itemList = baseOrderService.getOrderDetail(user, orderId);
 		return new BaseResult<List<OrderItem>>().success(itemList);
+    }
+	
+	/**
+	 * 购物车支付页面创建订单
+	 * @param user
+	 * @param req
+	 * @return
+	 * @throws Exception
+	 */
+	@ApiOperation(value = "团购创建订单")
+	@RequestMapping(value = "/rgroup/v3/order/create", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<JsSign> createOrder4Rgroup(@ModelAttribute(Constants.USER)User user, @RequestBody CreateOrderReq req) throws Exception {
+		
+		ServiceOrder o = baseOrderService.createOrder4Rgoup(user, req);
+		if(o == null) {
+			return new BaseResult<JsSign>().failMsg("订单提交失败，请稍后重试！");
+		}
+		String payMethod = "14";	//小程序支付
+		JsSign jsSign = baseOrderService.requestOrderPay(user, o.getId(), payMethod);
+		return new BaseResult<JsSign>().success(jsSign);
+	}
+	
+	/**
+	 * 我的订单
+	 * @param user
+	 * @param statusType
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroup/v3/orders/{statusType}/{currentPage}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RgroupOrdersVO>> groupOrdersV3(@ModelAttribute(Constants.USER)User user,
+			@PathVariable String statusType, @PathVariable int currentPage, @RequestParam(required = false) String searchName,
+			@RequestParam(required = false) String ruleId) throws Exception {
+		
+		List<Integer> status = new ArrayList<>();
+		List<Integer> itemStatus = null;
+		if("1".equalsIgnoreCase(statusType)){	//待支付
+			status.add(ModelConstant.ORDER_STATUS_INIT);
+		}else if("2".equalsIgnoreCase(statusType)){	//发货
+			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+			
+			itemStatus = new ArrayList<>();
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_PAID);
+			
+		}else if("3".equalsIgnoreCase(statusType)){	//售后
+			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+			
+			itemStatus = new ArrayList<>();
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_APPLYREFUND);
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_REFUNDING);
+			itemStatus.add(ModelConstant.ORDERITEM_REFUND_STATUS_REFUNDED);
+			
+		}else if("0".equalsIgnoreCase(statusType)){	//全部
+			status.add(ModelConstant.ORDER_STATUS_INIT);
+			status.add(ModelConstant.ORDER_STATUS_PAYED);
+			status.add(ModelConstant.ORDER_STATUS_CANCEL);
+			status.add(ModelConstant.ORDER_STATUS_REFUNDING);
+			status.add(ModelConstant.ORDER_STATUS_SENDED);
+			status.add(ModelConstant.ORDER_STATUS_RECEIVED);
+			status.add(ModelConstant.ORDER_STATUS_CONFIRM);
+			status.add(ModelConstant.ORDER_STATUS_RETURNED);
+			status.add(ModelConstant.ORDER_STATUS_REFUNDED);
+		} 
+		
+		return new BaseResult<List<RgroupOrdersVO>>().success(rgroupService.queryMyRgroupOrdersV3(user.getId(),status, searchName, ruleId, itemStatus, currentPage));
+    }
+	
+	/**
+	 * 我的订单明细
+	 * @param user
+	 * @param statusType
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroup/v3/orders/detail/{orderId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<RgroupOrdersVO> groupOrderDetailV3(@ModelAttribute(Constants.USER)User user, @PathVariable String orderId) throws Exception {
+		
+		return new BaseResult<RgroupOrdersVO>().success(rgroupService.queryRgroupOrderDetailV3(user.getId(), orderId));
+    }
+	
+	/**
+	 * 发起退款
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/order/refund", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> requestRefund(@ModelAttribute(Constants.USER)User user, @RequestBody RefundVO refundVO) throws Exception {
+		
+		baseOrderService.requestRefund(user, refundVO);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 发起退款
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/order/refund/cancel/{recorderId}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> cancelRefund(@ModelAttribute(Constants.USER)User user, @PathVariable String recorderId) throws Exception {
+		
+		baseOrderService.cancelRefund(user, recorderId);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 获取退款原因
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/order/refund2", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> requestRefund(@RequestBody RefundVO refundVO) throws Exception {
+		
+		User user = new User();
+		user.setId(125417);
+		baseOrderService.requestRefund(user, refundVO);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
 	
 }

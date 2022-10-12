@@ -10,9 +10,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
+import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.localservice.HomeCart;
 import com.yumu.hexie.model.market.Cart;
+import com.yumu.hexie.model.market.RgroupCart;
 import com.yumu.hexie.model.market.car.OrderCarInfo;
 import com.yumu.hexie.model.promotion.coupon.CouponCfg;
 import com.yumu.hexie.model.promotion.share.ShareAccessRecord;
@@ -36,10 +37,12 @@ public class RedisRepository {
 	private RedisTemplate<String, Object> authRedisTemplate;
     @Autowired
     @Qualifier("redisTemplate")
-    private RedisTemplate<String, ProductRule> proRedisTemplate;
+    private RedisTemplate<String, ProductRuleCache> proRedisTemplate;
     @Autowired
     @Qualifier("redisTemplate")
     private RedisTemplate<String, CouponCfg> couponRuleRedisTemplate;
+    @Autowired
+    private RedisTemplate<String, RgroupCart> rgroupCartRedisTemplate;
     
     /**
      * 获取订单车辆信息 
@@ -81,6 +84,17 @@ public class RedisRepository {
     	cartRedisTemplate.delete(key);
     }
     
+    public void setRgroupCart(String key, RgroupCart value) {
+        rgroupCartRedisTemplate.opsForValue().set(key, value, 60, TimeUnit.DAYS);
+    }
+    public RgroupCart getRgroupCart(String key) {
+        return rgroupCartRedisTemplate.opsForValue().get(key);
+    }
+    
+    public void removeRgroupCart(String key) {
+    	rgroupCartRedisTemplate.delete(key);
+    }
+    
     //分享信息保存1天
     public void setShareRecord(String key, ShareAccessRecord value) {
     	shareAccessRecordTemplate.opsForValue().set(key, value, 1, TimeUnit.DAYS);
@@ -105,14 +119,14 @@ public class RedisRepository {
     	return (String) authRedisTemplate.opsForValue().get(key);
     }
     
-    public void setProdcutRule(String key, ProductRule value) {
+    public void setProdcutRule(String key, ProductRuleCache value) {
     	
-    	Date start = value.getStartDate();
+//    	Date start = value.getStartDate();
     	Date end = value.getEndDate();
-    	long expire = end.getTime() - start.getTime();
+    	long expire = end.getTime() - System.currentTimeMillis();
     	proRedisTemplate.opsForValue().set(key, value, expire, TimeUnit.MILLISECONDS);
     }
-    public ProductRule getProdcutRule(String key) {
+    public ProductRuleCache getProdcutRule(String key) {
         return proRedisTemplate.opsForValue().get(key);
     }
     

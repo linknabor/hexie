@@ -67,7 +67,8 @@ public class Address  extends BaseModel{
 		if (StringUtil.isEmpty(county)) {
 			county = "";
 		}
-		return province + city + county + getXiaoquName();
+//		return province + city + county + getXiaoquName();
+		return province + city;
 	}
 	public long getUserId() {
 		return userId;

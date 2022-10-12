@@ -25,8 +25,11 @@ public class RgroupRule extends SalePlan {
 	private String ownerName;
 	private String ownerAddr;
 	private String ownerImg;
+	private String ownerTel;
+	private String ownerSect;
 	/** 售卖情况 */
 	
+	private long agentId;	//团购所在机构，取开团时团长的机构
 	private long groupFinishDate;	//成团日期
 
 	@Transient
@@ -132,6 +135,29 @@ public class RgroupRule extends SalePlan {
 		this.groupFinishDate = groupFinishDate;
 	}
 
-	
+	public String getOwnerTel() {
+		return ownerTel;
+	}
 
+	public void setOwnerTel(String ownerTel) {
+		this.ownerTel = ownerTel;
+	}
+
+	public long getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(long agentId) {
+		this.agentId = agentId;
+	}
+
+	public String getOwnerSect() {
+		return ownerSect;
+	}
+
+	public void setOwnerSect(String ownerSect) {
+		this.ownerSect = ownerSect;
+	}
+
+	
 }

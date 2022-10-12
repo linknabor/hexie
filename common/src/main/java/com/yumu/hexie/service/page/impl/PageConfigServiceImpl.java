@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.page.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.user.MiniUserPageAccess;
+import com.yumu.hexie.model.user.MiniUserPageAccessRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.Banner;
 import com.yumu.hexie.model.view.BannerRepository;
@@ -25,6 +28,8 @@ import com.yumu.hexie.model.view.CsHotline;
 import com.yumu.hexie.model.view.CsHotlineRepository;
 import com.yumu.hexie.model.view.Menu;
 import com.yumu.hexie.model.view.MenuRepository;
+import com.yumu.hexie.model.view.OrgMenu;
+import com.yumu.hexie.model.view.OrgMenuRepository;
 import com.yumu.hexie.model.view.PageConfigView;
 import com.yumu.hexie.model.view.PageConfigViewRepository;
 import com.yumu.hexie.model.view.QrCode;
@@ -33,6 +38,8 @@ import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.model.view.WuyePayTabsRepository;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.page.PageConfigService;
+import com.yumu.hexie.vo.menu.GroupMenuInfo;
+import com.yumu.hexie.vo.menu.MenuInfo;
 
 @Service("pageConfigService")
 public class PageConfigServiceImpl implements PageConfigService {
@@ -57,6 +64,10 @@ public class PageConfigServiceImpl implements PageConfigService {
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private MiniUserPageAccessRepository miniUserPageAccessRepository;
+	@Autowired
+	private OrgMenuRepository orgMenuRepository;
 	
 	/**
 	 * 根据banner类型动态获取
@@ -232,6 +243,54 @@ public class PageConfigServiceImpl implements PageConfigService {
 //			tips = systemConfigService.getSysConfigByKey("SWITCH_SECT_TIPS_"+page.toUpperCase());
 //		}
 		return tips;
+	}
+	
+	/**
+	 * 校验小程序用户页面访问权限
+	 * @param page
+	 * @param roleId
+	 */
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_MINI_ROLE_PAGE, key = "#page+'_' +#roleId", unless = "#result == null")
+	public MiniUserPageAccess getMiniPageAccess(String page, String roleId) {
+		return miniUserPageAccessRepository.findByPageAndRoleId(page, roleId);
+	}
+	
+	/**
+	 * 机构人员菜单
+	 * @param orgRoleId
+	 * @return
+	 */
+	@Override
+	@Cacheable(cacheNames = ModelConstant.KEY_TYPE_ORG_MENU, key = "#orgType+'_'+#orgRoleId" , unless = "#result == null")
+	public List<GroupMenuInfo> getOrgMenu(String orgRoleId, String orgType) {
+
+		String reRoleId = "";
+		String reOrgType = "";
+		if(!"99".equals(orgRoleId)) {
+			reRoleId = orgRoleId;
+			reOrgType = orgType;
+		}
+
+		List<GroupMenuInfo> list = new ArrayList<>();
+		List<OrgMenu> parentMenu = orgMenuRepository.findByUserRoleAndLevel(reRoleId, reOrgType, "0", "");
+		for(OrgMenu m : parentMenu) {
+			GroupMenuInfo group = new GroupMenuInfo();
+			group.setGroupName(m.getName());
+			List<OrgMenu> subMenu = orgMenuRepository.findByUserRoleAndLevel(reRoleId, reOrgType, "1", m.getCode());
+			List<MenuInfo> infos = new ArrayList<>();
+			for(OrgMenu sub : subMenu) {
+				MenuInfo info = new MenuInfo();
+				info.setCode(sub.getCode());
+				info.setMenuName(sub.getName());
+				info.setMenuIcon(sub.getImage());
+				info.setMenuPage(sub.getUrl());
+				infos.add(info);
+			}
+			group.setMenu(infos);
+			list.add(group);
+		}
+		return list;
 	}
 
 }

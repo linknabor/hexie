@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -293,19 +294,20 @@ public class NotifyServiceImpl implements NotifyService {
 	 * 电商类退款
 	 */
 	@Override
-	public void notifyEshopRefund(String orderId) {
-	
+	public void notifyEshopRefund(Map<String, Object> map) {
+		Object orderId = map.get("trade_water_id");
 		if (StringUtils.isEmpty(orderId)) {
 			log.info("notifyRefund: orderId is null, will return ! ");
 			return;
 		}
-		
+		String str = JSON.toJSONString(map);
+
 		int retryTimes = 0;
 		boolean isSuccess = false;
-		
+
 		while(!isSuccess && retryTimes < 3) {
 			try {
-				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, orderId);
+				redisTemplate.opsForList().rightPush(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, str);
 				isSuccess = true;
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -78,6 +79,7 @@ import com.yumu.hexie.web.shequ.vo.GetCellVO;
 import com.yumu.hexie.web.shequ.vo.OtherPayVO;
 import com.yumu.hexie.web.shequ.vo.PrepayReqVO;
 import com.yumu.hexie.web.shequ.vo.SignInOutVO;
+import com.yumu.hexie.web.shequ.vo.UnbindHouseVO;
 import com.yumu.hexie.web.user.resp.BankCardVO;
 import com.yumu.hexie.web.user.resp.UserInfo;
 
@@ -149,6 +151,29 @@ public class WuyeController extends BaseController {
 		}else {
 			return BaseResult.fail("解绑房子失败！");
 		}
+	}
+	
+	/**
+	 * 物业工作人员进行房屋解绑,PC端操作
+	 * @param user
+	 * @param houseId
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/hexiehouse/deleteByWuye", method = RequestMethod.POST)
+	@ResponseBody
+	public CommonResponse<Object> deleteHouseByWuye(@RequestBody UnbindHouseVO unbindHouseVO) throws Exception {
+		
+		User user = userService.findwuyeId(unbindHouseVO.getWuyeId());
+		boolean isSuccess = wuyeService.deleteHouse(user, unbindHouseVO.getCellId());
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		if (isSuccess) {
+			commonResponse.setResult("00");
+		} else {
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg("解除绑定房屋失败。");
+		}
+		return commonResponse;
 	}
 
 	/**
@@ -596,7 +621,7 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(invoice);
 		
 	}
-	
+
 	/**
 	 * 申请电子收据页面获取交易信息
 	 * @param response
@@ -830,7 +855,7 @@ public class WuyeController extends BaseController {
 	
 	/**
 	 * 获取用户绑定的银行卡信息
-	 * @param user
+	 * @param otherPayVo
 	 * @throws UnsupportedEncodingException 
 	 */
 	@SuppressWarnings("unchecked")
@@ -1012,7 +1037,7 @@ public class WuyeController extends BaseController {
 		Discounts discounts = wuyeService.getFeeSmsPayQrCode(user, queryFeeSmsBillReq);
 		return BaseResult.successResult(discounts);
 	}
-	
+
 	/**
 	 * 申请电子收据
 	 * 如果用户没有注册的，则直接注册。
@@ -1047,7 +1072,7 @@ public class WuyeController extends BaseController {
 			if (user != null) {
 				if (user.getTel()!=null && user.getTel().equals(mobile)) {
 					isCheck = true;
-				}
+}
 				if (StringUtils.isEmpty(user.getTel())) {
 					user.setTel(mobile);
 				}
@@ -1107,5 +1132,36 @@ public class WuyeController extends BaseController {
 		List<Receipt> receiptList = wuyeService.getReceiptList(user, page);
 		return BaseResult.successResult(receiptList);
 	}
+	
+	/**
+	 * 获取用户物业id
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/wuyeId", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<String> getWuyeId(HttpServletRequest request, @ModelAttribute(Constants.USER) User user) {
+		
+		String wuyeId = user.getWuyeId();
+		if(StringUtils.isEmpty(wuyeId)) {
+			log.info("user:" + user.getId() + ", wuyeId in session is null .");
+			User dbUser = userService.getById(user.getId());
+			if (dbUser != null) {
+				wuyeId = dbUser.getWuyeId();
+				if (StringUtil.isEmpty(wuyeId)) {
+					log.info("user:" + user.getId() + ", wuyeId in db is null .");
+					wuyeId = userService.bindWuYeIdSync(dbUser);
+				}
+				if (!StringUtils.isEmpty(wuyeId)) {
+					dbUser.setWuyeId(wuyeId);
+					BeanUtils.copyProperties(dbUser, user);
+				    request.getSession().setAttribute(Constants.USER, user);
+				}
+			}
+		}
+		return BaseResult.successResult(wuyeId);
+	}
+	
 	
 }

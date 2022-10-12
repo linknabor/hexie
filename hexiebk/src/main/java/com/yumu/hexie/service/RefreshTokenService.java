@@ -19,5 +19,7 @@ public interface RefreshTokenService {
     public void refreshAccessTokenJob();
 
     public void refreshJsTicketJob();
+
+	void refreshMiniAccessTokenJob();
     
 }

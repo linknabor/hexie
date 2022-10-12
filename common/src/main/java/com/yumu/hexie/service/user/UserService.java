@@ -1,11 +1,16 @@
 package com.yumu.hexie.service.user;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
+import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
+import com.yumu.hexie.model.event.dto.BaseEventDTO;
+import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
@@ -71,5 +76,85 @@ public interface UserService {
 	 * @return 
 	 */
 	User switchSect(User user, SwitchSectReq switchSectReq);
+	
+	/**
+	 * 获取微信小程序用户登陆key
+	 * @param code
+	 * @return
+	 * @throws Exception
+	 */
+	UserMiniprogram getWechatMiniUserSessionKey(String code) throws Exception;
+	
+	/**
+	 * 通过unionid获取用户信息
+	 * @param unionid
+	 * @return
+	 */
+	User getByUnionid(String unionid);
+	
+	/**
+	 * 保存小程序用户sessionKey
+	 * @param miniUser
+	 * @return
+	 */
+	User saveMiniUserSessionKey(UserMiniprogram miniUser);
+	
+	/**
+	 * 缓存小程序用户
+	 * @param user
+	 */
+	void recacheMiniUser(User user);
+	
+	/**
+	 * 验证小程序菜单访问权限
+	 * @param user
+	 * @param page
+	 * @return
+	 */
+	boolean validateMiniPageAccess(User user, String page);
+	
+	/**
+	 * 获取用户机构信息
+	 * @param userId
+	 * @return
+	 */
+	OrgOperator getOrgOperator(User user);
+	
+	/**
+	 * 获取小程序用户手机号
+	 * @param code
+	 * @return
+	 */
+	MiniUserPhone getMiniUserPhone(String code);
+	
+	/**
+	 * 保存小程序用户手机
+	 * @param user
+	 * @param miniUserPhone
+	 * @return
+	 */
+	User saveMiniUserPhone(User user, MiniUserPhone miniUserPhone);
+	
+	/**
+	 * 更新用户信息
+	 * @param user
+	 * @param map
+	 * @return
+	 */
+	User updateUserInfo(User user, Map<String, String> map);
+	
+	/**
+	 * 公众号关注事件绑定小程序用户
+	 * @param baseEventDTO
+	 * @return
+	 */
+	boolean bindMiniUser(BaseEventDTO baseEventDTO);
+	
+	/**
+	 * 获取物业id
+	 * @param user
+	 * @return 
+	 */
+	String bindWuYeIdSync(User user);
 
 }

@@ -30,10 +30,13 @@ import com.yumu.hexie.common.util.RequestUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
+import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
+import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.view.BgImage;
 import com.yumu.hexie.model.view.BottomIcon;
@@ -52,6 +55,7 @@ import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
+import com.yumu.hexie.vo.menu.GroupMenuInfo;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.req.MobileYzm;
@@ -156,7 +160,9 @@ public class UserController extends BaseController{
 			    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
 			    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
 			    	if (menuList.isEmpty()) {
-			    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
+			    		if (!StringUtils.isEmpty(user.getCspId())) {
+			    			menuList = pageConfigService.getMenuByCspId(user.getCspId());
+						}
 					}
 			    	if (menuList.isEmpty()) {
 			    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
@@ -505,10 +511,12 @@ public class UserController extends BaseController{
 		}
 		return new BaseResult<Map<String, String>>().success(map);
     }
-    
-    /**
+
+	/**
 	 * 切换小区
-	 * @param queryFeeSmsBillReq
+	 * @param request
+	 * @param user
+	 * @param switchSectReq
 	 * @return
 	 * @throws Exception
 	 */
@@ -604,5 +612,119 @@ public class UserController extends BaseController{
 		
 	    return new BaseResult<UserInfo>().success(userInfo);
 	}
+	
+	
+	/**
+     * 小程序登录
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/login/{code}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> miniLogin(HttpSession session, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        User user = null;
+        if (!StringUtils.isEmpty(code)) {
+            if (user == null) {
+                if (userService.checkDuplicateLogin(session, code)) {
+                    throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+                }
+                UserMiniprogram miniUser = userService.getWechatMiniUserSessionKey(code);
+
+                user = userService.saveMiniUserSessionKey(miniUser);
+                if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+                	userService.recacheMiniUser(user);
+                }
+            }
+            session.setAttribute(Constants.USER, user);
+        }
+        if (user == null) {
+            return new BaseResult<UserInfo>().failMsg("用户不存在！");
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "login，耗时：" + ((endTime - beginTime) / 1000));
+
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setReqPath(reqPath);
+        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
+        userInfo.setPermission(true);
+        if (!isValid) {
+            throw new BizValidateException("没有访问权限");
+        }
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 小程序获取用户手机
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/phoneNumber/{code}", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<UserInfo> getMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @PathVariable String code) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(code);
+        User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
+        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+        	userService.recacheMiniUser(user);
+        }
+        BeanUtils.copyProperties(savedUser, user);
+        request.getSession().setAttribute(Constants.USER, user);
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "getPhoneNumber，耗时：" + ((endTime - beginTime) / 1000));
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setPermission(true);
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 更新小程序用户头像和昵称
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/userInfo/update", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<String> updateUserInfo(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> map) throws Exception {
+        
+    	User dbuser = userService.updateUserInfo(user, map);
+        BeanUtils.copyProperties(dbuser, user);
+        request.getSession().setAttribute(Constants.USER, user);
+        return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+
+
     
 }

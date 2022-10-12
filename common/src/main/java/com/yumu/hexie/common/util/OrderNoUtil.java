@@ -46,6 +46,10 @@ public class OrderNoUtil {
         return DateUtil.dtFormat(new Date(), "yyyyMMddHHmm") + (int)(1000+(Math.random()*9000));
     }
     
+    public static String generateGroupCode(String groupNum) {
+        return DateUtil.dtFormat(new Date(), "yyMMddHHmmss") + groupNum + (int)(1000+(Math.random()*9000));
+    }
+    
     /**
 	 * 自定义订单编号
 	 * @return
@@ -64,13 +68,19 @@ public class OrderNoUtil {
 
 		Random r = new Random();
 		long i = r.nextInt(100000);
+		System.out.println(i);
 		long number = i + 900000L;
 		return Long.toString(number);
 	}
 	
 	public static void main(String[] args) {
 		
-		String ordnm = getOrderNum();
+		String groupNum = "36";
+		String ordnm = generateGroupCode(groupNum);
+		System.out.println(ordnm);
 		System.out.println(ordnm.length());
+		
+//		Double d = Math.random()*9000;
+//		System.out.println(d);
 	}
 }

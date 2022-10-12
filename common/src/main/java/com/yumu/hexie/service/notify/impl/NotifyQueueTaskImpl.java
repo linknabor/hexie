@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
@@ -635,10 +636,15 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                     Thread.sleep(60000);
                     continue;
                 }
-                String orderNo = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, 30, TimeUnit.SECONDS);
-                if (StringUtils.isEmpty(orderNo)) {
+                String str = redisTemplate.opsForList().leftPop(ModelConstant.KEY_NOTIFY_ESHOP_REFUND_QUEUE, 30, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(str)) {
                     continue;
                 }
+
+                JSONObject json = JSONObject.parseObject(str);
+                String orderNo = json.getOrDefault("trade_water_id", "").toString();
+                String productIds = json.getOrDefault("product_id", "").toString();
+
                 boolean isSuccess = false;
                 try {
                     logger.info("start to consume eshop refund queue, orderNo : " + orderNo);
@@ -655,7 +661,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                             orderList.add(order);
                         }
                         for (ServiceOrder o : orderList) {
-                            baseOrderService.finishRefund(o);
+                            baseOrderService.finishRefund(o, productIds);
                         }
 
                     }
@@ -1004,6 +1010,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                                 isSuccess = true;
                             } else if (wechatResponse.getErrcode() == 45009) {    //reach max api daily quota limit
                                 isSuccess = true;
+                            } else if (wechatResponse.getErrcode() == 40036) {		//invalid template_id size，没有配模板
+                            	isSuccess = true;
                             }
                             if (isSuccess) {
                                 try {
@@ -1095,6 +1103,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                             isSuccess = true;
                         } else if (wechatResponse.getErrcode() == 45009) {    //reach max api daily quota limit
                             isSuccess = true;
+                        } else if (wechatResponse.getErrcode() == 40036) {		//invalid template_id size，没有配模板
+                        	isSuccess = true;
                         }
                         if (isSuccess) {
                             try {

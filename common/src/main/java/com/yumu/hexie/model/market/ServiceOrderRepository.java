@@ -24,6 +24,23 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
 
     @Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 order by id desc", nativeQuery = true)
     List<ServiceOrder> findByUserAndStatusAndType(long userId, List<Integer> statuses, int orderType);
+    
+    @Query(value = "select distinct p.* from ServiceOrder p "
+    		+ "join orderItem o on o.orderId = p.id "
+    		+ "where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 "
+    		+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+    		+ "and if(?5!='', p.groupRuleId = ?5, 1=1) "
+    		+ "and (COALESCE(?6) IS NULL OR (o.isRefund IN (?6) )) "
+    		+ "and p.groupOrderId is not null order by p.id desc "
+    		, countQuery = "select count(distinct p.*) from ServiceOrder p "
+    				+ "join orderItem o on o.orderId = p.id "
+    	    		+ "where p.userId = ?1 and p.status in ?2 and p.orderType = ?3 "
+    	    		+ "and if(?4!='', o.productName like CONCAT('%',?4,'%'), 1=1) "
+    	    		+ "and if(?5!='', p.groupRuleId = ?5, 1=1) "
+    	    		+ "and (COALESCE(?6) IS NULL OR (o.isRefund IN (?6) )) "
+    	    		+ "and p.groupOrderId is not null order by p.id desc "
+    		, nativeQuery = true)
+    List<ServiceOrder> findByUserAndStatusAndTypeV3(long userId, List<Integer> status, int orderType, String productName, String ruleId, List<Integer> itemStatus, Pageable page);
 
     @Query(value = "select * from ServiceOrder p where p.userId = ?1 and p.orderType in ?2 order by id desc", nativeQuery = true)
     List<ServiceOrder> findByUserIdAndOrderType(long userId, List<Integer> types);
@@ -217,5 +234,34 @@ public interface ServiceOrderRepository extends JpaRepository<ServiceOrder, Long
                                         String agentNo, String agentName, String sectName, String groupRuleId, String groupStatus, String groupLeaderId, 
                                         long createDateBegin, long createDateEnd, List<String> sectList, Pageable pageable);
 
-    
+
+    //查询团购的订单列表
+    List<ServiceOrder> findByGroupRuleId(long ruleId);
+
+    //汇总团购订单里包含的商品和购买数量
+    @Query(value = "select p.id as productId, p.name as productName, sum(i.count) as count, sum(case when i.verifyStatus='0' then 1 else 0 end) as verifyNum "
+            + "from serviceorder o "
+            + "join orderItem i on o.id = i.orderId "
+            + "join product p on i.productId = p.id "
+            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) "
+            + "group by p.id "
+            , nativeQuery = true)
+    List<Object[]> findProductSum(long groupRuleId, List<Integer> status);
+
+    //分页查询团购订单
+    String sqlCol = "o.groupNum, o.id as orderId, o.orderNo, o.status, o.payDate, o.createDate, o.count, o.price, o.receiverName, " +
+            "o.tel, o.address, o.logisticType, o.memo, o.userId, o.refundType ";
+    @Query(value = "select distinct " + sqlCol + " from serviceorder o "
+            + "join orderItem i on o.id = i.orderId "
+            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
+            + "and (COALESCE(?4) IS NULL OR (i.isRefund IN (?4) )) "
+            , countQuery = "select count(1) from serviceorder o "
+            + "join orderItem i on o.id = i.orderId "
+            + "where o.groupRuleId = ?1 and o.status in ( ?2 ) and IF(?3 !='', i.verifyStatus = ?3, 1 = 1) "
+            + "and (COALESCE(?4) IS NULL OR (i.isRefund IN (?4) )) "
+            , nativeQuery = true)
+    Page<Object[]> findByGroupRuleIdPage(long ruleId, List<Integer> status, String verifyStatus, List<Integer> itemStatus, Pageable pageable);
+
+    //根据订单和团长ID查询订单
+    ServiceOrder findByIdAndGroupLeaderId(long orderId, long groupLeaderId);
 }

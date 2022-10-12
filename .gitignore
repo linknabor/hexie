@@ -16,3 +16,5 @@
 /hexie/common/.settings/*.prefs
 /hexie/common/logs/*.log
 /hexie/.idea
+*.iml
+/hexie-parent.iml

@@ -110,6 +110,7 @@ public class ReceiptInfo implements Serializable {
 		public void setTrashReason(String trashReason) {
 			this.trashReason = trashReason;
 		}
+
 		public String getTipsDesc() {
 			return tipsDesc;
 		}

@@ -30,5 +30,7 @@ public interface ScheduleService {
 	void initStockAndFreeze();
 	//14.更新团购发货状态
 	void executeRGroupDeliveryJob();
+	//15.团购商品超时
+	void executeRgroupRuleTimeoutJob();
 	
 }

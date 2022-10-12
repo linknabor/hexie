@@ -11,6 +11,9 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
+import com.yumu.hexie.integration.wechat.entity.MiniAccessToken;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
+import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.common.CloseOrderResp;
 import com.yumu.hexie.integration.wechat.entity.common.JsSign;
 import com.yumu.hexie.integration.wechat.entity.common.PaymentOrderResult;
@@ -19,6 +22,7 @@ import com.yumu.hexie.integration.wechat.entity.common.WxRefundOrder;
 import com.yumu.hexie.integration.wechat.entity.common.WxRefundResp;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.integration.wechat.service.FundService;
+import com.yumu.hexie.integration.wechat.service.MiniprogramAuthService;
 import com.yumu.hexie.integration.wechat.service.OAuthService;
 import com.yumu.hexie.integration.wechat.service.RefundService;
 import com.yumu.hexie.integration.wechat.service.UserService;
@@ -41,6 +45,8 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 	private SystemConfigService systemConfigService;
 	@Autowired
 	private RedisRepository redisRepository;
+	@Autowired
+	private MiniprogramAuthService miniprogramAuthService;
 	
 	@Override
 	public JsSign getPrepareSign(String prepay_id) {
@@ -147,5 +153,44 @@ public class WechatCoreServiceImpl implements WechatCoreService {
 		}
 		return null;
 	}
+	
+	/**
+     * 通过code获取微信小程序用户信息
+     *
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public UserMiniprogram getMiniUserSessionKey(String code) throws Exception {
+        return miniprogramAuthService.getMiniUserSessionKey(code);
+    }
+    
+    /**
+     * 通过code获取微信小程序accessToken
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public MiniAccessToken getMiniAccessToken() throws Exception {
+        return miniprogramAuthService.getMiniAccessToken();
+    }
+    
+    /**
+     * 通过code获取微信小程序用户手机号，此code跟login的code不是同一个
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public MiniUserPhone getMiniUserPhone(String code) throws Exception {
+        return miniprogramAuthService.getPhoneNumber(code);
+    }
+
+	@Override
+	public String getUnlimitedQrcode(String path, String param) throws Exception {
+		return miniprogramAuthService.getUnlimitedQrcode(path, param);
+	}
+
 
 }

@@ -34,6 +34,7 @@ import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
+import com.yumu.hexie.vo.QQMapVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.RegionInfo;
@@ -55,6 +56,7 @@ public class AddressController extends BaseController{
 	@Autowired
 	private SystemConfigService systemConfigService;
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/address/delete/{addressId}", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<String> deleteAddress(@ModelAttribute(Constants.USER)User user,@PathVariable long addressId) throws Exception {
@@ -62,6 +64,7 @@ public class AddressController extends BaseController{
         return BaseResult.successResult("删除地址成功");
     }
 
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/address/query/{addressId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<Address> queryAddressById(@ModelAttribute(Constants.USER)User user,@PathVariable long addressId) throws Exception {
@@ -137,13 +140,17 @@ public class AddressController extends BaseController{
 	@ResponseBody
     public BaseResult<Address> save4Rgroup(HttpSession session,@ModelAttribute(Constants.USER)User user,@RequestBody AddressReq address) throws Exception {
 
-		if(StringUtil.isEmpty(address.getXiaoquName()) || 
-				StringUtil.isEmpty(address.getSectId()) ||
-				StringUtil.isEmpty(address.getDetailAddress())){
-			return new BaseResult<Address>().failMsg("请填写小区和详细地址");
+		if(StringUtil.isEmpty(address.getSectId())){
+			return new BaseResult<Address>().failMsg("请查看当前小区是否开通了团购服务");
+		}
+		if (StringUtil.isEmpty(address.getDetailAddress())) {
+			return new BaseResult<Address>().failMsg("请填写详细地址");
+		}
+		if (StringUtil.isEmpty(address.getReceiveName())) {
+			return new BaseResult<Address>().failMsg("请填写收货人姓名");
 		}
 		if (StringUtil.isEmpty(address.getReceiveName()) || StringUtil.isEmpty(address.getTel())) {
-			return new BaseResult<Address>().failMsg("请检查真实姓名和手机号码是否正确");
+			return new BaseResult<Address>().failMsg("请填写收货人手机号码");
 		}
 		address.setUserId(user.getId());
 		if (StringUtil.isEmpty(address.getAmapId())) {
@@ -151,15 +158,16 @@ public class AddressController extends BaseController{
 		}
 		User currUser = userService.getById(user.getId());
 		Address addr = addressService.addAddress4Rgroup(currUser, address);
-		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
-			pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
-		}
+//		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
+//			pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
+//		}
 		BeanUtils.copyProperties(currUser, user);
 		session.setAttribute(Constants.USER, user);
 		return new BaseResult<Address>().success(addr);
     }
 	
-    @RequestMapping(value = "/regions/{type}/{parentId}", method = RequestMethod.GET)
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/{type}/{parentId}", method = RequestMethod.GET)
     @ResponseBody
     public BaseResult<List<Region>> queryRegions(@PathVariable int type,@PathVariable long parentId){
         List<Region> regions = addressService.queryRegions(type, parentId);
@@ -178,18 +186,21 @@ public class AddressController extends BaseController{
     }
     
 	//add by zhangxiaonan for amap
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/amap/{city}/{keyword}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAmapYuntuLocal(@PathVariable String city,@PathVariable String keyword){
 		return BaseResult.successResult(addressService.queryAmapYuntuLocal(city, keyword));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/amap/{longitude}/{latitude}/around/", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAround(@PathVariable double longitude, @PathVariable double latitude){
 		return BaseResult.successResult(addressService.queryAroundByCoordinate(longitude, latitude));
 	}
 	
+	@SuppressWarnings({ "unchecked", "static-access" })
 	@RequestMapping(value = "/getRegionByRuleId/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<SharedVo> queryAddrByShareCode(HttpSession session, @ModelAttribute(Constants.USER)User user,@PathVariable String ruleId) {
@@ -252,9 +263,70 @@ public class AddressController extends BaseController{
 		return BaseResult.successResult(addressService.queryCounty(cityId));
 	}
 	
-	public static void main(String[] args) {
-		
-		System.out.println(System.currentTimeMillis());
-	}
+	/**
+	 * 团长选取小区列表
+	 * @param user
+	 * @param regionName
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroup/query", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<List<Region>> queryRegions(@ModelAttribute(Constants.USER)User user,
+    		@RequestParam(required = false) String regionName){
+        List<Region> regions = regionService.findByNameLikeAndType(regionName);
+        return BaseResult.successResult(regions);
+    }
 	
+	/**
+	 * 团长添加过的小区列表展示
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroupowner/query", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<List<Region>> queryRgroupOwnerRegions(@ModelAttribute(Constants.USER)User user){
+        List<Region> regions = regionService.findByRgroupOwner(user);
+        return BaseResult.successResult(regions);
+    }
+	
+	/**
+	 * 缓存团长添加的小区
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroupowner/save", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<String> saveOwnerServiceArea(@ModelAttribute(Constants.USER)User user, @RequestBody Region region){
+		regionService.saveOwnerServiceArea(user, region);
+        return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 缓存团长添加的小区
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroupowner/del/{regionId}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<String> delOwnerServiceArea(@ModelAttribute(Constants.USER)User user, @PathVariable long regionId){
+		regionService.delOwnerServiceArea(user, regionId);
+        return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 缓存团长添加的小区
+	 * @param user
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/regions/rgroup/sect/save", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<Region> createSect(@ModelAttribute(Constants.USER)User user, @RequestBody QQMapVO mapVO){
+		Region region = regionService.createSect(user, mapVO);
+        return BaseResult.successResult(region);
+    }
 }
