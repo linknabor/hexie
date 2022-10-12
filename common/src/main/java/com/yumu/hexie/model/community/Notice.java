@@ -12,7 +12,7 @@ public class Notice extends BaseModel {
 	 */
 	private static final long serialVersionUID = -1144177388450035925L;
 	
-	private int noticeType;	//资讯类型  0.物业公告, 1.业委会公告, 2.居委会公告, 3.便民信息, 9.系统资讯-全局，10系统资讯-公众号级, 11圈子, 12通知消息推送
+	private int noticeType;	//资讯类型  0.物业公告, 1.业委会公告, 2.居委会公告, 3.便民信息, 9.系统资讯-全局，10系统资讯-公众号级, 11圈子, 12通知消息推送 13团购消息
 	private String title;	//资讯主标题
 	private String summary;	//资讯副标题
 	private String content;	//资讯内容

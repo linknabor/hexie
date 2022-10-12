@@ -32,7 +32,7 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_RECEIPT_APPLICATION_REMINDER = "receiptApplicationReminderTemplate";	//收据申请提醒
 	public static final String TEMPLATE_TYPE_RECEIPT_FINISH = "receiptFinishTemplate";	//收据下发提醒
 	public static final String TEMPLATE_TYPE_NOTICE_ARRIVAL = "noticeArrivalMessageTemplate";	//收据下发提醒
-
+	public static final String TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE = "groupSuccessMessageTemplate";	//团购成团提醒
 	
 	public static final String URL_SUCCESS = "successUrl";
 	public static final String URL_REG_SUCCESS = "regSuccessUrl";
@@ -59,6 +59,7 @@ public class MsgCfg {
 	public static final String URL_INVOICE_APPLICATION_URL = "invoiceApplicationUrl";	//发票申请页面
 	public static final String URL_RECEIPT_APPLICATION_URL = "receiptApplicationUrl";	//电子收据申请页面
 	public static final String URL_RECEIPT_VIEW_URL = "receiptViewUrl";	//电子收据详情页面
+	public static final String URL_GROUP_SUCCESS = "groupSuccessUrl";
 	
 	//订阅消息
 	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";

@@ -475,11 +475,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			
 			RgroupRule rule = rgroupRuleRepository.findByIdAndStatusIn(ruleId, statusList);
 			if (rule == null) {
-				if (isOnsale) {
-//					throw new BizValidateException("团购已下架");
-				} else {
-					throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
-				}
+				throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
 			}
 			vo.setRuleId(String.valueOf(rule.getId()));
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
@@ -615,11 +611,6 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			
 			Region region = regionRepository.findById(regionVos[0].getId());	//TODO 兼容旧版本
 			vo.setRegion(region);	//TODO 兼容旧版本
-			
-			if (isOnsale) {
-				stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rule.getId());
-				stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rule.getOwnerId());
-			}
 			
 			RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
 			int attendees = 0;
@@ -965,7 +956,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			if (images == null) {
 				images = new ArrayList<>();
 			}
-			images.addAll(vo.getDescMoreImages());
+			if (vo.getDescMoreImages()!= null) {
+				images.addAll(vo.getDescMoreImages());
+			}
 			queryRgroupSectsMapper.setGroupImages(images);
 		}
 		
@@ -1330,5 +1323,32 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		}
 		
 		return voList;
+	}
+	
+	/**
+	 * 团购商品访问统计
+	 * @param user
+	 * @param ruleId
+	 * @param ownerId
+	 */
+	@Override
+	public void visitView(User user, String ruleIdStr, String ownerIdStr) {
+		
+		long ruleId = 0l;
+		if (!StringUtils.isEmpty(ruleIdStr)) {
+			ruleId = Long.parseLong(ruleIdStr);
+		}
+		long ownerId = 0l;
+		if (!StringUtils.isEmpty(ownerIdStr)) {
+			ownerId = Long.parseLong(ownerIdStr);
+		}
+		
+		if (ruleId > 0) {
+			stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + ruleId);
+		}
+		if (ownerId > 0) {
+			stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + ownerId);
+		}
+		
 	}
 }

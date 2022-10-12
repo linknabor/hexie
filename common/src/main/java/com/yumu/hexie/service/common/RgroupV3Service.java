@@ -34,5 +34,8 @@ public interface RgroupV3Service {
 	RgroupOwnerVO getLeaderInfo(String groupLeaderId);
 
 	List<RgroupVO> getLeadGroups(String groupLeaderId, String title, int currentPage) throws Exception;
+
+	void visitView(User user, String ruleIdStr, String ownerIdStr);
+
 	
 }

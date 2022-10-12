@@ -90,4 +90,10 @@ public class NoticeServiceImpl implements NoticeService {
 		Assert.hasText(outSidKey, "关联ID不能为空");
 		return noticeRepository.findByOutsideKey(Long.parseLong(outSidKey));
 	}
+	
+	@Override
+	@Transactional
+	public void saveNotice(Notice notice) {
+		noticeRepository.save(notice);
+	}
 }

@@ -301,6 +301,7 @@ public class ModelConstant {
 	public static final int NOTICE_TYPE2_ARREARS_BILL = 14;
 	public static final int NOTICE_TYPE2_THREAD = 15;
 	public static final int NOTICE_TYPE2_ORDER = 16;
+	public static final int NOTICE_TYPE2_RGROUP = 17;
 	
 	//通知类型
 	public static final int NOTICE_TYPE_ORDER = 1;//订单通知

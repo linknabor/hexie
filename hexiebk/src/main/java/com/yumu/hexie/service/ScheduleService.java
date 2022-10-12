@@ -32,5 +32,7 @@ public interface ScheduleService {
 	void executeRGroupDeliveryJob();
 	//15.团购商品超时
 	void executeRgroupRuleTimeoutJob();
+	//16.团长数据固化
+	void updateGroupOwnerInfo();
 	
 }
