@@ -321,4 +321,13 @@ public class RgroupController extends BaseController{
 		
         return new BaseResult<Object>().success(rgroupV3Service.getLeadGroups(leaderId, title, page));
     }
+	
+	@RequestMapping(value = "/rgroups/v3/visitView", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> visitView(@ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> map) {
+		
+		rgroupV3Service.visitView(user, map.get("ruleId"), map.get("ownerId"));
+		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
+    }
+	
 }

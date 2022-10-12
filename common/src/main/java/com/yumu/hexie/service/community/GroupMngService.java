@@ -1,8 +1,12 @@
 package com.yumu.hexie.service.community;
 
+import java.util.List;
+import java.util.Map;
+
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
+import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
@@ -13,9 +17,6 @@ import com.yumu.hexie.model.market.RefundRecord;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.RegionVo;
-
-import java.util.List;
-import java.util.Map;
 
 public interface GroupMngService {
     //查询团购列表
@@ -84,5 +85,7 @@ public interface GroupMngService {
 	List<RgroupVO> queryGroupsByOwner(User user);
 
 	List<RegionVo> queryGroupRegionsByOwner(User user, String ruleId);
+
+	CommonResponse<Object> getGroupOwners(QueryGroupOwnerReq queryGroupOwnerReq);
 
 }

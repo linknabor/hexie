@@ -7,7 +7,8 @@ public class TemplateMsg<T> implements Serializable {
 	private static final long serialVersionUID = -3389303374046044405L;
 	private String touser;//":"OPENID",
 	private String template_id;//":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
-	private String url;//":"http://weixin.qq.com/download",  
+	private String url;//":"http://weixin.qq.com/download",
+	private MiniprogramVO miniprogram;
 	private T data;
 	public String getTouser() {
 		return touser;
@@ -33,10 +34,16 @@ public class TemplateMsg<T> implements Serializable {
 	public void setData(T data) {
 		this.data = data;
 	}
+	public MiniprogramVO getMiniprogram() {
+		return miniprogram;
+	}
+	public void setMiniprogram(MiniprogramVO miniprogram) {
+		this.miniprogram = miniprogram;
+	}
 	@Override
 	public String toString() {
-		return "TemplateMsg [touser=" + touser + ", template_id=" + template_id + ", url=" + url + ", data=" + data
-				+ "]";
+		return "TemplateMsg [touser=" + touser + ", template_id=" + template_id + ", url=" + url + ", miniprogram="
+				+ miniprogram + ", data=" + data + "]";
 	}
 	
 }

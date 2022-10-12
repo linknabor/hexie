@@ -30,4 +30,6 @@ public interface NotifyQueueTask {
 
 	void noticeRgroupArrial();
 
+	void notifyGroupSuccess();
+
 }

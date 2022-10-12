@@ -11,12 +11,14 @@ import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yumu.hexie.common.util.AppUtil;
+import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.RedisLock;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
+import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
 import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import com.yumu.hexie.service.shequ.NoticeService;
 import org.slf4j.Logger;
@@ -44,6 +46,7 @@ import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.model.community.Notice;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.ServiceOperatorRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
@@ -1189,6 +1192,64 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    /**
+     * 通知成团
+     */
+    @Async("taskExecutor")
+    @Override
+    public void notifyGroupSuccess() {
+        while (true) {
+            try {
+
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String str = redisTemplate.opsForList().leftPop(ModelConstant.KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE,
+                        10, TimeUnit.SECONDS);
+
+                if (str == null) {
+                    continue;
+                }
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                NoticeRgroupSuccess noticeRgroupSuccess = objectMapper.readValue(str, NoticeRgroupSuccess.class);
+                logger.info("strat to noticeRgroupSuccess queue : " + noticeRgroupSuccess);
+                
+                Date pubDate = new Date();
+                for (long userId : noticeRgroupSuccess.getOpers()) {
+                    User sendUser = userRepository.findById(userId);
+                    
+                    Notice notice = new Notice();
+                    notice.setNoticeType(ModelConstant.NOTICE_TYPE2_RGROUP);
+                    notice.setAppid(sendUser.getAppId());
+                    notice.setContent(noticeRgroupSuccess.getProductName());
+                    notice.setOpenid(sendUser.getOpenid());
+                    notice.setOutsideKey(noticeRgroupSuccess.getRuleId());
+                    notice.setTitle(noticeRgroupSuccess.getSectName() + " 拼团成功");
+                    notice.setStatus(0);
+                    notice.setPublishDate(DateUtil.dtFormat(pubDate, DateUtil.dttmSimple));
+                    notice.setSummary(noticeRgroupSuccess.getProductName());
+                }
+
+                boolean isSuccess = false;
+                try {
+                    gotongService.sendGroupSuccessNotification(noticeRgroupSuccess);
+                    isSuccess = true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e); // 里面有事务，报错自己会回滚，外面catch住处理
+                }
+
+                if (!isSuccess) {
+                    logger.info("notifyGroupSuccess failed !, repush into the queue. : " + str);
+                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE, str);
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);

@@ -554,11 +554,9 @@ public class AddressServiceImpl implements AddressService {
 			regionVo.setName(region.getName());
 			supportRegions.put(rgroupAreaItem.getRegionId(), regionVo);
 		}
-		List<Address> availalbe = new ArrayList<>();
 		List<Address> allAddr = addressRepository.findAllByUserId(userId);
 		for (Address address : allAddr) {
 			if (supportRegions.containsKey(address.getXiaoquId())) {
-				availalbe.add(address);
 				RgroupAddressVO vo = new RgroupAddressVO();
 				RegionVo regionVo = supportRegions.get(address.getXiaoquId());
 				vo.setRegion(regionVo);

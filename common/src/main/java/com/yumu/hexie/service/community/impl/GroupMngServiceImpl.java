@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
+import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
@@ -56,6 +59,8 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
+import com.yumu.hexie.model.user.RgroupOwner;
+import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.community.GroupMngService;
@@ -73,6 +78,8 @@ import com.yumu.hexie.vo.RgroupVO.Thumbnail;
  */
 @Service
 public class GroupMngServiceImpl implements GroupMngService {
+	
+	private static Logger logger = LoggerFactory.getLogger(GroupMngServiceImpl.class);
 
     @Autowired
     private RgroupRuleRepository rgroupRuleRepository;
@@ -109,6 +116,10 @@ public class GroupMngServiceImpl implements GroupMngService {
     
     @Autowired
     private RegionRepository regionRepository;
+    
+    @Autowired
+    private RgroupOwnerRepository rgroupOwnerRepository;
+    
 
     @Override
     public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
@@ -395,15 +406,42 @@ public class GroupMngServiceImpl implements GroupMngService {
         return "SUCCESS";
     }
     
-    public static void main(String[] args) {
-		
-    	Float f0 = 0.2F;
-    	Float f1 = 0.3F;
-    	Float f = f0 + f1;
-    	DecimalFormat decimalFormat=new DecimalFormat("#.##");
-    	String totalAmtStr = decimalFormat.format(f);
-    	System.out.println(totalAmtStr);
-	}
+    /**
+     * 差选团长信息
+     * @param queryGroupOwnerReq
+     * @return
+     */
+    @Override
+    public CommonResponse<Object> getGroupOwners(QueryGroupOwnerReq queryGroupOwnerReq) {
+    	
+    	logger.info("getGroupOwners, queryGroupOwnerReq : " + queryGroupOwnerReq);
+    	
+    	CommonResponse<Object> commonResponse = new CommonResponse<>();
+    	QueryListDTO<List<RgroupOwner>> queryListDTO = null;
+		try {
+			List<Sort.Order> sortList = new ArrayList<>();
+			Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
+			sortList.add(order);
+			Sort sort = Sort.by(sortList);
+			Pageable pageable = PageRequest.of(queryGroupOwnerReq.getCurrentPage(), queryGroupOwnerReq.getPageSize(), sort);
+			
+			Page<RgroupOwner> page = rgroupOwnerRepository.findByUserIdAndTelLikeAndName(queryGroupOwnerReq.getId(), queryGroupOwnerReq.getTel(), queryGroupOwnerReq.getName(), pageable);
+			List<RgroupOwner> list = page.getContent();
+			
+			queryListDTO = new QueryListDTO<>();
+			queryListDTO.setContent(list);
+			queryListDTO.setTotalPages(page.getTotalPages());
+			queryListDTO.setTotalSize(page.getTotalElements());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
+        commonResponse.setData(queryListDTO);
+        commonResponse.setResult("00");
+        return commonResponse;
+        
+    }
 
     @Override
     public GroupSumResp queryGroupSum(User user, String groupId) throws Exception {
@@ -926,6 +964,6 @@ public class GroupMngServiceImpl implements GroupMngService {
 		}
         return regionList;
     }
-    
+
     
 }

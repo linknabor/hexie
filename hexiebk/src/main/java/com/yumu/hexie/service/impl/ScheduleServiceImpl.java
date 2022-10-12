@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,8 @@ import com.yumu.hexie.model.user.Member;
 import com.yumu.hexie.model.user.MemberBill;
 import com.yumu.hexie.model.user.MemberBillRepository;
 import com.yumu.hexie.model.user.MemberRepository;
+import com.yumu.hexie.model.user.RgroupOwner;
+import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -121,6 +124,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 	private EvoucherRepository evoucherRepository;
 	@Autowired
 	private RgroupAreaItemRepository rgroupAreaItemRepository;
+	@Autowired
+	private RgroupOwnerRepository rgroupOwnerRepository;
 	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
@@ -570,7 +575,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 	/**
 	 * 团购商品超时下架
 	 */
-	@Scheduled(cron = "0 */20 * * * ?")
+	@Scheduled(cron = "0 */30 * * * ?")
 	@Override
 	public void executeRgroupRuleTimeoutJob() {
 		
@@ -617,6 +622,39 @@ public class ScheduleServiceImpl implements ScheduleService {
 			}
 		}
 		SCHEDULE_LOG.info("refresh stock and freeze finished .");
+	}
+	
+	/**
+	 * 固化团长数据
+	 */
+	@Scheduled(cron = "10 */15 * * * ?")
+	@Override
+	@Transactional
+	public void updateGroupOwnerInfo() {
+		
+		SCHEDULE_LOG.info("start to update groupOwner info .");
+		
+		List<RgroupOwner> ownerList = rgroupOwnerRepository.findAll();
+		for (RgroupOwner rgroupOwner : ownerList) {
+			String ownerAccessed = redisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rgroupOwner.getUserId());
+			String ownerOrdered = redisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rgroupOwner.getUserId());
+			
+			int members = 0;
+			if (!StringUtils.isEmpty(ownerAccessed)) {
+				members = Integer.parseInt(ownerAccessed);
+			}
+			int attendees = 0;
+			if (!StringUtils.isEmpty(ownerOrdered)) {
+				attendees = Integer.parseInt(ownerOrdered);
+			}
+			if (members > 0 || attendees > 0) {
+				rgroupOwner.setMembers(members);
+				rgroupOwner.setAttendees(attendees);
+				rgroupOwnerRepository.save(rgroupOwner);
+			}
+			
+		}
+		SCHEDULE_LOG.info("finish updating groupOwner info .");
 	}
 	
 }

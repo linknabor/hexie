@@ -1,9 +1,24 @@
 package com.yumu.hexie.web.community;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
+import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
@@ -21,12 +36,6 @@ import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.RegionVo;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 描述:
@@ -332,6 +341,16 @@ public class GroupMngController extends BaseController {
         commonResponse.setResult("00");
         commonResponse.setData(str);
         return commonResponse;
+    }
+    
+    /**
+     * 后台查询团购列表
+     * @param outSidProductDepotReq
+     * @return
+     */
+    @RequestMapping(value = "/outside/groupOwenrs", method = RequestMethod.POST)
+    public CommonResponse<Object> groupOwners(@RequestBody QueryGroupOwnerReq queryGroupOwnerReq) {
+        return groupMngService.getGroupOwners(queryGroupOwnerReq);
     }
     
     /**
