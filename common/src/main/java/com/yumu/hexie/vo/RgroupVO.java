@@ -136,7 +136,7 @@ public class RgroupVO implements Serializable {
 			if (!StringUtils.isEmpty(currNum)) {
 				currNum = Integer.parseInt(currentNum);
 			}
-			return minNum - currNum;
+			return (minNum-currNum < 0)?0:(minNum-currNum);
 			
 		}
 		@Override

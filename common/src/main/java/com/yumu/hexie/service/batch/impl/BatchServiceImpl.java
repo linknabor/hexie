@@ -138,7 +138,7 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.sendInvoiceMsgAsyc();
 		notifyQueueTask.sendReceiptMsgAsyc();
 		notifyQueueTask.noticeRgroupArrial();
-
+		notifyQueueTask.notifyGroupSuccess();
 		logger.info("异步队列任务启动完成。");
 		
 	}
