@@ -924,13 +924,16 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
     	Sort sort = Sort.by(orderList);
 		Pageable pageable = PageRequest.of(currentPage, 10, sort);
 		Date date = new Date();
-		Page<Object[]> page = rgroupRuleRepository.findGroupSects(ModelConstant.RULE_STATUS_ON, sectName, pageable);
+		List<Integer> statusList = new ArrayList<>();
+		statusList.add(ModelConstant.RULE_STATUS_ON);
+		statusList.add(ModelConstant.RULE_STATUS_OFF);
+		Page<Object[]> page = rgroupRuleRepository.findGroupSects(statusList, sectName, pageable);
 		List<QueryRgroupSectsMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
 		if (list == null) {
 			list = new ArrayList<>();
 		}
 		for (QueryRgroupSectsMapper queryRgroupSectsMapper : list) {
-			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(ModelConstant.RULE_STATUS_ON, date.getTime(), queryRgroupSectsMapper.getId().longValue());
+			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(statusList, date.getTime(), queryRgroupSectsMapper.getId().longValue());
 			RgroupVO vo = new RgroupVO();
 			for (RgroupRule rule : rules) {
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
@@ -994,7 +997,10 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			if (StringUtils.isEmpty(title)) {
 				title = "";
 			}
-			Page<RgroupRule> pages = rgroupRuleRepository.findByRegionId(ModelConstant.RULE_STATUS_ON, Long.valueOf(regionId), title, pageable);
+			List<Integer> statusList = new ArrayList<>();
+			statusList.add(ModelConstant.RULE_STATUS_ON);
+			statusList.add(ModelConstant.RULE_STATUS_OFF);
+			Page<RgroupRule> pages = rgroupRuleRepository.findByRegionId(statusList, Long.valueOf(regionId), title, pageable);
 			List<RgroupRule> ruleList = pages.getContent();
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 			long currentMills = System.currentTimeMillis();

@@ -608,12 +608,17 @@ public class RgroupVO implements Serializable {
 		String statusCn = "";
 		long currentMills = System.currentTimeMillis();
 		if (ModelConstant.RULE_STATUS_OFF == status) {
-			statusCn = "未发布";
+			statusCn = "活动尚未开始";
+			if (startDateMills >= currentMills){
+				statusCn = "活动尚未开始";
+			} else if (endDateMills <= currentMills) {
+				statusCn = "已结束";
+			}
 		} else {
 			if (startDateMills < currentMills && currentMills < endDateMills) {
 				statusCn = "正在跟团中";
 			} else if (startDateMills >= currentMills){
-				statusCn = "未开始";
+				statusCn = "活动尚未开始";
 			} else if (endDateMills <= currentMills) {
 				statusCn = "已结束";
 			}
