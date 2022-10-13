@@ -31,19 +31,19 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	
 	@Query(value = "select distinct rule.* from RgroupRule rule "
 			+ "join rgroupareaitem item on item.ruleId = rule.id "
-			+ "where rule.status = ?1 "
+			+ "where rule.status in ?1 "
 			+ "and item.regionId = ?2 "
 			+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
 			+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 			, countQuery = "select count(*) from ( select distinct rule.* from RgroupRule rule "
 					+ "join rgroupareaitem item on item.ruleId = rule.id "
-					+ "where rule.status = ?1 "
+					+ "where rule.status in ?1 "
 					+ "and item.regionId = ?2 "
 					+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
 					+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 					+ ") a "
 			, nativeQuery = true)
-	public Page<RgroupRule> findByRegionId(int status, long regionId, String title, Pageable pageable);
+	public Page<RgroupRule> findByRegionId(List<Integer> status, long regionId, String title, Pageable pageable);
 	
 	public List<RgroupRule> findAllByProductId(long productId);
 	
@@ -189,7 +189,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "from rgrouprule rule "
 			+ "join rgroupareaitem item on item.ruleId = rule.id "
 			+ "join region on region.id = item.regionId "
-			+ "where rule.status = ?1 "
+			+ "where rule.status in ?1 "
 			+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 			+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
 //			+ "and item.ruleCloseTime > ?3 "
@@ -199,20 +199,20 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 					+ "from rgrouprule rule "
 					+ "join rgroupareaitem item on item.ruleId = rule.id "
 					+ "join region on region.id = item.regionId "
-					+ "where rule.status = ?1 "
+					+ "where rule.status in ?1 "
 					+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 					+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
 //					+ "and item.ruleCloseTime > ?3 "
 					+ "group by region.id, region.name, region.xiaoquAddress "
 					+ "order by rule.id desc ) a "
 					, nativeQuery = true)
-	Page<Object[]> findGroupSects(int status, String sectName, Pageable pageable);
+	Page<Object[]> findGroupSects(List<Integer> status, String sectName, Pageable pageable);
 	
 	@Query(value = "select distinct rule.* from rgroupRule rule "
 			+ "join rgroupareaitem item on item.ruleId = rule.id "
-			+ "where rule.status = ?1 "
+			+ "where rule.status in ?1 "
 			+ "and item.ruleCloseTime > ?2 "
 			+ "and item.regionId = ?3"
 			, nativeQuery = true)
-	List<RgroupRule> findByAreaItem(int status, long currentDate, long regionId);
+	List<RgroupRule> findByAreaItem(List<Integer> status, long currentDate, long regionId);
 }
