@@ -132,7 +132,7 @@ public class CustomRgroupServiceImpl  extends CustomOrderServiceImpl {
         //给用户发送成团短信
         logger.info("groupSuccess, ruleId : " + rule.getId());
         userNoticeService.groupSuccess(u, u.getTel(), o.getGroupRuleId(), rule.getGroupMinNum(),
-            rule.getProductName(), rule.getName());
+            o.getProductName(), rule.getName());
 
     }
 

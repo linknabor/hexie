@@ -131,10 +131,19 @@ public class RgroupServiceImpl implements RgroupService {
 			for (RgroupAreaItem rgroupAreaItem : areaList) {
 				if(rgroupAreaItem.getCurrentNum() < rgroupAreaItem.getGroupMinNum()) {
 					cancelGroupMulti(rule, rgroupAreaItem);
+					
+					if (ModelConstant.RGROUP_STAUS_GROUPING == rgroupAreaItem.getGroupStatus()) {
+						rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_CANCEL);
+					} 
 				} else {
 					finishGroupMulti(rule, rgroupAreaItem);
 					allCancelled = false;
+					
+					if (ModelConstant.RGROUP_STAUS_GROUPING == rgroupAreaItem.getGroupStatus()) {
+						rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_FINISH);
+					} 
 				}
+				rgroupAreaItemRepository.save(rgroupAreaItem);
 			}
 			if (allCancelled) {
 				rule.setGroupStatus(ModelConstant.RGROUP_STAUS_CANCEL);
@@ -174,6 +183,14 @@ public class RgroupServiceImpl implements RgroupService {
 			return;
 		}
 		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERED);
+		
+		List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+		for (RgroupAreaItem rgroupAreaItem : areaList) {
+			if (ModelConstant.RGROUP_STAUS_DELIVERING == rgroupAreaItem.getGroupStatus()) {
+				rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERED);
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+			}
+		}
 		cacheableService.save(rule);
 		
 	}
@@ -353,6 +370,7 @@ public class RgroupServiceImpl implements RgroupService {
 		noticeRgroupSuccess.setOrderType(ModelConstant.ORDER_TYPE_RGROUP);
 		noticeRgroupSuccess.setProductName(rule.getProductName());
 		noticeRgroupSuccess.setSectId(region.getSectId());
+		noticeRgroupSuccess.setSectName(region.getName());
 		String price = new BigDecimal(rule.getPrice()).setScale(2, RoundingMode.HALF_UP).toString();
 		noticeRgroupSuccess.setPrice(price);
 		noticeRgroupSuccess.setRuleId(rule.getId());
@@ -370,7 +388,7 @@ public class RgroupServiceImpl implements RgroupService {
         }
 		
 	}
-
+	
 	@Override
 	public List<RgroupOrder> queryMyRgroupOrders(long userId,List<Integer> status) {
 		List<ServiceOrder> orders = serviceOrderRepository.findByUserAndStatusAndType(userId,status, ModelConstant.ORDER_TYPE_RGROUP);
@@ -447,6 +465,14 @@ public class RgroupServiceImpl implements RgroupService {
 		if (ModelConstant.RGROUP_STAUS_FINISH == rule.getGroupStatus()) {
 			rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERING);	//将状态改为发货中
 			cacheableService.save(rule);
+		}
+		
+		List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+		for (RgroupAreaItem rgroupAreaItem : areaList) {
+			if (ModelConstant.RGROUP_STAUS_FINISH == rgroupAreaItem.getGroupStatus()) {
+				rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERING);	//将状态改为发货中
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+			}
 		}
 		
 		while(!isSuccess && retryTimes < 3) {

@@ -34,6 +34,7 @@ public class Address  extends BaseModel{
 	private String userName;
 	private String receiveName;
 	private String detailAddress;
+	private String roomAddress;	//detailAddress的缩写，简单的楼号+室号，比如5号101
 	private String tel;
 	private boolean main;//是否是默认地址
 	private boolean bind;	//是否是绑定过的房屋。只要绑定过一次，这个值就是true，代表是servplat存在的房子，可以做报修服务
@@ -210,5 +211,15 @@ public class Address  extends BaseModel{
 	public void setCellId(long cellId) {
 		this.cellId = cellId;
 	}
+
+	public String getRoomAddress() {
+		return roomAddress;
+	}
+
+	public void setRoomAddress(String roomAddress) {
+		this.roomAddress = roomAddress;
+	}
+	
+	
 	
 }

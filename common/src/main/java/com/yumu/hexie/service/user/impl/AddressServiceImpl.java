@@ -194,8 +194,9 @@ public class AddressServiceImpl implements AddressService {
 		}
         address.setXiaoquAddress(xiaoquAddress);
         
-        String detailAddress = addressReq.getDetailAddress();
-        address.setDetailAddress(detailAddress);
+        String detailAddress = addressReq.getDetailAddress();	//这里detailAddress是楼号+室号的缩写
+        address.setDetailAddress(xiaoquAddress + detailAddress);
+        address.setRoomAddress(detailAddress);
         address.setUserName(addressReq.getReceiveName());
         List<Address> addrs = addressRepository.findAllByUserId(address.getUserId());
         if(getDefaultAddr(addrs) == null) {
