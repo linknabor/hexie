@@ -11,6 +11,7 @@ public class RuleDistribution extends Distribution{
 	private static final long serialVersionUID = 4808669460780339640L;
 
 	private long ruleId;
+	private long oriRuleId;	//编辑前规则id，编辑时如果删除区域，则把ruleid置0，将oriRuleId赋原来ruleId的值
     private long ruleCloseTime;
     
 
@@ -99,6 +100,14 @@ public class RuleDistribution extends Distribution{
 	}
 	public void setSortNo(int sortNo) {
 		this.sortNo = sortNo;
+	}
+
+	public long getOriRuleId() {
+		return oriRuleId;
+	}
+
+	public void setOriRuleId(long oriRuleId) {
+		this.oriRuleId = oriRuleId;
 	}
     
 }

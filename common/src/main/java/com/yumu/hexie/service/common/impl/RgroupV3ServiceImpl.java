@@ -358,10 +358,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			/*3.保存product end */
 			
 			/*4.保存rgroupAreaItem 20220926支持多小区 start*/
-			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByOriRuleId(rule.getId());
+			Map<Long, RgroupAreaItem> areaMap =new HashMap<>();
 			if (areaList != null && areaList.size() > 0) {
 				for (RgroupAreaItem areaItem : areaList) {
-					rgroupAreaItemRepository.deleteById(areaItem.getId());
+					areaMap.put(areaItem.getRegionId(), areaItem);
+					areaItem.setRuleId(0l);
+					rgroupAreaItemRepository.save(areaItem);
 				}
 			}
 			List<Sect> sectList = new ArrayList<>();
@@ -369,9 +372,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			for (int i = 0; i < rgroupVo.getRegions().length; i++) {
 				
 				RegionVo regionVo = rgroupVo.getRegions()[i];
-				RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
-				rgroupAreaItem.setRegionId(regionVo.getId());
-				rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
+				RgroupAreaItem rgroupAreaItem = areaMap.get(regionVo.getId());
+				if (rgroupAreaItem == null) {
+					rgroupAreaItem = new RgroupAreaItem();
+					rgroupAreaItem.setRegionId(regionVo.getId());
+					rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
+				}
+				
 				if (ModelConstant.RULE_STATUS_ON == rule.getStatus()) {
 					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
 				}else {
@@ -379,6 +386,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				}
 				long ruleCloseTime = rule.getEndDate().getTime();
 				rgroupAreaItem.setRuleId(rule.getId());
+				rgroupAreaItem.setOriRuleId(rule.getId());
 				rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
 				rgroupAreaItem.setSortNo(10);	
 				rgroupAreaItem.setRuleName(rule.getName());
@@ -387,6 +395,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					miniNum = Integer.valueOf(regionVo.getMiniNum());
 				}
 				rgroupAreaItem.setGroupMinNum(miniNum);
+				rgroupAreaItem.setGroupStatus(ModelConstant.GROUP_STAUS_GROUPING);
 				rgroupAreaItem.setRemark(regionVo.getRemark());
 				rgroupAreaItemRepository.save(rgroupAreaItem);
 				
