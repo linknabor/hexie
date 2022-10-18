@@ -34,6 +34,7 @@ import com.yumu.hexie.vo.OwnerGroupsVO;
 import com.yumu.hexie.vo.RefundVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.RegionVo;
+import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 
@@ -351,6 +352,36 @@ public class GroupMngController extends BaseController {
     @RequestMapping(value = "/outside/groupOwenrs", method = RequestMethod.POST)
     public CommonResponse<Object> groupOwners(@RequestBody QueryGroupOwnerReq queryGroupOwnerReq) {
         return groupMngService.getGroupOwners(queryGroupOwnerReq);
+    }
+    
+    /**
+     * 后台更新团长费率
+     * @param outSidProductDepotReq
+     * @return
+     */
+    @RequestMapping(value = "/outside/feeRate/update", method = RequestMethod.POST)
+    public CommonResponse<Object> updateOwnerFeeRate(@RequestBody RgroupOwnerVO rgroupOwnerVO) {
+        return groupMngService.updateOwnerFeeRate(rgroupOwnerVO);
+    }
+    
+    /**
+     * 查询团长名下的团购信息
+     *@deprecated
+     * @param user
+     * @param groupId
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/outside/ownerGroups", method = RequestMethod.GET)
+    public BaseResult<OwnerGroupsVO> queryOutsideGroupsByOwner(@RequestParam String ownerId, @RequestParam (required = false) String ruleId) {
+        User user = new User();
+        user.setId(Long.valueOf(ownerId));
+    	List<RgroupVO> groupList = groupMngService.queryGroupsByOwner(user);
+        List<RegionVo> regionList = groupMngService.queryGroupRegionsByOwner(user, ruleId);
+        OwnerGroupsVO ownerGroupsVO = new OwnerGroupsVO();
+        ownerGroupsVO.setGroupList(groupList);
+        ownerGroupsVO.setRegionList(regionList);
+        return BaseResult.successResult(ownerGroupsVO);
     }
     
     /**

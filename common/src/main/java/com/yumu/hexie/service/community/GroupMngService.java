@@ -17,6 +17,7 @@ import com.yumu.hexie.model.market.RefundRecord;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.RegionVo;
+import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 
 public interface GroupMngService {
     //查询团购列表
@@ -87,5 +88,7 @@ public interface GroupMngService {
 	List<RegionVo> queryGroupRegionsByOwner(User user, String ruleId);
 
 	CommonResponse<Object> getGroupOwners(QueryGroupOwnerReq queryGroupOwnerReq);
+
+	CommonResponse<Object> updateOwnerFeeRate(RgroupOwnerVO rgroupOwnerVO);
 
 }

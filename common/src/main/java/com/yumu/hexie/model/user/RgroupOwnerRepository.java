@@ -13,7 +13,7 @@ public interface RgroupOwnerRepository extends JpaRepository<RgroupOwner, Long> 
 	
 	RgroupOwner findById(long id);
 	
-	@Query(value = "select * from rgroupOwner "
+	@Query(value = "select id, userId, name, tel, createDate, attendees, members, feeRate, headImgUrl from rgroupOwner "
 			+ "where id > 0 "
 			+ "and if(?1 > 0, id = ?1, 1 = 1) "
 			+ "and if(?2!='', tel like CONCAT('%',?2,'%'), 1 = 1 ) "
@@ -24,5 +24,5 @@ public interface RgroupOwnerRepository extends JpaRepository<RgroupOwner, Long> 
 				+ "and if(?2!='', tel like CONCAT('%',?2,'%'), 1 = 1 ) "
 				+ "and if(?3!='', name like CONCAT('%', ?3, '%'), 1 = 1 ) " 
 			, nativeQuery = true )
-	Page<RgroupOwner> findByUserIdAndTelLikeAndName(long ownerId, String tel, String name, Pageable pageable);
+	Page<Object[]> findByUserIdAndTelLikeAndName(long ownerId, String tel, String name, Pageable pageable);
 }

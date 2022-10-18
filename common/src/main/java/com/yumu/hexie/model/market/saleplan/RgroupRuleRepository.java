@@ -162,6 +162,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "where 1 = 1 "
 			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
 			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3>0, a.ownerId = ?3, 1=1) "
 			+ "group by a.id "
 			, countQuery = "select count(1) from rgrouprule a "
 			+ "join ProductRule b on a.id = b.ruleId "
@@ -169,9 +170,10 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "where 1 = 1 "
 			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
 			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3>0, a.ownerId = ?3, 1=1) "
 			+ "group by a.id "
 			, nativeQuery = true)
-	Page<Object[]> queryGroupByOutSid(String name, String ownerName, Pageable pageable);
+	Page<Object[]> queryGroupByOutSid(String name, String ownerName, long ownerId, Pageable pageable);
 	
 	
 	/**
