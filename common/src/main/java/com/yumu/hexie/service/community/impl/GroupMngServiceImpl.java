@@ -26,6 +26,7 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
@@ -36,6 +37,7 @@ import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
+import com.yumu.hexie.integration.community.resp.GroupOwnerVO;
 import com.yumu.hexie.integration.community.resp.GroupProductSumVo;
 import com.yumu.hexie.integration.community.resp.GroupSumResp;
 import com.yumu.hexie.integration.community.resp.OutSidDepotResp;
@@ -68,6 +70,7 @@ import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.RegionVo;
+import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 import com.yumu.hexie.vo.RgroupVO.Thumbnail;
 
 /**
@@ -345,7 +348,8 @@ public class GroupMngServiceImpl implements GroupMngService {
             Sort sort = Sort.by(orderList);
 
             Pageable pageable = PageRequest.of(outSidProductDepotReq.getCurrentPage(), outSidProductDepotReq.getPageSize(), sort);
-            Page<Object[]> page = rgroupRuleRepository.queryGroupByOutSid(outSidProductDepotReq.getProductName(), outSidProductDepotReq.getOwnerName(), pageable);
+            Page<Object[]> page = rgroupRuleRepository.queryGroupByOutSid(outSidProductDepotReq.getProductName(), 
+            		outSidProductDepotReq.getOwnerName(), outSidProductDepotReq.getOwnerId(),  pageable);
             List<OutSidRelateGroupResp> list = ObjectToBeanUtils.objectToBean(page.getContent(), OutSidRelateGroupResp.class);
 
             for(OutSidRelateGroupResp resp : list) {
@@ -407,7 +411,7 @@ public class GroupMngServiceImpl implements GroupMngService {
     }
     
     /**
-     * 差选团长信息
+     * 查询团长信息
      * @param queryGroupOwnerReq
      * @return
      */
@@ -417,7 +421,7 @@ public class GroupMngServiceImpl implements GroupMngService {
     	logger.info("getGroupOwners, queryGroupOwnerReq : " + queryGroupOwnerReq);
     	
     	CommonResponse<Object> commonResponse = new CommonResponse<>();
-    	QueryListDTO<List<RgroupOwner>> queryListDTO = null;
+    	QueryListDTO<List<GroupOwnerVO>> queryListDTO = null;
 		try {
 			List<Sort.Order> sortList = new ArrayList<>();
 			Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
@@ -425,8 +429,9 @@ public class GroupMngServiceImpl implements GroupMngService {
 			Sort sort = Sort.by(sortList);
 			Pageable pageable = PageRequest.of(queryGroupOwnerReq.getCurrentPage(), queryGroupOwnerReq.getPageSize(), sort);
 			
-			Page<RgroupOwner> page = rgroupOwnerRepository.findByUserIdAndTelLikeAndName(queryGroupOwnerReq.getId(), queryGroupOwnerReq.getTel(), queryGroupOwnerReq.getName(), pageable);
-			List<RgroupOwner> list = page.getContent();
+			Page<Object[]> page = rgroupOwnerRepository.findByUserIdAndTelLikeAndName(queryGroupOwnerReq.getId(), queryGroupOwnerReq.getTel(), queryGroupOwnerReq.getName(), pageable);
+			
+			List<GroupOwnerVO> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOwnerVO.class);
 			
 			queryListDTO = new QueryListDTO<>();
 			queryListDTO.setContent(list);
@@ -438,6 +443,36 @@ public class GroupMngServiceImpl implements GroupMngService {
 			commonResponse.setErrMsg(e.getMessage());
 		}
         commonResponse.setData(queryListDTO);
+        commonResponse.setResult("00");
+        return commonResponse;
+        
+    }
+    
+    /**
+     * 更新团长费率
+     * @param queryGroupOwnerReq
+     * @return
+     */
+    @Override
+    public CommonResponse<Object> updateOwnerFeeRate(RgroupOwnerVO rgroupOwnerVO) {
+    	
+    	logger.info("updateOwnerFeeRate, rgroupOwnerVO : " + rgroupOwnerVO);
+    	Assert.isTrue(rgroupOwnerVO.getOwnerId() > 0, "团长id不能为空。");
+    	Assert.hasText(rgroupOwnerVO.getConsultRate(), "费率不能为空。");
+    	
+    	CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(rgroupOwnerVO.getOwnerId());
+			if (rgroupOwner == null) {
+				throw new BizValidateException("未查询到团长信息。 userId : " + rgroupOwnerVO.getOwnerId());
+			}
+			rgroupOwner.setFeeRate(rgroupOwnerVO.getConsultRate());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
+        commonResponse.setData(Constants.SERVICE_SUCCESS);
         commonResponse.setResult("00");
         return commonResponse;
         
