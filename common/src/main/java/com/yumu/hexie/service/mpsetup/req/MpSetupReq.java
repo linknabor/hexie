@@ -29,6 +29,7 @@ public class MpSetupReq implements Serializable {
 	private String []templateName;
 	@JsonProperty("template_id")
 	private String []templateId;
+	private String edit;
 	
 	public String getAppid() {
 		return appid;
@@ -90,12 +91,18 @@ public class MpSetupReq implements Serializable {
 	public void setTemplateId(String[] templateId) {
 		this.templateId = templateId;
 	}
+	public String getEdit() {
+		return edit;
+	}
+	public void setEdit(String edit) {
+		this.edit = edit;
+	}
 	@Override
 	public String toString() {
 		return "MpSetupReq [cspName=" + cspName + ", appid=" + appid + ", appName=" + appName + ", defaultSign="
 				+ defaultSign + ", abbr=" + abbr + ", appMenu=" + Arrays.toString(appMenu) + ", appLogo=" + appLogo
 				+ ", remark=" + remark + ", templateName=" + Arrays.toString(templateName) + ", templateId="
-				+ Arrays.toString(templateId) + "]";
+				+ Arrays.toString(templateId) + ", edit=" + edit + "]";
 	}
 	
 

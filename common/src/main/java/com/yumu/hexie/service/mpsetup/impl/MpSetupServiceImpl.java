@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.model.msgtemplate.MsgTempalateRepository;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
 import com.yumu.hexie.model.system.SystemConfig;
@@ -31,6 +30,8 @@ import com.yumu.hexie.model.view.QrCode;
 import com.yumu.hexie.model.view.QrCodeRepository;
 import com.yumu.hexie.model.view.WuyePayTabs;
 import com.yumu.hexie.model.view.WuyePayTabsRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.mpsetup.MpSetupService;
 import com.yumu.hexie.service.mpsetup.req.MpQueryReq;
 import com.yumu.hexie.service.mpsetup.req.MpSetupReq;
@@ -65,6 +66,8 @@ public class MpSetupServiceImpl implements MpSetupService {
 	private PageConfigService pageConfigService;
 	@Autowired
 	private WechatMsgService msgTemplateService;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	private Map<String, String> templateMap;
 	
@@ -89,86 +92,114 @@ public class MpSetupServiceImpl implements MpSetupService {
 		logger.info("mpSetupReq : " + mpSetupReq);
 
 		String appid = mpSetupReq.getAppid().trim();
-		QrCode qrCode = new QrCode();
-		qrCode.setFromSys(appid);
+		String accessToken = systemConfigService.queryWXAToken(appid);
+		if (StringUtils.isEmpty(accessToken)) {
+			throw new BizValidateException("请确认当前公众号是否已经授权或者appid是否正确，appid : " + appid);
+		}
+		String edit = mpSetupReq.getEdit();
+		QrCode qrCode = qrCodeRepository.findByFromSys(appid);
+		if (qrCode == null) {
+			qrCode = new QrCode();
+			qrCode.setFromSys(appid);
+		}
 		qrCode.setQrLink(mpSetupReq.getAppLogo().trim());
 		qrCodeRepository.save(qrCode);
 		
-		Map<String, Integer> bgImages = new HashMap<>();
-		bgImages.put("http://img.e-shequ.cn/Ft7OzEjBMt5Kq3FcMroB-lx6lwOt", 1);
-		bgImages.put("http://img.e-shequ.cn/Fq9i4DHCOz0hh5qOuFPO6ldfggPA", 3);
-		bgImages.put("http://img.e-shequ.cn/Ftq1onFgQLUQSOutUMycNftyktii", 4);
-		bgImages.put("http://img.e-shequ.cn/FocY5yjN1xKzMAjTrr-2q8qUFDp2", 5);
-		bgImages.put("http://img.e-shequ.cn/FjPqJk1IZmvw6syJM4yrKmjQbnfF", 6);
-		
-		Iterator<Map.Entry<String, Integer>> it = bgImages.entrySet().iterator();
-		while(it.hasNext()) {
-			Map.Entry<String, Integer> entry = it.next();
-			String imgUrl = entry.getKey();
-			Integer type = entry.getValue();
+		if (!"1".equals(edit)) {
+			Map<String, Integer> bgImages = new HashMap<>();
+			bgImages.put("http://img.e-shequ.cn/Ft7OzEjBMt5Kq3FcMroB-lx6lwOt", 1);
+			bgImages.put("http://img.e-shequ.cn/Fq9i4DHCOz0hh5qOuFPO6ldfggPA", 3);
+			bgImages.put("http://img.e-shequ.cn/Ftq1onFgQLUQSOutUMycNftyktii", 4);
+			bgImages.put("http://img.e-shequ.cn/FocY5yjN1xKzMAjTrr-2q8qUFDp2", 5);
+			bgImages.put("http://img.e-shequ.cn/FjPqJk1IZmvw6syJM4yrKmjQbnfF", 6);
 			
-			BgImage bgImage = new BgImage();
-			bgImage.setAppId(appid);
-			bgImage.setImgUrl(imgUrl);
-			bgImage.setType(type);
-			bgImageRepository.save(bgImage);
+			Iterator<Map.Entry<String, Integer>> it = bgImages.entrySet().iterator();
+			while(it.hasNext()) {
+				Map.Entry<String, Integer> entry = it.next();
+				String imgUrl = entry.getKey();
+				Integer type = entry.getValue();
+				
+				BgImage bgImage = new BgImage();
+				bgImage.setAppId(appid);
+				bgImage.setImgUrl(imgUrl);
+				bgImage.setType(type);
+				bgImageRepository.save(bgImage);
+				
+			}
+			BottomIcon bottomIcon = new BottomIcon();
+			bottomIcon.setAppId(appid);
+			bottomIcon.setIconClass("footer_logo footer_fuwu_liangyou");
+			bottomIcon.setIconLink("https://www.e-shequ.cn/weixin/wuye/index.html?oriApp=" + appid);
+			bottomIcon.setIconName("社区");
+			bottomIcon.setSort(1);
+			bottomIconRepository.save(bottomIcon);
 			
+			bottomIcon = new BottomIcon();
+			bottomIcon.setAppId(appid);
+			bottomIcon.setIconClass("footer_logo footer_person_liangyou");
+			bottomIcon.setIconLink("https://www.e-shequ.cn/weixin/person/index.html?oriApp=" + appid);
+			bottomIcon.setIconName("个人中心");
+			bottomIcon.setSort(3);
+			bottomIconRepository.save(bottomIcon);
+			
+			WuyePayTabs wuyePayTabs = new WuyePayTabs();
+			wuyePayTabs.setAppId(appid);
+			wuyePayTabs.setName("查询缴费");
+			wuyePayTabs.setSort("0");
+			wuyePayTabs.setValue("d");
+			wuyePayTabsRepository.save(wuyePayTabs);
+			
+			wuyePayTabs = new WuyePayTabs();
+			wuyePayTabs.setAppId(appid);
+			wuyePayTabs.setName("我的账单");
+			wuyePayTabs.setSort("1");
+			wuyePayTabs.setValue("b");
+			wuyePayTabsRepository.save(wuyePayTabs);
+			
+			wuyePayTabs = new WuyePayTabs();
+			wuyePayTabs.setAppId(appid);
+			wuyePayTabs.setName("扫描账单");
+			wuyePayTabs.setSort("2");
+			wuyePayTabs.setValue("a");
+			wuyePayTabsRepository.save(wuyePayTabs);
 		}
-		BottomIcon bottomIcon = new BottomIcon();
-		bottomIcon.setAppId(appid);
-		bottomIcon.setIconClass("footer_logo footer_fuwu_liangyou");
-		bottomIcon.setIconLink("https://www.e-shequ.cn/weixin/wuye/index.html?oriApp=" + appid);
-		bottomIcon.setIconName("社区");
-		bottomIcon.setSort(1);
-		bottomIconRepository.save(bottomIcon);
-		
-		bottomIcon = new BottomIcon();
-		bottomIcon.setAppId(appid);
-		bottomIcon.setIconClass("footer_logo footer_person_liangyou");
-		bottomIcon.setIconLink("https://www.e-shequ.cn/weixin/person/index.html?oriApp=" + appid);
-		bottomIcon.setIconName("个人中心");
-		bottomIcon.setSort(3);
-		bottomIconRepository.save(bottomIcon);
-		
-		WuyePayTabs wuyePayTabs = new WuyePayTabs();
-		wuyePayTabs.setAppId(appid);
-		wuyePayTabs.setName("查询缴费");
-		wuyePayTabs.setSort("0");
-		wuyePayTabs.setValue("d");
-		wuyePayTabsRepository.save(wuyePayTabs);
-		
-		wuyePayTabs = new WuyePayTabs();
-		wuyePayTabs.setAppId(appid);
-		wuyePayTabs.setName("我的账单");
-		wuyePayTabs.setSort("1");
-		wuyePayTabs.setValue("b");
-		wuyePayTabsRepository.save(wuyePayTabs);
-		
-		wuyePayTabs = new WuyePayTabs();
-		wuyePayTabs.setAppId(appid);
-		wuyePayTabs.setName("扫描账单");
-		wuyePayTabs.setSort("2");
-		wuyePayTabs.setValue("a");
-		wuyePayTabsRepository.save(wuyePayTabs);
 		
 		String defaultSign = mpSetupReq.getDefaultSign().trim();
 		String signKey = "DEFAULT_SIGN_" + appid;
-		SystemConfig systemConfig = new SystemConfig();
-		systemConfig.setSysKey(signKey);
+		List<SystemConfig> configs = systemConfigRepository.findAllBySysKey(signKey);
+		SystemConfig systemConfig = null;
+		if (configs == null || configs.isEmpty()) {
+			systemConfig = new SystemConfig();
+			systemConfig.setSysKey(signKey);
+		} else {
+			systemConfig = configs.get(0);
+		}
 		systemConfig.setSysValue(defaultSign);
 		systemConfigRepository.save(systemConfig);
 		
 		String abbr = mpSetupReq.getAbbr().trim();
+		if (!StringUtils.isEmpty(abbr)) {
+			abbr = abbr.replaceAll("_", "");
+		}
 		abbr = "_" + abbr;
 		String abbrKey = "APP_SYS_" + appid;
-		systemConfig = new SystemConfig();
-		systemConfig.setSysKey(abbrKey);
+		configs = systemConfigRepository.findAllBySysKey(abbrKey);
+		if (configs == null || configs.isEmpty()) {
+			systemConfig = new SystemConfig();
+			systemConfig.setSysKey(abbrKey);
+		} else {
+			systemConfig = configs.get(0);
+		}
 		systemConfig.setSysValue(abbr);
 		systemConfigRepository.save(systemConfig);
 		
 		String[]templateIds = mpSetupReq.getTemplateId();
 		String[]templateNames = mpSetupReq.getTemplateName();
 		
+		List<MsgTemplate> templateList = msgTempalateRepository.findByAppidAndTypeAndBizType(appid, 0, 0);
+		if (templateList != null && !templateList.isEmpty()) {
+			msgTempalateRepository.deleteAll(templateList);
+		}
 		for (int i = 0; i < templateIds.length; i++) {
 			String templateName = templateNames[i].trim();
 			String templateId = templateIds[i].trim();
@@ -187,7 +218,10 @@ public class MpSetupServiceImpl implements MpSetupService {
 			msgTemplate.setType(0);
 			msgTempalateRepository.save(msgTemplate);
 		}
-		
+		List<Menu> menuList = menuRepository.findByAppidAndType(appid, "0");
+		if (menuList!=null && !menuList.isEmpty()) {
+			menuRepository.deleteAll(menuList);
+		}
 		String[]menus = mpSetupReq.getAppMenu();
 		for (int i = 0; i < menus.length; i++) {
 			String menuCode = menus[i].trim();
@@ -300,12 +334,13 @@ public class MpSetupServiceImpl implements MpSetupService {
 		
 		paramService.updateSysParam();
 		pageConfigService.updatePageConfig();
+		pageConfigService.updateMenuConfig();
 		msgTemplateService.refreshCache();
 		
 	}
 	
 	@Override
-	public String queryMp(MpQueryReq mpQueryReq) throws Exception {
+	public MpQueryResp queryMp(MpQueryReq mpQueryReq) throws Exception {
 		
 		logger.info("mpQueryReq : " + mpQueryReq);
 		String appid = mpQueryReq.getAppid().trim();
@@ -315,6 +350,7 @@ public class MpSetupServiceImpl implements MpSetupService {
 		QrCode qrCode = qrCodeRepository.findByFromSys(appid);
 		String appLogo = qrCode.getQrLink();
 		MpQueryResp mpQueryResp = new MpQueryResp();
+		mpQueryResp.setAppid(appid);
 		mpQueryResp.setAppLogo(appLogo);
 		
 		String signKey = "DEFAULT_SIGN_" + appid;
@@ -346,8 +382,7 @@ public class MpSetupServiceImpl implements MpSetupService {
 		}
 		mpQueryResp.setTemplates(templateVos);
 		
-		String json = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(mpQueryResp);
-		return json;
+		return mpQueryResp;
 	}
 
 }

@@ -11,6 +11,7 @@ import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.service.mpsetup.MpSetupService;
 import com.yumu.hexie.service.mpsetup.req.MpQueryReq;
 import com.yumu.hexie.service.mpsetup.req.MpSetupReq;
+import com.yumu.hexie.service.mpsetup.resp.MpQueryResp;
 import com.yumu.hexie.web.BaseController;
 
 @RestController("mpSetupController")
@@ -36,13 +37,13 @@ public class MpSetupController extends BaseController {
 		return commonResponse;
     }
 	
-	@RequestMapping(value = "/wechatmp/query", method = RequestMethod.GET)
+	@RequestMapping(value = "/wechatmp/query", method = RequestMethod.POST)
 	public CommonResponse<Object> getMp(@RequestBody MpQueryReq mpQueryReq) throws Exception {
 		
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
 		try {
-			String json = mpSetupService.queryMp(mpQueryReq);
-			commonResponse.setData(json);
+			MpQueryResp mpQueryResp = mpSetupService.queryMp(mpQueryReq);
+			commonResponse.setData(mpQueryResp);
 			commonResponse.setErrMsg("");
 			commonResponse.setResult("00");
 		} catch (Exception e) {
