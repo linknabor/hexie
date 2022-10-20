@@ -47,5 +47,6 @@ public interface PageConfigService {
 
 	List<GroupMenuInfo> getOrgMenu(String orgRoleId, String orgType);
 
+	void updateMenuConfig();
 
 }
