@@ -63,6 +63,7 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.RgroupAreaRegionMapper;
 import com.yumu.hexie.vo.RgroupOrderRecordVO;
 import com.yumu.hexie.vo.RgroupRecordsVO;
+import com.yumu.hexie.vo.RgroupSubscribeVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.DescriptionMore;
 import com.yumu.hexie.vo.RgroupVO.ProductVO;
@@ -1364,6 +1365,50 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		if (ownerId > 0) {
 			stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + ownerId);
 		}
+		
+	}
+	
+	@Override
+	public void subscribe(User user, RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		String key = "";
+		switch (rgroupSubscribeVO.getType()) {
+		case 0:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_GROUP;
+			break;
+		case 1:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
+			break;
+		case 2:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_SECT;
+			break;
+		default:
+			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
+		}
+		key += rgroupSubscribeVO.getInfoId() + ":" + user.getId();	//这里用userId，因为公众号openid可能此时还没有
+		stringRedisTemplate.opsForValue().setIfAbsent(key, String.valueOf(System.currentTimeMillis()));
+	}
+	
+	@Override
+	public void unsubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		String key = "";
+		switch (rgroupSubscribeVO.getType()) {
+		case 0:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_GROUP;
+			break;
+		case 1:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
+			break;
+		case 2:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_SECT;
+			break;
+		default:
+			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
+		}
+		key += rgroupSubscribeVO.getInfoId()  + ":" + user.getId(); ;
+		
+		stringRedisTemplate.delete(key);
 		
 	}
 }

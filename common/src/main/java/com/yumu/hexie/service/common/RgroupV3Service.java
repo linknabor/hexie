@@ -7,6 +7,7 @@ import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.vo.RgroupRecordsVO;
+import com.yumu.hexie.vo.RgroupSubscribeVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 
@@ -36,6 +37,10 @@ public interface RgroupV3Service {
 	List<RgroupVO> getLeadGroups(String groupLeaderId, String title, int currentPage) throws Exception;
 
 	void visitView(User user, String ruleIdStr, String ownerIdStr);
+
+	void subscribe(User user, RgroupSubscribeVO rgroupSubscribeVO);
+
+	void unsubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO);
 
 	
 }

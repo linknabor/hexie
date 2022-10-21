@@ -541,5 +541,7 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_SECT_TITLE_SEARCH = "rgroup:search:sect:title:";	//后面接user的miniOpenid
 	public static final String KEY_RGROUP_LEADER_TITLE_SEARCH = "rgroup:search:leader:title:";	//后面接user的miniOpenid
 	
-
+	public static final String KEY_RGROUP_SUBSCRIBE_GROUP = "rgroup:subscribe:group:";	//后面接团购id
+	public static final String KEY_RGROUP_SUBSCRIBE_LEADER = "rgroup:subscribe:leader:";	//后面接团长ownerId
+	public static final String KEY_RGROUP_SUBSCRIBE_SECT = "rgroup:subscribe:sect:";	//后面接小区id
 }		

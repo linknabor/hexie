@@ -34,6 +34,7 @@ import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
 import com.yumu.hexie.service.search.SearchService;
 import com.yumu.hexie.vo.RgroupRecordsVO;
+import com.yumu.hexie.vo.RgroupSubscribeVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -322,6 +323,12 @@ public class RgroupController extends BaseController{
         return new BaseResult<Object>().success(rgroupV3Service.getLeadGroups(leaderId, title, page));
     }
 	
+	/**
+	 * 团购访问统计
+	 * @param user
+	 * @param map
+	 * @return
+	 */
 	@RequestMapping(value = "/rgroups/v3/visitView", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<Object> visitView(@ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> map) {
@@ -330,4 +337,31 @@ public class RgroupController extends BaseController{
 		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
     }
 	
+	/**
+	 * 用户订阅
+	 * @param user
+	 * @param rgroupSubscribeVO
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/v3/subscribe", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> subscribe(@ModelAttribute(Constants.USER)User user, @RequestBody RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		rgroupV3Service.subscribe(user, rgroupSubscribeVO);
+		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 用户取消订阅
+	 * @param user
+	 * @param rgroupSubscribeVO
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/v3/unsubscribe", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> unsubscribe(@ModelAttribute(Constants.USER)User user, @RequestBody RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		rgroupV3Service.unsubscribe(user, rgroupSubscribeVO);
+		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
+    }
 }

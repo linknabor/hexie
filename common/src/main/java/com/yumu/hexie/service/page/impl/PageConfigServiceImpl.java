@@ -224,6 +224,14 @@ public class PageConfigServiceImpl implements PageConfigService {
 	}
 	
 	@Override
+	@CacheEvict(cacheNames = {ModelConstant.KEY_TYPE_MENU_SECT, ModelConstant.KEY_TYPE_MENU_CSP, ModelConstant.KEY_TYPE_MENU_DEFAULT, 
+			ModelConstant.KEY_TYPE_MENU_APP_BINDED}
+			, allEntries = true)
+	public void updateMenuConfig() {
+
+	}
+	
+	@Override
 	public String getSwtichSectTips(User user, String page) {
 		
 		String tips = "";
