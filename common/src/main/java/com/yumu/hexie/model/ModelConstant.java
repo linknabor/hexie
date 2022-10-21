@@ -543,5 +543,7 @@ public class ModelConstant {
 	
 	public static final String KEY_RGROUP_SUBSCRIBE_GROUP = "rgroup:subscribe:group:";	//后面接团购id
 	public static final String KEY_RGROUP_SUBSCRIBE_LEADER = "rgroup:subscribe:leader:";	//后面接团长ownerId
-	public static final String KEY_RGROUP_SUBSCRIBE_SECT = "rgroup:subscribe:sect:";	//后面接小区id
+	public static final String KEY_RGROUP_SUBSCRIBE_REGION = "rgroup:subscribe:region:";	//后面接regionId
+	
+	public static final String KEY_RGROUP_PUB_QUEUE = "queue:rgroup:pub";	//团购发布
 }		

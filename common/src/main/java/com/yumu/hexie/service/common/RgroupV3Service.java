@@ -42,5 +42,7 @@ public interface RgroupV3Service {
 
 	void unsubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO);
 
+	void sendPubMsg(String ruleId);
+
 	
 }

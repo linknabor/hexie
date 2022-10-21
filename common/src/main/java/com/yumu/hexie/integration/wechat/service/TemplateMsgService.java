@@ -51,6 +51,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
+import com.yumu.hexie.vo.RgroupVO;
 
 @Component
 public class TemplateMsgService {
@@ -941,7 +942,7 @@ public class TemplateMsgService {
 	}
 	
 	/**
-	 * 电商支付成功通知
+	 * 团购到货通知
 	 * @param user
 	 * @param serviceOrder
 	 * @param accessToken
@@ -1004,6 +1005,88 @@ public class TemplateMsgService {
         msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE, sendUser.getAppId()));
         String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_GROUP_SUCCESS);
         String url = msgUrl + noticeRgroupSuccess.getRuleId();
+
+        MiniprogramVO miniVo = new MiniprogramVO();
+        miniVo.setAppid(miniprogramAppid);
+        miniVo.setPagepath(url);
+        msg.setMiniprogram(miniVo);
+        msg.setUrl(url);
+        msg.setTouser(sendUser.getOpenid());
+        sendMsg(msg, accessToken);
+
+    }
+    
+    /**
+     * 成团团长发货提醒
+     *
+     * @param sendUser
+     * @param noticeServiceOperator
+     * @param accessToken
+     */
+    public void sendGroupLeaderSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
+
+        String title = "您关注的团长：" + rgroupVO.getRgroupOwner().getOwnerName() + "发布了新团购";
+        CommonVO vo = new CommonVO();
+        vo.setFirst(new TemplateItem(title));
+        String desc = rgroupVO.getDescription();
+        if (desc.length() > 10) {
+        	desc = desc.substring(0, 10) + "...";
+		}
+        vo.setKeyword1(new TemplateItem(desc));
+        vo.setKeyword2(new TemplateItem(rgroupVO.getRgroupOwner().getOwnerName()));
+        vo.setKeyword3(new TemplateItem(rgroupVO.getStartDate()));
+        vo.setRemark(new TemplateItem("该消息仅推送给已订阅用户，如有打扰请点击链接进入跟团界面，取消对该团长的订阅即可。"));
+
+        TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+        msg.setData(vo);
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE, sendUser.getAppId())); //TODO 更换模板id
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_GROUP_SUCCESS);
+        String url = msgUrl + rgroupVO.getRuleId();
+
+        MiniprogramVO miniVo = new MiniprogramVO();
+        miniVo.setAppid(miniprogramAppid);
+        miniVo.setPagepath(url);
+        msg.setMiniprogram(miniVo);
+        msg.setUrl(url);
+        msg.setTouser(sendUser.getOpenid());
+        sendMsg(msg, accessToken);
+
+    }
+    
+
+    /**
+     * 成团团长发货提醒
+     *
+     * @param sendUser
+     * @param noticeServiceOperator
+     * @param accessToken
+     */
+    public void sendGroupRegionSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
+
+        String title = "您关注的小区：" + rgroupVO.getRegion().getName() + "发布了新的小区团，一大波人正在跟团";
+        CommonVO vo = new CommonVO();
+        vo.setFirst(new TemplateItem(title));
+        
+        String desc = rgroupVO.getDescription();
+        if (desc.length() > 24) {
+        	desc = desc.substring(0, 24) + "...";
+		}
+        
+        vo.setKeyword1(new TemplateItem(desc));
+        vo.setKeyword2(new TemplateItem(rgroupVO.getStartDate()));
+        vo.setKeyword3(new TemplateItem(rgroupVO.getRegion().getName()));
+        String productName = rgroupVO.getProductList()[0].getName();
+        if (productName.length() > 12) {
+        	productName = productName.substring(0, 12) + "...";
+		}
+        vo.setKeyword4(new TemplateItem(productName));
+        vo.setRemark(new TemplateItem("请尽快安排发货，谢谢。"));
+
+        TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+        msg.setData(vo);
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE, sendUser.getAppId()));
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_GROUP_SUCCESS);
+        String url = msgUrl + rgroupVO.getRuleId();
 
         MiniprogramVO miniVo = new MiniprogramVO();
         miniVo.setAppid(miniprogramAppid);
