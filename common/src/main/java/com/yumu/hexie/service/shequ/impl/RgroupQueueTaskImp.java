@@ -43,14 +43,13 @@ public class RgroupQueueTaskImp implements RgroupQueueTask {
 					continue;
 				}
 				String json = stringRedisTemplate.opsForList().leftPop(ModelConstant.KEY_RGROUP_PUB_QUEUE, 30, TimeUnit.SECONDS);
-
 				if (StringUtils.isEmpty(json)) {
 					continue;
 				}
+				Thread.sleep(10000);
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				Map<String, String> map = objectMapper.readValue(json, Map.class);
 				logger.info("strat to consume groupPubPush queue : " + map);
-
 				String ruleId = map.get("ruleId");
 				boolean isSuccess = false;
 				try {
