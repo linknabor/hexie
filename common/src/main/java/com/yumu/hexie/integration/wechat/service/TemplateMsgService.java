@@ -1032,6 +1032,7 @@ public class TemplateMsgService {
         if (desc.length() > 10) {
         	desc = desc.substring(0, 10) + "...";
 		}
+        desc = desc.trim();
         vo.setKeyword1(new TemplateItem(desc));
         vo.setKeyword2(new TemplateItem(rgroupVO.getStartDate()));
         vo.setKeyword3(new TemplateItem(rgroupVO.getRgroupOwner().getOwnerName()));
@@ -1078,6 +1079,7 @@ public class TemplateMsgService {
         if (desc.length() > 24) {
         	desc = desc.substring(0, 24) + "...";
 		}
+        desc = desc.trim();
         
         vo.setKeyword1(new TemplateItem(desc));
         vo.setKeyword2(new TemplateItem(rgroupVO.getStartDate()));
@@ -1088,7 +1090,7 @@ public class TemplateMsgService {
         	productName = "【" + productName + "】正在团购中";
 		}
         vo.setKeyword4(new TemplateItem(productName));
-        vo.setRemark(new TemplateItem("该消息仅推送给已订阅用户，如有打扰请点击链接进入跟团界面，取消对该团长的订阅即可。"));
+        vo.setRemark(new TemplateItem("该消息仅推送给已订阅用户，如有打扰请点击链接进入跟团界面，取消对该小区的订阅即可。"));
 
         TemplateMsg<CommonVO> msg = new TemplateMsg<>();
         msg.setData(vo);
