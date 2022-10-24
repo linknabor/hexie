@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
-import com.yumu.hexie.common.util.RedisUtil;
 import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.GroupOwnerInfo;
@@ -1411,8 +1411,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		default:
 			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
 		}
-		key += rgroupSubscribeVO.getInfoId() + ":" + user.getId();	//这里用userId，因为公众号openid可能此时还没有
-		stringRedisTemplate.opsForValue().setIfAbsent(key, String.valueOf(System.currentTimeMillis()));
+		key += rgroupSubscribeVO.getInfoId();
+		stringRedisTemplate.opsForHash().put(key, String.valueOf(user.getId()), String.valueOf(System.currentTimeMillis()));
+		
 	}
 	
 	@Override
@@ -1432,10 +1433,34 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		default:
 			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
 		}
-		key += rgroupSubscribeVO.getInfoId()  + ":" + user.getId(); ;
+		key += rgroupSubscribeVO.getInfoId();
+		stringRedisTemplate.opsForHash().delete(key, String.valueOf(user.getId()));
 		
-		stringRedisTemplate.delete(key);
+	}
+	
+	@Override
+	public boolean getUserSubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO) {
 		
+		String key = "";
+		switch (rgroupSubscribeVO.getType()) {
+		case 0:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_GROUP;
+			break;
+		case 1:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
+			break;
+		case 2:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION;
+			break;
+		default:
+			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
+		}
+		key += rgroupSubscribeVO.getInfoId();
+		Object object = stringRedisTemplate.opsForHash().get(key, String.valueOf(user.getId()));
+		if (object == null) {
+			return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -1452,39 +1477,54 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		RgroupVO rgroupVO = queryRgroupByRule(ruleId, true);
 		RgroupOwnerVO rgroupOwnerVO = rgroupVO.getRgroupOwner();
 		
-		String leaderKeyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER + rgroupOwnerVO.getOwnerId() + ":" + "*";
-		List<String> leaderSubscribers = RedisUtil.scanKeys(stringRedisTemplate, leaderKeyPattern);
-		logger.info("leaderSubscribers : " + leaderSubscribers);
+		String leaderKeyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER + rgroupOwnerVO.getOwnerId();
+		Map<Object, Object> leaderSuscribeMap = stringRedisTemplate.opsForHash().entries(leaderKeyPattern);
+		logger.info("leaderSuscribeMap : " + leaderSuscribeMap);
 		List<String> sendUserList = new ArrayList<>();
-		for (String userStr : leaderSubscribers) {
-			String userId = userStr.substring(userStr.lastIndexOf(":"), userStr.length());
-			sendUserList.add(userId);
-			
-			User sendUser = userService.getById(Long.valueOf(userId));
-			String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
-			templateMsgService.sendGroupLeaderSubscribe(sendUser, rgroupVO, accessToken);
+		
+		if (leaderSuscribeMap != null && !leaderSuscribeMap.isEmpty()) {
+			Iterator<Map.Entry<Object, Object>> it = leaderSuscribeMap.entrySet().iterator();
+			while(it.hasNext()) {
+				Map.Entry<Object, Object> entry = it.next();
+				String userId = (String) entry.getKey();
+				sendUserList.add(userId);
+				User sendUser = userService.getById(Long.valueOf(userId));
+				String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+				if (StringUtils.isEmpty(accessToken)) {
+					continue;
+				}
+				templateMsgService.sendGroupLeaderSubscribe(sendUser, rgroupVO, accessToken);
+			}
 		}
+		
 		
 		RegionVo[]regions= rgroupVO.getRegions();
 		for (RegionVo regionVo : regions) {
-			String keyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION + regionVo.getId() + ":" + "*";
-			List<String> subscribers = RedisUtil.scanKeys(stringRedisTemplate, keyPattern);
-			logger.info("regionSubscribers : " + subscribers);
-			for (String userStr : subscribers) {
-				String userId = userStr.substring(userStr.lastIndexOf(":"), userStr.length());
-				if (sendUserList.contains(userId)) {
-					continue;
+			String keyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION + regionVo.getId();
+			Map<Object, Object> regionSubscribeMap = stringRedisTemplate.opsForHash().entries(keyPattern);
+			logger.info("regionSubscribeMap : " + regionSubscribeMap);
+			if (regionSubscribeMap != null && !regionSubscribeMap.isEmpty()) {
+				Iterator<Map.Entry<Object, Object>> it = regionSubscribeMap.entrySet().iterator();
+				while(it.hasNext()) {
+					Map.Entry<Object, Object> entry = it.next();
+					String userId = (String) entry.getKey();
+					if (sendUserList.contains(userId)) {
+						continue;
+					}
+					User sendUser = userService.getById(Long.valueOf(userId));
+					String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+					Region region = new Region();
+					BeanUtils.copyProperties(regionVo, region);
+					rgroupVO.setRegion(region);
+					if (StringUtils.isEmpty(accessToken)) {
+						continue;
+					}
+					templateMsgService.sendGroupRegionSubscribe(sendUser, rgroupVO, accessToken);
 				}
-				User sendUser = userService.getById(Long.valueOf(userId));
-				String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
-				Region region = new Region();
-				BeanUtils.copyProperties(regionVo, region);
-				rgroupVO.setRegion(region);
-				templateMsgService.sendGroupRegionSubscribe(sendUser, rgroupVO, accessToken);
+				
 			}
 			
 		}
-		
 		
 	}
 }
