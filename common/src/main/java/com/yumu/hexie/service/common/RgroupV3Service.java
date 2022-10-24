@@ -44,5 +44,6 @@ public interface RgroupV3Service {
 
 	void sendPubMsg(String ruleId);
 
-	
+	boolean getUserSubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO);
+
 }

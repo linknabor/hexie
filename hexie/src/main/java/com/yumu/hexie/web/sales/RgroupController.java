@@ -364,4 +364,18 @@ public class RgroupController extends BaseController{
 		rgroupV3Service.unsubscribe(user, rgroupSubscribeVO);
 		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
     }
+	
+	/**
+	 * 用户订阅
+	 * @param user
+	 * @param rgroupSubscribeVO
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/v3/userSubscribe", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> userSubscribe(@ModelAttribute(Constants.USER)User user, @RequestBody RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		boolean b = rgroupV3Service.getUserSubscribe(user, rgroupSubscribeVO);
+		return new BaseResult<Object>().success(b);
+    }
 }
