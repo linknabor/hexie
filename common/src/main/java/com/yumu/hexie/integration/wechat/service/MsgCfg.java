@@ -62,7 +62,7 @@ public class MsgCfg {
 	public static final String URL_RECEIPT_VIEW_URL = "receiptViewUrl";	//电子收据详情页面
 	public static final String URL_GROUP_SUCCESS = "groupSuccessUrl";
 	public static final String URL_LEADER_GROUP_START = "leaderGroupStartUrl";
-	public static final String URL_REGION_GROUP_START = "sectGroupStartUrl";
+	public static final String URL_REGION_GROUP_START = "regionGroupStartUrl";
 	
 	//订阅消息
 	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";

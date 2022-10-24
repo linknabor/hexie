@@ -53,7 +53,13 @@ public class RgroupQueueTaskImp implements RgroupQueueTask {
 
 				String ruleId = map.get("ruleId");
 				boolean isSuccess = false;
-				rgroupV3Service.sendPubMsg(ruleId);
+				try {
+					rgroupV3Service.sendPubMsg(ruleId);
+					isSuccess = true;
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+					isSuccess = true;
+				}
 				if (!isSuccess) {
 					logger.info("groupPubPush queue consume failed !, repush into the queue. json : " + json);
 					stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_PUB_QUEUE, json);
