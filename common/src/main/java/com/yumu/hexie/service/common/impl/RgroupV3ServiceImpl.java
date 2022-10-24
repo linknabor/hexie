@@ -1493,7 +1493,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				if (StringUtils.isEmpty(accessToken)) {
 					continue;
 				}
-				templateMsgService.sendGroupLeaderSubscribe(sendUser, rgroupVO, accessToken);
+				try {
+					templateMsgService.sendGroupLeaderSubscribe(sendUser, rgroupVO, accessToken);
+				} catch (Exception e) {
+					logger.info(e.getMessage(), e);
+				}
 			}
 		}
 		
@@ -1519,7 +1523,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					if (StringUtils.isEmpty(accessToken)) {
 						continue;
 					}
-					templateMsgService.sendGroupRegionSubscribe(sendUser, rgroupVO, accessToken);
+					try {
+						templateMsgService.sendGroupRegionSubscribe(sendUser, rgroupVO, accessToken);
+					} catch (Exception e) {
+						logger.info(e.getMessage(), e);
+					}
 				}
 				
 			}
