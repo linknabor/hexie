@@ -58,7 +58,6 @@ public class RgroupQueueTaskImp implements RgroupQueueTask {
 					isSuccess = true;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
-					isSuccess = true;
 				}
 				if (!isSuccess) {
 					logger.info("groupPubPush queue consume failed !, repush into the queue. json : " + json);
