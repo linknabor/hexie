@@ -1047,7 +1047,7 @@ public class TemplateMsgService {
         TemplateMsg<CommonVO> msg = new TemplateMsg<>();
         msg.setData(vo);
         msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_START_MESSAGE, sendUser.getAppId())); //TODO 更换模板id
-        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_LEADER_GROUP_START + rgroupVO.getRgroupOwner().getOwnerId());
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_LEADER_GROUP_START) + rgroupVO.getRgroupOwner().getOwnerId();
         String url = msgUrl + rgroupVO.getRuleId();
 
         MiniprogramVO miniVo = new MiniprogramVO();
@@ -1093,7 +1093,7 @@ public class TemplateMsgService {
         TemplateMsg<CommonVO> msg = new TemplateMsg<>();
         msg.setData(vo);
         msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_START_MESSAGE, sendUser.getAppId()));
-        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_REGION_GROUP_START + rgroupVO.getRegion().getId());
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_REGION_GROUP_START ) + rgroupVO.getRegion().getId();
         String url = msgUrl + rgroupVO.getRuleId();
 
         MiniprogramVO miniVo = new MiniprogramVO();
