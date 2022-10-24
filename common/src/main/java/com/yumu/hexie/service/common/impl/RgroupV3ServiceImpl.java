@@ -1454,6 +1454,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		
 		String leaderKeyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER + rgroupOwnerVO.getOwnerId() + ":" + "*";
 		List<String> leaderSubscribers = RedisUtil.scanKeys(stringRedisTemplate, leaderKeyPattern);
+		logger.info("leaderSubscribers : " + leaderSubscribers);
 		List<String> sendUserList = new ArrayList<>();
 		for (String userStr : leaderSubscribers) {
 			String userId = userStr.substring(userStr.lastIndexOf(":"), userStr.length());
@@ -1468,6 +1469,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		for (RegionVo regionVo : regions) {
 			String keyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION + regionVo.getId() + ":" + "*";
 			List<String> subscribers = RedisUtil.scanKeys(stringRedisTemplate, keyPattern);
+			logger.info("regionSubscribers : " + subscribers);
 			for (String userStr : subscribers) {
 				String userId = userStr.substring(userStr.lastIndexOf(":"), userStr.length());
 				if (sendUserList.contains(userId)) {
