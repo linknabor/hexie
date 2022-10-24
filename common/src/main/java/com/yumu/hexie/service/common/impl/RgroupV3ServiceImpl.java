@@ -680,10 +680,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	/**
 	 * 更新团购状态
 	 * @param ruleId
+	 * @throws Exception 
 	 */
 	@Override
 	@Transactional
-	public void updateRgroupStatus(long ruleId, boolean isPub) {
+	public void updateRgroupStatus(long ruleId, boolean isPub) throws Exception {
 		
 		int ruleStatus = ModelConstant.RULE_STATUS_ON;
 		int distributionStatus = ModelConstant.DISTRIBUTION_STATUS_ON;
@@ -710,6 +711,16 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rgroupAreaItem.setStatus(distributionStatus);
 		}
 		rgroupAreaItemRepository.saveAll(itemList);
+		
+		if (isPub) {
+			/*通知订阅*/
+			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
+				Map<String, String> map = new HashMap<>();
+				map.put("ruleId", String.valueOf(rule.getId()));
+				String queue = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(map);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_PUB_QUEUE, queue);
+			}
+		}
 	}
 	
 	/**

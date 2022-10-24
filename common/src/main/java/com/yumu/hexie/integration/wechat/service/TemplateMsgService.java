@@ -1033,14 +1033,21 @@ public class TemplateMsgService {
         	desc = desc.substring(0, 10) + "...";
 		}
         vo.setKeyword1(new TemplateItem(desc));
-        vo.setKeyword2(new TemplateItem(rgroupVO.getRgroupOwner().getOwnerName()));
-        vo.setKeyword3(new TemplateItem(rgroupVO.getStartDate()));
+        vo.setKeyword2(new TemplateItem(rgroupVO.getStartDate()));
+        vo.setKeyword3(new TemplateItem(rgroupVO.getRgroupOwner().getOwnerName()));
+        String productName = rgroupVO.getProductList()[0].getName();
+        if (productName.length() > 8) {
+        	productName = productName.substring(0, 8) + "...";
+        	productName = "【" + productName + "】正在团购中";
+		}
+        vo.setKeyword4(new TemplateItem(productName));
         vo.setRemark(new TemplateItem("该消息仅推送给已订阅用户，如有打扰请点击链接进入跟团界面，取消对该团长的订阅即可。"));
+        
 
         TemplateMsg<CommonVO> msg = new TemplateMsg<>();
         msg.setData(vo);
-        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE, sendUser.getAppId())); //TODO 更换模板id
-        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_GROUP_SUCCESS);
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_START_MESSAGE, sendUser.getAppId())); //TODO 更换模板id
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_LEADER_GROUP_START + rgroupVO.getRgroupOwner().getOwnerId());
         String url = msgUrl + rgroupVO.getRuleId();
 
         MiniprogramVO miniVo = new MiniprogramVO();
@@ -1076,16 +1083,17 @@ public class TemplateMsgService {
         vo.setKeyword2(new TemplateItem(rgroupVO.getStartDate()));
         vo.setKeyword3(new TemplateItem(rgroupVO.getRegion().getName()));
         String productName = rgroupVO.getProductList()[0].getName();
-        if (productName.length() > 12) {
-        	productName = productName.substring(0, 12) + "...";
+        if (productName.length() > 8) {
+        	productName = productName.substring(0, 8) + "...";
+        	productName = "【" + productName + "】正在团购中";
 		}
         vo.setKeyword4(new TemplateItem(productName));
-        vo.setRemark(new TemplateItem("请尽快安排发货，谢谢。"));
+        vo.setRemark(new TemplateItem("该消息仅推送给已订阅用户，如有打扰请点击链接进入跟团界面，取消对该团长的订阅即可。"));
 
         TemplateMsg<CommonVO> msg = new TemplateMsg<>();
         msg.setData(vo);
-        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE, sendUser.getAppId()));
-        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_GROUP_SUCCESS);
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_START_MESSAGE, sendUser.getAppId()));
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_REGION_GROUP_START + rgroupVO.getRegion().getId());
         String url = msgUrl + rgroupVO.getRuleId();
 
         MiniprogramVO miniVo = new MiniprogramVO();
