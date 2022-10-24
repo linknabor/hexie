@@ -18,7 +18,7 @@ public interface RgroupV3Service {
 	
 	RgroupVO queryRgroupByRule(String rgroupRuleId, boolean isOnsale);
 
-	void updateRgroupStatus(long ruleId, boolean isPub);
+	void updateRgroupStatus(long ruleId, boolean isPub) throws Exception;
 
 	List<RgroupVO> queryOwnerRgroups(User user, String title, int currentPage);
 
@@ -41,6 +41,8 @@ public interface RgroupV3Service {
 	void subscribe(User user, RgroupSubscribeVO rgroupSubscribeVO);
 
 	void unsubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO);
+
+	void sendPubMsg(String ruleId);
 
 	
 }

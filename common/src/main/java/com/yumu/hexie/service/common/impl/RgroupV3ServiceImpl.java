@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,11 +29,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
+import com.yumu.hexie.common.util.RedisUtil;
 import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.GroupOwnerInfo;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.Sect;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
+import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
@@ -58,6 +61,7 @@ import com.yumu.hexie.model.user.RgroupOwner;
 import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.RgroupV3Service;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.RgroupAreaRegionMapper;
@@ -104,6 +108,10 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	private UserService userService;
 	@Autowired
 	private EshopUtil eshopUtil;
+	@Autowired
+	private TemplateMsgService templateMsgService;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	
 	@Override
@@ -454,6 +462,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			/*4.保存rgroupAreaItem 当前版本只支持单个小区 end*/
 			
+			/*通知订阅*/
+			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
+				Map<String, String> map = new HashMap<>();
+				map.put("ruleId", String.valueOf(rule.getId()));
+				String queue = objectMapper.writeValueAsString(map);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_PUB_QUEUE, queue);
+			}
 			return rule.getId();
 			
 		} catch (Exception e) {
@@ -665,10 +680,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	/**
 	 * 更新团购状态
 	 * @param ruleId
+	 * @throws Exception 
 	 */
 	@Override
 	@Transactional
-	public void updateRgroupStatus(long ruleId, boolean isPub) {
+	public void updateRgroupStatus(long ruleId, boolean isPub) throws Exception {
 		
 		int ruleStatus = ModelConstant.RULE_STATUS_ON;
 		int distributionStatus = ModelConstant.DISTRIBUTION_STATUS_ON;
@@ -695,6 +711,16 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rgroupAreaItem.setStatus(distributionStatus);
 		}
 		rgroupAreaItemRepository.saveAll(itemList);
+		
+		if (isPub) {
+			/*通知订阅*/
+			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
+				Map<String, String> map = new HashMap<>();
+				map.put("ruleId", String.valueOf(rule.getId()));
+				String queue = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(map);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_PUB_QUEUE, queue);
+			}
+		}
 	}
 	
 	/**
@@ -1380,7 +1406,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
 			break;
 		case 2:
-			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_SECT;
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION;
 			break;
 		default:
 			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
@@ -1401,7 +1427,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
 			break;
 		case 2:
-			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_SECT;
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION;
 			break;
 		default:
 			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
@@ -1409,6 +1435,54 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		key += rgroupSubscribeVO.getInfoId()  + ":" + user.getId(); ;
 		
 		stringRedisTemplate.delete(key);
+		
+	}
+	
+	/**
+	 * 团购发布后的订阅推送
+	 * @param ruleIdStr
+	 */
+	@Override
+	public void sendPubMsg(String ruleId) {
+		
+		if (StringUtils.isEmpty(ruleId)) {
+			logger.info("ruleId is empty, will return .");
+			return;
+		}
+		RgroupVO rgroupVO = queryRgroupByRule(ruleId, true);
+		RgroupOwnerVO rgroupOwnerVO = rgroupVO.getRgroupOwner();
+		
+		String leaderKeyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER + rgroupOwnerVO.getOwnerId() + ":" + "*";
+		List<String> leaderSubscribers = RedisUtil.scanKeys(stringRedisTemplate, leaderKeyPattern);
+		List<String> sendUserList = new ArrayList<>();
+		for (String userStr : leaderSubscribers) {
+			String userId = userStr.substring(userStr.lastIndexOf(":"), userStr.length());
+			sendUserList.add(userId);
+			
+			User sendUser = userService.getById(Long.valueOf(userId));
+			String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+			templateMsgService.sendGroupLeaderSubscribe(sendUser, rgroupVO, accessToken);
+		}
+		
+		RegionVo[]regions= rgroupVO.getRegions();
+		for (RegionVo regionVo : regions) {
+			String keyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION + regionVo.getId() + ":" + "*";
+			List<String> subscribers = RedisUtil.scanKeys(stringRedisTemplate, keyPattern);
+			for (String userStr : subscribers) {
+				String userId = userStr.substring(userStr.lastIndexOf(":"), userStr.length());
+				if (sendUserList.contains(userId)) {
+					continue;
+				}
+				User sendUser = userService.getById(Long.valueOf(userId));
+				String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+				Region region = new Region();
+				BeanUtils.copyProperties(regionVo, region);
+				rgroupVO.setRegion(region);
+				templateMsgService.sendGroupRegionSubscribe(sendUser, rgroupVO, accessToken);
+			}
+			
+		}
+		
 		
 	}
 }
