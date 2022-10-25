@@ -51,6 +51,9 @@ public class ProductServiceImpl implements ProductService {
 		if(StringUtils.isEmpty(stock)) {
 			stock = String.valueOf(Integer.MAX_VALUE);
 		}
+		if(StringUtils.isEmpty(freeze)) {
+			stock = "0";
+		}
 		int canSale = Integer.parseInt(stock) - Integer.parseInt(freeze);
 		if (canSale <= 0) {
 			throw new BizValidateException("您晚到了一步，商品["+product.getName()+"]已卖完！");
