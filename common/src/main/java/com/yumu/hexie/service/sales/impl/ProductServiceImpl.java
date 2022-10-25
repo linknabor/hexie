@@ -45,8 +45,11 @@ public class ProductServiceImpl implements ProductService {
 		}
 		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + product.getId());
 		String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + product.getId());
-		if(StringUtils.isEmpty(stock) || StringUtils.isEmpty(freeze)) {
-			throw new BizValidateException("您晚到了一步，商品["+product.getName()+"]已卖完！");
+//		if(StringUtils.isEmpty(stock) || StringUtils.isEmpty(freeze)) {
+//			throw new BizValidateException("您晚到了一步，商品["+product.getName()+"]已卖完！");
+//		}
+		if(StringUtils.isEmpty(stock)) {
+			stock = String.valueOf(Integer.MAX_VALUE);
 		}
 		int canSale = Integer.parseInt(stock) - Integer.parseInt(freeze);
 		if (canSale <= 0) {
