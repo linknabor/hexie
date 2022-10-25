@@ -906,7 +906,11 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         }
         request.setOwnerName(ownerName);
         request.setOwnerTel(o.getGroupLeaderTel());
+        log.info("ruleId : " + o.getGroupRuleId());
         RgroupRule rule = rgroupRuleRepository.findById(o.getGroupRuleId());
+        if (rule == null) {
+			throw new BizValidateException("请重新唤起支付。");
+		}
         String ruleName = rule.getDescription();
         if (!StringUtils.isEmpty(ruleName)) {
         	if (ruleName.length()>40) {
