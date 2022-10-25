@@ -52,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
 			stock = String.valueOf(Integer.MAX_VALUE);
 		}
 		if(StringUtils.isEmpty(freeze)) {
-			stock = "0";
+			freeze = "0";
 		}
 		int canSale = Integer.parseInt(stock) - Integer.parseInt(freeze);
 		if (canSale <= 0) {
