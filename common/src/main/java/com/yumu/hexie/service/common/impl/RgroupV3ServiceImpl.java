@@ -948,12 +948,14 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		List<Order> orderList = new ArrayList<>();
     	Order order = new Order(Direction.DESC, "createDate");
     	orderList.add(order);
+    	order = new Order(Direction.ASC, "status");
+    	orderList.add(order);
     	Sort sort = Sort.by(orderList);
 		Pageable pageable = PageRequest.of(currentPage, 10, sort);
 		Date date = new Date();
 		List<Integer> statusList = new ArrayList<>();
 		statusList.add(ModelConstant.RULE_STATUS_ON);
-		statusList.add(ModelConstant.RULE_STATUS_OFF);
+		statusList.add(ModelConstant.RULE_STATUS_END);
 		Page<Object[]> page = rgroupRuleRepository.findGroupSects(statusList, sectName, pageable);
 		List<QueryRgroupSectsMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
 		if (list == null) {
@@ -1018,6 +1020,8 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			List<Order> orderList = new ArrayList<>();
 	    	Order order = new Order(Direction.DESC, "updateDate");
 	    	orderList.add(order);
+	    	order = new Order(Direction.ASC, "status");
+	    	orderList.add(order);
 	    	Sort sort = Sort.by(orderList);
 			Pageable pageable = PageRequest.of(currentPage, 10, sort);
 			
@@ -1026,7 +1030,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			List<Integer> statusList = new ArrayList<>();
 			statusList.add(ModelConstant.RULE_STATUS_ON);
-			statusList.add(ModelConstant.RULE_STATUS_OFF);
+			statusList.add(ModelConstant.RULE_STATUS_END);
 			Page<RgroupRule> pages = rgroupRuleRepository.findByRegionId(statusList, Long.valueOf(regionId), title, pageable);
 			List<RgroupRule> ruleList = pages.getContent();
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);

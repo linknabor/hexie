@@ -142,7 +142,26 @@ public class GroupInfoVo implements Serializable {
     	if (getEndDate().getTime() < date.getTime()) {
     		groupStatusCn = "已结束";
 		}
+    	if (getStatus() == ModelConstant.RULE_STATUS_END) {
+    		groupStatusCn = "已结束";
+		}
         return groupStatusCn;
+    }
+    
+    //页面做代码项用。以免小程序页面需要修改字样
+    public String getShowStatus() {
+    	
+    	String showStatus = "";
+    	if ("跟团中".equals(groupStatusCn)) {
+			showStatus = "1";
+		} else if ("未开始".equals(groupStatusCn)) {
+			showStatus = "2";
+		} else if ("预览中".equals(groupStatusCn)) {
+			showStatus = "3";
+		} else if ("已结束".equals(groupStatusCn)) {
+			showStatus = "4";
+		}
+    	return showStatus;
     }
 
     public void setGroupStatusCn(String groupStatusCn) {

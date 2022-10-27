@@ -139,7 +139,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 				+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
 				+ "IF(?3='3', rule.status = '1' "
 				+ "and rule.startDate > CURRENT_TIMESTAMP() , "
-				+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
+				+ "IF(?3='4', (rule.endDate < CURRENT_TIMESTAMP() or rule.status = '2' ), 1=1) ))) "
 			, nativeQuery = true)
 	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
 
@@ -153,8 +153,8 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "group by a.id "
 			, nativeQuery = true)
 	List<Object[]> queryGroupByDepotId(String depotId);
-
-
+	
+	
 	@Query(value = "select " + sqlColumn3
 			+ "from rgrouprule a "
 			+ "join ProductRule b on a.id = b.ruleId "

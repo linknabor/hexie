@@ -51,6 +51,8 @@ import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.commonsupport.info.ProductRuleRepository;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
 import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.OrderItem;
@@ -122,6 +124,9 @@ public class GroupMngServiceImpl implements GroupMngService {
     
     @Autowired
     private RgroupOwnerRepository rgroupOwnerRepository;
+    
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
     
 
     @Override
@@ -239,7 +244,7 @@ public class GroupMngServiceImpl implements GroupMngService {
     @Transactional
     public Boolean updateGroupInfo(User user, String groupId, String operType) {
 
-        if (!"1".equals(operType) && !"3".equals(operType)) {
+        if (!"1".equals(operType) && !"3".equals(operType) && !"4".equals(operType) && !"5".equals(operType)) {
             throw new BizValidateException("不合法的操作数据类型");
         }
         if (StringUtils.isEmpty(groupId)) {
@@ -250,20 +255,31 @@ public class GroupMngServiceImpl implements GroupMngService {
         if (rgroupRule!=null) {
             if ("1".equals(operType)) { //结束操作
                 //修改团购结束日期
-                rgroupRule.setStatus(1);
-                Date date = new Date();
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(date);
-                calendar.add(Calendar.SECOND, -1);
-                date = calendar.getTime();
-                rgroupRule.setEndDate(date);
-            } else {
-                //下架团购
-                rgroupRule.setStatus(0);
-            }
+                rgroupRule.setStatus(ModelConstant.RULE_STATUS_END);
+            } else if ("3".equals(operType)) {	//删除团购
+                rgroupRule.setStatus(ModelConstant.RULE_STATUS_DEL);
+            } else if ("4".equals(operType)) {	//开启团购
+              Date date = new Date();
+              Calendar calendar = Calendar.getInstance();
+              calendar.setTime(date);
+              calendar.add(Calendar.DATE, 2);
+              date = calendar.getTime();
+              rgroupRule.setEndDate(date);
+              rgroupRule.setStatus(ModelConstant.RULE_STATUS_ON);
+              
+              List<RgroupAreaItem>  areaList = rgroupAreaItemRepository.findByRuleId(rgroupRule.getId());
+              for (RgroupAreaItem rgroupAreaItem : areaList) {
+            	  rgroupAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_ON, rgroupAreaItem.getId());
+            	  rgroupAreaItemRepository.save(rgroupAreaItem);
+              }
+              
+			} else if ("5".equals(operType)) {
+				rgroupRule.setHidden(true);
+			}
         } else {
-            throw new BizValidateException("为查到团购信息，请刷新重试");
+            throw new BizValidateException("未查到团购信息，请刷新重试");
         }
+        rgroupRuleRepository.save(rgroupRule);
         return true;
     }
 
