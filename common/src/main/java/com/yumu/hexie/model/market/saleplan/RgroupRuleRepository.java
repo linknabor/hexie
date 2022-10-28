@@ -27,7 +27,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			, countQuery = "select count(1) from RgroupRule where ownerId = ?1 "
 			+ "and if(?2!='', description like CONCAT('%',?2,'%'), 1=1) ",
 			nativeQuery = true)
-	public Page<RgroupRule> findByOwnerIdAndDescriptionLike(long ownerId, String description, List<Boolean> hidden, Pageable pageable);
+	public Page<RgroupRule> findByOwnerIdAndDescriptionLike(long ownerId, String description, Pageable pageable);
 	
 	@Query(value = "select distinct rule.* from RgroupRule rule "
 			+ "join rgroupareaitem item on item.ruleId = rule.id "
@@ -43,7 +43,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 					+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
 					+ ") a "
 			, nativeQuery = true)
-	public Page<RgroupRule> findByRegionId(List<Integer> status, long regionId, String title, boolean hidden, Pageable pageable);
+	public Page<RgroupRule> findByRegionId(List<Integer> status, long regionId, String title, Pageable pageable);
 	
 	public List<RgroupRule> findAllByProductId(long productId);
 	

@@ -321,19 +321,27 @@ public class GroupMngServiceImpl implements GroupMngService {
             List<OutSidRelateGroupResp> list = ObjectToBeanUtils.objectToBean(rgroupRules, OutSidRelateGroupResp.class);
 
             for(OutSidRelateGroupResp resp : list) {
-                if (resp.getStatus() == 1) {
-                    Date date = new Date();
-                    if (resp.getStartDate().getTime() <= date.getTime()
-                            && resp.getEndDate().getTime() >= date.getTime()) { //跟团中
-                        resp.setStatus_cn("正在跟团中");
-                    } else if (resp.getEndDate().getTime() < date.getTime()) {
-                        resp.setStatus_cn("已结束");
-                    } else if (resp.getStartDate().getTime() > date.getTime()) {
-                        resp.setStatus_cn("未开始");
-                    }
-                } else {
-                    resp.setStatus_cn("预览中");
-                }
+            	String groupStatusCn = "";
+                Date date = new Date();
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_ON) {
+            		if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "跟团中";
+            		}
+            		if (resp.getStartDate().getTime() > date.getTime()) {
+            			groupStatusCn = "未开始";
+        			}
+        		} else if(resp.getStatus() == ModelConstant.RULE_STATUS_OFF) {
+        			if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "预览中";
+            		}
+        		}
+            	if (resp.getEndDate().getTime() < date.getTime()) {
+            		groupStatusCn = "已结束";
+        		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_END) {
+            		groupStatusCn = "已结束";
+        		}
+            	resp.setStatus_cn(groupStatusCn);
             }
             QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
             responsePage.setContent(list);
@@ -369,19 +377,27 @@ public class GroupMngServiceImpl implements GroupMngService {
             List<OutSidRelateGroupResp> list = ObjectToBeanUtils.objectToBean(page.getContent(), OutSidRelateGroupResp.class);
 
             for(OutSidRelateGroupResp resp : list) {
-                if (resp.getStatus() == 1) {
-                    Date date = new Date();
-                    if (resp.getStartDate().getTime() <= date.getTime()
-                            && resp.getEndDate().getTime() >= date.getTime()) { //跟团中
-                        resp.setStatus_cn("正在跟团中");
-                    } else if (resp.getEndDate().getTime() < date.getTime()) {
-                        resp.setStatus_cn("已结束");
-                    } else if (resp.getStartDate().getTime() > date.getTime()) {
-                        resp.setStatus_cn("未开始");
-                    }
-                } else {
-                    resp.setStatus_cn("预览中");
-                }
+                String groupStatusCn = "";
+                Date date = new Date();
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_ON) {
+            		if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "跟团中";
+            		}
+            		if (resp.getStartDate().getTime() > date.getTime()) {
+            			groupStatusCn = "未开始";
+        			}
+        		} else if(resp.getStatus() == ModelConstant.RULE_STATUS_OFF) {
+        			if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "预览中";
+            		}
+        		}
+            	if (resp.getEndDate().getTime() < date.getTime()) {
+            		groupStatusCn = "已结束";
+        		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_END) {
+            		groupStatusCn = "已结束";
+        		}
+            	resp.setStatus_cn(groupStatusCn);
             }
             QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
             responsePage.setTotalPages(page.getTotalPages());
