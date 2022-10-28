@@ -50,6 +50,7 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.RgroupOrder;
 import com.yumu.hexie.vo.RgroupOrdersVO;
 
+
 @Service("rgroupService")
 public class RgroupServiceImpl implements RgroupService {
 	private static final Logger log = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
@@ -87,14 +88,7 @@ public class RgroupServiceImpl implements RgroupService {
 	 * @return
 	 */
 	public List<RgroupAreaItem> addProcessStatus(List<RgroupAreaItem> result) {
-		//TODO
         for(RgroupAreaItem item : result){
-            RgroupRule rule = findSalePlan(item.getRuleId());
-            if(rule!=null) {
-                item.setProcess(rule.getProcess());
-            } else {
-                item.setProcess(0);
-            }
             String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
     		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
     		int canSale = Integer.parseInt(stock) - Integer.parseInt(freeze);
@@ -108,6 +102,10 @@ public class RgroupServiceImpl implements RgroupService {
 		return cacheableService.findRgroupRule(ruleId);
 	}
 
+	/**
+	 * 老版本团购，按rule中的总成团份数检查是否达标
+	 * @param rule
+	 */
 	@Override
 	public void refreshGroupStatus(RgroupRule rule) {
 		if(System.currentTimeMillis()>rule.getEndDate().getTime()) {
@@ -116,6 +114,45 @@ public class RgroupServiceImpl implements RgroupService {
 			} else {
 				finishGroup(rule);
 			}
+		} else {
+			log.error("该团购未到结束时间！" + rule.getId());
+		}
+	}
+	
+	/**
+	 * 新版本团购，每个小区单独的成团分数
+	 */
+	@Override
+	public void refreshGroupStatus4MultiRegions(RgroupRule rule) {
+		
+		if(System.currentTimeMillis() > rule.getEndDate().getTime()) {
+			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+			boolean allCancelled = true;
+			for (RgroupAreaItem rgroupAreaItem : areaList) {
+				if(rgroupAreaItem.getCurrentNum() < rgroupAreaItem.getGroupMinNum()) {
+					cancelGroupMulti(rule, rgroupAreaItem);
+					
+					if (ModelConstant.RGROUP_STAUS_GROUPING == rgroupAreaItem.getGroupStatus()) {
+						rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_CANCEL);
+					} 
+				} else {
+					finishGroupMulti(rule, rgroupAreaItem);
+					allCancelled = false;
+					
+					if (ModelConstant.RGROUP_STAUS_GROUPING == rgroupAreaItem.getGroupStatus()) {
+						rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_FINISH);
+					} 
+				}
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+			}
+			if (allCancelled) {
+				rule.setGroupStatus(ModelConstant.RGROUP_STAUS_CANCEL);
+			} else {
+				rule.setGroupStatus(ModelConstant.RGROUP_STAUS_FINISH);
+				rule.setGroupFinishDate(System.currentTimeMillis());
+			}
+			cacheableService.save(rule);
+			
 		} else {
 			log.error("该团购未到结束时间！" + rule.getId());
 		}
@@ -136,7 +173,7 @@ public class RgroupServiceImpl implements RgroupService {
 			int count = serviceOrder.getCount();
 			if (ModelConstant.ORDER_STATUS_SENDED == orderStatus || ModelConstant.ORDER_STATUS_RECEIVED == orderStatus) {
 				delivered += count;
-			} else {
+			}else if (ModelConstant.ORDER_STATUS_PAYED == orderStatus) {
 				undelivered += count;
 			}
 		}
@@ -146,6 +183,14 @@ public class RgroupServiceImpl implements RgroupService {
 			return;
 		}
 		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERED);
+		
+		List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+		for (RgroupAreaItem rgroupAreaItem : areaList) {
+			if (ModelConstant.RGROUP_STAUS_DELIVERING == rgroupAreaItem.getGroupStatus()) {
+				rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERED);
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+			}
+		}
 		cacheableService.save(rule);
 		
 	}
@@ -155,7 +200,13 @@ public class RgroupServiceImpl implements RgroupService {
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_RGROUP,rule.getId(),"该团购已完成！").setError();
 		}
 	}
-
+	
+	private void cancelValidateMulti(RgroupAreaItem rgroupAreaItem) {
+		if(rgroupAreaItem.getGroupStatus() == ModelConstant.RGROUP_STAUS_FINISH){
+			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_RGROUP, rgroupAreaItem.getId(), "该团购已完成！").setError();
+		}
+	}
+	
 	private void cancelGroup(RgroupRule rule) {
 		log.error("cancelGroup:"+rule.getId());
 		cancelValidate(rule);
@@ -179,10 +230,44 @@ public class RgroupServiceImpl implements RgroupService {
 		rule.setGroupStatus(ModelConstant.RGROUP_STAUS_CANCEL);
 		cacheableService.save(rule);
 	}
+	
+	public void cancelGroupMulti(RgroupRule rule, RgroupAreaItem rgroupAreaItem) {
+		
+		log.error("cancelGroup:"+rule.getId());
+		cancelValidateMulti(rgroupAreaItem);
+		List<ServiceOrder> orders = serviceOrderRepository.findByRGroup(rule.getId());
+		for(ServiceOrder o : orders){
+			try{
+				if (o.getXiaoquId() != rgroupAreaItem.getRegionId()) {
+					continue;
+				}
+				o.setGroupStatus(ModelConstant.GROUP_STAUS_CANCEL);
+				if(ModelConstant.ORDER_STATUS_PAYED == o.getStatus()) {
+					baseOrderService.refund(o);
+				} else {
+					baseOrderService.cancelOrder(o);
+				}
+				User u = userService.getById(o.getUserId());
+
+				userNoticeService.groupFail(u, u.getTel(), o.getGroupRuleId(), rule.getProductName(), rule.getGroupMinNum(), rule.getName());
+			}catch(Exception e) {
+				log.error("cancelGroupError",e);
+			}
+		}
+		rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_CANCEL);
+		rgroupAreaItemRepository.save(rgroupAreaItem);
+
+	}
 
 	private void finishValidate(RgroupRule rule) {
 		if(rule.getGroupStatus() == ModelConstant.RGROUP_STAUS_CANCEL || rule.getCurrentNum() < rule.getGroupMinNum()){
 			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_RGROUP,rule.getId(),"该团购已取消或人数不足！").setError();
+		}
+	}
+	
+	private void finishValidateMulti(RgroupAreaItem rgroupAreaItem) {
+		if(rgroupAreaItem.getGroupStatus() == ModelConstant.RGROUP_STAUS_CANCEL || rgroupAreaItem.getCurrentNum() < rgroupAreaItem.getGroupMinNum()){
+			throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_RGROUP, rgroupAreaItem.getId(), "该团购已取消或人数不足！").setError();
 		}
 	}
 
@@ -251,7 +336,59 @@ public class RgroupServiceImpl implements RgroupService {
 		}
 		
 	}
-
+	
+	public void finishGroupMulti(RgroupRule rule, RgroupAreaItem rgroupAreaItem) {
+		
+		log.error("finishGroup:"+rule.getId()+", areaItem : " + rgroupAreaItem.getId());
+		finishValidateMulti(rgroupAreaItem);
+		List<ServiceOrder> orders = serviceOrderRepository.findByRGroup(rule.getId());
+		for(ServiceOrder o : orders){
+			try{
+				if (o.getXiaoquId() != rgroupAreaItem.getRegionId()) {
+					continue;
+				}
+				o.setGroupStatus(ModelConstant.GROUP_STAUS_FINISH);
+				if(ModelConstant.ORDER_STATUS_INIT == o.getStatus()) {
+					baseOrderService.cancelOrder(o);
+				} else if(ModelConstant.ORDER_STATUS_PAYED == o.getStatus()) {
+					baseOrderService.confirmOrder(o);
+				} else {
+					log.error("finishGroup:"+rule.getId());
+				}
+			}catch(Exception e) {
+				log.error("finishGroup:"+rule.getId(),e);
+			}
+		}
+		
+		long currTime = System.currentTimeMillis();
+		Integer currSectGroupNum = rgroupAreaItem.getCurrentNum();	//当前小区成团份数
+		//给团长发送成团消息
+		Region region = regionRepository.findById(rgroupAreaItem.getRegionId());
+		NoticeRgroupSuccess noticeRgroupSuccess = new NoticeRgroupSuccess();
+		noticeRgroupSuccess.setCreateDate(currTime);
+		noticeRgroupSuccess.setGroupNum(currSectGroupNum);
+		noticeRgroupSuccess.setOrderType(ModelConstant.ORDER_TYPE_RGROUP);
+		noticeRgroupSuccess.setProductName(rule.getProductName());
+		noticeRgroupSuccess.setSectId(region.getSectId());
+		noticeRgroupSuccess.setSectName(region.getName());
+		String price = new BigDecimal(rule.getPrice()).setScale(2, RoundingMode.HALF_UP).toString();
+		noticeRgroupSuccess.setPrice(price);
+		noticeRgroupSuccess.setRuleId(rule.getId());
+		List<Long> ownerIds = new ArrayList<>();
+		Long ownerId = rule.getOwnerId();
+		ownerIds.add(ownerId);
+		noticeRgroupSuccess.setOpers(ownerIds);
+		try {
+            ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+            String value = objectMapper.writeValueAsString(noticeRgroupSuccess);
+            //放入合协管家的redis中
+            redisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE, value);	//TODO
+        } catch (Exception e) {
+        	log.error("custom push redis error", e);
+        }
+		
+	}
+	
 	@Override
 	public List<RgroupOrder> queryMyRgroupOrders(long userId,List<Integer> status) {
 		List<ServiceOrder> orders = serviceOrderRepository.findByUserAndStatusAndType(userId,status, ModelConstant.ORDER_TYPE_RGROUP);
@@ -328,6 +465,14 @@ public class RgroupServiceImpl implements RgroupService {
 		if (ModelConstant.RGROUP_STAUS_FINISH == rule.getGroupStatus()) {
 			rule.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERING);	//将状态改为发货中
 			cacheableService.save(rule);
+		}
+		
+		List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+		for (RgroupAreaItem rgroupAreaItem : areaList) {
+			if (ModelConstant.RGROUP_STAUS_FINISH == rgroupAreaItem.getGroupStatus()) {
+				rgroupAreaItem.setGroupStatus(ModelConstant.RGROUP_STAUS_DELIVERING);	//将状态改为发货中
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+			}
 		}
 		
 		while(!isSuccess && retryTimes < 3) {

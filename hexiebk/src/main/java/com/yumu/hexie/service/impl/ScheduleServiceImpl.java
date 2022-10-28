@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,8 @@ import com.yumu.hexie.model.user.Member;
 import com.yumu.hexie.model.user.MemberBill;
 import com.yumu.hexie.model.user.MemberBillRepository;
 import com.yumu.hexie.model.user.MemberRepository;
+import com.yumu.hexie.model.user.RgroupOwner;
+import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
@@ -122,6 +125,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 	@Autowired
 	private RgroupAreaItemRepository rgroupAreaItemRepository;
 	@Autowired
+	private RgroupOwnerRepository rgroupOwnerRepository;
+	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
 	
@@ -165,7 +170,12 @@ public class ScheduleServiceImpl implements ScheduleService {
     	for(RgroupRule rule : rules) {
     		try{
     	    	SCHEDULE_LOG.error("refreshGroupStatus:" + rule.getId());
-    	    	rgroupService.refreshGroupStatus(rule);
+    	    	if (rule.getSectCount() > 0) {	//新版本，支持多个小区
+    	    		rgroupService.refreshGroupStatus4MultiRegions(rule);
+				} else {
+					rgroupService.refreshGroupStatus(rule);	//老版本
+				}
+    	    	
     		} catch(Exception e){
     			SCHEDULE_LOG.error("超时订单更新失败"+ rule.getId(),e);
     			recordError(e);
@@ -565,19 +575,19 @@ public class ScheduleServiceImpl implements ScheduleService {
 	/**
 	 * 团购商品超时下架
 	 */
-	@Scheduled(cron = "0 */20 * * * ?")
+	@Scheduled(cron = "0 */30 * * * ?")
 	@Override
 	public void executeRgroupRuleTimeoutJob() {
 		
 		List<RgroupRule> ruleList = rgroupRuleRepository.findTimeoutGroup(new Date());
 		for (RgroupRule rGroupRule : ruleList) {
-			rgroupRuleRepository.updateStatus(ModelConstant.RULE_STATUS_OFF, rGroupRule.getId());
+			rgroupRuleRepository.updateStatus(ModelConstant.RULE_STATUS_END, rGroupRule.getId());
 			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rGroupRule.getId());
 			for (RgroupAreaItem areaItem : areaList) {
 				rgroupAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_OFF, areaItem.getId());
 			}
-			Product product = productRepository.findById(rGroupRule.getProductId());
-			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
+//			Product product = productRepository.findById(rGroupRule.getProductId());
+//			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
 		}
 	
 	}
@@ -612,6 +622,39 @@ public class ScheduleServiceImpl implements ScheduleService {
 			}
 		}
 		SCHEDULE_LOG.info("refresh stock and freeze finished .");
+	}
+	
+	/**
+	 * 固化团长数据
+	 */
+	@Scheduled(cron = "10 */15 * * * ?")
+	@Override
+	@Transactional
+	public void updateGroupOwnerInfo() {
+		
+		SCHEDULE_LOG.info("start to update groupOwner info .");
+		
+		List<RgroupOwner> ownerList = rgroupOwnerRepository.findAll();
+		for (RgroupOwner rgroupOwner : ownerList) {
+			String ownerAccessed = redisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rgroupOwner.getUserId());
+			String ownerOrdered = redisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rgroupOwner.getUserId());
+			
+			int members = 0;
+			if (!StringUtils.isEmpty(ownerAccessed)) {
+				members = Integer.parseInt(ownerAccessed);
+			}
+			int attendees = 0;
+			if (!StringUtils.isEmpty(ownerOrdered)) {
+				attendees = Integer.parseInt(ownerOrdered);
+			}
+			if (members > 0 || attendees > 0) {
+				rgroupOwner.setMembers(members);
+				rgroupOwner.setAttendees(attendees);
+				rgroupOwnerRepository.save(rgroupOwner);
+			}
+			
+		}
+		SCHEDULE_LOG.info("finish updating groupOwner info .");
 	}
 	
 }

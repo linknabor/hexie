@@ -9,12 +9,26 @@ import java.io.Serializable;
  * @create 2022-05-05 21:15
  */
 public class OutSidProductDepotReq implements Serializable {
-    private String productName;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3814700291640200869L;
+	
+	private long ownerId;
+	private String productName;
     private String ownerName;
     private int currentPage;
     private int pageSize;
+    
+    public long getOwnerId() {
+		return ownerId;
+	}
 
-    public String getProductName() {
+	public void setOwnerId(long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getProductName() {
         return productName;
     }
 

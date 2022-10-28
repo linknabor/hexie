@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -20,15 +21,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
+import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.DistributionService;
 import com.yumu.hexie.service.common.RgroupV3Service;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.sales.CustomOrderService;
 import com.yumu.hexie.service.sales.RgroupService;
+import com.yumu.hexie.service.search.SearchService;
 import com.yumu.hexie.vo.RgroupRecordsVO;
+import com.yumu.hexie.vo.RgroupSubscribeVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
@@ -44,6 +50,8 @@ public class RgroupController extends BaseController{
     private DistributionService distributionService;
     @Autowired
     private RgroupV3Service rgroupV3Service;
+    @Autowired
+    private SearchService searchService;
     
 	@RequestMapping(value = "/rgroups/{page}", method = RequestMethod.GET)
 	@ResponseBody
@@ -211,4 +219,163 @@ public class RgroupController extends BaseController{
         return new BaseResult<List<Product>>().success(rgroupV3Service.getProductFromSales(user, searchValue, excludeIdList, currentPage));
     }
 	
+	/**
+	 * 获取有正在进行团购的小区列表
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/sects", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<QueryRgroupSectsMapper>> getGroupSects(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String sectName,
+			@RequestParam int page) throws Exception {
+		
+        return new BaseResult<List<QueryRgroupSectsMapper>>().success(rgroupV3Service.getGroupSects(user, sectName, page));
+    }
+	
+	/**
+	 * 获取当前小区的团购列表
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/sect/groups", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<RgroupVO>> getSectGroups(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String regionId,
+			@RequestParam(required = false) String title, @RequestParam int page) throws Exception {
+		
+		if (!StringUtils.isEmpty(title) && !StringUtils.isEmpty(title.trim())) {
+			String key = ModelConstant.KEY_RGROUP_SECT_TITLE_SEARCH + user.getMiniopenid();
+			searchService.save(key, title);
+		}
+        return new BaseResult<List<RgroupVO>>().success(rgroupV3Service.getSectGroups(user, regionId, title, page));
+    }
+	
+	/**
+	 * 查询团购搜索历史记录
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/searchHistory/{type}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Object> searchHistory(@ModelAttribute(Constants.USER)User user, @PathVariable(required = true) String type) throws Exception {
+		
+		String keyType = "";
+		if ("0".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_SECT_TITLE_SEARCH;
+		} else if ("1".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_LEADER_TITLE_SEARCH;
+		} else {
+			throw new BizValidateException("unknow search type : " + type);
+		}
+		String key = keyType + user.getMiniopenid();
+		Set<String> set = searchService.get(key);
+        return new BaseResult<Object>().success(set);
+    }
+	
+	/**
+	 * 删除团购搜索历史记录
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/delSearchHistory/{type}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> deleteSearchHistory(@ModelAttribute(Constants.USER)User user, @PathVariable(required = true) String type) throws Exception {
+
+		String keyType = "";
+		if ("0".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_SECT_TITLE_SEARCH;
+		} else if ("1".equals(type)) {
+			keyType = ModelConstant.KEY_RGROUP_LEADER_TITLE_SEARCH;
+		} else {
+			throw new BizValidateException("unknow search type : " + type);
+		}
+		String key = keyType + user.getMiniopenid();
+		searchService.removeAll(key);
+        return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 获取团长信息
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/leader/{leaderId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Object> getLeaderInfo(@PathVariable String leaderId) throws Exception {
+		
+        return new BaseResult<Object>().success(rgroupV3Service.getLeaderInfo(leaderId));
+    }
+	
+	/**
+	 * 获取团长下的团购
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/rgroups/v3/leader/groups", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<Object> getLeaderInfo(@ModelAttribute(Constants.USER)User user, @RequestParam(required = false) String leaderId, @RequestParam(required = false) String title, 
+			@RequestParam(required = false) int page) throws Exception {
+		
+		if (!StringUtils.isEmpty(title) && !StringUtils.isEmpty(title.trim())) {
+			String key = ModelConstant.KEY_RGROUP_LEADER_TITLE_SEARCH + user.getMiniopenid();
+			searchService.save(key, title);
+		}
+		
+        return new BaseResult<Object>().success(rgroupV3Service.getLeadGroups(leaderId, title, page));
+    }
+	
+	/**
+	 * 团购访问统计
+	 * @param user
+	 * @param map
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/v3/visitView", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> visitView(@ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> map) {
+		
+		rgroupV3Service.visitView(user, map.get("ruleId"), map.get("ownerId"));
+		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 用户订阅
+	 * @param user
+	 * @param rgroupSubscribeVO
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/v3/subscribe", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> subscribe(@ModelAttribute(Constants.USER)User user, @RequestBody RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		rgroupV3Service.subscribe(user, rgroupSubscribeVO);
+		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 用户取消订阅
+	 * @param user
+	 * @param rgroupSubscribeVO
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/v3/unsubscribe", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> unsubscribe(@ModelAttribute(Constants.USER)User user, @RequestBody RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		rgroupV3Service.unsubscribe(user, rgroupSubscribeVO);
+		return new BaseResult<Object>().success(Constants.PAGE_SUCCESS);
+    }
+	
+	/**
+	 * 用户订阅
+	 * @param user
+	 * @param rgroupSubscribeVO
+	 * @return
+	 */
+	@RequestMapping(value = "/rgroups/v3/userSubscribe", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> userSubscribe(@ModelAttribute(Constants.USER)User user, @RequestBody RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		boolean b = rgroupV3Service.getUserSubscribe(user, rgroupSubscribeVO);
+		return new BaseResult<Object>().success(b);
+    }
 }

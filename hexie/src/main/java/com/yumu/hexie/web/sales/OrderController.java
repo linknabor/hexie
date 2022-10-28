@@ -212,7 +212,7 @@ public class OrderController extends BaseController{
 		Address address = new Address();
 		if (currUser != null) {
 			if (!StringUtils.isEmpty(currUser.getSectId())&& !"0".equals(currUser.getSectId())) {	//绑定房屋的业主
-				List<Address> addrList = addressService.queryRgroupAddressByUser(currUser.getId(), String.valueOf(ruleId));
+				List<Address> addrList = addressService.queryRgroupAddressByUser(currUser.getId(), String.valueOf(ruleId), "");
 				if (addrList==null || addrList.size() ==0) {
 					addrList = addressService.queryBindedAddressByUser(currUser.getId());
 				}
@@ -610,11 +610,11 @@ public class OrderController extends BaseController{
 	@RequestMapping(value = "/rgroups/v3/order/refund2", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<String> requestRefund(@RequestBody RefundVO refundVO) throws Exception {
-		
+	
 		User user = new User();
 		user.setId(125417);
 		baseOrderService.requestRefund(user, refundVO);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
-    }
+}
 	
 }

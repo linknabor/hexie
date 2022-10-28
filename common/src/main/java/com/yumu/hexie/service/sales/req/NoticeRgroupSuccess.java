@@ -3,6 +3,8 @@ package com.yumu.hexie.service.sales.req;
 import java.io.Serializable;
 import java.util.List;
 
+import com.yumu.hexie.model.user.User;
+
 /**
  * 成团提醒
  * @author david
@@ -23,6 +25,8 @@ public class NoticeRgroupSuccess implements Serializable {
     private int groupNum;	//当前小区拼团人数
     private String sectId;
     private long ruleId;	//团购id
+    private String sectName;	//小区名称
+    private User sendUser;	//需要发送消息的用户
     
 	public List<Long> getOpers() {
 		return opers;
@@ -72,11 +76,23 @@ public class NoticeRgroupSuccess implements Serializable {
 	public void setRuleId(long ruleId) {
 		this.ruleId = ruleId;
 	}
+	public String getSectName() {
+		return sectName;
+	}
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
+	public User getSendUser() {
+		return sendUser;
+	}
+	public void setSendUser(User sendUser) {
+		this.sendUser = sendUser;
+	}
 	@Override
 	public String toString() {
 		return "NoticeRgroupSuccess [opers=" + opers + ", createDate=" + createDate + ", orderType=" + orderType
 				+ ", productName=" + productName + ", price=" + price + ", groupNum=" + groupNum + ", sectId=" + sectId
-				+ ", ruleId=" + ruleId + "]";
+				+ ", ruleId=" + ruleId + ", sectName=" + sectName + ", sendUser=" + sendUser + "]";
 	}
 	
     

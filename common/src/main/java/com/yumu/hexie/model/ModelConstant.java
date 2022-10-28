@@ -165,8 +165,11 @@ public class ModelConstant {
 	public static final int RULE_TYPE_CITY = 0;
 	public static final int RULE_TYPE_NEARBY = 1;
 
-	public static final int RULE_STATUS_ON = 1;
-	public static final int RULE_STATUS_OFF = 0;
+	public static final int RULE_STATUS_OFF = 0;	//未发布
+	public static final int RULE_STATUS_ON = 1;		//进行中
+	public static final int RULE_STATUS_END = 2;	//已结束。即便仍在有效时间段内，依然是结束，强制结束
+	public static final int RULE_STATUS_DEL = 3;	//已删除。不可见，回收站里找，界面上的删除暂时都是软删除
+	public static final int RULE_STATUS_PHYS_DEL = 4;	//已删除。物理删除
 	
 	public static final int DISTRIBUTION_STATUS_ON = 0;
 	public static final int DISTRIBUTION_STATUS_OFF = 1;
@@ -301,6 +304,7 @@ public class ModelConstant {
 	public static final int NOTICE_TYPE2_ARREARS_BILL = 14;
 	public static final int NOTICE_TYPE2_THREAD = 15;
 	public static final int NOTICE_TYPE2_ORDER = 16;
+	public static final int NOTICE_TYPE2_RGROUP = 17;
 	
 	//通知类型
 	public static final int NOTICE_TYPE_ORDER = 1;//订单通知
@@ -537,7 +541,12 @@ public class ModelConstant {
 	public static final Integer REFUND_OPERATION_SYS_REFUNDING = 7;	//发起退款
 	public static final Integer REFUND_OPERATION_REFUNDED = 8;	//退款完成
 	
+	public static final String KEY_RGROUP_SECT_TITLE_SEARCH = "rgroup:search:sect:title:";	//后面接user的miniOpenid
+	public static final String KEY_RGROUP_LEADER_TITLE_SEARCH = "rgroup:search:leader:title:";	//后面接user的miniOpenid
 	
+	public static final String KEY_RGROUP_SUBSCRIBE_GROUP = "rgroup:subscribe:group:";	//后面接团购id
+	public static final String KEY_RGROUP_SUBSCRIBE_LEADER = "rgroup:subscribe:leader:";	//后面接团长ownerId
+	public static final String KEY_RGROUP_SUBSCRIBE_REGION = "rgroup:subscribe:region:";	//后面接regionId
 	
-
+	public static final String KEY_RGROUP_PUB_QUEUE = "queue:rgroup:pub";	//团购发布
 }		

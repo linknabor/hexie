@@ -3,6 +3,8 @@ package com.yumu.hexie.vo;
 import java.io.Serializable;
 import java.util.List;
 
+import com.yumu.hexie.common.util.desensitize.annotation.Sensitive;
+import com.yumu.hexie.common.util.desensitize.enums.SensitiveType;
 import com.yumu.hexie.model.market.OrderItem;
 
 public class RgroupOrderRecordVO implements Serializable {
@@ -19,6 +21,7 @@ public class RgroupOrderRecordVO implements Serializable {
 	private boolean first;
 	private String headUrl;
 	private String tel;
+	@Sensitive(SensitiveType.CHINESE_NAME)
 	private String userName;
 	private int count = 1;//份数
 	List<OrderItem> items;

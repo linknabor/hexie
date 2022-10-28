@@ -29,6 +29,22 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			nativeQuery = true)
 	public Page<RgroupRule> findByOwnerIdAndDescriptionLike(long ownerId, String description, Pageable pageable);
 	
+	@Query(value = "select distinct rule.* from RgroupRule rule "
+			+ "join rgroupareaitem item on item.ruleId = rule.id "
+			+ "where rule.status in ?1 "
+			+ "and item.regionId = ?2 "
+			+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
+			+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
+			, countQuery = "select count(*) from ( select distinct rule.* from RgroupRule rule "
+					+ "join rgroupareaitem item on item.ruleId = rule.id "
+					+ "where rule.status in ?1 "
+					+ "and item.regionId = ?2 "
+					+ "and if(?3!='', description like CONCAT('%',?3,'%'), 1=1) "
+					+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
+					+ ") a "
+			, nativeQuery = true)
+	public Page<RgroupRule> findByRegionId(List<Integer> status, long regionId, String title, Pageable pageable);
+	
 	public List<RgroupRule> findAllByProductId(long productId);
 	
 	public List<RgroupRule> findByGroupStatus(int groupStatus);
@@ -112,6 +128,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "IF(?3='3', rule.status = '1' "
 			+ "and rule.startDate > CURRENT_TIMESTAMP() , "
 			+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
+			+ "and rule.status <> " + ModelConstant.RULE_STATUS_DEL + " "
 			, countQuery = "select count(1) from rgrouprule rule "
 				+ "where rule.ownerId = ?1 "
 				+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
@@ -123,7 +140,8 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 				+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
 				+ "IF(?3='3', rule.status = '1' "
 				+ "and rule.startDate > CURRENT_TIMESTAMP() , "
-				+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
+				+ "IF(?3='4', (rule.endDate < CURRENT_TIMESTAMP() or rule.status = '2' ), 1=1) ))) "
+				+ "and rule.status <> " + ModelConstant.RULE_STATUS_DEL + " "
 			, nativeQuery = true)
 	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
 
@@ -137,8 +155,8 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "group by a.id "
 			, nativeQuery = true)
 	List<Object[]> queryGroupByDepotId(String depotId);
-
-
+	
+	
 	@Query(value = "select " + sqlColumn3
 			+ "from rgrouprule a "
 			+ "join ProductRule b on a.id = b.ruleId "
@@ -146,6 +164,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "where 1 = 1 "
 			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
 			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3>0, a.ownerId = ?3, 1=1) "
 			+ "group by a.id "
 			, countQuery = "select count(1) from rgrouprule a "
 			+ "join ProductRule b on a.id = b.ruleId "
@@ -153,7 +172,51 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "where 1 = 1 "
 			+ "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
 			+ "and IF (?2!='', d.name like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3>0, a.ownerId = ?3, 1=1) "
 			+ "group by a.id "
 			, nativeQuery = true)
-	Page<Object[]> queryGroupByOutSid(String name, String ownerName, Pageable pageable);
+	Page<Object[]> queryGroupByOutSid(String name, String ownerName, long ownerId, Pageable pageable);
+	
+	
+	/**
+	 * 首页查询正在进行的团购小区列表
+	 * @param productType
+	 * @param ruleId
+	 * @param ruleName
+	 * @param groupStatus
+	 * @param agentId
+	 * @param isDemo
+	 * @param pageable
+	 * @return
+	 */
+	@Query(value = "select count(distinct rule.id) as groupCounts, region.id, region.name, region.xiaoquAddress "
+			+ "from rgrouprule rule "
+			+ "join rgroupareaitem item on item.ruleId = rule.id "
+			+ "join region on region.id = item.regionId "
+			+ "where rule.status in ?1 "
+			+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
+			+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
+//			+ "and item.ruleCloseTime > ?3 "
+			+ "group by region.id, region.name, region.xiaoquAddress "
+			+ "order by rule.id desc "
+			, countQuery = "select count(*) from ( select count(distinct rule.id), region.id, region.name, region.xiaoquAddress "
+					+ "from rgrouprule rule "
+					+ "join rgroupareaitem item on item.ruleId = rule.id "
+					+ "join region on region.id = item.regionId "
+					+ "where rule.status in ?1 "
+					+ "and rule.createDate >= 1659283200000 "	//老版本不要查出来
+					+ "and IF (?2!='', region.name like CONCAT('%',?2,'%'), 1=1) "
+//					+ "and item.ruleCloseTime > ?3 "
+					+ "group by region.id, region.name, region.xiaoquAddress "
+					+ "order by rule.id desc ) a "
+					, nativeQuery = true)
+	Page<Object[]> findGroupSects(List<Integer> status, String sectName, Pageable pageable);
+	
+	@Query(value = "select distinct rule.* from rgroupRule rule "
+			+ "join rgroupareaitem item on item.ruleId = rule.id "
+			+ "where rule.status in ?1 "
+			+ "and item.ruleCloseTime > ?2 "
+			+ "and item.regionId = ?3"
+			, nativeQuery = true)
+	List<RgroupRule> findByAreaItem(List<Integer> status, long currentDate, long regionId);
 }

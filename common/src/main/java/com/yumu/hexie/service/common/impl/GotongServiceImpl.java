@@ -44,6 +44,7 @@ import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.o2o.OperatorService;
+import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
 
 /**
  * <pre>
@@ -399,5 +400,21 @@ public class GotongServiceImpl implements GotongService {
         return templateMsgService.sendFinishReceiveMessage(receiptNotification, accessToken);
         
 	}
+    
+    /**
+     * 团购成团模板消息发送
+     * @param noticeRgroupSuccess
+     */
+    @Override
+    public void sendGroupSuccessNotification(NoticeRgroupSuccess noticeRgroupSuccess) {
+        List<Long> listUser = noticeRgroupSuccess.getOpers();
+        for (long userId : listUser) {
+            User sendUser = userRepository.findById(userId);
+            String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+            noticeRgroupSuccess.setSendUser(sendUser);
+            templateMsgService.sendGroupSuccessNotification(noticeRgroupSuccess, accessToken);
+        }
+
+    }
 
 }

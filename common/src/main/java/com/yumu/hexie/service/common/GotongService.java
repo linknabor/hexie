@@ -6,13 +6,13 @@ import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
-import com.yumu.hexie.model.community.Thread;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.bill.YunXiyiBill;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
+import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
 
 /**
  * <pre>
@@ -61,5 +61,7 @@ public interface GotongService {
 	WechatResponse sendMsg4ApplicationReceipt(BaseEventDTO baseEventDTO);
 
 	WechatResponse sendMsg4FinishReceipt(ReceiptNotification receiptNotification);
+
+	void sendGroupSuccessNotification(NoticeRgroupSuccess noticeRgroupSuccess);
 
 }

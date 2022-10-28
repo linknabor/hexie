@@ -1,9 +1,24 @@
 package com.yumu.hexie.web.community;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
+import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
@@ -15,15 +30,13 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.community.GroupMngService;
 import com.yumu.hexie.service.sales.BaseOrderService;
+import com.yumu.hexie.vo.OwnerGroupsVO;
 import com.yumu.hexie.vo.RefundVO;
+import com.yumu.hexie.vo.RgroupVO;
+import com.yumu.hexie.vo.RgroupVO.RegionVo;
+import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 描述:
@@ -83,7 +96,8 @@ public class GroupMngController extends BaseController {
      */
     @SuppressWarnings("unchecked")
 	@RequestMapping(value = "/queryGroupSum", method = RequestMethod.GET)
-    public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, @RequestParam String groupId) throws Exception {
+    public BaseResult<GroupSumResp> queryGroupSum(@ModelAttribute(Constants.USER) User user, 
+    		@RequestParam(required = false) String groupId) throws Exception {
         GroupSumResp resp = groupMngService.queryGroupSum(user, groupId);
         return BaseResult.successResult(resp);
     }
@@ -331,6 +345,46 @@ public class GroupMngController extends BaseController {
     }
     
     /**
+     * 后台查询团购列表
+     * @param outSidProductDepotReq
+     * @return
+     */
+    @RequestMapping(value = "/outside/groupOwenrs", method = RequestMethod.POST)
+    public CommonResponse<Object> groupOwners(@RequestBody QueryGroupOwnerReq queryGroupOwnerReq) {
+        return groupMngService.getGroupOwners(queryGroupOwnerReq);
+    }
+    
+    /**
+     * 后台更新团长费率
+     * @param outSidProductDepotReq
+     * @return
+     */
+    @RequestMapping(value = "/outside/feeRate/update", method = RequestMethod.POST)
+    public CommonResponse<Object> updateOwnerFeeRate(@RequestBody RgroupOwnerVO rgroupOwnerVO) {
+        return groupMngService.updateOwnerFeeRate(rgroupOwnerVO);
+    }
+    
+    /**
+     * 查询团长名下的团购信息
+     *@deprecated
+     * @param user
+     * @param groupId
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/outside/ownerGroups", method = RequestMethod.GET)
+    public BaseResult<OwnerGroupsVO> queryOutsideGroupsByOwner(@RequestParam String ownerId, @RequestParam (required = false) String ruleId) {
+        User user = new User();
+        user.setId(Long.valueOf(ownerId));
+    	List<RgroupVO> groupList = groupMngService.queryGroupsByOwner(user);
+        List<RegionVo> regionList = groupMngService.queryGroupRegionsByOwner(user, ruleId);
+        OwnerGroupsVO ownerGroupsVO = new OwnerGroupsVO();
+        ownerGroupsVO.setGroupList(groupList);
+        ownerGroupsVO.setRegionList(regionList);
+        return BaseResult.successResult(ownerGroupsVO);
+    }
+    
+    /**
      * 从已经发布的团购中导入商品
      * @param user
      * @param productDepotReq
@@ -385,5 +439,24 @@ public class GroupMngController extends BaseController {
     		@RequestBody(required = false) String memo) throws Exception {
         baseOrderService.rejectRefundAudit(user, recorderId, memo);
         return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
+    
+    
+    /**
+     * 查询团长名下的团购信息
+     *
+     * @param user
+     * @param groupId
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/queryGroupsByOwner", method = RequestMethod.GET)
+    public BaseResult<OwnerGroupsVO> queryGroupsByOwner(@ModelAttribute(Constants.USER) User user, @RequestParam (required = false) String ruleId) {
+        List<RgroupVO> groupList = groupMngService.queryGroupsByOwner(user);
+        List<RegionVo> regionList = groupMngService.queryGroupRegionsByOwner(user, ruleId);
+        OwnerGroupsVO ownerGroupsVO = new OwnerGroupsVO();
+        ownerGroupsVO.setGroupList(groupList);
+        ownerGroupsVO.setRegionList(regionList);
+        return BaseResult.successResult(ownerGroupsVO);
     }
 }

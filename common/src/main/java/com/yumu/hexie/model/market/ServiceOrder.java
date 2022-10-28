@@ -349,7 +349,11 @@ public class ServiceOrder  extends BaseModel {
 
 		String regionStr = StringUtils.isEmpty(address.getRegionStr())?"":address.getRegionStr();
 		String detailAddress = StringUtils.isEmpty(address.getDetailAddress())?"":address.getDetailAddress();
-		setAddress(regionStr + detailAddress);
+		String addressStr = regionStr + detailAddress;
+		if (detailAddress.contains(regionStr)) {
+			addressStr = detailAddress;
+		}
+		setAddress(addressStr);
 		if (ModelConstant.ORDER_TYPE_PROMOTION == orderType) {
 			String addr = address.getProvince() + "," + address.getCity() + "," + address.getCounty() + "," + address.getXiaoquName();
 			setAddress(addr);

@@ -26,6 +26,7 @@ import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.batch.BatchService;
 import com.yumu.hexie.service.card.WechatCardQueueTask;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
+import com.yumu.hexie.service.shequ.RgroupQueueTask;
 import com.yumu.hexie.service.shequ.WuyeQueueTask;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.subscribemsg.WechatSubscribeMsgQueueTask;
@@ -53,6 +54,10 @@ public class BatchServiceImpl implements BatchService {
 	
 	@Autowired
 	private CouponQueueTask couponQueueTask;
+	
+	@Autowired
+	private RgroupQueueTask rgroupQueueTask;
+	
 	
 	@Autowired
 	private WechatSubscribeMsgQueueTask wechatSubscribeMsgQueueTask;
@@ -138,7 +143,10 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.sendInvoiceMsgAsyc();
 		notifyQueueTask.sendReceiptMsgAsyc();
 		notifyQueueTask.noticeRgroupArrial();
-
+		notifyQueueTask.notifyGroupSuccess();
+		
+		rgroupQueueTask.groupPubPush();
+		
 		logger.info("异步队列任务启动完成。");
 		
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,10 +29,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.common.util.ObjectToBeanUtils;
+import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.GroupOwnerInfo;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.Sect;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
+import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
@@ -56,13 +61,17 @@ import com.yumu.hexie.model.user.RgroupOwner;
 import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.RgroupV3Service;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.vo.RgroupAreaRegionMapper;
 import com.yumu.hexie.vo.RgroupOrderRecordVO;
 import com.yumu.hexie.vo.RgroupRecordsVO;
+import com.yumu.hexie.vo.RgroupSubscribeVO;
 import com.yumu.hexie.vo.RgroupVO;
 import com.yumu.hexie.vo.RgroupVO.DescriptionMore;
 import com.yumu.hexie.vo.RgroupVO.ProductVO;
+import com.yumu.hexie.vo.RgroupVO.RegionVo;
 import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 import com.yumu.hexie.vo.RgroupVO.Tag;
 import com.yumu.hexie.vo.RgroupVO.Thumbnail;
@@ -99,6 +108,10 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	private UserService userService;
 	@Autowired
 	private EshopUtil eshopUtil;
+	@Autowired
+	private TemplateMsgService templateMsgService;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	
 	@Override
@@ -113,7 +126,27 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		Assert.noNullElements(rgroupVo.getProductList(), "团购商品不能为空");
 		Assert.hasText(rgroupVo.getStartDate(), "团购起始日期不能为空");
 		Assert.hasText(rgroupVo.getEndDate(), "团购结束日期不能为空");
-		Assert.notNull(rgroupVo.getRegion(), "团购区域不能为空");
+		
+		RegionVo[]regions = rgroupVo.getRegions();
+		if (regions == null) {	//兼容旧版本
+			Region formRegion = rgroupVo.getRegion();
+			if (formRegion == null) {
+				Assert.notNull(formRegion, "团购区域不能为空");
+			} else {
+				regions = new RegionVo[1];
+				RegionVo vo = new RegionVo();
+				vo.setId(formRegion.getId());
+				vo.setName(formRegion.getName());
+				vo.setSectId(formRegion.getSectId());
+				vo.setXiaoquAddress(formRegion.getXiaoquAddress());
+				vo.setLatitude(formRegion.getLatitude());
+				vo.setLongitude(formRegion.getLongitude());
+				regions[0] = vo;
+				rgroupVo.setRegions(regions);
+			}
+		} else {
+			Assert.noNullElements(rgroupVo.getRegions(), "团购区域不能为空");
+		}
 		
 		try {
 			
@@ -153,6 +186,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				rgroupOwner.setUserId(owner.getOwnerId());
 				rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
 				rgroupOwner.setMiniappid(ownerUser.getMiniAppId());
+				rgroupOwner.setName(ownerUser.getName());
+				rgroupOwner.setHeadImgUrl(ownerUser.getHeadimgurl());
+				rgroupOwner.setTel(ownerUser.getTel());
 				rgroupOwnerRepository.save(rgroupOwner);
 				
 				ownerUser.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
@@ -227,12 +263,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			} else {
 				rule.setGroupStatus(ModelConstant.GROUP_STAUS_INIT);
 			}
-			Region region = rgroupVo.getRegion();
+			RegionVo region = rgroupVo.getRegions()[0];
 			rule.setOwnerId(owner.getOwnerId());
 			rule.setOwnerName(owner.getOwnerName());
 			rule.setOwnerImg(owner.getOwnerImg());
 			rule.setOwnerSect(region.getName());
-			rule.setOwnerAddr(region.getXiaoquAddress());
+			rule.setSectCount(rgroupVo.getRegions().length);
+//			rule.setOwnerAddr(region.getXiaoquAddress());
 			rule.setOwnerTel(owner.getOwnerTel());
 			rule.setAgentId(agent.getId());
 			rule.setUpdateDate(new Date());
@@ -329,62 +366,89 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			/*3.保存product end */
 			
-			/*4.保存rgroupAreaItem 当前版本只支持单个小区 start*/
-			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rule.getId());
+			/*4.保存rgroupAreaItem 20220926支持多小区 start*/
+			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByOriRuleId(rule.getId());
+			Map<Long, RgroupAreaItem> areaMap =new HashMap<>();
 			if (areaList != null && areaList.size() > 0) {
 				for (RgroupAreaItem areaItem : areaList) {
-					rgroupAreaItemRepository.deleteById(areaItem.getId());
+					areaMap.put(areaItem.getRegionId(), areaItem);
+					areaItem.setRuleId(0l);
+					rgroupAreaItemRepository.save(areaItem);
 				}
 			}
-			RgroupAreaItem rgroupAreaItem = new RgroupAreaItem();
-			rgroupAreaItem.setRegionId(region.getId());
-			rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
-			if (ModelConstant.RULE_STATUS_ON == rule.getStatus()) {
-				rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
-			}else {
-				rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+			List<Sect> sectList = new ArrayList<>();
+			Map<Long, Region> dbSects = new HashMap<>();
+			for (int i = 0; i < rgroupVo.getRegions().length; i++) {
+				
+				RegionVo regionVo = rgroupVo.getRegions()[i];
+				RgroupAreaItem rgroupAreaItem = areaMap.get(regionVo.getId());
+				if (rgroupAreaItem == null) {
+					rgroupAreaItem = new RgroupAreaItem();
+					rgroupAreaItem.setRegionId(regionVo.getId());
+					rgroupAreaItem.setRegionType(ModelConstant.REGION_XIAOQU);
+				}
+				
+				if (ModelConstant.RULE_STATUS_ON == rule.getStatus()) {
+					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_ON);
+				}else {
+					rgroupAreaItem.setStatus(ModelConstant.DISTRIBUTION_STATUS_OFF);
+				}
+				long ruleCloseTime = rule.getEndDate().getTime();
+				rgroupAreaItem.setRuleId(rule.getId());
+				rgroupAreaItem.setOriRuleId(rule.getId());
+				rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
+				rgroupAreaItem.setSortNo(10);	
+				rgroupAreaItem.setRuleName(rule.getName());
+				Integer miniNum = 1;
+				if (!StringUtils.isEmpty(regionVo.getMiniNum())) {
+					miniNum = Integer.valueOf(regionVo.getMiniNum());
+				}
+				rgroupAreaItem.setGroupMinNum(miniNum);
+				rgroupAreaItem.setGroupStatus(ModelConstant.GROUP_STAUS_GROUPING);
+				rgroupAreaItem.setRemark(regionVo.getRemark());
+				rgroupAreaItemRepository.save(rgroupAreaItem);
+				
+				Region dbSect = regionRepository.findById(regionVo.getId());
+				if (StringUtils.isEmpty(dbSect.getSectId())) {
+					List<Region> distList = regionRepository.findByNameAndRegionType(dbSect.getParentName(), ModelConstant.REGION_COUNTY);
+					Region dist = distList.get(0);
+					List<Region> cityList = regionRepository.findByNameAndRegionType(dist.getParentName(), ModelConstant.REGION_CITY);
+					Region city = cityList.get(0);
+					createRgroupRequest.setCreateSect(Boolean.TRUE);
+					
+					Sect sect = new Sect();
+					sect.setRegionId(dbSect.getId());
+					sect.setProvince(city.getParentName());
+					sect.setCity(dist.getParentName());
+					sect.setDistrict(dbSect.getParentName());
+					sect.setSectName(dbSect.getName());
+					sect.setSectAddr(dbSect.getXiaoquAddress());
+					sectList.add(sect);
+				}
+				dbSects.put(dbSect.getId(), dbSect);
+				
 			}
-			long ruleCloseTime = rule.getEndDate().getTime();
-			rgroupAreaItem.setRuleId(rule.getId());
-			rgroupAreaItem.setRuleCloseTime(ruleCloseTime);	//取规则的结束时间,转成毫秒
-			rgroupAreaItem.setSortNo(10);	
-			rgroupAreaItem.setRuleName(rule.getName());
-			rgroupAreaItemRepository.save(rgroupAreaItem);
-			
-			Region dbSect = regionRepository.findById(region.getId());
-			String regionName = "";
-			if (StringUtils.isEmpty(dbSect.getSectId())) {
-				List<Region> distList = regionRepository.findByNameAndRegionType(dbSect.getParentName(), ModelConstant.REGION_COUNTY);
-				Region dist = distList.get(0);
-				List<Region> cityList = regionRepository.findByNameAndRegionType(dist.getParentName(), ModelConstant.REGION_CITY);
-				Region city = cityList.get(0);
-				createRgroupRequest.setCreateSect(Boolean.TRUE);
-				List<Sect> sectList = new ArrayList<>();
-				Sect sect = new Sect();
-				sect.setProvince(city.getParentName());
-				sect.setCity(dist.getParentName());
-				sect.setDistrict(dbSect.getParentName());
-				sect.setSectName(dbSect.getName());
-				sect.setSectAddr(dbSect.getXiaoquAddress());
-				sectList.add(sect);
-				createRgroupRequest.setSects(sectList);
-				regionName = sect.getProvince();
-			}
+			createRgroupRequest.setSects(sectList);
 			
 			if (createRgroupRequest.getCreateOwner() || createRgroupRequest.getCreateSect()) {
-				CreateRgroupRequest response = eshopUtil.createRgroup(regionName, createRgroupRequest);
-				List<Sect> sectList = response.getSects();
-				
-				if (createRgroupRequest.getCreateSect() && sectList != null && !sectList.isEmpty()) {
-					dbSect.setSectId(sectList.get(0).getSectId());
-					regionRepository.save(dbSect);
+				CreateRgroupRequest response = eshopUtil.createRgroup("", createRgroupRequest);
+				List<Sect> respSectList = response.getSects();
+				if (createRgroupRequest.getCreateSect() && respSectList != null && !respSectList.isEmpty()) {
+					for (Sect sect : respSectList) {
+						Region dbSect = dbSects.get(sect.getRegionId());
+						dbSect.setSectId(sect.getSectId());
+						regionRepository.save(dbSect);
+					}
+					
 					if (StringUtils.isEmpty(ownerUser.getSectId())) {
-						ownerUser.setSectId(dbSect.getSectId());
+						ownerUser.setSectId(respSectList.get(0).getSectId());
 						ownerUser.setCspId(sectList.get(0).getCspId());
-						ownerUser.setXiaoquName(dbSect.getName());
+						ownerUser.setXiaoquName(respSectList.get(0).getSectName());
 						userService.save(ownerUser);
 					}
 				}
+				
+				
 				GroupOwnerInfo groupOwner = response.getOwner();
 				if (createRgroupRequest.getCreateOwner() && groupOwner!=null) {
 					orgOperator.setOrgOperId(groupOwner.getOrgOperId());
@@ -398,6 +462,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			/*4.保存rgroupAreaItem 当前版本只支持单个小区 end*/
 			
+			/*通知订阅*/
+			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
+				Map<String, String> map = new HashMap<>();
+				map.put("ruleId", String.valueOf(rule.getId()));
+				String queue = objectMapper.writeValueAsString(map);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_PUB_QUEUE, queue);
+			}
 			return rule.getId();
 			
 		} catch (Exception e) {
@@ -429,11 +500,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			
 			RgroupRule rule = rgroupRuleRepository.findByIdAndStatusIn(ruleId, statusList);
 			if (rule == null) {
-				if (isOnsale) {
-//					throw new BizValidateException("团购已下架");
-				} else {
-					throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
-				}
+				throw new BizValidateException("未查询到团购, id : " + rgroupRuleId);
 			}
 			vo.setRuleId(String.valueOf(rule.getId()));
 			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
@@ -545,17 +612,30 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			}
 			vo.setProductList(proVoList.toArray(new ProductVO[0]));
 			
-			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(ruleId);
-			if (areaList != null && areaList.size() > 0) {
-				RgroupAreaItem areaItem = areaList.get(0);
-				Region region = regionRepository.findById(areaItem.getRegionId());
-				vo.setRegion(region);
+			List<Object[]> areaList = rgroupAreaItemRepository.findWithRegionByRuleId(ruleId);
+			List<RgroupAreaRegionMapper> regionList = ObjectToBeanUtils.objectToBean(areaList, RgroupAreaRegionMapper.class);
+			if (regionList == null) {
+				regionList = new ArrayList<>();
 			}
+			RegionVo[] regionVos = new RegionVo[regionList.size()];
+			for (int j = 0; j < regionList.size(); j++) {
+				RgroupAreaRegionMapper areaRegionMapper = regionList.get(j);
+				RegionVo regionVo = new RegionVo();
+				regionVo.setId(areaRegionMapper.getId().longValue());
+				regionVo.setName(areaRegionMapper.getName());
+				regionVo.setXiaoquAddress(areaRegionMapper.getXiaoquAddress());
+				regionVo.setMiniNum(String.valueOf(areaRegionMapper.getGroupMinNum()));
+				regionVo.setCurrentNum(String.valueOf(areaRegionMapper.getCurrentNum()));
+				regionVo.setRemark(areaRegionMapper.getRemark());
+				regionVo.setLatitude(areaRegionMapper.getLatitude());
+				regionVo.setLongitude(areaRegionMapper.getLongitude());
+				regionVo.setSectId(areaRegionMapper.getSectId());
+				regionVos[j] = regionVo;
+			}
+			vo.setRegions(regionVos);
 			
-			if (isOnsale) {
-				stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rule.getId());
-				stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rule.getOwnerId());
-			}
+			Region region = regionRepository.findById(regionVos[0].getId());	//TODO 兼容旧版本
+			vo.setRegion(region);	//TODO 兼容旧版本
 			
 			RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
 			int attendees = 0;
@@ -600,10 +680,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	/**
 	 * 更新团购状态
 	 * @param ruleId
+	 * @throws Exception 
 	 */
 	@Override
 	@Transactional
-	public void updateRgroupStatus(long ruleId, boolean isPub) {
+	public void updateRgroupStatus(long ruleId, boolean isPub) throws Exception {
 		
 		int ruleStatus = ModelConstant.RULE_STATUS_ON;
 		int distributionStatus = ModelConstant.DISTRIBUTION_STATUS_ON;
@@ -630,6 +711,16 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rgroupAreaItem.setStatus(distributionStatus);
 		}
 		rgroupAreaItemRepository.saveAll(itemList);
+		
+		if (isPub) {
+			/*通知订阅*/
+			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
+				Map<String, String> map = new HashMap<>();
+				map.put("ruleId", String.valueOf(rule.getId()));
+				String queue = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(map);
+				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_PUB_QUEUE, queue);
+			}
+		}
 	}
 	
 	/**
@@ -845,5 +936,607 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		Date createDate = c.getTime();
 		Page<Product> products = productRepository.findProductFromSalesByOwner(user.getId(), createDate, productName, excludeDepotIds, pageable);
 		return products.getContent();
+	}
+	
+	/**
+	 * 获取正在进行团购的小区列表
+	 * @throws Exception 
+	 */
+	@Override
+	public List<QueryRgroupSectsMapper> getGroupSects(User user, String sectName, int currentPage) throws Exception {
+		
+		List<Order> orderList = new ArrayList<>();
+    	Order order = new Order(Direction.DESC, "createDate");
+    	orderList.add(order);
+    	order = new Order(Direction.ASC, "status");
+    	orderList.add(order);
+    	Sort sort = Sort.by(orderList);
+		Pageable pageable = PageRequest.of(currentPage, 10, sort);
+		Date date = new Date();
+		List<Integer> statusList = new ArrayList<>();
+		statusList.add(ModelConstant.RULE_STATUS_ON);
+		statusList.add(ModelConstant.RULE_STATUS_END);
+		Page<Object[]> page = rgroupRuleRepository.findGroupSects(statusList, sectName, pageable);
+		List<QueryRgroupSectsMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
+		if (list == null) {
+			list = new ArrayList<>();
+		}
+		for (QueryRgroupSectsMapper queryRgroupSectsMapper : list) {
+			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(statusList, date.getTime(), queryRgroupSectsMapper.getId().longValue());
+			RgroupVO vo = new RgroupVO();
+			for (RgroupRule rule : rules) {
+				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+				String descMoreStr = rule.getDescriptionMore();
+				DescriptionMore[]descriptionMore = new DescriptionMore[0];
+				if (!StringUtils.isEmpty(descMoreStr)) {
+					TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+					descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+					vo.setDescription(rule.getDescription());
+					vo.setDescriptionMore(descriptionMore);
+					vo.setStatus(rule.getStatus());
+				}
+				
+				List<String> descMoreImages = new ArrayList<>();
+				for (DescriptionMore descM : descriptionMore) {
+					String imageUrl = descM.getImage();
+					if (!StringUtils.isEmpty(imageUrl)) {
+						descMoreImages.add(imageUrl);
+					}
+					Thumbnail[]thumbnails = descM.getThumbnail();
+					if (thumbnails!=null && thumbnails.length>0) {
+						for (Thumbnail thumbnail : thumbnails) {
+							if (!StringUtils.isEmpty(thumbnail.getUrl())) {
+								descMoreImages.add(thumbnail.getUrl());
+							}
+						}
+					}
+				}
+				vo.setDescMoreImages(descMoreImages);
+			}
+			List<String> images = queryRgroupSectsMapper.getGroupImages();
+			if (images == null) {
+				images = new ArrayList<>();
+			}
+			if (vo.getDescMoreImages()!= null) {
+				images.addAll(vo.getDescMoreImages());
+			}
+			queryRgroupSectsMapper.setGroupImages(images);
+		}
+		
+		return list;
+	}
+	
+	/**
+	 * 获取某一小区小的团购列表
+	 * @throws Exception 
+	 */
+	@Override
+	public List<RgroupVO> getSectGroups(User user, String regionId, String title, int currentPage) throws Exception {
+		
+		Assert.hasLength(regionId, "小区id不能为空。");
+		
+		List<RgroupVO> voList = new ArrayList<>();
+		try {
+			List<Order> orderList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "updateDate");
+	    	orderList.add(order);
+	    	order = new Order(Direction.ASC, "status");
+	    	orderList.add(order);
+	    	Sort sort = Sort.by(orderList);
+			Pageable pageable = PageRequest.of(currentPage, 10, sort);
+			
+			if (StringUtils.isEmpty(title)) {
+				title = "";
+			}
+			List<Integer> statusList = new ArrayList<>();
+			statusList.add(ModelConstant.RULE_STATUS_ON);
+			statusList.add(ModelConstant.RULE_STATUS_END);
+			Page<RgroupRule> pages = rgroupRuleRepository.findByRegionId(statusList, Long.valueOf(regionId), title, pageable);
+			List<RgroupRule> ruleList = pages.getContent();
+			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+			long currentMills = System.currentTimeMillis();
+			for (RgroupRule rgroupRule : ruleList) {
+				RgroupVO vo = new RgroupVO();
+				String descMoreStr = rgroupRule.getDescriptionMore();
+				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+				DescriptionMore[]descriptionMore = null;
+				if (!StringUtils.isEmpty(descMoreStr)) {
+					descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				} else {
+					descriptionMore = new DescriptionMore[0];
+				}
+				RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
+				int attendees = 0;
+				String attendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rgroupRule.getOwnerId());
+				if (!StringUtils.isEmpty(attendeesStr)) {
+					attendees = Integer.parseInt(attendeesStr);
+				}
+				rgroupOwnerVO.setAttendees(attendees);
+				int members = 0;
+				String membersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rgroupRule.getOwnerId());
+				if (!StringUtils.isEmpty(membersStr)) {
+					members = Integer.parseInt(membersStr);
+				}
+				rgroupOwnerVO.setMembers(members);
+				rgroupOwnerVO.setOwnerId(rgroupRule.getOwnerId());
+				rgroupOwnerVO.setOwnerName(rgroupRule.getOwnerName());
+				rgroupOwnerVO.setOwnerImg(rgroupRule.getOwnerImg());
+				rgroupOwnerVO.setOwnerTel(rgroupRule.getOwnerTel());
+				vo.setRgroupOwner(rgroupOwnerVO);
+				
+				int groupAttendees = 0;
+				String groupAttendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ORDERED + rgroupRule.getId());
+				if (!StringUtils.isEmpty(groupAttendeesStr)) {
+					groupAttendees = Integer.parseInt(groupAttendeesStr);
+				}
+				vo.setOrdered(groupAttendees);
+				
+				int groupMembers = 0;
+				String groupMembersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rgroupRule.getId());
+				if (!StringUtils.isEmpty(groupMembersStr)) {
+					groupMembers = Integer.parseInt(groupMembersStr);
+				}
+				vo.setAccessed(groupMembers);
+				
+				List<String> descMoreImages = new ArrayList<>();
+				for (DescriptionMore descMore : descriptionMore) {
+					if ("0".equals(descMore.getType())) {
+						continue;
+					} else if ("1".equals(descMore.getType())) {
+						Thumbnail[]thumbnails = descMore.getThumbnail();
+						if (thumbnails == null || thumbnails.length == 0) {
+							continue;
+						}
+						for (Thumbnail thumbnail : thumbnails) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(thumbnail.getUrl());
+							}
+						}
+					} else if ("2".equals(descMore.getType())) {
+						if (!StringUtils.isEmpty(descMore.getImage())) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(descMore.getImage());
+							}
+						}
+					}
+				}
+				
+				List<Product> productList = productRepository.findMultiByRuleId(rgroupRule.getId());
+				float miniPrice = 0f;
+				float maxPrice = 0f;
+				for (int i = 0; i < productList.size(); i++) {
+					Product product = productList.get(i);
+					if (descMoreImages.size() < 3) {
+						String[]pics = product.getPictureList();
+						for (String pic : pics) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(pic);
+							}
+						}
+					}
+					float singlePrice = product.getSinglePrice();
+					if (i == 0) {
+						miniPrice = singlePrice;
+					} else {
+						if (singlePrice < miniPrice) {
+							miniPrice = singlePrice;
+						}
+					}
+					if (singlePrice > maxPrice) {
+						maxPrice = singlePrice;
+					}
+				}
+				String pricePeriod = miniPrice + "~" + maxPrice;
+				if (miniPrice == 0f || miniPrice == maxPrice) {
+					pricePeriod = String.valueOf(maxPrice);
+				}
+				vo.setPricePeriod(pricePeriod);
+				vo.setRuleId(String.valueOf(rgroupRule.getId()));
+				vo.setDescMoreImages(descMoreImages);
+				vo.setDescription(rgroupRule.getDescription());
+				Date startDate = rgroupRule.getStartDate();
+				String startDateStr = "";
+				if (startDate != null) {
+					if ((currentMills - startDate.getTime()) < (3600 * 24 * 1000l)) {
+						startDateStr = DateUtil.dtFormat(startDate, "MM-dd");
+						if (!StringUtils.isEmpty(startDateStr)) {
+							String[]dateArr = startDateStr.split("-");
+							startDateStr = dateArr[0] + "月" + dateArr[1] + "日";
+						}
+					} else {
+						startDateStr = DateUtil.getSendTime(startDate.getTime());
+						
+					}
+					vo.setStartDate(startDateStr);
+				}
+				Date endDate = rgroupRule.getEndDate();
+				vo.setStartDateMills(startDate.getTime());
+				vo.setEndDateMills(endDate.getTime());
+				vo.setStatus(rgroupRule.getStatus());
+				
+				RgroupRecordsVO rgroupRecordsVO = queryOrderRecords(vo.getRuleId(), 0);
+				vo.setRgroupRecords(rgroupRecordsVO);
+				voList.add(vo);
+			}
+			
+		} catch (Exception e) {
+			logger.info(e.getMessage(), e);
+			throw new BizValidateException(e.getMessage());
+		}
+		
+		return voList;
+	}
+	
+	/**
+	 * 获取团购信息
+	 * @param rgroupRuleId
+	 */
+	@Override
+	public RgroupOwnerVO getLeaderInfo(String groupLeaderId) {
+		
+		Assert.hasText(groupLeaderId, "团长id不能为空。");
+		try {
+			long leaderId = Long.valueOf(groupLeaderId);
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(leaderId);
+			if(rgroupOwner == null) {
+				throw new BizValidateException("未查询到团长信息");
+			}
+			RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
+			int attendees = 0;
+			String attendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rgroupOwner.getUserId());
+			if (!StringUtils.isEmpty(attendeesStr)) {
+				attendees = Integer.parseInt(attendeesStr);
+			}
+			rgroupOwnerVO.setAttendees(attendees);
+			int members = 0;
+			String membersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rgroupOwner.getUserId());
+			if (!StringUtils.isEmpty(membersStr)) {
+				members = Integer.parseInt(membersStr);
+			}
+			rgroupOwnerVO.setMembers(members);
+			rgroupOwnerVO.setOwnerId(leaderId);
+			rgroupOwnerVO.setOwnerName(rgroupOwner.getName());
+			rgroupOwnerVO.setOwnerImg(rgroupOwner.getHeadImgUrl());
+			rgroupOwnerVO.setOwnerTel(rgroupOwner.getTel());
+			return rgroupOwnerVO;
+			
+		} catch (Exception e) {
+			logger.info(e.getMessage(), e);
+			throw new BizValidateException(e.getMessage());
+		}
+		
+	}
+	
+	/**
+	 * 获取某一小区小的团购列表
+	 * @throws Exception 
+	 */
+	@Override
+	public List<RgroupVO> getLeadGroups(String groupLeaderId, String title, int currentPage) throws Exception {
+		
+		Assert.hasText(groupLeaderId, "团长id不能为空。");
+		
+		List<RgroupVO> voList = new ArrayList<>();
+		try {
+			long leaderId = Long.valueOf(groupLeaderId);
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(leaderId);
+			if(rgroupOwner == null) {
+				throw new BizValidateException("未查询到团长信息");
+			}
+			
+			List<Order> orderList = new ArrayList<>();
+	    	Order order = new Order(Direction.DESC, "updateDate");
+	    	orderList.add(order);
+	    	Sort sort = Sort.by(orderList);
+			Pageable pageable = PageRequest.of(currentPage, 10, sort);
+			
+			if (StringUtils.isEmpty(title)) {
+				title = "";
+			}
+			
+			Page<RgroupRule> pages = rgroupRuleRepository.findByOwnerIdAndDescriptionLike(rgroupOwner.getUserId(), title, pageable);
+			List<RgroupRule> ruleList = pages.getContent();
+			ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+			long currentMills = System.currentTimeMillis();
+			for (RgroupRule rgroupRule : ruleList) {
+				RgroupVO vo = new RgroupVO();
+				String descMoreStr = rgroupRule.getDescriptionMore();
+				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+				DescriptionMore[]descriptionMore = null;
+				if (!StringUtils.isEmpty(descMoreStr)) {
+					descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				} else {
+					descriptionMore = new DescriptionMore[0];
+				}
+				
+				RgroupOwnerVO rgroupOwnerVO = new RgroupOwnerVO();
+				int attendees = 0;
+				String attendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ORDERED + rgroupRule.getOwnerId());
+				if (!StringUtils.isEmpty(attendeesStr)) {
+					attendees = Integer.parseInt(attendeesStr);
+				}
+				rgroupOwnerVO.setAttendees(attendees);
+				int members = 0;
+				String membersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + rgroupRule.getOwnerId());
+				if (!StringUtils.isEmpty(membersStr)) {
+					members = Integer.parseInt(membersStr);
+				}
+				rgroupOwnerVO.setMembers(members);
+				rgroupOwnerVO.setOwnerId(rgroupRule.getOwnerId());
+				rgroupOwnerVO.setOwnerName(rgroupRule.getOwnerName());
+				rgroupOwnerVO.setOwnerImg(rgroupRule.getOwnerImg());
+				rgroupOwnerVO.setOwnerTel(rgroupRule.getOwnerTel());
+				vo.setRgroupOwner(rgroupOwnerVO);
+				
+				int groupAttendees = 0;
+				String groupAttendeesStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ORDERED + rgroupRule.getId());
+				if (!StringUtils.isEmpty(groupAttendeesStr)) {
+					groupAttendees = Integer.parseInt(groupAttendeesStr);
+				}
+				vo.setOrdered(groupAttendees);
+				
+				int groupMembers = 0;
+				String groupMembersStr = stringRedisTemplate.opsForValue().get(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + rgroupRule.getId());
+				if (!StringUtils.isEmpty(groupMembersStr)) {
+					groupMembers = Integer.parseInt(groupMembersStr);
+				}
+				vo.setAccessed(groupMembers);
+				
+				List<String> descMoreImages = new ArrayList<>();
+				for (DescriptionMore descMore : descriptionMore) {
+					if ("0".equals(descMore.getType())) {
+						continue;
+					} else if ("1".equals(descMore.getType())) {
+						Thumbnail[]thumbnails = descMore.getThumbnail();
+						if (thumbnails == null || thumbnails.length == 0) {
+							continue;
+						}
+						for (Thumbnail thumbnail : thumbnails) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(thumbnail.getUrl());
+							}
+						}
+					} else if ("2".equals(descMore.getType())) {
+						if (!StringUtils.isEmpty(descMore.getImage())) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(descMore.getImage());
+							}
+						}
+					}
+				}
+				
+				List<Product> productList = productRepository.findMultiByRuleId(rgroupRule.getId());
+				float miniPrice = 0f;
+				float maxPrice = 0f;
+				for (int i = 0; i < productList.size(); i++) {
+					Product product = productList.get(i);
+					if (descMoreImages.size() < 3) {
+						String[]pics = product.getPictureList();
+						for (String pic : pics) {
+							if (descMoreImages.size() < 3) {
+								descMoreImages.add(pic);
+							}
+						}
+					}
+					float singlePrice = product.getSinglePrice();
+					if (i == 0) {
+						miniPrice = singlePrice;
+					} else {
+						if (singlePrice < miniPrice) {
+							miniPrice = singlePrice;
+						}
+					}
+					if (singlePrice > maxPrice) {
+						maxPrice = singlePrice;
+					}
+				}
+				String pricePeriod = miniPrice + "~" + maxPrice;
+				if (miniPrice == 0f || miniPrice == maxPrice) {
+					pricePeriod = String.valueOf(maxPrice);
+				}
+				vo.setPricePeriod(pricePeriod);
+				vo.setRuleId(String.valueOf(rgroupRule.getId()));
+				vo.setDescMoreImages(descMoreImages);
+				vo.setDescription(rgroupRule.getDescription());
+				Date startDate = rgroupRule.getStartDate();
+				String startDateStr = "";
+				if (startDate != null) {
+					if ((currentMills - startDate.getTime()) < (3600 * 24 * 1000l)) {
+						startDateStr = DateUtil.dtFormat(startDate, "MM-dd");
+						if (!StringUtils.isEmpty(startDateStr)) {
+							String[]dateArr = startDateStr.split("-");
+							startDateStr = dateArr[0] + "月" + dateArr[1] + "日";
+						}
+					} else {
+						startDateStr = DateUtil.getSendTime(startDate.getTime());
+						
+					}
+					vo.setStartDate(startDateStr);
+				}
+				Date endDate = rgroupRule.getEndDate();
+				vo.setStartDateMills(startDate.getTime());
+				vo.setEndDateMills(endDate.getTime());
+				vo.setStatus(rgroupRule.getStatus());
+				
+				RgroupRecordsVO rgroupRecordsVO = queryOrderRecords(vo.getRuleId(), 0);
+				vo.setRgroupRecords(rgroupRecordsVO);
+				voList.add(vo);
+			}
+			
+		} catch (Exception e) {
+			logger.info(e.getMessage(), e);
+			throw new BizValidateException(e.getMessage());
+		}
+		
+		return voList;
+	}
+	
+	/**
+	 * 团购商品访问统计
+	 * @param user
+	 * @param ruleId
+	 * @param ownerId
+	 */
+	@Override
+	public void visitView(User user, String ruleIdStr, String ownerIdStr) {
+		
+		long ruleId = 0l;
+		if (!StringUtils.isEmpty(ruleIdStr)) {
+			ruleId = Long.parseLong(ruleIdStr);
+		}
+		long ownerId = 0l;
+		if (!StringUtils.isEmpty(ownerIdStr)) {
+			ownerId = Long.parseLong(ownerIdStr);
+		}
+		
+		if (ruleId > 0) {
+			stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_GROUP_ACCESSED + ruleId);
+		}
+		if (ownerId > 0) {
+			stringRedisTemplate.opsForValue().increment(ModelConstant.KEY_RGROUP_OWNER_ACCESSED + ownerId);
+		}
+		
+	}
+	
+	@Override
+	public void subscribe(User user, RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		String key = "";
+		switch (rgroupSubscribeVO.getType()) {
+		case 0:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_GROUP;
+			break;
+		case 1:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
+			break;
+		case 2:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION;
+			break;
+		default:
+			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
+		}
+		key += rgroupSubscribeVO.getInfoId();
+		stringRedisTemplate.opsForHash().put(key, String.valueOf(user.getId()), String.valueOf(System.currentTimeMillis()));
+		
+	}
+	
+	@Override
+	public void unsubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		String key = "";
+		switch (rgroupSubscribeVO.getType()) {
+		case 0:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_GROUP;
+			break;
+		case 1:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
+			break;
+		case 2:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION;
+			break;
+		default:
+			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
+		}
+		key += rgroupSubscribeVO.getInfoId();
+		stringRedisTemplate.opsForHash().delete(key, String.valueOf(user.getId()));
+		
+	}
+	
+	@Override
+	public boolean getUserSubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO) {
+		
+		String key = "";
+		switch (rgroupSubscribeVO.getType()) {
+		case 0:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_GROUP;
+			break;
+		case 1:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER;
+			break;
+		case 2:
+			key = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION;
+			break;
+		default:
+			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
+		}
+		key += rgroupSubscribeVO.getInfoId();
+		Object object = stringRedisTemplate.opsForHash().get(key, String.valueOf(user.getId()));
+		if (object == null) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 团购发布后的订阅推送
+	 * @param ruleIdStr
+	 */
+	@Override
+	public void sendPubMsg(String ruleId) {
+		
+		if (StringUtils.isEmpty(ruleId)) {
+			logger.info("ruleId is empty, will return .");
+			return;
+		}
+		RgroupVO rgroupVO = queryRgroupByRule(ruleId, true);
+		RgroupOwnerVO rgroupOwnerVO = rgroupVO.getRgroupOwner();
+		
+		String leaderKeyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_LEADER + rgroupOwnerVO.getOwnerId();
+		Map<Object, Object> leaderSuscribeMap = stringRedisTemplate.opsForHash().entries(leaderKeyPattern);
+		logger.info("leaderSuscribeMap : " + leaderSuscribeMap);
+		List<String> sendUserList = new ArrayList<>();
+		
+		if (leaderSuscribeMap != null && !leaderSuscribeMap.isEmpty()) {
+			Iterator<Map.Entry<Object, Object>> it = leaderSuscribeMap.entrySet().iterator();
+			while(it.hasNext()) {
+				Map.Entry<Object, Object> entry = it.next();
+				String userId = (String) entry.getKey();
+				sendUserList.add(userId);
+				User sendUser = userService.getById(Long.valueOf(userId));
+				String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+				if (StringUtils.isEmpty(accessToken)) {
+					continue;
+				}
+				try {
+					templateMsgService.sendGroupLeaderSubscribe(sendUser, rgroupVO, accessToken);
+				} catch (Exception e) {
+					logger.info(e.getMessage(), e);
+				}
+			}
+		}
+		
+		
+		RegionVo[]regions= rgroupVO.getRegions();
+		for (RegionVo regionVo : regions) {
+			String keyPattern = ModelConstant.KEY_RGROUP_SUBSCRIBE_REGION + regionVo.getId();
+			Map<Object, Object> regionSubscribeMap = stringRedisTemplate.opsForHash().entries(keyPattern);
+			logger.info("regionSubscribeMap : " + regionSubscribeMap);
+			if (regionSubscribeMap != null && !regionSubscribeMap.isEmpty()) {
+				Iterator<Map.Entry<Object, Object>> it = regionSubscribeMap.entrySet().iterator();
+				while(it.hasNext()) {
+					Map.Entry<Object, Object> entry = it.next();
+					String userId = (String) entry.getKey();
+					if (sendUserList.contains(userId)) {
+						continue;
+					}
+					User sendUser = userService.getById(Long.valueOf(userId));
+					String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+					Region region = new Region();
+					BeanUtils.copyProperties(regionVo, region);
+					rgroupVO.setRegion(region);
+					if (StringUtils.isEmpty(accessToken)) {
+						continue;
+					}
+					try {
+						templateMsgService.sendGroupRegionSubscribe(sendUser, rgroupVO, accessToken);
+					} catch (Exception e) {
+						logger.info(e.getMessage(), e);
+					}
+				}
+				
+			}
+			
+		}
+		
 	}
 }

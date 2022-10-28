@@ -48,6 +48,8 @@ import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
+import com.yumu.hexie.vo.RgroupAddressVO;
+import com.yumu.hexie.vo.RgroupVO.RegionVo;
 
 @Service("addressService")
 public class AddressServiceImpl implements AddressService {
@@ -192,8 +194,9 @@ public class AddressServiceImpl implements AddressService {
 		}
         address.setXiaoquAddress(xiaoquAddress);
         
-        String detailAddress = addressReq.getDetailAddress();
-        address.setDetailAddress(detailAddress);
+        String detailAddress = addressReq.getDetailAddress();	//这里detailAddress是楼号+室号的缩写
+        address.setDetailAddress(xiaoquAddress + detailAddress);
+        address.setRoomAddress(detailAddress);
         address.setUserName(addressReq.getReceiveName());
         List<Address> addrs = addressRepository.findAllByUserId(address.getUserId());
         if(getDefaultAddr(addrs) == null) {
@@ -514,11 +517,16 @@ public class AddressServiceImpl implements AddressService {
 	 * 获取用户当前团购可用的地址
 	 */
 	@Override
-	public List<Address> queryRgroupAddressByUser(long userId, String ruleId) {
+	public List<Address> queryRgroupAddressByUser(long userId, String ruleId, String regionId) {
 		
 		List<Long> supportRegions = new ArrayList<>();
 		List<RgroupAreaItem> areaItems = rgroupAreaItemRepository.findByRuleId(Long.valueOf(ruleId));
 		for (RgroupAreaItem rgroupAreaItem : areaItems) {
+			if (!StringUtils.isEmpty(regionId)) {
+				if (!regionId.equals(String.valueOf(rgroupAreaItem.getRegionId()))) {
+					continue;
+				}
+			}
 			supportRegions.add(rgroupAreaItem.getRegionId());
 		}
 		List<Address> availalbe = new ArrayList<>();
@@ -529,6 +537,39 @@ public class AddressServiceImpl implements AddressService {
 			}
 		}
 		return availalbe;
+	}
+	
+	/**
+	 * 获取用户当前团购用户默认地址
+	 */
+	@Override
+	public RgroupAddressVO queryRgroupDefaultAddress(long userId, String ruleId) {
+		
+		List<RgroupAddressVO> defaultAddressList = new ArrayList<>();
+		Map<Long, RegionVo> supportRegions = new HashMap<>();
+		List<RgroupAreaItem> areaItems = rgroupAreaItemRepository.findByRuleId(Long.valueOf(ruleId));
+		for (RgroupAreaItem rgroupAreaItem : areaItems) {
+			Region region = regionRepository.findById(rgroupAreaItem.getRegionId());
+			RegionVo regionVo = new RegionVo();
+			regionVo.setId(region.getId());
+			regionVo.setName(region.getName());
+			supportRegions.put(rgroupAreaItem.getRegionId(), regionVo);
+		}
+		List<Address> allAddr = addressRepository.findAllByUserId(userId);
+		for (Address address : allAddr) {
+			if (supportRegions.containsKey(address.getXiaoquId())) {
+				RgroupAddressVO vo = new RgroupAddressVO();
+				RegionVo regionVo = supportRegions.get(address.getXiaoquId());
+				vo.setRegion(regionVo);
+				vo.setAddress(address);
+				defaultAddressList.add(vo);
+			}
+		}
+		RgroupAddressVO returnVo = null;
+		if (!defaultAddressList.isEmpty()) {
+			returnVo = defaultAddressList.get(0);
+		}
+		return returnVo;
 	}
 
 	@Override

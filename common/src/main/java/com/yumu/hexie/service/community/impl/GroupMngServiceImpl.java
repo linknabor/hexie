@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,15 +26,18 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
+import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
 import com.yumu.hexie.integration.community.resp.GroupInfoVo;
 import com.yumu.hexie.integration.community.resp.GroupOrderVo;
+import com.yumu.hexie.integration.community.resp.GroupOwnerVO;
 import com.yumu.hexie.integration.community.resp.GroupProductSumVo;
 import com.yumu.hexie.integration.community.resp.GroupSumResp;
 import com.yumu.hexie.integration.community.resp.OutSidDepotResp;
@@ -44,8 +49,10 @@ import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
-import com.yumu.hexie.model.commonsupport.info.ProductRuleRepository;
+import com.yumu.hexie.model.distribution.RgroupAreaItem;
+import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
+import com.yumu.hexie.model.distribution.region.Region;
+import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.market.OrderItem;
 import com.yumu.hexie.model.market.OrderItemRepository;
 import com.yumu.hexie.model.market.RefundRecord;
@@ -54,12 +61,16 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
+import com.yumu.hexie.model.user.RgroupOwner;
+import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.community.GroupMngService;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.UserNoticeService;
 import com.yumu.hexie.vo.RgroupVO;
+import com.yumu.hexie.vo.RgroupVO.RegionVo;
+import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 import com.yumu.hexie.vo.RgroupVO.Thumbnail;
 
 /**
@@ -70,12 +81,11 @@ import com.yumu.hexie.vo.RgroupVO.Thumbnail;
  */
 @Service
 public class GroupMngServiceImpl implements GroupMngService {
+	
+	private static Logger logger = LoggerFactory.getLogger(GroupMngServiceImpl.class);
 
     @Autowired
     private RgroupRuleRepository rgroupRuleRepository;
-
-    @Autowired
-    private ProductRuleRepository productRuleRepository;
 
     @Autowired
     private ServiceOrderRepository serviceOrderRepository;
@@ -103,6 +113,16 @@ public class GroupMngServiceImpl implements GroupMngService {
     
     @Autowired
     private RefundRecordRepository refundRecordRepository;
+    
+    @Autowired
+    private RegionRepository regionRepository;
+    
+    @Autowired
+    private RgroupOwnerRepository rgroupOwnerRepository;
+    
+    @Autowired
+    private RgroupAreaItemRepository rgroupAreaItemRepository;
+    
 
     @Override
     public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
@@ -219,7 +239,7 @@ public class GroupMngServiceImpl implements GroupMngService {
     @Transactional
     public Boolean updateGroupInfo(User user, String groupId, String operType) {
 
-        if (!"1".equals(operType) && !"3".equals(operType)) {
+        if (!"1".equals(operType) && !"3".equals(operType) && !"4".equals(operType) && !"5".equals(operType)) {
             throw new BizValidateException("不合法的操作数据类型");
         }
         if (StringUtils.isEmpty(groupId)) {
@@ -230,20 +250,31 @@ public class GroupMngServiceImpl implements GroupMngService {
         if (rgroupRule!=null) {
             if ("1".equals(operType)) { //结束操作
                 //修改团购结束日期
-                rgroupRule.setStatus(1);
-                Date date = new Date();
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(date);
-                calendar.add(Calendar.SECOND, -1);
-                date = calendar.getTime();
-                rgroupRule.setEndDate(date);
-            } else {
-                //下架团购
-                rgroupRule.setStatus(0);
-            }
+                rgroupRule.setStatus(ModelConstant.RULE_STATUS_END);
+            } else if ("3".equals(operType)) {	//删除团购
+                rgroupRule.setStatus(ModelConstant.RULE_STATUS_DEL);
+            } else if ("4".equals(operType)) {	//开启团购
+              Date date = new Date();
+              Calendar calendar = Calendar.getInstance();
+              calendar.setTime(date);
+              calendar.add(Calendar.DATE, 2);
+              date = calendar.getTime();
+              rgroupRule.setEndDate(date);
+              rgroupRule.setStatus(ModelConstant.RULE_STATUS_ON);
+              
+              List<RgroupAreaItem>  areaList = rgroupAreaItemRepository.findByRuleId(rgroupRule.getId());
+              for (RgroupAreaItem rgroupAreaItem : areaList) {
+            	  rgroupAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_ON, rgroupAreaItem.getId());
+            	  rgroupAreaItemRepository.save(rgroupAreaItem);
+              }
+              
+			} else if ("5".equals(operType)) {
+				rgroupRule.setHidden(true);
+			}
         } else {
-            throw new BizValidateException("为查到团购信息，请刷新重试");
+            throw new BizValidateException("未查到团购信息，请刷新重试");
         }
+        rgroupRuleRepository.save(rgroupRule);
         return true;
     }
 
@@ -285,19 +316,30 @@ public class GroupMngServiceImpl implements GroupMngService {
             List<OutSidRelateGroupResp> list = ObjectToBeanUtils.objectToBean(rgroupRules, OutSidRelateGroupResp.class);
 
             for(OutSidRelateGroupResp resp : list) {
-                if (resp.getStatus() == 1) {
-                    Date date = new Date();
-                    if (resp.getStartDate().getTime() <= date.getTime()
-                            && resp.getEndDate().getTime() >= date.getTime()) { //跟团中
-                        resp.setStatus_cn("正在跟团中");
-                    } else if (resp.getEndDate().getTime() < date.getTime()) {
-                        resp.setStatus_cn("已结束");
-                    } else if (resp.getStartDate().getTime() > date.getTime()) {
-                        resp.setStatus_cn("未开始");
-                    }
-                } else {
-                    resp.setStatus_cn("预览中");
-                }
+            	String groupStatusCn = "";
+                Date date = new Date();
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_ON) {
+            		if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "跟团中";
+            		}
+            		if (resp.getStartDate().getTime() > date.getTime()) {
+            			groupStatusCn = "未开始";
+        			}
+        		} else if(resp.getStatus() == ModelConstant.RULE_STATUS_OFF) {
+        			if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "预览中";
+            		}
+        		}
+            	if (resp.getEndDate().getTime() < date.getTime()) {
+            		groupStatusCn = "已结束";
+        		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_END) {
+            		groupStatusCn = "已结束";
+        		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_DEL) {
+            		groupStatusCn = "已删除";
+				}
+            	resp.setStatus_cn(groupStatusCn);
             }
             QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
             responsePage.setContent(list);
@@ -328,23 +370,35 @@ public class GroupMngServiceImpl implements GroupMngService {
             Sort sort = Sort.by(orderList);
 
             Pageable pageable = PageRequest.of(outSidProductDepotReq.getCurrentPage(), outSidProductDepotReq.getPageSize(), sort);
-            Page<Object[]> page = rgroupRuleRepository.queryGroupByOutSid(outSidProductDepotReq.getProductName(), outSidProductDepotReq.getOwnerName(), pageable);
+            Page<Object[]> page = rgroupRuleRepository.queryGroupByOutSid(outSidProductDepotReq.getProductName(), 
+            		outSidProductDepotReq.getOwnerName(), outSidProductDepotReq.getOwnerId(),  pageable);
             List<OutSidRelateGroupResp> list = ObjectToBeanUtils.objectToBean(page.getContent(), OutSidRelateGroupResp.class);
 
             for(OutSidRelateGroupResp resp : list) {
-                if (resp.getStatus() == 1) {
-                    Date date = new Date();
-                    if (resp.getStartDate().getTime() <= date.getTime()
-                            && resp.getEndDate().getTime() >= date.getTime()) { //跟团中
-                        resp.setStatus_cn("正在跟团中");
-                    } else if (resp.getEndDate().getTime() < date.getTime()) {
-                        resp.setStatus_cn("已结束");
-                    } else if (resp.getStartDate().getTime() > date.getTime()) {
-                        resp.setStatus_cn("未开始");
-                    }
-                } else {
-                    resp.setStatus_cn("预览中");
-                }
+                String groupStatusCn = "";
+                Date date = new Date();
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_ON) {
+            		if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "跟团中";
+            		}
+            		if (resp.getStartDate().getTime() > date.getTime()) {
+            			groupStatusCn = "未开始";
+        			}
+        		} else if(resp.getStatus() == ModelConstant.RULE_STATUS_OFF) {
+        			if(resp.getStartDate().getTime() <= date.getTime() && resp.getEndDate().getTime() >= date.getTime()) {
+            			groupStatusCn = "预览中";
+            		}
+        		}
+            	if (resp.getEndDate().getTime() < date.getTime()) {
+            		groupStatusCn = "已结束";
+        		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_END) {
+            		groupStatusCn = "已结束";
+        		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_DEL) {
+            		groupStatusCn = "已删除";
+				}
+            	resp.setStatus_cn(groupStatusCn);
             }
             QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
             responsePage.setTotalPages(page.getTotalPages());
@@ -362,6 +416,7 @@ public class GroupMngServiceImpl implements GroupMngService {
     }
 
     @Override
+    @Transactional
     public String operGroupByOutSid(String groupId, String operType) {
         if (StringUtils.isEmpty(groupId)) {
             throw new BizValidateException("团购编号为空，请刷新重试");
@@ -371,54 +426,116 @@ public class GroupMngServiceImpl implements GroupMngService {
         }
 
         RgroupRule rgroupRule = rgroupRuleRepository.findById(Long.parseLong(groupId));
-        if (rgroupRule!=null) {
-            if ("0".equals(operType)) { //下架
-                rgroupRule.setStatus(0);
-            } else if("1".equals(operType)) {
-                rgroupRuleRepository.delete(rgroupRule);
-                List<ProductRule> productRules = productRuleRepository.findByRuleId(rgroupRule.getId());
-                for(ProductRule rule : productRules) {
-                    productRuleRepository.delete(rule);
-                }
-            } else {
-                throw new BizValidateException("操作类型为空，请刷新重试");
-            }
-        } else {
-            throw new BizValidateException("为查到团购信息，请刷新重试");
+        if (rgroupRule == null) {
+        	throw new BizValidateException("未查询到团购信息。团购id: " + groupId);
+		}
+        if (!"0".equals(operType) && !"1".equals(operType)) {
+        	throw new BizValidateException("不支持的操作类型。");
+		}
+        if ("0".equals(operType)) { //下架
+            rgroupRule.setStatus(ModelConstant.RULE_STATUS_END);
+        } else if("1".equals(operType)) {	//删除
+        	rgroupRule.setStatus(ModelConstant.RULE_STATUS_DEL);
         }
-        return "SUCCESS";
+        rgroupRuleRepository.save(rgroupRule);
+        return Constants.SERVICE_SUCCESS;
     }
     
-    public static void main(String[] args) {
-		
-    	Float f0 = 0.2F;
-    	Float f1 = 0.3F;
-    	Float f = f0 + f1;
-    	DecimalFormat decimalFormat=new DecimalFormat("#.##");
-    	String totalAmtStr = decimalFormat.format(f);
-    	System.out.println(totalAmtStr);
-	}
+    /**
+     * 查询团长信息
+     * @param queryGroupOwnerReq
+     * @return
+     */
+    @Override
+    public CommonResponse<Object> getGroupOwners(QueryGroupOwnerReq queryGroupOwnerReq) {
+    	
+    	logger.info("getGroupOwners, queryGroupOwnerReq : " + queryGroupOwnerReq);
+    	
+    	CommonResponse<Object> commonResponse = new CommonResponse<>();
+    	QueryListDTO<List<GroupOwnerVO>> queryListDTO = null;
+		try {
+			List<Sort.Order> sortList = new ArrayList<>();
+			Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
+			sortList.add(order);
+			Sort sort = Sort.by(sortList);
+			Pageable pageable = PageRequest.of(queryGroupOwnerReq.getCurrentPage(), queryGroupOwnerReq.getPageSize(), sort);
+			
+			Page<Object[]> page = rgroupOwnerRepository.findByUserIdAndTelLikeAndName(queryGroupOwnerReq.getId(), queryGroupOwnerReq.getTel(), queryGroupOwnerReq.getName(), pageable);
+			
+			List<GroupOwnerVO> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOwnerVO.class);
+			
+			queryListDTO = new QueryListDTO<>();
+			queryListDTO.setContent(list);
+			queryListDTO.setTotalPages(page.getTotalPages());
+			queryListDTO.setTotalSize(page.getTotalElements());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
+        commonResponse.setData(queryListDTO);
+        commonResponse.setResult("00");
+        return commonResponse;
+        
+    }
+    
+    /**
+     * 更新团长费率
+     * @param queryGroupOwnerReq
+     * @return
+     */
+    @Override
+    public CommonResponse<Object> updateOwnerFeeRate(RgroupOwnerVO rgroupOwnerVO) {
+    	
+    	logger.info("updateOwnerFeeRate, rgroupOwnerVO : " + rgroupOwnerVO);
+    	Assert.isTrue(rgroupOwnerVO.getOwnerId() > 0, "团长id不能为空。");
+    	Assert.hasText(rgroupOwnerVO.getConsultRate(), "费率不能为空。");
+    	
+    	CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(rgroupOwnerVO.getOwnerId());
+			if (rgroupOwner == null) {
+				throw new BizValidateException("未查询到团长信息。 userId : " + rgroupOwnerVO.getOwnerId());
+			}
+			rgroupOwner.setFeeRate(rgroupOwnerVO.getConsultRate());
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			commonResponse.setResult("99");
+			commonResponse.setErrMsg(e.getMessage());
+		}
+        commonResponse.setData(Constants.SERVICE_SUCCESS);
+        commonResponse.setResult("00");
+        return commonResponse;
+        
+    }
 
     @Override
     public GroupSumResp queryGroupSum(User user, String groupId) throws Exception {
-        if (StringUtils.isEmpty(groupId)) {
-            throw new BizValidateException("团购ID不能为空，请刷新重试");
-        }
 
         //汇总当前团购的有效订单，总金额和退款金额
         GroupSumResp resp = new GroupSumResp();
         List<GroupSumResp.SearchVo> searchVoList = new ArrayList<>();
 
-        List<ServiceOrder> serviceOrderList = serviceOrderRepository.findByGroupRuleId(Long.parseLong(groupId));
+        List<ServiceOrder> serviceOrderList = null;
+        long ruleId = 0l;
+        if (!StringUtils.isEmpty(groupId)) {
+        	ruleId = Long.valueOf(groupId);
+        }        	
+        if (ruleId != 0l) {
+        	serviceOrderList = serviceOrderRepository.findByGroupRuleId(ruleId);
+		} else {
+			serviceOrderList = serviceOrderRepository.findByGroupLeaderId(user.getId());
+		}
         int validNum = serviceOrderList.size(); //有效订单数
         Float totalAmt = 0F; //总金额
         Float refundAmt = 0F; //退款金额
         for (ServiceOrder serviceOrder : serviceOrderList) {
-            if (serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_CANCEL) {
+            if (ModelConstant.ORDER_STATUS_CANCEL == serviceOrder.getStatus() || ModelConstant.ORDER_STATUS_INIT == serviceOrder.getStatus()) {
                 validNum = validNum - 1;
-                refundAmt += serviceOrder.getPrice();
+//                refundAmt += serviceOrder.getPrice();
+            } else {
+            	totalAmt += serviceOrder.getPrice();
             }
-            totalAmt += serviceOrder.getPrice();
             if (serviceOrder.getStatus() == ModelConstant.ORDER_STATUS_REFUNDED) {
             	Float refunded = serviceOrder.getRefundAmt()==null?0F:serviceOrder.getRefundAmt();
                 refundAmt += refunded;
@@ -437,7 +554,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("订单总金额");
         searchVo.setNum("¥" + totalAmtStr);
-        searchVo.setMessage("订单总金额：所有订单金额的加总（包含已取消订单）");
+        searchVo.setMessage("订单总金额：所有订单金额的加总");
         searchVoList.add(searchVo);
 
         //退款金额 全部订单的退款金额
@@ -445,7 +562,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         searchVo = new GroupSumResp.SearchVo();
         searchVo.setName("退款金额");
         searchVo.setNum("¥" + refundAmtStr);
-        searchVo.setMessage("退款金额：所有订单的退款金额（包含已取消订单）");
+        searchVo.setMessage("退款金额：所有订单的退款金额");
         searchVoList.add(searchVo);
         resp.setSearchVoList(searchVoList);
 
@@ -461,7 +578,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         status.add(ModelConstant.ORDER_STATUS_CONFIRM);
         status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_REFUNDED);
-        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(Long.parseLong(groupId), status);
+        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(ruleId, user.getId(), status);
         int totalNum = 0;
         int totalVerify = 0;
         List<GroupProductSumVo> vos = new ArrayList<>();
@@ -487,7 +604,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         List<Integer> itemStatus = null;	//子项退款状态,默认0，未退款
         if ("0".equals(queryGroupReq.getOrderStatus())) { //查全部
             status.add(ModelConstant.ORDER_STATUS_PAYED);
-            status.add(ModelConstant.ORDER_STATUS_CANCEL);
+//            status.add(ModelConstant.ORDER_STATUS_CANCEL);
             status.add(ModelConstant.ORDER_STATUS_SENDED);
             status.add(ModelConstant.ORDER_STATUS_RECEIVED);
             status.add(ModelConstant.ORDER_STATUS_CANCEL_MERCHANT);
@@ -524,8 +641,17 @@ public class GroupMngServiceImpl implements GroupMngService {
         Sort sort = Sort.by(sortList);
         Pageable pageable = PageRequest.of(queryGroupReq.getCurrentPage(), 10, sort);
 
-        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(Long.parseLong(queryGroupReq.getGroupId()), status, verifyStatus, 
-        			itemStatus, pageable);
+        long ruleId = 0l;
+        if (!StringUtils.isEmpty(queryGroupReq.getGroupId())) {
+        	ruleId = Long.parseLong(queryGroupReq.getGroupId());
+		}
+        long regionId = 0l;
+        if(!StringUtils.isEmpty(queryGroupReq.getRegionId())) {
+        	regionId = Long.parseLong(queryGroupReq.getRegionId());
+        }
+        
+        Page<Object[]> page = serviceOrderRepository.findByGroupRuleIdPage(user.getId(), ruleId, regionId, status, verifyStatus, 
+        			itemStatus, queryGroupReq.getQueryName(), pageable);
         List<GroupOrderVo> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOrderVo.class);
         if (list != null) {
         	Sort refundSort = Sort.by(Direction.DESC, "id");
@@ -854,5 +980,56 @@ public class GroupMngServiceImpl implements GroupMngService {
     	
     }
     
+    
+    @Override
+    public List<RgroupVO> queryGroupsByOwner(User user) {
+
+        List<Sort.Order> sortList = new ArrayList<>();
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
+        sortList.add(order);
+        Sort sort = Sort.by(sortList);
+        Pageable pageable = PageRequest.of(0, 1000, sort);	//TODO 这里分页显示数为1000，没有分页
+        Page<RgroupRule> rgroupPages = rgroupRuleRepository.findByOwnerIdAndDescriptionLike(user.getId(), "", pageable);
+        List<RgroupRule> groups = rgroupPages.getContent();
+        
+        List<RgroupVO> groupVo = new ArrayList<>();
+        for (RgroupRule rgroupRule : groups) {
+        	RgroupVO vo = new RgroupVO();
+        	String createDate = DateUtil.dtFormat(rgroupRule.getCreateDate(), DateUtil.dttmSimple);
+        	vo.setCreateDate(createDate);
+        	vo.setDescription(rgroupRule.getDescription());
+        	vo.setRuleId(String.valueOf(rgroupRule.getId()));
+        	groupVo.add(vo);
+		}
+        
+        return groupVo;
+    }
+    
+    @Override
+    public List<RegionVo> queryGroupRegionsByOwner(User user, String ruleIdStr) {
+
+    	long ruleId = 0l;
+    	if (!StringUtils.isEmpty(ruleIdStr)) {
+    		ruleId = Long.valueOf(ruleIdStr);
+		}
+        List<Sort.Order> sortList = new ArrayList<>();
+        Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
+        sortList.add(order);
+        Sort sort = Sort.by(sortList);
+        Pageable pageable = PageRequest.of(0, 1000, sort);	//TODO 这里分页显示数为1000，没有分页
+        Page<Region> regionPages = regionRepository.findByRgroupOwner(user.getId(), ruleId, pageable);
+        List<Region> regions = regionPages.getContent();
+        
+        List<RegionVo> regionList = new ArrayList<>();
+        for (Region region : regions) {
+        	RegionVo vo = new RegionVo();
+        	vo.setId(region.getId());
+        	vo.setName(region.getName());
+        	vo.setXiaoquAddress(region.getXiaoquAddress());
+        	regionList.add(vo);
+		}
+        return regionList;
+    }
+
     
 }

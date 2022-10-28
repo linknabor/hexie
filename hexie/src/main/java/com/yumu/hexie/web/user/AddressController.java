@@ -35,6 +35,7 @@ import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
 import com.yumu.hexie.vo.QQMapVO;
+import com.yumu.hexie.vo.RgroupAddressVO;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
 import com.yumu.hexie.web.user.resp.RegionInfo;
@@ -100,13 +101,36 @@ public class AddressController extends BaseController{
 		return r;
     }
 	
+	/**
+	 * 获取团购支持的地址
+	 * @param user
+	 * @param ruleId
+	 * @return
+	 * @throws Exception
+	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/rgroupAddresses/{ruleId}", method = RequestMethod.GET)
 	@ResponseBody
     public BaseResult<List<Address>> queryRgroupAddressList(@ModelAttribute(Constants.USER)User user,
-    		@PathVariable(name="ruleId") String ruleId) throws Exception {
-		List<Address> addresses = addressService.queryRgroupAddressByUser(user.getId(), ruleId);
+    		@PathVariable(name="ruleId") String ruleId, @RequestParam(name="regionId" , required = false) String regionId) throws Exception {
+		List<Address> addresses = addressService.queryRgroupAddressByUser(user.getId(), ruleId, regionId);
 		return BaseResult.successResult(addresses);
+    }
+	
+	/**
+	 * 获取团购默认地址
+	 * @param user
+	 * @param ruleId
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/rgroup/address/default/{ruleId}", method = RequestMethod.GET)
+	@ResponseBody
+    public BaseResult<RgroupAddressVO> queryRgroupDefaultAddress(@ModelAttribute(Constants.USER)User user,
+    		@PathVariable(name="ruleId") String ruleId) throws Exception {
+		RgroupAddressVO rgroupAddressVO = addressService.queryRgroupDefaultAddress(user.getId(), ruleId);
+		return BaseResult.successResult(rgroupAddressVO);
     }
 	
 	@RequestMapping(value = "/addAddress", method = RequestMethod.POST)

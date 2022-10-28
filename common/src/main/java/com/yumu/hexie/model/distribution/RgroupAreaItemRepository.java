@@ -60,6 +60,8 @@ public interface RgroupAreaItemRepository extends JpaRepository<RgroupAreaItem, 
 	
 	public List<RgroupAreaItem> findByRuleId(long ruleId);
 	
+	public List<RgroupAreaItem> findByOriRuleId(long ruleId);
+	
 	public List<RgroupAreaItem> findByProductIdAndRegionId(long productId, long regionId);
 	
 	@Query("from RgroupAreaItem m where m.status="+ModelConstant.DISTRIBUTION_STATUS_ON+" and ((m.regionType=0) "
@@ -132,6 +134,25 @@ public interface RgroupAreaItemRepository extends JpaRepository<RgroupAreaItem, 
 					+ "and r.sectId = ?4 ",
 			nativeQuery = true)
 	public List<RgroupAreaItem> findByBindedSect(int status, int type, long current, String sectId, Pageable pageable);
+	
+	/**
+	 * 根据团购id查询，包括所在region的信息一并查
+	 * @param status
+	 * @param type
+	 * @param current
+	 * @param pageable
+	 * @return
+	 */
+	@Query(value = "select m.ruleId, m.currentNum, m.groupMinNum, m.groupStatus, m.remark, r.id, r.name, r.parentName, "
+			+ "r.latitude, r.longitude, r.xiaoquAddress, r.sectId "
+			+ "from RgroupAreaItem m "
+			+ "join region r on m.regionId = r.id "
+			+ "where m.ruleId = ?1 ",
+			countQuery = "select count(*) from RgroupAreaItem m "
+					+ "join region r on m.regionId = r.id "
+					+ "where m.ruleId = ?1 "
+			, nativeQuery = true)
+	public List<Object[]> findWithRegionByRuleId(long ruleId);
 	
 	
 	@Transactional

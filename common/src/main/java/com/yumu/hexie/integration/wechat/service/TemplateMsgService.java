@@ -5,12 +5,10 @@ import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 
-import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
-import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -21,15 +19,16 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.Operator;
-import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.ReceiptNotification;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO2;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.CsOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.MiniprogramVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PayNotifyMsgVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
@@ -40,6 +39,8 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
+import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComment;
@@ -47,7 +48,10 @@ import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrde
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
+import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
+import com.yumu.hexie.vo.RgroupVO;
 
 @Component
 public class TemplateMsgService {
@@ -58,6 +62,8 @@ public class TemplateMsgService {
 	private RestUtil restUtil;
 	@Autowired
 	private WechatMsgService wechatMsgService;
+	@Value("${wechat.miniprogramAppId}")
+    private String miniprogramAppid;
 	
 	/**
 	 * 模板消息发送
@@ -936,7 +942,7 @@ public class TemplateMsgService {
 	}
 	
 	/**
-	 * 电商支付成功通知
+	 * 团购到货通知
 	 * @param user
 	 * @param serviceOrder
 	 * @param accessToken
@@ -975,5 +981,131 @@ public class TemplateMsgService {
 		return isSuccess;
 		
 	}
+	
+	/**
+     * 成团团长发货提醒
+     *
+     * @param sendUser
+     * @param noticeServiceOperator
+     * @param accessToken
+     */
+    public void sendGroupSuccessNotification(NoticeRgroupSuccess noticeRgroupSuccess, String accessToken) {
+
+    	User sendUser = noticeRgroupSuccess.getSendUser();
+        String title = "您好，您有新的团购成团。";
+        CommonVO vo = new CommonVO();
+        vo.setFirst(new TemplateItem(title));
+        vo.setKeyword1(new TemplateItem(noticeRgroupSuccess.getProductName()));
+        vo.setKeyword2(new TemplateItem(noticeRgroupSuccess.getPrice()));
+        vo.setKeyword3(new TemplateItem("当前小区:" + noticeRgroupSuccess.getSectName() + ", " + noticeRgroupSuccess.getGroupNum()+"人"));
+        vo.setRemark(new TemplateItem("请尽快安排发货，谢谢。"));
+
+        TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+        msg.setData(vo);
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE, sendUser.getAppId()));
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_GROUP_SUCCESS);
+        String url = msgUrl + noticeRgroupSuccess.getRuleId();
+
+        MiniprogramVO miniVo = new MiniprogramVO();
+        miniVo.setAppid(miniprogramAppid);
+        miniVo.setPagepath(url);
+        msg.setMiniprogram(miniVo);
+        msg.setUrl(url);
+        msg.setTouser(sendUser.getOpenid());
+        sendMsg(msg, accessToken);
+
+    }
+    
+    /**
+     * 成团团长发货提醒
+     *
+     * @param sendUser
+     * @param noticeServiceOperator
+     * @param accessToken
+     */
+    public void sendGroupLeaderSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
+
+        String title = "您关注的团长：" + rgroupVO.getRgroupOwner().getOwnerName() + "发布了新团购";
+        CommonVO vo = new CommonVO();
+        vo.setFirst(new TemplateItem(title));
+        String desc = rgroupVO.getDescription();
+        if (desc.length() > 10) {
+        	desc = desc.substring(0, 10) + "...";
+		}
+        desc = desc.trim();
+        vo.setKeyword1(new TemplateItem(desc));
+        vo.setKeyword2(new TemplateItem(rgroupVO.getStartDate()));
+        vo.setKeyword3(new TemplateItem(rgroupVO.getRgroupOwner().getOwnerName()));
+        String productName = rgroupVO.getProductList()[0].getName();
+        if (productName.length() > 8) {
+        	productName = productName.substring(0, 8) + "...";
+        	productName = "【" + productName + "】正在团购中";
+		}
+        vo.setKeyword4(new TemplateItem(productName));
+        vo.setRemark(new TemplateItem("该消息仅推送给已订阅用户，如有打扰请点击链接进入跟团界面，取消对该团长的订阅即可。"));
+        
+
+        TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+        msg.setData(vo);
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_START_MESSAGE, sendUser.getAppId())); //TODO 更换模板id
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_LEADER_GROUP_START) + rgroupVO.getRgroupOwner().getOwnerId();
+        String url = msgUrl + rgroupVO.getRuleId();
+
+        MiniprogramVO miniVo = new MiniprogramVO();
+        miniVo.setAppid(miniprogramAppid);
+        miniVo.setPagepath(url);
+        msg.setMiniprogram(miniVo);
+        msg.setUrl(url);
+        msg.setTouser(sendUser.getOpenid());
+        sendMsg(msg, accessToken);
+
+    }
+    
+
+    /**
+     * 成团团长发货提醒
+     *
+     * @param sendUser
+     * @param noticeServiceOperator
+     * @param accessToken
+     */
+    public void sendGroupRegionSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
+
+        String title = "您关注的小区：" + rgroupVO.getRegion().getName() + "发布了新的小区团，一大波人正在跟团";
+        CommonVO vo = new CommonVO();
+        vo.setFirst(new TemplateItem(title));
+        
+        String desc = rgroupVO.getDescription();
+        if (desc.length() > 24) {
+        	desc = desc.substring(0, 24) + "...";
+		}
+        desc = desc.trim();
+        
+        vo.setKeyword1(new TemplateItem(desc));
+        vo.setKeyword2(new TemplateItem(rgroupVO.getStartDate()));
+        vo.setKeyword3(new TemplateItem(rgroupVO.getRegion().getName()));
+        String productName = rgroupVO.getProductList()[0].getName();
+        if (productName.length() > 8) {
+        	productName = productName.substring(0, 8) + "...";
+        	productName = "【" + productName + "】正在团购中";
+		}
+        vo.setKeyword4(new TemplateItem(productName));
+        vo.setRemark(new TemplateItem("该消息仅推送给已订阅用户，如有打扰请点击链接进入跟团界面，取消对该小区的订阅即可。"));
+
+        TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+        msg.setData(vo);
+        msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_GROUP_START_MESSAGE, sendUser.getAppId()));
+        String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_REGION_GROUP_START ) + rgroupVO.getRegion().getId();
+        String url = msgUrl + rgroupVO.getRuleId();
+
+        MiniprogramVO miniVo = new MiniprogramVO();
+        miniVo.setAppid(miniprogramAppid);
+        miniVo.setPagepath(url);
+        msg.setMiniprogram(miniVo);
+        msg.setUrl(url);
+        msg.setTouser(sendUser.getOpenid());
+        sendMsg(msg, accessToken);
+
+    }
 
 }

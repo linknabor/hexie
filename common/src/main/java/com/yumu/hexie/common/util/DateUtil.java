@@ -22,19 +22,22 @@ public class DateUtil {
         calendar.add(Calendar.DATE, addedDays);//把日期往后增加一天.整数往后推,负数往前移动
         return calendar.getTime();
     }
-
+    
     public static String getSendTime(long time) {
         Calendar cal = Calendar.getInstance();
         long l = cal.getTimeInMillis() - time;
+        long month = l/ (24 * 60 * 60 * 1000) /30;
         long day = l / (24 * 60 * 60 * 1000);
         long hour = (l / (60 * 60 * 1000) - day * 24);
         long min = ((l / (60 * 1000)) - day * 24 * 60 - hour * 60);
         long s = (l / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - min * 60);
 
         StringBuffer sb = new StringBuffer();
-        if (day > 0)
+        if (month > 0) {
+        	sb.append(month + "个月");
+		} else if (day > 0) {
             sb.append(day + "天");
-        else if (hour > 0) {
+		} else if (hour > 0) {
             sb.append(hour + "小时");
         } else if (min > 0) {
             sb.append(min + "分");
