@@ -26,7 +26,6 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
