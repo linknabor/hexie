@@ -1417,7 +1417,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
 		}
 		key += rgroupSubscribeVO.getInfoId();
-		stringRedisTemplate.opsForHash().put(key, String.valueOf(user.getId()), String.valueOf(System.currentTimeMillis()));
+		stringRedisTemplate.opsForHash().put(key, user.getMiniopenid(), String.valueOf(System.currentTimeMillis()));
 		
 	}
 	
@@ -1439,7 +1439,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
 		}
 		key += rgroupSubscribeVO.getInfoId();
-		stringRedisTemplate.opsForHash().delete(key, String.valueOf(user.getId()));
+		stringRedisTemplate.opsForHash().delete(key, user.getMiniopenid());
 		
 	}
 	
@@ -1461,7 +1461,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			throw new BizValidateException("unknow subscribe type : " + rgroupSubscribeVO.getType());
 		}
 		key += rgroupSubscribeVO.getInfoId();
-		Object object = stringRedisTemplate.opsForHash().get(key, String.valueOf(user.getId()));
+		Object object = stringRedisTemplate.opsForHash().get(key, user.getMiniopenid());
 		if (object == null) {
 			return false;
 		}
@@ -1491,9 +1491,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			Iterator<Map.Entry<Object, Object>> it = leaderSuscribeMap.entrySet().iterator();
 			while(it.hasNext()) {
 				Map.Entry<Object, Object> entry = it.next();
-				String userId = (String) entry.getKey();
-				sendUserList.add(userId);
-				User sendUser = userService.getById(Long.valueOf(userId));
+				String miniOpenid = (String) entry.getKey();
+				sendUserList.add(miniOpenid);
+				User sendUser = userService.getByMiniopenid(miniOpenid);
 				String accessToken = "";
 				if (!StringUtils.isEmpty(sendUser.getAppId())) {
 					accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
@@ -1519,12 +1519,18 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				Iterator<Map.Entry<Object, Object>> it = regionSubscribeMap.entrySet().iterator();
 				while(it.hasNext()) {
 					Map.Entry<Object, Object> entry = it.next();
-					String userId = (String) entry.getKey();
-					if (sendUserList.contains(userId)) {
+					String miniOpenid = (String) entry.getKey();
+					if (sendUserList.contains(miniOpenid)) {
 						continue;
 					}
-					User sendUser = userService.getById(Long.valueOf(userId));
+					User sendUser = userService.getByMiniopenid(miniOpenid);
 					String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+					if (!StringUtils.isEmpty(sendUser.getAppId())) {
+						accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+					}
+					if (StringUtils.isEmpty(accessToken)) {
+						continue;
+					}
 					Region region = new Region();
 					BeanUtils.copyProperties(regionVo, region);
 					rgroupVO.setRegion(region);

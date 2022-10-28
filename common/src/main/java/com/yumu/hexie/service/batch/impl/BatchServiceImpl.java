@@ -146,6 +146,7 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.notifyGroupSuccess();
 		
 		rgroupQueueTask.groupPubPush();
+		rgroupQueueTask.eventViewMiniprogram();
 		
 		logger.info("异步队列任务启动完成。");
 		
