@@ -157,4 +157,25 @@ public interface UserService {
 	 */
 	boolean bindMiniUser(BaseEventDTO baseEventDTO);
 
+	/**
+	 * 获取物业id
+	 * @param user
+	 * @return 
+	 */
+	String bindWuYeIdSync(User user);
+	
+	/**
+	 * 更新用户unionid
+	 * @param baseEventDTO
+	 * @return
+	 */
+	boolean updateUserUnionid(BaseEventDTO baseEventDTO);
+	
+	/**
+	 * 根据小程序用户openid获取用户
+	 * @param miniopenid
+	 * @return
+	 */
+	User getByMiniopenid(String miniopenid);
+
 }
