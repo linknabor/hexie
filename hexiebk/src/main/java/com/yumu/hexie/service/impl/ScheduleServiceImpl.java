@@ -581,13 +581,13 @@ public class ScheduleServiceImpl implements ScheduleService {
 		
 		List<RgroupRule> ruleList = rgroupRuleRepository.findTimeoutGroup(new Date());
 		for (RgroupRule rGroupRule : ruleList) {
-			rgroupRuleRepository.updateStatus(ModelConstant.RULE_STATUS_OFF, rGroupRule.getId());
+			rgroupRuleRepository.updateStatus(ModelConstant.RULE_STATUS_END, rGroupRule.getId());
 			List<RgroupAreaItem> areaList = rgroupAreaItemRepository.findByRuleId(rGroupRule.getId());
 			for (RgroupAreaItem areaItem : areaList) {
 				rgroupAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_OFF, areaItem.getId());
 			}
-			Product product = productRepository.findById(rGroupRule.getProductId());
-			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
+//			Product product = productRepository.findById(rGroupRule.getProductId());
+//			productRepository.updateStatus(ModelConstant.PRODUCT_OFF, product.getId());
 		}
 	
 	}

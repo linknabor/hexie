@@ -128,6 +128,7 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "IF(?3='3', rule.status = '1' "
 			+ "and rule.startDate > CURRENT_TIMESTAMP() , "
 			+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
+			+ "and rule.status <> " + ModelConstant.RULE_STATUS_DEL + " "
 			, countQuery = "select count(1) from rgrouprule rule "
 			+ "where rule.ownerId = ?1 "
 			+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
@@ -139,7 +140,8 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 				+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
 			+ "IF(?3='3', rule.status = '1' "
 			+ "and rule.startDate > CURRENT_TIMESTAMP() , "
-				+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
+				+ "IF(?3='4', (rule.endDate < CURRENT_TIMESTAMP() or rule.status = '2' ), 1=1) ))) "
+				+ "and rule.status <> " + ModelConstant.RULE_STATUS_DEL + " "
 			, nativeQuery = true)
 	Page<Object[]> findRgroupList(long ownerId, String description, String groupStatus, Pageable pageable);
 

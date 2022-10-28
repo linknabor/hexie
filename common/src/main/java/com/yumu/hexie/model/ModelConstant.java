@@ -165,8 +165,11 @@ public class ModelConstant {
 	public static final int RULE_TYPE_CITY = 0;
 	public static final int RULE_TYPE_NEARBY = 1;
 
-	public static final int RULE_STATUS_ON = 1;
-	public static final int RULE_STATUS_OFF = 0;
+	public static final int RULE_STATUS_OFF = 0;	//未发布
+	public static final int RULE_STATUS_ON = 1;		//进行中
+	public static final int RULE_STATUS_END = 2;	//已结束。即便仍在有效时间段内，依然是结束，强制结束
+	public static final int RULE_STATUS_DEL = 3;	//已删除。不可见，回收站里找，界面上的删除暂时都是软删除
+	public static final int RULE_STATUS_PHYS_DEL = 4;	//已删除。物理删除
 	
 	public static final int DISTRIBUTION_STATUS_ON = 0;
 	public static final int DISTRIBUTION_STATUS_OFF = 1;

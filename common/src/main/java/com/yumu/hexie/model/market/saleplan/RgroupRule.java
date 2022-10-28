@@ -1,5 +1,6 @@
 package com.yumu.hexie.model.market.saleplan;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 
@@ -32,6 +33,9 @@ public class RgroupRule extends SalePlan {
 	private long agentId;	//团购所在机构，取开团时团长的机构
 	private long groupFinishDate;	//成团日期
 	private int sectCount = 1;	//参与团购的小区数
+	
+	@Column(nullable=true, columnDefinition="bit(1) default 0 ")
+	private boolean hidden = false;	//是否隐藏
 
 	@Transient
 	@JsonIgnore
@@ -166,6 +170,14 @@ public class RgroupRule extends SalePlan {
 
 	public void setSectCount(int sectCount) {
 		this.sectCount = sectCount;
+	}
+
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
 	}
 
 	
