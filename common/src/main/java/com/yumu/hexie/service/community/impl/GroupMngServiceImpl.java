@@ -26,8 +26,10 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.QueryListDTO;
@@ -237,7 +239,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     @Transactional
-    public Boolean updateGroupInfo(User user, String groupId, String operType) {
+    public Boolean updateGroupInfo(User user, String groupId, String operType) throws Exception {
 
         if (!"1".equals(operType) && !"3".equals(operType) && !"4".equals(operType) && !"5".equals(operType)) {
             throw new BizValidateException("不合法的操作数据类型");
@@ -267,6 +269,14 @@ public class GroupMngServiceImpl implements GroupMngService {
             	  rgroupAreaItemRepository.updateStatus(ModelConstant.DISTRIBUTION_STATUS_ON, rgroupAreaItem.getId());
             	  rgroupAreaItemRepository.save(rgroupAreaItem);
               }
+              
+              /*通知订阅*/
+  			if (ModelConstant.RULE_STATUS_ON == rgroupRule.getStatus()) {
+  				Map<String, String> map = new HashMap<>();
+  				map.put("ruleId", String.valueOf(rgroupRule.getId()));
+  				String queue = JacksonJsonUtil.getMapperInstance(false).writeValueAsString(map);
+  				stringRedisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_PUB_QUEUE, queue);
+  			}
               
 			} else if ("5".equals(operType)) {
 				rgroupRule.setHidden(true);

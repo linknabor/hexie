@@ -62,7 +62,7 @@ public interface GroupMngService {
     Boolean noticeReceiving(User user, String groupId);
 
     //更新团购状态
-    Boolean updateGroupInfo(User user, String groupId, String operType);
+    Boolean updateGroupInfo(User user, String groupId, String operType) throws Exception;
 
     //后台访问，查询商品库列表
     CommonResponse<Object> queryProductDepotListPage(OutSidProductDepotReq outSidProductDepotReq);
