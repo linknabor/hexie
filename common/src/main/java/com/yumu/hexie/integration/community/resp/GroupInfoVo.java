@@ -163,6 +163,8 @@ public class GroupInfoVo implements Serializable {
 			showStatus = "3";
 		} else if ("已结束".equals(groupStatusCn)) {
 			showStatus = "4";
+		} else if ("已删除".equals(groupStatusCn)) {
+			showStatus = "5";
 		}
     	return showStatus;
     }
