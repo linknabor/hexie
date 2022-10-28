@@ -16,6 +16,9 @@ public class OtherPayDTO {
 	private String orderDetail;
 	private String invoice_type;
 	private String smsBatch;
+	private String startDate;
+	private String endDate;
+	private String invoice_title_type;
 	
 	public User getUser() {
 		return user;
@@ -90,12 +93,49 @@ public class OtherPayDTO {
 	public void setInvoice_type(String invoice_type) {
 		this.invoice_type = invoice_type;
 	}
-	@Override
-	public String toString() {
-		return "OtherPayDTO [user=" + user + ", money=" + money + ", sectId=" + sectId + ", feeId=" + feeId
-				+ ", remark=" + remark + ", qrCodeId=" + qrCodeId + ", mngCellId=" + mngCellId + ", payee_openid="
-				+ payee_openid + ", orderId=" + orderId + ", orderDetail=" + orderDetail + ", invoice_type="
-				+ invoice_type + ", smsBatch=" + smsBatch + "]";
+
+	public String getStartDate() {
+		return startDate;
 	}
 
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+
+	public String getInvoice_title_type() {
+		return invoice_title_type;
+	}
+
+	public void setInvoice_title_type(String invoice_title_type) {
+		this.invoice_title_type = invoice_title_type;
+	}
+
+	@Override
+	public String toString() {
+		return "OtherPayDTO{" +
+				"user=" + user +
+				", money='" + money + '\'' +
+				", sectId='" + sectId + '\'' +
+				", feeId='" + feeId + '\'' +
+				", remark='" + remark + '\'' +
+				", qrCodeId='" + qrCodeId + '\'' +
+				", mngCellId='" + mngCellId + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", orderId='" + orderId + '\'' +
+				", orderDetail='" + orderDetail + '\'' +
+				", invoice_type='" + invoice_type + '\'' +
+				", smsBatch='" + smsBatch + '\'' +
+				", startDate='" + startDate + '\'' +
+				", endDate='" + endDate + '\'' +
+				", invoice_title_type='" + invoice_title_type + '\'' +
+				'}';
+	}
 }
