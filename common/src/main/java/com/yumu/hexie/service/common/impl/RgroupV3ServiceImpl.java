@@ -1494,7 +1494,10 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				String userId = (String) entry.getKey();
 				sendUserList.add(userId);
 				User sendUser = userService.getById(Long.valueOf(userId));
-				String accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+				String accessToken = "";
+				if (!StringUtils.isEmpty(sendUser.getAppId())) {
+					accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
+				}
 				if (StringUtils.isEmpty(accessToken)) {
 					continue;
 				}
