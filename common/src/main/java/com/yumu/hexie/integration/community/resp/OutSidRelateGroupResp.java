@@ -14,7 +14,11 @@ import java.sql.Timestamp;
  */
 public class OutSidRelateGroupResp implements Serializable {
 
-    private BigInteger id;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 7696766440512152770L;
+	private BigInteger id;
     @JsonProperty("owner_id")
     private BigInteger ownerId;
     @JsonProperty("owner_name")
@@ -42,6 +46,8 @@ public class OutSidRelateGroupResp implements Serializable {
     private String userName;
 
     private String status_cn;
+    @JsonProperty("show_status")
+    private String showStatus;
 
     public OutSidRelateGroupResp(BigInteger id, BigInteger ownerId, String ownerName, String ownerAddr, String ownerImg, String ownerTel, Float price, String description, Integer status, Integer groupStatus, Timestamp startDate, Timestamp endDate, String descriptionMore, BigInteger productNum, String userName) {
         this.id = id;
@@ -188,4 +194,25 @@ public class OutSidRelateGroupResp implements Serializable {
     public void setStatus_cn(String status_cn) {
         this.status_cn = status_cn;
     }
+
+	public String getShowStatus() {
+    	if ("跟团中".equals(status_cn)) {
+			this.showStatus = "1";
+		} else if ("未开始".equals(status_cn)) {
+			this.showStatus = "2";
+		} else if ("预览中".equals(status_cn)) {
+			this.showStatus = "3";
+		} else if ("已结束".equals(status_cn)) {
+			this.showStatus = "4";
+		} else if ("已删除".equals(status_cn)) {
+			this.showStatus = "5";
+		}
+		return this.showStatus;
+	}
+
+	public void setShowStatus(String showStatus) {
+		this.showStatus = showStatus;
+	}
+    
+    
 }
