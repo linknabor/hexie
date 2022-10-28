@@ -145,6 +145,9 @@ public class GroupInfoVo implements Serializable {
     	if (getStatus() == ModelConstant.RULE_STATUS_END) {
     		groupStatusCn = "已结束";
 		}
+    	if (getStatus() == ModelConstant.RULE_STATUS_DEL) {
+    		groupStatusCn = "已删除";
+		}
         return groupStatusCn;
     }
     

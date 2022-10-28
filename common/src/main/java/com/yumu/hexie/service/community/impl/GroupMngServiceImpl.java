@@ -336,6 +336,9 @@ public class GroupMngServiceImpl implements GroupMngService {
             	if (resp.getStatus() == ModelConstant.RULE_STATUS_END) {
             		groupStatusCn = "已结束";
         		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_DEL) {
+            		groupStatusCn = "已删除";
+				}
             	resp.setStatus_cn(groupStatusCn);
             }
             QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
@@ -392,6 +395,9 @@ public class GroupMngServiceImpl implements GroupMngService {
             	if (resp.getStatus() == ModelConstant.RULE_STATUS_END) {
             		groupStatusCn = "已结束";
         		}
+            	if (resp.getStatus() == ModelConstant.RULE_STATUS_DEL) {
+            		groupStatusCn = "已删除";
+				}
             	resp.setStatus_cn(groupStatusCn);
             }
             QueryListDTO<List<OutSidRelateGroupResp>> responsePage = new QueryListDTO<>();
