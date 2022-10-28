@@ -49,8 +49,6 @@ import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
-import com.yumu.hexie.model.commonsupport.info.ProductRule;
-import com.yumu.hexie.model.commonsupport.info.ProductRuleRepository;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -88,9 +86,6 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Autowired
     private RgroupRuleRepository rgroupRuleRepository;
-
-    @Autowired
-    private ProductRuleRepository productRuleRepository;
 
     @Autowired
     private ServiceOrderRepository serviceOrderRepository;
@@ -415,6 +410,7 @@ public class GroupMngServiceImpl implements GroupMngService {
     }
 
     @Override
+    @Transactional
     public String operGroupByOutSid(String groupId, String operType) {
         if (StringUtils.isEmpty(groupId)) {
             throw new BizValidateException("团购编号为空，请刷新重试");
@@ -424,22 +420,19 @@ public class GroupMngServiceImpl implements GroupMngService {
         }
 
         RgroupRule rgroupRule = rgroupRuleRepository.findById(Long.parseLong(groupId));
-        if (rgroupRule!=null) {
-            if ("0".equals(operType)) { //下架
-                rgroupRule.setStatus(0);
-            } else if("1".equals(operType)) {
-                rgroupRuleRepository.delete(rgroupRule);
-                List<ProductRule> productRules = productRuleRepository.findByRuleId(rgroupRule.getId());
-                for(ProductRule rule : productRules) {
-                    productRuleRepository.delete(rule);
-                }
-            } else {
-                throw new BizValidateException("操作类型为空，请刷新重试");
-            }
-        } else {
-            throw new BizValidateException("为查到团购信息，请刷新重试");
+        if (rgroupRule == null) {
+        	throw new BizValidateException("未查询到团购信息。团购id: " + groupId);
+		}
+        if (!"0".equals(operType) && !"1".equals(operType)) {
+        	throw new BizValidateException("不支持的操作类型。");
+		}
+        if ("0".equals(operType)) { //下架
+            rgroupRule.setStatus(ModelConstant.RULE_STATUS_END);
+        } else if("1".equals(operType)) {	//删除
+        	rgroupRule.setStatus(ModelConstant.RULE_STATUS_DEL);
         }
-        return "SUCCESS";
+        rgroupRuleRepository.save(rgroupRule);
+        return Constants.SERVICE_SUCCESS;
     }
     
     /**
