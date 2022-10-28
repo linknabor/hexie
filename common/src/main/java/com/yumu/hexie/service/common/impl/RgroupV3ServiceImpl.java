@@ -495,7 +495,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				statusList.add(ModelConstant.RULE_STATUS_ON);
 			} else {
 				statusList.add(ModelConstant.RULE_STATUS_ON);
-				statusList.add(ModelConstant.RULE_STATUS_OFF);
+				statusList.add(ModelConstant.RULE_STATUS_END);
 			}
 			
 			RgroupRule rule = rgroupRuleRepository.findByIdAndStatusIn(ruleId, statusList);
