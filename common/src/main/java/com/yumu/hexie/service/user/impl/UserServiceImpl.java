@@ -807,5 +807,64 @@ public class UserServiceImpl implements UserService {
 		return true;
 	}
 
+	
+	/**
+	 * 通过微信查看小程序事件，更新用户的unionid
+	 */
+	@Override
+	@Transactional
+	public boolean updateUserUnionid(BaseEventDTO baseEventDTO) {
+		
+		String openid = baseEventDTO.getOpenid();
+		String appid = baseEventDTO.getAppId();
+		User user = multiFindByOpenId(openid);
+		if (user != null) {	
+			//未查询到用户存在两种情况：1.用户未没有产生小程序用户，2用户产生了小程序用户，但未和公众号openid关联上
+			UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
+			if (userWeiXin == null) {
+				logger.warn("can't find user from wechat, openid : " + openid);
+				return true;
+			}
+			String unionid = userWeiXin.getUnionid();
+			if (StringUtils.isEmpty(unionid)) {
+				logger.warn("user does not have unionid, openid : " + openid + ", appid : " + appid);
+				return true;
+			}
+			User unionUser = getByUnionid(unionid);
+			if (unionUser != null) {
+				logger.warn("user unionid exists. will skip .");
+				return true;
+			}
+			user.setUnionid(unionid);
+	        userRepository.save(user);
+		} else {
+//			UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
+//			if (userWeiXin == null) {
+//				logger.warn("can't find user from wechat, openid : " + openid);
+//				return true;
+//			}
+//			String unionid = userWeiXin.getUnionid();
+//			user = new User();
+//			user.setOpenid(openid);
+//			user.setAppId(appid);
+//			user.setAge(20);
+//			user.setCityId(0l);
+//			user.setCountyId(0l);
+//			user.setCurrentAddrId(0l);
+//			user.setProvinceId(0l);
+//			user.setXiaoquId(0);
+//			user.setStatus(0);
+//			user.setRegisterDate(System.currentTimeMillis());
+//			user.setNewRegiste(false);
+//			user.setUnionid(unionid);
+//			simpleRegister(user);
+		}
+		return true;
+	}
+	
+	@Override
+	public User getByMiniopenid(String miniopenid) {
+		return userRepository.findByMiniopenid(miniopenid);
+	}
 
 }
