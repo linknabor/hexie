@@ -495,7 +495,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				statusList.add(ModelConstant.RULE_STATUS_ON);
 			} else {
 				statusList.add(ModelConstant.RULE_STATUS_ON);
-				statusList.add(ModelConstant.RULE_STATUS_OFF);
+				statusList.add(ModelConstant.RULE_STATUS_END);
 			}
 			
 			RgroupRule rule = rgroupRuleRepository.findByIdAndStatusIn(ruleId, statusList);
@@ -952,7 +952,6 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
     	orderList.add(order);
     	Sort sort = Sort.by(orderList);
 		Pageable pageable = PageRequest.of(currentPage, 10, sort);
-		Date date = new Date();
 		List<Integer> statusList = new ArrayList<>();
 		statusList.add(ModelConstant.RULE_STATUS_ON);
 		statusList.add(ModelConstant.RULE_STATUS_END);
@@ -962,9 +961,9 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			list = new ArrayList<>();
 		}
 		for (QueryRgroupSectsMapper queryRgroupSectsMapper : list) {
-			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(statusList, date.getTime(), queryRgroupSectsMapper.getId().longValue());
-			RgroupVO vo = new RgroupVO();
+			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(statusList, 0l, queryRgroupSectsMapper.getId().longValue());
 			for (RgroupRule rule : rules) {
+				RgroupVO vo = new RgroupVO();
 				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 				String descMoreStr = rule.getDescriptionMore();
 				DescriptionMore[]descriptionMore = new DescriptionMore[0];
@@ -992,15 +991,17 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					}
 				}
 				vo.setDescMoreImages(descMoreImages);
+				
+				List<String> images = queryRgroupSectsMapper.getGroupImages();
+				if (images == null) {
+					images = new ArrayList<>();
+				}
+				if (vo.getDescMoreImages()!= null) {
+					images.addAll(vo.getDescMoreImages());
+				}
+				queryRgroupSectsMapper.setGroupImages(images);
 			}
-			List<String> images = queryRgroupSectsMapper.getGroupImages();
-			if (images == null) {
-				images = new ArrayList<>();
-			}
-			if (vo.getDescMoreImages()!= null) {
-				images.addAll(vo.getDescMoreImages());
-			}
-			queryRgroupSectsMapper.setGroupImages(images);
+			
 		}
 		
 		return list;
