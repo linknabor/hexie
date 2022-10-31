@@ -766,6 +766,8 @@ public class UserServiceImpl implements UserService {
 
 	/**
 	 * 通过微信关注事件，绑定小程序用户
+	 * 1.已经关注过合协的用户，并且已经形成用户的，则关联小程序用户（如果小程序用户存在）
+	 * 2.新关注用户，在user表中并未形成数据的，这里需要新建一个
 	 */
 	@Override
 	@Transactional
@@ -773,6 +775,12 @@ public class UserServiceImpl implements UserService {
 		
 		String openid = baseEventDTO.getOpenid();
 		String appid = baseEventDTO.getAppId();
+		
+		if (!ConstantWeChat.APPID.equals(appid)) {
+			logger.info("appid: " + appid + ", not hexie subscribe event, will skip. ");
+			return true;
+		}
+		
 		User user = multiFindByOpenId(openid);
 		if (user != null) {	
 			logger.warn("user already exists, will skip. openid : " + openid);
@@ -789,21 +797,33 @@ public class UserServiceImpl implements UserService {
 			logger.warn("user does not have unionid, openid : " + openid + ", appid : " + appid);
 			return true;
 		}
-		user = getByUnionid(unionid);
-		if (user == null) {
-			logger.warn("cant' find user by unionid in database, unionid : " + unionid);
-			return true;
-		}
-		String miniOpenid = user.getMiniopenid();
-		if (StringUtils.isEmpty(miniOpenid)) {
-			logger.warn("cant' find miniuser in database, unionid : " + unionid);
-			return true;
+		User miniUser = getByUnionid(unionid);
+		if (miniUser == null) {
+			//如果数据库中没有有关联的用户，需要新建用户
+			logger.info("no hexie user, will create new user, user openid : " + openid);
+			User newUser = new User();
+			newUser.setOpenid(openid);
+			newUser.setAppId(appid);
+			newUser.setAge(20);
+			newUser.setCityId(0l);
+			newUser.setCountyId(0l);
+			newUser.setCurrentAddrId(0l);
+			newUser.setProvinceId(0l);
+			newUser.setXiaoquId(0);
+			newUser.setStatus(0);
+			newUser.setRegisterDate(System.currentTimeMillis());
+			newUser.setNewRegiste(false);
+			newUser.setUnionid(unionid);
+			simpleRegister(newUser);
+			
+		} else {
+			logger.info("find miniapp user, miniopenid : " + miniUser.getMiniopenid());
+			//如果数据库中有关联的用户，更新该小程序用户的openid和appid
+			miniUser.setOpenid(openid);
+			miniUser.setAppId(appid);
+	        userRepository.save(miniUser);
 		}
 		
-		//如果数据库中有关联的用户，更新该小程序用户的openid和appid
-		user.setOpenid(openid);
-		user.setAppId(appid);
-        userRepository.save(user);
 		return true;
 	}
 
@@ -817,6 +837,12 @@ public class UserServiceImpl implements UserService {
 		
 		String openid = baseEventDTO.getOpenid();
 		String appid = baseEventDTO.getAppId();
+		
+		if (!ConstantWeChat.APPID.equals(appid)) {
+			logger.info("appid: " + appid + ", not hexie viewMiniProgram event, will skip. ");
+			return true;
+		}
+		
 		User user = multiFindByOpenId(openid);
 		if (user != null) {	
 			//未查询到用户存在两种情况：1.用户未没有产生小程序用户，2用户产生了小程序用户，但未和公众号openid关联上
@@ -825,7 +851,7 @@ public class UserServiceImpl implements UserService {
 				logger.warn("can't find user from wechat, openid : " + openid);
 				return true;
 			}
-			String unionid = userWeiXin.getUnionid();
+			String unionid = userWeiXin.getUnionid();	//这里只对合协的用户有效，因为只有合协公众号的用户跟小程序共享unionid。其他公众号的用户，关注需要关注合协新产生一个用户
 			if (StringUtils.isEmpty(unionid)) {
 				logger.warn("user does not have unionid, openid : " + openid + ", appid : " + appid);
 				return true;
