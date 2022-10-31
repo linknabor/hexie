@@ -179,6 +179,15 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				boolean isSuccess = false;
 				WechatResponse wechatResponse = null;
 				try {
+					
+					logger.info("event type : " + type + ", common subscribe . " );
+					try {
+						//所有关注“合协社区”公众号的用户，为其关联小程序用户。如果没有合协用户的，为其新建一个带unionid的用户
+						userService.bindMiniUser(baseEventDTO);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
+					
 					if ("01".equals(type)) {
 						logger.info("event type : " + type + ", apply invoice . " );
 						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
@@ -220,14 +229,8 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							logger.error(e.getMessage(), e);
 						}
 				    	isSuccess = true;
-					} else if ("99".equals(type)) {
-						logger.info("event type : " + type + ", common subscribe . " );
-						try {
-							userService.bindMiniUser(baseEventDTO);
-							isSuccess = true;
-						} catch (Exception e) {
-							logger.error(e.getMessage(), e);
-						}
+					} else {
+						isSuccess = true;
 					}
 					
 				} catch (Exception e) {
