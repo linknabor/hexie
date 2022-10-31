@@ -229,6 +229,8 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							logger.error(e.getMessage(), e);
 						}
 				    	isSuccess = true;
+					} else {
+						isSuccess = true;
 					}
 					
 				} catch (Exception e) {
