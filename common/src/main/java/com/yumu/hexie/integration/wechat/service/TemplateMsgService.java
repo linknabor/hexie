@@ -773,6 +773,7 @@ public class TemplateMsgService {
 		String title = invoiceNotification.getInvoiceTitle();
 		String type = invoiceNotification.getInvoiceType();
 		String amt = invoiceNotification.getJsAmt();
+		amt = "-";
 		String makeDate = invoiceNotification.getMakeDate();
     	
     	TemplateItem firstItem = new TemplateItem(first);
