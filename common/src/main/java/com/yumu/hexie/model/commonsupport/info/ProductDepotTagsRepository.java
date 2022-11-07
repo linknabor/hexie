@@ -8,5 +8,7 @@ public interface ProductDepotTagsRepository extends JpaRepository<ProductDepotTa
 
     //查询团长的商品
     List<ProductDepotTags> findByOwnerId(long ownerId);
+    
+    ProductDepotTags findByNameAndAgentNo(String name, String agentNo);
 
 }

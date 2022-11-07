@@ -24,6 +24,7 @@ public interface ProductDepotRepository extends JpaRepository<ProductDepot, Long
             + "where 1 = 1 "
             + "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
             + "and IF (?2!='', e.name like CONCAT('%',?2,'%'), 1=1) "
+            + "and (COALESCE(?3) IS NULL OR (b.agentId IN (?3) )) "
             + "group by a.id "
             , countQuery = "select count(1) from ProductDepot a "
             + "left join Product b on b.depotId = a.id "
@@ -34,9 +35,10 @@ public interface ProductDepotRepository extends JpaRepository<ProductDepot, Long
             + "where 1 = 1 "
             + "and IF (?1!='', a.name like CONCAT('%',?1,'%'), 1=1) "
             + "and IF (?2!='', e.name like CONCAT('%',?2,'%'), 1=1) "
+            + "and (COALESCE(?3) IS NULL OR (b.agentId IN (?3) )) "
             + "group by a.id "
             , nativeQuery = true)
-    Page<Object[]> getDepotListPage(String name, String ownerName, Pageable pageable);
+    Page<Object[]> getDepotListPage(String name, String ownerName, List<Long> agentIds, Pageable pageable);
 
 
 
