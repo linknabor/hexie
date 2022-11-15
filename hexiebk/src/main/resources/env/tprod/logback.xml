@@ -14,6 +14,7 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
+			<charset>gbk</charset>
         </encoder>
     </appender>
     <appender name="INTEGRATION" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -26,6 +27,7 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
+			<charset>gbk</charset>
         </encoder>
     </appender>
     <appender name="ORDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -38,6 +40,7 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
+			<charset>gbk</charset>
         </encoder>
     </appender>
     <appender name="SCHEDUE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -50,6 +53,7 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
+			<charset>gbk</charset>
         </encoder>
     </appender>
     <appender name="SPRING" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -62,6 +66,7 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
+			<charset>gbk</charset>
         </encoder>
     </appender>
     <appender name="HIBERNATE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -74,6 +79,7 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
             </pattern>
+			<charset>gbk</charset>
         </encoder>
     </appender>
     
