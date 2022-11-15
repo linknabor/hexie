@@ -87,7 +87,7 @@
     <logger name="com.yumu.hexie.integration"  level="INFO" additivity="false">  
 	    <appender-ref ref="INTEGRATION"/>  
 	</logger>
-    <logger name="org.hibernate"  level="DEBUG" additivity="false">  
+    <logger name="org.hibernate"  level="INFO" additivity="false">  
 	    <appender-ref ref="HIBERNATE"/>  
 	</logger>
     <logger name="com.yumu.hexie.service.sales.impl.BaseOrderServiceImpl"  level="INFO" additivity="false">  
