@@ -17,6 +17,10 @@ public class MerchantPlat extends BaseModel {
 	private String appId;
 	private String appName;
 	
+	public MerchantPlat() {
+		super();
+	}
+
 	public MerchantPlat(long merchantId, String merchantName, String appId, String appName) {
 		super();
 		this.merchantId = merchantId;

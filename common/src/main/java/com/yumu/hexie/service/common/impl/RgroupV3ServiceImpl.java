@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -76,6 +77,7 @@ import com.yumu.hexie.vo.RgroupVO.RgroupOwnerVO;
 import com.yumu.hexie.vo.RgroupVO.Tag;
 import com.yumu.hexie.vo.RgroupVO.Thumbnail;
 
+@Service
 public class RgroupV3ServiceImpl implements RgroupV3Service {
 	
 	private static Logger logger = LoggerFactory.getLogger(RgroupV3ServiceImpl.class);

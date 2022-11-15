@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +20,7 @@ import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.shequ.RgroupQueueTask;
 import com.yumu.hexie.service.user.UserService;
 
+@Service
 public class RgroupQueueTaskImp implements RgroupQueueTask {
 	
 	private static Logger logger = LoggerFactory.getLogger(RgroupQueueTaskImp.class);

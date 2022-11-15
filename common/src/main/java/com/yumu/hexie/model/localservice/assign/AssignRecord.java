@@ -39,7 +39,12 @@ public class AssignRecord extends BaseModel {
     private String orderTime;//订单时间
     private long orderDate;
     
-    public AssignRecord(ServiceOperator ro,RepairOrder order) {
+    
+    public AssignRecord() {
+		super();
+	}
+
+	public AssignRecord(ServiceOperator ro,RepairOrder order) {
         this.operatorId = ro.getId();
         this.operatorUserId = ro.getUserId();
         
