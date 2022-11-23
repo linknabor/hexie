@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
+import com.yumu.hexie.integration.community.req.OutsideSaveProDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
@@ -90,5 +91,7 @@ public interface GroupMngService {
 	CommonResponse<Object> getGroupOwners(QueryGroupOwnerReq queryGroupOwnerReq);
 
 	CommonResponse<Object> updateOwnerFeeRate(RgroupOwnerVO rgroupOwnerVO);
+
+	CommonResponse<Object> saveProductDepot(OutsideSaveProDepotReq outsideSaveProDepotReq);
 
 }

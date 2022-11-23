@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.community.req.OutSidProductDepotReq;
+import com.yumu.hexie.integration.community.req.OutsideSaveProDepotReq;
 import com.yumu.hexie.integration.community.req.ProductDepotReq;
 import com.yumu.hexie.integration.community.req.QueryGroupOwnerReq;
 import com.yumu.hexie.integration.community.req.QueryGroupReq;
@@ -310,7 +311,12 @@ public class GroupMngController extends BaseController {
     public CommonResponse<Object> getRelateGroupa(@RequestBody Map<String, String> map) {
         return groupMngService.queryRelateGroup(map.get("depotId"));
     }
-
+    
+    /**
+     * 删除商品库存
+     * @param map
+     * @return
+     */
     @RequestMapping(value = "/outside/delDepot", method = RequestMethod.POST)
     public CommonResponse<String> delDepot(@RequestBody Map<String, String> map) {
         String str = groupMngService.delDepotById(map.get("depotId"));
@@ -328,6 +334,18 @@ public class GroupMngController extends BaseController {
     @RequestMapping(value = "/outside/groupList", method = RequestMethod.POST)
     public CommonResponse<Object> groupList(@RequestBody OutSidProductDepotReq outSidProductDepotReq) {
         return groupMngService.queryGroupListPage(outSidProductDepotReq);
+    }
+    
+    /**
+     * 新增，编辑商品库
+     * @param user
+     * @param productDepotReq
+     * @return
+     */
+	@RequestMapping(value = "/outside/saveDepot", method = RequestMethod.POST)
+    public CommonResponse<Object> saveProductDepot(@RequestBody OutsideSaveProDepotReq outsideSaveProDepotReq) {
+    	CommonResponse<Object> commonResponse = groupMngService.saveProductDepot(outsideSaveProDepotReq);
+        return commonResponse;
     }
 
     /**

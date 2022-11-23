@@ -13,9 +13,15 @@ import javax.persistence.Entity;
 @Entity
 public class ProductDepotTags extends BaseModel {
 
-    private String name;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 8421208961849420850L;
+	
+	private String name;
     private String color = "#FF9333";
     private long ownerId; //拥有者
+    private String agentNo;
 
     public String getName() {
         return name;
@@ -41,12 +47,19 @@ public class ProductDepotTags extends BaseModel {
         this.ownerId = ownerId;
     }
 
-    @Override
-    public String toString() {
-        return "ProductDepotTags{" +
-                "name='" + name + '\'' +
-                ", color='" + color + '\'' +
-                ", ownerId=" + ownerId +
-                '}';
-    }
+	public String getAgentNo() {
+		return agentNo;
+	}
+
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+
+	@Override
+	public String toString() {
+		return "ProductDepotTags [name=" + name + ", color=" + color + ", ownerId=" + ownerId + ", agentNo=" + agentNo
+				+ "]";
+	}
+
+    
 }

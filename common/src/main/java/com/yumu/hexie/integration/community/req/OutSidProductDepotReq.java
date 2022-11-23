@@ -17,6 +17,7 @@ public class OutSidProductDepotReq implements Serializable {
 	private long ownerId;
 	private String productName;
     private String ownerName;
+    private String agentNo;
     private int currentPage;
     private int pageSize;
     
@@ -59,4 +60,14 @@ public class OutSidProductDepotReq implements Serializable {
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
     }
+
+	public String getAgentNo() {
+		return agentNo;
+	}
+
+	public void setAgentNo(String agentNo) {
+		this.agentNo = agentNo;
+	}
+    
+    
 }
