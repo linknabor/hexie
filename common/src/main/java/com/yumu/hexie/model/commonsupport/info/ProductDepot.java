@@ -77,6 +77,8 @@ public class ProductDepot extends BaseModel {
 	private boolean isService = false;
 
 	private long ownerId; //团长ID
+	private String ownerName;	//团长姓名
+	private int areaLimit;	//地区限制,0无限制，1限制
 	
 	
 	public long getMerchantId() {
@@ -375,6 +377,18 @@ public class ProductDepot extends BaseModel {
 	}
 	public void setSpecs(String specs) {
 		this.specs = specs;
+	}
+	public int getAreaLimit() {
+		return areaLimit;
+	}
+	public void setAreaLimit(int areaLimit) {
+		this.areaLimit = areaLimit;
+	}
+	public String getOwnerName() {
+		return ownerName;
+	}
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
 	}
 	
 }

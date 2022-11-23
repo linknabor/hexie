@@ -94,4 +94,6 @@ public interface GroupMngService {
 
 	CommonResponse<Object> saveProductDepot(OutsideSaveProDepotReq outsideSaveProDepotReq);
 
+	CommonResponse<Object> queryProductDepotById(String depotId);
+
 }

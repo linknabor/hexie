@@ -14,6 +14,7 @@ public class OutSidProductDepotReq implements Serializable {
 	 */
 	private static final long serialVersionUID = -3814700291640200869L;
 	
+	private long depotId;
 	private long ownerId;
 	private String productName;
     private String ownerName;
@@ -68,6 +69,20 @@ public class OutSidProductDepotReq implements Serializable {
 	public void setAgentNo(String agentNo) {
 		this.agentNo = agentNo;
 	}
-    
+
+	public long getDepotId() {
+		return depotId;
+	}
+
+	public void setDepotId(long depotId) {
+		this.depotId = depotId;
+	}
+
+	@Override
+	public String toString() {
+		return "OutSidProductDepotReq [depotId=" + depotId + ", ownerId=" + ownerId + ", productName=" + productName
+				+ ", ownerName=" + ownerName + ", agentNo=" + agentNo + ", currentPage=" + currentPage + ", pageSize="
+				+ pageSize + "]";
+	}
     
 }

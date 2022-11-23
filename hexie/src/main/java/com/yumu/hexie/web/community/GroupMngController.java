@@ -347,6 +347,19 @@ public class GroupMngController extends BaseController {
     	CommonResponse<Object> commonResponse = groupMngService.saveProductDepot(outsideSaveProDepotReq);
         return commonResponse;
     }
+	
+	/**
+     * 新增，编辑商品库
+     * @param user
+     * @param productDepotReq
+     * @return
+     */
+	@RequestMapping(value = "/outside/getDepot", method = RequestMethod.POST)
+    public CommonResponse<Object> getProductDepotDetail(@RequestBody Map<String, String> map) {
+		String depotId = map.get("depotId");
+    	CommonResponse<Object> commonResponse = groupMngService.queryProductDepotById(depotId);
+        return commonResponse;
+    }
 
     /**
      * 后台，操作团购

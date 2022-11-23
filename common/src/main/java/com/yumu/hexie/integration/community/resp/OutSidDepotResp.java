@@ -1,9 +1,11 @@
 package com.yumu.hexie.integration.community.resp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yumu.hexie.common.util.DateUtil;
 
 import java.io.Serializable;
 import java.math.BigInteger;
+
 
 public class OutSidDepotResp implements Serializable {
 
@@ -15,6 +17,8 @@ public class OutSidDepotResp implements Serializable {
 	//商品信息
 	private BigInteger id;	//公众号的商品ID
 	private String name;
+	@JsonProperty("create_date")
+	private BigInteger createDate;
 	@JsonProperty("main_picture")
 	private String mainPicture;	//封面图链接
 	@JsonProperty("small_picture")
@@ -32,15 +36,17 @@ public class OutSidDepotResp implements Serializable {
 	private Integer totalCount;	//库存
 	@JsonProperty("user_name")
 	private String userName; //团长
+	@JsonProperty("area_limit")
+	private Integer areaLimit;	//商品上架区域限制
 	@JsonProperty("group_count")
 	private BigInteger groupCount; //团购数
-
 	@JsonProperty("order_num")
 	private BigInteger orderNum; //下单数
-
-	public OutSidDepotResp(BigInteger id, String name, String mainPicture, String smallPicture, String pictures, Float miniPrice, Float oriPrice, Float singlePrice, String serviceDesc, Integer totalCount, String userName, BigInteger groupCount, BigInteger orderNum) {
+	
+	public OutSidDepotResp(BigInteger id, String name, BigInteger createDate, String mainPicture, String smallPicture, String pictures, Float miniPrice, Float oriPrice, Float singlePrice, String serviceDesc, Integer totalCount, String userName, Integer areaLimit, BigInteger groupCount, BigInteger orderNum) {
 		this.id = id;
 		this.name = name;
+		this.createDate = createDate;
 		this.mainPicture = mainPicture;
 		this.smallPicture = smallPicture;
 		this.pictures = pictures;
@@ -50,8 +56,15 @@ public class OutSidDepotResp implements Serializable {
 		this.serviceDesc = serviceDesc;
 		this.totalCount = totalCount;
 		this.userName = userName;
+		this.areaLimit = areaLimit;
 		this.groupCount = groupCount;
 		this.orderNum = orderNum;
+	}
+	
+	
+
+	public OutSidDepotResp() {
+		super();
 	}
 
 	public BigInteger getId() {
@@ -157,4 +170,26 @@ public class OutSidDepotResp implements Serializable {
 	public void setOrderNum(BigInteger orderNum) {
 		this.orderNum = orderNum;
 	}
+
+	public String getCreateDate() {
+		String formatted = "";
+		if (createDate!=null) {
+			formatted = DateUtil.dtFormat(createDate.longValue(), DateUtil.dttmSimple);
+		}
+		return formatted;
+	}
+
+	public void setCreateDate(BigInteger createDate) {
+		this.createDate = createDate;
+	}
+
+	public Integer getAreaLimit() {
+		return areaLimit;
+	}
+
+	public void setAreaLimit(Integer areaLimit) {
+		this.areaLimit = areaLimit;
+	}
+	
+	
 }

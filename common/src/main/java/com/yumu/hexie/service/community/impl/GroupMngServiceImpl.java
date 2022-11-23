@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,6 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -45,11 +45,16 @@ import com.yumu.hexie.integration.community.resp.GroupProductSumVo;
 import com.yumu.hexie.integration.community.resp.GroupSumResp;
 import com.yumu.hexie.integration.community.resp.OutSidDepotResp;
 import com.yumu.hexie.integration.community.resp.OutSidRelateGroupResp;
+import com.yumu.hexie.integration.community.resp.QueryDepotDTO;
+import com.yumu.hexie.integration.community.resp.QueryProDepotResp;
+import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.info.Product;
 import com.yumu.hexie.model.commonsupport.info.ProductDepot;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotArea;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotAreaRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTags;
 import com.yumu.hexie.model.commonsupport.info.ProductDepotTagsRepository;
@@ -66,8 +71,6 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
-import com.yumu.hexie.model.user.OrgOperator;
-import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.RgroupOwner;
 import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
@@ -134,7 +137,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 	private AgentRepository agentRepository;
 	
 	@Autowired
-	private OrgOperatorRepository orgOperatorRepository;
+	private ProductDepotAreaRepository productDepotAreaRepository;
 
 	@Override
 	public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
@@ -938,6 +941,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 			}
 		}
 		depot.setOwnerId(user.getId());
+		depot.setOwnerName(user.getName());
 		productDepotRepository.save(depot);
 		return depot;
 	}
@@ -952,12 +956,12 @@ public class GroupMngServiceImpl implements GroupMngService {
 	public CommonResponse<Object> saveProductDepot(OutsideSaveProDepotReq outsideSaveProDepotReq) {
 		
 		CommonResponse<Object> commonResponse = new CommonResponse<>();
-		
 		ProductDepot depot = new ProductDepot();
+		depot.setOwnerId(0l);
+		depot.setOwnerName(outsideSaveProDepotReq.getAgentName());
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getId())) { // 编辑
 			depot = productDepotRepository.findById(Long.parseLong(outsideSaveProDepotReq.getId())).get();
 		}
-
 		BeanUtils.copyProperties(outsideSaveProDepotReq, depot);
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getPictures())) {
 			String[] strs = outsideSaveProDepotReq.getPictures().split(",");
@@ -973,7 +977,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 			String[] strs = outsideSaveProDepotReq.getProTags().split(",");
 			for (String name : strs) {
 				if (!StringUtils.isEmpty(name)) {
-					ProductDepotTags tag = productDepotTagsRepository.findByNameAndAgentNo(name, outsideSaveProDepotReq.getAgentNo());
+					ProductDepotTags tag = productDepotTagsRepository.findByName(name);
 					if (tag == null) {
 						tag = new ProductDepotTags();
 						tag.setName(name);
@@ -991,17 +995,119 @@ public class GroupMngServiceImpl implements GroupMngService {
 				depot.setTags(jsonArray.toJSONString());
 			}
 		}
-		depot.setOwnerId(0l);
+		int areaLimit = 0;
+		if (outsideSaveProDepotReq.getSaleAreas()!=null && outsideSaveProDepotReq.getSaleAreas().size()>0) {
+			areaLimit = 1;
+		}
+		depot.setAreaLimit(areaLimit);
 		productDepotRepository.save(depot);
+		
+		if (areaLimit == 1) {
+			for (Region saleArea : outsideSaveProDepotReq.getSaleAreas()) {
+				Region region = getRegion(saleArea);
+				ProductDepotArea productDepotArea = new ProductDepotArea();
+				productDepotArea.setDepotId(depot.getId());
+				productDepotArea.setRegionId(region.getId());
+				productDepotAreaRepository.save(productDepotArea);
+			}
+		}
 		commonResponse.setData(depot);
 		commonResponse.setResult("00");
-		
 		return commonResponse;
+	}
+	
+	/**
+	 * 获取平台小区对应的region
+	 * @param saleArea
+	 * @return
+	 */
+	private Region getRegion(Region saleArea) {
+		
+		Region region = null;
+		List<Region> regionList = regionRepository.findAllBySectId(saleArea.getSectId());
+		if (regionList==null || regionList.isEmpty()) {
+			regionList = regionRepository.findByNameAndRegionType(saleArea.getName(), saleArea.getRegionType());
+			if (regionList == null || regionList.isEmpty()) {
+				region = new Region();
+				BeanUtils.copyProperties(saleArea, region);
+				region.setLongitude(0d);
+				region.setLatitude(0d);
+				region = regionRepository.save(region);
+			}else {
+				if (regionList.size()>1) {
+					for (Region currRegion : regionList) {
+						if (!StringUtils.isEmpty(currRegion.getSectId())) {
+							region = currRegion;
+						}
+					}
+					if (region == null) {
+						region = regionList.get(0);
+					}
+				}else {
+					region = regionList.get(0);
+				}
+				region.setSectId(saleArea.getSectId());
+				region = regionRepository.save(region);
+			}
+		}else {
+			region = regionList.get(0);
+		}
+		return region;
 	}
 
 	@Override
 	public ProductDepot queryProductDepotDetail(User user, String productId) {
 		return productDepotRepository.findById(Long.parseLong(productId)).get();
+	}
+	
+	@Override
+	public CommonResponse<Object> queryProductDepotById(String depotIdStr) {
+		
+		Assert.hasText(depotIdStr, "库存id不能为空。");
+		CommonResponse<Object> commonResponse = new CommonResponse<>();
+		try {
+			long depotId = Long.valueOf(depotIdStr);
+			QueryDepotDTO dto = new QueryDepotDTO();
+			Optional<ProductDepot> optional = productDepotRepository.findById(depotId);
+			ProductDepot productDepot = null;
+			if (optional.isPresent()) {
+				productDepot = optional.get();
+			}
+			if (productDepot!=null) {
+				QueryProDepotResp queryProDepotResp = new QueryProDepotResp();
+				queryProDepotResp.setId(productDepot.getId());
+				queryProDepotResp.setName(productDepot.getName());
+				queryProDepotResp.setOriPrice(productDepot.getOriPrice());
+				queryProDepotResp.setMiniPrice(productDepot.getSinglePrice());
+				queryProDepotResp.setSinglePrice(productDepot.getSinglePrice());
+				queryProDepotResp.setPictures(productDepot.getPictures());
+				queryProDepotResp.setServiceDesc(productDepot.getServiceDesc());
+				queryProDepotResp.setAreaLimit(productDepot.getAreaLimit());
+				queryProDepotResp.setSpecs(productDepot.getSpecs());
+				queryProDepotResp.setTotalCount(productDepot.getTotalCount());
+				if (!StringUtils.isEmpty(productDepot.getTags())) {
+					queryProDepotResp.setTags(productDepot.getTags());
+				}
+				dto.setContent(queryProDepotResp);
+				
+				List<Region> regions = productDepotAreaRepository.findRegionsByDepotId(depotId);
+				List<SaleAreaMapper> supportAreas = new ArrayList<>();
+				if (regions!=null) {
+					for (Region region : regions) {
+						SaleAreaMapper saleArea = new SaleAreaMapper(region.getName(), region.getParentName(), 
+								region.getSectId());
+						supportAreas.add(saleArea);
+					}
+					dto.setSaleArea(supportAreas);
+				}
+			}
+			commonResponse.setData(dto);
+			commonResponse.setResult("00");
+		} catch (Exception e) {
+			commonResponse.setErrMsg(e.getMessage());
+			commonResponse.setResult("99"); // TODO 写一个公共handler统一做异常处理
+		}
+		return commonResponse;
 	}
 
 	@Override
@@ -1019,14 +1125,6 @@ public class GroupMngServiceImpl implements GroupMngService {
 		ProductDepotTags tags = new ProductDepotTags();
 		tags.setName(tagName);
 		tags.setOwnerId(user.getId());
-		List<OrgOperator> operList = orgOperatorRepository.findByUserId(user.getId());
-		OrgOperator orgOperator = null;
-		if (operList!=null && !operList.isEmpty()) {
-			orgOperator = operList.get(0);
-			if (orgOperator != null) {
-				tags.setAgentNo(orgOperator.getOrgId());
-			}
-		}
 		productDepotTagsRepository.save(tags);
 		return true;
 	}
@@ -1069,6 +1167,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 			}
 			depot.setAgentId(0l);
 			depot.setOwnerId(user.getId());
+			depot.setOwnerName(user.getName());
 			productDepotRepository.save(depot);
 
 			product.setDepotId(depot.getId());
