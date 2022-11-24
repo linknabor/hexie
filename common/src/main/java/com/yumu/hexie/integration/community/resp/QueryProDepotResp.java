@@ -23,8 +23,8 @@ public class QueryProDepotResp implements Serializable {
 	private int areaLimit;
 	private String pictures;
 	private String tags;
-	@JsonProperty("service_desc")
-	private String serviceDesc;
+	@JsonProperty("other_desc")
+	private String otherDesc;
 	private String specs;
 	@JsonProperty("total_count")
 	private int totalCount;
@@ -65,11 +65,11 @@ public class QueryProDepotResp implements Serializable {
 	public void setAreaLimit(int areaLimit) {
 		this.areaLimit = areaLimit;
 	}
-	public String getServiceDesc() {
-		return serviceDesc;
+	public String getOtherDesc() {
+		return otherDesc;
 	}
-	public void setServiceDesc(String serviceDesc) {
-		this.serviceDesc = serviceDesc;
+	public void setOtherDesc(String otherDesc) {
+		this.otherDesc = otherDesc;
 	}
 	public String getSpecs() {
 		return specs;

@@ -6,13 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.yumu.hexie.model.distribution.region.Region;
-
 @Repository
 public interface ProductDepotAreaRepository extends JpaRepository<ProductDepotArea, Long>{
 
-	@Query(value = "select r.* from ProductDepotArea a join region r on a.regionId = r.id "
+	@Query(value = "select r.name, r.parentName, r.sectId from ProductDepotArea a join region r on a.regionId = r.id "
 			+ "where a.depotId = ?1 ", 
 			nativeQuery = true)
-	List<Region> findRegionsByDepotId(long depotId);
+	List<Object[]> findRegionsByDepotId(long depotId);
+	
+	
+	List<ProductDepotArea> findByDepotId(long depotId);
 }

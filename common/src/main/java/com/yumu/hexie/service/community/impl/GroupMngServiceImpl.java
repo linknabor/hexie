@@ -1003,6 +1003,10 @@ public class GroupMngServiceImpl implements GroupMngService {
 		productDepotRepository.save(depot);
 		
 		if (areaLimit == 1) {
+			List<ProductDepotArea> areas = productDepotAreaRepository.findByDepotId(depot.getId());
+			if (areas!=null && areas.size()>0) {
+				productDepotAreaRepository.deleteAll(areas);
+			}
 			for (Region saleArea : outsideSaveProDepotReq.getSaleAreas()) {
 				Region region = getRegion(saleArea);
 				ProductDepotArea productDepotArea = new ProductDepotArea();
@@ -1011,7 +1015,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 				productDepotAreaRepository.save(productDepotArea);
 			}
 		}
-		commonResponse.setData(depot);
+		commonResponse.setData(Constants.SERVICE_SUCCESS);
 		commonResponse.setResult("00");
 		return commonResponse;
 	}
@@ -1078,10 +1082,10 @@ public class GroupMngServiceImpl implements GroupMngService {
 				queryProDepotResp.setId(productDepot.getId());
 				queryProDepotResp.setName(productDepot.getName());
 				queryProDepotResp.setOriPrice(productDepot.getOriPrice());
-				queryProDepotResp.setMiniPrice(productDepot.getSinglePrice());
+				queryProDepotResp.setMiniPrice(productDepot.getMiniPrice());
 				queryProDepotResp.setSinglePrice(productDepot.getSinglePrice());
 				queryProDepotResp.setPictures(productDepot.getPictures());
-				queryProDepotResp.setServiceDesc(productDepot.getServiceDesc());
+				queryProDepotResp.setOtherDesc(productDepot.getOtherDesc());
 				queryProDepotResp.setAreaLimit(productDepot.getAreaLimit());
 				queryProDepotResp.setSpecs(productDepot.getSpecs());
 				queryProDepotResp.setTotalCount(productDepot.getTotalCount());
@@ -1090,15 +1094,10 @@ public class GroupMngServiceImpl implements GroupMngService {
 				}
 				dto.setContent(queryProDepotResp);
 				
-				List<Region> regions = productDepotAreaRepository.findRegionsByDepotId(depotId);
-				List<SaleAreaMapper> supportAreas = new ArrayList<>();
-				if (regions!=null) {
-					for (Region region : regions) {
-						SaleAreaMapper saleArea = new SaleAreaMapper(region.getName(), region.getParentName(), 
-								region.getSectId());
-						supportAreas.add(saleArea);
-					}
-					dto.setSaleArea(supportAreas);
+				List<Object[]> regions = productDepotAreaRepository.findRegionsByDepotId(depotId);
+				List<SaleAreaMapper> areaList = ObjectToBeanUtils.objectToBean(regions, SaleAreaMapper.class);
+				if (areaList!=null) {
+					dto.setSaleArea(areaList);
 				}
 			}
 			commonResponse.setData(dto);

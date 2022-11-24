@@ -27,7 +27,7 @@ public class OutsideSaveProDepotReq implements Serializable {
 	private String endDate;	//下架日期
 	private String totalCount;	//库存
 	private String pictures;	//商品图
-	private String serviceDesc;	//描述
+	private String otherDesc;	//描述
 	
 	//物业或服务商信息
 	private String agentName;
@@ -116,12 +116,12 @@ public class OutsideSaveProDepotReq implements Serializable {
 		this.totalCount = totalCount;
 	}
 
-	public String getServiceDesc() {
-		return serviceDesc;
+	public String getOtherDesc() {
+		return otherDesc;
 	}
 
-	public void setServiceDesc(String serviceDesc) {
-		this.serviceDesc = serviceDesc;
+	public void setOtherDesc(String otherDesc) {
+		this.otherDesc = otherDesc;
 	}
 
 	public String getAgentName() {
@@ -169,9 +169,8 @@ public class OutsideSaveProDepotReq implements Serializable {
 		return "OutsideSaveProDepotReq [operType=" + operType + ", proTags=" + proTags + ", id=" + id + ", name=" + name
 				+ ", type=" + type + ", oriPrice=" + oriPrice + ", miniPrice=" + miniPrice + ", singlePrice="
 				+ singlePrice + ", startDate=" + startDate + ", endDate=" + endDate + ", totalCount=" + totalCount
-				+ ", pictures=" + pictures + ", serviceDesc=" + serviceDesc + ", agentName=" + agentName + ", agentNo="
+				+ ", pictures=" + pictures + ", otherDesc=" + otherDesc + ", agentName=" + agentName + ", agentNo="
 				+ agentNo + ", saleAreas=" + saleAreas + "]";
 	}
 
-    
 }
