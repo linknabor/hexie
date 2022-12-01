@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.ModelConstant;
@@ -266,7 +267,13 @@ public class DistributionServiceImpl implements DistributionService {
     	
     	for (OnSaleAreaItem item : itemList) {
     		String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
+    		if (StringUtils.isEmpty(stock)) {
+    			stock = "0";
+			}
     		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
+    		if (StringUtil.isEmpty(stock)) {
+				stock = "0";
+			}
 			int totalCount = Integer.valueOf(stock) - Integer.valueOf(freeze);
     		item.setTotalCount(totalCount);
 		}
