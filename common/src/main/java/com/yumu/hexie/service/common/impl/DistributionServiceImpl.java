@@ -271,8 +271,8 @@ public class DistributionServiceImpl implements DistributionService {
     			stock = "0";
 			}
     		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());
-    		if (StringUtil.isEmpty(stock)) {
-				stock = "0";
+    		if (StringUtil.isEmpty(freeze)) {
+    			freeze = "0";
 			}
 			int totalCount = Integer.valueOf(stock) - Integer.valueOf(freeze);
     		item.setTotalCount(totalCount);
