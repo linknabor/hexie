@@ -164,7 +164,6 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     @Autowired
     private RefundRecordRepository refundRecordRepository;
 
-
     private List<String> preOrderCreate(ServiceOrder order, Address address) {
         log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
         List<String> messageList = new ArrayList<>();	//这里校验报错，如果缺货或者商品下架，不能直接返回到页面，能成功购买的商品还是要下单的
@@ -175,7 +174,12 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             //校验规则
             salePlanService.getService(order.getOrderType()).validateRule(order, plan, item, address);
             //校验商品
-            Product product = productService.getProduct(item.getProductId());
+            Product product = null;
+            if (item.getProductId() == null || item.getProductId() == 0L) {
+            	product = productService.getProduct(plan.getProductId());
+			} else {
+				product = productService.getProduct(item.getProductId());
+			}
             try {
 				productService.checkSalable(product, item.getCount());
 			} catch (Exception e) {
