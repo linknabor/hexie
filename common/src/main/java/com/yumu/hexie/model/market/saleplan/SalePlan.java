@@ -243,6 +243,15 @@ public class SalePlan extends BaseModel {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
+	@Override
+	public String toString() {
+		return "SalePlan [productId=" + productId + ", ruleNo=" + ruleNo + ", name=" + name + ", limitNumOnce="
+				+ limitNumOnce + ", startDate=" + startDate + ", endDate=" + endDate + ", price=" + price
+				+ ", oriPrice=" + oriPrice + ", postageFee=" + postageFee + ", freeShippingNum=" + freeShippingNum
+				+ ", description=" + description + ", descriptionMore=" + descriptionMore + ", productName="
+				+ productName + ", timeoutForPay=" + timeoutForPay + ", supportRegionType=" + supportRegionType
+				+ ", tagUrl=" + tagUrl + ", status=" + status + ", updateDate=" + updateDate + "]";
+	}
 	
 	
 }
