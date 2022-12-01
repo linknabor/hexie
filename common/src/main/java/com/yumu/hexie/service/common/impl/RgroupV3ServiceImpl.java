@@ -746,8 +746,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			for (RgroupRule rgroupRule : ruleList) {
 				RgroupVO vo = new RgroupVO();
 				String descMoreStr = rgroupRule.getDescriptionMore();
-				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
-				DescriptionMore[]descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				DescriptionMore[]descriptionMore = new DescriptionMore[0];
+				if (!StringUtils.isEmpty(descMoreStr)) {
+					TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+					descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				}
 				
 				List<String> descMoreImages = new ArrayList<>();
 				for (DescriptionMore descMore : descriptionMore) {
