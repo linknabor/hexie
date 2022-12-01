@@ -60,6 +60,8 @@ import com.yumu.hexie.model.market.RefundRecord;
 import com.yumu.hexie.model.market.RefundRecordRepository;
 import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
+import com.yumu.hexie.model.market.saleplan.OnSaleRule;
+import com.yumu.hexie.model.market.saleplan.OnSaleRuleRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
 import com.yumu.hexie.model.market.saleplan.SalePlan;
@@ -163,6 +165,8 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
     private RgroupRuleRepository rgroupRuleRepository;
     @Autowired
     private RefundRecordRepository refundRecordRepository;
+    @Autowired
+    private OnSaleRuleRepository onSaleRuleRepository;
 
     private List<String> preOrderCreate(ServiceOrder order, Address address) {
         log.warn("[Create]创建订单OrderNo:" + order.getOrderNo());
@@ -171,13 +175,22 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         String productName = "";
         for (OrderItem item : order.getItems()) {
             SalePlan plan = findSalePlan(order.getOrderType(), item.getRuleId());
+            log.info("salePlant is : " + plan);
             //校验规则
             salePlanService.getService(order.getOrderType()).validateRule(order, plan, item, address);
             //校验商品
             Product product = null;
             if (item.getProductId() == null || item.getProductId() == 0L) {
             	product = productService.getProduct(plan.getProductId());
-			} else {
+            	if (product == null) {
+					Optional<OnSaleRule> optional = onSaleRuleRepository.findById(item.getRuleId());
+					if (optional.isPresent()) {
+						OnSaleRule onSaleRule = optional.get();
+						product = productService.getProduct(onSaleRule.getProductId());
+					}
+				}
+            } else {
+
 				product = productService.getProduct(item.getProductId());
 			}
             try {
