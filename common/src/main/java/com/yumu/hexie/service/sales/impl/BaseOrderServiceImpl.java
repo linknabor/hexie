@@ -190,6 +190,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 					}
 				}
             } else {
+
 				product = productService.getProduct(item.getProductId());
 			}
             try {
