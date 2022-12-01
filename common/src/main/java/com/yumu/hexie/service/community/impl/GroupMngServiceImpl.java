@@ -810,7 +810,7 @@ public class GroupMngServiceImpl implements GroupMngService {
             if (rgroupRule.getGroupStatus() == ModelConstant.RGROUP_STAUS_FINISH) {
                 List<ServiceOrder> serviceOrderList = serviceOrderRepository.findByGroupRuleId(Long.parseLong(groupId));
                 for (ServiceOrder order : serviceOrderList) {
-                    if (order.getStatus() == ModelConstant.ORDER_STATUS_PAYED) {
+                    if (order.getStatus() == ModelConstant.ORDER_STATUS_PAYED || order.getStatus() == ModelConstant.ORDER_STATUS_CONFIRM) {
                         list.add(order);
                     }
                 }
