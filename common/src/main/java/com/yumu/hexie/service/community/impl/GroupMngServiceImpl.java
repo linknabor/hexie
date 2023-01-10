@@ -48,6 +48,7 @@ import com.yumu.hexie.integration.community.resp.OutSidRelateGroupResp;
 import com.yumu.hexie.integration.community.resp.QueryDepotDTO;
 import com.yumu.hexie.integration.community.resp.QueryProDepotResp;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
+import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
@@ -71,6 +72,7 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
+import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.RgroupOwner;
 import com.yumu.hexie.model.user.RgroupOwnerRepository;
 import com.yumu.hexie.model.user.User;
@@ -93,6 +95,8 @@ import com.yumu.hexie.vo.RgroupVO.Thumbnail;
 public class GroupMngServiceImpl implements GroupMngService {
 
 	private static Logger logger = LoggerFactory.getLogger(GroupMngServiceImpl.class);
+	
+	private static final String DEFAULT_AGENT_NO = "000000000000"; // 全平台机构号。如果是全平台的，不用加筛选条件，全不能看。
 
 	@Autowired
 	private RgroupRuleRepository rgroupRuleRepository;
@@ -138,7 +142,13 @@ public class GroupMngServiceImpl implements GroupMngService {
 	
 	@Autowired
 	private ProductDepotAreaRepository productDepotAreaRepository;
+	
+	@Autowired
+	private OrgOperatorRepository orgOperatorRepository;
 
+	@Autowired
+	private EshopUtil eshopUtil;
+	
 	@Override
 	public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
 		try {
@@ -508,8 +518,12 @@ public class GroupMngServiceImpl implements GroupMngService {
 			Pageable pageable = PageRequest.of(queryGroupOwnerReq.getCurrentPage(), queryGroupOwnerReq.getPageSize(),
 					sort);
 
-			Page<Object[]> page = rgroupOwnerRepository.findByUserIdAndTelLikeAndName(queryGroupOwnerReq.getId(),
-					queryGroupOwnerReq.getTel(), queryGroupOwnerReq.getName(), pageable);
+			String agentNo = queryGroupOwnerReq.getAgentNo();
+			if (DEFAULT_AGENT_NO.equals(agentNo)) {
+				agentNo = "";
+			}
+			Page<Object[]> page = rgroupOwnerRepository.findByUserIdAndTelLikeAndNameAndAgentNo(queryGroupOwnerReq.getId(),
+					queryGroupOwnerReq.getTel(), queryGroupOwnerReq.getName(), agentNo, pageable);
 
 			List<GroupOwnerVO> list = ObjectToBeanUtils.objectToBean(page.getContent(), GroupOwnerVO.class);
 
@@ -854,7 +868,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 			if (rgroupRule.getGroupStatus() == ModelConstant.RGROUP_STAUS_FINISH) {
 				List<ServiceOrder> serviceOrderList = serviceOrderRepository.findByGroupRuleId(Long.parseLong(groupId));
 				for (ServiceOrder order : serviceOrderList) {
-					if (order.getStatus() == ModelConstant.ORDER_STATUS_PAYED) {
+					if (order.getStatus() == ModelConstant.ORDER_STATUS_PAYED || order.getStatus() == ModelConstant.ORDER_STATUS_CONFIRM) {
 						list.add(order);
 					}
 				}
@@ -961,6 +975,14 @@ public class GroupMngServiceImpl implements GroupMngService {
 		depot.setOwnerName(outsideSaveProDepotReq.getAgentName());
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getId())) { // 编辑
 			depot = productDepotRepository.findById(Long.parseLong(outsideSaveProDepotReq.getId())).get();
+		} else {
+			if (!StringUtils.isEmpty(outsideSaveProDepotReq.getAgentNo())
+					&& !DEFAULT_AGENT_NO.equals(outsideSaveProDepotReq.getAgentNo())) {
+				Agent agent = agentRepository.findByAgentNo(outsideSaveProDepotReq.getAgentNo());
+				if (agent != null) {
+					depot.setAgentId(agent.getId());
+				}
+			}
 		}
 		BeanUtils.copyProperties(outsideSaveProDepotReq, depot);
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getPictures())) {
@@ -1244,5 +1266,5 @@ public class GroupMngServiceImpl implements GroupMngService {
 		}
 		return regionList;
 	}
-
+	
 }

@@ -33,8 +33,10 @@ import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.ObjectToBeanUtils;
 import com.yumu.hexie.integration.eshop.mapper.QueryRgroupSectsMapper;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest;
+import com.yumu.hexie.integration.eshop.req.InviteLeaderRequest;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.GroupOwnerInfo;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest.Sect;
+import com.yumu.hexie.integration.eshop.resp.InviteLeaderResp;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wechat.service.TemplateMsgService;
 import com.yumu.hexie.model.ModelConstant;
@@ -746,8 +748,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			for (RgroupRule rgroupRule : ruleList) {
 				RgroupVO vo = new RgroupVO();
 				String descMoreStr = rgroupRule.getDescriptionMore();
-				TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
-				DescriptionMore[]descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				DescriptionMore[]descriptionMore = new DescriptionMore[0];
+				if (!StringUtils.isEmpty(descMoreStr)) {
+					TypeReference<DescriptionMore[]> typeReference = new TypeReference<RgroupVO.DescriptionMore[]>() {};
+					descriptionMore = objectMapper.readValue(descMoreStr, typeReference);
+				}
 				
 				List<String> descMoreImages = new ArrayList<>();
 				for (DescriptionMore descMore : descriptionMore) {
@@ -1551,4 +1556,64 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		}
 		
 	}
+	
+	/**
+	 *二维码邀请团长
+	 * @throws Exception 
+	 */
+	@Override
+	@Transactional
+	public boolean inviteGroupLeader(User user, String code) throws Exception {
+		
+		logger.info("user : " + user.getId() + ", invite code : " + code);
+		
+		InviteLeaderRequest inviteLeaderRequest = new InviteLeaderRequest();
+    	inviteLeaderRequest.setCode(code);
+    	inviteLeaderRequest.setLeaderId(String.valueOf(user.getId()));
+    	inviteLeaderRequest.setMiniopenid(user.getMiniopenid());
+    	inviteLeaderRequest.setName(user.getName());
+    	inviteLeaderRequest.setOpenid(user.getOpenid());
+    	inviteLeaderRequest.setTel(user.getTel());
+    	InviteLeaderResp inviteLeaderResp = eshopUtil.inviteLeader("", inviteLeaderRequest);
+		
+		Agent agent = agentRepository.findByAgentNo(inviteLeaderResp.getOrgId());
+		if (agent == null) {
+			agent = new Agent();
+			agent.setAgentNo(inviteLeaderResp.getOrgId());
+			agent.setName(inviteLeaderResp.getOrgName());
+			agent.setStatus(1);
+			agentRepository.save(agent);
+		}
+		
+		OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(user.getId(), ModelConstant.USER_ROLE_RGROUPOWNER);
+		if (orgOperator == null) {
+			orgOperator = new OrgOperator();
+			orgOperator.setOrgOperId(inviteLeaderResp.getOrgOperId());
+			orgOperator.setOrgOperName(user.getName());
+			orgOperator.setRoleId("03");
+			orgOperator.setUserId(user.getId());
+		}
+		orgOperator.setOrgId(inviteLeaderResp.getOrgId());
+		orgOperator.setOrgName(inviteLeaderResp.getOrgName());
+		orgOperator.setOrgType(inviteLeaderResp.getOrgType());
+		orgOperatorRepository.save(orgOperator);
+		
+		User ownerUser = userService.getById(user.getId());;
+		RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(user.getId());
+		if (rgroupOwner == null) {
+			rgroupOwner = new RgroupOwner();
+			rgroupOwner.setUserId(ownerUser.getId());
+			rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
+			rgroupOwner.setMiniappid(ownerUser.getMiniAppId());
+			rgroupOwner.setName(ownerUser.getName());
+			rgroupOwner.setHeadImgUrl(ownerUser.getHeadimgurl());
+			rgroupOwner.setTel(ownerUser.getTel());
+			rgroupOwnerRepository.save(rgroupOwner);
+			
+			ownerUser.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
+			userService.save(ownerUser);
+		}
+		return true;
+	}
+	
 }

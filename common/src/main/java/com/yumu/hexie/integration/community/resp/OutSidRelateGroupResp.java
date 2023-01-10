@@ -42,14 +42,11 @@ public class OutSidRelateGroupResp implements Serializable {
     private String descriptionMore;
     @JsonProperty("product_num")
     private BigInteger productNum;
-    @JsonProperty("area_limit")
-    private Integer areaLimit; 
-    
     private String status_cn;
     @JsonProperty("show_status")
     private String showStatus;
 
-    public OutSidRelateGroupResp(BigInteger id, BigInteger ownerId, String ownerName, String ownerAddr, String ownerImg, String ownerTel, Float price, String description, Integer status, Integer groupStatus, Timestamp startDate, Timestamp endDate, String descriptionMore, BigInteger productNum, Integer areaLimit) {
+    public OutSidRelateGroupResp(BigInteger id, BigInteger ownerId, String ownerName, String ownerAddr, String ownerImg, String ownerTel, Float price, String description, Integer status, Integer groupStatus, Timestamp startDate, Timestamp endDate, String descriptionMore, BigInteger productNum) {
         this.id = id;
         this.ownerId = ownerId;
         this.ownerName = ownerName;
@@ -64,7 +61,6 @@ public class OutSidRelateGroupResp implements Serializable {
         this.endDate = endDate;
         this.descriptionMore = descriptionMore;
         this.productNum = productNum;
-        this.areaLimit = areaLimit;
     }
 
     public BigInteger getId() {
@@ -206,13 +202,5 @@ public class OutSidRelateGroupResp implements Serializable {
 		this.showStatus = showStatus;
 	}
 
-	public Integer getAreaLimit() {
-		return areaLimit;
-	}
-
-	public void setAreaLimit(Integer areaLimit) {
-		this.areaLimit = areaLimit;
-	}
-    
     
 }

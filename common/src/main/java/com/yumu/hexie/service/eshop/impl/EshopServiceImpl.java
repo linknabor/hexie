@@ -399,6 +399,7 @@ public class EshopServiceImpl implements EshopSerivce {
 		if (!StringUtils.isEmpty(saveProductVO.getProductCategoryId())) {
 			product.setProductCategoryId(Integer.parseInt(saveProductVO.getProductCategoryId()));
 		}
+		product.setUserLimitCount(Integer.parseInt(saveProductVO.getLimitNumOnce()));
 		product = productRepository.save(product);
 		
 		int salePlanType = Integer.parseInt(saveProductVO.getSalePlanType());

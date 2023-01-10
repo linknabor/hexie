@@ -46,4 +46,6 @@ public interface RgroupV3Service {
 
 	boolean getUserSubscribe(User user, RgroupSubscribeVO rgroupSubscribeVO);
 
+	boolean inviteGroupLeader(User user, String code) throws Exception;
+
 }

@@ -30,8 +30,8 @@ public class OutSidDepotResp implements Serializable {
 	private Float oriPrice;//市场价
 	@JsonProperty("single_price")
 	private Float singlePrice;	//销售价
-	@JsonProperty("service_desc")
-	private String serviceDesc;	//描述
+	@JsonProperty("other_desc")
+	private String otherDesc;	//描述
 	@JsonProperty("total_count")
 	private Integer totalCount;	//库存
 	@JsonProperty("user_name")
@@ -43,7 +43,7 @@ public class OutSidDepotResp implements Serializable {
 	@JsonProperty("order_num")
 	private BigInteger orderNum; //下单数
 	
-	public OutSidDepotResp(BigInteger id, String name, BigInteger createDate, String mainPicture, String smallPicture, String pictures, Float miniPrice, Float oriPrice, Float singlePrice, String serviceDesc, Integer totalCount, String userName, Integer areaLimit, BigInteger groupCount, BigInteger orderNum) {
+	public OutSidDepotResp(BigInteger id, String name, BigInteger createDate, String mainPicture, String smallPicture, String pictures, Float miniPrice, Float oriPrice, Float singlePrice, String otherDesc, Integer totalCount, String userName, Integer areaLimit, BigInteger groupCount, BigInteger orderNum) {
 		this.id = id;
 		this.name = name;
 		this.createDate = createDate;
@@ -53,15 +53,13 @@ public class OutSidDepotResp implements Serializable {
 		this.miniPrice = miniPrice;
 		this.oriPrice = oriPrice;
 		this.singlePrice = singlePrice;
-		this.serviceDesc = serviceDesc;
+		this.otherDesc = otherDesc;
 		this.totalCount = totalCount;
 		this.userName = userName;
 		this.areaLimit = areaLimit;
 		this.groupCount = groupCount;
 		this.orderNum = orderNum;
 	}
-	
-	
 
 	public OutSidDepotResp() {
 		super();
@@ -131,12 +129,12 @@ public class OutSidDepotResp implements Serializable {
 		this.singlePrice = singlePrice;
 	}
 
-	public String getServiceDesc() {
-		return serviceDesc;
+	public String getOtherDesc() {
+		return otherDesc;
 	}
 
-	public void setServiceDesc(String serviceDesc) {
-		this.serviceDesc = serviceDesc;
+	public void setOtherDesc(String otherDesc) {
+		this.otherDesc = otherDesc;
 	}
 
 	public Integer getTotalCount() {

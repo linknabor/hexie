@@ -13,16 +13,20 @@ public interface RgroupOwnerRepository extends JpaRepository<RgroupOwner, Long> 
 	
 	RgroupOwner findById(long id);
 	
-	@Query(value = "select id, userId, name, tel, createDate, attendees, members, feeRate, headImgUrl from rgroupOwner "
-			+ "where id > 0 "
-			+ "and if(?1 > 0, id = ?1, 1 = 1) "
-			+ "and if(?2!='', tel like CONCAT('%',?2,'%'), 1 = 1 ) "
-			+ "and if(?3!='', name like CONCAT('%', ?3, '%'), 1 = 1 ) " 
-			, countQuery = "select count(*) from rgroupOwner "
-				+ "where id > 0 "
-				+ "and if(?1 > 0, id = ?1, 1 = 1) "
-				+ "and if(?2!='', tel like CONCAT('%',?2,'%'), 1 = 1 ) "
-				+ "and if(?3!='', name like CONCAT('%', ?3, '%'), 1 = 1 ) " 
+	@Query(value = "select ro.id, ro.userId, ro.name, ro.tel, ro.createDate, ro.attendees, ro.members, ro.feeRate, ro.headImgUrl from rgroupOwner ro "
+			+ "join orgoperator op on ro.userId = op.userId "
+			+ "where ro.id > 0 "
+			+ "and if(?1 > 0, ro.id = ?1, 1 = 1) "
+			+ "and if(?2!='', ro.tel like CONCAT('%',?2,'%'), 1 = 1 ) "
+			+ "and if(?3!='', ro.name like CONCAT('%', ?3, '%'), 1 = 1 ) "
+			+ "and if(?4!='', op.orgId = ?4, 1 = 1) "
+			, countQuery = "select count(*) from rgroupOwner ro "
+				+ "join orgoperator op on ro.userId = op.userId "
+				+ "where ro.id > 0 "
+				+ "and if(?1 > 0, ro.id = ?1, 1 = 1) "
+				+ "and if(?2!='', ro.tel like CONCAT('%',?2,'%'), 1 = 1 ) "
+				+ "and if(?3!='', ro.name like CONCAT('%', ?3, '%'), 1 = 1 ) " 
+				+ "and if(?4!='', op.orgId = ?4, 1 = 1) "
 			, nativeQuery = true )
-	Page<Object[]> findByUserIdAndTelLikeAndName(long ownerId, String tel, String name, Pageable pageable);
+	Page<Object[]> findByUserIdAndTelLikeAndNameAndAgentNo(long ownerId, String tel, String name, String agentNo, Pageable pageable);
 }

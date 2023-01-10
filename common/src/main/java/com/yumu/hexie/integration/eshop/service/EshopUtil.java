@@ -17,8 +17,10 @@ import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.common.ServiceOrderRequest;
 import com.yumu.hexie.integration.eshop.req.CreateRgroupRequest;
 import com.yumu.hexie.integration.eshop.req.EshopServiceRequest;
+import com.yumu.hexie.integration.eshop.req.InviteLeaderRequest;
 import com.yumu.hexie.integration.eshop.req.NotifyConsumeRequest;
 import com.yumu.hexie.integration.eshop.req.QueryRgroupSect;
+import com.yumu.hexie.integration.eshop.resp.InviteLeaderResp;
 import com.yumu.hexie.integration.eshop.resp.RgroupRegionsVO;
 import com.yumu.hexie.model.user.User;
 
@@ -32,6 +34,7 @@ public class EshopUtil {
 	private static final String RESET_PASSWORD_URL = "resetPwdSDO.do";	//重置密码
 	private static final String QUERY_SECT_URL = "/eshop/getSectInfoSDO.do";		//查询小区信息
 	private static final String CREATE_RGROUP_URL = "/eshop/createRgroupSDO.do";		//开团创建团长和小区信息
+	private static final String INVITE_LEADER_URL = "/eshop/inviteLeaderSDO.do";		//邀请成为团长
 
 	@Autowired
 	private RequestUtil requestUtil;
@@ -177,5 +180,23 @@ public class EshopUtil {
 		CommonResponse<CreateRgroupRequest> commonResponse = restUtil.exchangeOnBody(requestUrl, request, typeReference);
 		return commonResponse.getData();
 	}
+	
+	/**
+	 * 新建团购->创建团长和小区地址
+	 * @param user
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	public InviteLeaderResp inviteLeader(String regionName, InviteLeaderRequest request) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(new User(), regionName);
+		requestUrl += INVITE_LEADER_URL;
+		
+		TypeReference<CommonResponse<InviteLeaderResp>> typeReference = new TypeReference<CommonResponse<InviteLeaderResp>>(){};
+		CommonResponse<InviteLeaderResp> commonResponse = restUtil.exchangeOnBody(requestUrl, request, typeReference);
+		return commonResponse.getData();
+	}
+	
 	
 }

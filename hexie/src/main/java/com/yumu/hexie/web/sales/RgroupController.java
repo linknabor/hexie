@@ -378,4 +378,20 @@ public class RgroupController extends BaseController{
 		boolean b = rgroupV3Service.getUserSubscribe(user, rgroupSubscribeVO);
 		return new BaseResult<Object>().success(b);
     }
+	
+	/**
+     * 邀请团长
+     * @param user
+     * @param productDepotReq
+     * @return
+     * @throws Exception 
+     */
+    @SuppressWarnings("unchecked")
+	@RequestMapping(value = "/groupLeader/invitation/{code}", method = RequestMethod.POST)
+    public BaseResult<String> scanInvitation(@ModelAttribute(Constants.USER) User user, @PathVariable String code) throws Exception {
+    	
+    	rgroupV3Service.inviteGroupLeader(user, code);
+        return BaseResult.successResult(Constants.PAGE_SUCCESS);
+    }
+	
 }
