@@ -961,10 +961,14 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		statusList.add(ModelConstant.RULE_STATUS_ON);
 		statusList.add(ModelConstant.RULE_STATUS_END);
 		Page<Object[]> page = rgroupRuleRepository.findGroupSects(statusList, sectName, pageable);
-		List<QueryRgroupSectsMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
+		List<QueryRgroupSectsMapper> list = null;
+		if (page != null) {
+			list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
+		}
 		if (list == null) {
 			list = new ArrayList<>();
 		}
+		
 		for (QueryRgroupSectsMapper queryRgroupSectsMapper : list) {
 			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(statusList, 0l, queryRgroupSectsMapper.getId().longValue());
 			for (RgroupRule rule : rules) {

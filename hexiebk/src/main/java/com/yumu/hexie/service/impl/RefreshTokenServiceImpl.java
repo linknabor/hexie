@@ -149,9 +149,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if(!Constants.MAIN_SERVER){
             return;
         }
-        logger.error("--------------------refresh token[B]-------------------");
+        logger.error("--------------------refresh mini token[B]-------------------");
         String sysKey = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniprogramAppid;
         Long expire = stringRedisTemplate.opsForValue().getOperations().getExpire(sysKey);	//返回-1表示永久，返回-2表示没有值
+        logger.info("expire :" + expire);
         boolean updateFlag = false;
         if (expire <= 60*10l) {	//小于等于10分钟的，重新获取token
         	updateFlag = true;
@@ -173,7 +174,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 			
 		}
         
-        logger.error("--------------------refresh token[E]-------------------");
+        logger.error("--------------------refresh mini token[E]-------------------");
     }
     
 }
