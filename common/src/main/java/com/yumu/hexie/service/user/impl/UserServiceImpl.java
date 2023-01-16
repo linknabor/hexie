@@ -563,9 +563,12 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User saveMiniUserSessionKey(UserMiniprogram miniUser) {
+    	logger.info("miniUser : " + miniUser);
         String unionid = miniUser.getUnionid();
-        User userAccount = getByUnionid(unionid);
-
+        User userAccount = null;
+        if (!StringUtils.isEmpty(unionid)) {
+        	userAccount = getByUnionid(unionid);
+		}
         if (userAccount == null) {
             userAccount = new User();
             userAccount.setOpenid("0");    //TODO
