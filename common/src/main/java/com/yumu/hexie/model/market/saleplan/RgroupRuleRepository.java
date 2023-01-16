@@ -24,9 +24,11 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 	
 	@Query(value = "select * from RgroupRule where ownerId = ?1 "
 			+ "and if(?2!='', description like CONCAT('%',?2,'%'), 1=1) "
+			+ "and status <> " + ModelConstant.RULE_STATUS_DEL + " "
 			, countQuery = "select count(1) from RgroupRule where ownerId = ?1 "
-			+ "and if(?2!='', description like CONCAT('%',?2,'%'), 1=1) ",
-			nativeQuery = true)
+			+ "and if(?2!='', description like CONCAT('%',?2,'%'), 1=1) "
+			+ "and status <> " + ModelConstant.RULE_STATUS_DEL + " "
+			, nativeQuery = true)
 	public Page<RgroupRule> findByOwnerIdAndDescriptionLike(long ownerId, String description, Pageable pageable);
 	
 	@Query(value = "select distinct rule.* from RgroupRule rule "
