@@ -564,10 +564,14 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User saveMiniUserSessionKey(UserMiniprogram miniUser) {
     	logger.info("miniUser : " + miniUser);
-        String unionid = miniUser.getUnionid();
+        String unionid = miniUser.getUnionid();	
+        String miniopenid = miniUser.getOpenid();
         User userAccount = null;
         if (!StringUtils.isEmpty(unionid)) {
         	userAccount = getByUnionid(unionid);
+		}
+        if (!StringUtils.isEmpty(miniopenid)) {
+        	userAccount = getByMiniopenid(miniopenid);
 		}
         if (userAccount == null) {
             userAccount = new User();
