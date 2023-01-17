@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -155,6 +156,15 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				String appId = map.get("appId");
 				String openid = map.get("openid");
 				String eventKey = map.get("eventKey");
+				String createTime = map.get("createTime");
+				
+				String lockKey = "lock:event:subscribe:" + openid + "_" + createTime;
+				
+				Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, "", Duration.ofHours(24));	//24小时过期
+				if (!success) {
+					logger.warn("duplicated request, user :" + openid + ", createTime : " + createTime);
+					continue;
+				}
 				
 				User user = userService.multiFindByOpenId(openid);
 				if (user == null) {
