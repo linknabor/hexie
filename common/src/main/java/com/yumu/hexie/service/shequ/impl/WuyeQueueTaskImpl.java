@@ -191,10 +191,8 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 					if (yanjiAppid.equals(appId)) {
 						logger.info("subscribe event 4 yanji. ");
 						try {
-							String respStr = yanjiUtil.subsribeEventRequest(json);
-							if (Constants.SERVICE_SUCCESS.equals(respStr)) {
-								isSuccess = true;
-							}
+							yanjiUtil.subsribeEventRequest(json);
+							isSuccess = true;
 						} catch (Exception e) {
 							logger.error(e.getMessage(), e);
 						}
