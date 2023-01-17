@@ -17,7 +17,7 @@ public class YanjiUtil {
 	
 	private static final String YANJI_BASE_URL = "https://tg.shenghuocang.com.cn/wechat/hexie/wechat";
 //	private static final String YANJI_BASE_URL = "http://localhost:89";
-	private static final String SUBSCRIBE_EVENT_URL = "/yanji/envent/subscribe";
+	private static final String SUBSCRIBE_EVENT_URL = "/yanji/event/subscribe";
 	
 	/**
 	 * 通知延吉公众号关注时间
