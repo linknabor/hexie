@@ -9,12 +9,14 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.web.BaseController;
 
+@RestController
 @RequestMapping(value = "/yanji/event")
 public class EventHandlerController extends BaseController{
 	
