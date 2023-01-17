@@ -116,35 +116,18 @@ public class BatchServiceImpl implements BatchService {
 		}
 		init();
 		
-		wuyeQueueTask.bindHouseByTrade();
-		wuyeQueueTask.eventScan();
 		wuyeQueueTask.eventScanSubscribe();
 		wuyeQueueTask.registerAndBind();
-//		wechatCardQueueTask.eventSubscribe();
 		wechatCardQueueTask.eventUserGetCard();
 		wechatCardQueueTask.eventUpdateCard();
-		wechatCardQueueTask.updatePointAsync();
 		wechatCardQueueTask.wuyeRefund();
 		notifyQueueTask.sendWuyeNotificationAysc();
-		notifyQueueTask.sendCustomServiceNotificationAysc();
-		notifyQueueTask.updateServiceCfgAysc();
 		notifyQueueTask.updateOrderStatusAysc();
 		notifyQueueTask.sendDeliveryNotificationAsyc();
-		notifyQueueTask.updatePartnerAsync();
 		notifyQueueTask.eshopRefundAsync();
-		couponQueueTask.gainCouponAsync();
-		notifyQueueTask.consumeWuyeCouponAsync();
-		notifyQueueTask.sendWuyeNotification4HouseBinderAysc();
 		wechatSubscribeMsgQueueTask.eventSubscribeMsg();
-//		userQueueTask.eventSubscribe();
-//		userQueueTask.eventUnsubscribe();
-		notifyQueueTask.sendWorkOrderMsgNotificationAsyc();
-		notifyQueueTask.handleConversionAsyc();
-		notifyQueueTask.sendInvoiceMsgAsyc();
-		notifyQueueTask.sendReceiptMsgAsyc();
 		notifyQueueTask.noticeRgroupArrial();
 		notifyQueueTask.notifyGroupSuccess();
-		
 		rgroupQueueTask.groupPubPush();
 		rgroupQueueTask.eventViewMiniprogram();
 		
