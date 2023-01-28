@@ -163,7 +163,23 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			
 			/*1.保存团长信息 start */
 			RgroupOwnerVO owner = rgroupVo.getRgroupOwner();
-			OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(owner.getOwnerId(), ModelConstant.USER_ROLE_RGROUPOWNER);
+			User ownerUser = null;
+			List<User> userList = userService.getByTel(owner.getOwnerTel());
+			if (userList == null || userList.isEmpty()) {
+				throw new BizValidateException("未查询到用户，手机：" + owner.getOwnerTel());
+			}
+			if (userList.size() > 1) {
+				for (User user : userList) {
+					if (!StringUtils.isEmpty(user.getMiniopenid())) {
+						ownerUser = user;
+						break;
+					}
+				}
+			} else {
+				ownerUser = userList.get(0);
+			}
+			
+			OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(ownerUser.getId(), ModelConstant.USER_ROLE_RGROUPOWNER);
 			Agent agent = null;
 			
 			if (orgOperator == null) {
@@ -173,7 +189,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				orgOperator.setOrgName(agent.getName());
 				orgOperator.setOrgOperName(owner.getOwnerName());
 				orgOperator.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
-				orgOperator.setUserId(owner.getOwnerId());
+				orgOperator.setUserId(ownerUser.getId());
 				orgOperator.setOrgOperId("");		//TODO 联动backmng后回调
 				orgOperator.setOrgType("");	//联动后回调
 				orgOperatorRepository.save(orgOperator);
@@ -182,12 +198,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				agent = agentRepository.findByAgentNo(orgOperator.getOrgId());
 			}
 			
-			User ownerUser = userService.getById(owner.getOwnerId());;
-			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(owner.getOwnerId());
+			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(ownerUser.getId());
 			if (rgroupOwner == null) {
 				rgroupOwner = new RgroupOwner();
 				
-				rgroupOwner.setUserId(owner.getOwnerId());
+				rgroupOwner.setUserId(ownerUser.getId());
 				rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
 				rgroupOwner.setMiniappid(ownerUser.getMiniAppId());
 				rgroupOwner.setName(ownerUser.getName());
@@ -268,7 +283,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				rule.setGroupStatus(ModelConstant.GROUP_STAUS_INIT);
 			}
 			RegionVo region = rgroupVo.getRegions()[0];
-			rule.setOwnerId(owner.getOwnerId());
+			rule.setOwnerId(ownerUser.getId());
 			rule.setOwnerName(owner.getOwnerName());
 			rule.setOwnerImg(owner.getOwnerImg());
 			rule.setOwnerSect(region.getName());
@@ -963,10 +978,14 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		statusList.add(ModelConstant.RULE_STATUS_ON);
 		statusList.add(ModelConstant.RULE_STATUS_END);
 		Page<Object[]> page = rgroupRuleRepository.findGroupSects(statusList, sectName, pageable);
-		List<QueryRgroupSectsMapper> list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
+		List<QueryRgroupSectsMapper> list = null;
+		if (page != null) {
+			list = ObjectToBeanUtils.objectToBean(page.getContent(), QueryRgroupSectsMapper.class);
+		}
 		if (list == null) {
 			list = new ArrayList<>();
 		}
+		
 		for (QueryRgroupSectsMapper queryRgroupSectsMapper : list) {
 			List<RgroupRule> rules = rgroupRuleRepository.findByAreaItem(statusList, 0l, queryRgroupSectsMapper.getId().longValue());
 			for (RgroupRule rule : rules) {
