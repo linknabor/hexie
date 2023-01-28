@@ -386,7 +386,6 @@ public class RgroupController extends BaseController{
      * @return
      * @throws Exception 
      */
-    @SuppressWarnings("unchecked")
 	@RequestMapping(value = "/groupLeader/invitation/{code}", method = RequestMethod.POST)
     public BaseResult<String> scanInvitation(@ModelAttribute(Constants.USER) User user, @PathVariable String code) throws Exception {
     	

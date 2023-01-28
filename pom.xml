@@ -88,6 +88,14 @@
 				<profileActive>tprod</profileActive>
 			</properties>
 		</profile>
+		
+		<!-- 延吉环境 -->
+		<profile>
+			<id>yanji</id>
+			<properties>
+				<profileActive>yanji</profileActive>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>
