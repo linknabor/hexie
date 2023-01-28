@@ -1584,15 +1584,31 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	@Transactional
 	public boolean inviteGroupLeader(User user, String code) throws Exception {
 		
-		logger.info("user : " + user.getId() + ", invite code : " + code);
+		logger.info("user : " + user.getTel() + ", invite code : " + code);
+		
+		User ownerUser = null;
+		List<User> userList = userService.getByTel(user.getTel());
+		if (userList == null || userList.isEmpty()) {
+			throw new BizValidateException("未查询到用户，手机：" + user.getTel());
+		}
+		if (userList.size() > 1) {
+			for (User currUser : userList) {
+				if (!StringUtils.isEmpty(currUser.getMiniopenid())) {
+					ownerUser = currUser;
+					break;
+				}
+			}
+		} else {
+			ownerUser = userList.get(0);
+		}
 		
 		InviteLeaderRequest inviteLeaderRequest = new InviteLeaderRequest();
     	inviteLeaderRequest.setCode(code);
-    	inviteLeaderRequest.setLeaderId(String.valueOf(user.getId()));
-    	inviteLeaderRequest.setMiniopenid(user.getMiniopenid());
-    	inviteLeaderRequest.setName(user.getName());
-    	inviteLeaderRequest.setOpenid(user.getOpenid());
-    	inviteLeaderRequest.setTel(user.getTel());
+    	inviteLeaderRequest.setLeaderId(String.valueOf(ownerUser.getId()));
+    	inviteLeaderRequest.setMiniopenid(ownerUser.getMiniopenid());
+    	inviteLeaderRequest.setName(ownerUser.getName());
+    	inviteLeaderRequest.setOpenid(ownerUser.getOpenid());
+    	inviteLeaderRequest.setTel(ownerUser.getTel());
     	InviteLeaderResp inviteLeaderResp = eshopUtil.inviteLeader("", inviteLeaderRequest);
 		
 		Agent agent = agentRepository.findByAgentNo(inviteLeaderResp.getOrgId());
@@ -1604,21 +1620,20 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			agentRepository.save(agent);
 		}
 		
-		OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(user.getId(), ModelConstant.USER_ROLE_RGROUPOWNER);
+		OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(ownerUser.getId(), ModelConstant.USER_ROLE_RGROUPOWNER);
 		if (orgOperator == null) {
 			orgOperator = new OrgOperator();
 			orgOperator.setOrgOperId(inviteLeaderResp.getOrgOperId());
-			orgOperator.setOrgOperName(user.getName());
+			orgOperator.setOrgOperName(ownerUser.getName());
 			orgOperator.setRoleId("03");
-			orgOperator.setUserId(user.getId());
+			orgOperator.setUserId(ownerUser.getId());
 		}
 		orgOperator.setOrgId(inviteLeaderResp.getOrgId());
 		orgOperator.setOrgName(inviteLeaderResp.getOrgName());
 		orgOperator.setOrgType(inviteLeaderResp.getOrgType());
 		orgOperatorRepository.save(orgOperator);
 		
-		User ownerUser = userService.getById(user.getId());;
-		RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(user.getId());
+		RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(ownerUser.getId());
 		if (rgroupOwner == null) {
 			rgroupOwner = new RgroupOwner();
 			rgroupOwner.setUserId(ownerUser.getId());
@@ -1627,11 +1642,12 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			rgroupOwner.setName(ownerUser.getName());
 			rgroupOwner.setHeadImgUrl(ownerUser.getHeadimgurl());
 			rgroupOwner.setTel(ownerUser.getTel());
-			rgroupOwnerRepository.save(rgroupOwner);
 			
 			ownerUser.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
 			userService.save(ownerUser);
 		}
+		rgroupOwner.setFeeRate(inviteLeaderResp.getFeeRate());
+		rgroupOwnerRepository.save(rgroupOwner);
 		return true;
 	}
 	

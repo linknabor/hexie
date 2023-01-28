@@ -387,6 +387,7 @@ public class RgroupController extends BaseController{
      * @throws Exception 
      */
 	@RequestMapping(value = "/groupLeader/invitation/{code}", method = RequestMethod.POST)
+	@ResponseBody
     public BaseResult<String> scanInvitation(@ModelAttribute(Constants.USER) User user, @PathVariable String code) throws Exception {
     	
     	rgroupV3Service.inviteGroupLeader(user, code);

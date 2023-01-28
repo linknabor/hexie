@@ -570,8 +570,11 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isEmpty(unionid)) {
         	userAccount = getByUnionid(unionid);
 		}
-        if (!StringUtils.isEmpty(miniopenid)) {
-        	userAccount = getByMiniopenid(miniopenid);
+        if (userAccount == null) {
+        	//这种情况适用于没有unionid的小程序，即没有在开放平台绑定公众号和小程序的情况
+			if (!StringUtils.isEmpty(miniopenid)) {
+				userAccount = getByMiniopenid(miniopenid);
+			}
 		}
         if (userAccount == null) {
             userAccount = new User();
@@ -582,10 +585,13 @@ public class UserServiceImpl implements UserService {
             userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
         } else {
         	if(StringUtils.isEmpty(userAccount.getMiniopenid())) {
-        		userAccount.setUnionid(miniUser.getUnionid());
+//        		userAccount.setUnionid(miniUser.getUnionid());
                 userAccount.setMiniopenid(miniUser.getOpenid());
                 userAccount.setMiniAppId(miniprogramAppid);
-        	}
+        	} 
+        	if (StringUtils.isEmpty(userAccount.getUnionid())) {
+        		userAccount.setUnionid(miniUser.getUnionid());
+			}
         }
         String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getUnionid();
         String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
