@@ -11,6 +11,9 @@ public interface ProductDepotRepository extends JpaRepository<ProductDepot, Long
 
     //查询团长的商品
     List<ProductDepot> findByOwnerIdAndNameContaining(long ownerId, String name, Pageable pageable);
+    
+    //查询可以帮卖的商品
+    List<ProductDepot> findByAgentIdAndNameContaining(long agentId, String name, Pageable pageable);
 
     String sqlColumn1 = " a.id,a.name,a.createDate,a.mainPicture,a.smallPicture,a.pictures,a.miniPrice,a.oriPrice,a.singlePrice,a.otherDesc,a.totalCount,a.ownerName as userName, a.areaLimit, count(DISTINCT d.id) as groupCount, count(distinct f.orderId) as orderNum ";
 

@@ -72,6 +72,7 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.market.saleplan.RgroupRule;
 import com.yumu.hexie.model.market.saleplan.RgroupRuleRepository;
+import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.RgroupOwner;
 import com.yumu.hexie.model.user.RgroupOwnerRepository;
@@ -886,7 +887,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 	}
 
 	@Override
-	public List<ProductDepot> queryProductDepotList(User user, String searchValue, int currentPage) {
+	public List<ProductDepot> queryProductDepotList(User user, String searchValue, String searchType, int currentPage) {
 //        User userInfo = userRepository.findById(user.getId());
 //        if(userInfo == null) {
 //            throw new BizValidateException("用户不存在");
@@ -894,14 +895,32 @@ public class GroupMngServiceImpl implements GroupMngService {
 //        if(!"03".equals(user.getRoleId())) {
 //            throw new BizValidateException("当前用户不是团长，无法操作");
 //        }
-
+		
+		if (StringUtils.isEmpty(searchType)) {
+			searchType = "0";
+		}
 		List<Sort.Order> sortList = new ArrayList<>();
 		Sort.Order order = new Sort.Order(Sort.Direction.DESC, "createDate");
 		sortList.add(order);
 		Sort sort = Sort.by(sortList);
 		Pageable pageable = PageRequest.of(currentPage, 10, sort);
-
-		return productDepotRepository.findByOwnerIdAndNameContaining(user.getId(), searchValue, pageable);
+		
+		List<ProductDepot> depotList = null;
+		if ("0".equals(searchType)) {
+			depotList = productDepotRepository.findByOwnerIdAndNameContaining(user.getId(), searchValue, pageable);
+		} else {
+			OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(user.getId(), "03");
+			if (orgOperator != null) {
+				Agent agent = agentRepository.findByAgentNo(orgOperator.getOrgId());
+				if (agent != null) {
+					depotList = productDepotRepository.findByAgentIdAndNameContaining(agent.getId(), searchValue, pageable);
+				}
+			}
+			if (depotList == null) {
+				depotList = new ArrayList<>();
+			}
+		}
+		return depotList;
 	}
 
 	@Override
@@ -976,15 +995,16 @@ public class GroupMngServiceImpl implements GroupMngService {
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getId())) { // 编辑
 			depot = productDepotRepository.findById(Long.parseLong(outsideSaveProDepotReq.getId())).get();
 		} else {
-			if (!StringUtils.isEmpty(outsideSaveProDepotReq.getAgentNo())
-					&& !DEFAULT_AGENT_NO.equals(outsideSaveProDepotReq.getAgentNo())) {
+			if (!StringUtils.isEmpty(outsideSaveProDepotReq.getAgentNo())) {
 				Agent agent = agentRepository.findByAgentNo(outsideSaveProDepotReq.getAgentNo());
 				if (agent != null) {
 					depot.setAgentId(agent.getId());
 				}
 			}
 		}
-		BeanUtils.copyProperties(outsideSaveProDepotReq, depot);
+		BeanUtils.copyProperties(outsideSaveProDepotReq, depot, "oriPrice", "miniPrice", "singlePrice");
+		depot.setMiniPrice(Float.parseFloat(outsideSaveProDepotReq.getMiniPrice()));	//机构上架只要一个成本价就够了
+		
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getPictures())) {
 			String[] strs = outsideSaveProDepotReq.getPictures().split(",");
 			depot.setMainPicture(strs[0]);

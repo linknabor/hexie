@@ -37,7 +37,7 @@ public interface GroupMngService {
     Boolean cancelOrder(User user, String orderId) throws Exception;
 
     //查询商品列表
-    List<ProductDepot> queryProductDepotList(User user, String searchValue, int currentPage);
+    List<ProductDepot> queryProductDepotList(User user, String searchValue, String searchType, int currentPage);
 
     //删除商品
     Boolean delProductDepot(User user, String productId);

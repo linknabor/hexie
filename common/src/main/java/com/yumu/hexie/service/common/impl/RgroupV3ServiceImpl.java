@@ -181,12 +181,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			
 			OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(ownerUser.getId(), ModelConstant.USER_ROLE_RGROUPOWNER);
 			Agent agent = null;
-			
 			if (orgOperator == null) {
-				agent = agentRepository.findByAgentNo("000000000000");
+//				agent = agentRepository.findByAgentNo("000000000000");
 				orgOperator = new OrgOperator();
-				orgOperator.setOrgId(agent.getAgentNo());
-				orgOperator.setOrgName(agent.getName());
+				orgOperator.setOrgId("0");
+				orgOperator.setOrgName("个人");
 				orgOperator.setOrgOperName(owner.getOwnerName());
 				orgOperator.setRoleId(ModelConstant.USER_ROLE_RGROUPOWNER);
 				orgOperator.setUserId(ownerUser.getId());
@@ -196,6 +195,11 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				
 			} else {
 				agent = agentRepository.findByAgentNo(orgOperator.getOrgId());
+				if (agent == null) {
+					agent = new Agent();
+					agent.setAgentNo("0");
+					agent.setName("个人");
+				}
 			}
 			
 			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(ownerUser.getId());
@@ -363,6 +367,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				}
 				product.setDepotId(0l);
 				if (!StringUtils.isEmpty(productView.getDepotId())) {
+					//TODO
 					product.setDepotId(Long.valueOf(productView.getDepotId()));
 				}
 				product.setSpecs(productView.getSpecs());

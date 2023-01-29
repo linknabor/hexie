@@ -1896,6 +1896,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             orderItem.setFreeShippingNum(productRule.getFreeShippingNum());
             orderItem.setPostageFee(productRule.getPostageFee());
             orderItem.setPrice(productRule.getPrice());
+            orderItem.setMiniPrice(productRule.getMiniPrice());
 
             Long agentId = productRule.getAgentId();
             orderItem.setAgentId(productRule.getAgentId());

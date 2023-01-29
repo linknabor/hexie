@@ -34,6 +34,7 @@ public class OrderItem  extends BaseModel {
     @JoinColumn(name = "orderId")
 	private ServiceOrder serviceOrder;
 
+	private Float miniPrice;	//成本价
 	private Float price;	//售价
 	private Float oriPrice;	//原价
 	
@@ -82,6 +83,7 @@ public class OrderItem  extends BaseModel {
 		
 		productId = product.getId();
 		oriPrice = product.getOriPrice();
+		miniPrice = product.getMiniPrice();
 		merchantId = product.getMerchantId();
 		productName = product.getName();
 		productPic = product.getMainPicture();
@@ -98,6 +100,7 @@ public class OrderItem  extends BaseModel {
 		
 		productId = product.getId();
 		oriPrice = product.getOriPrice();
+		miniPrice = product.getMiniPrice();
 		merchantId = product.getMerchantId();
 		productName = product.getName();
 		if (!StringUtils.isEmpty(product.getPictures())) {
@@ -312,6 +315,12 @@ public class OrderItem  extends BaseModel {
 	}
 	public void setRefundApplyDate(Date refundApplyDate) {
 		this.refundApplyDate = refundApplyDate;
+	}
+	public Float getMiniPrice() {
+		return miniPrice;
+	}
+	public void setMiniPrice(Float miniPrice) {
+		this.miniPrice = miniPrice;
 	}
 	
 	
