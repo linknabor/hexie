@@ -511,6 +511,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			if (isOnsale) {
 				statusList.add(ModelConstant.RULE_STATUS_ON);
 			} else {
+				statusList.add(ModelConstant.RULE_STATUS_OFF);
 				statusList.add(ModelConstant.RULE_STATUS_ON);
 				statusList.add(ModelConstant.RULE_STATUS_END);
 			}
