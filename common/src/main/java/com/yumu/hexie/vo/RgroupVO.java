@@ -349,6 +349,7 @@ public class RgroupVO implements Serializable {
 		private int status;	//商品状态,1上架，2下架
 		private String depotId;	//商品库id
 		private String specs;	//商品规格
+		private long agentId;	//归属机构
 		
 		public String getName() {
 			return name;
@@ -446,6 +447,12 @@ public class RgroupVO implements Serializable {
 		public void setSpecs(String specs) {
 			this.specs = specs;
 		}
+		public long getAgentId() {
+			return agentId;
+		}
+		public void setAgentId(long agentId) {
+			this.agentId = agentId;
+		}
 		@Override
 		public String toString() {
 			return "ProductVO [id=" + id + ", name=" + name + ", singlePrice=" + singlePrice + ", miniPrice="
@@ -453,9 +460,8 @@ public class RgroupVO implements Serializable {
 					+ userLimitCount + ", description=" + description + ", images=" + Arrays.toString(images)
 					+ ", tags=" + Arrays.toString(tags) + ", imageList=" + Arrays.toString(imageList) + ", cartNum="
 					+ cartNum + ", saledNum=" + saledNum + ", status=" + status + ", depotId=" + depotId + ", specs="
-					+ specs + "]";
+					+ specs + ", agentId=" + agentId + "]";
 		}
-		
 		
 	}
 

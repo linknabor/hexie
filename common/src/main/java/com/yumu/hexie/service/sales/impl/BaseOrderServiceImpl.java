@@ -857,6 +857,9 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                 couponAmt += orderItem.getCouponAmount();
             }
             subOrder.setSubPic(orderItem.getProductThumbPic());
+            if (orderItem.getAgentId() > 0) {
+            	subOrder.setMiniPrice(String.valueOf(orderItem.getMiniPrice()));
+			}
             subOrderList.add(subOrder);
 
             totalPrice = totalPrice.add(new BigDecimal(String.valueOf(orderItem.getAmount())));

@@ -654,6 +654,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					proVo.setTags(tags);
 				}
 				proVo.setSpecs(product.getSpecs());
+				proVo.setAgentId(product.getAgentId());
 				proVoList.add(proVo);
 			}
 			vo.setProductList(proVoList.toArray(new ProductVO[0]));

@@ -120,6 +120,8 @@ public class CommonPayRequest extends CommonRequest {
 		private Float subCouponAmt;
 		@JsonProperty("sub_pic")
 		private String subPic;
+		@JsonProperty("sub_mini_price")
+		private String miniPrice;
 		
 		public String getProductName() {
 			return productName;
@@ -169,20 +171,24 @@ public class CommonPayRequest extends CommonRequest {
 		public void setSubCouponAmt(Float subCouponAmt) {
 			this.subCouponAmt = subCouponAmt;
 		}
-
 		public String getSubPic() {
 			return subPic;
 		}
-
 		public void setSubPic(String subPic) {
 			this.subPic = subPic;
 		}
-
+		public String getMiniPrice() {
+			return miniPrice;
+		}
+		public void setMiniPrice(String miniPrice) {
+			this.miniPrice = miniPrice;
+		}
 		@Override
 		public String toString() {
 			return "SubOrder [productName=" + productName + ", productId=" + productId + ", agentNo=" + agentNo
 					+ ", agentName=" + agentName + ", count=" + count + ", amount=" + amount + ", subCouponId="
-					+ subCouponId + ", subCouponAmt=" + subCouponAmt + "]";
+					+ subCouponId + ", subCouponAmt=" + subCouponAmt + ", subPic=" + subPic + ", miniPrice=" + miniPrice
+					+ "]";
 		}
 		
 	}
