@@ -197,7 +197,7 @@ public class GroupMngController extends BaseController {
     @SuppressWarnings("unchecked")
 	@RequestMapping(value = "/queryProductDepotList", method = RequestMethod.GET)
     public BaseResult<List<ProductDepot>> queryProductList(@ModelAttribute(Constants.USER) User user, @RequestParam String searchValue, 
-    		@RequestParam String searchType, @RequestParam int currentPage) {
+    		@RequestParam(required = false) String searchType, @RequestParam int currentPage) {
         List<ProductDepot> list = groupMngService.queryProductDepotList(user, searchValue, searchType, currentPage);
         return BaseResult.successResult(list);
     }

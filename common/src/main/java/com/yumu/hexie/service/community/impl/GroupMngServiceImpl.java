@@ -48,7 +48,6 @@ import com.yumu.hexie.integration.community.resp.OutSidRelateGroupResp;
 import com.yumu.hexie.integration.community.resp.QueryDepotDTO;
 import com.yumu.hexie.integration.community.resp.QueryProDepotResp;
 import com.yumu.hexie.integration.eshop.mapper.SaleAreaMapper;
-import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
@@ -147,9 +146,6 @@ public class GroupMngServiceImpl implements GroupMngService {
 	@Autowired
 	private OrgOperatorRepository orgOperatorRepository;
 
-	@Autowired
-	private EshopUtil eshopUtil;
-	
 	@Override
 	public List<GroupInfoVo> queryGroupList(User user, QueryGroupReq queryGroupReq) {
 		try {
@@ -909,7 +905,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 		if ("0".equals(searchType)) {
 			depotList = productDepotRepository.findByOwnerIdAndNameContaining(user.getId(), searchValue, pageable);
 		} else {
-			OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(user.getId(), "03");
+			OrgOperator orgOperator = orgOperatorRepository.findByUserIdAndRoleId(user.getId(), ModelConstant.USER_ROLE_RGROUPOWNER);
 			if (orgOperator != null) {
 				Agent agent = agentRepository.findByAgentNo(orgOperator.getOrgId());
 				if (agent != null) {
@@ -1012,7 +1008,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 		}
 
 		if (StringUtils.isEmpty(outsideSaveProDepotReq.getTotalCount())) {
-			depot.setTotalCount(Integer.MAX_VALUE);
+			depot.setTotalCount(9999999);
 		}
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getProTags())) {
 			JSONArray jsonArray = new JSONArray();

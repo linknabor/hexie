@@ -208,7 +208,7 @@ public class RgroupController extends BaseController{
 	@RequestMapping(value = "/rgroups/v3/productFromsales", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<Product>> getProductFromSales(@ModelAttribute(Constants.USER)User user, @RequestParam int currentPage, 
-			@RequestParam String searchValue, @RequestParam String excludeDepotIds) throws Exception {
+			@RequestParam String searchValue, @RequestParam(required = false) String searchType, @RequestParam String excludeDepotIds) throws Exception {
 		
 		List<String> excludeIdList = null;
 		if (!StringUtils.isEmpty(excludeDepotIds)) {
@@ -216,7 +216,7 @@ public class RgroupController extends BaseController{
 			excludeIds = excludeDepotIds.split(",");
 			excludeIdList = Arrays.asList(excludeIds);
 		}
-        return new BaseResult<List<Product>>().success(rgroupV3Service.getProductFromSales(user, searchValue, excludeIdList, currentPage));
+        return new BaseResult<List<Product>>().success(rgroupV3Service.getProductFromSales(user, searchValue, searchType, excludeIdList, currentPage));
     }
 	
 	/**

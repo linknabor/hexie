@@ -44,6 +44,8 @@ import com.yumu.hexie.model.agent.Agent;
 import com.yumu.hexie.model.agent.AgentRepository;
 import com.yumu.hexie.model.commonsupport.cache.ProductRuleCache;
 import com.yumu.hexie.model.commonsupport.info.Product;
+import com.yumu.hexie.model.commonsupport.info.ProductDepot;
+import com.yumu.hexie.model.commonsupport.info.ProductDepotRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRepository;
 import com.yumu.hexie.model.commonsupport.info.ProductRule;
 import com.yumu.hexie.model.commonsupport.info.ProductRuleRepository;
@@ -116,6 +118,8 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	private TemplateMsgService templateMsgService;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Autowired
+	private ProductDepotRepository productDepotRepository;
 	
 	
 	@Override
@@ -205,7 +209,6 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			RgroupOwner rgroupOwner = rgroupOwnerRepository.findByUserId(ownerUser.getId());
 			if (rgroupOwner == null) {
 				rgroupOwner = new RgroupOwner();
-				
 				rgroupOwner.setUserId(ownerUser.getId());
 				rgroupOwner.setMiniopenid(ownerUser.getMiniopenid());
 				rgroupOwner.setMiniappid(ownerUser.getMiniAppId());
@@ -300,6 +303,8 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			/*2.保存rGroupRule end */
 			
 			/*3.保存product start */
+			boolean hasSelf = false;	//是否有自建商品
+			boolean hasAgent = false;	//是否有帮卖商品
 			for (ProductVO productView : productList) {
 				String productIdStr = productView.getId();
 				if (isCopy) {
@@ -367,8 +372,20 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				}
 				product.setDepotId(0l);
 				if (!StringUtils.isEmpty(productView.getDepotId())) {
-					//TODO
 					product.setDepotId(Long.valueOf(productView.getDepotId()));
+					Optional<ProductDepot> optional = productDepotRepository.findById(Long.valueOf(productView.getDepotId()));
+					if (optional.isPresent()) {
+						ProductDepot productDepot = optional.get();
+						if (productDepot != null) {
+							if (productDepot.getAgentId() == 0) {
+								hasSelf = true;
+							} else {
+								hasAgent = true;
+							}
+						}
+					}
+				} else {
+					hasSelf = true;
 				}
 				product.setSpecs(productView.getSpecs());
 				productRepository.save(product);
@@ -388,6 +405,10 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				stringRedisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));	//TODO 编辑是否要改库存？
 			
 			}
+			if (hasSelf == true && hasAgent == true) {
+				throw new BizValidateException("自建商品与帮卖商品不能同时上架到同一团购。");
+			}
+			
 			/*3.保存product end */
 			
 			/*4.保存rgroupAreaItem 20220926支持多小区 start*/
@@ -484,7 +505,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				}
 				
 			}
-			/*4.保存rgroupAreaItem 当前版本只支持单个小区 end*/
+			/*4.保存rgroupAreaItem 20220926支持多小区 end*/
 			
 			/*通知订阅*/
 			if (ModelConstant.RULE_STATUS_ON == ruleStatus) {
@@ -518,6 +539,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			if (isOnsale) {
 				statusList.add(ModelConstant.RULE_STATUS_ON);
 			} else {
+				statusList.add(ModelConstant.RULE_STATUS_OFF);
 				statusList.add(ModelConstant.RULE_STATUS_ON);
 				statusList.add(ModelConstant.RULE_STATUS_END);
 			}
@@ -950,7 +972,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 	 * 团购记录
 	 */
 	@Override
-	public List<Product> getProductFromSales(User user, String productName, List<String>excludeDepotIds, int currentPage) {
+	public List<Product> getProductFromSales(User user, String productName, String searchType, List<String>excludeDepotIds, int currentPage) {
 		
 		List<Order> orderList = new ArrayList<>();
     	Order order = new Order(Direction.DESC, "createDate");
@@ -961,7 +983,10 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 		c.setTime(new Date());
 		c.add(Calendar.MONTH, - 6);
 		Date createDate = c.getTime();
-		Page<Product> products = productRepository.findProductFromSalesByOwner(user.getId(), createDate, productName, excludeDepotIds, pageable);
+		if (StringUtils.isEmpty(searchType)) {
+			searchType = "0";
+		}
+		Page<Product> products = productRepository.findProductFromSalesByOwner(user.getId(), createDate, productName, searchType, excludeDepotIds, pageable);
 		return products.getContent();
 	}
 	

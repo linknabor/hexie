@@ -216,13 +216,20 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     agentId = product.getAgentId();
                 }
             }
-            Agent agent = agentRepository.findById(agentId);
-            if (agent != null) {
-                item.setAgentId(agent.getId());
-                item.setAgentName(agent.getName());
-                item.setAgentNo(agent.getAgentNo());
-            }
-
+            Agent agent = null;
+            if (agentId == 0) {
+            	agent = new Agent();
+            	agent.setId(0);
+            	agent.setName("个人");
+            	agent.setAgentNo("0");
+			} else {
+				agent = agentRepository.findById(agentId);
+				if (agent != null) {
+	                item.setAgentId(agent.getId());
+	                item.setAgentName(agent.getName());
+	                item.setAgentNo(agent.getAgentNo());
+	            }
+			}
             if (StringUtils.isEmpty(order.getProductName())) {
                 order.fillProductInfo(product);
                 if(agent != null) {
@@ -901,7 +908,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         request.setServiceName(productName);
         request.setOrderType(String.valueOf(o.getOrderType()));
 
-        Agent agent = agentRepository.findById(o.getAgentId());
+        Agent agent = null;
+        if (o.getAgentId() == 0) {
+			agent = new Agent();
+			agent.setAgentNo("");
+			agent.setName("个人");
+		} else {
+			agent = agentRepository.findById(o.getAgentId());
+		}
         if (agent != null) {
             request.setAgentNo(agent.getAgentNo());
             String agentName = agent.getName();
@@ -910,6 +924,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             }
             request.setAgentName(agentName);
         }
+        
         request.setCount(String.valueOf(totalCount));
         request.setPayMethod(payMethod);
         

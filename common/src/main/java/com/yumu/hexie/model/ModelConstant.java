@@ -514,7 +514,7 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId
 	public static final String KEY_MINI_ACCESS_TOKEN = "miniprogram:accessToken:";	//后面接小程序appid
 
-	public static final String USER_ROLE_RGROUPOWNER = "03";	//01团长
+	public static final String USER_ROLE_RGROUPOWNER = "03";	//03团长
 	public static final String KEY_CREATE_NEW_REGION_LOCK = "lock:createRegion:";	//后面接小区名字
 	public static final String KEY_RGROUP_NUM_GENERATOR = "rgroup:groupNum:";	//跟团号生成器，后面接ruleId
 	public static final String KEY_RGROUP_OWNER_ACCESSED = "rgroup:accessed:owner:";	//后面接团长id,团长被访问次数

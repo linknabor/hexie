@@ -167,15 +167,17 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 			+ "where r.ownerId = ?1 "
 			+ "and r.createDate >= ?2 "
 			+ "and IF (?3!='', p.name like CONCAT('%',?3,'%'), 1=1) "
-			+ "and (COALESCE(?4) IS NULL OR (p.depotId not IN (?4) )) "
+			+ "and if (?4='0', p.agentId = 0, p.agentId >0) "
+			+ "and (COALESCE(?5) IS NULL OR (p.depotId not IN (?5) )) "
 			, countQuery = "select count(distinct p.id) from product p join productRule pr on p.id = pr.productId "
 					+ "join rgroupRule r on r.id = pr.ruleId "
 					+ "where r.ownerId = ?1 "
 					+ "and r.createDate >= ?2 "
 					+ "and IF (?3!='', p.name like CONCAT('%',?3,'%'), 1=1) "
-					+ "and (COALESCE(?4) IS NULL OR (p.depotId not IN (?4) )) "
+					+ "and if (?4='0', p.agentId = 0, p.agentId >0) "
+					+ "and (COALESCE(?5) IS NULL OR (p.depotId not IN (?5) )) "
 			, nativeQuery = true)
-	Page<Product> findProductFromSalesByOwner(long userId, Date createDate, String productName, List<String> excludeDepotIds, Pageable pageable);
+	Page<Product> findProductFromSalesByOwner(long userId, Date createDate, String productName, String searchType, List<String> excludeDepotIds, Pageable pageable);
 	
 	
 }

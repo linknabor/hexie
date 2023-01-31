@@ -26,7 +26,7 @@ public interface RgroupV3Service {
 
 	List<Map<String, String>> getRefundReason();
 
-	List<Product> getProductFromSales(User user, String productName, List<String> excludDepotIds, int currentPage);
+	List<Product> getProductFromSales(User user, String productName, String searchType, List<String> excludDepotIds, int currentPage);
 
 	List<QueryRgroupSectsMapper> getGroupSects(User user, String sectName, int currentPage) throws Exception;
 
