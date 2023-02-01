@@ -1785,7 +1785,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     if (!StringUtils.isEmpty(user.getAppId())) {
                     	if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
                     		String token = systemconfigservice.queryWXAToken(user.getAppId());
-                            templateMsgService.sendOrderSuccessMsg(user, order, token);
+                            templateMsgService.sendOrderSuccessMsg(user, serviceOrder, token);
 						}
 					} else {
 						log.info("user appid or openid is null, will skip sending template message .");
