@@ -1782,8 +1782,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
                 if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
                     //发送模板消息
-                    String token = systemconfigservice.queryWXAToken(user.getAppId());
-                    templateMsgService.sendOrderSuccessMsg(user, serviceOrder, token);
+                    if (!StringUtils.isEmpty(user.getAppId())) {
+                    	if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+                    		String token = systemconfigservice.queryWXAToken(user.getAppId());
+                            templateMsgService.sendOrderSuccessMsg(user, order, token);
+						}
+					} else {
+						log.info("user appid or openid is null, will skip sending template message .");
+					}
 
                     //清空购物车中已购买的商品
                     if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
