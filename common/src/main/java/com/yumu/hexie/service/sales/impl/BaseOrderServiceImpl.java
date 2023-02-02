@@ -859,6 +859,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             subOrder.setSubPic(orderItem.getProductThumbPic());
             if (orderItem.getAgentId() > 0) {
             	subOrder.setMiniPrice(String.valueOf(orderItem.getMiniPrice()));
+            	subOrder.setFloorPrice(String.valueOf(orderItem.getFloorPrice()));
 			}
             subOrderList.add(subOrder);
 
@@ -1769,8 +1770,14 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
                     salePlanService.getService(order.getOrderType()).postPaySuccess(order);    //修改orderItems
 
                     //发送模板消息
-                    String token = systemconfigservice.queryWXAToken(user.getAppId());
-                    templateMsgService.sendOrderSuccessMsg(user, order, token);
+                    if (!StringUtils.isEmpty(user.getAppId())) {
+                    	if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+                    		String token = systemconfigservice.queryWXAToken(user.getAppId());
+                            templateMsgService.sendOrderSuccessMsg(user, order, token);
+						}
+					} else {
+						log.info("user appid or openid is null, will skip sending template message .");
+					}
 
                     //清空购物车中已购买的商品
                     List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
@@ -1799,8 +1806,15 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
 
                 if (ModelConstant.ORDER_TYPE_PROMOTION != serviceOrder.getOrderType() && ModelConstant.ORDER_TYPE_SAASSALE != serviceOrder.getOrderType()) {
                     //发送模板消息
-                    String token = systemconfigservice.queryWXAToken(user.getAppId());
-                    templateMsgService.sendOrderSuccessMsg(user, serviceOrder, token);
+                    if (!StringUtils.isEmpty(user.getAppId())) {
+                    	if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+                    		String token = systemconfigservice.queryWXAToken(user.getAppId());
+                            templateMsgService.sendOrderSuccessMsg(user, serviceOrder, token);
+						}
+					} else {
+						log.info("user appid or openid is null, will skip sending template message .");
+					}
+                    
 
                     //清空购物车中已购买的商品
                     if (ModelConstant.ORDER_TYPE_ONSALE == serviceOrder.getOrderType()) {
@@ -1915,6 +1929,7 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             orderItem.setPostageFee(productRule.getPostageFee());
             orderItem.setPrice(productRule.getPrice());
             orderItem.setMiniPrice(productRule.getMiniPrice());
+            orderItem.setFloorPrice(productRule.getFloorPrice());
 
             Long agentId = productRule.getAgentId();
             orderItem.setAgentId(productRule.getAgentId());

@@ -305,6 +305,13 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			/*3.保存product start */
 			boolean hasSelf = false;	//是否有自建商品
 			boolean hasAgent = false;	//是否有帮卖商品
+			
+			List<ProductRule> relatedPro = productRuleRepository.findByRuleId(rule.getId());
+			List<Long> removePros = new ArrayList<>();
+			for (ProductRule pr : relatedPro) {
+				removePros.add(pr.getProductId());
+			}
+			
 			for (ProductVO productView : productList) {
 				String productIdStr = productView.getId();
 				if (isCopy) {
@@ -316,6 +323,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					productId = Long.valueOf(productIdStr);
 					Optional<Product> proOptional = productRepository.findById(productId);
 					product = proOptional.get();
+					removePros.remove(product.getId());
 				}
 				if (product == null) {
 					product = new Product();
@@ -350,7 +358,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				
 				product.setStatus(ModelConstant.PRODUCT_ONSALE);
 				String totalStr = productView.getTotalCount();
-				int totalCount = Integer.MAX_VALUE - 1;
+				int totalCount = ModelConstant.PRODUCT_DEFAULT_STOCK;
 				if (!StringUtils.isEmpty(totalStr)) {
 					totalCount = Integer.parseInt(totalStr);
 				}
@@ -376,6 +384,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					Optional<ProductDepot> optional = productDepotRepository.findById(Long.valueOf(productView.getDepotId()));
 					if (optional.isPresent()) {
 						ProductDepot productDepot = optional.get();
+						product.setFloorPrice(productDepot.getFloorPrice());
 						if (productDepot != null) {
 							if (productDepot.getAgentId() == 0) {
 								hasSelf = true;
@@ -405,6 +414,16 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				stringRedisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));	//TODO 编辑是否要改库存？
 			
 			}
+			
+			for (Long removeProId : removePros) {
+				ProductRule productRule = productRuleRepository.findByRuleIdAndProductId(rule.getId(), removeProId);
+				if (productRule != null) {
+					productRuleRepository.delete(productRule);
+					String key = ModelConstant.KEY_PRO_RULE_INFO + rule.getId()+ ":" + removeProId;
+					stringRedisTemplate.delete(key);
+				}
+			}
+			
 			if (hasSelf == true && hasAgent == true) {
 				throw new BizValidateException("自建商品与帮卖商品不能同时上架到同一团购。");
 			}

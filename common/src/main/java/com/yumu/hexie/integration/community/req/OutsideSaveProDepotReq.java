@@ -23,6 +23,7 @@ public class OutsideSaveProDepotReq implements Serializable {
 	private String oriPrice;//市场价
 	private String miniPrice;	//结算价
 	private String singlePrice;	//销售价
+	private String floorPrice;	//供应商成本
 	private String startDate;	//上架日期
 	private String endDate;	//下架日期
 	private String totalCount;	//库存
@@ -164,13 +165,22 @@ public class OutsideSaveProDepotReq implements Serializable {
 		this.proTags = proTags;
 	}
 
+	public String getFloorPrice() {
+		return floorPrice;
+	}
+
+	public void setFloorPrice(String floorPrice) {
+		this.floorPrice = floorPrice;
+	}
+
 	@Override
 	public String toString() {
 		return "OutsideSaveProDepotReq [operType=" + operType + ", proTags=" + proTags + ", id=" + id + ", name=" + name
 				+ ", type=" + type + ", oriPrice=" + oriPrice + ", miniPrice=" + miniPrice + ", singlePrice="
-				+ singlePrice + ", startDate=" + startDate + ", endDate=" + endDate + ", totalCount=" + totalCount
-				+ ", pictures=" + pictures + ", otherDesc=" + otherDesc + ", agentName=" + agentName + ", agentNo="
-				+ agentNo + ", saleAreas=" + saleAreas + "]";
+				+ singlePrice + ", floorPrice=" + floorPrice + ", startDate=" + startDate + ", endDate=" + endDate
+				+ ", totalCount=" + totalCount + ", pictures=" + pictures + ", otherDesc=" + otherDesc + ", agentName="
+				+ agentName + ", agentNo=" + agentNo + ", saleAreas=" + saleAreas + "]";
 	}
 
+	
 }

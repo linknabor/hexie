@@ -20,15 +20,16 @@ public class Product extends BaseModel {
 	private long agentId;
 	private String productNo;
 	private String merchanProductNo;
-	private String  productType;
+	private String productType;
 	private String name;
 	private String mainPicture;//封面图片
 	private String smallPicture;//商品列表小图
 	private String pictures;//逗号分隔
 	private float miniPrice;//最低价格（基准价）
-	private float oriPrice;//原价（市场价）
+	private float oriPrice;//原价（市场价），划线价
 	private float singlePrice;//单个商品价格（单买价）
-
+	private float floorPrice;	//底价，地板价，用于和供货商结算，C端用户不可见
+	
 	private String serviceDescMore;
 	private String serviceDesc;
 	private int totalCount;//(总量)
@@ -375,6 +376,12 @@ public class Product extends BaseModel {
 	}
 	public void setSpecs(String specs) {
 		this.specs = specs;
+	}
+	public float getFloorPrice() {
+		return floorPrice;
+	}
+	public void setFloorPrice(float floorPrice) {
+		this.floorPrice = floorPrice;
 	}
 	
 	

@@ -551,4 +551,5 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_SUBSCRIBE_REGION = "rgroup:subscribe:region:";	//后面接regionId
 	
 	public static final String KEY_RGROUP_PUB_QUEUE = "queue:rgroup:pub";	//团购发布
+	public static final int PRODUCT_DEFAULT_STOCK = 999999;	//商品默认库存值
 }		

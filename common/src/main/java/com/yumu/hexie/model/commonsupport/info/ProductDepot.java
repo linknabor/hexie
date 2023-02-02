@@ -26,6 +26,7 @@ public class ProductDepot extends BaseModel {
 	private float miniPrice;//最低价格（基准价）
 	private float oriPrice;//原价（市场价）
 	private float singlePrice;//单个商品价格（单买价）
+	private float floorPrice;	//底价，地板价，用于和供货商结算，C端用户不可见
 
 	private String serviceDescMore;
 	private String serviceDesc;
@@ -389,6 +390,12 @@ public class ProductDepot extends BaseModel {
 	}
 	public void setOwnerName(String ownerName) {
 		this.ownerName = ownerName;
+	}
+	public float getFloorPrice() {
+		return floorPrice;
+	}
+	public void setFloorPrice(float floorPrice) {
+		this.floorPrice = floorPrice;
 	}
 	
 }

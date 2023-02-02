@@ -31,6 +31,7 @@ public class ProductRuleCache implements Serializable {
 	private Float oriPrice;// 市场价
 	private Float miniPrice; // 结算价
 	private Float singlePrice; // 销售价
+	private Float floorPrice;	//供应商成本
 	private int status; // 状态，0初始 1上架 2下架 3删除
 	private Date startDate; // 上架日期
 	private Date endDate; // 下架日期
@@ -287,6 +288,13 @@ public class ProductRuleCache implements Serializable {
 	public void setSpecs(String specs) {
 		this.specs = specs;
 	}
-	
+
+	public Float getFloorPrice() {
+		return floorPrice;
+	}
+
+	public void setFloorPrice(Float floorPrice) {
+		this.floorPrice = floorPrice;
+	}
 	
 }

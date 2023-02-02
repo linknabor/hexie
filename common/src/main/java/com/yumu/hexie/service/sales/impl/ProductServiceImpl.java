@@ -49,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
 //			throw new BizValidateException("您晚到了一步，商品["+product.getName()+"]已卖完！");
 //		}
 		if(StringUtils.isEmpty(stock)) {
-			stock = String.valueOf(Integer.MAX_VALUE);
+			stock = String.valueOf(ModelConstant.PRODUCT_DEFAULT_STOCK);
 		}
 		if(StringUtils.isEmpty(freeze)) {
 			freeze = "0";

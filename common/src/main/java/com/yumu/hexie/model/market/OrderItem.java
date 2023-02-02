@@ -37,6 +37,7 @@ public class OrderItem  extends BaseModel {
 	private Float miniPrice;	//成本价
 	private Float price;	//售价
 	private Float oriPrice;	//原价
+	private Float floorPrice;	//底价，地板价，用于和供货商结算，C端用户不可见
 	
 	private Float postageFee;	//商品邮费单价
 	private int freeShippingNum;	//商品免邮件数
@@ -84,6 +85,7 @@ public class OrderItem  extends BaseModel {
 		productId = product.getId();
 		oriPrice = product.getOriPrice();
 		miniPrice = product.getMiniPrice();
+		floorPrice = product.getFloorPrice();
 		merchantId = product.getMerchantId();
 		productName = product.getName();
 		productPic = product.getMainPicture();
@@ -101,6 +103,7 @@ public class OrderItem  extends BaseModel {
 		productId = product.getId();
 		oriPrice = product.getOriPrice();
 		miniPrice = product.getMiniPrice();
+		floorPrice = product.getFloorPrice();
 		merchantId = product.getMerchantId();
 		productName = product.getName();
 		if (!StringUtils.isEmpty(product.getPictures())) {
@@ -321,6 +324,12 @@ public class OrderItem  extends BaseModel {
 	}
 	public void setMiniPrice(Float miniPrice) {
 		this.miniPrice = miniPrice;
+	}
+	public Float getFloorPrice() {
+		return floorPrice;
+	}
+	public void setFloorPrice(Float floorPrice) {
+		this.floorPrice = floorPrice;
 	}
 	
 	

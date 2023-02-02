@@ -27,6 +27,7 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
@@ -950,7 +951,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 		}
 
 		if (StringUtils.isEmpty(productDepotReq.getTotalCount())) {
-			depot.setTotalCount(Integer.MAX_VALUE);
+			depot.setTotalCount(ModelConstant.PRODUCT_DEFAULT_STOCK);
 		}
 		if (!StringUtils.isEmpty(productDepotReq.getTags())) {
 			JSONArray jsonArray = new JSONArray();
@@ -998,8 +999,9 @@ public class GroupMngServiceImpl implements GroupMngService {
 				}
 			}
 		}
-		BeanUtils.copyProperties(outsideSaveProDepotReq, depot, "oriPrice", "miniPrice", "singlePrice");
-		depot.setMiniPrice(Float.parseFloat(outsideSaveProDepotReq.getMiniPrice()));	//机构上架只要一个成本价就够了
+		BeanUtils.copyProperties(outsideSaveProDepotReq, depot, "oriPrice", "miniPrice", "singlePrice", "floorPrice");
+		depot.setMiniPrice(Float.parseFloat(outsideSaveProDepotReq.getMiniPrice()));
+		depot.setFloorPrice(Float.parseFloat(outsideSaveProDepotReq.getFloorPrice()));
 		
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getPictures())) {
 			String[] strs = outsideSaveProDepotReq.getPictures().split(",");
@@ -1008,7 +1010,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 		}
 
 		if (StringUtils.isEmpty(outsideSaveProDepotReq.getTotalCount())) {
-			depot.setTotalCount(9999999);
+			depot.setTotalCount(ModelConstant.PRODUCT_DEFAULT_STOCK);
 		}
 		if (!StringUtils.isEmpty(outsideSaveProDepotReq.getProTags())) {
 			JSONArray jsonArray = new JSONArray();
@@ -1199,9 +1201,7 @@ public class GroupMngServiceImpl implements GroupMngService {
 			ProductDepot depot = new ProductDepot();
 			BeanUtils.copyProperties(product, depot, "id", "createDate", "startDate", "endDate");
 			int totalCount = product.getTotalCount();
-			if (totalCount == Integer.MAX_VALUE) {
-				depot.setTotalCount(9999999);
-			}
+			depot.setTotalCount(totalCount);
 			depot.setAgentId(0l);
 			depot.setOwnerId(user.getId());
 			depot.setOwnerName(user.getName());

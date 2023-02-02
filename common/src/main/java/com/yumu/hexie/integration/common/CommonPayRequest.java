@@ -122,6 +122,8 @@ public class CommonPayRequest extends CommonRequest {
 		private String subPic;
 		@JsonProperty("sub_mini_price")
 		private String miniPrice;
+		@JsonProperty("sub_floor_price")
+		private String floorPrice;
 		
 		public String getProductName() {
 			return productName;
@@ -183,13 +185,20 @@ public class CommonPayRequest extends CommonRequest {
 		public void setMiniPrice(String miniPrice) {
 			this.miniPrice = miniPrice;
 		}
+		public String getFloorPrice() {
+			return floorPrice;
+		}
+		public void setFloorPrice(String floorPrice) {
+			this.floorPrice = floorPrice;
+		}
 		@Override
 		public String toString() {
 			return "SubOrder [productName=" + productName + ", productId=" + productId + ", agentNo=" + agentNo
 					+ ", agentName=" + agentName + ", count=" + count + ", amount=" + amount + ", subCouponId="
 					+ subCouponId + ", subCouponAmt=" + subCouponAmt + ", subPic=" + subPic + ", miniPrice=" + miniPrice
-					+ "]";
+					+ ", floorPrice=" + floorPrice + "]";
 		}
+		
 		
 	}
 	
