@@ -294,6 +294,12 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 			/*2.保存rGroupRule end */
 			
 			/*3.保存product start */
+			List<ProductRule> relatedPro = productRuleRepository.findByRuleId(rule.getId());
+			List<Long> removePros = new ArrayList<>();
+			for (ProductRule pr : relatedPro) {
+				removePros.add(pr.getProductId());
+			}
+			
 			for (ProductVO productView : productList) {
 				String productIdStr = productView.getId();
 				if (isCopy) {
@@ -305,6 +311,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 					productId = Long.valueOf(productIdStr);
 					Optional<Product> proOptional = productRepository.findById(productId);
 					product = proOptional.get();
+					removePros.remove(product.getId());
 				}
 				if (product == null) {
 					product = new Product();
@@ -380,6 +387,15 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				redisRepository.setProdcutRule(key, productRuleCache);
 				stringRedisTemplate.opsForValue().set(ModelConstant.KEY_PRO_STOCK + product.getId(), String.valueOf(product.getTotalCount()));	//TODO 编辑是否要改库存？
 			
+			}
+			
+			for (Long removeProId : removePros) {
+				ProductRule productRule = productRuleRepository.findByRuleIdAndProductId(rule.getId(), removeProId);
+				if (productRule != null) {
+					productRuleRepository.delete(productRule);
+					String key = ModelConstant.KEY_PRO_RULE_INFO + rule.getId()+ ":" + removeProId;
+					stringRedisTemplate.delete(key);
+				}
 			}
 			/*3.保存product end */
 			
