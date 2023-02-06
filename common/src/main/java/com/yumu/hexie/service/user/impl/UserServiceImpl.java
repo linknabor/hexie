@@ -570,7 +570,7 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isEmpty(unionid)) {
         	userAccount = getByUnionid(unionid);
 		}
-		if (userAccount == null) {
+        if (userAccount == null) {
         	//这种情况适用于没有unionid的小程序，即没有在开放平台绑定公众号和小程序的情况
 			if (!StringUtils.isEmpty(miniopenid)) {
 				userAccount = getByMiniopenid(miniopenid);
