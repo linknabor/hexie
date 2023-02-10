@@ -585,10 +585,12 @@ public class UserServiceImpl implements UserService {
             userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
         } else {
         	if(StringUtils.isEmpty(userAccount.getMiniopenid())) {
-        		userAccount.setUnionid(miniUser.getUnionid());
                 userAccount.setMiniopenid(miniUser.getOpenid());
                 userAccount.setMiniAppId(miniprogramAppid);
         	}
+        	if (StringUtil.isEmpty(userAccount.getUnionid())) {
+        		userAccount.setUnionid(miniUser.getUnionid());
+			}
         }
         String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getUnionid();
         String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
