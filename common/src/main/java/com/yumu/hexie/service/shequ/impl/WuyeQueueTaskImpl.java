@@ -18,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -26,7 +25,6 @@ import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
-import com.yumu.hexie.integration.yanji.YanjiUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.user.User;
@@ -53,8 +51,6 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 	private MaintenanceService maintenanceService;
 	@Value("${yanji.appid:wxb2e5b64025a1a5f8}")
 	private String yanjiAppid;
-	@Autowired
-	private YanjiUtil yanjiUtil;
 	
 	/**
 	 * 绑定房屋队列。在缴费后调用，做异步绑定，缴费完了只要显示缴费金额即可，绑定在后台操作
@@ -197,69 +193,57 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				WechatResponse wechatResponse = null;
 				try {
 					logger.info("event type : " + type + ", common subscribe . " );
+
+					try {
+						//所有关注“合协社区”公众号的用户，为其关联小程序用户。如果没有合协用户的，为其新建一个带unionid的用户
+						userService.bindMiniUser(baseEventDTO);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
 					
-					if (yanjiAppid.equals(appId)) {
-						logger.info("subscribe event 4 yanji. ");
-						try {
-							yanjiUtil.subsribeEventRequest(json);
+					if ("01".equals(type)) {
+						logger.info("event type : " + type + ", apply invoice . " );
+						wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
+						
+						if (wechatResponse.getErrcode() == 0) {
 							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 40037) {
+							logger.error("invalid template_id, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 45009) {
+							logger.error("reach max api daily quota limit, 请联系系统管理员！");
+							isSuccess = true;
+						}
+						
+					} else if ("02".equals(type)) {
+						logger.info("event type : " + type + ", apply receipt . " );
+				    	String[]eventKeyArr = eventKey.split("\\|");
+				    	if (eventKeyArr == null || eventKeyArr.length < 6) {
+							logger.error("illegal event key : " + eventKey);
+						}
+				    	String tradeWaterId = "";
+				    	try {
+							tradeWaterId = eventKeyArr[1];
+							ReceiptApplicationReq receiptApplicationReq = new ReceiptApplicationReq();
+							receiptApplicationReq.setAppid(appId);
+							receiptApplicationReq.setOpenid(openid);
+							receiptApplicationReq.setTradeWaterId(tradeWaterId);
+							
+							user.setAppId(appId);
+							user.setOpenid(openid);
+							wuyeService.applyReceipt(user, receiptApplicationReq);
+							if (!StringUtils.isEmpty(user.getOpenid())) {
+								wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
+							}
+							
 						} catch (Exception e) {
 							logger.error(e.getMessage(), e);
 						}
-						
+				    	isSuccess = true;
 					} else {
-						try {
-							//所有关注“合协社区”公众号的用户，为其关联小程序用户。如果没有合协用户的，为其新建一个带unionid的用户
-							userService.bindMiniUser(baseEventDTO);
-						} catch (Exception e) {
-							logger.error(e.getMessage(), e);
-						}
-						
-						if ("01".equals(type)) {
-							logger.info("event type : " + type + ", apply invoice . " );
-							wechatResponse = wuyeService.scanEvent4Invoice(baseEventDTO);
-							
-							if (wechatResponse.getErrcode() == 0) {
-								isSuccess = true;
-							}
-							if (wechatResponse.getErrcode() == 40037) {
-								logger.error("invalid template_id, 请联系系统管理员！");
-								isSuccess = true;
-							}
-							if (wechatResponse.getErrcode() == 45009) {
-								logger.error("reach max api daily quota limit, 请联系系统管理员！");
-								isSuccess = true;
-							}
-							
-						} else if ("02".equals(type)) {
-							logger.info("event type : " + type + ", apply receipt . " );
-					    	String[]eventKeyArr = eventKey.split("\\|");
-					    	if (eventKeyArr == null || eventKeyArr.length < 6) {
-								logger.error("illegal event key : " + eventKey);
-							}
-					    	String tradeWaterId = "";
-					    	try {
-								tradeWaterId = eventKeyArr[1];
-								ReceiptApplicationReq receiptApplicationReq = new ReceiptApplicationReq();
-								receiptApplicationReq.setAppid(appId);
-								receiptApplicationReq.setOpenid(openid);
-								receiptApplicationReq.setTradeWaterId(tradeWaterId);
-								
-								user.setAppId(appId);
-								user.setOpenid(openid);
-								wuyeService.applyReceipt(user, receiptApplicationReq);
-								if (!StringUtils.isEmpty(user.getOpenid())) {
-									wuyeService.registerAndBind(user, tradeWaterId, "6");	//队列，异步执行
-								}
-								
-							} catch (Exception e) {
-								logger.error(e.getMessage(), e);
-							}
-					    	isSuccess = true;
-						} else {
-							isSuccess = true;
-						}
-						
+						isSuccess = true;
 					}
 					
 				} catch (Exception e) {
