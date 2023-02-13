@@ -1956,10 +1956,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             log.info("items : " + items);
 
             //4. 保存orderItem
+            String code = OrderNoUtil.generateGroupCode(String.valueOf(groupNum));
             for (OrderItem item : items) {
                 item.setServiceOrder(o);
                 item.setUserId(o.getUserId());
-                String code = OrderNoUtil.generateGroupCode(String.valueOf(groupNum));
                 item.setCode(code);
                 orderItemRepository.save(item);
             }
