@@ -2243,6 +2243,18 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             throw new BizValidateException("订单状态[]"+o.getStatus()+"不能进行当前操作");
         }
     	
+    	List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(o);
+        for (OrderItem orderItem : orderItems) {
+			if (ModelConstant.ORDERITEM_REFUND_STATUS_APPLYREFUND == orderItem.getIsRefund()) {
+				orderItem.setIsRefund(ModelConstant.ORDERITEM_REFUND_STATUS_PAID);
+				orderItem.setRefundApplyType(0);
+				orderItem.setRefundReason(null);
+				orderItem.setRefundMemo(null);
+				orderItem.setRefundApplyDate(null);
+				orderItemRepository.save(orderItem);
+			}
+		}
+    	
         RefundRecord latestRec = new RefundRecord();
         BeanUtils.copyProperties(record, latestRec, "id", "createDate");
         latestRec.setStatus(ModelConstant.REFUND_STATUS_CANCEL);
