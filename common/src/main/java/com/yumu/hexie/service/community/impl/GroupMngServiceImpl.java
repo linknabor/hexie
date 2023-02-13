@@ -624,6 +624,7 @@ public class GroupMngServiceImpl implements GroupMngService {
             
         } else if ("1".equals(queryGroupReq.getOrderStatus())) { //查待核销的
             status.add(ModelConstant.ORDER_STATUS_PAYED);
+            status.add(ModelConstant.ORDER_STATUS_CONFIRM);
             verifyStatus = "0";
             
             itemStatus = new ArrayList<>();
