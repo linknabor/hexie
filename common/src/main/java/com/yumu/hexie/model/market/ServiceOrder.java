@@ -1027,7 +1027,6 @@ public class ServiceOrder  extends BaseModel {
 	}
 	public boolean signable() {
 		return (ModelConstant.ORDER_STATUS_SENDED == getStatus()
-				|| ModelConstant.ORDER_STATUS_CONFIRM == getStatus()
 				|| ModelConstant.ORDER_STATUS_CONFIRM == getStatus());
 	}
 	public boolean returnable() {

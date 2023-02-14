@@ -1071,6 +1071,21 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         order = serviceOrderRepository.save(order);
         log.warn("[signOrder]order-signed:" + order.getId());
         commonPostProcess(ModelConstant.ORDER_OP_SIGN, order);
+        
+        if (ModelConstant.ORDER_TYPE_RGROUP == order.getOrderType()) {
+        	List<OrderItem> itemList = orderItemRepository.findByServiceOrder(order);
+            boolean flag = false;
+            for (OrderItem item : itemList) {
+                if (item.getVerifyStatus() == 0 ) {
+                    item.setVerifyStatus(1);
+                    orderItemRepository.save(item);
+                    flag = true;
+                }
+            }
+            if (!flag) {
+                throw new BizValidateException("订单已签收或已核销，请确认。");
+            }
+		}
         return order;
     }
 
