@@ -1950,10 +1950,10 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
             log.info("items : " + items);
 
             //4. 保存orderItem
+            String code = OrderNoUtil.generateGroupCode(String.valueOf(groupNum));
             for (OrderItem item : items) {
                 item.setServiceOrder(o);
                 item.setUserId(o.getUserId());
-                String code = OrderNoUtil.generateGroupCode(String.valueOf(groupNum));
                 item.setCode(code);
                 orderItemRepository.save(item);
             }
@@ -2236,6 +2236,18 @@ public class BaseOrderServiceImpl extends BaseOrderProcessor implements BaseOrde
         		ModelConstant.ORDER_STATUS_RECEIVED!=o.getStatus()) {
             throw new BizValidateException("订单状态[]"+o.getStatus()+"不能进行当前操作");
         }
+    	
+    	List<OrderItem> orderItems = orderItemRepository.findByServiceOrder(o);
+        for (OrderItem orderItem : orderItems) {
+			if (ModelConstant.ORDERITEM_REFUND_STATUS_APPLYREFUND == orderItem.getIsRefund()) {
+				orderItem.setIsRefund(ModelConstant.ORDERITEM_REFUND_STATUS_PAID);
+				orderItem.setRefundApplyType(0);
+				orderItem.setRefundReason(null);
+				orderItem.setRefundMemo(null);
+				orderItem.setRefundApplyDate(null);
+				orderItemRepository.save(orderItem);
+			}
+		}
     	
         RefundRecord latestRec = new RefundRecord();
         BeanUtils.copyProperties(record, latestRec, "id", "createDate");

@@ -588,7 +588,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         status.add(ModelConstant.ORDER_STATUS_CONFIRM);
         status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_REFUNDED);
-        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(ruleId, user.getId(), status);
+        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(user.getId(), ruleId, status);
         int totalNum = 0;
         int totalVerify = 0;
         List<GroupProductSumVo> vos = new ArrayList<>();
@@ -623,7 +623,7 @@ public class GroupMngServiceImpl implements GroupMngService {
             status.add(ModelConstant.ORDER_STATUS_REFUNDED);
             
         } else if ("1".equals(queryGroupReq.getOrderStatus())) { //查待核销的
-            status.add(ModelConstant.ORDER_STATUS_PAYED);
+            status.add(ModelConstant.ORDER_STATUS_CONFIRM);
             verifyStatus = "0";
             
             itemStatus = new ArrayList<>();

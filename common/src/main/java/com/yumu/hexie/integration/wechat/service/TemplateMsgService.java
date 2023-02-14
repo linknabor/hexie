@@ -997,7 +997,23 @@ public class TemplateMsgService {
         CommonVO vo = new CommonVO();
         vo.setFirst(new TemplateItem(title));
         vo.setKeyword1(new TemplateItem(noticeRgroupSuccess.getProductName()));
-        vo.setKeyword2(new TemplateItem(noticeRgroupSuccess.getPrice()));
+        
+        String priceStr = noticeRgroupSuccess.getPrice();
+        if (!StringUtils.isEmpty(priceStr)) {
+        	Float price = 0F;
+			try {
+				price = Float.parseFloat(priceStr);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			if (price == 0F) {
+				priceStr = "-";
+			}
+		} else {
+			priceStr = "-";
+		}
+        vo.setKeyword2(new TemplateItem(priceStr));
+        
         vo.setKeyword3(new TemplateItem("当前小区:" + noticeRgroupSuccess.getSectName() + ", " + noticeRgroupSuccess.getGroupNum()+"人"));
         vo.setRemark(new TemplateItem("请尽快安排发货，谢谢。"));
 
