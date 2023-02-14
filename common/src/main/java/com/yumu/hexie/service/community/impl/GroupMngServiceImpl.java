@@ -521,7 +521,9 @@ public class GroupMngServiceImpl implements GroupMngService {
 
     @Override
     public GroupSumResp queryGroupSum(User user, String groupId) throws Exception {
-
+    	
+    	logger.info("user is :" + user.getId()  + ", groupId : " + groupId);
+    	
         //汇总当前团购的有效订单，总金额和退款金额
         GroupSumResp resp = new GroupSumResp();
         List<GroupSumResp.SearchVo> searchVoList = new ArrayList<>();
@@ -588,7 +590,7 @@ public class GroupMngServiceImpl implements GroupMngService {
         status.add(ModelConstant.ORDER_STATUS_CONFIRM);
         status.add(ModelConstant.ORDER_STATUS_REFUNDING);
         status.add(ModelConstant.ORDER_STATUS_REFUNDED);
-        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(ruleId, user.getId(), status);
+        List<Object[]> groupProductSumVos = serviceOrderRepository.findProductSum(user.getId(), ruleId, status);
         int totalNum = 0;
         int totalVerify = 0;
         List<GroupProductSumVo> vos = new ArrayList<>();
