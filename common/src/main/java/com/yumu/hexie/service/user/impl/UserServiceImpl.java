@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,10 @@ public class UserServiceImpl implements UserService {
 	private PageConfigService pageConfigService;
 	@Autowired
 	private OrgOperatorRepository orgOperatorRepository;
-	
+
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
+
 	@Value("${mainServer}")
 	private Boolean mainServer;
 	
@@ -449,6 +453,16 @@ public class UserServiceImpl implements UserService {
 		registerCouponStrategy.sendCoupon(user);
 		user.setRegisterDate(System.currentTimeMillis());
         save(user);
+
+		//把用户注册信息传入平台，目的是根据手机号绑定房子
+		try {
+			BaseResult<String> r = wuyeUtil2.pushUserRegisterUrl(user);
+			if ("99".equals(r.getResult())) {
+				logger.error(r.getMessage());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
         return user;
 		
 	}

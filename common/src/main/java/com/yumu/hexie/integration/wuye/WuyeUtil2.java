@@ -106,6 +106,7 @@ public class WuyeUtil2 {
 	private static final String APPLY_RECEIPT_URL = "receipt/allpyReceiptSDO.do";
 	private static final String QUERY_RECEIPT_URL = "receipt/getReceiptSDO.do";
 	private static final String QUERY_RECEIPT_LIST_URL = "receipt/getReceiptByUserSDO.do";
+	private static final String PUSH_USER_REGISTER_URL = "pushUserRegisterSDO.do";
 
 	/**
 	 * 标准版查询账单
@@ -804,6 +805,28 @@ public class WuyeUtil2 {
 		baseResult.setData(hexieResponse.getData());
 		return baseResult;
 		
+	}
+
+	/**
+	 * 用户注册信息传入平台
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> pushUserRegisterUrl(User user) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += PUSH_USER_REGISTER_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("user_id", user.getWuyeId());
+		map.put("openid", user.getOpenid());
+		map.put("mobile", user.getTel());
+		map.put("appid", user.getAppId());
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+
 	}
 
 }
