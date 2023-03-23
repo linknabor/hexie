@@ -111,6 +111,8 @@ public class PrepayRequest extends WuyeRequest {
 	private String batchNo;	//短信批次号
 	@JsonProperty("cell_id")
 	private String cellId;	//房屋id
+	@JsonProperty("pay_method")
+	private String payMethod;	//支付方式，仅小程序支付此项有值
 	
 	private String payMethod;	//支付方式，仅小程序支付此项有值
 	
