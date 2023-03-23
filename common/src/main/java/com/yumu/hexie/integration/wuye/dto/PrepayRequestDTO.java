@@ -62,6 +62,8 @@ public class PrepayRequestDTO implements Serializable {
 	//短信催缴
 	private String cellId;
 	private String batchNo;	//批次号
+	
+	private String payMethod;
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -265,43 +267,27 @@ public class PrepayRequestDTO implements Serializable {
 	public void setInvoiceType(String invoiceType) {
 		this.invoiceType = invoiceType;
 	}
-
+	
+	public String getPayMethod() {
+		return payMethod;
+	}
+	
+	public void setPayMethod(String payMethod) {
+		this.payMethod = payMethod;
+	}
 	@Override
 	public String toString() {
-		return "PrepayRequestDTO{" +
-				"user=" + user +
-				", couponUnit='" + couponUnit + '\'' +
-				", couponNum='" + couponNum + '\'' +
-				", couponId='" + couponId + '\'' +
-				", reduceAmt='" + reduceAmt + '\'' +
-				", invoiceTitle='" + invoiceTitle + '\'' +
-				", invoiceTitleType='" + invoiceTitleType + '\'' +
-				", creditCode='" + creditCode + '\'' +
-				", needInvoice='" + needInvoice + '\'' +
-				", invoiceType='" + invoiceType + '\'' +
-				", regionUrl='" + regionUrl + '\'' +
-				", regionName='" + regionName + '\'' +
-				", billId='" + billId + '\'' +
-				", stmtId='" + stmtId + '\'' +
-				", payType='" + payType + '\'' +
-				", customerName='" + customerName + '\'' +
-				", certType='" + certType + '\'' +
-				", certId='" + certId + '\'' +
-				", acctNo='" + acctNo + '\'' +
-				", phoneNo='" + phoneNo + '\'' +
-				", quickToken='" + quickToken + '\'' +
-				", veriCode='" + veriCode + '\'' +
-				", remember='" + remember + '\'' +
-				", cardId='" + cardId + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", ruleType='" + ruleType + '\'' +
-				", reductionAmt='" + reductionAmt + '\'' +
-				", payFeeType='" + payFeeType + '\'' +
-				", isQrcode='" + isQrcode + '\'' +
-				", appid='" + appid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				", cellId='" + cellId + '\'' +
-				", batchNo='" + batchNo + '\'' +
-				'}';
+		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
+				+ ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitle=" + invoiceTitle
+				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", needInvoice="
+				+ needInvoice + ", invoiceType=" + invoiceType + ", regionUrl=" + regionUrl + ", regionName="
+				+ regionName + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType + ", customerName="
+				+ customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo="
+				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", remember=" + remember
+				+ ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType + ", reductionAmt="
+				+ reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + ", appid=" + appid
+				+ ", payee_openid=" + payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo + ", payMethod="
+				+ payMethod + "]";
 	}
+
 }
