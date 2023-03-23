@@ -112,6 +112,8 @@ public class PrepayRequest extends WuyeRequest {
 	@JsonProperty("cell_id")
 	private String cellId;	//房屋id
 	
+	private String payMethod;	//支付方式，仅小程序支付此项有值
+	
 	public String getCouponUnit() {
 		return couponUnit;
 	}
@@ -308,42 +310,26 @@ public class PrepayRequest extends WuyeRequest {
 	public void setInvoiceType(String invoiceType) {
 		this.invoiceType = invoiceType;
 	}
-
+	
+	public String getPayMethod() {
+		return payMethod;
+	}
+	
+	public void setPayMethod(String payMethod) {
+		this.payMethod = payMethod;
+	}
 	@Override
 	public String toString() {
-		return "PrepayRequest{" +
-				"wuyeId='" + wuyeId + '\'' +
-				", fromSys='" + fromSys + '\'' +
-				", couponUnit='" + couponUnit + '\'' +
-				", couponNum='" + couponNum + '\'' +
-				", couponId='" + couponId + '\'' +
-				", reduceAmt='" + reduceAmt + '\'' +
-				", openid='" + openid + '\'' +
-				", appid='" + appid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				", mobile='" + mobile + '\'' +
-				", invoiceTitle='" + invoiceTitle + '\'' +
-				", invoiceTitleType='" + invoiceTitleType + '\'' +
-				", creditCode='" + creditCode + '\'' +
-				", needInvoice='" + needInvoice + '\'' +
-				", invoiceType='" + invoiceType + '\'' +
-				", billId='" + billId + '\'' +
-				", stmtId='" + stmtId + '\'' +
-				", payType='" + payType + '\'' +
-				", customerName='" + customerName + '\'' +
-				", certType='" + certType + '\'' +
-				", certId='" + certId + '\'' +
-				", acctNo='" + acctNo + '\'' +
-				", phoneNo='" + phoneNo + '\'' +
-				", quickToken='" + quickToken + '\'' +
-				", veriCode='" + veriCode + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", ruleType='" + ruleType + '\'' +
-				", reductionAmt='" + reductionAmt + '\'' +
-				", payFeeType='" + payFeeType + '\'' +
-				", isQrcode='" + isQrcode + '\'' +
-				", batchNo='" + batchNo + '\'' +
-				", cellId='" + cellId + '\'' +
-				'}';
+		return "PrepayRequest [wuyeId=" + wuyeId + ", fromSys=" + fromSys + ", couponUnit=" + couponUnit
+				+ ", couponNum=" + couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", openid="
+				+ openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", mobile=" + mobile
+				+ ", invoiceTitle=" + invoiceTitle + ", invoiceTitleType=" + invoiceTitleType + ", creditCode="
+				+ creditCode + ", needInvoice=" + needInvoice + ", invoiceType=" + invoiceType + ", billId=" + billId
+				+ ", stmtId=" + stmtId + ", payType=" + payType + ", customerName=" + customerName + ", certType="
+				+ certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken="
+				+ quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo + ", ruleType=" + ruleType
+				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
+				+ ", batchNo=" + batchNo + ", cellId=" + cellId + ", payMethod=" + payMethod + "]";
 	}
+
 }
