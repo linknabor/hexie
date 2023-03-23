@@ -63,7 +63,7 @@ public class PrepayRequestDTO implements Serializable {
 	private String cellId;
 	private String batchNo;	//批次号
 	
-	private String payMethod;
+	private Boolean tpPrepay;	//是否第三方预支付
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -268,13 +268,14 @@ public class PrepayRequestDTO implements Serializable {
 		this.invoiceType = invoiceType;
 	}
 	
-	public String getPayMethod() {
-		return payMethod;
+	public Boolean getTpPrepay() {
+		return tpPrepay;
 	}
 	
-	public void setPayMethod(String payMethod) {
-		this.payMethod = payMethod;
+	public void setTpPrepay(Boolean tpPrepay) {
+		this.tpPrepay = tpPrepay;
 	}
+	
 	@Override
 	public String toString() {
 		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
@@ -286,8 +287,9 @@ public class PrepayRequestDTO implements Serializable {
 				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", remember=" + remember
 				+ ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType + ", reductionAmt="
 				+ reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + ", appid=" + appid
-				+ ", payee_openid=" + payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo + ", payMethod="
-				+ payMethod + "]";
+				+ ", payee_openid=" + payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo + ", tpPrepay="
+				+ tpPrepay + "]";
 	}
-
+	
+	
 }
