@@ -754,20 +754,20 @@ public class UserServiceImpl implements UserService {
 				userAccount.setNickname(miniUser.getNickname());
 				userAccount.setName(miniUser.getNickname());
 			}
-            
-            //删除已经登陆形成的新用户
-            userRepository.deleteById(miniUser.getId());
-            
-            //合并用户购物车的商品
-            String cartKey = Keys.uidRgroupCartKey(miniUser.getId());	//根据被合并用户的id，获取购物车
-    		RgroupCart cart = redisRepository.getRgroupCart(cartKey);
-    		if (cart != null) {
-    			cartKey = Keys.uidRgroupCartKey(userAccount.getId());	//更换cartKey
-    			redisRepository.setRgroupCart(cartKey, cart);
-    		}
+            if (miniUser.getId()!=userAccount.getId()) {
+            	//删除已经登陆形成的新用户
+            	userRepository.deleteById(miniUser.getId());
+                
+                //合并用户购物车的商品
+                String cartKey = Keys.uidRgroupCartKey(miniUser.getId());	//根据被合并用户的id，获取购物车
+        		RgroupCart cart = redisRepository.getRgroupCart(cartKey);
+        		if (cart != null) {
+        			cartKey = Keys.uidRgroupCartKey(userAccount.getId());	//更换cartKey
+        			redisRepository.setRgroupCart(cartKey, cart);
+        		}
+			}
             
         }
-        userRepository.flush();
         userRepository.save(userAccount);
         return userAccount;
     }
