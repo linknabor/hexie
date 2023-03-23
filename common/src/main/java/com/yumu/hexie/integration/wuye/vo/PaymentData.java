@@ -12,6 +12,8 @@ public class PaymentData implements Serializable {
 	private String ver_no;//户号
 	private List<PaymentItem> fee_name;
 	private String fee_price;
+	private String cell_addr;
+	private String cnst_area;
 	
 	public String getSect_name() {
 		return sect_name;
@@ -42,6 +44,18 @@ public class PaymentData implements Serializable {
 	}
 	public void setFee_price(String fee_price) {
 		this.fee_price = fee_price;
+	}
+	public String getCell_addr() {
+		return cell_addr;
+	}
+	public void setCell_addr(String cell_addr) {
+		this.cell_addr = cell_addr;
+	}
+	public String getCnst_area() {
+		return cnst_area;
+	}
+	public void setCnst_area(String cnst_area) {
+		this.cnst_area = cnst_area;
 	}
 	
 
