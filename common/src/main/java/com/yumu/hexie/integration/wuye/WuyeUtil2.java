@@ -133,6 +133,7 @@ public class WuyeUtil2 {
 		CommonResponse<BillListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, billStdRequest, typeReference);
 		BaseResult<BillListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -164,6 +165,7 @@ public class WuyeUtil2 {
 		CommonResponse<PaymentInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, billDetailRequest, typeReference);
 		BaseResult<PaymentInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 	
@@ -192,6 +194,7 @@ public class WuyeUtil2 {
 		CommonResponse<BillListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, quickPayRequest, typeReference);
 		BaseResult<BillListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 	
@@ -222,6 +225,7 @@ public class WuyeUtil2 {
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -252,6 +256,7 @@ public class WuyeUtil2 {
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -273,6 +278,7 @@ public class WuyeUtil2 {
 		CommonResponse<Discounts> hexieResponse = restUtil.exchangeOnUri(requestUrl, discountViewRequest, typeReference);
 		BaseResult<Discounts> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -295,6 +301,7 @@ public class WuyeUtil2 {
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryOrderRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -318,6 +325,7 @@ public class WuyeUtil2 {
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, paySmsCodeRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -338,6 +346,7 @@ public class WuyeUtil2 {
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, otherPayRequest, typeReference);
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 	
@@ -360,6 +369,7 @@ public class WuyeUtil2 {
 		CommonResponse<QrCodePayService> hexieResponse = restUtil.exchangeOnUri(requestUrl, qrCodePayServiceRequest, typeReference);
 		BaseResult<QrCodePayService> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -382,6 +392,7 @@ public class WuyeUtil2 {
 		CommonResponse<byte[]> hexieResponse = restUtil.exchange4ResourceOnUri(requestUrl, qrCodeRequest, typeReference);
 		BaseResult<byte[]> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -404,6 +415,7 @@ public class WuyeUtil2 {
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, signInOutRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -427,6 +439,7 @@ public class WuyeUtil2 {
 		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, getCellRequest, typeReference);
 		BaseResult<CellListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -457,6 +470,7 @@ public class WuyeUtil2 {
 		CommonResponse<HexieConfig> hexieResponse = restUtil.exchangeOnUri(requestUrl, wuyeParamRequest, typeReference);
 		BaseResult<HexieConfig> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 
@@ -479,6 +493,7 @@ public class WuyeUtil2 {
 		CommonResponse<EReceipt> hexieResponse = restUtil.exchangeOnUri(requestUrl, request, typeReference);
 		BaseResult<EReceipt> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 
@@ -502,6 +517,7 @@ public class WuyeUtil2 {
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 	
@@ -522,6 +538,7 @@ public class WuyeUtil2 {
 		CommonResponse<Message> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
 		BaseResult<Message> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 
@@ -543,6 +560,7 @@ public class WuyeUtil2 {
 		CommonResponse<List<Message>> hexieResponse = restUtil.exchangeOnUri(requestUrl, messageRequest, typeReference);
 		BaseResult<List<Message>> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 	
@@ -567,6 +585,7 @@ public class WuyeUtil2 {
 		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryCellRequest, typeReference);
 		BaseResult<CellListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 
@@ -592,6 +611,7 @@ public class WuyeUtil2 {
 		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, querySectRequet, typeReference);
 		BaseResult<CellListVO> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 
@@ -610,6 +630,7 @@ public class WuyeUtil2 {
 		CommonResponse<Boolean> hexieResponse = restUtil.exchangeOnUri(requestUrl, opinionRequest, typeReference);
 		BaseResult<Boolean> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 	
@@ -631,6 +652,7 @@ public class WuyeUtil2 {
 		BaseResult<MpQrCodeParam> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 	}
 
@@ -654,6 +676,7 @@ public class WuyeUtil2 {
 		BaseResult<List<InvoiceDetail>> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -678,6 +701,7 @@ public class WuyeUtil2 {
 		BaseResult<PaymentInfo> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -705,6 +729,7 @@ public class WuyeUtil2 {
 		BaseResult<Discounts> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -729,6 +754,7 @@ public class WuyeUtil2 {
 		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 }
@@ -752,6 +778,7 @@ public class WuyeUtil2 {
 		BaseResult<ReceiptInfo> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -777,6 +804,7 @@ public class WuyeUtil2 {
 		BaseResult<List<Receipt>> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
@@ -803,6 +831,7 @@ public class WuyeUtil2 {
 		BaseResult<List<Receipt>> baseResult = new BaseResult<>();
 		baseResult.setResult(hexieResponse.getResult());
 		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
 	}
