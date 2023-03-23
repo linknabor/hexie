@@ -757,7 +757,6 @@ public class UserServiceImpl implements UserService {
 			}
             
         }
-        userRepository.flush();
         userRepository.save(userAccount);
         return userAccount;
     }
