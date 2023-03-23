@@ -114,6 +114,8 @@ public class PrepayRequest extends WuyeRequest {
 	@JsonProperty("pay_method")
 	private String payMethod;	//支付方式，仅小程序支付此项有值
 	
+	private String payMethod;	//支付方式，仅小程序支付此项有值
+	
 	public String getCouponUnit() {
 		return couponUnit;
 	}

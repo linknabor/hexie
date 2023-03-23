@@ -270,6 +270,7 @@ public class PrepayReqVO implements Serializable {
 	public void setPayMehtod(String payMethod) {
 		this.payMethod = payMethod;
 	}
+  
 	@Override
 	public String toString() {
 		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
