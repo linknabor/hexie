@@ -111,11 +111,9 @@ public class PrepayRequest extends WuyeRequest {
 	private String batchNo;	//短信批次号
 	@JsonProperty("cell_id")
 	private String cellId;	//房屋id
-	@JsonProperty("pay_method")
-	private String payMethod;	//支付方式，仅小程序支付此项有值
-	
-	private String payMethod;	//支付方式，仅小程序支付此项有值
-	
+	@JsonProperty("tp_prepay")
+	private Boolean tpPrepay;	//是否第三方预支付
+
 	public String getCouponUnit() {
 		return couponUnit;
 	}
@@ -313,13 +311,14 @@ public class PrepayRequest extends WuyeRequest {
 		this.invoiceType = invoiceType;
 	}
 	
-	public String getPayMethod() {
-		return payMethod;
+	public Boolean getTpPrepay() {
+		return tpPrepay;
 	}
 	
-	public void setPayMethod(String payMethod) {
-		this.payMethod = payMethod;
+	public void setTpPrepay(Boolean tpPrepay) {
+		this.tpPrepay = tpPrepay;
 	}
+	
 	@Override
 	public String toString() {
 		return "PrepayRequest [wuyeId=" + wuyeId + ", fromSys=" + fromSys + ", couponUnit=" + couponUnit
@@ -331,7 +330,8 @@ public class PrepayRequest extends WuyeRequest {
 				+ certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken="
 				+ quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo + ", ruleType=" + ruleType
 				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
-				+ ", batchNo=" + batchNo + ", cellId=" + cellId + ", payMethod=" + payMethod + "]";
+				+ ", batchNo=" + batchNo + ", cellId=" + cellId + ", tpPrepay=" + tpPrepay + "]";
 	}
-
+	
+	
 }

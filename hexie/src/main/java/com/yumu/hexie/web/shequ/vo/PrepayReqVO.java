@@ -63,8 +63,8 @@ public class PrepayReqVO implements Serializable {
 	
 	private String cellId;	//催缴短信支付的房屋ID
 	private String batchNo;	//催缴短信批次号
-	private String payMethod;	//仅小程序支付此项有值
-	
+	private Boolean tpPrepay;	//是否第三方预支付
+
 	public String getBillId() {
 		return billId;
 	}
@@ -263,14 +263,14 @@ public class PrepayReqVO implements Serializable {
 		this.invoiceType = invoiceType;
 	}
 	
-	public String getPayMethod() {
-		return payMethod;
+	public Boolean getTpPrepay() {
+		return tpPrepay;
 	}
 	
-	public void setPayMehtod(String payMethod) {
-		this.payMethod = payMethod;
+	public void setTpPrepay(Boolean tpPrepay) {
+		this.tpPrepay = tpPrepay;
 	}
-  
+	
 	@Override
 	public String toString() {
 		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
@@ -282,7 +282,9 @@ public class PrepayReqVO implements Serializable {
 				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
 				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
 				+ ", openid=" + openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", cellId=" + cellId
-				+ ", batchNo=" + batchNo + ", payMethod=" + payMethod + "]";
-	}
+				+ ", batchNo=" + batchNo + ", tpPrepay=" + tpPrepay + "]";
 
+	}
+	
+	
 }
