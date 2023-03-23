@@ -63,7 +63,7 @@ public class PrepayReqVO implements Serializable {
 	
 	private String cellId;	//催缴短信支付的房屋ID
 	private String batchNo;	//催缴短信批次号
-	private String payMehtod;	//仅小程序支付此项有值
+	private String payMethod;	//仅小程序支付此项有值
 	
 	public String getBillId() {
 		return billId;
@@ -263,12 +263,12 @@ public class PrepayReqVO implements Serializable {
 		this.invoiceType = invoiceType;
 	}
 	
-	public String getPayMehtod() {
-		return payMehtod;
+	public String getPayMethod() {
+		return payMethod;
 	}
 	
-	public void setPayMehtod(String payMehtod) {
-		this.payMehtod = payMehtod;
+	public void setPayMehtod(String payMethod) {
+		this.payMethod = payMethod;
 	}
 	@Override
 	public String toString() {
@@ -281,7 +281,7 @@ public class PrepayReqVO implements Serializable {
 				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
 				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
 				+ ", openid=" + openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", cellId=" + cellId
-				+ ", batchNo=" + batchNo + ", payMehtod=" + payMehtod + "]";
+				+ ", batchNo=" + batchNo + ", payMethod=" + payMethod + "]";
 	}
 
 }
