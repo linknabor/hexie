@@ -216,8 +216,12 @@ public class UserController extends BaseController{
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
 				log.error("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
-				request.getSession().setMaxInactiveInterval(1);//将会话过期
-				Thread.sleep(50);	//延时，因为上面设置了1秒。页面上也设置了延时，所以这里不需要1秒
+				HttpSession httpSession = request.getSession();
+				if (httpSession != null) {
+					httpSession.removeAttribute(Constants.USER);
+					httpSession.invalidate();
+					request.getSession().setMaxInactiveInterval(1);
+				}
 				return new BaseResult<UserInfo>().success(null);
 			}
 		} catch (Exception e) {
@@ -275,7 +279,7 @@ public class UserController extends BaseController{
 		}
     	log.info("oriApp : " + oriApp);	//来源系统，如果为空，则说明来自于合协社区
     	
-		if (StringUtil.isNotEmpty(code)) {
+    	if (StringUtil.isNotEmpty(code)) {
 		    if(Boolean.TRUE.equals(testMode)) {
 		        try{
 			        Long id = Long.valueOf(code);
@@ -724,7 +728,7 @@ public class UserController extends BaseController{
         request.getSession().setAttribute(Constants.USER, user);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
-
-
     
+        
+        
 }
