@@ -139,6 +139,7 @@ public class SmsServiceImpl implements SmsService {
 			smsHis = getSmsFromCache(mobilePhone);
 		}
         if (smsHis == null) {
+			LOGGER.info("user id : " + user.getId() + ", user appid : " + user.getAppId());
 			String sign = getMsgSignature(user.getAppId());
 
 	        message = sign.concat(message);

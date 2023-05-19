@@ -352,7 +352,8 @@ public class UserController extends BaseController{
 		if (yzm.getType() == 0) {
 			yzm.setType(ModelConstant.SMS_TYPE_REG);
 		}
-		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp, yzm.getType());
+		User dbUser = userService.getById(user.getId());
+		boolean result = smsService.sendVerificationCode(dbUser, yzm.getMobile(), requestIp, yzm.getType());
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
