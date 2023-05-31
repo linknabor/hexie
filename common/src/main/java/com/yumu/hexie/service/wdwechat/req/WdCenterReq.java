@@ -36,4 +36,13 @@ public class WdCenterReq implements Serializable {
     public void setSign(String sign) {
         this.sign = sign;
     }
+
+    @Override
+    public String toString() {
+        return "WdCenterReq{" +
+                "time='" + time + '\'' +
+                ", phone='" + phone + '\'' +
+                ", sign='" + sign + '\'' +
+                '}';
+    }
 }
