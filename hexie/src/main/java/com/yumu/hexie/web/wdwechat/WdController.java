@@ -56,7 +56,7 @@ public class WdController extends BaseController {
         jsonObject.put("phone", phone);
         boolean flag;
         try {
-            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PRIVATE_KEY), sign);
+            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PUBLIC_KEY), sign);
         } catch (Exception e) {
             return BaseResp.fail("验签失败");
         }
@@ -100,7 +100,7 @@ public class WdController extends BaseController {
         jsonObject.put("time", time);
         boolean flag;
         try {
-            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PRIVATE_KEY), sign);
+            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PUBLIC_KEY), sign);
         } catch (Exception e) {
             return BaseResp.fail("验签失败");
         }
