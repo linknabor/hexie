@@ -51,7 +51,7 @@ public class WdServiceImpl implements WdService {
             String token = Base64.getEncoder().encodeToString(str.getBytes());
             TokenResp resp = new TokenResp();
             resp.setToken(token);
-            resp.setExpire_time("2023-05-30 17:30:00");
+            resp.setExpire_time("2099-12-31 23:59:59");
             return resp;
         }
         return null;

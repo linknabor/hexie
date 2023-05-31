@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -33,8 +34,11 @@ public class WdController extends BaseController {
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/getToken", method = RequestMethod.POST)
     @ResponseBody
-    public BaseResp<TokenResp> getToken(@RequestBody WdCenterReq req) {
+    public BaseResp<TokenResp> getToken(@RequestBody(required = false) WdCenterReq req) {
         log.info("WdCenterReq : " + req);
+        if(req == null || !StringUtils.hasText(req.getPhone())) {
+            return BaseResp.fail("获取token失败,参数不能为空");
+        }
         TokenResp resp = wdService.getTokenByPhone(req);
         if(resp != null) {
             return BaseResp.success(resp);
@@ -50,10 +54,13 @@ public class WdController extends BaseController {
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/getUserInfo", method = RequestMethod.POST)
     @ResponseBody
-    public BaseResp<UserInfoResp> getUserInfo(@RequestBody WdCenterReq req, @RequestHeader HttpHeaders headers) {
+    public BaseResp<UserInfoResp> getUserInfo(@RequestBody(required = false) WdCenterReq req, @RequestHeader HttpHeaders headers) {
         String token = headers.getFirst("Authorization");
         log.info("WdCenterReq : " + req);
         log.info("Authorization : " + token);
+        if(!StringUtils.hasText(token) || req == null || !StringUtils.hasText(req.getSign())) {
+            return BaseResp.fail("参数不能为空");
+        }
         UserInfoResp resp = wdService.getUserInfoByToken(req, token);
         if(resp != null) {
             return BaseResp.success(resp);
