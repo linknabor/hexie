@@ -60,13 +60,11 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.shequ.req.InvoiceApplicationReq;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
-import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.BankCardService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.PointService;
@@ -96,10 +94,6 @@ public class WuyeController extends BaseController {
 	protected CouponService couponService;
 	@Inject
 	protected UserService userService;
-	@Inject
-	protected AddressService addressService;
-	@Inject
-	protected UserRepository userRepository;
 	@Inject
 	private SystemConfigService systemConfigService;
 	@Autowired
@@ -155,8 +149,7 @@ public class WuyeController extends BaseController {
 	
 	/**
 	 * 物业工作人员进行房屋解绑,PC端操作
-	 * @param user
-	 * @param houseId
+	 * @param unbindHouseVO
 	 * @return
 	 * @throws Exception
 	 */
@@ -204,7 +197,6 @@ public class WuyeController extends BaseController {
 	 * @param user
 	 * @param stmtId
 	 * @param houseId
-	 * @param area
 	 * @return
 	 * @throws Exception
 	 */
@@ -277,9 +269,8 @@ public class WuyeController extends BaseController {
 	/**
 	 * 查询缴费详情
 	 * 
-	 * @param session
-	 * @param trade_water_id
-	 *            流水号
+	 * @param user
+	 * @param trade_water_id 流水号
 	 * @return
 	 * @throws Exception
 	 */
@@ -356,7 +347,7 @@ public class WuyeController extends BaseController {
 	 * 创建交易，获取预支付ID
 	 * stmtId在快捷支付的时候会用到
 	 * @param user
-	 * @param prepayReq
+	 * @param prepayReqVo
 	 * @return
 	 * @throws Exception
 	 */
@@ -366,21 +357,19 @@ public class WuyeController extends BaseController {
 	public BaseResult<WechatPayInfo> getPrePayInfo(@ModelAttribute(Constants.USER) User user,
 			@RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
-		WechatPayInfo result = new WechatPayInfo();
 		log.info("prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
 		dto.setUser(user);
 		log.info("prepayRequestDTO : " + dto);
-		result = wuyeService.getPrePayInfo(dto);
+		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
 	
 	/**
 	 * 创建交易，获取预支付ID
 	 * stmtId在快捷支付的时候会用到
-	 * @param user
-	 * @param prepayReq
+	 * @param prepayReqVo
 	 * @return
 	 * @throws Exception
 	 */
@@ -406,8 +395,7 @@ public class WuyeController extends BaseController {
 	/**
 	 * 创建交易，获取预支付ID
 	 * stmtId在快捷支付的时候会用到
-	 * @param user
-	 * @param prepayReq
+	 * @param prepayReqVo
 	 * @return
 	 * @throws Exception
 	 */
@@ -431,12 +419,9 @@ public class WuyeController extends BaseController {
 	}
 
 	/**
-	 *  通知支付成功，并获取支付查询的返回结果
+	 * 通知支付成功，并获取支付查询的返回结果
 	 * @param user
-	 * @param billId
-	 * @param stmtId
 	 * @param tradeWaterId
-	 * @param packageId
 	 * @param feePrice
 	 * @param couponId
 	 * @param bindSwitch
@@ -510,8 +495,10 @@ public class WuyeController extends BaseController {
 
 	/**
 	 * 获取支付物业费时可用的红包
-	 * 
-	 * @param session
+	 * @param user
+	 * @param payType
+	 * @param amount
+	 * @param agentNo
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -523,7 +510,7 @@ public class WuyeController extends BaseController {
 		log.info("payType is : " + payType + ", amount : " + amount + ", agentNo :" + agentNo);
 		List<Coupon> list = couponService.findAvaibleCouponForWuye(user, payType, amount, agentNo);
 		if (list == null) {
-			list = new ArrayList<Coupon>();
+			list = new ArrayList<>();
 		}
 		return BaseResult.successResult(list);
 
@@ -533,14 +520,7 @@ public class WuyeController extends BaseController {
 	 * 申请电子发票
 	 * 如果用户没有注册的，则直接注册。
 	 * 如果用户没有绑定房屋的，则直接绑定
-	 * @param mobile
-	 * @param invoice_title
-	 * @param yzm
-	 * @param trade_water_id
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param openid
-	 * @param event
+	 * @param applicationReq
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
@@ -555,7 +535,7 @@ public class WuyeController extends BaseController {
 		String openid = applicationReq.getOpenid();
 		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);	//校验验证码
 		
-		User user = null;
+		User user;
 		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
 			user = userService.multiFindByOpenId(openid);
 			if (user != null) {
@@ -589,16 +569,6 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult("succeeded");
 	}
 	
-	public static void main(String[] args) {
-		
-		String mobile = "18116419486";
-		String prefix = mobile.substring(0, 3);
-		String suffix = mobile.substring(7, mobile.length());
-		String name = prefix + "***" + suffix;
-		System.out.println(name);
-		
-	}
-
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getInvoice", method = RequestMethod.POST)
 	@ResponseBody
@@ -625,9 +595,10 @@ public class WuyeController extends BaseController {
 	/**
 	 * 申请电子收据页面获取交易信息
 	 * @param response
-	 * @param trade_water_id
+	 * @param tradeWaterId
+	 * @param appid
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/receipt/trade", method = RequestMethod.GET)
@@ -684,14 +655,10 @@ public class WuyeController extends BaseController {
 			return BaseResult.successResult(new ArrayList<CellVO>());
 		}
 	}
-	
+
 	/**
 	 * 根据ID查询指定类型的合协社区物业信息
-	 * @param user
-	 * @param sect_id
-	 * @param build_id
-	 * @param unit_id
-	 * @param data_type
+	 * @param getCellVO
 	 * @return
 	 * @throws Exception
 	 */
@@ -756,12 +723,11 @@ public class WuyeController extends BaseController {
 
 		return BaseResult.successResult(wuyeService.getBillStartDateSDO(user,house_id,regionname));
 	}
-	
+
 	/**
 	 * 根据户号添加绑定房屋
 	 * @param user
-	 * @param houseId
-	 * @param area
+	 * @param verNo
 	 * @return
 	 * @throws Exception
 	 */
@@ -806,13 +772,12 @@ public class WuyeController extends BaseController {
 	public BaseResult<Discounts> getDiscountDetail(@ModelAttribute(Constants.USER) User user,
 			@RequestBody DiscountViewReqVO discountViewReqVO) throws Exception {
 		
-		Discounts discountDetail = new Discounts();
 		log.info("discountViewReqVO : " + discountViewReqVO);
 		DiscountViewRequestDTO dto = new DiscountViewRequestDTO();
 		BeanUtils.copyProperties(discountViewReqVO, dto);
 		dto.setUser(user);
 		log.info("discountViewRequestDTO : " + dto);
-		discountDetail = wuyeService.getDiscounts(dto);
+		Discounts discountDetail = wuyeService.getDiscounts(dto);
 
 		return BaseResult.successResult(discountDetail);
 	}
@@ -850,9 +815,7 @@ public class WuyeController extends BaseController {
 		String result = wuyeService.queyrOrder(user, orderNo);
 		return BaseResult.successResult(result);
 	}
-	
-	
-	
+
 	/**
 	 * 获取用户绑定的银行卡信息
 	 * @param otherPayVo
@@ -954,7 +917,8 @@ public class WuyeController extends BaseController {
 	/**
 	 * 根据名称模糊查询合协社区小区列表
 	 * @param user
-	 * @param sect_name
+	 * @param sectId
+	 * @param cellAddr
 	 * @return
 	 * @throws Exception
 	 */
@@ -1042,16 +1006,9 @@ public class WuyeController extends BaseController {
 	 * 申请电子收据
 	 * 如果用户没有注册的，则直接注册。
 	 * 如果用户没有绑定房屋的，则直接绑定
-	 * @param mobile
-	 * @param invoice_title
-	 * @param yzm
-	 * @param trade_water_id
-	 * @param invoice_title_type
-	 * @param credit_code
-	 * @param openid
-	 * @param event
+	 * @param receiptApplicationReq
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@SuppressWarnings("rawtypes")
 	@RequestMapping(value = "/receipt/apply", method = RequestMethod.POST)
@@ -1066,7 +1023,7 @@ public class WuyeController extends BaseController {
 		String openid = receiptApplicationReq.getOpenid();
 		boolean isCheck = smsService.checkVerificationCode(mobile, vericode);	//校验验证码
 		
-		User user = null;
+		User user;
 		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
 			user = userService.multiFindByOpenId(openid);
 			if (user != null) {
@@ -1100,7 +1057,7 @@ public class WuyeController extends BaseController {
 	
 	/**
 	 * 查看电子收据明细
-	 * @param sys
+	 * @param appid
 	 * @param receiptId
 	 * @return
 	 * @throws Exception 
@@ -1119,8 +1076,8 @@ public class WuyeController extends BaseController {
 	
 	/**
 	 * 查看电子收据明细
-	 * @param sys
-	 * @param receiptId
+	 * @param user
+	 * @param page
 	 * @return
 	 * @throws Exception 
 	 */
@@ -1162,6 +1119,4 @@ public class WuyeController extends BaseController {
 		}
 		return BaseResult.successResult(wuyeId);
 	}
-	
-	
 }
