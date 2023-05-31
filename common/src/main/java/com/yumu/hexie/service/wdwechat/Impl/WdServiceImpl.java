@@ -1,6 +1,8 @@
 package com.yumu.hexie.service.wdwechat.Impl;
 
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.RSAUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.wdwechat.WdService;
@@ -31,18 +33,18 @@ public class WdServiceImpl implements WdService {
     @Inject
     private UserRepository userRepository;
 
-    private final String GM_APPID = "wx95f46f41ca5e570e"; //TODO 改为动态？
-
     @Override
     public TokenResp getTokenByPhone(WdCenterReq req) {
-        //1.验签
+        //2.解析手机号,手机号用了公钥加密,这里要解出来
+        String phone = req.getPhone();
+        try {
+            phone = RSAUtil.decrypt(phone, ConstantWd.PRIVATE_KEY);
+        } catch (Exception e) {
+           return null;
+        }
 
-        //2.解析手机号
-        String oriPhone = req.getPhone();
-
-        String phone = oriPhone;
         //3.根据手机号查询用户信息
-        List<User> list = userRepository.findByTelAndAppId(phone, GM_APPID);
+        List<User> list = userRepository.findByTelAndAppId(phone, ConstantWd.APPID);
         //4.判断用户是否存在
         if(list != null && list.size() > 0) {
             User user = list.get(0);
@@ -62,7 +64,7 @@ public class WdServiceImpl implements WdService {
         if(StringUtils.hasText(token)) {
             token = new String(Base64.getDecoder().decode(token));
         }
-        List<User> list = userRepository.findByWuyeIdAndAppId(token, GM_APPID);
+        List<User> list = userRepository.findByWuyeIdAndAppId(token, ConstantWd.APPID);
         if(list != null && list.size() > 0) {
             User user = list.get(0);
 
@@ -81,7 +83,13 @@ public class WdServiceImpl implements WdService {
                 String registerDate = DateUtil.dttmFormat(new Date(user.getRegisterDate()));
                 resp.setCreated_time(registerDate);
             }
-            resp.setPhone(user.getTel()); //TODO 这里要用公钥加密
+            String tel = user.getTel();
+            try {
+                tel = RSAUtil.encrypt(tel, ConstantWd.PUBLIC_KEY);
+            } catch (Exception e) {
+                return null;
+            }
+            resp.setPhone(tel); //TODO 这里要用公钥加密
             return resp;
         }
         return null;

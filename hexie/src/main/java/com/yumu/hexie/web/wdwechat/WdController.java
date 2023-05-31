@@ -1,5 +1,8 @@
 package com.yumu.hexie.web.wdwechat;
 
+import com.alibaba.fastjson.JSONObject;
+import com.yumu.hexie.common.util.RSAUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.service.wdwechat.req.WdCenterReq;
 import com.yumu.hexie.service.wdwechat.WdService;
 import com.yumu.hexie.service.wdwechat.resp.BaseResp;
@@ -48,10 +51,24 @@ public class WdController extends BaseController {
         req.setPhone(phone);
         req.setSign(sign);
         log.info("WdCenterReq : " + req);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("time", time);
+        jsonObject.put("phone", phone);
+        boolean flag;
+        try {
+            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PRIVATE_KEY), sign);
+        } catch (Exception e) {
+            return BaseResp.fail("验签失败");
+        }
+
+        if(!StringUtils.hasText(sign) || !flag) {
+            return BaseResp.fail("验签失败");
+        }
         if(!StringUtils.hasText(req.getPhone())) {
             return BaseResp.fail("获取token失败,参数不能为空");
         }
         TokenResp resp = wdService.getTokenByPhone(req);
+        log.info("TokenResp : " + resp);
         if(resp != null) {
             return BaseResp.success(resp);
         } else {
@@ -78,10 +95,25 @@ public class WdController extends BaseController {
         req.setSign(sign);
         log.info("WdCenterReq : " + req);
         log.info("Authorization : " + token);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("time", time);
+        boolean flag;
+        try {
+            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PRIVATE_KEY), sign);
+        } catch (Exception e) {
+            return BaseResp.fail("验签失败");
+        }
+
+        if(!StringUtils.hasText(sign) || !flag) {
+            return BaseResp.fail("验签失败");
+        }
+
         if(!StringUtils.hasText(token) || !StringUtils.hasText(req.getSign())) {
             return BaseResp.fail("参数不能为空");
         }
         UserInfoResp resp = wdService.getUserInfoByToken(req, token);
+        log.info("UserInfoResp :" + resp);
         if(resp != null) {
             return BaseResp.success(resp);
         } else {

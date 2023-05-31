@@ -25,4 +25,12 @@ public class TokenResp {
     public void setExpire_time(String expire_time) {
         this.expire_time = expire_time;
     }
+
+    @Override
+    public String toString() {
+        return "TokenResp{" +
+                "token='" + token + '\'' +
+                ", expire_time='" + expire_time + '\'' +
+                '}';
+    }
 }
