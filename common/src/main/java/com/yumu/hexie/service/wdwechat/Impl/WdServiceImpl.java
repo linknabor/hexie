@@ -11,13 +11,15 @@ import com.yumu.hexie.service.wdwechat.resp.TokenResp;
 import com.yumu.hexie.service.wdwechat.resp.UserInfoResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Package : Wechat
@@ -32,6 +34,9 @@ public class WdServiceImpl implements WdService {
 
     @Inject
     private UserRepository userRepository;
+    @Autowired
+    @Qualifier("stringRedisTemplate")
+    private RedisTemplate<String, String> redisTemplate;
 
     @Override
     public TokenResp getTokenByPhone(WdCenterReq req) {
@@ -55,8 +60,23 @@ public class WdServiceImpl implements WdService {
             resp.setToken(token);
             resp.setExpire_time("2099-12-31 23:59:59");
             return resp;
+        } else {
+            //TODO 这里是否需要自动注册
+            //先放入redis暂存？
+            String token = UUID.randomUUID().toString();
+            String key = "register:" + ConstantWd.APPID + ":" + token;
+            redisTemplate.opsForValue().set(key, phone, 1, TimeUnit.HOURS);
+            TokenResp resp = new TokenResp();
+            resp.setToken(token);
+
+            //暂时有效期1小时
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(new Date());
+            calendar.add(Calendar.HOUR_OF_DAY, 1);
+            String str = DateUtil.dttmFormat(calendar.getTime());
+            resp.setExpire_time(str);
+            return resp;
         }
-        return null;
     }
 
     @Override

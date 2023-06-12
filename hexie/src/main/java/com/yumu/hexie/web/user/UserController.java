@@ -1,14 +1,13 @@
 package com.yumu.hexie.web.user;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URLEncoder;
+import java.util.*;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -118,6 +117,17 @@ public class UserController extends BaseController{
 				
 				long endTime = System.currentTimeMillis();
 				BeanUtils.copyProperties(dbUser, user);
+
+				//TODO 这个需要判断如果是农工商进来的用户，需要判断是否已经注册，如果没注册，根据传过来的token进行自动注册
+				String token = request.getParameter("token");
+				if(StringUtils.hasText(token)) {
+					String phone = stringRedisTemplate.opsForValue().get("register:" + oriApp + ":" + token);
+					if(StringUtils.hasText(phone)) {
+						user.setTel(phone);
+						userService.simpleRegister(user);
+					}
+				}
+
 			    request.getSession().setAttribute(Constants.USER, user);
 		    
 			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
@@ -145,7 +155,18 @@ public class UserController extends BaseController{
 			    log.info("userInfo2，耗时：" + ((endTime-beginTime)));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
+			    //TODO 如果是农工商用户，除了我们自己的物业板块，其他的跳转地址，要做特殊处理
+				if(ConstantWd.APPID.equals(user.getAppId())) {
+					for(BottomIcon icon : iconList) {
+						if(!icon.getIconLink().contains("e-shequ")) {
+							String url = icon.getIconLink();
+							url = URLEncoder.encode(url, "UTF-8");
+							String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());;
+							icon.setIconLink(String.format(ConstantWd.CENTER_URL, url, wdToken));
+						}
+					}
+				}
+				List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
