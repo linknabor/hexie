@@ -157,12 +157,14 @@ public class UserController extends BaseController{
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
 			    //TODO 如果是农工商用户，除了我们自己的物业板块，其他的跳转地址，要做特殊处理
 				if(ConstantWd.APPID.equals(user.getAppId())) {
-					for(BottomIcon icon : iconList) {
-						if(!icon.getIconLink().contains("e-shequ")) {
-							String url = icon.getIconLink();
-							url = URLEncoder.encode(url, "UTF-8");
-							String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());;
-							icon.setIconLink(String.format(ConstantWd.CENTER_URL, url, wdToken));
+					if(StringUtils.hasText(user.getTel())) {
+						for(BottomIcon icon : iconList) {
+							if(!icon.getIconLink().contains("e-shequ")) {
+								String url = icon.getIconLink();
+								url = URLEncoder.encode(url, "UTF-8");
+								String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());;
+								icon.setIconLink(String.format(ConstantWd.CENTER_URL, url, wdToken));
+							}
 						}
 					}
 				}
