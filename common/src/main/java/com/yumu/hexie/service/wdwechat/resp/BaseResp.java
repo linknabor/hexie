@@ -53,5 +53,13 @@ public class BaseResp<T> {
         return r;
     }
 
+    @Override
+    public String toString() {
+        return "BaseResp{" +
+                "code='" + code + '\'' +
+                ", message='" + message + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }
 

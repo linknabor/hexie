@@ -13,6 +13,8 @@ import java.security.Signature;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import com.alibaba.fastjson.JSONObject;
+import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;
@@ -43,7 +45,7 @@ public class RSAUtil {
      * @param key 密钥字符串（经过base64编码）
      * @throws Exception
      */
-    private static PrivateKey getPrivateKey(String key) throws Exception {
+    public static PrivateKey getPrivateKey(String key) throws Exception {
         byte[] keyBytes = buildPKCS8Key(key);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM_NAME);
@@ -174,6 +176,14 @@ public class RSAUtil {
         return new String(Base64.encodeBase64(tempBytes));
     }
 
+    public static String encrypt1(String data, String publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance(ALGORITHM_NAME);
+        cipher.init(Cipher.ENCRYPT_MODE, getPrivateKey(publicKey));
+        byte[] tempBytes = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        // 加密后的字符串
+        return new String(Base64.encodeBase64(tempBytes));
+    }
+
     /**
      * RSA解密
      *
@@ -209,5 +219,16 @@ public class RSAUtil {
         signature.update(srcData.getBytes());
         //signature.verify签署或验证所有更新字节的签名
         return signature.verify(Base64.decodeBase64(sign.getBytes()));
+    }
+
+    public static String sign(String data, PrivateKey privateKey) throws Exception {
+        byte[] keyBytes = privateKey.getEncoded();
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM_NAME);
+        PrivateKey key = keyFactory.generatePrivate(keySpec);
+        Signature signature = Signature.getInstance(SIGN_ALGORITHMS);
+        signature.initSign(key);
+        signature.update(data.getBytes(StandardCharsets.UTF_8));
+        return new String(Base64.encodeBase64(signature.sign()), StandardCharsets.UTF_8);
     }
 }

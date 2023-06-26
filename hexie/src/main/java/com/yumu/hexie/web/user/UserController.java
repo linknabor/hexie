@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
+import com.yumu.hexie.service.wdwechat.WdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -85,6 +86,8 @@ public class UserController extends BaseController{
     private WechatMsgService wechatMsgService;
     @Autowired
 	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private WdService wdService;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -120,18 +123,23 @@ public class UserController extends BaseController{
 
 				//TODO 这个需要判断如果是农工商进来的用户，需要判断是否已经注册，如果没注册，根据传过来的token进行自动注册
 				String token = request.getParameter("token");
-				if(StringUtils.hasText(token)) {
+				if(StringUtils.hasText(token) && ConstantWd.APPID.equals(user.getAppId())) {
 					String phone = stringRedisTemplate.opsForValue().get("register:" + oriApp + ":" + token);
 					if(StringUtils.hasText(phone)) {
 						user.setTel(phone);
-						userService.simpleRegister(user);
+						user = userService.simpleRegister(user);
+					}
+
+					//判断农工商用户是否做过同步
+					if(!StringUtils.hasText(user.getUniqueCode())) {
+						wdService.syncUserInfo(user);
 					}
 				}
 
 			    request.getSession().setAttribute(Constants.USER, user);
 		    
-			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
-			    
+			    OperatorDefinition odDefinition = operatorService.defineOperator(user);
+
 				/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
 				List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 				List<String> templateIds = new ArrayList<>();
@@ -162,7 +170,7 @@ public class UserController extends BaseController{
 							if(!icon.getIconLink().contains("e-shequ")) {
 								String url = icon.getIconLink();
 								url = URLEncoder.encode(url, "UTF-8");
-								String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());;
+								String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());
 								icon.setIconLink(String.format(ConstantWd.CENTER_URL, url, wdToken));
 							}
 						}

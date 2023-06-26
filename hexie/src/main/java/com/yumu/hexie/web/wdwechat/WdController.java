@@ -1,6 +1,7 @@
 package com.yumu.hexie.web.wdwechat;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RSAUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.service.wdwechat.req.WdCenterReq;
@@ -9,12 +10,10 @@ import com.yumu.hexie.service.wdwechat.resp.BaseResp;
 import com.yumu.hexie.service.wdwechat.resp.TokenResp;
 import com.yumu.hexie.service.wdwechat.resp.UserInfoResp;
 import com.yumu.hexie.web.BaseController;
-import com.yumu.hexie.web.user.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,9 +91,6 @@ public class WdController extends BaseController {
         String token = headers.getFirst("Authorization");
         WdCenterReq req = new WdCenterReq();
         req.setTime(time);
-        req.setSign(sign);
-        log.info("WdCenterReq : " + req);
-        log.info("Authorization : " + token);
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("time", time);
@@ -104,6 +100,10 @@ public class WdController extends BaseController {
         } catch (Exception e) {
             return BaseResp.fail("验签失败");
         }
+
+        req.setSign(sign);
+        log.info("WdCenterReq : " + req);
+        log.info("Authorization : " + token);
 
         if(!StringUtils.hasText(sign) || !flag) {
             return BaseResp.fail("验签失败");
@@ -119,6 +119,49 @@ public class WdController extends BaseController {
         } else {
             return BaseResp.fail("获取用户信息失败");
         }
+    }
+
+    /**
+     * 接收用户新手机号通知
+     * @param time
+     * @param sign
+     * @param uniqueCode
+     * @param newPhone
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/notifyUserTel", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResp<Object> notifyUserTel(@RequestParam("time") String time,
+                              @RequestParam("sign") String sign,
+                              @RequestParam("uniqueCode") String uniqueCode,
+                              @RequestParam("newPhone") String newPhone) {
+        WdCenterReq req = new WdCenterReq();
+        req.setTime(time);
+        req.setPhone(newPhone);
+        req.setUniqueCode(uniqueCode);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("time", time);
+        jsonObject.put("newPhone", newPhone);
+        jsonObject.put("uniqueCode", uniqueCode);
+        boolean flag;
+        try {
+            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PUBLIC_KEY), sign);
+        } catch (Exception e) {
+            return BaseResp.fail("验签失败");
+        }
+        req.setSign(sign);
+
+        if(!StringUtils.hasText(sign) || !flag) {
+            return BaseResp.fail("验签失败");
+        }
+        String resp = wdService.replUserTel(req);
+        if("SUCCESS".equals(resp)) {
+            return BaseResp.success(resp);
+        } else {
+            return BaseResp.fail(resp);
+        }
+
     }
 
 

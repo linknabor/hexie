@@ -1,16 +1,21 @@
 package com.yumu.hexie.service.wdwechat.Impl;
 
 import com.yumu.hexie.common.util.DateUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RSAUtil;
+import com.yumu.hexie.integration.wdwechat.WdWechatUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.wdwechat.WdService;
+import com.yumu.hexie.service.wdwechat.req.SyncUserInfoReq;
 import com.yumu.hexie.service.wdwechat.req.WdCenterReq;
+import com.yumu.hexie.service.wdwechat.resp.BaseResp;
 import com.yumu.hexie.service.wdwechat.resp.TokenResp;
 import com.yumu.hexie.service.wdwechat.resp.UserInfoResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -38,11 +44,15 @@ public class WdServiceImpl implements WdService {
     @Qualifier("stringRedisTemplate")
     private RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+    private WdWechatUtil wdWechatUtil;
+
     @Override
     public TokenResp getTokenByPhone(WdCenterReq req) {
         //2.解析手机号,手机号用了公钥加密,这里要解出来
         String phone = req.getPhone();
         try {
+            URLDecoder.decode(phone, "UTF-8");
             phone = RSAUtil.decrypt(phone, ConstantWd.PRIVATE_KEY);
         } catch (Exception e) {
            return null;
@@ -111,6 +121,83 @@ public class WdServiceImpl implements WdService {
             }
             resp.setPhone(tel); //TODO 这里要用公钥加密
             return resp;
+        }
+        return null;
+    }
+
+    @Override
+    public String replUserTel(WdCenterReq req) {
+        if(!StringUtils.hasText(req.getPhone())) {
+            return "手机号为空";
+        }
+        String phone = req.getPhone();
+        try {
+            phone = RSAUtil.decrypt(phone, ConstantWd.PRIVATE_KEY);
+        } catch (Exception e) {
+            return "解析手机号失败";
+        }
+
+        //更新用户手机号
+        User user = userRepository.findByAppIdAndUniqueCode(ConstantWd.APPID, req.getUniqueCode());
+        if(user != null) {
+            user.setTel(phone);
+            userRepository.save(user);
+        }
+        return "SUCCESS";
+    }
+
+    @Override
+    public String syncUserInfo(User user) {
+        User userDB = userRepository.findById(user.getId());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+
+        SyncUserInfoReq req = new SyncUserInfoReq();
+        req.setAppid(ConstantWd.TOKEN_APPID);
+        req.setTime(String.valueOf(calendar.getTime().getTime()));
+        String sexCn = "未知";
+        if(userDB.getSex() == 1) {
+            sexCn = "男";
+        } else if(userDB.getSex() == 2) {
+            sexCn = "女";
+        }
+        req.setSex(sexCn);
+        req.setName(userDB.getName());
+        req.setNickname(userDB.getNickname());
+        req.setAvatar(userDB.getHeadimgurl());
+        String tel = userDB.getTel();
+        try {
+            tel = RSAUtil.encrypt(tel, ConstantWd.PUBLIC_KEY);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return e.getMessage();
+        }
+        req.setPhone(tel);
+        try {
+            req.setPlatform(JacksonJsonUtil.beanToJson(new ArrayList<>()));
+        } catch (Exception ignored) {
+
+        }
+        String sign;
+        try {
+            String str = JacksonJsonUtil.beanToJson(req);
+            Map<String, Object> map = JacksonJsonUtil.json2map(str);
+            Map<String, Object> m = new TreeMap<>(map);
+            str = JacksonJsonUtil.beanToJson(m);
+
+            sign = RSAUtil.signByPrivate(str, ConstantWd.PRIVATE_KEY, "UTF-8");
+            m.put("sign", sign);
+            BaseResp<WdCenterReq> resp = wdWechatUtil.sycnWdUserInfo(m);
+            if("0".equals(resp.getCode())) {
+                WdCenterReq r = resp.getData();
+                if(StringUtils.hasText(r.getUniqueCode())) {
+                    userDB.setUniqueCode(r.getUniqueCode());
+                    userRepository.save(userDB);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return e.getMessage();
         }
         return null;
     }

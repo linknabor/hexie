@@ -86,6 +86,7 @@ public class User extends BaseModel{
 	private String unionid;
 	private String miniopenid;
 	private String miniAppId;
+	private String uniqueCode; //农工商会员平台唯一标识
 	
 	public String getSectId() {
 		return sectId;
@@ -495,22 +496,64 @@ public class User extends BaseModel{
 		this.miniAppId = miniAppId;
 	}
 
-	@Override
-	public String toString() {
-		return "User [realName=" + realName + ", name=" + name + ", tel=" + tel + ", provinceId=" + provinceId
-				+ ", cityId=" + cityId + ", countyId=" + countyId + ", xiaoquId=" + xiaoquId + ", county=" + county
-				+ ", xiaoquName=" + xiaoquName + ", longitude=" + longitude + ", latitude=" + latitude
-				+ ", currentAddrId=" + currentAddrId + ", wuyeId=" + wuyeId + ", openid=" + openid + ", memo=" + memo
-				+ ", subscribe=" + subscribe + ", status=" + status + ", nickname=" + nickname + ", sex=" + sex
-				+ ", age=" + age + ", city=" + city + ", country=" + country + ", province=" + province + ", language="
-				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", unsubscribeDate="
-				+ unsubscribeDate + ", registerDate=" + registerDate + ", identityCard=" + identityCard + ", zhima="
-				+ zhima + ", lvdou=" + lvdou + ", couponCount=" + couponCount + ", shareCode=" + shareCode
-				+ ", newRegiste=" + newRegiste + ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId
-				+ ", totalBind=" + totalBind + ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId
-				+ ", point=" + point + ", roleId=" + roleId + ", unionid=" + unionid + ", miniopenid=" + miniopenid
-				+ ", miniAppId=" + miniAppId + "]";
+	public String getUniqueCode() {
+		return uniqueCode;
 	}
 
-		
+	public void setUniqueCode(String uniqueCode) {
+		this.uniqueCode = uniqueCode;
+	}
+
+	@Override
+	public String toString() {
+		return "User{" +
+				"realName='" + realName + '\'' +
+				", name='" + name + '\'' +
+				", tel='" + tel + '\'' +
+				", provinceId=" + provinceId +
+				", cityId=" + cityId +
+				", countyId=" + countyId +
+				", xiaoquId=" + xiaoquId +
+				", county='" + county + '\'' +
+				", xiaoquName='" + xiaoquName + '\'' +
+				", longitude=" + longitude +
+				", latitude=" + latitude +
+				", currentAddrId=" + currentAddrId +
+				", wuyeId='" + wuyeId + '\'' +
+				", openid='" + openid + '\'' +
+				", memo='" + memo + '\'' +
+				", subscribe=" + subscribe +
+				", status=" + status +
+				", nickname='" + nickname + '\'' +
+				", sex=" + sex +
+				", age=" + age +
+				", city='" + city + '\'' +
+				", country='" + country + '\'' +
+				", province='" + province + '\'' +
+				", language='" + language + '\'' +
+				", headimgurl='" + headimgurl + '\'' +
+				", subscribe_time=" + subscribe_time +
+				", unsubscribeDate=" + unsubscribeDate +
+				", registerDate=" + registerDate +
+				", identityCard='" + identityCard + '\'' +
+				", zhima=" + zhima +
+				", lvdou=" + lvdou +
+				", couponCount=" + couponCount +
+				", shareCode='" + shareCode + '\'' +
+				", newRegiste=" + newRegiste +
+				", officeTel='" + officeTel + '\'' +
+				", sectId='" + sectId + '\'' +
+				", cspId='" + cspId + '\'' +
+				", totalBind=" + totalBind +
+				", appId='" + appId + '\'' +
+				", oriSys='" + oriSys + '\'' +
+				", oriUserId=" + oriUserId +
+				", point=" + point +
+				", roleId='" + roleId + '\'' +
+				", unionid='" + unionid + '\'' +
+				", miniopenid='" + miniopenid + '\'' +
+				", miniAppId='" + miniAppId + '\'' +
+				", uniqueCode='" + uniqueCode + '\'' +
+				'}';
+	}
 }

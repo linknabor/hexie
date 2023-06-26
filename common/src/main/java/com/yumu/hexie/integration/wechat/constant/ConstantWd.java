@@ -2,7 +2,9 @@ package com.yumu.hexie.integration.wechat.constant;
 
 public class ConstantWd {
 
-	public static final String APPID = "wx95f46f41ca5e570e";
+	public static final String APPID = "wx95f46f41ca5e570e"; //wx5b1a7c252c3cbc26
+
+	public static final String TOKEN_APPID = "238217a88ce16442b6a986a8ad660a06";
 	
 	public static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuaOwYqqQH1XX9g/rTQ4p8QM4yJo+LSbUiaHYFmUN1SlWwTcTyEI65MAO6rdu3AbVpZKXNnJPFyU9mzt8OZDGAlIX7HwhDGB4M/ZDBtceuXwKt7EILZ1sV6STqrCexhwGxOW5V66xCn7kNNwOWwP/7asW0JW2xxa16MmnTDoHK2RVYbl6gyGIxNqLUcuEgNY+bWwArUIgLROfzyQ4C727CKlKDB4Wnc79Eiu4wnQGkCOTlmb9oNyUEBwOiwB4MumrG6kWkO5R2QNxzJq2Vh9dyT+4wToVEHNLuZSYLVpw4eYiRycxhsZ4NlOmI2fWpGcJd1GFcLMSfLnlq7uye9w5OQIDAQAB";
 	
