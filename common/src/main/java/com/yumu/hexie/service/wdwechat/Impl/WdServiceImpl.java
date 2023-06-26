@@ -92,7 +92,12 @@ public class WdServiceImpl implements WdService {
     @Override
     public UserInfoResp getUserInfoByToken(WdCenterReq req, String token) {
         if(StringUtils.hasText(token)) {
-            token = new String(Base64.getDecoder().decode(token));
+            try {
+                token = new String(Base64.getDecoder().decode(token));
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                return null;
+            }
         }
         List<User> list = userRepository.findByWuyeIdAndAppId(token, ConstantWd.APPID);
         if(list != null && list.size() > 0) {
