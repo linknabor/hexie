@@ -1,5 +1,11 @@
 package com.yumu.hexie.service.wdwechat.resp;
 
+import com.yumu.hexie.common.util.JacksonJsonUtil;
+import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * @Package : Wechat
  * @Author :
@@ -37,10 +43,11 @@ public class BaseResp<T> {
     }
 
     //异常时返回
-    public static BaseResp fail(String errMsg){
+    public static BaseResp fail(String errMsg) {
         BaseResp r = new BaseResp();
         r.setCode("0");
         r.setMessage(errMsg);
+        r.setData(new HashMap<>());
         return r;
     }
 
