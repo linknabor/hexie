@@ -171,7 +171,8 @@ public class UserController extends BaseController{
 								String url = icon.getIconLink();
 								url = URLEncoder.encode(url, "UTF-8");
 								String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());
-								icon.setIconLink(String.format(ConstantWd.CENTER_URL, url, wdToken));
+								icon.setIconLink(String.format(ConstantWd.CENTER_URL, icon.getAliasName(), url, wdToken));
+
 							}
 						}
 					}
