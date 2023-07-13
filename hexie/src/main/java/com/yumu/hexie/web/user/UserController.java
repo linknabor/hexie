@@ -1,14 +1,14 @@
 package com.yumu.hexie.web.user;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.URLEncoder;
+import java.util.*;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.wechat.constant.ConstantWd;
+import com.yumu.hexie.service.wdwechat.WdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -86,6 +86,8 @@ public class UserController extends BaseController{
     private WechatMsgService wechatMsgService;
     @Autowired
 	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private WdService wdService;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -118,10 +120,26 @@ public class UserController extends BaseController{
 				
 				long endTime = System.currentTimeMillis();
 				BeanUtils.copyProperties(dbUser, user);
+
+				//TODO 这个需要判断如果是农工商进来的用户，需要判断是否已经注册，如果没注册，根据传过来的token进行自动注册
+				String token = request.getParameter("token");
+				if(StringUtils.hasText(token) && ConstantWd.APPID.equals(user.getAppId())) {
+					String phone = stringRedisTemplate.opsForValue().get("register:" + oriApp + ":" + token);
+					if(StringUtils.hasText(phone)) {
+						user.setTel(phone);
+						user = userService.simpleRegister(user);
+					}
+
+					//判断农工商用户是否做过同步
+					if(!StringUtils.hasText(user.getUniqueCode())) {
+						wdService.syncUserInfo(user);
+					}
+				}
+
 			    request.getSession().setAttribute(Constants.USER, user);
 		    
-			    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
-			    
+			    OperatorDefinition odDefinition = operatorService.defineOperator(user);
+
 				/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
 				List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 				List<String> templateIds = new ArrayList<>();
@@ -145,7 +163,20 @@ public class UserController extends BaseController{
 			    log.info("userInfo2，耗时：" + ((endTime-beginTime)));
 			    
 			    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-			    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
+			    //TODO 如果是农工商用户，除了我们自己的物业板块，其他的跳转地址，要做特殊处理
+				if(ConstantWd.APPID.equals(user.getAppId())) {
+					if(StringUtils.hasText(user.getTel())) {
+						for(BottomIcon icon : iconList) {
+							if(!icon.getIconLink().contains("e-shequ")) {
+								String url = icon.getIconLink();
+								url = URLEncoder.encode(url, "UTF-8");
+								String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());
+								icon.setIconLink(String.format(ConstantWd.CENTER_URL, url, wdToken));
+							}
+						}
+					}
+				}
+				List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
 			    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
 			    userInfo.setIconList(iconList);
 			    userInfo.setBgImageList(bgImageList);
@@ -352,8 +383,7 @@ public class UserController extends BaseController{
 		if (yzm.getType() == 0) {
 			yzm.setType(ModelConstant.SMS_TYPE_REG);
 		}
-		User dbUser = userService.getById(user.getId());
-		boolean result = smsService.sendVerificationCode(dbUser, yzm.getMobile(), requestIp, yzm.getType());
+		boolean result = smsService.sendVerificationCode(user, yzm.getMobile(), requestIp, yzm.getType());
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}
