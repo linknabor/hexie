@@ -140,4 +140,19 @@ public class NotifyController extends BaseController {
 		return "SUCCESS";
 	}
 	
+	
+	/**
+	 * 释放发票申请锁
+	 * @param workOrderNotification
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/invoice/application/release", method = RequestMethod.POST )
+	public String releaseInvoiceApplication(@RequestBody String trade_water_id) throws Exception {
+		
+		log.info("releaseInvoiceApplication, trade_water_id :" + trade_water_id);
+		notifyService.releaseInvoiceApplicationLock(trade_water_id);
+		return "SUCCESS";
+	}
+	
 }
