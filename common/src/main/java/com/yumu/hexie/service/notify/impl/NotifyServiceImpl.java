@@ -582,7 +582,7 @@ public class NotifyServiceImpl implements NotifyService {
 			log.info("releaseInvoiceApplicationLock: tradeWaterId is empty, will return ! ");
 			return;
 		}
-		
+		log.info("will remove invoice apply lock, trade_water_id : " + tradeWaterId);
 		String key = ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + tradeWaterId;
 		redisTemplate.delete(key);
 		

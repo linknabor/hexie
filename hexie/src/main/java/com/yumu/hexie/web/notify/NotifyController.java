@@ -148,10 +148,10 @@ public class NotifyController extends BaseController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/invoice/application/release", method = RequestMethod.POST )
-	public String releaseInvoiceApplication(@RequestBody String trade_water_id) throws Exception {
+	public String releaseInvoiceApplication(@RequestBody Map<String, String> map) throws Exception {
 		
-		log.info("releaseInvoiceApplication, trade_water_id :" + trade_water_id);
-		notifyService.releaseInvoiceApplicationLock(trade_water_id);
+		log.info("releaseInvoiceApplication, map :" + map);
+		notifyService.releaseInvoiceApplicationLock(map.get("trade_water_id"));
 		return "SUCCESS";
 	}
 	
