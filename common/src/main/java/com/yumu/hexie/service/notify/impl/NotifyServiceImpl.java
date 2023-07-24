@@ -571,6 +571,21 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		
 	}
-
+	
+	/**
+	 * 释放发票申请的锁
+	 */
+	@Override
+	public void releaseInvoiceApplicationLock(String tradeWaterId) {
+		
+		if (StringUtils.isEmpty(tradeWaterId)) {
+			log.info("releaseInvoiceApplicationLock: tradeWaterId is empty, will return ! ");
+			return;
+		}
+		log.info("will remove invoice apply lock, trade_water_id : " + tradeWaterId);
+		String key = ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + tradeWaterId;
+		redisTemplate.delete(key);
+		
+	}
 
 }

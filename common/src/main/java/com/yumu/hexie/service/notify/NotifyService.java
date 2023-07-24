@@ -40,5 +40,6 @@ public interface NotifyService {
 
 	void sendReceiptMsgAsync(ReceiptNotification receiptNotification);
 
+	void releaseInvoiceApplicationLock(String tradeWaterId);
 
 }
