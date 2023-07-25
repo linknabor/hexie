@@ -22,4 +22,6 @@ public interface WdService {
     String replUserTel(WdCenterReq req);
 
     String syncUserInfo(User user);
+
+    void syncUserTel(User user);
 }

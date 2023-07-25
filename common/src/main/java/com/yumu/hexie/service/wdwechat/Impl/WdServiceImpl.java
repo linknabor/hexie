@@ -206,4 +206,42 @@ public class WdServiceImpl implements WdService {
         }
         return null;
     }
+
+    @Override
+    public void syncUserTel(User user) {
+        User userDB = userRepository.findById(user.getId());
+        Map<String, Object> map = new TreeMap<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+
+        String tel = userDB.getTel();
+        try {
+            tel = RSAUtil.encrypt(tel, ConstantWd.PUBLIC_KEY);
+        } catch (Exception e) {
+            log.error("syncUserTel tel error：", e);
+            return;
+        }
+        if(StringUtils.isEmpty(userDB.getUniqueCode())) {
+            log.error("user id:" + user.getId() + " syncUserTel UniqueCode is empty");
+            return;
+        }
+        try {
+            map.put("appid", ConstantWd.TOKEN_APPID);
+            map.put("time", String.valueOf(calendar.getTime().getTime()));
+            map.put("newPhone", tel);
+            map.put("uniqueCode", userDB.getUniqueCode());
+            String str = JacksonJsonUtil.beanToJson(map);
+            String sign = RSAUtil.signByPrivate(str, ConstantWd.PRIVATE_KEY, "UTF-8");
+            map.put("sign", sign);
+            BaseResp<Object> resp = wdWechatUtil.sycnWdUserTel(map);
+            if("0".equals(resp.getCode())) {
+                Object r = resp.getData();
+                if(r != null) {
+                    log.info("syncUserTel resp:" + r);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 }
