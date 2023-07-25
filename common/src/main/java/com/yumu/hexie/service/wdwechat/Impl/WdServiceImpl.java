@@ -15,7 +15,6 @@ import com.yumu.hexie.service.wdwechat.resp.TokenResp;
 import com.yumu.hexie.service.wdwechat.resp.UserInfoResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -193,7 +192,7 @@ public class WdServiceImpl implements WdService {
             sign = RSAUtil.signByPrivate(str, ConstantWd.PRIVATE_KEY, "UTF-8");
             m.put("sign", sign);
             BaseResp<WdCenterReq> resp = wdWechatUtil.sycnWdUserInfo(m);
-            if("0".equals(resp.getCode())) {
+            if("1".equals(resp.getCode())) {
                 WdCenterReq r = resp.getData();
                 if(StringUtils.hasText(r.getUniqueCode())) {
                     userDB.setUniqueCode(r.getUniqueCode());
@@ -234,7 +233,7 @@ public class WdServiceImpl implements WdService {
             String sign = RSAUtil.signByPrivate(str, ConstantWd.PRIVATE_KEY, "UTF-8");
             map.put("sign", sign);
             BaseResp<Object> resp = wdWechatUtil.sycnWdUserTel(map);
-            if("0".equals(resp.getCode())) {
+            if("1".equals(resp.getCode())) {
                 Object r = resp.getData();
                 if(r != null) {
                     log.info("syncUserTel resp:" + r);
