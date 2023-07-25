@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import javax.inject.Inject;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -216,6 +217,12 @@ public class WdServiceImpl implements WdService {
         String tel = userDB.getTel();
         try {
             tel = RSAUtil.encrypt(tel, ConstantWd.PUBLIC_KEY);
+            if(StringUtils.hasText(tel)) {
+                try {
+                    tel = URLEncoder.encode(tel, "UTF-8");
+                } catch (Exception ignored) {
+                }
+            }
         } catch (Exception e) {
             log.error("syncUserTel tel error：", e);
             return;
