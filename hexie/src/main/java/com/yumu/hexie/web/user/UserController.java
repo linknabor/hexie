@@ -129,11 +129,10 @@ public class UserController extends BaseController{
 						user.setTel(phone);
 						user = userService.simpleRegister(user);
 					}
-
-					//判断农工商用户是否做过同步
-					if(!StringUtils.hasText(user.getUniqueCode())) {
-						wdService.syncUserInfo(user);
-					}
+				}
+				//判断农工商用户是否做过同步
+				if(ConstantWd.APPID.equals(user.getAppId()) && !StringUtils.hasText(user.getUniqueCode())) {
+					wdService.syncUserInfo(user);
 				}
 
 			    request.getSession().setAttribute(Constants.USER, user);
@@ -172,7 +171,6 @@ public class UserController extends BaseController{
 								url = URLEncoder.encode(url, "UTF-8");
 								String wdToken = Base64.getEncoder().encodeToString(user.getWuyeId().getBytes());
 								icon.setIconLink(String.format(ConstantWd.CENTER_URL, icon.getAliasName(), url, wdToken));
-
 							}
 						}
 					}
@@ -432,7 +430,24 @@ public class UserController extends BaseController{
 		}
 	    return  new BaseResult<String>().success("验证码发送成功");
     }
-	
+
+	@RequestMapping(value = "/savePersonTel", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<UserInfo> savePersonTel(HttpSession session, @ModelAttribute(Constants.USER)User user, @RequestBody(required = false) Map<String, String> postData) {
+		String tel = postData.get("tel");
+		if(StringUtils.isEmpty(tel)) {
+			return new BaseResult<UserInfo>().failMsg("更新手机号失败,手机号为空！");
+		}
+		//TODO 这里模拟修改手机号
+		user.setTel(tel);
+		userService.save(user);
+		session.setAttribute(Constants.USER, user);
+
+		//如果是旺都用户，需要同步
+		wdService.syncUserTel(user);
+		return new BaseResult<UserInfo>().success(new UserInfo(user));
+	}
+
 	@RequestMapping(value = "/savePersonInfo/{captcha}", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<UserInfo> savePersonInfo(HttpSession session,@RequestBody User editUser,@ModelAttribute(Constants.USER)User user,

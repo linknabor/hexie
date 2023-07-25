@@ -20,6 +20,7 @@ public class WdWechatUtil {
 
     public final static String BaseUrl = "https://guangming-center-api.mart4meta.com/";
     public final static String SyncUserInfoUrl = "/api/v1/center/syncInfo";
+    public final static String SyncUserTelUrl = "/api/v1/center/updatePhone";
 
     @Autowired
     private RestUtil restUtil;
@@ -27,6 +28,12 @@ public class WdWechatUtil {
     public BaseResp<WdCenterReq> sycnWdUserInfo(Map<String, Object> map) throws Exception {
         String requestUrl = BaseUrl + SyncUserInfoUrl;
         TypeReference<BaseResp<WdCenterReq>> typeReference = new TypeReference<BaseResp<WdCenterReq>>(){};
+        return restUtil.exchangeOnBody(requestUrl, map, typeReference);
+    }
+
+    public BaseResp<Object> sycnWdUserTel(Map<String, Object> map) throws Exception {
+        String requestUrl = BaseUrl + SyncUserTelUrl;
+        TypeReference<BaseResp<Object>> typeReference = new TypeReference<BaseResp<Object>>(){};
         return restUtil.exchangeOnBody(requestUrl, map, typeReference);
     }
 
