@@ -447,10 +447,12 @@ public class UserController extends BaseController{
 			//TODO 这里模拟修改手机号
 			user.setTel(tel);
 			userService.save(user);
+			//如果是旺都用户，需要同步
+			wdService.syncUserTel(user);
+			return new BaseResult<UserInfo>().success(new UserInfo(user));
+		} else {
+			return new BaseResult<UserInfo>().failMsg("用户不存在");
 		}
-		//如果是旺都用户，需要同步
-		wdService.syncUserTel(user);
-		return new BaseResult<UserInfo>().success(new UserInfo(user));
 	}
 
 	@RequestMapping(value = "/savePersonTel", method = RequestMethod.POST)
