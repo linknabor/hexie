@@ -115,7 +115,7 @@ public class WdServiceImpl implements WdService {
             resp.setNickname(user.getNickname());
             resp.setAvatar(user.getHeadimgurl());
             if(user.getRegisterDate() != 0) {
-                String registerDate = DateUtil.dttmFormat(new Date(user.getRegisterDate()));
+                String registerDate = DateUtil.dtFormat(user.getRegisterDate(), DateUtil.dttmSimple);
                 resp.setCreated_time(registerDate);
             }
             String tel = user.getTel();
@@ -170,6 +170,11 @@ public class WdServiceImpl implements WdService {
         req.setName(userDB.getName());
         req.setNickname(userDB.getNickname());
         req.setAvatar(userDB.getHeadimgurl());
+        String registerDate = "";
+        if(userDB.getRegisterDate() != 0) {
+            registerDate = DateUtil.dtFormat(userDB.getRegisterDate(), DateUtil.dttmSimple);
+        }
+        req.setCreated_time(registerDate);
         String tel = userDB.getTel();
         try {
             tel = RSAUtil.encrypt(tel, ConstantWd.PUBLIC_KEY);
