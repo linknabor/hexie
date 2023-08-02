@@ -872,9 +872,9 @@ public class TemplateMsgService {
 			dataMap.put("value", makeDate);
 			map.put("time1", dataMap);
 			
-			dataMap = new HashMap<>();
-			dataMap.put("value", "0");
-			map.put("character_string3", dataMap);
+//			dataMap = new HashMap<>();
+//			dataMap.put("value", "0");
+//			map.put("character_string3", dataMap);
 			
 			dataMap = new HashMap<>();
 			dataMap.put("value", amt);
