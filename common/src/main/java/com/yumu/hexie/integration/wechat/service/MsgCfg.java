@@ -29,6 +29,10 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_WORKORDER_NOTIFY = "workOrderNotificationTemplate";
 	public static final String TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER = "invoiceApplicationReminderTemplate";	//发票申请提醒
 	public static final String TEMPLATE_TYPE_INVOICE_FINISH = "invoiceFinishTemplate";	//发票开具完成提醒
+	
+	public static final String TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER2 = "invoiceApplicationReminderTemplate2";	//发票申请提醒
+	public static final String TEMPLATE_TYPE_INVOICE_FINISH2 = "invoiceFinishTemplate2";	//发票开具完成提醒
+	
 	public static final String TEMPLATE_TYPE_RECEIPT_APPLICATION_REMINDER = "receiptApplicationReminderTemplate";	//收据申请提醒
 	public static final String TEMPLATE_TYPE_RECEIPT_FINISH = "receiptFinishTemplate";	//收据下发提醒
 	public static final String TEMPLATE_TYPE_NOTICE_ARRIVAL = "noticeArrivalMessageTemplate";	//收据下发提醒

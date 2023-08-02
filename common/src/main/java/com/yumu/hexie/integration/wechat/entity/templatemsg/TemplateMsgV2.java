@@ -1,0 +1,49 @@
+package com.yumu.hexie.integration.wechat.entity.templatemsg;
+
+import java.io.Serializable;
+
+public class TemplateMsgV2<T> implements Serializable {
+
+	private static final long serialVersionUID = -3389303374046044405L;
+	private String touser;//":"OPENID",
+	private String template_id;//":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
+	private String page;//":"http://weixin.qq.com/download",
+	private MiniprogramVO miniprogram;
+	private T data;
+	public String getTouser() {
+		return touser;
+	}
+	public void setTouser(String touser) {
+		this.touser = touser;
+	}
+	public String getTemplate_id() {
+		return template_id;
+	}
+	public void setTemplate_id(String template_id) {
+		this.template_id = template_id;
+	}
+	public String getPage() {
+		return page;
+	}
+	public void setPage(String page) {
+		this.page = page;
+	}
+	public T getData() {
+		return data;
+	}
+	public void setData(T data) {
+		this.data = data;
+	}
+	public MiniprogramVO getMiniprogram() {
+		return miniprogram;
+	}
+	public void setMiniprogram(MiniprogramVO miniprogram) {
+		this.miniprogram = miniprogram;
+	}
+	@Override
+	public String toString() {
+		return "TemplateMsgV2 [touser=" + touser + ", template_id=" + template_id + ", page=" + page + ", miniprogram="
+				+ miniprogram + ", data=" + data + "]";
+	}
+	
+}
