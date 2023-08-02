@@ -38,7 +38,6 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.ResetPasswordVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateItem;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsgV2;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
@@ -89,26 +88,6 @@ public class TemplateMsgService {
 		return wechatResponse;
 	}
 	
-	/**
-	 * 模板消息发送
-	 */
-	private WechatResponse sendMsgV2(TemplateMsgV2<?> msg, String accessToken) {
-        
-		String requestUrl = MsgCfg.TEMPLATE_MSG;
-		if(StringUtil.isNotEmpty(accessToken)){
-	        requestUrl = requestUrl.replace("ACCESS_TOKEN", accessToken);
-	    }
-		TypeReference<WechatResponse> typeReference = new TypeReference<WechatResponse>() {};
-		WechatResponse wechatResponse = new WechatResponse();
-		try {
-			wechatResponse = restUtil.exchangeOnBody(requestUrl, msg, typeReference);
-		} catch (Exception e) {
-			log.error("发送模板消息失败: " +e.getMessage());
-			log.error(e.getMessage(), e);
-		}
-		return wechatResponse;
-	}
-
 	private WechatResponse sendMsgBill(TemplateMsg<?> msg, String accessToken) {
 
 		String requestUrl = MsgCfg.TEMPLATE_MSG;
@@ -808,14 +787,14 @@ public class TemplateMsgService {
 			dataMap.put("value", tranAmt);
 			map.put("amount3", dataMap);
 			
-			TemplateMsgV2<Map<String, Map<String, String>>> msg = new TemplateMsgV2<>();
+			TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
 			msg.setData(map);
 			
 			url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
-			msg.setPage(url);
+			msg.setUrl(url);
 			msg.setTemplate_id(templateId);
 			msg.setTouser(baseEventDTO.getOpenid());
-			wechatResponse = sendMsgV2(msg, accessToken);
+			wechatResponse = sendMsg(msg, accessToken);
 		}
 		return wechatResponse;
 
@@ -901,12 +880,13 @@ public class TemplateMsgService {
 			dataMap.put("value", amt);
 			map.put("amount5", dataMap);
 			
-			TemplateMsgV2<Map<String, Map<String, String>>> msg = new TemplateMsgV2<>();
+			TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
 			msg.setData(map);
 			msg.setTemplate_id(templateId);
 			String url = invoiceNotification.getPdfAddr();
-			msg.setPage(url);
+			msg.setUrl(url);
 			msg.setTouser(invoiceNotification.getOpenid());
+			wechatResponse = sendMsg(msg, accessToken);
 		}
     	
 		return wechatResponse;
