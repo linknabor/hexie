@@ -30,7 +30,7 @@ public class WechatMsgServiceImpl implements WechatMsgService {
      * 不同公众号用不同模板消息
      */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_MSG_TEMPLATE, key = "#templateName+'_'+#appId", unless = "#result == null or #result.isEmpty()")
+	@Cacheable(cacheNames = ModelConstant.KEY_MSG_TEMPLATE, key = "#templateName+'_'+#appId", unless = "#result == null ")
     public String getTemplateByNameAndAppId(String templateName, String appId) {
     	
     	Assert.hasText(templateName, "模板消息名称不能为空。");
@@ -51,7 +51,7 @@ public class WechatMsgServiceImpl implements WechatMsgService {
      * 不同公众号用不同模板消息
      */
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_MSG_TEMPLATE, key = "#templateName+'_'+#appId", unless = "#result == null or #result.isEmpty()")
+	@Cacheable(cacheNames = ModelConstant.KEY_MSG_TEMPLATE, key = "#templateName+'_'+#appId", unless = "#result == null ")
     public MsgTemplate getTemplateByNameAndAppIdV2(String templateName, String appId) {
     	
     	Assert.hasText(templateName, "模板消息名称不能为空。");
