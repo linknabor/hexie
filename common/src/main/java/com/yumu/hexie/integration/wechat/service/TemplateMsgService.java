@@ -3,7 +3,9 @@ package com.yumu.hexie.integration.wechat.service;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,7 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.ResetPasswordVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateItem;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
+import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsgV2;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
@@ -47,6 +50,7 @@ import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnComm
 import com.yumu.hexie.model.localservice.oldversion.thirdpartyorder.HaoJiaAnOrder;
 import com.yumu.hexie.model.localservice.repair.RepairOrder;
 import com.yumu.hexie.model.market.ServiceOrder;
+import com.yumu.hexie.model.msgtemplate.MsgTemplate;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
@@ -69,6 +73,26 @@ public class TemplateMsgService {
 	 * 模板消息发送
 	 */
 	private WechatResponse sendMsg(TemplateMsg<?> msg, String accessToken) {
+        
+		String requestUrl = MsgCfg.TEMPLATE_MSG;
+		if(StringUtil.isNotEmpty(accessToken)){
+	        requestUrl = requestUrl.replace("ACCESS_TOKEN", accessToken);
+	    }
+		TypeReference<WechatResponse> typeReference = new TypeReference<WechatResponse>() {};
+		WechatResponse wechatResponse = new WechatResponse();
+		try {
+			wechatResponse = restUtil.exchangeOnBody(requestUrl, msg, typeReference);
+		} catch (Exception e) {
+			log.error("发送模板消息失败: " +e.getMessage());
+			log.error(e.getMessage(), e);
+		}
+		return wechatResponse;
+	}
+	
+	/**
+	 * 模板消息发送
+	 */
+	private WechatResponse sendMsgV2(TemplateMsgV2<?> msg, String accessToken) {
         
 		String requestUrl = MsgCfg.TEMPLATE_MSG;
 		if(StringUtil.isNotEmpty(accessToken)){
@@ -709,13 +733,14 @@ public class TemplateMsgService {
 	 */
 	public WechatResponse sendInvoiceApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
 		
+		WechatResponse wechatResponse = new WechatResponse();
 		String eventKey = baseEventDTO.getEventKey();
     	if (!eventKey.startsWith("01") && !eventKey.startsWith("qrscene_01")) {	//01表示扫二维码开票的场景
-			return new WechatResponse();
+			return wechatResponse;
 		}
     	String[]eventKeyArr = eventKey.split("\\|");
     	if (eventKeyArr == null || eventKeyArr.length < 4) {
-			return new WechatResponse();
+			return wechatResponse;
 		}
     	String tradeWaterId = "";
     	String tranAmt = ""; 
@@ -726,23 +751,24 @@ public class TemplateMsgService {
 			shopName = eventKeyArr[3];
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			return new WechatResponse();
+			return wechatResponse;
 		}
     	
-    	TemplateItem firstItem = new TemplateItem("请点击查看详情进入电子发票自助申请！");
-    	TemplateItem keywordItem1 = new TemplateItem(shopName);
-    	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
-    	TemplateItem remarkItem = new TemplateItem("请及时进行申请");
-
-		CommonVO2 vo = new CommonVO2();
-		vo.setFirst(firstItem);
-		vo.setKeyword1(keywordItem1);
-		vo.setKeyword2(keywordItem2);
-		vo.setRemark(remarkItem);
-
-		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
-		msg.setData(vo);
-		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER, baseEventDTO.getAppId()));
+		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER, baseEventDTO.getAppId());
+		if (msgTemplate == null) {
+			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER2, baseEventDTO.getAppId());
+		}
+		
+		String templateId = "";
+		if (msgTemplate != null) {
+			templateId = msgTemplate.getValue();
+		}
+		if (StringUtils.isEmpty(templateId)) {
+			wechatResponse.setErrcode(99999);
+			wechatResponse.setErrmsg("未配置模板消息，tempalteName: " + MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER);
+			return wechatResponse;
+		}
+		
 		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_INVOICE_APPLICATION_URL);
 		url = AppUtil.addAppOnUrl(url, baseEventDTO.getAppId());
 		
@@ -750,10 +776,48 @@ public class TemplateMsgService {
 		if (StringUtils.isEmpty(tel)) {
 			tel = "";
 		}
-		url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
-		msg.setUrl(url);
-		msg.setTouser(baseEventDTO.getOpenid());
-		return sendMsg(msg, accessToken);
+		int templateType = msgTemplate.getType();
+		if (templateType == 0) {
+			TemplateItem firstItem = new TemplateItem("请点击查看详情进入电子发票自助申请！");
+	    	TemplateItem keywordItem1 = new TemplateItem(shopName);
+	    	TemplateItem keywordItem2 = new TemplateItem(tranAmt);
+	    	TemplateItem remarkItem = new TemplateItem("请及时进行申请");
+
+			CommonVO2 vo = new CommonVO2();
+			vo.setFirst(firstItem);
+			vo.setKeyword1(keywordItem1);
+			vo.setKeyword2(keywordItem2);
+			vo.setRemark(remarkItem);
+
+			TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+			msg.setData(vo);
+			
+			url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
+			msg.setUrl(url);
+			msg.setTemplate_id(templateId);
+			msg.setTouser(baseEventDTO.getOpenid());
+			wechatResponse = sendMsg(msg, accessToken);
+		} else if (templateType == 2) {
+			
+			Map<String, Map<String, String>> map = new HashMap<>();
+			Map<String, String> dataMap = new HashMap<>();
+			dataMap.put("value", shopName);
+			map.put("thing2", dataMap);
+			
+			dataMap = new HashMap<>();
+			dataMap.put("value", tranAmt);
+			map.put("amount3", dataMap);
+			
+			TemplateMsgV2<Map<String, Map<String, String>>> msg = new TemplateMsgV2<>();
+			msg.setData(map);
+			
+			url = url.replaceAll("TRADE_WATER_ID", tradeWaterId).replaceAll("OPENID", baseEventDTO.getOpenid()).replace("TEL", tel);
+			msg.setPage(url);
+			msg.setTemplate_id(templateId);
+			msg.setTouser(baseEventDTO.getOpenid());
+			wechatResponse = sendMsgV2(msg, accessToken);
+		}
+		return wechatResponse;
 
 	}
 
@@ -775,32 +839,77 @@ public class TemplateMsgService {
 		String amt = invoiceNotification.getJsAmt();
 		amt = "-";
 		String makeDate = invoiceNotification.getMakeDate();
+		
+		
+		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_INVOICE_FINISH, 
+				invoiceNotification.getUser().getAppId());
+		
+		if (msgTemplate == null) {
+			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_INVOICE_FINISH2, 
+					invoiceNotification.getUser().getAppId());
+		}
+		String templateId = "";
+		if (msgTemplate != null) {
+			templateId = msgTemplate.getValue();
+		}
+		WechatResponse wechatResponse = new WechatResponse();
+		if (StringUtils.isEmpty(templateId)) {
+			wechatResponse.setErrcode(99999);
+			wechatResponse.setErrmsg("未配置模板消息，tempalteName: " + MsgCfg.TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER);
+			return wechatResponse;
+		}
+		
+		int templateType = msgTemplate.getType();
+		if (templateType == 0) {
+			TemplateItem firstItem = new TemplateItem(first);
+	    	TemplateItem keywordItem1 = new TemplateItem(shopName);
+	    	TemplateItem keywordItem2 = new TemplateItem(title);
+	    	TemplateItem keywordItem3 = new TemplateItem(type);
+	    	TemplateItem keywordItem4 = new TemplateItem(amt);
+	    	TemplateItem keywordItem5 = new TemplateItem(makeDate);
+	    	TemplateItem remarkItem = new TemplateItem("点击查看发票详情");
+
+			CommonVO2 vo = new CommonVO2();
+			vo.setFirst(firstItem);
+			vo.setKeyword1(keywordItem1);
+			vo.setKeyword2(keywordItem2);
+			vo.setKeyword3(keywordItem3);
+			vo.setKeyword4(keywordItem4);
+			vo.setKeyword5(keywordItem5);
+			vo.setRemark(remarkItem);
+
+			TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
+			msg.setData(vo);
+			msg.setTemplate_id(templateId);
+			String url = invoiceNotification.getPdfAddr();
+			msg.setUrl(url);
+			msg.setTouser(invoiceNotification.getOpenid());
+			wechatResponse = sendMsg(msg, accessToken);
+			
+		} else if (templateType == 2) {
+			
+			Map<String, Map<String, String>> map = new HashMap<>();
+			Map<String, String> dataMap = new HashMap<>();
+			dataMap.put("value", makeDate);
+			map.put("time1", dataMap);
+			
+			dataMap = new HashMap<>();
+			dataMap.put("value", "0");
+			map.put("character_string3", dataMap);
+			
+			dataMap = new HashMap<>();
+			dataMap.put("value", amt);
+			map.put("amount5", dataMap);
+			
+			TemplateMsgV2<Map<String, Map<String, String>>> msg = new TemplateMsgV2<>();
+			msg.setData(map);
+			msg.setTemplate_id(templateId);
+			String url = invoiceNotification.getPdfAddr();
+			msg.setPage(url);
+			msg.setTouser(invoiceNotification.getOpenid());
+		}
     	
-    	TemplateItem firstItem = new TemplateItem(first);
-    	TemplateItem keywordItem1 = new TemplateItem(shopName);
-    	TemplateItem keywordItem2 = new TemplateItem(title);
-    	TemplateItem keywordItem3 = new TemplateItem(type);
-    	TemplateItem keywordItem4 = new TemplateItem(amt);
-    	TemplateItem keywordItem5 = new TemplateItem(makeDate);
-    	TemplateItem remarkItem = new TemplateItem("点击查看发票详情");
-
-		CommonVO2 vo = new CommonVO2();
-		vo.setFirst(firstItem);
-		vo.setKeyword1(keywordItem1);
-		vo.setKeyword2(keywordItem2);
-		vo.setKeyword3(keywordItem3);
-		vo.setKeyword4(keywordItem4);
-		vo.setKeyword5(keywordItem5);
-		vo.setRemark(remarkItem);
-
-		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
-		msg.setData(vo);
-		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_INVOICE_FINISH, 
-				invoiceNotification.getUser().getAppId()));
-		String url = invoiceNotification.getPdfAddr();
-		msg.setUrl(url);
-		msg.setTouser(invoiceNotification.getOpenid());
-		return sendMsg(msg, accessToken);
+		return wechatResponse;
 
 	}
 	
