@@ -244,6 +244,17 @@ public class WechatResponse implements Serializable{
 	public void setUnionid(String unionid) {
 		this.unionid = unionid;
 	}
+
+	@Override
+	public String toString() {
+		return "WechatResponse [errcode=" + errcode + ", errmsg=" + errmsg + ", access_token=" + access_token
+				+ ", expires_in=" + expires_in + ", refresh_token=" + refresh_token + ", openid=" + openid + ", scope="
+				+ scope + ", group=" + group + ", groups=" + groups + ", groupid=" + groupid + ", menu=" + menu
+				+ ", ticket=" + ticket + ", subscribe=" + subscribe + ", nickname=" + nickname + ", sex=" + sex
+				+ ", city=" + city + ", country=" + country + ", province=" + province + ", language=" + language
+				+ ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", unionid=" + unionid
+				+ ", data=" + data + ", privilege=" + privilege + "]";
+	}
 	
 	
 }
