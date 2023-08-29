@@ -125,16 +125,16 @@ public class CommunityServiceImpl implements CommunityService {
 			}
 			resp.setImgUrlLink(imgLinkList);
 			resp.setThumbnailLink(thumbnailLinkList);
+		}
 
-			String creatTime = DateUtil.formatDateTimeFromDB(resp.getCreate_date(), resp.getCreate_time());
-			Date date = DateUtil.getDateTimeFromString(creatTime);
-			String dateStr = DateUtil.getSendTime(date.getTime());
-			resp.setFormattedDateTime(dateStr);
+		String creatTime = DateUtil.formatDateTimeFromDB(resp.getCreate_date(), resp.getCreate_time());
+		Date date = DateUtil.getDateTimeFromString(creatTime);
+		String dateStr = DateUtil.getSendTime(date.getTime());
+		resp.setFormattedDateTime(dateStr);
 
-			//是否是所有人
-			if(req.getUserId().equals(String.valueOf(currUser.getId()))) {
-				resp.setIsThreadOwner("true");
-			}
+		//是否是所有人
+		if(req.getUserId().equals(String.valueOf(currUser.getId()))) {
+			resp.setIsThreadOwner("true");
 		}
 		return resp;
 	}
