@@ -1249,6 +1249,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     }
 
     @Override
+    @Async("taskExecutor")
     public void notifyInteractComment() {
         while (true) {
             try {
@@ -1307,6 +1308,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
     //
     @Override
+    @Async("taskExecutor")
     public void notifyInteractGrade() {
         while (true) {
             try {
