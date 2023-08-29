@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,6 @@ import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
-import com.yumu.hexie.integration.wuye.req.OpinionRequestTemp;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -87,7 +87,7 @@ public class TemplateMsgService {
 		}
 		return wechatResponse;
 	}
-	
+
 	private WechatResponse sendMsgBill(TemplateMsg<?> msg, String accessToken) {
 
 		String requestUrl = MsgCfg.TEMPLATE_MSG;
@@ -616,29 +616,28 @@ public class TemplateMsgService {
 
 	/**
 	 * 业主意见回复
-	 * @param opinionRequest
+	 * @param commentNotice
 	 * @param accessToken
 	 */
-	public void sendOpinionNotificationMessage(OpinionRequestTemp opinionRequest, String accessToken) {
+	public void sendOpinionNotificationMessage(InteractCommentNotice commentNotice, String accessToken) {
 
 		CommonVO2 vo = new CommonVO2();
 		vo.setFirst(new TemplateItem("您好，你的意见建议已有反馈。"));
-		vo.setKeyword1(new TemplateItem(opinionRequest.getThreadContent()));
-		vo.setKeyword2(new TemplateItem(opinionRequest.getOpinionDate()));
-		vo.setKeyword3(new TemplateItem(opinionRequest.getContent()));
-		vo.setKeyword4(new TemplateItem(opinionRequest.getCommMan()));
+		vo.setKeyword1(new TemplateItem(commentNotice.getContent()));
+		vo.setKeyword2(new TemplateItem(commentNotice.getOpinionDate()));
+		vo.setKeyword3(new TemplateItem(commentNotice.getCommentContent()));
+		vo.setKeyword4(new TemplateItem(commentNotice.getCommentName()));
 		vo.setRemark(new TemplateItem("谢谢您宝贵的意见和建议"));
 
 		TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
 		msg.setData(vo);
-		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_OPINION_NOTIFY, opinionRequest.getAppId()));
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_OPINION_NOTIFY, commentNotice.getAppid()));
 		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE);
-		url = AppUtil.addAppOnUrl(url, opinionRequest.getAppId());
-		url = url.replaceAll("THREAD_ID", opinionRequest.getThreadId());
+		url = AppUtil.addAppOnUrl(url, commentNotice.getAppid());
+		url = url.replaceAll("THREAD_ID", commentNotice.getInteractId());
 		msg.setUrl(url);
-		msg.setTouser(opinionRequest.getOpenId());
+		msg.setTouser(commentNotice.getOpenid());
 		sendMsg(msg, accessToken);
-
 	}
 
 	/**
@@ -662,8 +661,8 @@ public class TemplateMsgService {
 			return;
 		}
 		
-		String title = "";
-		String operName = "";
+		String title;
+		String operName;
 		if ("05".equals(workOrderNotification.getOperation())) {
 	    	title = "您的"+workOrderNotification.getOrderType()+"工单已被受理";
 	    	operName = workOrderNotification.getAcceptor();
@@ -895,7 +894,7 @@ public class TemplateMsgService {
 	
 	/**
 	 * 发送电子收据申请模板消息
-	 * @param opinionRequest
+	 * @param baseEventDTO
 	 * @param accessToken
 	 */
 	public WechatResponse sendReceiptApplicationMessage(BaseEventDTO baseEventDTO, String accessToken) {
@@ -904,13 +903,13 @@ public class TemplateMsgService {
     	if (!eventKey.startsWith("02") && !eventKey.startsWith("qrscene_02")) {	//01表示扫二维码开票的场景
 			return new WechatResponse();
 		}
-    	String[]eventKeyArr = eventKey.split("\\|");
-    	if (eventKeyArr == null || eventKeyArr.length < 6) {
+    	String[] eventKeyArr = eventKey.split("\\|");
+    	if (eventKeyArr.length < 6) {
 			return new WechatResponse();
 		}
-    	String shopName = "";
-    	String tradeWaterId = "";
-    	String tranAmt = ""; 
+    	String shopName;
+    	String tradeWaterId;
+    	String tranAmt;
 //    	String payMethod = "";
     	try {
 			tradeWaterId = eventKeyArr[1];
@@ -955,7 +954,7 @@ public class TemplateMsgService {
 	
 	/**
 	 * 发送电子收据开具成功的模板消息
-	 * @param invoiceNotification
+	 * @param receiptNotification
 	 * @param accessToken
 	 * @return
 	 */
@@ -1075,8 +1074,7 @@ public class TemplateMsgService {
 	/**
      * 成团团长发货提醒
      *
-     * @param sendUser
-     * @param noticeServiceOperator
+     * @param noticeRgroupSuccess
      * @param accessToken
      */
     public void sendGroupSuccessNotification(NoticeRgroupSuccess noticeRgroupSuccess, String accessToken) {
@@ -1089,7 +1087,7 @@ public class TemplateMsgService {
         
         String priceStr = noticeRgroupSuccess.getPrice();
         if (!StringUtils.isEmpty(priceStr)) {
-        	Float price = 0F;
+        	float price = 0F;
 			try {
 				price = Float.parseFloat(priceStr);
 			} catch (Exception e) {
@@ -1121,15 +1119,14 @@ public class TemplateMsgService {
         sendMsg(msg, accessToken);
 
     }
-    
-    /**
-     * 成团团长发货提醒
-     *
-     * @param sendUser
-     * @param noticeServiceOperator
-     * @param accessToken
-     */
-    public void sendGroupLeaderSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
+
+	/**
+	 * 成团团长发货提醒
+	 * @param sendUser
+	 * @param rgroupVO
+	 * @param accessToken
+	 */
+	public void sendGroupLeaderSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
 
         String title = "您关注的团长：" + rgroupVO.getRgroupOwner().getOwnerName() + "发布了新团购";
         CommonVO vo = new CommonVO();
@@ -1166,16 +1163,15 @@ public class TemplateMsgService {
         sendMsg(msg, accessToken);
 
     }
-    
 
-    /**
-     * 成团团长发货提醒
-     *
-     * @param sendUser
-     * @param noticeServiceOperator
-     * @param accessToken
-     */
-    public void sendGroupRegionSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
+
+	/**
+	 * 成团团长发货提醒
+	 * @param sendUser
+	 * @param rgroupVO
+	 * @param accessToken
+	 */
+	public void sendGroupRegionSubscribe(User sendUser, RgroupVO rgroupVO, String accessToken) {
 
         String title = "您关注的小区：" + rgroupVO.getRegion().getName() + "发布了新的小区团，一大波人正在跟团";
         CommonVO vo = new CommonVO();

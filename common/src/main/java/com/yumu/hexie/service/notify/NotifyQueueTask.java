@@ -32,4 +32,8 @@ public interface NotifyQueueTask {
 
 	void notifyGroupSuccess();
 
+	void notifyInteractComment();
+
+	void notifyInteractGrade();
+
 }
