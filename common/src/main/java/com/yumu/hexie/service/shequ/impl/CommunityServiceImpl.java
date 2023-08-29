@@ -50,7 +50,7 @@ public class CommunityServiceImpl implements CommunityService {
 				for (int j = 0; j < (Math.min(urls.length, 3)); j++) {
 					String urlKey = urls[j];
 					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
-					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
+					thumbnailLinkList.add(qiniuUtil.getPreviewLink(urlKey, "3", "0"));
 				}
 				resp.setImgUrlLink(imgLinkList);
 				resp.setThumbnailLink(thumbnailLinkList);
@@ -121,7 +121,7 @@ public class CommunityServiceImpl implements CommunityService {
 			List<String> thumbnailLinkList = new ArrayList<>();
 			for (String urlKey : urls) {
 				imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
-				thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
+				thumbnailLinkList.add(qiniuUtil.getPreviewLink(urlKey, "3", "0"));
 			}
 			resp.setImgUrlLink(imgLinkList);
 			resp.setThumbnailLink(thumbnailLinkList);
@@ -164,7 +164,7 @@ public class CommunityServiceImpl implements CommunityService {
 				List<String> thumbnailLinkList = new ArrayList<>();
 				for (String urlKey : urls) {
 					imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
-					thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
+					thumbnailLinkList.add(qiniuUtil.getPreviewLink(urlKey, "3", "0"));
 				}
 				resp.setImgUrlLink(imgLinkList);
 				resp.setThumbnailLink(thumbnailLinkList);
@@ -198,7 +198,7 @@ public class CommunityServiceImpl implements CommunityService {
 			List<String> thumbnailLinkList = new ArrayList<>();
 			for (String urlKey : urls) {
 				imgLinkList.add(qiniuUtil.getInterlaceImgLink(urlKey, "1"));
-				thumbnailLinkList.add(qiniuUtil.getThumbnailLink(urlKey, "3", "0"));
+				thumbnailLinkList.add(qiniuUtil.getPreviewLink(urlKey, "3", "0"));
 			}
 			resp.setImgUrlLink(imgLinkList);
 			resp.setThumbnailLink(thumbnailLinkList);
