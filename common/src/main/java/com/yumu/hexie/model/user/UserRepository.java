@@ -100,4 +100,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public List<User> findByCspIdAndWuyeIdIn(String cspId, List<String> wuyeIds);
 	
 	public User findByMiniopenid(String miniopenid);
+
+	public List<User> findByTelAndAppId(String tel, String appid);
+
+	public User findByAppIdAndUniqueCode(String appid, String uniqueCode);
 }
