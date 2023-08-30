@@ -511,7 +511,7 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_ARRIVAL_NOTICE_QUEUE = "queue:notify:rgroup:arriavalNotice";	//团购到货提醒。发给客户
 	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 
-	public static final String KEY_USER_SESSION_KEY = "user:org:sessionKey:";	//小程序的sessionkey
+	public static final String KEY_USER_SESSION_KEY = "miniuser:sessionKey:";	//小程序的sessionkey
 	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
 	
 	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId

@@ -753,6 +753,61 @@ public class UserController extends BaseController{
     }
     
     /**
+     * 小程序登录
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/login/v2/{appid}/{code}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> miniLogin(HttpSession session, @PathVariable String appid, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        User user = null;
+        if (!StringUtils.isEmpty(code)) {
+            if (user == null) {
+                if (userService.checkDuplicateLogin(session, code)) {
+                    throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+                }
+                UserMiniprogram miniUser = userService.getWechatMiniUserSessionKey(appid, code);
+
+                user = userService.saveMiniUserSessionKey(miniUser);
+                if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+                	userService.recacheMiniUser(user);
+                }
+            }
+            session.setAttribute(Constants.USER, user);
+        }
+        if (user == null) {
+            return new BaseResult<UserInfo>().failMsg("用户不存在！");
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "login，耗时：" + ((endTime - beginTime) / 1000));
+
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setReqPath(reqPath);
+        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
+        userInfo.setPermission(true);
+        if (!isValid) {
+            throw new BizValidateException("没有访问权限");
+        }
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
      * 小程序获取用户手机
      *
      * @param session
@@ -765,7 +820,7 @@ public class UserController extends BaseController{
     @ResponseBody
     public BaseResult<UserInfo> getMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @PathVariable String code) throws Exception {
         long beginTime = System.currentTimeMillis();
-        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(code);
+        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(user, code);
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
         if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
         	userService.recacheMiniUser(user);

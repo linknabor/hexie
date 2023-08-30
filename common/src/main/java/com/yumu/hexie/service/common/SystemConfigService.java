@@ -4,7 +4,10 @@
  */
 package com.yumu.hexie.service.common;
 
+import java.util.List;
 import java.util.Set;
+
+import com.yumu.hexie.model.system.SystemConfig;
 
 /**
  * <pre>
@@ -30,5 +33,6 @@ public interface SystemConfigService {
 	boolean isDonghu(String appId);
 	boolean registerCouponServiceAvailabe(String appId);
 	boolean isCardPayServiceAvailabe(String appId);
+	List<SystemConfig> getAll();
 
 }
