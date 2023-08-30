@@ -25,7 +25,7 @@ public class InteractInfoResp {
     private String attachment_urls; //上传图片缩略图
     private String ex_group; //互动归类
     private String sect_id; //物业项目ID
-    private String grade; //是否满意
+    private int grade; //是否满意
     private String feedback; //不满意原因
 
     private String formattedDateTime;	//时间。格式为：xx秒前，xx分钟前
@@ -161,11 +161,11 @@ public class InteractInfoResp {
         this.sect_id = sect_id;
     }
 
-    public String getGrade() {
+    public int getGrade() {
         return grade;
     }
 
-    public void setGrade(String grade) {
+    public void setGrade(int grade) {
         this.grade = grade;
     }
 

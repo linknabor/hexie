@@ -23,7 +23,7 @@ public class InteractReq {
     private String interactId; //互动主信息ID
     private String commentId; //回复ID
 
-    private String grade; //评分  0：不满意 1：满意
+    private int grade; //评分  0：不满意 1：满意
     private String feedback; //不满意时的描述
 
     public String getUserId() {
@@ -82,11 +82,11 @@ public class InteractReq {
         this.commentId = commentId;
     }
 
-    public String getGrade() {
+    public int getGrade() {
         return grade;
     }
 
-    public void setGrade(String grade) {
+    public void setGrade(int grade) {
         this.grade = grade;
     }
 
@@ -115,7 +115,7 @@ public class InteractReq {
                 ", appid='" + appid + '\'' +
                 ", interactId='" + interactId + '\'' +
                 ", commentId='" + commentId + '\'' +
-                ", grade='" + grade + '\'' +
+                ", grade=" + grade +
                 ", feedback='" + feedback + '\'' +
                 '}';
     }
