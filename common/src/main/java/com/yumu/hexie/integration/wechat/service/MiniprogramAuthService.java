@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -12,26 +11,25 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.MiniAccessToken;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.model.ModelConstant;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.exception.BizValidateException;
 
 @Service
 public class MiniprogramAuthService {
-	
-	@Value("${wechat.miniprogramAppId}")
-	private String miniprogramAppid;
-	
-	@Value("${wechat.miniprogramSecret}")
-	private String miniprogramSecret;
 	
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
 	
 	@Autowired
 	private RestUtil restUtil;
+	
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	public static final String CODE2SESSION_URL = "https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code";
 
@@ -40,6 +38,8 @@ public class MiniprogramAuthService {
 	public static final String MINI_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
 
 	public static final String MINI_QRCODE_URL = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=ACCESS_TOKEN";
+	
+	public static final String MINI_APP_KEY_PREFIX = "MP_APP_";
 
 	/**
 	 * 通过code获取微信小程序用户信息
@@ -49,7 +49,7 @@ public class MiniprogramAuthService {
 	 */
 	public UserMiniprogram getMiniUserSessionKey(String code) throws Exception {
 		
-		String requestUrl = CODE2SESSION_URL.replaceAll("APPID", miniprogramAppid).replaceAll("SECRET", miniprogramSecret)
+		String requestUrl = CODE2SESSION_URL.replaceAll("APPID", ConstantWeChat.MINIPROGRAM_APPID).replaceAll("SECRET", ConstantWeChat.MINIPROGRAM_SECRET)
 		.replaceAll("JSCODE", code);
 		
 		TypeReference<UserMiniprogram> typeReference = new TypeReference<UserMiniprogram>() {};
@@ -57,7 +57,36 @@ public class MiniprogramAuthService {
 		if (!StringUtils.isEmpty(userMiniprogram.getErrcode())) {
 			throw new BizValidateException(userMiniprogram.getErrcode() + ", " + userMiniprogram.getErrmsg());
 		}
+		userMiniprogram.setAppid(ConstantWeChat.MINIPROGRAM_APPID);
 		return userMiniprogram;
+	}
+	
+	/**
+	 * 通过appid和code获取微信小程序用户信息
+	 * @param miniAppid
+	 * @param code
+	 * @return
+	 * @throws Exception
+	 */
+	public UserMiniprogram getMiniUserSessionKeyByAppid(String miniAppid, String code) throws Exception {
+		
+		if (StringUtils.isEmpty(miniAppid)) {
+			throw new BizValidateException("miniappid is empty ! ");
+		}
+		
+		String appKey = MINI_APP_KEY_PREFIX + miniAppid;
+		String appSecret = systemConfigService.getSysConfigByKey(appKey);
+		
+		String requestUrl = CODE2SESSION_URL.replaceAll("APPID", miniAppid).replaceAll("SECRET", appSecret).replaceAll("JSCODE", code);
+		
+		TypeReference<UserMiniprogram> typeReference = new TypeReference<UserMiniprogram>() {};
+		UserMiniprogram userMiniprogram = restUtil.exchangeOnUri(requestUrl, null, typeReference);
+		if (!StringUtils.isEmpty(userMiniprogram.getErrcode())) {
+			throw new BizValidateException(userMiniprogram.getErrcode() + ", " + userMiniprogram.getErrmsg());
+		}
+		userMiniprogram.setAppid(miniAppid);
+		return userMiniprogram;
+		
 	}
 	
 	/**
@@ -67,7 +96,20 @@ public class MiniprogramAuthService {
 	 */
 	public MiniAccessToken getMiniAccessToken() throws Exception {
 		
-		String requestUrl = MINI_ACCESS_TOKEN_URL.replaceAll("APPID", miniprogramAppid).replaceAll("APPSECRET", miniprogramSecret);
+		String requestUrl = MINI_ACCESS_TOKEN_URL.replaceAll("APPID", ConstantWeChat.MINIPROGRAM_APPID).replaceAll("APPSECRET", ConstantWeChat.MINIPROGRAM_SECRET);
+		TypeReference<MiniAccessToken> typeReference = new TypeReference<MiniAccessToken>() {};
+		MiniAccessToken miniAccessToken = restUtil.exchangeOnUri(requestUrl, null, typeReference);
+		return miniAccessToken;
+	}
+	
+	/**
+	 * 获取小程序access_token
+	 * @return
+	 * @throws Exception
+	 */
+	public MiniAccessToken getMiniAccessToken(String miniAppid, String appSecret) throws Exception {
+		
+		String requestUrl = MINI_ACCESS_TOKEN_URL.replaceAll("APPID", miniAppid).replaceAll("APPSECRET", appSecret);
 		TypeReference<MiniAccessToken> typeReference = new TypeReference<MiniAccessToken>() {};
 		MiniAccessToken miniAccessToken = restUtil.exchangeOnUri(requestUrl, null, typeReference);
 		return miniAccessToken;
@@ -79,9 +121,9 @@ public class MiniprogramAuthService {
 	 * @return
 	 * @throws Exception
 	 */
-	public MiniUserPhone getPhoneNumber(String code) throws Exception {
+	public MiniUserPhone getPhoneNumber(String miniAppid, String code) throws Exception {
 		
-		String key = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniprogramAppid;
+		String key = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniAppid;
 		String accessToken = stringRedisTemplate.opsForValue().get(key);
 		String requestUrl = CODE4PHONE_URL.replaceAll("ACCESS_TOKEN", accessToken);
 		TypeReference<MiniUserPhone> typeReference = new TypeReference<MiniUserPhone>() {};
@@ -91,8 +133,8 @@ public class MiniprogramAuthService {
 		return miniUserPhone;
 	}
 
-	public String getUnlimitedQrcode(String page, String param) throws Exception {
-		String key = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniprogramAppid;
+	public String getUnlimitedQrcode(String miniAppid, String page, String param) throws Exception {
+		String key = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniAppid;
 		String accessToken = stringRedisTemplate.opsForValue().get(key);
 		if(ObjectUtils.isEmpty(accessToken)) {
 			accessToken = getMiniAccessToken().getAccess_token();

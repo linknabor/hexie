@@ -30,6 +30,7 @@ import com.yumu.hexie.integration.wechat.util.WeixinUtil;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.payment.RefundOrder;
 import com.yumu.hexie.model.redis.RedisRepository;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.exception.WechatException;
@@ -167,6 +168,18 @@ public class WechatCoreServiceImpl implements WechatCoreService {
     }
     
     /**
+     * 通过code获取微信小程序用户信息
+     * @param miniAppid
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public UserMiniprogram getMiniUserSessionKey(String miniAppid, String code) throws Exception {
+        return miniprogramAuthService.getMiniUserSessionKeyByAppid(miniAppid, code);
+    }
+    
+    /**
      * 通过code获取微信小程序accessToken
      * @return
      * @throws Exception
@@ -177,19 +190,29 @@ public class WechatCoreServiceImpl implements WechatCoreService {
     }
     
     /**
+     * 通过code获取微信小程序accessToken
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public MiniAccessToken getMiniAccessToken(String miniAppid, String appSecret) throws Exception {
+        return miniprogramAuthService.getMiniAccessToken(miniAppid, appSecret);
+    }
+    
+    /**
      * 通过code获取微信小程序用户手机号，此code跟login的code不是同一个
      * @param code
      * @return
      * @throws Exception
      */
     @Override
-    public MiniUserPhone getMiniUserPhone(String code) throws Exception {
-        return miniprogramAuthService.getPhoneNumber(code);
+    public MiniUserPhone getMiniUserPhone(String miniAppid, String code) throws Exception {
+        return miniprogramAuthService.getPhoneNumber(miniAppid, code);
     }
 
 	@Override
-	public String getUnlimitedQrcode(String path, String param) throws Exception {
-		return miniprogramAuthService.getUnlimitedQrcode(path, param);
+	public String getUnlimitedQrcode(User user, String path, String param) throws Exception {
+		return miniprogramAuthService.getUnlimitedQrcode(user.getMiniAppId(),path, param);
 	}
 
 
