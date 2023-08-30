@@ -89,6 +89,12 @@ public class BatchServiceImpl implements BatchService {
 	
 	@Value("${wechat.notifyUrl}")
 	private String wechatNotifyUrl;
+	
+	@Value("${wechat.miniprogramAppId}")
+	private String miniprogramAppId;
+	
+	@Value("${wechat.miniprogramSecret}")
+	private String miniprogramSecret;
 	/*微信参数end#################################*/
 	
 	/*支付宝参数begin#################################*/
@@ -165,6 +171,8 @@ public class BatchServiceImpl implements BatchService {
 		ConstantWeChat.UNIFIEDURL = wechatUnifiedUrl;
 		ConstantWeChat.NOTIFYURL = wechatNotifyUrl;
 		ConstantWeChat.COMPONENT_APPID = wechatComponentAppId;
+		ConstantWeChat.MINIPROGRAM_APPID = miniprogramAppId;		//这个参数取系统参数表，应对多个小程序，后面要删除这里的赋值 FIXME
+		ConstantWeChat.MINIPROGRAM_SECRET = miniprogramSecret;		//这个参数取系统参数表，应对多个小程序，后面要删除这里的赋值 FIXME
 		
 		ConstantAlipay.APPID = alipayAppId;
 		ConstantAlipay.SECRET = alipayAppSecret;

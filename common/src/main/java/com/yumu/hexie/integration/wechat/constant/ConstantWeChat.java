@@ -21,6 +21,10 @@ public class ConstantWeChat {
 	
 	public static String NOTIFYURL;
 	
+	public static String MINIPROGRAM_APPID;
+	
+	public static String MINIPROGRAM_SECRET;
+	
 	/**
 	 * 
 	 */

@@ -334,6 +334,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		return REQUEST_URL;
 	}
 
-	
+	@Override
+	public List<SystemConfig> getAll() {
+		return systemConfigRepository.findAll();
+	}
     
 }

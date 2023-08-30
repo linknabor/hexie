@@ -219,6 +219,10 @@ public class WuyeUtil2 {
 		prepayRequest.setFromSys(fromSys);
 		prepayRequest.setAppid(user.getAppId());
 		prepayRequest.setPayee_openid(prepayRequestDTO.getPayee_openid());
+		if ("2".equals(prepayRequestDTO.getPayType())) {	//小程序支付
+			prepayRequest.setOpenid(user.getMiniopenid());
+			prepayRequest.setAppid(user.getMiniAppId());
+		}
 
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);

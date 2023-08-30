@@ -86,6 +86,15 @@ public interface UserService {
 	UserMiniprogram getWechatMiniUserSessionKey(String code) throws Exception;
 	
 	/**
+	 * 获取微信小程序用户登陆key
+	 * @param miniAppid
+	 * @param code
+	 * @return
+	 * @throws Exception
+	 */
+	UserMiniprogram getWechatMiniUserSessionKey(String miniAppid, String code) throws Exception;
+	
+	/**
 	 * 通过unionid获取用户信息
 	 * @param unionid
 	 * @return
@@ -125,7 +134,7 @@ public interface UserService {
 	 * @param code
 	 * @return
 	 */
-	MiniUserPhone getMiniUserPhone(String code);
+	MiniUserPhone getMiniUserPhone(User user, String code);
 	
 	/**
 	 * 保存小程序用户手机

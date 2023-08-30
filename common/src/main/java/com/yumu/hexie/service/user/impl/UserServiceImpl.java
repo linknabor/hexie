@@ -101,9 +101,6 @@ public class UserServiceImpl implements UserService {
 	@Value("${mainServer}")
 	private Boolean mainServer;
 	
-	@Value("${wechat.miniprogramAppId}")
-    private String miniprogramAppid;
-	
 	@Override
 	public User getById(long uId) {
 		return userRepository.findById(uId);
@@ -559,6 +556,13 @@ public class UserServiceImpl implements UserService {
         Assert.hasText(code, "code不能为空。");
         return wechatCoreService.getMiniUserSessionKey(code);
     }
+	
+	@Override
+    public UserMiniprogram getWechatMiniUserSessionKey(String miniAppid, String code) throws Exception {
+		Assert.hasText(miniAppid, "miniappid不能为空。");
+		Assert.hasText(code, "code不能为空。");
+        return wechatCoreService.getMiniUserSessionKey(miniAppid, code);
+    }
 
     @Override
     @Transactional
@@ -581,16 +585,16 @@ public class UserServiceImpl implements UserService {
             userAccount.setOpenid("0");    //TODO
             userAccount.setUnionid(miniUser.getUnionid());
             userAccount.setMiniopenid(miniUser.getOpenid());
-            userAccount.setMiniAppId(miniprogramAppid);
+            userAccount.setMiniAppId(miniUser.getAppid());
             userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
         } else {
         	if(StringUtils.isEmpty(userAccount.getMiniopenid())) {
         		userAccount.setUnionid(miniUser.getUnionid());
                 userAccount.setMiniopenid(miniUser.getOpenid());
-                userAccount.setMiniAppId(miniprogramAppid);
+                userAccount.setMiniAppId(miniUser.getAppid());
         	}
         }
-        String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getUnionid();
+        String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getMiniopenid();
         String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(miniUser.getSessionKey())) {
             redisTemplate.opsForValue().set(key, miniUser.getSessionKey(), 71, TimeUnit.HOURS);    //官方3天失效，也就是72小时
@@ -683,12 +687,12 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	public MiniUserPhone getMiniUserPhone(String code) {
+	public MiniUserPhone getMiniUserPhone(User user, String code) {
 		
 		Assert.hasText(code, "授权码不能为空。");
 		MiniUserPhone miniUserPhone = null;
 		try {
-			miniUserPhone = wechatCoreService.getMiniUserPhone(code);
+			miniUserPhone = wechatCoreService.getMiniUserPhone(user.getMiniAppId(), code);
 			if (!StringUtils.isEmpty(miniUserPhone.getErrorcode())) {
 				throw new BizValidateException(miniUserPhone.getErrmsg());
 			}

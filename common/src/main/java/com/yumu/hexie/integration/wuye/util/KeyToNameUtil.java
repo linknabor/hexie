@@ -54,6 +54,7 @@ public class KeyToNameUtil {
 		keyName.put("06","微信支付");
 		keyName.put("07","微信支付");
 		keyName.put("11","银行卡支付");
+		keyName.put("14","小程序支付");
 		keyNameConfig.put(PAYMETHOD_TYPE, keyName);
 		
 		keyName = new HashMap<String, String>();

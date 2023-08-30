@@ -4,6 +4,8 @@
  */
 package com.yumu.hexie.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.entity.MiniAccessToken;
 import com.yumu.hexie.integration.wechat.util.WeixinUtil;
@@ -40,6 +43,8 @@ import com.yumu.hexie.service.common.WechatCoreService;
 @Service("refreshTokenService")
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
+	public static final String MINI_APP_KEY_PREFIX = "MP_APP_";
+	
 	private static final String ACC_TOKEN = "ACCESS_TOKEN";
 	private static final String JS_TOKEN = "JS_TOKEN";
 	
@@ -149,32 +154,52 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         if(!Constants.MAIN_SERVER){
             return;
         }
-        logger.error("--------------------refresh mini token[B]-------------------");
-        String sysKey = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniprogramAppid;
-        Long expire = stringRedisTemplate.opsForValue().getOperations().getExpire(sysKey);	//返回-1表示永久，返回-2表示没有值
-        logger.info("expire :" + expire);
-        boolean updateFlag = false;
-        if (expire <= 60*10l) {	//小于等于10分钟的，重新获取token
-        	updateFlag = true;
-		}
-        if (updateFlag) {
-			logger.info("will update miniprogram accessToken .");
-			MiniAccessToken miniAccessToken = null;
-			try {
-				miniAccessToken = wechatCoreService.getMiniAccessToken();
-				if (!StringUtils.isEmpty(miniAccessToken.getErrcode())) {
-					logger.info("get miniAccessToken failed, errcode : " + miniAccessToken.getErrcode() + ", errormsg: " + miniAccessToken.getErrmsg());
-					return;
-				}
-				stringRedisTemplate.opsForValue().set(sysKey, miniAccessToken.getAccess_token(), 7200, TimeUnit.SECONDS);
-				
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
+        
+        List<SystemConfig> configList = systemConfigService.getAll();
+        if (configList == null || configList.isEmpty()) {
+			SystemConfig systemConfig = new SystemConfig();
+			systemConfig.setSysKey(MINI_APP_KEY_PREFIX + ConstantWeChat.MINIPROGRAM_APPID);
+			systemConfig.setSysValue(ConstantWeChat.MINIPROGRAM_SECRET);
+			if (configList == null) {
+				configList = new ArrayList<>();
 			}
-			
+			configList.add(systemConfig);
+		}
+        for (SystemConfig systemConfig : configList) {
+        	String sysKey = systemConfig.getSysKey();
+        	if (sysKey.indexOf(MINI_APP_KEY_PREFIX) == -1) {
+				continue;
+			}
+        	String miniAppid = sysKey.substring(sysKey.lastIndexOf("_")+1, sysKey.length());
+    		String appSecret = systemConfigService.getSysConfigByKey(sysKey);
+            
+            logger.info("--------------------refresh mini token, appid : " + miniAppid + "[B]-------------------");
+            String tokenKey = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniAppid;
+            Long expire = stringRedisTemplate.opsForValue().getOperations().getExpire(tokenKey);	//返回-1表示永久，返回-2表示没有值
+            logger.info("expire :" + expire);
+            boolean updateFlag = false;
+            if (expire <= 60*10l) {	//小于等于10分钟的，重新获取token
+            	updateFlag = true;
+    		}
+            if (updateFlag) {
+    			logger.info("will update miniprogram accessToken, appid : " + miniAppid);
+    			MiniAccessToken miniAccessToken = null;
+    			try {
+    				miniAccessToken = wechatCoreService.getMiniAccessToken(miniAppid, appSecret);
+    				if (!StringUtils.isEmpty(miniAccessToken.getErrcode())) {
+    					logger.info("get miniAccessToken failed, errcode : " + miniAccessToken.getErrcode() + ", errormsg: " + miniAccessToken.getErrmsg());
+    					return;
+    				}
+    				stringRedisTemplate.opsForValue().set(tokenKey, miniAccessToken.getAccess_token(), 7200, TimeUnit.SECONDS);
+    				
+    			} catch (Exception e) {
+    				logger.error(e.getMessage(), e);
+    			}
+    			
+    		}
+            logger.info("--------------------refresh mini token, appid: " + miniAppid + "[E]-------------------");
 		}
         
-        logger.error("--------------------refresh mini token[E]-------------------");
     }
     
 }
