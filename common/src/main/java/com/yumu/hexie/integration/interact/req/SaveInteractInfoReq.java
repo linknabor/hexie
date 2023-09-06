@@ -1,6 +1,5 @@
 package com.yumu.hexie.integration.interact.req;
 
-import com.yumu.hexie.integration.common.ServiceOrderRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;

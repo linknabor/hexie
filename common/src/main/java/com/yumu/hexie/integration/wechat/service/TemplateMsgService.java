@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.wechat.entity.templatemsg.*;
 import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,22 +27,6 @@ import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.CommonVO2;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.CsOrderVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnCommentVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.HaoJiaAnOrderVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.MiniprogramVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.PayNotifyMsgVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.PaySuccessVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.RegisterSuccessVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.RepairOrderVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.ResetPasswordVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateItem;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.TemplateMsg;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyePaySuccessVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.WuyeServiceVO;
-import com.yumu.hexie.integration.wechat.entity.templatemsg.YuyueOrderVO;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.localservice.ServiceOperator;
@@ -637,6 +622,27 @@ public class TemplateMsgService {
 		url = url.replaceAll("THREAD_ID", commentNotice.getInteractId());
 		msg.setUrl(url);
 		msg.setTouser(commentNotice.getOpenid());
+		sendMsg(msg, accessToken);
+	}
+
+	/**
+	 * 业主意见评价
+	 * @param notice
+	 * @param accessToken
+	 */
+	public void sendOpinionGradeNotificationMsg(InteractCommentNotice notice, String accessToken) {
+		CommonVO3 vo = new CommonVO3();
+		vo.setThing3(new TemplateItem(notice.getContent()));	//keyword1
+		vo.setThing6(new TemplateItem(notice.getUserName()));	//keyword2
+		TemplateMsg<CommonVO3> msg = new TemplateMsg<>();
+		msg.setData(vo);
+		msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_OPINION_GRADE_NOTIFY, notice.getAppid()));
+		msg.setTouser(notice.getOpenid());
+
+		String url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_GRADE_NOTICE);
+		url = AppUtil.addAppOnUrl(url, notice.getAppid());
+		url = url.replaceAll("INTERACT_ID", notice.getInteractId());
+		msg.setUrl(url);
 		sendMsg(msg, accessToken);
 	}
 

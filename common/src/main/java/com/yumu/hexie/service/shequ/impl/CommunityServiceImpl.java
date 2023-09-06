@@ -12,7 +12,9 @@ import com.yumu.hexie.integration.interact.resp.InteractCommentResp;
 import com.yumu.hexie.integration.interact.resp.InteractInfoResp;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.yumu.hexie.common.util.DateUtil;

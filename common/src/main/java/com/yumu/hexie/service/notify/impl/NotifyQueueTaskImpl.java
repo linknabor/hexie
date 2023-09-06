@@ -1323,12 +1323,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                     continue;
                 }
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-                InteractCommentNotice commentNotice = objectMapper.readValue(str, InteractCommentNotice.class);
-                logger.info("strat to notifyInteractGrade queue : " + commentNotice);
+                InteractCommentNotice notice = objectMapper.readValue(str, InteractCommentNotice.class);
+                logger.info("strat to notifyInteractGrade queue : " + notice);
 
                 boolean isSuccess = false;
                 try {
-                    gotongService.sendInteractNotification(commentNotice);
+                    gotongService.sendInteractGradeNotification(notice);
                     isSuccess = true;
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);

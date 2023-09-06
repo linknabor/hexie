@@ -11,11 +11,9 @@ import com.yumu.hexie.integration.interact.resp.InteractCommentResp;
 import com.yumu.hexie.integration.interact.resp.InteractInfoResp;
 import com.yumu.hexie.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,9 +25,6 @@ import java.util.Map;
  */
 @Service
 public class InteractUtil {
-
-    @Value("${sysName}")
-    private String sysName;
     @Autowired
     private RestUtil restUtil;
     @Autowired

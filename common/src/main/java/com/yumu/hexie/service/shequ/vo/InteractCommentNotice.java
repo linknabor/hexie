@@ -17,6 +17,7 @@ public class InteractCommentNotice {
     private String appid;
     private String commentName;
     private String opinionDate;
+    private String userName;
 
     public String getInteractId() {
         return interactId;
@@ -98,6 +99,14 @@ public class InteractCommentNotice {
         this.opinionDate = opinionDate;
     }
 
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     @Override
     public String toString() {
         return "InteractCommentNotice{" +
@@ -111,6 +120,7 @@ public class InteractCommentNotice {
                 ", appid='" + appid + '\'' +
                 ", commentName='" + commentName + '\'' +
                 ", opinionDate='" + opinionDate + '\'' +
+                ", userName='" + userName + '\'' +
                 '}';
     }
 }

@@ -424,4 +424,10 @@ public class GotongServiceImpl implements GotongService {
         templateMsgService.sendOpinionNotificationMessage(commentNotice, accessToken);
     }
 
+    @Override
+    public void sendInteractGradeNotification(InteractCommentNotice notice) {
+        String accessToken = systemConfigService.queryWXAToken(notice.getAppid());
+        templateMsgService.sendOpinionGradeNotificationMsg(notice, accessToken);
+    }
+
 }

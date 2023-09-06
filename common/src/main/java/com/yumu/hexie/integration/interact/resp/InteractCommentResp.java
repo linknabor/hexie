@@ -1,6 +1,5 @@
 package com.yumu.hexie.integration.interact.resp;
 
-import javax.persistence.Transient;
 import java.util.List;
 
 /**

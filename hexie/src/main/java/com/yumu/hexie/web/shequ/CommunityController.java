@@ -212,4 +212,5 @@ public class CommunityController extends BaseController{
 		}
 		return BaseResult.successResult(imgUrl);
 	}
+
 }

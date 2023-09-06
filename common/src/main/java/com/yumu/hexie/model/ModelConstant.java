@@ -423,7 +423,6 @@ public class ModelConstant {
 	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新
 	public static final String KEY_UPDATE_ORDER_STATUS_QUEUE = "queue:orderstatus:update";	//订单状态（服务、特卖、团购）更新
 	public static final String KEY_NOTIFY_DELIVERY_QUEUE = "queue:noitfy:delivery";	//特卖、团购快递发货通知
-	public static final String KEY_NOTIFY_PROMOTION_QUEUE = "queue:noitfy:promotion";	//推广下单通知
 	public static final String KEY_NOTIFY_PARTNER_REFUND_QUEUE = "queue:notify:partnerRefund";	//合伙人退款通知
 	public static final String KEY_NOTIFY_ESHOP_REFUND_QUEUE = "queue:notify:eshopRefund";	//合伙人退款通知
 	public static final String KEY_NOTIFY_WUYE_COUPON_QUEUE = "queue:notify:wuyeCoupon";	//物业红包消费通知
