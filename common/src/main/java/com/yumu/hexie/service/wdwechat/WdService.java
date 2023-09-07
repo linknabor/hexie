@@ -23,5 +23,5 @@ public interface WdService {
 
     String syncUserInfo(User user);
 
-    void syncUserTel(User user);
+    void syncUserTel(User user, String oldPhone);
 }
