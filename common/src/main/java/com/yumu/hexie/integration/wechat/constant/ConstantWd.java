@@ -2,7 +2,7 @@ package com.yumu.hexie.integration.wechat.constant;
 
 public class ConstantWd {
 
-	public static final String APPID = "wx5b1a7c252c3cbc26"; //wx95f46f41ca5e570e
+	public static final String APPID = "wx95f46f41ca5e570e"; //wx95f46f41ca5e570e  wx5b1a7c252c3cbc26
 
 	public static final String TOKEN_APPID = "238217a88ce16442b6a986a8ad660a06";
 	
