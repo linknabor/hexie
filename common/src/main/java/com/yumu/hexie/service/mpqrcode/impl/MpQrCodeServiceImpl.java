@@ -76,7 +76,7 @@ public class MpQrCodeServiceImpl implements MpQrCodeService {
 		if (StringUtils.isEmpty(type)) {
 			type = "01";
 		}
-		String keyStr = type+"_"+orderId+"_"+appid;
+		String keyStr = type+"_"+orderId+"_"+appid+"_"+tranAmt;
 		String key = ModelConstant.KEY_MP_QRCODE_CACHED + keyStr;
 		String qrCodeUrl = stringRedisTemplate.opsForValue().get(key);
 		if (!StringUtils.isEmpty(qrCodeUrl)) {	//同一场景下，同一个公众号的同一笔流水申请二维码，只从腾讯生成一次。后面取缓存里的

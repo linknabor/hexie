@@ -219,6 +219,15 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 								logger.error("reach max api daily quota limit, 请联系系统管理员！");
 								isSuccess = true;
 							}
+							if (wechatResponse.getErrcode() == 43004) {
+								logger.error("require subscribe, 请联系系统管理员！");
+								isSuccess = true;
+							}
+							if (wechatResponse.getErrcode() == 99999) {
+								logger.error(wechatResponse.getErrmsg() + ",请联系系统管理员！");
+								isSuccess = true;
+							}
+							logger.info("wechatResponse : " + wechatResponse);
 							
 						} else if ("02".equals(type)) {
 							logger.info("event type : " + type + ", apply receipt . " );
@@ -329,6 +338,18 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 							logger.error("reach max api daily quota limit, 请联系系统管理员！");
 							isSuccess = true;
 						}
+						if (wechatResponse.getErrcode() == 43004) {
+							logger.error("require subscribe, 请联系系统管理员！");
+							isSuccess = true;
+						}
+
+						if (wechatResponse.getErrcode() == 99999) {
+							logger.error(wechatResponse.getErrmsg() + ",请联系系统管理员！");
+							isSuccess = true;
+						}
+						
+						logger.info("wechatResponse : " + wechatResponse);
+
 						
 					} else if ("02".equals(type)) {
 						

@@ -7,6 +7,8 @@ import com.yumu.hexie.model.msgtemplate.MsgTemplate;
 public interface WechatMsgService {
 
 	String getTemplateByNameAndAppId(String templateName, String appId);
+	
+	MsgTemplate getTemplateByNameAndAppIdV2(String templateName, String appId);
 
 	String getMsgUrl(String urlName);
 	
@@ -16,5 +18,5 @@ public interface WechatMsgService {
 
 	List<MsgTemplate> getSubscribeMsgTemplate(String appId, int type, int bizType);
 
-
+	
 }
