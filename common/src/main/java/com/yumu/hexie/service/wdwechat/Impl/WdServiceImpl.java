@@ -232,6 +232,7 @@ public class WdServiceImpl implements WdService {
             log.error("syncUserTel tel error：", e);
             return;
         }
+
         if(StringUtils.isEmpty(userDB.getUniqueCode())) {
             log.error("user id:" + user.getId() + " syncUserTel UniqueCode is empty");
             return;

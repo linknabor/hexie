@@ -18,7 +18,7 @@ import java.util.Map;
 @Service
 public class WdWechatUtil {
 
-    public final static String BaseUrl = "https://guangming-center-api.mart4meta.com/";
+    public final static String BaseUrl = "https://api.gm4life.cn/";
     public final static String SyncUserInfoUrl = "/api/v1/center/syncInfo";
     public final static String SyncUserTelUrl = "/api/v1/center/updatePhone";
 
