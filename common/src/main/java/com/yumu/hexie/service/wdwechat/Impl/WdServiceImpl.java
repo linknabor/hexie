@@ -213,7 +213,7 @@ public class WdServiceImpl implements WdService {
     }
 
     @Override
-    public void syncUserTel(User user, String oldPhone) {
+    public void syncUserTel(User user) {
         User userDB = userRepository.findById(user.getId());
         Map<String, Object> map = new TreeMap<>();
         Calendar calendar = Calendar.getInstance();
@@ -233,19 +233,6 @@ public class WdServiceImpl implements WdService {
             return;
         }
 
-        try {
-            oldPhone = RSAUtil.encrypt(oldPhone, ConstantWd.PUBLIC_KEY);
-            if(StringUtils.hasText(oldPhone)) {
-                try {
-                    oldPhone = URLEncoder.encode(oldPhone, "UTF-8");
-                } catch (Exception ignored) {
-                }
-            }
-        } catch (Exception e) {
-            log.error("syncUserTel1 tel error：", e);
-            return;
-        }
-
         if(StringUtils.isEmpty(userDB.getUniqueCode())) {
             log.error("user id:" + user.getId() + " syncUserTel UniqueCode is empty");
             return;
@@ -253,7 +240,6 @@ public class WdServiceImpl implements WdService {
         try {
             map.put("appid", ConstantWd.TOKEN_APPID);
             map.put("time", String.valueOf(calendar.getTime().getTime()));
-            map.put("phone", oldPhone);
             map.put("newPhone", tel);
             map.put("uniqueCode", userDB.getUniqueCode());
             String str = JacksonJsonUtil.beanToJson(map);

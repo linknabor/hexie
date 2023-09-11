@@ -445,11 +445,10 @@ public class UserController extends BaseController{
 		User user = userService.getById(Long.parseLong(id));
 		if(user != null) {
 			//TODO 这里模拟修改手机号
-			String oldPhone = user.getTel();
 			user.setTel(tel);
 			userService.save(user);
 			//如果是旺都用户，需要同步
-			wdService.syncUserTel(user, oldPhone);
+			wdService.syncUserTel(user);
 			return new BaseResult<UserInfo>().success(new UserInfo(user));
 		} else {
 			return new BaseResult<UserInfo>().failMsg("用户不存在");
@@ -464,13 +463,12 @@ public class UserController extends BaseController{
 			return new BaseResult<UserInfo>().failMsg("更新手机号失败,手机号为空！");
 		}
 		//TODO 这里模拟修改手机号
-		String oldPhone = user.getTel();
 		user.setTel(tel);
 		userService.save(user);
 		session.setAttribute(Constants.USER, user);
 
 		//如果是旺都用户，需要同步
-		wdService.syncUserTel(user, oldPhone);
+		wdService.syncUserTel(user);
 		return new BaseResult<UserInfo>().success(new UserInfo(user));
 	}
 
