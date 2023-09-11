@@ -1,7 +1,6 @@
 package com.yumu.hexie.web.wdwechat;
 
 import com.alibaba.fastjson.JSONObject;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RSAUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.service.wdwechat.req.WdCenterReq;
@@ -145,6 +144,7 @@ public class WdController extends BaseController {
         req.setTime(time);
         req.setPhone(newPhone);
         req.setUniqueCode(uniqueCode);
+
         boolean flag;
         try {
             Map<String, String> map = new TreeMap<>();
