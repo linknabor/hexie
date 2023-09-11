@@ -16,6 +16,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
  * @Package : Wechat
  * @Author :
@@ -141,15 +144,18 @@ public class WdController extends BaseController {
         req.setTime(time);
         req.setPhone(newPhone);
         req.setUniqueCode(uniqueCode);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("time", time);
-        jsonObject.put("newPhone", newPhone);
-        jsonObject.put("uniqueCode", uniqueCode);
-        jsonObject.put("phone", phone);
-        log.info("notifyUserTel :" + jsonObject);
+
         boolean flag;
         try {
-            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PUBLIC_KEY), sign);
+            Map<String, String> map = new TreeMap<>();
+            map.put("time", time);
+            map.put("newPhone", newPhone);
+            map.put("uniqueCode", uniqueCode);
+            map.put("phone", phone);
+            String str = JacksonJsonUtil.beanToJson(map);
+            log.info("notifyUserTel :" + str);
+
+            flag = RSAUtil.verify(str, RSAUtil.getPublicKey(ConstantWd.PUBLIC_KEY), sign);
         } catch (Exception e) {
             return BaseResp.fail("验签失败");
         }
