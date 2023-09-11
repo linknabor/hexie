@@ -1,7 +1,6 @@
 package com.yumu.hexie.web.wdwechat;
 
 import com.alibaba.fastjson.JSONObject;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RSAUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.service.wdwechat.req.WdCenterReq;
@@ -16,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @Package : Wechat
@@ -89,6 +91,8 @@ public class WdController extends BaseController {
                                               @RequestParam("sign") String sign,
                                               @RequestHeader HttpHeaders headers) {
         String token = headers.getFirst("Authorization");
+        log.info("Authorization : " + token);
+
         WdCenterReq req = new WdCenterReq();
         req.setTime(time);
 
@@ -103,7 +107,6 @@ public class WdController extends BaseController {
 
         req.setSign(sign);
         log.info("WdCenterReq : " + req);
-        log.info("Authorization : " + token);
 
         if(!StringUtils.hasText(sign) || !flag) {
             return BaseResp.fail("验签失败");
@@ -135,22 +138,29 @@ public class WdController extends BaseController {
     public BaseResp<Object> notifyUserTel(@RequestParam("time") String time,
                               @RequestParam("sign") String sign,
                               @RequestParam("uniqueCode") String uniqueCode,
-                              @RequestParam("newPhone") String newPhone) {
+                              @RequestParam("newPhone") String newPhone,
+                              @RequestParam("phone") String phone) {
         WdCenterReq req = new WdCenterReq();
         req.setTime(time);
         req.setPhone(newPhone);
         req.setUniqueCode(uniqueCode);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("time", time);
-        jsonObject.put("newPhone", newPhone);
-        jsonObject.put("uniqueCode", uniqueCode);
+
         boolean flag;
         try {
-            flag = RSAUtil.verify(jsonObject.toString(), RSAUtil.getPublicKey(ConstantWd.PUBLIC_KEY), sign);
+            Map<String, String> map = new TreeMap<>();
+            map.put("time", time);
+            map.put("newPhone", newPhone);
+            map.put("uniqueCode", uniqueCode);
+            map.put("phone", phone);
+            String str = JacksonJsonUtil.beanToJson(map);
+            log.info("notifyUserTel :" + str);
+
+            flag = RSAUtil.verify(str, RSAUtil.getPublicKey(ConstantWd.PUBLIC_KEY), sign);
         } catch (Exception e) {
             return BaseResp.fail("验签失败");
         }
         req.setSign(sign);
+        log.info("notifyUserTel body :" + req);
 
         if(!StringUtils.hasText(sign) || !flag) {
             return BaseResp.fail("验签失败");
@@ -161,8 +171,5 @@ public class WdController extends BaseController {
         } else {
             return BaseResp.fail(resp);
         }
-
     }
-
-
 }
