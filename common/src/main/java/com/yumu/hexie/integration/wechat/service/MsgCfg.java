@@ -25,7 +25,8 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_DELIVERY_MESSAGE = "deliveryMessageTemplate";	//商家订单发货提醒
 	public static final String TEMPLATE_TYPE_CUSTOMER_DELIVERY = "customerDeliveryTemplate";	//买家发货提醒
 	public static final String TEMPLATE_TYPE_BILL_PUSH = "billPushTemplate"; //物业账单通知
-	public static final String TEMPLATE_TYPE_OPINION_NOTIFY = "sendOpinionNotificationMessageTemplate";
+	public static final String TEMPLATE_TYPE_OPINION_NOTIFY = "sendOpinionNotificationMessageTemplate"; //业主意见回复通知
+	public static final String TEMPLATE_TYPE_OPINION_GRADE_NOTIFY = "sendOpinionGradeNotificationMsgTemplate"; //业主意见评价通知
 	public static final String TEMPLATE_TYPE_WORKORDER_NOTIFY = "workOrderNotificationTemplate";
 	public static final String TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER = "invoiceApplicationReminderTemplate";	//发票申请提醒
 	public static final String TEMPLATE_TYPE_INVOICE_FINISH = "invoiceFinishTemplate";	//发票开具完成提醒
@@ -59,7 +60,8 @@ public class MsgCfg {
 	public static final String URL_CUSTOMER_DELIVERY = "customerDeliveryUrl";
 	public static final String URL_CUSTOMER_GROUP_DELIVERY = "customerGroupDeliveryUrl";
 	public static final String URL_WUYE_PAY = "wuyePayUrl"; //物业缴费页面
-	public static final String URL_OPINION_NOTICE = "sendOpinionUrl";
+	public static final String URL_OPINION_NOTICE = "sendOpinionUrl"; //业主意见回复通知
+	public static final String URL_OPINION_GRADE_NOTICE = "sendOpinionGradeUrl"; //业主意见完成评价统计
 	public static final String URL_WORK_ORDER_DETAIL = "workOrderDetail";	//工单明细页面
 	public static final String URL_INVOICE_APPLICATION_URL = "invoiceApplicationUrl";	//发票申请页面
 	public static final String URL_RECEIPT_APPLICATION_URL = "receiptApplicationUrl";	//电子收据申请页面

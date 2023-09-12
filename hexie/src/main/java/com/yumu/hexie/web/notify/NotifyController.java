@@ -1,20 +1,14 @@
 package com.yumu.hexie.web.notify;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.yumu.hexie.common.Constants;
 import com.yumu.hexie.integration.notify.CommonNotificationResponse;
 import com.yumu.hexie.integration.notify.ConversionNotification;
@@ -38,23 +32,13 @@ public class NotifyController extends BaseController {
 
 	/**
 	 * 接收servplat过来的请求，消优惠券，增加积分
-	 * @param user
 	 * @param tradeWaterId
-	 * @param feePrice
-	 * @param couponId
-	 * @param bindSwitch
-	 * @param wuyeId
-	 * @param cardNo
-	 * @param quickToken
+	 * @param commonNotificationResponse
 	 * @return
-	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/servplat/noticeCardPay", method = {RequestMethod.GET, RequestMethod.POST})
 	public String noticeCardPay(@RequestParam(required = false) String tradeWaterId,
-			@RequestBody CommonNotificationResponse<PayNotification> commonNotificationResponse) throws Exception {
+			@RequestBody CommonNotificationResponse<PayNotification> commonNotificationResponse) {
 		
 		log.info("payNotificationResponse :" + commonNotificationResponse);
 		if ("00".equals(commonNotificationResponse.getResult())) {
@@ -66,7 +50,7 @@ public class NotifyController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/promotion/partner/update", method = RequestMethod.POST )
-	public <T> BaseResult<String> updatePartner(@RequestBody CommonNotificationResponse<List<PartnerNotification>> commonNotificationResponse) throws Exception {
+	public BaseResult<String> updatePartner(@RequestBody CommonNotificationResponse<List<PartnerNotification>> commonNotificationResponse) throws Exception {
 		
 		log.info("updatePartner :" + commonNotificationResponse);
 		notifyService.updatePartner(commonNotificationResponse.getData());
@@ -77,7 +61,7 @@ public class NotifyController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/eshop/notifyRefund", method = RequestMethod.POST )
-	public String notifyRefund(@RequestBody Map<String, Object> map) throws Exception {
+	public String notifyRefund(@RequestBody Map<String, Object> map) {
 		
 		log.info("notifyRefund :" + map);
 		notifyService.notifyEshopRefund(map);
@@ -88,10 +72,9 @@ public class NotifyController extends BaseController {
 	 * 工单消息通知
 	 * @param workOrderNotification
 	 * @return
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/workorder/notication", method = RequestMethod.POST )
-	public String notifyRefund(@RequestBody WorkOrderNotification workOrderNotification) throws Exception {
+	public String notifyRefund(@RequestBody WorkOrderNotification workOrderNotification) {
 		
 		log.info("workOrderNotification :" + workOrderNotification);
 		notifyService.notifyWorkOrderMsgAsync(workOrderNotification);
@@ -100,12 +83,11 @@ public class NotifyController extends BaseController {
 	
 	/**
 	 * 工单消息通知
-	 * @param workOrderNotification
+	 * @param conversionNotification
 	 * @return
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/conversion/notication", method = RequestMethod.POST )
-	public String notifyRefund(@RequestBody ConversionNotification conversionNotification) throws Exception {
+	public String notifyRefund(@RequestBody ConversionNotification conversionNotification) {
 		
 		log.info("conversionNotification :" + conversionNotification);
 		notifyService.notifyConversionAsync(conversionNotification);
@@ -114,12 +96,11 @@ public class NotifyController extends BaseController {
 	
 	/**
 	 * 发票开具成功消息通知
-	 * @param workOrderNotification
+	 * @param invoiceNotification
 	 * @return
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/invoice/notification", method = RequestMethod.POST )
-	public String notifyInvoice(@RequestBody InvoiceNotification invoiceNotification) throws Exception {
+	public String notifyInvoice(@RequestBody InvoiceNotification invoiceNotification) {
 		
 		log.info("invoiceNotification :" + invoiceNotification);
 		notifyService.notifyInvoiceMsgAsync(invoiceNotification);
@@ -128,12 +109,11 @@ public class NotifyController extends BaseController {
 
 	/**
 	 * 电子收据开具成功消息通知
-	 * @param workOrderNotification
+	 * @param receiptNotification
 	 * @return
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/receipt/notification", method = RequestMethod.POST )
-	public String notifyReceipt(@RequestBody ReceiptNotification receiptNotification) throws Exception {
+	public String notifyReceipt(@RequestBody ReceiptNotification receiptNotification) {
 		
 		log.info("receiptNotification :" + receiptNotification);
 		notifyService.sendReceiptMsgAsync(receiptNotification);
@@ -143,15 +123,35 @@ public class NotifyController extends BaseController {
 	
 	/**
 	 * 释放发票申请锁
-	 * @param workOrderNotification
+	 * @param map
 	 * @return
-	 * @throws Exception
 	 */
 	@RequestMapping(value = "/invoice/application/release", method = RequestMethod.POST )
-	public String releaseInvoiceApplication(@RequestBody Map<String, String> map) throws Exception {
+	public String releaseInvoiceApplication(@RequestBody Map<String, String> map) {
 		
 		log.info("releaseInvoiceApplication, map :" + map);
 		notifyService.releaseInvoiceApplicationLock(map.get("trade_water_id"));
+		return "SUCCESS";
+	}
+
+	/**
+	 * 业主意见物业回复通知
+	 * @param notice
+	 * @return
+	 */
+	@RequestMapping(value = "/interact/noticeComment", method = RequestMethod.POST)
+	@ResponseBody
+	public String noticeComment(@RequestBody InteractCommentNotice notice) throws Exception {
+		log.info("/interact/noticeComment notice:" + notice);
+		notifyService.noticeComment(notice);
+		return "SUCCESS";
+	}
+
+	@RequestMapping(value = "/interact/noticeEvaluate", method = RequestMethod.POST)
+	@ResponseBody
+	public String noticeEvaluate(@RequestBody InteractCommentNotice notice) throws Exception {
+		log.info("/interact/noticeEvaluate notice:" + notice);
+		notifyService.noticeEvaluate(notice);
 		return "SUCCESS";
 	}
 	

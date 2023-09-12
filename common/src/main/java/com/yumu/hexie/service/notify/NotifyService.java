@@ -11,6 +11,7 @@ import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
+import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 
 public interface NotifyService {
 
@@ -42,4 +43,8 @@ public interface NotifyService {
 
 	void releaseInvoiceApplicationLock(String tradeWaterId);
 
+	//业主意见物业回复通知
+	void noticeComment(InteractCommentNotice notice) throws Exception;
+
+	void noticeEvaluate(InteractCommentNotice notice) throws Exception;
 }

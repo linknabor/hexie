@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -415,6 +416,18 @@ public class GotongServiceImpl implements GotongService {
             templateMsgService.sendGroupSuccessNotification(noticeRgroupSuccess, accessToken);
         }
 
+    }
+
+    @Override
+    public void sendInteractNotification(InteractCommentNotice commentNotice) {
+        String accessToken = systemConfigService.queryWXAToken(commentNotice.getAppid());
+        templateMsgService.sendOpinionNotificationMessage(commentNotice, accessToken);
+    }
+
+    @Override
+    public void sendInteractGradeNotification(InteractCommentNotice notice) {
+        String accessToken = systemConfigService.queryWXAToken(notice.getAppid());
+        templateMsgService.sendOpinionGradeNotificationMsg(notice, accessToken);
     }
 
 }

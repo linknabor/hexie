@@ -21,6 +21,7 @@ import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
 import com.yumu.hexie.service.sales.req.NoticeServiceOperator;
 import com.yumu.hexie.service.shequ.NoticeService;
+import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -932,16 +933,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 if (StringUtils.isEmpty(threadId)) {
                     logger.warn("conversion source id is empty, will skip . orderId : " + cn.getOrderId());
                 }
-
-                String reversed = cn.getReversed();
-
-                com.yumu.hexie.model.community.Thread thread = communityService.getThreadByTreadId(Long.valueOf(threadId));
-                thread.setRectified(Boolean.TRUE);
-                if ("1".equals(reversed)) {
-                    thread.setRectified(Boolean.FALSE);
-                }
-                communityService.updateThread(thread);
-
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -1250,6 +1241,102 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 if (!isSuccess) {
                     logger.info("notifyGroupSuccess failed !, repush into the queue. : " + str);
                     redisTemplate.opsForList().rightPush(ModelConstant.KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE, str);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    @Async("taskExecutor")
+    public void notifyInteractComment() {
+        while (true) {
+            try {
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String str = redisTemplate.opsForList().leftPop(ModelConstant.interactReplyNoticeQueue, 10, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(str)) {
+                    logger.info("queue str is empty, will skip !");
+                    continue;
+                }
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                InteractCommentNotice commentNotice = objectMapper.readValue(str, InteractCommentNotice.class);
+                logger.info("strat to InteractCommentNotice queue : " + commentNotice);
+
+                //保存到通知表
+                //添加到消息中心
+                CommunityRequest request = new CommunityRequest();
+                StringBuilder sb = new StringBuilder();
+                sb.append("意见标题：").append(commentNotice.getContent()).append("|");
+                sb.append("回复内容：").append(commentNotice.getCommentContent()).append("|");
+                sb.append("回复人：").append(commentNotice.getCommentName());
+                request.setTitle(sb.toString());
+                request.setContent(sb.toString());
+                request.setSummary(sb.toString());
+                request.setAppid(commentNotice.getAppid());
+                request.setOpenid(commentNotice.getOpenid());
+                request.setNoticeType(ModelConstant.NOTICE_TYPE2_THREAD);
+                String url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE);
+                url = AppUtil.addAppOnUrl(url, commentNotice.getAppid());
+                url = url.replaceAll("INTERACT_ID", commentNotice.getInteractId()+"");
+                request.setUrl(url);
+                SimpleDateFormat df1 = new SimpleDateFormat("yyyy-MM-dd HH:mm");//设置日期格式
+                request.setPublishDate(df1.format(new Date()));
+                noticeService.addOutSidNotice(request);
+
+                boolean isSuccess = false;
+                try {
+                    gotongService.sendInteractNotification(commentNotice);
+                    isSuccess = true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+
+                if (!isSuccess) {
+                    logger.info("InteractCommentNotice failed !, repush into the queue. : " + str);
+                    redisTemplate.opsForList().rightPush(ModelConstant.interactReplyNoticeQueue, str);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    //
+    @Override
+    @Async("taskExecutor")
+    public void notifyInteractGrade() {
+        while (true) {
+            try {
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String str = redisTemplate.opsForList().leftPop(ModelConstant.interactGradeNoticeQueue, 10, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(str)) {
+                    logger.info("queue str is empty, will skip !");
+                    continue;
+                }
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                InteractCommentNotice notice = objectMapper.readValue(str, InteractCommentNotice.class);
+                logger.info("strat to notifyInteractGrade queue : " + notice);
+
+                boolean isSuccess = false;
+                try {
+                    gotongService.sendInteractGradeNotification(notice);
+                    isSuccess = true;
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+
+                if (!isSuccess) {
+                    logger.info("notifyInteractGrade failed !, repush into the queue. : " + str);
+                    redisTemplate.opsForList().rightPush(ModelConstant.interactGradeNoticeQueue, str);
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);

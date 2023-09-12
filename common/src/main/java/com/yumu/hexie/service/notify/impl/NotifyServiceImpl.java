@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
+import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +70,7 @@ public class NotifyServiceImpl implements NotifyService {
 		
 		String tradeWaterId = payNotification.getOrderId();
 		String key = ModelConstant.KEY_NOITFY_PAY_DUPLICATION_CHECK + tradeWaterId;
-		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		Long result = RedisLock.lock(key, redisTemplate, 3600L);
 		if (0 == result) {
 			log.info("tradeWaterId : " + tradeWaterId + ", already notified, will skip ! ");
 			return;
@@ -403,7 +404,7 @@ public class NotifyServiceImpl implements NotifyService {
 		String timestamp = workOrderNotification.getTimestamp();
 		String checkKey = orderId + "_" + timestamp;
 		String key = ModelConstant.KEY_NOTIFY_WORK_ORDER_DUPLICATION_CHECK + checkKey;
-		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		Long result = RedisLock.lock(key, redisTemplate, 3600L);
 		if (0 == result) {
 			log.info("orderId : " + orderId + ", already notified, will skip ! ");
 			return;
@@ -448,7 +449,7 @@ public class NotifyServiceImpl implements NotifyService {
 		String timestamp = notification.getTimestamp();
 		String checkKey = orderId + "_" + timestamp;
 		String key = ModelConstant.KEY_NOTIFY_CONVERSION_DUPLICATION_CHECK + checkKey;
-		Long result = RedisLock.lock(key, redisTemplate, 3600l);
+		Long result = RedisLock.lock(key, redisTemplate, 3600L);
 		if (0 == result) {
 			log.info("orderId : " + orderId + ", already notified, will skip ! ");
 			return;
@@ -496,10 +497,9 @@ public class NotifyServiceImpl implements NotifyService {
 			log.info("notifyInvoiceMsgAsync: orderid is empty, will return ! ");
 			return;
 		}
-		
-		String checkKey = applyId;
-		String key = ModelConstant.KEY_INVOICE_NOTIFICATION_LOCK + checkKey;
-		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*1);
+
+		String key = ModelConstant.KEY_INVOICE_NOTIFICATION_LOCK + applyId;
+		Long result = RedisLock.lock(key, redisTemplate, 3600L * 24);
 		if (0 == result) {
 			log.info("invoice msg notification, applyId : " + applyId + ", already notified, will skip ! ");
 			return;
@@ -542,7 +542,7 @@ public class NotifyServiceImpl implements NotifyService {
 			return;
 		}
 		String key = ModelConstant.KEY_RECEIPT_NOTIFICATION_LOCK + receiptId + ":" + openid;
-		Long result = RedisLock.lock(key, redisTemplate, 3600l*24*1);
+		Long result = RedisLock.lock(key, redisTemplate, 3600L * 24);
 		if (0 == result) {
 			log.info("receipt msg notification, receiptId : " + receiptId + ", already notified, will skip ! ");
 			return;
@@ -586,6 +586,35 @@ public class NotifyServiceImpl implements NotifyService {
 		String key = ModelConstant.KEY_INVOICE_APPLICATIONF_FLAG + tradeWaterId;
 		redisTemplate.delete(key);
 		
+	}
+
+	@Override
+	public void noticeComment(InteractCommentNotice notice) throws Exception {
+		if(notice == null) {
+			log.error("推送内容为空");
+			return;
+		}
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		String value = objectMapper.writeValueAsString(notice);
+		redisTemplate.opsForList().rightPush(ModelConstant.interactReplyNoticeQueue, value);
+	}
+
+	@Override
+	public void noticeEvaluate(InteractCommentNotice notice) throws Exception {
+		if(notice == null) {
+			log.error("评价推送内容为空");
+			return;
+		}
+		if(StringUtils.isEmpty(notice.getInteractId())
+				|| StringUtils.isEmpty(notice.getContent())
+				|| StringUtils.isEmpty(notice.getUserName())
+				|| StringUtils.isEmpty(notice.getAppid())) {
+			log.error("评价推送内容为空");
+			return;
+		}
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		String value = objectMapper.writeValueAsString(notice);
+		redisTemplate.opsForList().rightPush(ModelConstant.interactGradeNoticeQueue, value);
 	}
 
 }
