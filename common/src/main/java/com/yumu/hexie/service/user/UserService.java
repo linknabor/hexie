@@ -48,11 +48,41 @@ public interface UserService {
 	void bindWuYeId(User user);
 	boolean checkDuplicateLogin(HttpSession httpSession, String code);
 	
-	//注册
+	/**
+	 * 用户注册
+	 * @param user
+	 * @return
+	 */
 	User simpleRegister(User user);
+	
+	/**
+	 * 微信获取用户授权token
+	 * @param code
+	 * @param appid
+	 * @return
+	 */
 	AccessTokenOAuth getAccessTokenOAuth(String code, String appid);
+	
+	/**
+	 * 支付宝获取用户授权
+	 * @param code
+	 * @return
+	 */
 	AccessTokenOAuth getAlipayAuth(String code);
-	//根据openid从数据库中获取缓存
+	
+	/**
+	 * 支付宝获取用户授权 
+	 * @param appid
+	 * @param code
+	 * @return
+	 */
+	AccessTokenOAuth getAlipayAuth(String appid, String code);
+	
+	/**
+	 * 根据openid从数据库中获取缓存
+	 * @param sessonUser
+	 * @return
+	 */
 	User getByOpenIdFromCache(User sessonUser);
 	
 	/**
@@ -179,5 +209,21 @@ public interface UserService {
 	 * @return
 	 */
 	User getByMiniopenid(String miniopenid);
+	
+	/**
+	 * 保存支付宝用户和authToken
+	 * @param accessTokenOAuth
+	 * @return
+	 */
+	User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth);
+	
+	/**
+	 * 获取支付宝用户手机
+	 * @param user
+	 * @param code
+	 * @return
+	 */
+	MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
+	
 
 }

@@ -863,6 +863,87 @@ public class UserController extends BaseController{
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
     }
     
+    
+    /**
+     * 小程序登录
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/miniprogram/login/v2/{appid}/{code}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> alipayMiniLogin(HttpSession session, @PathVariable String appid, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        User user = null;
+        if (!StringUtils.isEmpty(code)) {
+            if (user == null) {
+                if (userService.checkDuplicateLogin(session, code)) {
+                    throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+                }
+                AccessTokenOAuth userOauth = userService.getAlipayAuth(appid, code);
+                log.info("userOauth : " + userOauth);
+                user = userService.saveAlipayMiniUserToken(userOauth);
+                //TODO 看以后访问量要不要缓存用户
+            }
+            session.setAttribute(Constants.USER, user);
+        }
+        if (user == null) {
+            return new BaseResult<UserInfo>().failMsg("用户不存在！");
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "login，耗时：" + ((endTime - beginTime) / 1000));
+
+        UserInfo userInfo = new UserInfo(user);
+        userInfo.setReqPath(reqPath);
+        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
+        userInfo.setPermission(true);
+        if (!isValid) {
+            throw new BizValidateException("没有访问权限");
+        }
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 小程序获取用户手机
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/miniprogram/phoneNumber", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> getAlipayMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> dataMap) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        String encryptedData = dataMap.get("encryptedData");
+        MiniUserPhone miniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
+        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+        	userService.recacheMiniUser(user);
+        }
+        BeanUtils.copyProperties(savedUser, user);
+        request.getSession().setAttribute(Constants.USER, user);
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "getPhoneNumber，耗时：" + ((endTime - beginTime) / 1000));
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setPermission(true);
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
         
         
 }

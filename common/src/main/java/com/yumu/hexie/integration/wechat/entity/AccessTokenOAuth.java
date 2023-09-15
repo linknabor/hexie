@@ -28,6 +28,11 @@ public class AccessTokenOAuth {
 	 * 用户授权的作用域，使用逗号（,）分隔
 	 */
 	private String scope;
+	
+	/**
+	 * 所属的应用appid
+	 */
+	private String appid;
 
 	public String getAccessToken() {
 		return accessToken;
@@ -68,6 +73,14 @@ public class AccessTokenOAuth {
 	public void setScope(String scope) {
 		this.scope = scope;
 	}
+	
+	public String getAppid() {
+		return appid;
+	}
+
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
 
 	public AccessTokenOAuth(String accessToken, int expiresIn,
 			String refreshToken, String openid, String scope) {
@@ -83,4 +96,11 @@ public class AccessTokenOAuth {
 		super();
 	}
 
+	@Override
+	public String toString() {
+		return "AccessTokenOAuth [accessToken=" + accessToken + ", expiresIn=" + expiresIn + ", refreshToken="
+				+ refreshToken + ", openid=" + openid + ", scope=" + scope + ", appid=" + appid + "]";
+	}
+
+	
 }

@@ -88,6 +88,9 @@ public class User extends BaseModel{
 	private String miniAppId;
 	private String uniqueCode; //农工商会员平台唯一标识
 	
+	private String aliuserid;
+	private String aliappid;
+	
 	public String getSectId() {
 		return sectId;
 	}
@@ -504,56 +507,39 @@ public class User extends BaseModel{
 		this.uniqueCode = uniqueCode;
 	}
 
+	public String getAliuserid() {
+		return aliuserid;
+	}
+
+	public void setAliuserid(String aliuserid) {
+		this.aliuserid = aliuserid;
+	}
+
+	public String getAliappid() {
+		return aliappid;
+	}
+
+	public void setAliappid(String aliappid) {
+		this.aliappid = aliappid;
+	}
+
 	@Override
 	public String toString() {
-		return "User{" +
-				"realName='" + realName + '\'' +
-				", name='" + name + '\'' +
-				", tel='" + tel + '\'' +
-				", provinceId=" + provinceId +
-				", cityId=" + cityId +
-				", countyId=" + countyId +
-				", xiaoquId=" + xiaoquId +
-				", county='" + county + '\'' +
-				", xiaoquName='" + xiaoquName + '\'' +
-				", longitude=" + longitude +
-				", latitude=" + latitude +
-				", currentAddrId=" + currentAddrId +
-				", wuyeId='" + wuyeId + '\'' +
-				", openid='" + openid + '\'' +
-				", memo='" + memo + '\'' +
-				", subscribe=" + subscribe +
-				", status=" + status +
-				", nickname='" + nickname + '\'' +
-				", sex=" + sex +
-				", age=" + age +
-				", city='" + city + '\'' +
-				", country='" + country + '\'' +
-				", province='" + province + '\'' +
-				", language='" + language + '\'' +
-				", headimgurl='" + headimgurl + '\'' +
-				", subscribe_time=" + subscribe_time +
-				", unsubscribeDate=" + unsubscribeDate +
-				", registerDate=" + registerDate +
-				", identityCard='" + identityCard + '\'' +
-				", zhima=" + zhima +
-				", lvdou=" + lvdou +
-				", couponCount=" + couponCount +
-				", shareCode='" + shareCode + '\'' +
-				", newRegiste=" + newRegiste +
-				", officeTel='" + officeTel + '\'' +
-				", sectId='" + sectId + '\'' +
-				", cspId='" + cspId + '\'' +
-				", totalBind=" + totalBind +
-				", appId='" + appId + '\'' +
-				", oriSys='" + oriSys + '\'' +
-				", oriUserId=" + oriUserId +
-				", point=" + point +
-				", roleId='" + roleId + '\'' +
-				", unionid='" + unionid + '\'' +
-				", miniopenid='" + miniopenid + '\'' +
-				", miniAppId='" + miniAppId + '\'' +
-				", uniqueCode='" + uniqueCode + '\'' +
-				'}';
+		return "User [realName=" + realName + ", name=" + name + ", tel=" + tel + ", provinceId=" + provinceId
+				+ ", cityId=" + cityId + ", countyId=" + countyId + ", xiaoquId=" + xiaoquId + ", county=" + county
+				+ ", xiaoquName=" + xiaoquName + ", longitude=" + longitude + ", latitude=" + latitude
+				+ ", currentAddrId=" + currentAddrId + ", wuyeId=" + wuyeId + ", openid=" + openid + ", memo=" + memo
+				+ ", subscribe=" + subscribe + ", status=" + status + ", nickname=" + nickname + ", sex=" + sex
+				+ ", age=" + age + ", city=" + city + ", country=" + country + ", province=" + province + ", language="
+				+ language + ", headimgurl=" + headimgurl + ", subscribe_time=" + subscribe_time + ", unsubscribeDate="
+				+ unsubscribeDate + ", registerDate=" + registerDate + ", identityCard=" + identityCard + ", zhima="
+				+ zhima + ", lvdou=" + lvdou + ", couponCount=" + couponCount + ", shareCode=" + shareCode
+				+ ", newRegiste=" + newRegiste + ", officeTel=" + officeTel + ", sectId=" + sectId + ", cspId=" + cspId
+				+ ", totalBind=" + totalBind + ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId
+				+ ", point=" + point + ", roleId=" + roleId + ", unionid=" + unionid + ", miniopenid=" + miniopenid
+				+ ", miniAppId=" + miniAppId + ", uniqueCode=" + uniqueCode + ", aliuserid=" + aliuserid + ", aliappid="
+				+ aliappid + "]";
 	}
+
+	
 }

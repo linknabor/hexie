@@ -509,6 +509,7 @@ public class ModelConstant {
 	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 
 	public static final String KEY_USER_SESSION_KEY = "miniuser:sessionKey:";	//小程序的sessionkey
+	public static final String KEY_ALI_USER_AUTH_TOKEN = "miniuser:alipay:authToken:";	//支付宝小程序authToken
 	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
 	
 	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId
