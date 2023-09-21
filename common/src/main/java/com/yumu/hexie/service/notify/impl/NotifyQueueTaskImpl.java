@@ -1006,6 +1006,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         in.setUser(user);
                         logger.info("start send Msg4FinishInvoice,  invoiceNotification : " + in);
                         wechatResponse = gotongService.sendMsg4FinishInvoice(in);
+                        logger.info("wechatResponse : " + wechatResponse);
                         if (wechatResponse.getErrcode() == 0) {
                             isSuccess = true;
                         } else {
@@ -1015,7 +1016,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                                 isSuccess = true;
                             } else if (wechatResponse.getErrcode() == 40036) {		//invalid template_id size，没有配模板
                             	isSuccess = true;
-                            }
+                            } else if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
+                            	isSuccess = true;
+							} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
+                            	isSuccess = true;	//未配置模板消息
+
+							}
                             if (isSuccess) {
                                 try {
                                     BizError bizError = new BizError();
@@ -1099,6 +1105,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 try {
                     logger.info("start send Msg4FinishReceipt,  receiptNotification : " + in);
                     WechatResponse wechatResponse = gotongService.sendMsg4FinishReceipt(in);
+                    logger.info("wechatResponse : " + wechatResponse);
                     if (wechatResponse.getErrcode() == 0) {
                         isSuccess = true;
                     } else {
@@ -1108,7 +1115,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                             isSuccess = true;
                         } else if (wechatResponse.getErrcode() == 40036) {		//invalid template_id size，没有配模板
                         	isSuccess = true;
-                        }
+                        } else if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
+                        	isSuccess = true;
+						} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
+                        	isSuccess = true;	//未配置模板消息
+
+						}
                         if (isSuccess) {
                             try {
                                 BizError bizError = new BizError();
