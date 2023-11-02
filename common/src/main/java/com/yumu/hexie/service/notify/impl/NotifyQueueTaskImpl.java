@@ -1011,6 +1011,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                             	isSuccess = true;
 							} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                             	isSuccess = true;	//未配置模板消息
+
 							}
                             if (isSuccess) {
                                 try {
@@ -1109,6 +1110,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         	isSuccess = true;
 						} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                         	isSuccess = true;	//未配置模板消息
+
 						}
                         if (isSuccess) {
                             try {
