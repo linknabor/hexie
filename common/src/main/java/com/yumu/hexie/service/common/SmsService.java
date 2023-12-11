@@ -28,7 +28,9 @@ public interface SmsService {
 	
 	String saveAndGetReceiptToken(String tradeWaterId, String appid);
 
-	
+	boolean sendInvoiceVerificationCode(User user, String mobilePhone, String requestIp, int msgType,
+			String tradeWaterId);
 
+	
 
 }

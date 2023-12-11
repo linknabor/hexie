@@ -424,7 +424,7 @@ public class UserController extends BaseController{
 		if (!result) {
 			return new BaseResult<String>().failMsg("invalid request!");
 		}
-		result = smsService.sendVerificationCode(new User(), yzm.getMobile(), requestIp, smsType);
+		result = smsService.sendInvoiceVerificationCode(new User(), yzm.getMobile(), requestIp, smsType, trade_water_id);
 		if(!result) {
 		    return new BaseResult<String>().failMsg("发送验证码失败");
 		}

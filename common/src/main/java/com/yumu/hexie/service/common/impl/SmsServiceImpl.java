@@ -69,6 +69,22 @@ public class SmsServiceImpl implements SmsService {
     	return sendMessage(user, mobilePhone, message, code, msgType);
 
     }
+    
+    /**
+     * 发送短信验证码
+     */
+    @Override
+    public boolean sendInvoiceVerificationCode(User user, String mobilePhone, String requestIp, int msgType, String tradeWaterId) {
+      
+    	String code = RandomStringUtils.randomNumeric(6);
+    	String message = MessageFormat.format(VERICODE_MESSAGE, code);
+    	checkIpFrequency(requestIp);
+//    	checkMsgFrequency(mobilePhone);
+    	checkMsgFrequency4trade(mobilePhone, msgType, tradeWaterId);
+    	checkMsgTotalLimit(mobilePhone);
+    	return sendMessage(user, mobilePhone, message, code, msgType);
+
+    }
 
     /**
      * 校验短信验证码
@@ -223,6 +239,25 @@ public class SmsServiceImpl implements SmsService {
 	public void checkMsgFrequency(String mobile) {
 		
 		String key = ModelConstant.KEY_VERICODE_FREQUENCY + mobile;
+		Object lastSent = stringRedisTemplate.opsForValue().get(key);
+		if (lastSent != null) {
+			throw new BizValidateException("发送过于频繁，请稍后再试");
+		}else {
+			stringRedisTemplate.opsForValue().set(key, "1", 5, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+		}
+		
+	}
+	
+	/**
+	 * 校验短信发送频率(发票专用)
+	 * 1.校验同一手机号一定时间段内（1分钟内）的发送次数
+	 * @param mobile
+	 * @param msgType
+	 * @param orderId
+	 */
+	public void checkMsgFrequency4trade(String mobile, int msgType, String orderId) {
+		
+		String key = ModelConstant.KEY_VERICODE_FREQUENCY + msgType + ":" + orderId + ":" + mobile;
 		Object lastSent = stringRedisTemplate.opsForValue().get(key);
 		if (lastSent != null) {
 			throw new BizValidateException("发送过于频繁，请稍后再试");
