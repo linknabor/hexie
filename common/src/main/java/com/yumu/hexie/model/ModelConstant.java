@@ -389,9 +389,9 @@ public class ModelConstant {
 	public static final String KEY_USER_LOGIN = "lock:userLoginSession:";
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
-	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
-	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericodeTotalLimit_";
-	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
+	public static final String KEY_VERICODE_FREQUENCY = "vericode:Frequency:";
+	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericode:TotalLimit:";
+	public static final String KEY_VERICODE_IP_FREQUENCY = "vericode:IpFrequency:";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";	//发票申请短信验证码
 	public static final String KEY_VERICODE_RECEIPT_TRADE_ID = "vericode:receipt:trade:";	//电子申请短信验证码,后面接_sh:trade_water_id或者_guizhou:trade_water_id
 	
