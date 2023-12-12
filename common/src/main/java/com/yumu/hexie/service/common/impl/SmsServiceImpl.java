@@ -243,7 +243,7 @@ public class SmsServiceImpl implements SmsService {
 		if (lastSent != null) {
 			throw new BizValidateException("发送过于频繁，请稍后再试");
 		}else {
-			stringRedisTemplate.opsForValue().set(key, "1", 5, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+			stringRedisTemplate.opsForValue().set(key, "1", 30, TimeUnit.SECONDS);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
 		}
 		
 	}
@@ -262,7 +262,7 @@ public class SmsServiceImpl implements SmsService {
 		if (lastSent != null) {
 			throw new BizValidateException("发送过于频繁，请稍后再试");
 		}else {
-			stringRedisTemplate.opsForValue().set(key, "1", 5, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+			stringRedisTemplate.opsForValue().set(key, "1", 30, TimeUnit.SECONDS);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
 		}
 		
 	}
