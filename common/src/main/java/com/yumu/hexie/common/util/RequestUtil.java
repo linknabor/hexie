@@ -13,6 +13,10 @@ public class RequestUtil {
 		
 		String ip = request.getHeader("x-forwarded-for");
 		logger.info("x-forwarded-for : " + ip);
+		if (!StringUtil.isEmpty(ip)) {
+			String[]ipArr = ip.split(",");
+			ip = ipArr[0];
+		}
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
             ip = request.getHeader("Proxy-Client-IP");  
             logger.info("Proxy-Client-IP : " + ip);
@@ -32,7 +36,7 @@ public class RequestUtil {
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {  
             ip = request.getRemoteAddr();
             logger.info("remoteAddr : " + ip);
-        }  
+        }
         return ip;
 		
 	}
