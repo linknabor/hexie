@@ -22,13 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
-import com.alipay.api.request.AlipaySystemOauthTokenRequest;
-import com.alipay.api.response.AlipaySystemOauthTokenResponse;
+import com.alipay.api.internal.util.AlipayEncrypt;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
+import com.yumu.hexie.integration.alipay.AuthService;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
@@ -90,13 +87,13 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private RedisRepository redisRepository;
 	@Autowired
-	private AlipayClient alipayClient;
-	@Autowired
 	private RegionService regionService;
 	@Autowired
 	private PageConfigService pageConfigService;
 	@Autowired
 	private OrgOperatorRepository orgOperatorRepository;
+	@Autowired
+	private AuthService authService;
 	
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -475,21 +472,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public AccessTokenOAuth getAlipayAuth(String code) {
 		
-		Assert.hasText(code, "code不能为空。");
-		AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
-		request.setCode(code);
-		request.setGrantType(ConstantAlipay.AUTHORIZATION_TYPE);
-		AccessTokenOAuth oAuth = new AccessTokenOAuth();
-		try {
-			logger.info("alipayClient: " + alipayClient);
-			logger.info("grantType: " + ConstantAlipay.AUTHORIZATION_TYPE);
-		    AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
-		    oAuth.setOpenid(oauthTokenResponse.getUserId());
-		    oAuth.setAccessToken(oauthTokenResponse.getAccessToken());
-		} catch (AlipayApiException e) {
-			throw new BizValidateException(e.getMessage(), e);
-		}
-		return oAuth;
+		return getAlipayAuth(null, code);
+		
+	}
+	
+	@Override
+	public AccessTokenOAuth getAlipayAuth(String appid, String code) {
+		
+		return authService.getAlipayAuth(appid, code);
 		
 	}
 
@@ -700,6 +690,28 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	
+	/**
+	 * 获取小程序用户的手机号
+	 * @param code
+	 * @return
+	 */
+	@Override
+	public MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData) {
+		
+		Assert.hasText(encryptedData, "encryptedData不能为空。");
+		MiniUserPhone miniUserPhone = null;
+		try {
+			
+			String decrptyContent = AlipayEncrypt.decryptContent(encryptedData, "AES", "Csf90IejcIrzDVi3f2nSXw==", "utf8");
+			logger.info("decrptyContent: " + decrptyContent);
+			return miniUserPhone;
+			
+		} catch (Exception e) {
+			throw new BizValidateException(e.getMessage(), e);
+		}
+		
+	}
+	
 	@Override
     @Transactional
     public User saveMiniUserPhone(User user, MiniUserPhone miniUserPhone) {
@@ -902,5 +914,44 @@ public class UserServiceImpl implements UserService {
 	public User getByMiniopenid(String miniopenid) {
 		return userRepository.findByMiniopenid(miniopenid);
 	}
+	
+	@Override
+    @Transactional
+    public User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth) {
+    	logger.info("accessTokenOAuth : " + accessTokenOAuth);
+        
+    	String userId = accessTokenOAuth.getOpenid();
+    	
+        User userAccount = null;
+        if (!StringUtils.isEmpty(userId)) {
+        	List<User> userList = userRepository.findByAliuserid(userId);
+        	if (userList!=null && !userList.isEmpty()) {
+        		if (userList.size() > 1) {
+        			for (User dbUser : userList) {
+    					if (!StringUtils.isEmpty(dbUser.getTel())) {
+    						userAccount = dbUser;
+    						break;
+    					}
+    				}
+				} else {
+					userAccount = userList.get(0);
+				}
+				
+			}
+		}
+        if (userAccount == null) {
+            userAccount = new User();
+            userAccount.setAliuserid(userId);
+            userAccount.setAppId(accessTokenOAuth.getAppid());
+            userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
+        } 
+        String key = ModelConstant.KEY_ALI_USER_AUTH_TOKEN + userId;
+        String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(accessTokenOAuth.getAccessToken())) {
+            redisTemplate.opsForValue().set(key, accessTokenOAuth.getAccessToken(), 359, TimeUnit.HOURS);    //官方15天失效，也就是360小时
+        }
+        userRepository.save(userAccount);
+        return userAccount;
+    }
 
 }

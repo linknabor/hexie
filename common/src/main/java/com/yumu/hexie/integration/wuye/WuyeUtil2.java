@@ -211,6 +211,9 @@ public class WuyeUtil2 {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
+		if (StringUtils.isEmpty(fromSys)) {
+			fromSys = sysName;
+		}
 		String requestUrl = requestUtil.getRequestUrl(user, prepayRequestDTO.getRegionName());
 		requestUrl += WX_PAY_URL;
 		
@@ -218,6 +221,13 @@ public class WuyeUtil2 {
 		prepayRequest.setFromSys(fromSys);
 		prepayRequest.setAppid(user.getAppId());
 		prepayRequest.setPayee_openid(prepayRequestDTO.getPayee_openid());
+		if ("2".equals(prepayRequestDTO.getPayType())) {	//微信小程序支付
+			prepayRequest.setOpenid(user.getMiniopenid());
+			prepayRequest.setAppid(user.getMiniAppId());
+		} else if ("3".equals(prepayRequestDTO.getPayType())) {	//支付宝小程序支付
+			prepayRequest.setOpenid(user.getAliuserid());
+			prepayRequest.setAppid(user.getAppId());
+		}
 
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
