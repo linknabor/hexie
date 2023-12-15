@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -36,7 +37,9 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.integration.wechat.service.OAuthService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
+import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
@@ -57,9 +60,11 @@ import com.yumu.hexie.service.coupon.CouponStrategy;
 import com.yumu.hexie.service.coupon.CouponStrategyFactory;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.page.PageConfigService;
+import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.dto.AliUserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 @Service("userService")
@@ -94,7 +99,11 @@ public class UserServiceImpl implements UserService {
 	private OrgOperatorRepository orgOperatorRepository;
 	@Autowired
 	private AuthService authService;
-	
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
+	@Autowired
+	private AddressService addressService;
+
 	@Value("${mainServer}")
 	private Boolean mainServer;
 	
@@ -953,5 +962,75 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userAccount);
         return userAccount;
     }
+	
+	@Override
+	public User getUserByAliUserId(String aliUserId) {
+		
+		if (StringUtils.isEmpty(aliUserId)) {
+			throw new BizValidateException("user_id不能为空。");
+		}
+		List<User> userList = userRepository.findByAliuserid(aliUserId);
+		User aliUser = null;
+		if (userList!=null && !userList.isEmpty()) {
+			aliUser = userList.get(0);
+		}
+		return aliUser;
+	}
+	
+	@Override
+	@Transactional
+	public User saveAliH5User(AliUserDTO aliUserDTO) throws Exception {
+		
+		if (StringUtils.isEmpty(aliUserDTO.getUserId())) {
+			throw new BizValidateException("user_id不能为空。");
+		}
+		
+		if (StringUtils.isEmpty(aliUserDTO.getAppid())) {
+			throw new BizValidateException("appid不能为空。");
+		}
+		
+		if (StringUtils.isEmpty(aliUserDTO.getCellId())) {
+			throw new BizValidateException("cell_id不能为空。");
+		}
+		
+		User user = new User();
+		user.setAliuserid(aliUserDTO.getUserId());
+		user.setAliappid(aliUserDTO.getAppid());
+		user.setTel(aliUserDTO.getMobile());
+		
+		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(aliUserDTO);
+		if (!baseResult.isSuccess()) {
+			throw new BizValidateException(baseResult.getMessage());
+		}
+		
+		HexieUser hexieUser = baseResult.getData();
+		HexieAddress hexieAddress = new HexieAddress();
+		BeanUtils.copyProperties(hexieUser, hexieAddress);
+		
+		addressService.updateDefaultAddress(user, hexieAddress);
+		Integer totalBind = user.getTotalBind();
+		if (totalBind == null) {
+			totalBind = 0;
+		}
+		if (!StringUtils.isEmpty(hexieUser.getTotal_bind())) {
+			if (hexieUser.getTotal_bind() > 0) {
+				totalBind = hexieUser.getTotal_bind();	//如果值不为空，说明是跑批程序返回回来的，直接取值即可，如果值是空，走下面的else累加即可
+			}
+		}
+		if (totalBind == 0) {
+			totalBind = totalBind + 1;
+		}
+		user.setTotalBind(totalBind);
+		user.setWuyeId(hexieUser.getUser_id());
+		user.setXiaoquName(hexieUser.getSect_name());
+		user.setProvince(hexieUser.getProvince_name());
+		user.setCity(hexieUser.getCity_name());
+		user.setCounty(hexieUser.getRegion_name());
+		user.setSectId(hexieUser.getSect_id());	
+		user.setCspId(hexieUser.getCsp_id());
+		user.setOfficeTel(hexieUser.getOffice_tel());
+		userRepository.save(user);
+		return user;
+	}
 
 }

@@ -12,6 +12,7 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.user.dto.AliUserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 
@@ -215,5 +216,20 @@ public interface UserService {
 	 * @return
 	 */
 	MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
+	
+	/**
+	 * 根据支付宝用户id获取用户
+	 * @param aliUserId
+	 * @return
+	 */
+	User getUserByAliUserId(String aliUserId);
+	
+	/**
+	 * 保存支付h5用户信息
+	 * @param aliUserDTO
+	 * @return
+	 * @throws Exception 
+	 */
+	User saveAliH5User(AliUserDTO aliUserDTO) throws Exception;
 
 }

@@ -54,6 +54,7 @@ import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.dto.AliUserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 import com.yumu.hexie.vo.menu.GroupMenuInfo;
 import com.yumu.hexie.web.BaseController;
@@ -887,6 +888,25 @@ public class UserController extends BaseController{
 		}
         userInfo.setPermission(true);
         return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<UserInfo> alipayH5Login(HttpSession session, @RequestBody(required = false) AliUserDTO aliUserDTO) throws Exception {
+		
+		long beginTime = System.currentTimeMillis();
+    	log.info("alipayH5Login : " + aliUserDTO);
+    	User userAccount = userService.getUserByAliUserId(aliUserDTO.getUserId());
+    	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId())) {
+    		userAccount = userService.saveAliH5User(aliUserDTO);
+		}
+		long endTime = System.currentTimeMillis();
+	    UserInfo userInfo = new UserInfo(userAccount);
+	    log.info("alipay h5 user:" + aliUserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
+	    
+	    session.setAttribute(Constants.USER, userAccount);
+	    return new BaseResult<UserInfo>().success(userInfo);
+
     }
     
         
