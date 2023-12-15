@@ -43,10 +43,10 @@ import com.yumu.hexie.model.distribution.region.RegionRepository;
 import com.yumu.hexie.model.user.Address;
 import com.yumu.hexie.model.user.AddressRepository;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.RegionService;
-import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.req.AddressReq;
 import com.yumu.hexie.vo.RgroupAddressVO;
 import com.yumu.hexie.vo.RgroupVO.RegionVo;
@@ -59,7 +59,7 @@ public class AddressServiceImpl implements AddressService {
     private static Map<String,Long> map = null;
     
     @Inject
-    private UserService userService;
+    private UserRepository userRepository;
     @Inject
     private AddressRepository addressRepository;
     @Inject
@@ -138,7 +138,7 @@ public class AddressServiceImpl implements AddressService {
             List<Address> addrs = addressRepository.findAllByUserId(address.getUserId());
             if(getDefaultAddr(addrs) == null) {
                 address.setMain(true);
-                User user = userService.getById(address.getUserId());
+                User user = userRepository.findById(address.getUserId());
                 configDefaultAddress(user, address.getId());
             }
         } else {
@@ -220,7 +220,7 @@ public class AddressServiceImpl implements AddressService {
             user.setCspId(addressReq.getCspId());
             
             log.info("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
-            userService.save(user);
+            userRepository.save(user);
             log.info("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + address.getId());
 		}
         return address;
@@ -323,7 +323,7 @@ public class AddressServiceImpl implements AddressService {
         user.setLongitude(currentAddr.getLongitude());
 
         log.error("设置用户默认地址[B]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + currentAddr.getId());
-        userService.save(user);
+        userRepository.save(user);
         log.error("设置用户默认地址[E]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + currentAddr.getId());
         
         return currentAddr;
@@ -459,6 +459,11 @@ public class AddressServiceImpl implements AddressService {
 					add.setCreateDate(System.currentTimeMillis());
 					add.setXiaoquId(re.get(0).getId());
 					add.setXiaoquName(addr.getSect_name());
+					Long cellId = 0L;
+					if (!StringUtils.isEmpty(addr.getCell_id())) {
+						cellId = Long.valueOf(addr.getCell_id());
+					}
+					add.setCellId(cellId);
 					add.setDetailAddress(addr.getCell_addr());
 					add.setCity(addr.getCity_name());
 					Long cityId = map.get(addr.getCity_name());
