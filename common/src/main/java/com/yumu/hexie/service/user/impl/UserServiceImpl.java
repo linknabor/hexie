@@ -979,7 +979,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public User saveAliH5User(AliUserDTO aliUserDTO) throws Exception {
+	public void saveAliH5User(User user, AliUserDTO aliUserDTO) throws Exception {
 		
 		if (StringUtils.isEmpty(aliUserDTO.getUserId())) {
 			throw new BizValidateException("user_id不能为空。");
@@ -993,8 +993,10 @@ public class UserServiceImpl implements UserService {
 			throw new BizValidateException("cell_id不能为空。");
 		}
 		
-		User user = new User();
-		user.setAliuserid(aliUserDTO.getUserId());
+		if (user == null) {
+			user = new User();
+			user.setAliuserid(aliUserDTO.getUserId());
+		}
 		user.setAliappid(aliUserDTO.getAppid());
 		user.setTel(aliUserDTO.getMobile());
 		
@@ -1030,7 +1032,6 @@ public class UserServiceImpl implements UserService {
 		user.setCspId(hexieUser.getCsp_id());
 		user.setOfficeTel(hexieUser.getOffice_tel());
 		userRepository.save(user);
-		return user;
 	}
 
 }

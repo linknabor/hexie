@@ -898,7 +898,7 @@ public class UserController extends BaseController{
     	log.info("alipayH5Login : " + aliUserDTO);
     	User userAccount = userService.getUserByAliUserId(aliUserDTO.getUserId());
     	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId())) {
-    		userAccount = userService.saveAliH5User(aliUserDTO);
+    		userService.saveAliH5User(userAccount, aliUserDTO);
 		}
 		long endTime = System.currentTimeMillis();
 	    UserInfo userInfo = new UserInfo(userAccount);
