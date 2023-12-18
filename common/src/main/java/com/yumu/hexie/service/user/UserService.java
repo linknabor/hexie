@@ -235,10 +235,11 @@ public interface UserService {
 	
 	/**
 	 * 保存支付h5用户信息
+	 * @param user
 	 * @param aliUserDTO
 	 * @return
 	 * @throws Exception 
 	 */
-	User saveAliH5User(AliUserDTO aliUserDTO) throws Exception;
+	void saveAliH5User(User user, AliUserDTO aliUserDTO) throws Exception;
 
 }
