@@ -105,9 +105,6 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private AddressService addressService;
 
-	@Autowired
-	private WuyeUtil2 wuyeUtil2;
-
 	@Value("${mainServer}")
 	private Boolean mainServer;
 	
