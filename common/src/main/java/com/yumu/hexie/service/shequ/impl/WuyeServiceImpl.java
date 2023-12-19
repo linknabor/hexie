@@ -708,6 +708,19 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	/**
+	 * 获取当前用户申请过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public List<InvoiceDetail> getInvoiceByTrade(User user, String tradeWaterId) throws Exception {
+		
+		return wuyeUtil2.queryInvoiceByTrade(user, tradeWaterId).getData();
+		
+	}
+	
+	/**
 	 * 获取催缴短信用户欠费账单
 	 * @param user
 	 * @param queryFeeSmsBillReq

@@ -108,6 +108,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_RECEIPT_LIST_URL = "receipt/getReceiptByUserSDO.do";
 	private static final String PUSH_USER_REGISTER_URL = "pushUserRegisterSDO.do";
 	private static final String H5_USER_LOGIN_URL = "alipayH5LoginSDO.do";	//h5用户登陆注册
+	private static final String QUERY_TRADE_INVOICE_URL = "queryInvoiceByTradeSDO.do";	//获取用户申请过的发票
 
 	/**
 	 * 标准版查询账单
@@ -662,6 +663,30 @@ public class WuyeUtil2 {
 		map.put("openid", user.getOpenid());
 		map.put("curr_page", currPage);
 		map.put("total_count", "1000");
+
+		TypeReference<CommonResponse<List<InvoiceDetail>>> typeReference = new TypeReference<CommonResponse<List<InvoiceDetail>>>(){};
+		CommonResponse<List<InvoiceDetail>> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<List<InvoiceDetail>> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 根据交易ID获取相关的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<InvoiceDetail>> queryInvoiceByTrade(User user, String tradeWaterId) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_TRADE_INVOICE_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("user_id", user.getWuyeId());
+		map.put("openid", user.getOpenid());
+		map.put("trade_water_id", tradeWaterId);
 
 		TypeReference<CommonResponse<List<InvoiceDetail>>> typeReference = new TypeReference<CommonResponse<List<InvoiceDetail>>>(){};
 		CommonResponse<List<InvoiceDetail>> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
