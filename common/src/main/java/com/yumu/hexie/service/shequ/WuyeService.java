@@ -349,6 +349,15 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	List<InvoiceDetail> getInvoice(User user, String currPage) throws Exception;
+	
+	/**
+	 * 获取交易相关的发票信息
+	 * @param user
+	 * @param tradeWaterId
+	 * @return
+	 * @throws Exception
+	 */
+	List<InvoiceDetail> getInvoiceByTrade(User user, String tradeWaterId) throws Exception;
 
 	/**
 	 * 获取催缴短信用户欠费账单

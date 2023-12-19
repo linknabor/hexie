@@ -979,6 +979,15 @@ public class WuyeController extends BaseController {
 		List<InvoiceDetail> invoiceList = wuyeService.getInvoice(user, page);
 		return BaseResult.successResult(invoiceList);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/inovice", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<InvoiceDetail>> getInvoiceByTrade(@ModelAttribute(Constants.USER) User user, @RequestParam String tradeWaterId) throws Exception {
+		
+		List<InvoiceDetail> invoiceList = wuyeService.getInvoiceByTrade(user, tradeWaterId);
+		return BaseResult.successResult(invoiceList);
+	}
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getFeeSmsBill", method = RequestMethod.GET)
