@@ -897,7 +897,8 @@ public class UserController extends BaseController{
 		long beginTime = System.currentTimeMillis();
     	log.info("alipayH5Login : " + aliUserDTO);
     	User userAccount = userService.getUserByAliUserId(aliUserDTO.getUserId());
-    	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || userAccount.getOriUserId() == null) {
+    	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || 
+    			userAccount.getOriUserId() == null || 0L == userAccount.getOriUserId()) {
     		userService.saveAliH5User(userAccount, aliUserDTO);
 		}
 		long endTime = System.currentTimeMillis();
