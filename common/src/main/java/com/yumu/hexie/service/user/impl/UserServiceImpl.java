@@ -1014,6 +1014,12 @@ public class UserServiceImpl implements UserService {
 		}
 		user.setAliappid(aliUserDTO.getAppid());
 		user.setTel(aliUserDTO.getMobile());
+		Long auId = null;
+		if (!StringUtils.isEmpty(aliUserDTO.getAuId())) {
+			auId = Long.valueOf(aliUserDTO.getAuId());
+		}
+		user.setOriUserId(auId);
+		user.setOriSys("_shwy");
 		
 		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(aliUserDTO);
 		if (!baseResult.isSuccess()) {
