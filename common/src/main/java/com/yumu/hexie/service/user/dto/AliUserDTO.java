@@ -17,6 +17,8 @@ public class AliUserDTO implements Serializable {
 	@JsonProperty("cell_id")
 	private String cellId;	//缴费房屋ID
 	private String mobile;	//用户手机号
+	@JsonProperty("au_id")
+	private String auId;	//房地局系统用户id
 	
 	public String getAppid() {
 		return appid;
@@ -42,10 +44,16 @@ public class AliUserDTO implements Serializable {
 	public void setMobile(String mobile) {
 		this.mobile = mobile;
 	}
+	public String getAuId() {
+		return auId;
+	}
+	public void setAuId(String auId) {
+		this.auId = auId;
+	}
 	@Override
 	public String toString() {
-		return "AlipayH5LoginReq [appid=" + appid + ", userId=" + userId + ", cellId=" + cellId + ", mobile=" + mobile
-				+ "]";
+		return "AliUserDTO [appid=" + appid + ", userId=" + userId + ", cellId=" + cellId + ", mobile=" + mobile
+				+ ", auId=" + auId + "]";
 	}
 	
 }
