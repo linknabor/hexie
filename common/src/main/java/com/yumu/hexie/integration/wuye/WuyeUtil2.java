@@ -225,12 +225,15 @@ public class WuyeUtil2 {
 		prepayRequest.setFromSys(fromSys);
 		prepayRequest.setAppid(user.getAppId());
 		prepayRequest.setPayee_openid(prepayRequestDTO.getPayee_openid());
-		if ("2".equals(prepayRequestDTO.getPayType())) {	//微信小程序支付
+		if ("0".equals(prepayRequestDTO.getPayType())) {
+			prepayRequest.setOpenid(user.getOpenid());
+			prepayRequest.setAppid(user.getAppId());
+		} else if ("2".equals(prepayRequestDTO.getPayType())) {	//微信小程序支付
 			prepayRequest.setOpenid(user.getMiniopenid());
 			prepayRequest.setAppid(user.getMiniAppId());
 		} else if ("3".equals(prepayRequestDTO.getPayType())) {	//支付宝小程序支付
 			prepayRequest.setOpenid(user.getAliuserid());
-			prepayRequest.setAppid(user.getAppId());
+			prepayRequest.setAppid(user.getAliappid());
 		}
 
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
