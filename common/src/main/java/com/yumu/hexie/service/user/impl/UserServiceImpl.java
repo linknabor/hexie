@@ -65,7 +65,7 @@ import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
-import com.yumu.hexie.service.user.dto.AliUserDTO;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 @Service("userService")
@@ -994,34 +994,39 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void saveAliH5User(User user, AliUserDTO aliUserDTO) throws Exception {
+	public void saveH5User(User user, H5UserDTO h5UserDTO) throws Exception {
 		
-		if (StringUtils.isEmpty(aliUserDTO.getUserId())) {
+		if (StringUtils.isEmpty(h5UserDTO.getUserId())) {
 			throw new BizValidateException("user_id不能为空。");
 		}
 		
-		if (StringUtils.isEmpty(aliUserDTO.getAppid())) {
+		if (StringUtils.isEmpty(h5UserDTO.getAppid())) {
 			throw new BizValidateException("appid不能为空。");
 		}
 		
-		if (StringUtils.isEmpty(aliUserDTO.getCellId())) {
+		if (StringUtils.isEmpty(h5UserDTO.getCellId())) {
 			throw new BizValidateException("cell_id不能为空。");
 		}
 		
 		if (user == null) {
 			user = new User();
-			user.setAliuserid(aliUserDTO.getUserId());
+			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
+				user.setAliuserid(h5UserDTO.getUserId());
+				user.setAliappid(h5UserDTO.getAppid());
+			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
+				user.setMiniopenid(h5UserDTO.getUserId());
+				user.setMiniAppId(h5UserDTO.getAppid());
+			}
 		}
-		user.setAliappid(aliUserDTO.getAppid());
-		user.setTel(aliUserDTO.getMobile());
+		user.setTel(h5UserDTO.getMobile());
 		Long auId = null;
-		if (!StringUtils.isEmpty(aliUserDTO.getAuId())) {
-			auId = Long.valueOf(aliUserDTO.getAuId());
+		if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
+			auId = Long.valueOf(h5UserDTO.getAuId());
 		}
 		user.setOriUserId(auId);
 		user.setOriSys("_shwy");
 		
-		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(aliUserDTO);
+		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(h5UserDTO);
 		if (!baseResult.isSuccess()) {
 			throw new BizValidateException(baseResult.getMessage());
 		}
@@ -1053,6 +1058,12 @@ public class UserServiceImpl implements UserService {
 		user.setCspId(hexieUser.getCsp_id());
 		user.setOfficeTel(hexieUser.getOffice_tel());
 		userRepository.save(user);
+	}
+	
+	@Override
+	public List<User> getUserByOriSysAndOriUserId(String oriSys, String oriUserId) {
+		
+		return userRepository.findByOriSysAndOriUserId(oriSys, oriUserId);
 	}
 
 }

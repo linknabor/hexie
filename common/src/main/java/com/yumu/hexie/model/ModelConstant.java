@@ -464,6 +464,9 @@ public class ModelConstant {
 	public static final String KEY_USER_SERVE_ROLE = "user:servRole";	//用户服务类型
 	public static final String KEY_USER_SUBSCRIBE_MSG_TEMPLATE = "user:subscribeMsgTemplate";	//用户订阅过的消息模板
 	
+	public static final String H5_USER_TYPE_ALIPAY = "1";
+	public static final String H5_USER_TYPE_WECHAT = "2";
+	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AliUserDTO implements Serializable {
+public class H5UserDTO implements Serializable {
 
 	/**
 	 * 
@@ -19,6 +19,8 @@ public class AliUserDTO implements Serializable {
 	private String mobile;	//用户手机号
 	@JsonProperty("au_id")
 	private String auId;	//房地局系统用户id
+	@JsonProperty("client_type")
+	private String clientType;	//终端类型,1支付宝用户，2微信用户
 	
 	public String getAppid() {
 		return appid;
@@ -50,10 +52,16 @@ public class AliUserDTO implements Serializable {
 	public void setAuId(String auId) {
 		this.auId = auId;
 	}
+	public String getClientType() {
+		return clientType;
+	}
+	public void setClientType(String clientType) {
+		this.clientType = clientType;
+	}
 	@Override
 	public String toString() {
-		return "AliUserDTO [appid=" + appid + ", userId=" + userId + ", cellId=" + cellId + ", mobile=" + mobile
-				+ ", auId=" + auId + "]";
+		return "H5UserDTO [appid=" + appid + ", userId=" + userId + ", cellId=" + cellId + ", mobile=" + mobile
+				+ ", auId=" + auId + ", clientType=" + clientType + "]";
 	}
 	
 }
