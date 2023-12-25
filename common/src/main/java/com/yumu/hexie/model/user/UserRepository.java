@@ -107,5 +107,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	public List<User> findByAliuserid(String aliuserid);
 	
-	public List<User> findByOriSysAndOriUserId(String oriSys, String oriUserId);
+	public List<User> findByOriSysAndOriUserId(String oriSys, Long oriUserId);
 }
