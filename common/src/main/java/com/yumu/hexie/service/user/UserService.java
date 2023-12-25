@@ -248,6 +248,6 @@ public interface UserService {
 	 * @param oriUserId
 	 * @return
 	 */
-	List<User> getUserByOriSysAndOriUserId(String oriSys, String oriUserId);
+	List<User> getUserByOriSysAndOriUserId(String oriSys, Long oriUserId);
 
 }

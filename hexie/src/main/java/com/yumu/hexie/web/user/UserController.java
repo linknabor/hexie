@@ -960,7 +960,7 @@ public class UserController extends BaseController{
 		}
     	User userAccount = null;
     	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
-    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", h5UserDTO.getAuId());
+    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
     		if (userList != null && !userList.isEmpty() ) {
     			for (User user : userList) {
 					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getMiniopenid())) {

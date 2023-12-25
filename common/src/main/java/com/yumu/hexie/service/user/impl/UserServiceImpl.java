@@ -1061,7 +1061,7 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public List<User> getUserByOriSysAndOriUserId(String oriSys, String oriUserId) {
+	public List<User> getUserByOriSysAndOriUserId(String oriSys, Long oriUserId) {
 		
 		return userRepository.findByOriSysAndOriUserId(oriSys, oriUserId);
 	}
