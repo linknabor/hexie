@@ -59,7 +59,7 @@ import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
-import com.yumu.hexie.service.user.dto.AliUserDTO;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.vo.req.MessageReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
@@ -883,7 +883,7 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<HexieUser> h5UserLogin(AliUserDTO aliUserDTO) throws Exception {
+	public BaseResult<HexieUser> h5UserLogin(H5UserDTO aliUserDTO) throws Exception {
 		String requestUrl = requestUtil.getRequestUrl(new User(), "");
 		requestUrl += H5_USER_LOGIN_URL;
 		TypeReference<CommonResponse<HexieUser>> typeReference = new TypeReference<CommonResponse<HexieUser>>(){};

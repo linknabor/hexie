@@ -106,4 +106,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public User findByAppIdAndUniqueCode(String appid, String uniqueCode);
 	
 	public List<User> findByAliuserid(String aliuserid);
+	
+	public List<User> findByOriSysAndOriUserId(String oriSys, String oriUserId);
 }

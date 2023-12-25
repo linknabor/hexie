@@ -54,7 +54,7 @@ import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.user.UserService;
-import com.yumu.hexie.service.user.dto.AliUserDTO;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 import com.yumu.hexie.vo.menu.GroupMenuInfo;
 import com.yumu.hexie.web.BaseController;
@@ -892,18 +892,42 @@ public class UserController extends BaseController{
     
     @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<UserInfo> alipayH5Login(HttpSession session, @RequestBody(required = false) AliUserDTO aliUserDTO) throws Exception {
+    public BaseResult<UserInfo> h5Login(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
 		
 		long beginTime = System.currentTimeMillis();
-    	log.info("alipayH5Login : " + aliUserDTO);
-    	User userAccount = userService.getUserByAliUserId(aliUserDTO.getUserId());
+    	log.info("h5Login : " + h5UserDTO);
+    	if (StringUtils.isEmpty(h5UserDTO.getClientType())) {
+			if (org.apache.commons.lang3.StringUtils.isNumeric(h5UserDTO.getUserId())) {
+				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
+			} else {
+				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_WECHAT);
+			}
+		}
+    	User userAccount = null;
+    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
+    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", h5UserDTO.getAuId());
+    		if (userList != null && !userList.isEmpty() ) {
+    			for (User user : userList) {
+					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getMiniopenid())) {
+						userAccount = user;
+						break;
+					}
+				}
+			}
+		} else {
+			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
+				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
+			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
+				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
+			}
+		}
     	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || 
     			userAccount.getOriUserId() == null || 0L == userAccount.getOriUserId()) {
-    		userService.saveAliH5User(userAccount, aliUserDTO);
+    		userService.saveH5User(userAccount, h5UserDTO);
 		}
 		long endTime = System.currentTimeMillis();
 	    UserInfo userInfo = new UserInfo(userAccount);
-	    log.info("alipay h5 user:" + aliUserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
+	    log.info("h5 user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
 	    
 	    session.setAttribute(Constants.USER, userAccount);
 	    return new BaseResult<UserInfo>().success(userInfo);

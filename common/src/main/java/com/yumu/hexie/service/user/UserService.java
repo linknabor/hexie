@@ -12,7 +12,7 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.user.dto.AliUserDTO;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 
@@ -231,6 +231,14 @@ public interface UserService {
 	 * @return
 	 * @throws Exception 
 	 */
-	void saveAliH5User(User user, AliUserDTO aliUserDTO) throws Exception;
+	void saveH5User(User user, H5UserDTO aliUserDTO) throws Exception;
+	
+	/**
+	 * 根据源系统查询用户信息
+	 * @param oriSys
+	 * @param oriUserId
+	 * @return
+	 */
+	List<User> getUserByOriSysAndOriUserId(String oriSys, String oriUserId);
 
 }
