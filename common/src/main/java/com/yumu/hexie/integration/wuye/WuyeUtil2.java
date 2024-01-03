@@ -216,6 +216,11 @@ public class WuyeUtil2 {
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
 		if (StringUtils.isEmpty(fromSys)) {
+			if ("_shwy".equals(user.getOriSys())) {
+				fromSys = user.getOriSys();
+			}
+		}
+		if (StringUtils.isEmpty(fromSys)) {
 			fromSys = sysName;
 		}
 		String requestUrl = requestUtil.getRequestUrl(user, prepayRequestDTO.getRegionName());
