@@ -1044,7 +1044,10 @@ public class TemplateMsgService {
 	public WechatResponse sendFinishReceiveMessage(ReceiptNotification receiptNotification, String accessToken) {
 		
 		WechatResponse wechatResponse = null;
-		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RECEIPT_FINISH2, receiptNotification.getAppid());
+		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RECEIPT_FINISH, receiptNotification.getAppid());
+		if (msgTemplate == null) {
+			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RECEIPT_FINISH2, receiptNotification.getAppid());
+		}
 		if (msgTemplate == null) {
 			wechatResponse = new WechatResponse();
 			wechatResponse.setErrcode(99999);
