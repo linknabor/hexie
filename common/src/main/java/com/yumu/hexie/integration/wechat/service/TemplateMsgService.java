@@ -632,11 +632,19 @@ public class TemplateMsgService {
 	 */
 	public WechatResponse sendOpinionNotificationMessage(InteractCommentNotice commentNotice, String accessToken) {
 		
+		
+		WechatResponse wechatResponse = null;
+		if (StringUtils.isEmpty(commentNotice.getAppid()) || StringUtils.isEmpty(commentNotice.getInteractId())) {
+			wechatResponse = new WechatResponse();
+			wechatResponse.setErrcode(99998);
+			wechatResponse.setErrmsg("appid或interactId不能为空");
+			return wechatResponse;
+		}
+		
 		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_OPINION_NOTIFY, commentNotice.getAppid());
 		if (msgTemplate == null) {
 			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_OPINION_NOTIFY2, commentNotice.getAppid());
 		}
-		WechatResponse wechatResponse = null;
 		if (msgTemplate == null) {
 			wechatResponse = new WechatResponse();
 			wechatResponse.setErrcode(99999);
