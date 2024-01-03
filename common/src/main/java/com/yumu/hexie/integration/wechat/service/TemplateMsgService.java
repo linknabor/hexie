@@ -608,6 +608,11 @@ public class TemplateMsgService {
 				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setTouser(openid);
 				wechatResponse = sendMsg(msg, accessToken);
+			} else {
+				log.info("unknow msgTemplate type : " + templateType);
+				wechatResponse = new WechatResponse();
+				wechatResponse.setErrcode(99999);
+				wechatResponse.setErrmsg("未知的模板消息类型： " + templateType);
 			}
 		}
 		
@@ -670,7 +675,6 @@ public class TemplateMsgService {
 				msg.setTouser(commentNotice.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
 			} else if (msgType == 2) {
-				
 				Map<String, Map<String, String>> map = new HashMap<>();
 				Map<String, String> dataMap = new HashMap<>();
 				dataMap.put("value", commentNotice.getContent());
@@ -694,7 +698,11 @@ public class TemplateMsgService {
 				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setTouser(commentNotice.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
-				
+			} else {
+				log.info("unknow msgTemplate type : " + msgType);
+				wechatResponse = new WechatResponse();
+				wechatResponse.setErrcode(99999);
+				wechatResponse.setErrmsg("未知的模板消息类型： " + msgType);
 			}
 		}
 		return wechatResponse;
@@ -1101,6 +1109,11 @@ public class TemplateMsgService {
 				msg.setUrl(url);
 				msg.setTouser(receiptNotification.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
+			} else {
+				log.info("unknow msgTemplate type : " + msgType);
+				wechatResponse = new WechatResponse();
+				wechatResponse.setErrcode(99999);
+				wechatResponse.setErrmsg("未知的模板消息类型： " + msgType);
 			}
 		}
 		return wechatResponse;
