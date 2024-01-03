@@ -13,6 +13,7 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
 import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
+import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 
 /**
  * <pre>
@@ -64,4 +65,9 @@ public interface GotongService {
 
 	void sendGroupSuccessNotification(NoticeRgroupSuccess noticeRgroupSuccess);
 
+	//物业意见回复通知
+	void sendInteractNotification(InteractCommentNotice commentNotice);
+
+	//业主评价模板推送
+	void sendInteractGradeNotification(InteractCommentNotice notice);
 }

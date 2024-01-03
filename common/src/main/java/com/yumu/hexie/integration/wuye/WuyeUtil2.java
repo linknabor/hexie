@@ -27,7 +27,6 @@ import com.yumu.hexie.integration.wuye.req.BillStdRequest;
 import com.yumu.hexie.integration.wuye.req.DiscountViewRequest;
 import com.yumu.hexie.integration.wuye.req.GetCellRequest;
 import com.yumu.hexie.integration.wuye.req.MessageRequest;
-import com.yumu.hexie.integration.wuye.req.OpinionRequest;
 import com.yumu.hexie.integration.wuye.req.OtherPayRequest;
 import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
@@ -96,7 +95,6 @@ public class WuyeUtil2 {
 	private static final String MESSAGE_URL = "msg/sendMessageSDO.do";
 	private static final String QUERY_MESSAGE_URL = "msg/getMessageSDO.do";
 	private static final String QUERY_MESSAGE_HISTORY_URL = "msg/sendHistorySDO.do";
-	private static final String SEND_NOTIFICATION_URL = "msg/sendNotificationSDO.do";//业主意见回复消息推送
 	private static final String QUERY_CELL_ADDR_URL = "queryCellAddrSDO.do";
 	private static final String SECT_VAGUE_LIST_URL = "queryVagueSectByNameSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
 	private static final String QUERY_MPQRCODE_PARAM_URL = "queryMpQrCodeParamSDO.do";//获取生成公众号动态二维码的必要参数
@@ -106,6 +104,7 @@ public class WuyeUtil2 {
 	private static final String APPLY_RECEIPT_URL = "receipt/allpyReceiptSDO.do";
 	private static final String QUERY_RECEIPT_URL = "receipt/getReceiptSDO.do";
 	private static final String QUERY_RECEIPT_LIST_URL = "receipt/getReceiptByUserSDO.do";
+	private static final String PUSH_USER_REGISTER_URL = "pushUserRegisterSDO.do";
 
 	/**
 	 * 标准版查询账单
@@ -615,28 +614,9 @@ public class WuyeUtil2 {
 	}
 
 	/**
-	 * 回复消息推送
-	 * @param user
-	 * @param opinionRequest
-	 * @return
-	 * @throws Exception
-	 */
-	public BaseResult<Boolean> sendMinNotification(User user, OpinionRequest opinionRequest) throws Exception{
-		String requestUrl = requestUtil.getRequestUrl(user, "");
-		requestUrl += SEND_NOTIFICATION_URL;
-
-		TypeReference<CommonResponse<Boolean>> typeReference = new TypeReference<CommonResponse<Boolean>>(){};
-		CommonResponse<Boolean> hexieResponse = restUtil.exchangeOnUri(requestUrl, opinionRequest, typeReference);
-		BaseResult<Boolean> baseResult = new BaseResult<>();
-		baseResult.setData(hexieResponse.getData());
-		baseResult.setMessage(hexieResponse.getErrMsg());
-		return baseResult;
-	}
-	
-	/**
 	 * 获取生成公众号动态二维码的必要参数
 	 * @param user
-	 * @param opinionRequest
+	 * @param tradeWaterId
 	 * @return
 	 * @throws Exception
 	 */
@@ -757,10 +737,12 @@ public class WuyeUtil2 {
 		return baseResult;
 		
 }
-	
+
 	/**
 	 * 根据收据ID获取电子收据
-	 * @param user
+	 * @param receiptId
+	 * @param sys
+	 * @param region
 	 * @return
 	 * @throws Exception
 	 */
@@ -833,6 +815,28 @@ public class WuyeUtil2 {
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
+	}
+
+	/**
+	 * 用户注册信息传入平台
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> pushUserRegisterUrl(User user) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += PUSH_USER_REGISTER_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("user_id", user.getWuyeId());
+		map.put("openid", user.getOpenid());
+		map.put("mobile", user.getTel());
+		map.put("appid", user.getAppId());
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		return baseResult;
+
 	}
 
 }

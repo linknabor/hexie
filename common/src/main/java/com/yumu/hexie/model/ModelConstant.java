@@ -192,9 +192,9 @@ public class ModelConstant {
 	public static final int THREAD_CATEGORY_EDUCATION = 5;	//亲子教育
 	public static final int THREAD_CATEGORY_SPORTS = 6;	//运动达人
 	public static final int THREAD_CATEGORY_CHAT = 7;	//社区杂谈
-	public static final int THREAD_CATEGORY_BEAUTIES = 8;	//都市丽人
 
-	public static final int THREAD_CATEGORY_SUGGESTION = 9;	//意见投诉
+	public static final int THREAD_CATEGORY_COMPLAINT = 8;	//业主投诉
+	public static final int THREAD_CATEGORY_SUGGESTION = 9;	//业主意见
 	public static final int THREAD_CATEGORY_HEALTH_REPORT = 10;	//健康上报
 	public static final int THREAD_CATEGORY_MASK_RESV = 11;	//口罩预约
 	public static final int THREAD_CATEGORY_SERVICE_RESV = 12;	//服务预约
@@ -389,9 +389,9 @@ public class ModelConstant {
 	public static final String KEY_USER_LOGIN = "lock:userLoginSession:";
 
 	public static final String KEY_MOBILE_VERICODE = "mobileVericode_";	//手机短信验证码
-	public static final String KEY_VERICODE_FREQUENCY = "vericodeFrequency_";
-	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericodeTotalLimit_";
-	public static final String KEY_VERICODE_IP_FREQUENCY = "vericodeIpFrequency_";
+	public static final String KEY_VERICODE_FREQUENCY = "vericode:Frequency:";
+	public static final String KEY_VERICODE_TOTAL_LIMIT = "vericode:TotalLimit:";
+	public static final String KEY_VERICODE_IP_FREQUENCY = "vericode:IpFrequency:";
 	public static final String KEY_VERICODE_TRADE_ID = "vericodeInvoiceTrade_";	//发票申请短信验证码
 	public static final String KEY_VERICODE_RECEIPT_TRADE_ID = "vericode:receipt:trade:";	//电子申请短信验证码,后面接_sh:trade_water_id或者_guizhou:trade_water_id
 	
@@ -442,7 +442,7 @@ public class ModelConstant {
 	public static final String KEY_SUBSCRIBE_MSG_TEMPLATE = "cfg:subscribeMsg:template";	//所有能订阅的消息模板
 	
 	public static final String KEY_WUYE_PARAM_CFG = "cfg:wuyeParam";
-	
+	public static final String KEY_INTERACT_TYPE_CFG = "cfg:interactType";
 	public static final int SMS_TYPE_REG = 101;	//用户注册短信
 	public static final int SMS_TYPE_INVOICE = 102;	//发票验证码获取
 	public static final int SMS_TYPE_PROMOTION_PAY = 103;	//发票验证码获取
@@ -501,6 +501,9 @@ public class ModelConstant {
 	
 	public static final String KEY_WORKORDER_CFG = "workorder:cfg:";	//工单配置，后面接city_db:sect_id
 
+	public static final String interactReplyNoticeQueue = "queue:interact:replyToHx"; //业主意见物业回复的通知给用户
+	public static final String interactGradeNoticeQueue = "queue:interact:grade"; //投诉建议处理结果评价
+	//
 
 	public static final String KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:deliveryReceiver"; //电商接单人推送
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送

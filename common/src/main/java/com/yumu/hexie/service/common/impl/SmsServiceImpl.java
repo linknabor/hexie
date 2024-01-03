@@ -69,6 +69,22 @@ public class SmsServiceImpl implements SmsService {
     	return sendMessage(user, mobilePhone, message, code, msgType);
 
     }
+    
+    /**
+     * 发送短信验证码
+     */
+    @Override
+    public boolean sendInvoiceVerificationCode(User user, String mobilePhone, String requestIp, int msgType, String tradeWaterId) {
+      
+    	String code = RandomStringUtils.randomNumeric(6);
+    	String message = MessageFormat.format(VERICODE_MESSAGE, code);
+    	checkIpFrequency(requestIp);
+//    	checkMsgFrequency(mobilePhone);
+    	checkMsgFrequency4trade(mobilePhone, msgType, tradeWaterId);
+    	checkMsgTotalLimit(mobilePhone);
+    	return sendMessage(user, mobilePhone, message, code, msgType);
+
+    }
 
     /**
      * 校验短信验证码
@@ -223,13 +239,33 @@ public class SmsServiceImpl implements SmsService {
 	public void checkMsgFrequency(String mobile) {
 		
 		String key = ModelConstant.KEY_VERICODE_FREQUENCY + mobile;
-		Object lastSent = stringRedisTemplate.opsForValue().get(key);
-		if (lastSent != null) {
-			throw new BizValidateException("发送过于频繁，请稍后再试");
-		}else {
-			stringRedisTemplate.opsForValue().set(key, "1", 5, TimeUnit.MINUTES);	//设置1分钟超时，如果一分钟内访问，提示发送过于频繁
+		Boolean success = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 5, TimeUnit.MINUTES);	//5分钟内3次
+		if (!success) {
+			Long sendCount = stringRedisTemplate.opsForValue().increment(key);
+			if (sendCount > 3) {
+				throw new BizValidateException("发送过于频繁，请稍后再试");
+			}
 		}
 		
+	}
+	
+	/**
+	 * 校验短信发送频率(发票专用)
+	 * 1.校验同一手机号一定时间段内（1分钟内）的发送次数
+	 * @param mobile
+	 * @param msgType
+	 * @param orderId
+	 */
+	public void checkMsgFrequency4trade(String mobile, int msgType, String orderId) {
+		
+		String key = ModelConstant.KEY_VERICODE_FREQUENCY + msgType + ":" + orderId + ":" + mobile;
+		Boolean success = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 5, TimeUnit.MINUTES);	//5分钟内3次
+		if (!success) {
+			Long sendCount = stringRedisTemplate.opsForValue().increment(key);
+			if (sendCount > 3) {
+				throw new BizValidateException("发送过于频繁，请稍后再试");
+			}
+		}
 	}
 	
 	 /**
@@ -239,16 +275,13 @@ public class SmsServiceImpl implements SmsService {
 	public void checkMsgTotalLimit(String mobile) {
 		
 		String key = ModelConstant.KEY_VERICODE_TOTAL_LIMIT + mobile;
-		Object totalSent = stringRedisTemplate.opsForValue().get(key);
-		if (totalSent != null) {
-			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
-			if (sent > 15) {
+		Boolean success = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 24, TimeUnit.HOURS);	//设置一天内15条
+		if (!success) {
+			Long sendCount = stringRedisTemplate.opsForValue().increment(key, 1);
+			if (sendCount > 15) {
 				throw new BizValidateException("当日短信验证码发送次数超限，请联系社区客服。");
 			}
-		}else {
-			stringRedisTemplate.opsForValue().set(key, "1", 24, TimeUnit.HOURS);	//设置一天内10条
 		}
-		
 	}
 	
 	/**
@@ -258,17 +291,13 @@ public class SmsServiceImpl implements SmsService {
 	public void checkIpFrequency(String requestIp) {
 		
 		String key = ModelConstant.KEY_VERICODE_IP_FREQUENCY + requestIp;
-		Object totalSent = stringRedisTemplate.opsForValue().get(key);
-		if (totalSent != null) {
-			Long sent = stringRedisTemplate.opsForValue().increment(key, 1);
-			if (sent > 15) {
+		Boolean success = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 24, TimeUnit.HOURS);	//对于同一IP，设置24小时内的访问次数限制
+		if (!success) {
+			Long sendCount = stringRedisTemplate.opsForValue().increment(key);
+			if (sendCount > 15) {
 				throw new BizValidateException("发送过于频繁，请稍后再试");
 			}
-		}else {
-			stringRedisTemplate.opsForValue().increment(key, 1);
-			stringRedisTemplate.expire(key, 24, TimeUnit.HOURS);	//对于同一IP，设置30分钟内的访问次数限制
 		}
-		
 	}
 	
 	public static void main(String[] args) {
