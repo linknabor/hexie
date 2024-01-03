@@ -564,7 +564,7 @@ public class TemplateMsgService {
 			if (!StringUtils.isEmpty(url)) {
 				url = AppUtil.addAppOnUrl(url, appId);
 			}
-			if (templateType == 1) {
+			if (templateType == 0) {
 				CommonVO vo = new CommonVO();
 				vo.setFirst(new TemplateItem(billPushDetail.getShowFirstMsg()));
 				vo.setKeyword1(new TemplateItem(billPushDetail.getSectName())); //小区名称
@@ -659,7 +659,7 @@ public class TemplateMsgService {
 			url = AppUtil.addAppOnUrl(url, commentNotice.getAppid());
 			url = url.replaceAll("THREAD_ID", commentNotice.getInteractId());
 			int msgType = msgTemplate.getType();
-			if (msgType == 1) {
+			if (msgType == 0) {
 				CommonVO2 vo = new CommonVO2();
 				vo.setFirst(new TemplateItem("您好，你的意见建议已有反馈。"));
 				vo.setKeyword1(new TemplateItem(commentNotice.getContent()));
@@ -1068,7 +1068,7 @@ public class TemplateMsgService {
 			url += receiptId;
 			url = AppUtil.addAppOnUrl(url, receiptNotification.getAppid());
 			int msgType = msgTemplate.getType();
-			if (msgType == 1) {
+			if (msgType == 0) {
 				String first = "您的电子收据已开具。";
 		    	TemplateItem firstItem = new TemplateItem(first);
 		    	TemplateItem keywordItem1 = new TemplateItem(receiptId);
