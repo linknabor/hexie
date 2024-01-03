@@ -1028,7 +1028,11 @@ public class UserServiceImpl implements UserService {
 		
 		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(h5UserDTO);
 		if (!baseResult.isSuccess()) {
-			throw new BizValidateException(baseResult.getMessage());
+			if ("99".equals(baseResult.getResult())) {
+				throw new BizValidateException(baseResult.getMessage());
+			} else if ("199".equals(baseResult.getResult())) {
+				throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_H5LOGIN, 0l, baseResult.getMessage());
+			}
 		}
 		
 		HexieUser hexieUser = baseResult.getData();
