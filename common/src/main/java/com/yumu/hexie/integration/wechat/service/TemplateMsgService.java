@@ -575,7 +575,7 @@ public class TemplateMsgService {
 
 				TemplateMsg<CommonVO> msg = new TemplateMsg<>();
 				msg.setData(vo);
-				msg.setTemplate_id(String.valueOf(msgTemplate.getId()));
+				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setUrl(url);
 				msg.setTouser(openid);
 				wechatResponse = sendMsg(msg, accessToken);
@@ -605,7 +605,7 @@ public class TemplateMsgService {
 				TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
 				msg.setData(map);
 				msg.setUrl(url);
-				msg.setTemplate_id(String.valueOf(msgTemplate.getId()));
+				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setTouser(openid);
 				wechatResponse = sendMsg(msg, accessToken);
 			}
@@ -657,7 +657,7 @@ public class TemplateMsgService {
 
 				TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
 				msg.setData(vo);
-				msg.setTemplate_id(String.valueOf(msgTemplate.getId()));
+				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setUrl(url);
 				msg.setTouser(commentNotice.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
@@ -683,7 +683,7 @@ public class TemplateMsgService {
 				TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
 				msg.setData(map);
 				msg.setUrl(url);
-				msg.setTemplate_id(String.valueOf(msgTemplate.getId()));
+				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setTouser(commentNotice.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
 				
@@ -1066,7 +1066,7 @@ public class TemplateMsgService {
 
 				TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
 				msg.setData(vo);
-				msg.setTemplate_id(String.valueOf(msgTemplate.getId()));
+				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setUrl(url);
 				msg.setTouser(receiptNotification.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
@@ -1086,7 +1086,7 @@ public class TemplateMsgService {
 				
 				TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
 				msg.setData(map);
-				msg.setTemplate_id(String.valueOf(msgTemplate.getId()));
+				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setUrl(url);
 				msg.setTouser(receiptNotification.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
