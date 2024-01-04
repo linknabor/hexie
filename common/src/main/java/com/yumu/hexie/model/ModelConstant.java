@@ -494,6 +494,7 @@ public class ModelConstant {
 	public static final String KEY_EVENT_SCAN_SUBSCRIBE_QUEUE = "queue:event:scanSubscribe";	//扫码关注事件消息队列(未关注过的用户)
 	public static final String KEY_EVENT_SCAN_QUEUE = "queue:event:scan";	//扫码事件消息队列(已关注过的用户)
 	public static final String KEY_EVENT_VIEW_MINIPROGRAM = "queue:event:viewMiniprogram";	//用户查看小程序事件
+	public static final String KEY_EVENT_TEMPLATE_MSG_RETRY = "event:retry:";	//模板消息重试次数，后面接时间KEY，value是重试次数
 	
 	public static final String KEY_REGISER_AND_BIND_QUEUE = "queue:registerBind";
 	public static final String KEY_INVOICE_NOTIFICATION_LOCK = "lock:invoiceNotification:";	//开票成功通知-锁
