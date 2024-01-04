@@ -49,11 +49,15 @@ public class KeyToNameUtil {
 		keyName.put("01","现金");
 		keyName.put("02","转账");
 		keyName.put("03","POS");
-		keyName.put("04","支付宝");
-		keyName.put("05","财付通");
+		keyName.put("04","支付宝H5");
+		keyName.put("05","微信H5");
 		keyName.put("06","微信支付");
 		keyName.put("07","微信支付");
+		keyName.put("08","微信扫码");
+		keyName.put("09","支付宝扫码");
 		keyName.put("11","银行卡支付");
+		keyName.put("14", "微信小程序");
+		keyName.put("19", "支付宝小程序");
 		keyNameConfig.put(PAYMETHOD_TYPE, keyName);
 		
 		keyName = new HashMap<String, String>();

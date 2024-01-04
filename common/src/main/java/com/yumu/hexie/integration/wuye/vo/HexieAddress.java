@@ -2,6 +2,7 @@ package com.yumu.hexie.integration.wuye.vo;
 
 public class HexieAddress {
 	
+	private String cell_id;
 	private String cell_addr;
 	private String sect_id;
 	private String sect_name;
@@ -59,13 +60,17 @@ public class HexieAddress {
 	public void setCsp_id(String csp_id) {
 		this.csp_id = csp_id;
 	}
+	public String getCell_id() {
+		return cell_id;
+	}
+	public void setCell_id(String cell_id) {
+		this.cell_id = cell_id;
+	}
 	@Override
 	public String toString() {
-		return "HexieAddress [cell_addr=" + cell_addr + ", sect_id=" + sect_id + ", sect_name=" + sect_name
-				+ ", sect_addr=" + sect_addr + ", region_name=" + region_name + ", city_name=" + city_name
+		return "HexieAddress [cell_id=" + cell_id + ", cell_addr=" + cell_addr + ", sect_id=" + sect_id + ", sect_name="
+				+ sect_name + ", sect_addr=" + sect_addr + ", region_name=" + region_name + ", city_name=" + city_name
 				+ ", province_name=" + province_name + ", csp_id=" + csp_id + "]";
 	}
-	
-	
 	
 }

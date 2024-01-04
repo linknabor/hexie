@@ -61,7 +61,7 @@ public class SimpleCORSFilter implements Filter {
             String originHeader = request.getHeader("Origin");
             response.setHeader("Access-Control-Allow-Origin", originHeader);
 		}
-        response.setHeader("Access-Control-Allow-Credentials", "true");
+//        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, Access-Control-Allow-Token");
         response.setHeader("Access-Control-Expose-Headers", "Access-Control-Allow-Token");

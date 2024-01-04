@@ -277,6 +277,7 @@ public class ModelConstant {
 	public static final int EXCEPTION_BIZ_TYPE_COUPON = 8;
 	public static final int EXCEPTION_BIZ_TYPE_SYSTEM = 9;
 	public static final int EXCEPTION_BIZ_TYPE_TEMPLATEMSG = 10;
+	public static final int EXCEPTION_BIZ_TYPE_H5LOGIN = 11;
 	
 	public static final int EXCEPTION_LEVEL_INFO = 1;
 	public static final int EXCEPTION_LEVEL_ERROR = 2;
@@ -465,6 +466,9 @@ public class ModelConstant {
 	public static final String KEY_USER_SERVE_ROLE = "user:servRole";	//用户服务类型
 	public static final String KEY_USER_SUBSCRIBE_MSG_TEMPLATE = "user:subscribeMsgTemplate";	//用户订阅过的消息模板
 	
+	public static final String H5_USER_TYPE_ALIPAY = "1";
+	public static final String H5_USER_TYPE_WECHAT = "2";
+	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
 	
@@ -512,6 +516,7 @@ public class ModelConstant {
 	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 
 	public static final String KEY_USER_SESSION_KEY = "user:org:sessionKey:";	//小程序的sessionkey
+	public static final String KEY_ALI_USER_AUTH_TOKEN = "miniuser:alipay:authToken:";	//支付宝小程序authToken
 	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
 	
 	public static final String KEY_RGROUP_OWNER_REGION = "rgroup:owner:region:";	//后面接userId

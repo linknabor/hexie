@@ -104,4 +104,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public List<User> findByTelAndAppId(String tel, String appid);
 
 	public User findByAppIdAndUniqueCode(String appid, String uniqueCode);
+	
+	public List<User> findByAliuserid(String aliuserid);
+	
+	public List<User> findByOriSysAndOriUserId(String oriSys, Long oriUserId);
 }

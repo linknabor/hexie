@@ -13,6 +13,7 @@ public class PayWater implements Serializable {
 	private String tran_time;
 	private String bill_tran_amt;
 	private String paymethod;
+	private String invoiced;
 	
 	@Transient
 	public String getPaymethodStr(){
@@ -41,6 +42,12 @@ public class PayWater implements Serializable {
 	}
 	public void setPaymethod(String paymethod) {
 		this.paymethod = paymethod;
+	}
+	public String getInvoiced() {
+		return invoiced;
+	}
+	public void setInvoiced(String invoiced) {
+		this.invoiced = invoiced;
 	}
 	
 }

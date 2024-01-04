@@ -24,7 +24,8 @@ public class HexieUser implements Serializable {
 	private String user_tel;
 	private String is_house;//房屋数
 	private String office_tel;//小区电话
-	private String cell_addr;//小区地址
+	private String cell_id;	//房屋id
+	private String cell_addr;//房屋地址
 	private String sect_name;//小区名字
 	private long province_id;//省id
 	private String province_name;//省名
@@ -171,15 +172,22 @@ public class HexieUser implements Serializable {
 	public void setTotal_bind(Integer total_bind) {
 		this.total_bind = total_bind;
 	}
+	public String getCell_id() {
+		return cell_id;
+	}
+	public void setCell_id(String cell_id) {
+		this.cell_id = cell_id;
+	}
 	@Override
 	public String toString() {
 		return "HexieUser [user_id=" + user_id + ", user_name=" + user_name + ", user_head=" + user_head + ", user_sex="
 				+ user_sex + ", user_email=" + user_email + ", email_activie=" + email_activie + ", user_tel="
-				+ user_tel + ", is_house=" + is_house + ", office_tel=" + office_tel + ", cell_addr=" + cell_addr
-				+ ", sect_name=" + sect_name + ", province_id=" + province_id + ", province_name=" + province_name
-				+ ", city_id=" + city_id + ", city_name=" + city_name + ", region_id=" + region_id + ", region_name="
-				+ region_name + ", sect_addr=" + sect_addr + ", sect_id=" + sect_id + ", csp_id=" + csp_id
-				+ ", center_id=" + center_id + ", total_bind=" + total_bind + "]";
+				+ user_tel + ", is_house=" + is_house + ", office_tel=" + office_tel + ", cell_id=" + cell_id
+				+ ", cell_addr=" + cell_addr + ", sect_name=" + sect_name + ", province_id=" + province_id
+				+ ", province_name=" + province_name + ", city_id=" + city_id + ", city_name=" + city_name
+				+ ", region_id=" + region_id + ", region_name=" + region_name + ", sect_addr=" + sect_addr
+				+ ", sect_id=" + sect_id + ", csp_id=" + csp_id + ", center_id=" + center_id + ", total_bind="
+				+ total_bind + "]";
 	}
 	
 }

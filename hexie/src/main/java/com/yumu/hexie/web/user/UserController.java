@@ -54,6 +54,7 @@ import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 import com.yumu.hexie.vo.menu.GroupMenuInfo;
 import com.yumu.hexie.web.BaseController;
@@ -806,6 +807,131 @@ public class UserController extends BaseController{
         BeanUtils.copyProperties(dbuser, user);
         request.getSession().setAttribute(Constants.USER, user);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+    
+    /**
+     * 小程序登录
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/miniprogram/login/v2/{appid}/{code}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> alipayMiniLogin(HttpSession session, @PathVariable String appid, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        User user = null;
+        if (!StringUtils.isEmpty(code)) {
+            if (user == null) {
+                if (userService.checkDuplicateLogin(session, code)) {
+                    throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+                }
+                AccessTokenOAuth userOauth = userService.getAlipayAuth(appid, code);
+                log.info("userOauth : " + userOauth);
+                user = userService.saveAlipayMiniUserToken(userOauth);
+                //TODO 看以后访问量要不要缓存用户
+            }
+            session.setAttribute(Constants.USER, user);
+        }
+        if (user == null) {
+            return new BaseResult<UserInfo>().failMsg("用户不存在！");
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "login，耗时：" + ((endTime - beginTime) / 1000));
+
+        UserInfo userInfo = new UserInfo(user);
+        userInfo.setReqPath(reqPath);
+        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
+        userInfo.setPermission(true);
+        if (!isValid) {
+            throw new BizValidateException("没有访问权限");
+        }
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 小程序获取用户手机
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/miniprogram/phoneNumber", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> getAlipayMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> dataMap) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        String encryptedData = dataMap.get("encryptedData");
+        MiniUserPhone miniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
+        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+        	userService.recacheMiniUser(user);
+        }
+        BeanUtils.copyProperties(savedUser, user);
+        request.getSession().setAttribute(Constants.USER, user);
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "getPhoneNumber，耗时：" + ((endTime - beginTime) / 1000));
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setPermission(true);
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<UserInfo> h5Login(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
+		
+		long beginTime = System.currentTimeMillis();
+    	log.info("h5Login : " + h5UserDTO);
+    	if (StringUtils.isEmpty(h5UserDTO.getClientType())) {
+			if (org.apache.commons.lang3.StringUtils.isNumeric(h5UserDTO.getUserId())) {
+				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
+			} else {
+				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_WECHAT);
+			}
+		}
+    	User userAccount = null;
+    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
+    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
+    		if (userList != null && !userList.isEmpty() ) {
+    			for (User user : userList) {
+					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getMiniopenid())) {
+						userAccount = user;
+						break;
+					}
+				}
+			}
+		} else {
+			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
+				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
+			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
+				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
+			}
+		}
+    	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || 
+    			userAccount.getOriUserId() == null || 0L == userAccount.getOriUserId()) {
+    		userService.saveH5User(userAccount, h5UserDTO);
+		}
+		long endTime = System.currentTimeMillis();
+	    UserInfo userInfo = new UserInfo(userAccount);
+	    log.info("h5 user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
+	    
+	    session.setAttribute(Constants.USER, userAccount);
+	    return new BaseResult<UserInfo>().success(userInfo);
+
     }
     
         

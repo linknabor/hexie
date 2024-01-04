@@ -99,6 +99,9 @@ public class UserInfo implements Serializable {
 	private OrgInfo orgInfo;
 	private String miniopenid;	//小程序openid
 	
+	private String aliuserid;
+	private String aliappid;
+	
 	public static class OrgInfo {
 		
 	 	private String orgName;	//机构名称，机构操作员有这个字段
@@ -610,5 +613,20 @@ public class UserInfo implements Serializable {
 		this.miniopenid = miniopenid;
 	}
 
-	
+	public String getAliuserid() {
+		return aliuserid;
+	}
+
+	public void setAliuserid(String aliuserid) {
+		this.aliuserid = aliuserid;
+	}
+
+	public String getAliappid() {
+		return aliappid;
+	}
+
+	public void setAliappid(String aliappid) {
+		this.aliappid = aliappid;
+	}
+
 }
