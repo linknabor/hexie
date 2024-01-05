@@ -38,7 +38,6 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.integration.wechat.service.OAuthService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
-import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;

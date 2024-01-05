@@ -791,17 +791,13 @@ public class UserController extends BaseController{
         
         OrgOperator orgOperator = userService.getOrgOperator(user);
         UserInfo userInfo = new UserInfo(user, orgOperator);
-
         if (orgOperator != null) {
-        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
-            userInfo.setOrgMenuList(menuList);
+        	List<GroupMenuInfo> orgMenuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(orgMenuList);
 		}
-        userInfo.setReqPath(reqPath);
-        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
-        userInfo.setPermission(true);
-        if (!isValid) {
-            throw new BizValidateException("没有访问权限");
-        }
+        
+        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
+	    userInfo.setMenuList(menuList);
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
