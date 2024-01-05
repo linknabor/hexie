@@ -16,10 +16,6 @@ package com.yumu.hexie.service;
  */
 public interface RefreshTokenService {
 	
-    public void refreshAccessTokenJob();
-
-    public void refreshJsTicketJob();
-
 	void refreshMiniAccessTokenJob();
     
 }

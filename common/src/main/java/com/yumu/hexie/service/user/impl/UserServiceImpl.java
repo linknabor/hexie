@@ -558,6 +558,13 @@ public class UserServiceImpl implements UserService {
         Assert.hasText(code, "code不能为空。");
         return wechatCoreService.getMiniUserSessionKey(code);
     }
+	
+	@Override
+	public UserMiniprogram getWechatMiniUserSessionKey(String miniAppid, String code) throws Exception {
+		Assert.hasText(miniAppid, "miniAppid不能为空。");
+		Assert.hasText(code, "code不能为空。");
+		return wechatCoreService.getMiniUserSessionKey(miniAppid, code);
+	}
 
     @Override
     @Transactional
@@ -682,12 +689,12 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	public MiniUserPhone getMiniUserPhone(String code) {
+	public MiniUserPhone getMiniUserPhone(String code, String miniAppid) {
 		
 		Assert.hasText(code, "授权码不能为空。");
 		MiniUserPhone miniUserPhone = null;
 		try {
-			miniUserPhone = wechatCoreService.getMiniUserPhone(code);
+			miniUserPhone = wechatCoreService.getMiniUserPhone(code, miniAppid);
 			if (!StringUtils.isEmpty(miniUserPhone.getErrorcode())) {
 				throw new BizValidateException(miniUserPhone.getErrmsg());
 			}

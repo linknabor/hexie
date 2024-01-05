@@ -4,29 +4,23 @@
  */
 package com.yumu.hexie.service.impl;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.Constants;
-import com.yumu.hexie.common.util.JacksonJsonUtil;
-import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.integration.wechat.entity.MiniAccessToken;
-import com.yumu.hexie.integration.wechat.util.WeixinUtil;
+import com.yumu.hexie.integration.wechat.service.MiniprogramAuthService;
 import com.yumu.hexie.model.ModelConstant;
-import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.system.SystemConfig;
+import com.yumu.hexie.model.system.SystemConfigRepository;
 import com.yumu.hexie.service.RefreshTokenService;
-import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 
 /**
@@ -40,128 +34,56 @@ import com.yumu.hexie.service.common.WechatCoreService;
 @Service("refreshTokenService")
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
-	private static final String ACC_TOKEN = "ACCESS_TOKEN";
-	private static final String JS_TOKEN = "JS_TOKEN";
 	
     private static final Logger logger = LoggerFactory.getLogger("com.yumu.hexie.schedule");
     
     @Autowired
-    private SystemConfigService systemConfigService;
-    @Autowired
-    @Qualifier("systemConfigRedisTemplate")
-    private RedisTemplate<String, SystemConfig> redisTemplate;
-    @Value("${wechat.miniprogramAppId}")
-	private String miniprogramAppid;
-    @Autowired
     private WechatCoreService wechatCoreService;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
-    
-    /**
-     * 获取AccessToken
-     * 大于等于1小时50分，更新token
-     */
-//    @Scheduled(cron = "0 0/10 * * * ?")
-    public void refreshAccessTokenJob() {
-        if(!Constants.MAIN_SERVER){
-            return;
-        }
-        logger.error("--------------------refresh token[B]-------------------");
-        String sysKey = Keys.systemConfigKey(ACC_TOKEN);
-        boolean updateFlag = checkTokenValidate(sysKey);
-        if (updateFlag) {
-			logger.info("will update AccessToken .");
-			AccessToken at = WeixinUtil.getAccessToken();
-			if (at == null) {
-				logger.error("获取token失败----------------------------------------------！！！！！！！！！！！");
-	            return;
-	        }
-			SystemConfig config = null;
-			try {
-				config = new SystemConfig(ACC_TOKEN, JacksonJsonUtil.beanToJson(at));
-				config.setCreateDate(System.currentTimeMillis());
-				redisTemplate.opsForValue().set(sysKey, config);
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-			
-		}
-        logger.error("--------------------refresh token[E]-------------------");
-    }
-
-    /**
-     * 获取jstoken
-     * 大于等于1小时50分，更新token
-     */
-//    @Scheduled(cron = "0 0/10 * * * ?")
-    public void refreshJsTicketJob() {
-        if(!Constants.MAIN_SERVER){
-            return;
-        }
-        logger.error("--------------------refresh ticket[B]-------------------");
-        String sysKey = Keys.systemConfigKey(JS_TOKEN);
-        boolean updateFlag = checkTokenValidate(sysKey);
-        if (updateFlag) {
-        	 String jsToken = WeixinUtil.getRefreshJsTicket(systemConfigService.queryWXAToken(""));
-             if (StringUtils.isEmpty(jsToken)) {
-                 logger.error("获取ticket失败----------------------------------------------！！！！！！！！！！！");
-                 return;
-             }
-             SystemConfig config = new SystemConfig(JS_TOKEN, jsToken);
-             config.setCreateDate(System.currentTimeMillis());
-             redisTemplate.opsForValue().set(sysKey, config);
-		}
-        logger.error("--------------------refresh ticket[E]-------------------");
-    }
-    
-    /**
-     * check token的时效
-     * @param sysKey
-     * @return
-     */
-    private boolean checkTokenValidate(String sysKey) {
-    	
-    	boolean updateFlag = false;
-    	SystemConfig systemConfig = redisTemplate.opsForValue().get(sysKey);
-        if (systemConfig == null) {
-			updateFlag = true;
-		}else {
-			Long createDate = systemConfig.getCreateDate();
-			if (createDate == null) {
-				createDate = 0l;
-			}
-			long currDate = System.currentTimeMillis();
-			if ((currDate - createDate) >= ((60+50)*60*1000)) {	//大于等于1小时50分，更新token
-				updateFlag = true;
-			}
-		}
-        return updateFlag;
-    	
-    }
+    @Autowired
+	private SystemConfigRepository systemConfigRepository;
     
     /**
      * 获取小程序AccessToken
      * 大于等于1小时50分，更新token
      */
     @Scheduled(cron = "0 0/10 * * * ?")
-    @Override
-    public void refreshMiniAccessTokenJob() {
-        if(!Constants.MAIN_SERVER){
-            return;
-        }
-        logger.error("--------------------refresh mini token[B]-------------------");
-        String sysKey = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniprogramAppid;
+	@Override
+	public void refreshMiniAccessTokenJob() {
+    	
+    	List<SystemConfig> configs = systemConfigRepository.findAll();
+    	if (configs != null && configs.size() > 0) {
+    		for (SystemConfig systemConfig : configs) {
+    			String sysKey = systemConfig.getSysKey();
+    			if (sysKey.indexOf(MiniprogramAuthService.MINI_APP_KEY_PREFIX) > -1) {
+					String miniAppid = sysKey.substring(sysKey.lastIndexOf("_")+1, sysKey.length());
+					refreshMiniTokenByMiniAppid(miniAppid);
+				}
+			}
+    		
+		}
+
+	}
+    
+    /**
+     * 更新小程序AccessToken
+     * @param miniAppid
+     */
+	private void refreshMiniTokenByMiniAppid(String miniAppid) {
+		logger.error("--------------------refresh mini token[B]-------------------");
+        String sysKey = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniAppid;
         Long expire = stringRedisTemplate.opsForValue().getOperations().getExpire(sysKey);	//返回-1表示永久，返回-2表示没有值
-        logger.info("expire :" + expire);
+        logger.info("miniappid " + miniAppid + ", expire :" + expire);
         boolean updateFlag = false;
         if (expire <= 60*10l) {	//小于等于10分钟的，重新获取token
         	updateFlag = true;
 		}
         if (updateFlag) {
-			logger.info("will update miniprogram accessToken .");
+			logger.info("will update miniprogram accessToken. miniappid : " + miniAppid);
 			MiniAccessToken miniAccessToken = null;
 			try {
-				miniAccessToken = wechatCoreService.getMiniAccessToken();
+				miniAccessToken = wechatCoreService.getMiniAccessToken(miniAppid);
 				if (!StringUtils.isEmpty(miniAccessToken.getErrcode())) {
 					logger.info("get miniAccessToken failed, errcode : " + miniAccessToken.getErrcode() + ", errormsg: " + miniAccessToken.getErrmsg());
 					return;
@@ -173,8 +95,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 			}
 			
 		}
-        
         logger.error("--------------------refresh mini token[E]-------------------");
-    }
+	}
     
 }

@@ -707,6 +707,7 @@ public class UserController extends BaseController{
      * @return
      * @throws Exception
      */
+	@Deprecated
     @RequestMapping(value = "/miniprogram/login/{code}", method = RequestMethod.POST)
     @ResponseBody
     public BaseResult<UserInfo> miniLogin(HttpSession session, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
@@ -751,6 +752,64 @@ public class UserController extends BaseController{
     }
     
     /**
+     * 小程序登陆v2
+     * @param session
+     * @param appid
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/login/v2/{appid}/{code}", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<UserInfo> miniLogin(HttpSession session, @PathVariable String appid, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+		long beginTime = System.currentTimeMillis();
+		User userAccount = null;
+    	
+		if (StringUtil.isNotEmpty(code)) {
+		    if(Boolean.TRUE.equals(testMode)) {
+		        try {
+			        long id = Long.parseLong(code);
+			    	userAccount = userService.getById(id);
+		        } catch(Exception ignored){
+
+		        }
+		    }
+		    if(userAccount == null) {
+		    	if (userService.checkDuplicateLogin(session, code)) {
+					throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+				}
+				UserMiniprogram miniUser = userService.getWechatMiniUserSessionKey(appid, code);
+				userAccount = userService.saveMiniUserSessionKey(miniUser);
+				if (!StringUtils.isEmpty(userAccount.getOpenid()) && !"0".equals(userAccount.getOpenid())) {
+					userService.recacheMiniUser(userAccount);
+				}
+			}
+		    session.setAttribute(Constants.USER, userAccount);
+		}
+		
+		long endTime = System.currentTimeMillis();
+		log.info("user:" + userAccount.getName() + "login，耗时：" + ((endTime-beginTime)/1000));
+		
+		
+		String roleId = userAccount.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        OrgOperator orgOperator = userService.getOrgOperator(userAccount);
+        UserInfo userInfo = new UserInfo(userAccount, orgOperator);
+        
+        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(userAccount.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
+	    userInfo.setMenuList(menuList);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> orgMenuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(orgMenuList);
+		}
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
      * 小程序获取用户手机
      *
      * @param session
@@ -763,7 +822,7 @@ public class UserController extends BaseController{
     @ResponseBody
     public BaseResult<UserInfo> getMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @PathVariable String code) throws Exception {
         long beginTime = System.currentTimeMillis();
-        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(code);
+        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(code, "");
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
         if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
         	userService.recacheMiniUser(user);
@@ -786,6 +845,23 @@ public class UserController extends BaseController{
 		}
         userInfo.setPermission(true);
         return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 小程序获取用户手机
+     *
+     * @param user
+     * @param appid
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/phoneNumber/{appid}/{code}", method = RequestMethod.GET)
+    @ResponseBody
+    public BaseResult<String> getMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user,  
+    		@PathVariable String appid, @PathVariable String code) throws Exception {
+        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(code, appid);
+        return new BaseResult<String>().success(miniUserPhone.getPhone_info().getPurePhoneNumber());
     }
     
     /**

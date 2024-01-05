@@ -13,8 +13,6 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.payment.PaymentOrder;
 import com.yumu.hexie.model.payment.RefundOrder;
 
-import java.io.BufferedInputStream;
-
 public interface WechatCoreService {
 
 	public JsSign getJsSign(String url, String appId);
@@ -32,10 +30,14 @@ public interface WechatCoreService {
 	public WxRefundOrder refundQuery(String outTradeNo);
 
 	UserMiniprogram getMiniUserSessionKey(String code) throws Exception;
+	
+	UserMiniprogram getMiniUserSessionKey(String miniAppid, String code) throws Exception;
 
-	MiniAccessToken getMiniAccessToken() throws Exception;
+	MiniAccessToken getMiniAccessToken(String miniAppid) throws Exception;
 
-	MiniUserPhone getMiniUserPhone(String code) throws Exception;
+	MiniUserPhone getMiniUserPhone(String code, String miniprogramAppid) throws Exception;
 
-	String getUnlimitedQrcode(String path, String param) throws Exception;
+	String getUnlimitedQrcode(String path, String param, String miniprogramAppid) throws Exception;
+
+
 }

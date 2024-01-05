@@ -167,13 +167,24 @@ public class WechatCoreServiceImpl implements WechatCoreService {
     }
     
     /**
+	 * 通过code获取微信小程序用户信息
+	 * @param code
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public UserMiniprogram getMiniUserSessionKey(String miniAppid, String code) throws Exception {
+		return miniprogramAuthService.getMiniUserSessionKeyByAppid(miniAppid, code);
+	}
+    
+    /**
      * 通过code获取微信小程序accessToken
      * @return
      * @throws Exception
      */
     @Override
-    public MiniAccessToken getMiniAccessToken() throws Exception {
-        return miniprogramAuthService.getMiniAccessToken();
+    public MiniAccessToken getMiniAccessToken(String miniAppid) throws Exception {
+        return miniprogramAuthService.getMiniAccessToken(miniAppid);
     }
     
     /**
@@ -183,13 +194,13 @@ public class WechatCoreServiceImpl implements WechatCoreService {
      * @throws Exception
      */
     @Override
-    public MiniUserPhone getMiniUserPhone(String code) throws Exception {
-        return miniprogramAuthService.getPhoneNumber(code);
+    public MiniUserPhone getMiniUserPhone(String code, String miniprogramAppid) throws Exception {
+        return miniprogramAuthService.getPhoneNumber(code, miniprogramAppid);
     }
 
 	@Override
-	public String getUnlimitedQrcode(String path, String param) throws Exception {
-		return miniprogramAuthService.getUnlimitedQrcode(path, param);
+	public String getUnlimitedQrcode(String path, String param, String miniprogramAppid) throws Exception {
+		return miniprogramAuthService.getUnlimitedQrcode(path, param, miniprogramAppid);
 	}
 
 

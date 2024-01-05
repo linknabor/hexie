@@ -46,6 +46,12 @@ public class ConstantConfig {
 	
 	@Value("${wechat.notifyUrl}")
 	private String wechatNotifyUrl;
+	
+	@Value("${wechat.miniprogramAppId}")
+	private String wechatMiniProgramAppid;
+	
+	@Value("${wechat.miniprogramSecret}")
+	private String wechatMiniProgramSecret;
 	/*微信参数end#################################*/
 	
 	/*支付宝参数begin#################################*/
@@ -79,6 +85,8 @@ public class ConstantConfig {
 		ConstantWeChat.UNIFIEDURL = wechatUnifiedUrl;
 		ConstantWeChat.NOTIFYURL = wechatNotifyUrl;
 		ConstantWeChat.COMPONENT_APPID = wechatComponentAppId;
+		ConstantWeChat.MINIPROGRAM_APPID = wechatMiniProgramAppid;
+		ConstantWeChat.MINIPROGRAM_SECRET = wechatMiniProgramSecret;
 		
 		ConstantAlipay.APPID = alipayAppId;
 		ConstantAlipay.SECRET = alipayAppSecret;

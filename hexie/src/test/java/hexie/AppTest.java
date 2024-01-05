@@ -123,6 +123,26 @@ public class AppTest extends TestCase {
 		}
 		
 	}
+	
+	@Test
+	public void decrypt() throws IOException{
+		
+		Properties sysProp = System.getProperties();
+		String password = sysProp.getProperty("jasypt.encryptor.password");
+		System.out.println("password : " + password);
+		
+		String miniprogramAppId = "7ICVuS7Hk8bvyWGM3zvPfZuMtdrf5YgjMk33M2V1i8E=";
+		String miniprogramSecret = "2laD+WaEwQApfh0jv4EjWWU8f8/Kq51GWgbGL0v4d70R9NMX9zcPUBOgngQTmVbW";
+		
+		BasicTextEncryptor textEncryptor = new BasicTextEncryptor();
+        textEncryptor.setPassword(password);
+        
+        String decryptMiniAppid = textEncryptor.decrypt(miniprogramAppId);
+        System.out.println("decryptMiniAppid:" + decryptMiniAppid);
+        
+        String decryptMiniSecret = textEncryptor.decrypt(miniprogramSecret);
+        System.out.println("decryptMiniSecret:" + decryptMiniSecret);
+	}
 
 
 
