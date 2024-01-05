@@ -747,6 +747,7 @@ public class UserController extends BaseController{
         	List<GroupMenuInfo> orgMenuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
             userInfo.setOrgMenuList(orgMenuList);
 		}
+        userInfo.setPermission(true);
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
@@ -798,6 +799,7 @@ public class UserController extends BaseController{
         
         List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
 	    userInfo.setMenuList(menuList);
+	    userInfo.setPermission(true);
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
