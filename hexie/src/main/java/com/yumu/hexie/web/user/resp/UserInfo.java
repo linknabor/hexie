@@ -530,7 +530,7 @@ public class UserInfo implements Serializable {
 	public void setRepairService(boolean repairService) {
 		this.repairService = repairService;
 	}
-  
+
 	public String getOpenid() {
 		return openid;
 	}
@@ -546,7 +546,7 @@ public class UserInfo implements Serializable {
 	public void setPermission(boolean permission) {
 		this.permission = permission;
 	}
-	
+
 	public String getReqPath() {
 		return reqPath;
 	}

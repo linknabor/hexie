@@ -50,7 +50,6 @@ import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.vo.RgroupOrder;
 import com.yumu.hexie.vo.RgroupOrdersVO;
 
-
 @Service("rgroupService")
 public class RgroupServiceImpl implements RgroupService {
 	private static final Logger log = LoggerFactory.getLogger(BaseOrderServiceImpl.class);
@@ -88,6 +87,7 @@ public class RgroupServiceImpl implements RgroupService {
 	 * @return
 	 */
 	public List<RgroupAreaItem> addProcessStatus(List<RgroupAreaItem> result) {
+		//TODO
         for(RgroupAreaItem item : result){
             String stock = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_STOCK + item.getProductId());
     		String freeze = redisTemplate.opsForValue().get(ModelConstant.KEY_PRO_FREEZE + item.getProductId());

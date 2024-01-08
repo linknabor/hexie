@@ -424,7 +424,6 @@ public class ModelConstant {
 	public static final String KEY_UPDATE_SERVICE_CFG_QUEUE = "queue:servicecfg:update";	//服务配置更新
 	public static final String KEY_UPDATE_ORDER_STATUS_QUEUE = "queue:orderstatus:update";	//订单状态（服务、特卖、团购）更新
 	public static final String KEY_NOTIFY_DELIVERY_QUEUE = "queue:noitfy:delivery";	//特卖、团购快递发货通知
-	public static final String KEY_NOTIFY_PROMOTION_QUEUE = "queue:noitfy:promotion";	//推广下单通知
 	public static final String KEY_NOTIFY_PARTNER_REFUND_QUEUE = "queue:notify:partnerRefund";	//合伙人退款通知
 	public static final String KEY_NOTIFY_ESHOP_REFUND_QUEUE = "queue:notify:eshopRefund";	//合伙人退款通知
 	public static final String KEY_NOTIFY_WUYE_COUPON_QUEUE = "queue:notify:wuyeCoupon";	//物业红包消费通知
@@ -516,7 +515,7 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_ARRIVAL_NOTICE_QUEUE = "queue:notify:rgroup:arriavalNotice";	//团购到货提醒。发给客户
 	public static final String KEY_PAGE_TIPS_SWITCH_SECT = "tips:switchsect:";	//后面接page
 
-	public static final String KEY_USER_SESSION_KEY = "user:org:sessionKey:";	//小程序的sessionkey
+	public static final String KEY_USER_SESSION_KEY = "miniuser:sessionKey:";	//小程序的sessionkey
 	public static final String KEY_ALI_USER_AUTH_TOKEN = "miniuser:alipay:authToken:";	//支付宝小程序authToken
 	public static final String KEY_TYPE_ORG_MENU = "cfg:page:org:menu";		//机构工作人员菜单
 	

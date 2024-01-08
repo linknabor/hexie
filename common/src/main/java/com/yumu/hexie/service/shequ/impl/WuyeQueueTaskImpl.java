@@ -360,6 +360,9 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
                         	isSuccess = true;	//未配置模板消息
 						}
 						
+						logger.info("wechatResponse : " + wechatResponse);
+
+						
 					} else if ("02".equals(type)) {
 						
 						logger.info("event type : " + type + ", apply receipt . " );

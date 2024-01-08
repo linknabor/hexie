@@ -132,16 +132,16 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "IF(?3='4', rule.endDate < CURRENT_TIMESTAMP(), 1=1) ))) "
 			+ "and rule.status <> " + ModelConstant.RULE_STATUS_DEL + " "
 			, countQuery = "select count(1) from rgrouprule rule "
-				+ "where rule.ownerId = ?1 "
-				+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
-				+ "and IF (?3='1', rule.status = '1' "
+			+ "where rule.ownerId = ?1 "
+			+ "and IF (?2!='', rule.description like CONCAT('%',?2,'%'), 1=1) "
+			+ "and IF (?3='1', rule.status = '1' "
 				+ "and rule.startDate <= CURRENT_TIMESTAMP() "
 				+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
 				+ "IF(?3='2', rule.status = '0' "
 				+ "and rule.startDate <= CURRENT_TIMESTAMP() "
 				+ "and rule.endDate >= CURRENT_TIMESTAMP(), "
-				+ "IF(?3='3', rule.status = '1' "
-				+ "and rule.startDate > CURRENT_TIMESTAMP() , "
+			+ "IF(?3='3', rule.status = '1' "
+			+ "and rule.startDate > CURRENT_TIMESTAMP() , "
 				+ "IF(?3='4', (rule.endDate < CURRENT_TIMESTAMP() or rule.status = '2' ), 1=1) ))) "
 				+ "and rule.status <> " + ModelConstant.RULE_STATUS_DEL + " "
 			, nativeQuery = true)
@@ -157,8 +157,8 @@ public interface RgroupRuleRepository extends JpaRepository<RgroupRule, Long> {
 			+ "group by a.id "
 			, nativeQuery = true)
 	List<Object[]> queryGroupByDepotId(String depotId);
-	
-	
+
+
 	@Query(value = "select " + sqlColumn3
 			+ "from rgrouprule a "
 			+ "join ProductRule b on a.id = b.ruleId "

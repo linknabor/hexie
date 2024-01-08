@@ -8,7 +8,7 @@ import com.yumu.hexie.model.BaseModel;
 public class BottomIcon extends BaseModel {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8422693309475336542L;
 
@@ -19,7 +19,7 @@ public class BottomIcon extends BaseModel {
 	private Integer sort;
 	private String iconKey;
 	private String aliasName;
-	
+
 	public String getIconName() {
 		return iconName;
 	}

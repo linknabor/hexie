@@ -109,12 +109,28 @@ public interface UserService {
 	User switchSect(User user, SwitchSectReq switchSectReq);
 	
 	/**
+	 * 获取物业id
+	 * @param user
+	 * @return 
+	 */
+	String bindWuYeIdSync(User user);
+
+	/**
 	 * 获取微信小程序用户登陆key
 	 * @param code
 	 * @return
 	 * @throws Exception
 	 */
 	UserMiniprogram getWechatMiniUserSessionKey(String code) throws Exception;
+	
+	/**
+	 * 获取微信小程序用户登陆key
+	 * @param miniAppid
+	 * @param code
+	 * @return
+	 * @throws Exception
+	 */
+	UserMiniprogram getWechatMiniUserSessionKey(String miniAppid, String code) throws Exception;
 	
 	/**
 	 * 通过unionid获取用户信息
@@ -156,7 +172,7 @@ public interface UserService {
 	 * @param code
 	 * @return
 	 */
-	MiniUserPhone getMiniUserPhone(String code);
+	MiniUserPhone getMiniUserPhone(User user, String code);
 	
 	/**
 	 * 保存小程序用户手机
@@ -180,13 +196,6 @@ public interface UserService {
 	 * @return
 	 */
 	boolean bindMiniUser(BaseEventDTO baseEventDTO);
-	
-	/**
-	 * 获取物业id
-	 * @param user
-	 * @return 
-	 */
-	String bindWuYeIdSync(User user);
 	
 	/**
 	 * 更新用户unionid
