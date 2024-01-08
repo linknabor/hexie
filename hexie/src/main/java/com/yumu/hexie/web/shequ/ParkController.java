@@ -33,8 +33,8 @@ public class ParkController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(value = "/getIndexCar", method = RequestMethod.GET)
-    public BaseResult<UserCarList> getIndexCar(@ModelAttribute(Constants.USER) User user) throws Exception {
-        UserCarList userCarList = parkService.getUserCar(user);
+    public BaseResult<UserCarList> getIndexCar(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String parkId) throws Exception {
+        UserCarList userCarList = parkService.getUserCar(user, parkId);
         return BaseResult.successResult(userCarList);
     }
 

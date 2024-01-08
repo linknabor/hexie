@@ -11,7 +11,6 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -46,13 +45,14 @@ public class ParkUtil {
      * @return
      * @throws Exception
      */
-    public CommonResponse<UserCarList> getUserCar(User user) throws Exception {
+    public CommonResponse<UserCarList> getUserCar(User user, String parkId) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_PARK_MORE_URL;
 
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", String.valueOf(user.getAppId()));
+        map.put("park_id", parkId);
 
         TypeReference<CommonResponse<UserCarList>> typeReference = new TypeReference<CommonResponse<UserCarList>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
