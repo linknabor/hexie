@@ -1052,7 +1052,6 @@ public class TemplateMsgService {
 	public WechatResponse sendFinishReceiveMessage(ReceiptNotification receiptNotification, String accessToken) {
 		
 		log.info("sendFinishReceiveMessage : " + receiptNotification);
-
 		WechatResponse wechatResponse = null;
 		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RECEIPT_FINISH, receiptNotification.getAppid());
 		if (msgTemplate == null) {
