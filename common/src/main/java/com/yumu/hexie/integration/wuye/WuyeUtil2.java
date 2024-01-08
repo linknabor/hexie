@@ -884,7 +884,7 @@ public class WuyeUtil2 {
 		return baseResult;
 
 	}
-
+	
 	/**
 	 * 支付平台h5用户注册登陆
 	 * @param user
@@ -902,6 +902,8 @@ public class WuyeUtil2 {
 		baseResult.setResult(hexieResponse.getResult());
 		return baseResult;
 
-}
+	}
 
+
+	
 }

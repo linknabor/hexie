@@ -1072,6 +1072,7 @@ public class TemplateMsgService {
 			
 			log.info("receiptId : " + receiptId);
 			log.info("msgType : " + msgType);
+
 			if (msgType == 0) {
 				String first = "您的电子收据已开具。";
 		    	TemplateItem firstItem = new TemplateItem(first);

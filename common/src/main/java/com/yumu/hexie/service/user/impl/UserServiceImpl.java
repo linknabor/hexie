@@ -490,7 +490,7 @@ public class UserServiceImpl implements UserService {
 		
 		return getAlipayAuth(null, code);
 		
-		}
+	}
 		
 	@Override
 	public AccessTokenOAuth getAlipayAuth(String appid, String code) {
@@ -937,7 +937,7 @@ public class UserServiceImpl implements UserService {
 	public User getByMiniopenid(String miniopenid) {
 		return userRepository.findByMiniopenid(miniopenid);
 	}
-
+	
 	@Override
     @Transactional
     public User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth) {
@@ -954,7 +954,7 @@ public class UserServiceImpl implements UserService {
     					if (!StringUtils.isEmpty(dbUser.getTel())) {
     						userAccount = dbUser;
     						break;
-}
+    					}
     				}
 				} else {
 					userAccount = userList.get(0);
