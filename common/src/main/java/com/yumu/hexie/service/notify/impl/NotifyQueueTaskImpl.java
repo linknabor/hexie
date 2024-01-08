@@ -62,7 +62,6 @@ import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
-import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.UserNoticeService;
 
@@ -97,8 +96,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     private WechatMsgService wechatMsgService;
     @Autowired
     private NoticeService noticeService;
-    @Autowired
-    private CommunityService communityService;
     @Autowired
     private BizErrorRepository bizErrorRepository;
     @Autowired
@@ -1135,10 +1132,18 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 }
                 if (!isSuccess) {
-                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+                    String retryKey = ModelConstant.KEY_EVENT_TEMPLATE_MSG_RETRY + sysSource + ":" +orderId;
+					Long retry = redisTemplate.opsForValue().increment(retryKey);
+					if (retry <= 5) {
+						logger.info(",sg4FinishReceipt queue consume failed !, repush into the queue. json : " + queue);
+						redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+					} else {
+						logger.info("retry times reached max, will discard the msg, orderId : " + orderId);
+						redisTemplate.delete(retryKey);
+					}
+                    
                 }
             
-                
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
