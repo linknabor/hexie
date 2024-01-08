@@ -1062,6 +1062,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 ReceiptNotification in = objectMapper.readValue(queue, new TypeReference<ReceiptNotification>() {});
+                logger.info("receiptNotification is : " + in);
                 String orderId = in.getTradeWaterId();	//交易流水号
                 String appid = in.getAppid();	//判断贵州还是上海
                 
