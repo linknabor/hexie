@@ -171,11 +171,16 @@ public class SystemConfigServiceImpl implements SystemConfigService {
                    log.error("queryWXAccToken failed :", e);
                 }
             }
-            throw new BizValidateException("微信token没有记录");
+            throw new BizValidateException("未获取到token, appid : " + appId);
 		
     	} else {
     		
-    		String authorizerAccessToken = redisRepository.getAuthorizerAccessToken(ConstantWeChat.KEY_AUTHORIZER_ACCESS_TOKEN + appId);
+    		String authorizerAccessToken = "";
+			try {
+				authorizerAccessToken = redisRepository.getAuthorizerAccessToken(ConstantWeChat.KEY_AUTHORIZER_ACCESS_TOKEN + appId);
+			} catch (Exception e) {
+				log.error("queryWXAccToken failed :", e);
+			}
     		return authorizerAccessToken;
     		
 		}
