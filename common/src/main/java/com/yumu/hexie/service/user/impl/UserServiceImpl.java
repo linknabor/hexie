@@ -1069,5 +1069,4 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByOriSysAndOriUserId(oriSys, oriUserId);
 	}
 
-
 }

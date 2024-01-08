@@ -904,4 +904,23 @@ public class WuyeUtil2 {
 
 	}
 
+	/**
+	 * 支付平台h5用户注册登陆
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<HexieUser> h5UserLogin(H5UserDTO aliUserDTO) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(new User(), "");
+		requestUrl += H5_USER_LOGIN_URL;
+		TypeReference<CommonResponse<HexieUser>> typeReference = new TypeReference<CommonResponse<HexieUser>>(){};
+		CommonResponse<HexieUser> hexieResponse = restUtil.exchangeOnUri(requestUrl, aliUserDTO, typeReference);
+		BaseResult<HexieUser> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		baseResult.setResult(hexieResponse.getResult());
+		return baseResult;
+
+}
+
 }
