@@ -226,6 +226,10 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 								logger.error("require subscribe, 请联系系统管理员！");
 								isSuccess = true;
 							}
+							if (wechatResponse.getErrcode() == 48001) {
+								logger.error("api unauthorized, 请联系系统管理员！");
+								isSuccess = true;
+							}
 							if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
 	                        	isSuccess = true;	//未配置模板消息							
 	                        }
@@ -355,6 +359,10 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 						}
 						if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
                         	isSuccess = true;
+						}
+						if (wechatResponse.getErrcode() == 48001) {
+							logger.error("api unauthorized, 请联系系统管理员！");
+							isSuccess = true;
 						}
 						if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                         	isSuccess = true;	//未配置模板消息
