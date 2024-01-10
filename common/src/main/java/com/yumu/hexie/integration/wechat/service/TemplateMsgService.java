@@ -689,7 +689,7 @@ public class TemplateMsgService {
 				map.put("thing1", dataMap);
 				
 				dataMap = new HashMap<>();
-				dataMap.put("value", "");
+				dataMap.put("value", "-");
 				map.put("phone_number2", dataMap);
 				
 				TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
