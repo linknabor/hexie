@@ -1,5 +1,6 @@
 package com.yumu.hexie.service.msgtemplate.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,9 @@ public class WechatMsgServiceImpl implements WechatMsgService {
 	@Cacheable(cacheNames = ModelConstant.KEY_SUBSCRIBE_MSG_TEMPLATE, key = "#appId+'_'+#type+'_'+#bizType")
     public List<MsgTemplate> getSubscribeMsgTemplate(String appId, int type, int bizType) {
     	
-    	Assert.hasText(appId, "appId不能为空。");
+    	if (StringUtils.isEmpty(appId)) {
+			return new ArrayList<>();
+		}
     	return msgTempalateRepository.findByAppidAndTypeAndBizType(appId, type, bizType);
     	
     }
