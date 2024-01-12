@@ -654,10 +654,16 @@ public class UserController extends BaseController{
 	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
 			}
 	    	if (menuList.isEmpty()) {
+	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
+			}
+	    	if (menuList.isEmpty()) {
 		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
 			}
 	    } else {	//未绑定房屋的
 	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 2);	//表示绑定了房屋的默认菜单
+	    	if (menuList.isEmpty()) {
+	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
+			}
 	    	if (menuList.isEmpty()) {
 		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
 			}
