@@ -16,7 +16,7 @@ public interface CommunityService {
     List<InteractInfoResp> getInteractList(User user, InteractReq req) throws Exception;
 
     //2.获取互动分类
-    List<Map<String, String>> getInteractType(User user) throws Exception;
+    List<Map<String, String>> getInteractType(User user, String appid) throws Exception;
 
     //3.添加新帖子
     void addInteract(User user, SaveInteractInfoReq req) throws Exception;

@@ -66,7 +66,11 @@ public class CommunityController extends BaseController{
 	@RequestMapping(value = "/interact/getInteractType", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<Map<String, String>>> getInteractType(@ModelAttribute(Constants.USER)User user) throws Exception {
-		List<Map<String, String>> list = communityService.getInteractType(user);
+		String appid = user.getAppId();
+		if(StringUtils.isEmpty(appid)) {
+			appid = user.getMiniAppId();
+		}
+		List<Map<String, String>> list = communityService.getInteractType(user, appid);
 		return BaseResult.successResult(list);
 	}
 
