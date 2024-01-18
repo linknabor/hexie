@@ -85,6 +85,7 @@ public class CommunityController extends BaseController{
 	@RequestMapping(value = "/interact/addInteract", method = RequestMethod.POST)
 	@ResponseBody
 	public BaseResult<String> addThread(@ModelAttribute(Constants.USER)User user, @RequestBody SaveInteractInfoReq req) throws Exception{
+		log.info("content length : " + req.getEx_content().length());
 		if(req.getEx_content().length()>200) {
 			return BaseResult.fail("发布信息内容超过200字。");
 		}
