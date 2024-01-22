@@ -1287,6 +1287,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 InteractCommentNotice commentNotice = objectMapper.readValue(str, InteractCommentNotice.class);
                 logger.info("strat to InteractCommentNotice queue : " + commentNotice);
+                
+                if (StringUtils.isEmpty(commentNotice.getAppid())) {
+					logger.warn("user appid is null, will skip noticing !");
+					continue;
+				}
 
                 //保存到通知表
                 //添加到消息中心
