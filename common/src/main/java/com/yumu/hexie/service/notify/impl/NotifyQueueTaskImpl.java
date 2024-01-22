@@ -1316,8 +1316,40 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 boolean isSuccess = false;
                 try {
-                    gotongService.sendInteractNotification(commentNotice);
-                    isSuccess = true;
+                    WechatResponse wechatResponse = gotongService.sendInteractNotification(commentNotice);
+                    logger.info("wechatResponse : " + wechatResponse);
+					
+					if (wechatResponse.getErrcode() == 0) {
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 40037) {
+						logger.error("invalid template_id, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 45009) {
+						logger.error("reach max api daily quota limit, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 43004) {
+						logger.error("require subscribe, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
+                    	isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 48001) {
+						logger.error("api unauthorized, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 99998) {
+                    	isSuccess = true;	//appid为空
+					}
+					if (wechatResponse.getErrcode() == 99999) {
+                    	isSuccess = true;	//未配置模板消息
+					}
+					
+					logger.info("wechatResponse : " + wechatResponse);
+                    
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }
