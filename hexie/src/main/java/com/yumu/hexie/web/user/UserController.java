@@ -948,6 +948,14 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<UserInfo> h5Login(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getUserId()) ) {
+			throw new BizValidateException("请传入支付宝用户user_id或微信用户openid");
+		}
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
+			throw new BizValidateException("请传入支付宝或微信appid");
+		}
 		
 		long beginTime = System.currentTimeMillis();
     	log.info("h5Login : " + h5UserDTO);
@@ -959,18 +967,19 @@ public class UserController extends BaseController{
 			}
 		}
     	User userAccount = null;
-    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
-    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
-    		if (userList != null && !userList.isEmpty() ) {
-    			for (User user : userList) {
-					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getOpenid())) {
-						userAccount = user;
-						break;
-					}
-				}
-			}
-		} else {
-			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
+//    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
+//    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
+//    		if (userList != null && !userList.isEmpty() ) {
+//    			for (User user : userList) {
+//					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getOpenid())) {
+//						userAccount = user;
+//						break;
+//					}
+//				}
+//			}
+//		}
+    	if (userAccount == null) {
+    		if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
 				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
 			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
 //				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
