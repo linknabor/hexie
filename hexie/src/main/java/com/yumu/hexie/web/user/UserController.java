@@ -973,7 +973,11 @@ public class UserController extends BaseController{
 			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
 				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
 			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
-				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
+//				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
+				List<User> userList = userService.getByOpenId(h5UserDTO.getUserId());
+				if (userList != null && !userList.isEmpty() ) {
+	    			userAccount = userList.get(0);
+				}
 			}
 		}
     	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || 
