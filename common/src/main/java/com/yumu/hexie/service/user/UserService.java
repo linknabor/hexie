@@ -240,7 +240,7 @@ public interface UserService {
 	 * @return
 	 * @throws Exception 
 	 */
-	void saveH5User(User user, H5UserDTO aliUserDTO) throws Exception;
+	User saveH5User(User user, H5UserDTO aliUserDTO) throws Exception;
 	
 	/**
 	 * 根据源系统查询用户信息
