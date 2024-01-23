@@ -993,8 +993,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void saveH5User(User user, H5UserDTO h5UserDTO) throws Exception {
+	public User saveH5User(User user, H5UserDTO h5UserDTO) throws Exception {
 		
+		logger.info("saveH5User, h5UserDTO : " + h5UserDTO);
 		if (StringUtils.isEmpty(h5UserDTO.getUserId())) {
 			throw new BizValidateException("user_id不能为空。");
 		}
@@ -1062,7 +1063,7 @@ public class UserServiceImpl implements UserService {
 		user.setSectId(hexieUser.getSect_id());	
 		user.setCspId(hexieUser.getCsp_id());
 		user.setOfficeTel(hexieUser.getOffice_tel());
-		userRepository.save(user);
+		return userRepository.save(user);
 	}
 	
 	@Override

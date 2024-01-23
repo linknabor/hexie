@@ -963,7 +963,7 @@ public class UserController extends BaseController{
     		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
     		if (userList != null && !userList.isEmpty() ) {
     			for (User user : userList) {
-					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getMiniopenid())) {
+					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getOpenid())) {
 						userAccount = user;
 						break;
 					}
@@ -974,15 +974,12 @@ public class UserController extends BaseController{
 				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
 			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
 //				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
-				List<User> userList = userService.getByOpenId(h5UserDTO.getUserId());
-				if (userList != null && !userList.isEmpty() ) {
-	    			userAccount = userList.get(0);
-				}
+				userAccount = userService.multiFindByOpenId(h5UserDTO.getUserId());
 			}
 		}
     	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || 
     			userAccount.getOriUserId() == null || 0L == userAccount.getOriUserId()) {
-    		userService.saveH5User(userAccount, h5UserDTO);
+    		userAccount = userService.saveH5User(userAccount, h5UserDTO);
 		}
 		long endTime = System.currentTimeMillis();
 	    UserInfo userInfo = new UserInfo(userAccount);
