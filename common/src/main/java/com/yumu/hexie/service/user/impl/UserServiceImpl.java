@@ -1013,8 +1013,10 @@ public class UserServiceImpl implements UserService {
 				user.setAliuserid(h5UserDTO.getUserId());
 				user.setAliappid(h5UserDTO.getAppid());
 			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
-				user.setMiniopenid(h5UserDTO.getUserId());
-				user.setMiniAppId(h5UserDTO.getAppid());
+//				user.setMiniopenid(h5UserDTO.getUserId());
+//				user.setMiniAppId(h5UserDTO.getAppid());
+				user.setOpenid(h5UserDTO.getUserId());
+				user.setAppId(h5UserDTO.getAppid());
 			}
 		}
 		user.setTel(h5UserDTO.getMobile());
