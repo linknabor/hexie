@@ -1021,12 +1021,15 @@ public class UserServiceImpl implements UserService {
 			}
 		}
 		user.setTel(h5UserDTO.getMobile());
-		Long auId = null;
-		if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
-			auId = Long.valueOf(h5UserDTO.getAuId());
+		
+		if (!"_shwy".equals(user.getOriSys())) {
+			Long auId = null;
+			if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
+				auId = Long.valueOf(h5UserDTO.getAuId());
+			}
+			user.setOriUserId(auId);
+			user.setOriSys("_shwy");
 		}
-		user.setOriUserId(auId);
-		user.setOriSys("_shwy");
 		
 		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(h5UserDTO);
 		if (!baseResult.isSuccess()) {
