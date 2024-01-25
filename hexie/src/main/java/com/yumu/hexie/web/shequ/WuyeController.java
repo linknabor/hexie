@@ -697,10 +697,10 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String sect_name,
+			@RequestParam(required = false) String sect_name, @RequestParam(required = false) String queryAppid,
 			@RequestParam(required = false, value = "regionname") String regionName) throws Exception {
 
-		CellListVO cellMng = wuyeService.getVagueSectByName(user, sect_name, regionName);
+		CellListVO cellMng = wuyeService.getVagueSectByName(user, sect_name, regionName, queryAppid);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
