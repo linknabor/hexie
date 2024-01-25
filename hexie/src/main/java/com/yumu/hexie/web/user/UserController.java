@@ -986,10 +986,8 @@ public class UserController extends BaseController{
 //				userAccount = userService.multiFindByOpenId(h5UserDTO.getUserId());
 			}
 		}
-    	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || 
-    			userAccount.getOriUserId() == null || 0L == userAccount.getOriUserId()) {
-    		userAccount = userService.saveH5User(userAccount, h5UserDTO);
-		}
+    	userAccount = userService.saveH5User(userAccount, h5UserDTO);
+    	
 		long endTime = System.currentTimeMillis();
 	    UserInfo userInfo = new UserInfo(userAccount);
 	    log.info("h5 user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
