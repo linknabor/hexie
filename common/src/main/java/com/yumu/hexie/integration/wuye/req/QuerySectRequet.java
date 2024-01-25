@@ -22,6 +22,10 @@ public class QuerySectRequet extends WuyeRequest {
 	private String sectName;
 	private String openid;
 	private String appid;
+	@JsonProperty("query_appid")
+	private String queryAppid;
+	@JsonProperty("client_type")
+	private String clientType;
 	
 	public String getSectName() {
 		return sectName;
@@ -48,9 +52,22 @@ public class QuerySectRequet extends WuyeRequest {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
+	public String getQueryAppid() {
+		return queryAppid;
+	}
+	public void setQueryAppid(String queryAppid) {
+		this.queryAppid = queryAppid;
+	}
+	public String getClientType() {
+		return clientType;
+	}
+	public void setClientType(String clientType) {
+		this.clientType = clientType;
+	}
 	@Override
 	public String toString() {
-		return "QuerySectRequet [sectName=" + sectName + ", openid=" + openid + ", appid=" + appid + "]";
+		return "QuerySectRequet [logger=" + logger + ", sectName=" + sectName + ", openid=" + openid + ", appid="
+				+ appid + ", queryAppid=" + queryAppid + ", clientType=" + clientType + "]";
 	}
 	
 }
