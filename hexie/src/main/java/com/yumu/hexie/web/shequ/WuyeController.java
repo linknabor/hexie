@@ -536,7 +536,7 @@ public class WuyeController extends BaseController {
 		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);	//校验验证码
 		
 		User user;
-		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {	//如果手机号已经注册过，则不需要验证码
 			user = userService.multiFindByOpenId(openid);
 			if (user != null) {
 				if (user.getTel()!=null && user.getTel().equals(mobile)) {
@@ -563,7 +563,7 @@ public class WuyeController extends BaseController {
 				applicationReq.getCredit_code(), applicationReq.getTrade_water_id(), applicationReq.getOpenid());
 		
 		
-		if (!StringUtils.isEmpty(openid)) {
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {
 			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id(), "5");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");
@@ -1033,7 +1033,7 @@ public class WuyeController extends BaseController {
 		boolean isCheck = smsService.checkVerificationCode(mobile, vericode);	//校验验证码
 		
 		User user;
-		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {	//如果手机号已经注册过，则不需要验证码
 			user = userService.multiFindByOpenId(openid);
 			if (user != null) {
 				if (user.getTel()!=null && user.getTel().equals(mobile)) {
@@ -1058,7 +1058,7 @@ public class WuyeController extends BaseController {
 		
 		wuyeService.applyReceipt(user, receiptApplicationReq);	//申请电子收据
 		
-		if (!StringUtils.isEmpty(openid)) {
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {
 			wuyeService.registerAndBind(user, receiptApplicationReq.getTradeWaterId(), "6");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");

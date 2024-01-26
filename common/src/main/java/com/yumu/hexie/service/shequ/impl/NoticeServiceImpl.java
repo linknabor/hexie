@@ -54,7 +54,7 @@ public class NoticeServiceImpl implements NoticeService {
 		list.add(ModelConstant.NOTICE_TYPE2_ORDER);
 		String appid = user.getAppId();
 		String openid = user.getOpenid();
-		if (StringUtils.isEmpty(appid) || StringUtils.isEmpty(openid)) {
+		if (StringUtils.isEmpty(appid) || StringUtils.isEmpty(openid) || "0".equals(openid)) {
 			appid = user.getMiniAppId();
 			openid = user.getMiniopenid();
 		}

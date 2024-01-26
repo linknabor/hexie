@@ -191,7 +191,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                     User user = null;
                     String openid = openidMap.get("openid");
-                    if (StringUtils.isEmpty(openid)) {
+                    if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
                         logger.warn("openid is empty, will skip. ");
                         continue;
                     }
@@ -975,7 +975,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 logger.info("start to consume invoice msg queue : " + in);
                 String openid = in.getOpenid();
-                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
+                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid) || "0".equals(openid)) {
                     logger.warn("openid is null, will skip.");
                     continue;
                 }
@@ -1086,7 +1086,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 logger.info("start to consume receipt msg queue : " + in);
                 String openid = in.getOpenid();
-                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
+                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid) || "0".equals(openid)) {
                     logger.warn("openid is null, will skip.");
                     continue;
                 }
