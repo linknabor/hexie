@@ -85,7 +85,7 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		String openid = user.getOpenid();
 		String appid = user.getAppId();
-		if (StringUtils.isEmpty(openid) || StringUtils.isEmpty(appid)) {
+		if (StringUtils.isEmpty(openid) || "0".equals(openid) || StringUtils.isEmpty(appid)) {
 			openid = user.getMiniopenid();
 			appid = user.getMiniAppId();
 		}
