@@ -616,8 +616,13 @@ public class UserController extends BaseController{
 	    
 	    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
 	    
+	    String appid = user.getAppId();
+	    if (StringUtils.isEmpty(appid)) {
+			appid = user.getMiniAppId();
+		}
+	    
 		/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
+		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(appid, ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 		List<String> templateIds = new ArrayList<>();
 		for (MsgTemplate msgTemplate : msgTemplateListAll) {
 			templateIds.add(msgTemplate.getValue());
@@ -632,9 +637,9 @@ public class UserController extends BaseController{
 	    boolean repairService = paramService.repairServiceAvailable(user);
 	    userInfo.setRepairService(repairService);	//新版工单服务是否开通
 	    
-	    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-	    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
-	    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
+	    List<BottomIcon> iconList = pageConfigService.getBottomIcon(appid);
+	    List<BgImage> bgImageList = pageConfigService.getBgImage(appid);
+	    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(appid);
 	    userInfo.setIconList(iconList);
 	    userInfo.setBgImageList(bgImageList);
 	    userInfo.setWuyeTabsList(tabsList);
@@ -651,13 +656,13 @@ public class UserController extends BaseController{
 	    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
 			}
 	    	if (menuList.isEmpty()) {
-	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
+	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 1);	//表示绑定了房屋的默认菜单
 			}
 	    	if (menuList.isEmpty()) {
 		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
 			}
 	    } else {	//未绑定房屋的
-	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 2);	//表示绑定了房屋的默认菜单
+	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 2);	//表示绑定了房屋的默认菜单
 	    	if (menuList.isEmpty()) {
 		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
 			}
@@ -671,13 +676,13 @@ public class UserController extends BaseController{
 			userInfo.setPoint(wechatCard.getBonus());
 		}
 	    
-	    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
+	    QrCode qrCode = pageConfigService.getQrCode(appid);
 	    String qrLink = "";
 	    if (qrCode != null) {
 	    	qrLink = qrCode.getQrLink();
 		}
 	    
-	    CsHotline csHotline = pageConfigService.getCsHotline(user.getAppId());
+	    CsHotline csHotline = pageConfigService.getCsHotline(appid);
 	    String hotline = "";
 	    if (csHotline != null) {
 	    	hotline = csHotline.getHotline();
@@ -686,10 +691,10 @@ public class UserController extends BaseController{
 	    userInfo.setQrCode(qrLink);
 	    userInfo.setCsHotline(hotline);
 	    userInfo.setCardStatus(wechatCard.getStatus());
-	    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
-	    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
-	    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
-	    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
+	    userInfo.setCardService(systemConfigService.isCardServiceAvailable(appid));
+	    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(appid));
+	    userInfo.setDonghu(systemConfigService.isDonghu(appid));
+	    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(appid));
 	    		    
 	    long endTime = System.currentTimeMillis();
 		log.info("switch sect :" + user.getName() + ", 耗时：" + ((endTime-beginTime)));
@@ -943,6 +948,14 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<UserInfo> h5Login(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getUserId()) ) {
+			throw new BizValidateException("请传入支付宝用户user_id或微信用户openid");
+		}
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
+			throw new BizValidateException("请传入支付宝或微信appid");
+		}
 		
 		long beginTime = System.currentTimeMillis();
     	log.info("h5Login : " + h5UserDTO);
@@ -954,27 +967,27 @@ public class UserController extends BaseController{
 			}
 		}
     	User userAccount = null;
-    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
-    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
-    		if (userList != null && !userList.isEmpty() ) {
-    			for (User user : userList) {
-					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getMiniopenid())) {
-						userAccount = user;
-						break;
-					}
-				}
-			}
-		} else {
-			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
+//    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
+//    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
+//    		if (userList != null && !userList.isEmpty() ) {
+//    			for (User user : userList) {
+//					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getOpenid())) {
+//						userAccount = user;
+//						break;
+//					}
+//				}
+//			}
+//		}
+    	if (userAccount == null) {
+    		if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
 				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
 			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
 				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
+//				userAccount = userService.multiFindByOpenId(h5UserDTO.getUserId());
 			}
 		}
-    	if (userAccount == null || StringUtils.isEmpty(userAccount.getSectId()) || "0".equals(userAccount.getSectId()) || 
-    			userAccount.getOriUserId() == null || 0L == userAccount.getOriUserId()) {
-    		userService.saveH5User(userAccount, h5UserDTO);
-		}
+    	userAccount = userService.saveH5User(userAccount, h5UserDTO);
+    	
 		long endTime = System.currentTimeMillis();
 	    UserInfo userInfo = new UserInfo(userAccount);
 	    log.info("h5 user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));

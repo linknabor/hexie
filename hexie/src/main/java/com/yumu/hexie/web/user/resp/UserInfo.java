@@ -98,6 +98,7 @@ public class UserInfo implements Serializable {
 	private String reqPath; //访问的地址
 	private OrgInfo orgInfo;
 	private String miniopenid;	//小程序openid
+	private String miniAppId;	//小程序appid
 	
 	private String aliuserid;
 	private String aliappid;
@@ -611,6 +612,14 @@ public class UserInfo implements Serializable {
 
 	public void setMiniopenid(String miniopenid) {
 		this.miniopenid = miniopenid;
+	}
+	
+	public String getMiniAppId() {
+		return miniAppId;
+	}
+
+	public void setMiniAppId(String miniAppId) {
+		this.miniAppId = miniAppId;
 	}
 
 	public String getAliuserid() {

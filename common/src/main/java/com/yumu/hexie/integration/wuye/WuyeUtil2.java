@@ -617,7 +617,7 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<CellListVO> getVagueSectByName(User user, String sectName, String regionName) throws Exception{
+	public BaseResult<CellListVO> getVagueSectByName(User user, String sectName, String regionName, String queryAppid) throws Exception{
 		
 		String requestUrl = requestUtil.getRequestUrl(user, regionName);
 		requestUrl += SECT_VAGUE_LIST_URL;
@@ -626,7 +626,14 @@ public class WuyeUtil2 {
 		querySectRequet.setSectName(sectName);
 		querySectRequet.setOpenid(user.getOpenid());
 		querySectRequet.setAppid(user.getAppId());
-		
+		querySectRequet.setQueryAppid(queryAppid);
+		if (!StringUtils.isEmpty(queryAppid)) {
+			String clientType = "0";
+			if (queryAppid.equals(user.getMiniAppId())) {
+				clientType = "1";
+			}
+			querySectRequet.setClientType(clientType);
+		}
 		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
 		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, querySectRequet, typeReference);
 		BaseResult<CellListVO> baseResult = new BaseResult<>();

@@ -993,8 +993,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public void saveH5User(User user, H5UserDTO h5UserDTO) throws Exception {
+	public User saveH5User(User user, H5UserDTO h5UserDTO) throws Exception {
 		
+		logger.info("saveH5User, h5UserDTO : " + h5UserDTO);
 		if (StringUtils.isEmpty(h5UserDTO.getUserId())) {
 			throw new BizValidateException("user_id不能为空。");
 		}
@@ -1015,15 +1016,20 @@ public class UserServiceImpl implements UserService {
 			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
 				user.setMiniopenid(h5UserDTO.getUserId());
 				user.setMiniAppId(h5UserDTO.getAppid());
+//				user.setOpenid(h5UserDTO.getUserId());
+//				user.setAppId(h5UserDTO.getAppid());
 			}
 		}
 		user.setTel(h5UserDTO.getMobile());
-		Long auId = null;
-		if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
-			auId = Long.valueOf(h5UserDTO.getAuId());
+		
+		if (!"_shwy".equals(user.getOriSys())) {
+			Long auId = null;
+			if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
+				auId = Long.valueOf(h5UserDTO.getAuId());
+			}
+			user.setOriUserId(auId);
+			user.setOriSys("_shwy");
 		}
-		user.setOriUserId(auId);
-		user.setOriSys("_shwy");
 		
 		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(h5UserDTO);
 		if (!baseResult.isSuccess()) {
@@ -1060,7 +1066,7 @@ public class UserServiceImpl implements UserService {
 		user.setSectId(hexieUser.getSect_id());	
 		user.setCspId(hexieUser.getCsp_id());
 		user.setOfficeTel(hexieUser.getOffice_tel());
-		userRepository.save(user);
+		return userRepository.save(user);
 	}
 	
 	@Override
