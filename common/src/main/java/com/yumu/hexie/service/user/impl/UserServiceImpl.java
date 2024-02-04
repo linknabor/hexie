@@ -50,6 +50,8 @@ import com.yumu.hexie.model.market.RgroupCart;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.MiniUserPageAccess;
+import com.yumu.hexie.model.user.NewLionUser;
+import com.yumu.hexie.model.user.NewLionUserRepository;
 import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.User;
@@ -103,6 +105,8 @@ public class UserServiceImpl implements UserService {
 	private WuyeUtil2 wuyeUtil2;
 	@Autowired
 	private AddressService addressService;
+	@Autowired
+	private NewLionUserRepository newLionUserRepository;
 
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -1073,6 +1077,16 @@ public class UserServiceImpl implements UserService {
 	public List<User> getUserByOriSysAndOriUserId(String oriSys, Long oriUserId) {
 		
 		return userRepository.findByOriSysAndOriUserId(oriSys, oriUserId);
+	}
+	
+	@Override
+	public List<NewLionUser> getNewLionUserByMobile(String mobile) {
+		
+		if (StringUtils.isEmpty(mobile)) {
+			throw new BizValidateException("用户手机号不能为空");
+		}
+		return newLionUserRepository.findByMobile(mobile);
+		
 	}
 
 }

@@ -16,6 +16,7 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
+import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -66,7 +67,7 @@ public interface WuyeService {
 	 * @param area
 	 * @return
 	 */
-	HexieUser bindHouseNoStmt(User user, String houseId, String area);
+	HexieUser bindHouseNoStmt(User user, String houseId, String area, String appid);
 
 	/**
 	 * 删除房产
@@ -416,6 +417,15 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	List<Receipt> getReceiptList(User user, String page) throws Exception;
+
+	/**
+	 * 新朗恩用户绑定房屋
+	 * @param user
+	 * @param mobile
+	 * @return
+	 * @throws Exception
+	 */
+	HexieHouses bindHouse4NewLionUser(User user, String mobile) throws Exception;
 
 
 }

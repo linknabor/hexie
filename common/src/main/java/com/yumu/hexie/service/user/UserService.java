@@ -10,6 +10,7 @@ import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
+import com.yumu.hexie.model.user.NewLionUser;
 import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.user.dto.H5UserDTO;
@@ -249,5 +250,12 @@ public interface UserService {
 	 * @return
 	 */
 	List<User> getUserByOriSysAndOriUserId(String oriSys, Long oriUserId);
+	
+	/**
+	 * 根据手机号查询新朗恩用户
+	 * @param mobile
+	 * @return
+	 */
+	List<NewLionUser> getNewLionUserByMobile(String mobile);
 
 }

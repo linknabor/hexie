@@ -44,7 +44,7 @@ public class WuyeUtil {
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
-	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
+	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s&appid=%s&unionid=%s"; // 登录验证（微信登录）
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&trade_water_id=%s"; // 微信支付返回
@@ -111,9 +111,17 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static BaseResult<HexieUser> bindHouseNoStmt(User user, String houseId, String area) {
-		String url = getRequestUri(user) + String.format(ADD_HOUSENOSTMT_URL, user.getWuyeId(), houseId, area, user.getOpenid(), user.getAppId(), user.getTel());
-		log.error("【绑定房产url】="+url);
+	public static BaseResult<HexieUser> bindHouseNoStmt(User user, String houseId, String area, String appid) {
+		String openid = user.getOpenid();
+		if(!StringUtils.isEmpty(appid)) {
+			if (appid.equals(user.getMiniAppId())) {
+				openid = user.getMiniopenid();
+			}
+		} else {
+			appid = user.getAppId();
+		}
+		String url = getRequestUri(user) + String.format(ADD_HOUSENOSTMT_URL, user.getWuyeId(), houseId, area, openid, appid, user.getTel());
+		log.info("【绑定房产url】="+url);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
 	
@@ -150,13 +158,17 @@ public class WuyeUtil {
 	@SuppressWarnings("unchecked")
 	public static BaseResult<HexieUser> userLogin(User user) {
 		String openid = user.getOpenid();
+		String appid = user.getAppId();
+		String unionid = user.getUnionid();
 		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
 			openid = user.getMiniopenid();
+			appid = user.getMiniAppId();
 		}
 		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
 			openid = user.getAliuserid();
+			appid = user.getAliappid();
 		}
-		String url = getRequestUri(user) + String.format(WXLOGIN_URL, openid);
+		String url = getRequestUri(user) + String.format(WXLOGIN_URL, openid, appid, unionid);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
 	

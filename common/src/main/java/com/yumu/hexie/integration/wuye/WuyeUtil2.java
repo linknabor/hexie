@@ -46,6 +46,7 @@ import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
+import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.Message;
@@ -109,6 +110,7 @@ public class WuyeUtil2 {
 	private static final String PUSH_USER_REGISTER_URL = "pushUserRegisterSDO.do";
 	private static final String H5_USER_LOGIN_URL = "alipayH5LoginSDO.do";	//h5用户登陆注册
 	private static final String QUERY_TRADE_INVOICE_URL = "queryInvoiceByTradeSDO.do";	//获取用户申请过的发票
+	private static final String NEWLION_USER_BIND_URL = "bindHouse4NewLionUserSDO.do";	//新郎恩存量用户绑定
 
 	/**
 	 * 标准版查询账单
@@ -904,6 +906,32 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<HexieUser>> typeReference = new TypeReference<CommonResponse<HexieUser>>(){};
 		CommonResponse<HexieUser> hexieResponse = restUtil.exchangeOnUri(requestUrl, aliUserDTO, typeReference);
 		BaseResult<HexieUser> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		baseResult.setResult(hexieResponse.getResult());
+		return baseResult;
+
+	}
+	
+	
+	/**
+	 * 新朗恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<HexieHouses> bindHouse4NewLionUser(User user, String mobile) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += NEWLION_USER_BIND_URL;
+		
+		Map<String, String> requestMap = new HashMap<>();
+		requestMap.put("user_id", user.getWuyeId());
+		requestMap.put("openid", user.getMiniopenid());	//西部用户取miniopenid
+		requestMap.put("appid", user.getMiniAppId());
+		requestMap.put("mobile", mobile);
+		TypeReference<CommonResponse<HexieHouses>> typeReference = new TypeReference<CommonResponse<HexieHouses>>(){};
+		CommonResponse<HexieHouses> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
+		BaseResult<HexieHouses> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		baseResult.setResult(hexieResponse.getResult());
