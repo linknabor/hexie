@@ -34,6 +34,8 @@ public class AccessTokenOAuth {
 	 */
 	private String appid;
 
+	private String unionid;
+	
 	public String getAccessToken() {
 		return accessToken;
 	}
@@ -81,6 +83,14 @@ public class AccessTokenOAuth {
 	public void setAppid(String appid) {
 		this.appid = appid;
 	}
+	
+	public String getUnionid() {
+		return unionid;
+	}
+
+	public void setUnionid(String unionid) {
+		this.unionid = unionid;
+	}
 
 	public AccessTokenOAuth(String accessToken, int expiresIn,
 			String refreshToken, String openid, String scope) {
@@ -99,7 +109,8 @@ public class AccessTokenOAuth {
 	@Override
 	public String toString() {
 		return "AccessTokenOAuth [accessToken=" + accessToken + ", expiresIn=" + expiresIn + ", refreshToken="
-				+ refreshToken + ", openid=" + openid + ", scope=" + scope + ", appid=" + appid + "]";
+				+ refreshToken + ", openid=" + openid + ", scope=" + scope + ", appid=" + appid + ", unionid=" + unionid
+				+ "]";
 	}
 
 }

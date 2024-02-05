@@ -98,6 +98,7 @@ public class OAuthService {
 			accessTokenOAuth.setRefreshToken(jsonObject.getRefresh_token());
 			accessTokenOAuth.setOpenid(jsonObject.getOpenid());
 			accessTokenOAuth.setScope(jsonObject.getScope());
+			accessTokenOAuth.setUnionid(jsonObject.getUnionid());
 		}else {
 			if (null != jsonObject&&jsonObject.getErrcode() != 0) {
 				throw new BizValidateException("errcode: " + jsonObject.getErrcode() + ", errmsg : " + jsonObject.getErrmsg());
@@ -134,6 +135,7 @@ public class OAuthService {
 				user.setLanguage(jsonObject.getLanguage());
 				user.setPrivilege(jsonObject.getPrivilege());
 				user.setHeadimgurl(jsonObject.getHeadimgurl());
+				user.setUnionid(jsonObject.getUnionid());
 			}
 		}
 		return user;
