@@ -28,7 +28,9 @@ import com.yumu.hexie.integration.wechat.entity.AccessToken;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.system.SystemConfig;
 import com.yumu.hexie.model.system.SystemConfigRepository;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
 import com.yumu.hexie.service.exception.BizValidateException;
 
 /**
@@ -47,6 +49,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private static final String JS_TOKEN = "JS_TOKEN";
     private static final String ACC_TOKEN = "ACCESS_TOKEN";
     private static final String KEY_APP_SYS = "APP_SYS_";
+    private static final String KEY_APPID_ACTIVE = "APPID_ACTIVE_";
 	private static Map<String, String> sysMap = new HashMap<>();
 	private static Map<String, SystemConfig> sysConfigParam = new HashMap<>();
     private static String REQUEST_URL;
@@ -342,6 +345,33 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	@Override
 	public List<SystemConfig> getAll() {
 		return systemConfigRepository.findAll();
+	}
+	
+	/**
+	 * 获取当前用户生效的appid(看是取小程序的appid还是公众号的appid)
+	 * @param user
+	 * @return
+	 */
+	@Override
+	public ActiveApp getActiveApp(User user) {
+	
+		String activeAppid = "";
+		String activeOpenid = "";
+		if (StringUtils.isEmpty(user.getAppId())) {
+			activeAppid = user.getMiniAppId();
+			activeOpenid = user.getMiniopenid();
+		} else {
+			activeAppid = getSysConfigByKey(KEY_APPID_ACTIVE + user.getAppId());
+			if (StringUtils.isEmpty(activeAppid) || activeAppid.equals(user.getAppId())) {
+				activeAppid = user.getAppId();
+				activeOpenid = user.getOpenid();
+			} else if (activeAppid.equals(user.getMiniAppId())) {
+				activeAppid = user.getMiniAppId();
+				activeOpenid = user.getMiniopenid();
+			}
+		}
+		ActiveApp activeApp = new ActiveApp(activeAppid, activeOpenid);
+		return activeApp;
 	}
     
 }

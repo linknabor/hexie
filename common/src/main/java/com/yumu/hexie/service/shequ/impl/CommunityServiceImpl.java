@@ -20,6 +20,8 @@ import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.CommunityService;
 
@@ -34,6 +36,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Autowired
 	private InteractUtil interactUtil;
+	
+	@Autowired
+	private SystemConfigService systemConfigService;
 
 	@Override
 	public List<InteractInfoResp> getInteractList(User user, InteractReq req) throws Exception {
@@ -83,12 +88,10 @@ public class CommunityServiceImpl implements CommunityService {
 		req.setSect_id(currUser.getSectId());
 		req.setUser_mobile(currUser.getTel());
 		
-		String openid = user.getOpenid();
-		String appid = user.getAppId();
-		if (StringUtils.isEmpty(openid) || "0".equals(openid) || StringUtils.isEmpty(appid)) {
-			openid = user.getMiniopenid();
-			appid = user.getMiniAppId();
-		}
+		ActiveApp activeApp = systemConfigService.getActiveApp(currUser);
+		String openid = activeApp.getActiveOpenid();
+		String appid = activeApp.getActiveAppid();
+		
 		req.setOpenid(openid);
 		req.setAppid(appid);
 		req.setEx_source("01"); //公众号

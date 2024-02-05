@@ -66,8 +66,9 @@ public interface WuyeService {
 	 * @param houseId
 	 * @param area
 	 * @return
+	 * @throws Exception 
 	 */
-	HexieUser bindHouseNoStmt(User user, String houseId, String area, String appid);
+	HexieUser bindHouseNoStmt(User user, String houseId, String area) throws Exception;
 
 	/**
 	 * 删除房产
@@ -85,12 +86,6 @@ public interface WuyeService {
 	 */
 	HexieHouse getHouse(User user, String stmtId);
 	
-	/**
-	 * 用户登录
-	 * @param user
-	 * @return
-	 */
-	HexieUser userLogin(User user);
 	/**
 	 * 缴费记录查询
 	 * @param user

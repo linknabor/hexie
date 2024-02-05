@@ -235,10 +235,9 @@ public class WuyeController extends BaseController {
 	public BaseResult<HexieHouse> addHouseNoStmt(HttpSession httpSession, 
 			@ModelAttribute(Constants.USER) User user,
 			@RequestParam(required = false) String houseId, 
-			@RequestParam(required = false) String area,
-			@RequestParam(required = false) String appid) throws Exception {
+			@RequestParam(required = false) String area) throws Exception {
 		
-		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area, appid);
+		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
 		log.info("HexieUser : " + u);
 		if (u != null) {
 			log.info("user : " + user);

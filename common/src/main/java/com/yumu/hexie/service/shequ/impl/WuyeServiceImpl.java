@@ -180,11 +180,6 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public HexieUser userLogin(User user) {
-		return WuyeUtil.userLogin(user).getData();
-	}
-
-	@Override
 	public PayWaterListVO queryPaymentList(User user, String startDate, String endDate) {
 		return WuyeUtil.queryPaymentList(user, startDate, endDate).getData();
 	}
@@ -322,9 +317,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public HexieUser bindHouseNoStmt(User user, String houseId, String area, String appid) {
+	public HexieUser bindHouseNoStmt(User user, String houseId, String area) throws Exception {
 		
-		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(user, houseId, area, appid);
+		BaseResult<HexieUser> r= wuyeUtil2.bindHouseNoStmt(user, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
