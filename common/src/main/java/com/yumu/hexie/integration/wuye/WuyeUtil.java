@@ -136,7 +136,10 @@ public class WuyeUtil {
 	public static BaseResult<HexieUser> userLogin(User user) {
 		String openid = user.getOpenid();
 		String appid = user.getAppId();
-		String unionid = user.getUnionid();
+		String unionid = "";
+		if (StringUtils.isEmpty(unionid)) {
+			unionid = user.getUnionid();
+		}
 		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
 			openid = user.getMiniopenid();
 			appid = user.getMiniAppId();
