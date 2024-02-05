@@ -47,6 +47,7 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
+import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -59,6 +60,7 @@ import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
+import com.yumu.hexie.model.user.NewLionUser;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -1128,4 +1130,24 @@ public class WuyeController extends BaseController {
 		}
 		return BaseResult.successResult(wuyeId);
 	}
+	
+	/**
+	 * 为新郎恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/newlion/user/bind", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<HexieHouses> checkBindNewLionUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
+		
+		BaseResult<HexieHouses> baseResult = new BaseResult<>();
+		List<NewLionUser> newLionUserList = userService.getNewLionUserByMobile(mobile);
+		if (newLionUserList != null && !newLionUserList.isEmpty()) {
+			HexieHouses hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
+			baseResult.success(hexieHouses);
+		}
+		return BaseResult.successResult(baseResult);
+	} 
 }

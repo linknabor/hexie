@@ -38,13 +38,12 @@ public class WuyeUtil {
 	// 接口地址
 	private static final String HOUSE_DETAIL_URL = "getHoseInfoSDO.do?user_id=%s&sect_id=%s"; // 房屋详情地址
 	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s&openid=%s&appid=%s&mobile=%s"; // 添加房子
-	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s&openid=%s&appid=%s&mobile=%s"; // 无账单添加房子
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s&house_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s&openid=%s&appid=%s&mobile=%s"; // 删除房子
 	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
-	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s"; // 登录验证（微信登录）
+	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s&appid=%s&unionid=%s"; // 登录验证（微信登录）
 	private static final String MEMBER_WX_PAY_URL = "member/memberPayRequestSDO.do?bill_id=%s&openid=%s&totalPrice=%s&notifyUrl=%s"; // 微信支付请求
 	private static final String MEMBER_WX_Query_URL = "member/memberQueryOrderSDO.do?bill_id=%s"; // 微信支付查询请求
 	private static final String WX_PAY_NOTICE = "wechatPayQuerySDO.do?user_id=%s&trade_water_id=%s"; // 微信支付返回
@@ -104,20 +103,6 @@ public class WuyeUtil {
 	}
 	
 	/**
-	 * 无账单绑定房产
-	 * @param user
-	 * @param houseId
-	 * @param area
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static BaseResult<HexieUser> bindHouseNoStmt(User user, String houseId, String area) {
-		String url = getRequestUri(user) + String.format(ADD_HOUSENOSTMT_URL, user.getWuyeId(), houseId, area, user.getOpenid(), user.getAppId(), user.getTel());
-		log.error("【绑定房产url】="+url);
-		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
-	}
-	
-	/**
 	 * 删除房产
 	 * @param user
 	 * @param houseId
@@ -150,13 +135,17 @@ public class WuyeUtil {
 	@SuppressWarnings("unchecked")
 	public static BaseResult<HexieUser> userLogin(User user) {
 		String openid = user.getOpenid();
+		String appid = user.getAppId();
+		String unionid = user.getUnionid();
 		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
 			openid = user.getMiniopenid();
+			appid = user.getMiniAppId();
 		}
 		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
 			openid = user.getAliuserid();
+			appid = user.getAliappid();
 		}
-		String url = getRequestUri(user) + String.format(WXLOGIN_URL, openid);
+		String url = getRequestUri(user) + String.format(WXLOGIN_URL, openid, appid, unionid);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
 	
