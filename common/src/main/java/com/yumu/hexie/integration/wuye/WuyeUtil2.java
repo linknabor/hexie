@@ -46,7 +46,7 @@ import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
-import com.yumu.hexie.integration.wuye.vo.HexieHouses;
+import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.Message;
@@ -925,7 +925,7 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<HexieHouses> bindHouse4NewLionUser(User user, String mobile) throws Exception {
+	public BaseResult<List<HexieHouse>> bindHouse4NewLionUser(User user, String mobile) throws Exception {
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += NEWLION_USER_BIND_URL;
 		
@@ -934,9 +934,9 @@ public class WuyeUtil2 {
 		requestMap.put("openid", user.getMiniopenid());	//西部用户取miniopenid
 		requestMap.put("appid", user.getMiniAppId());
 		requestMap.put("mobile", mobile);
-		TypeReference<CommonResponse<HexieHouses>> typeReference = new TypeReference<CommonResponse<HexieHouses>>(){};
-		CommonResponse<HexieHouses> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
-		BaseResult<HexieHouses> baseResult = new BaseResult<>();
+		TypeReference<CommonResponse<List<HexieHouse>>> typeReference = new TypeReference<CommonResponse<List<HexieHouse>>>(){};
+		CommonResponse<List<HexieHouse>> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
+		BaseResult<List<HexieHouse>> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		baseResult.setResult(hexieResponse.getResult());
