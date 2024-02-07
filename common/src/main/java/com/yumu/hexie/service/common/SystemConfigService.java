@@ -37,5 +37,6 @@ public interface SystemConfigService {
 	boolean isCardPayServiceAvailabe(String appId);
 	List<SystemConfig> getAll();
 	ActiveApp getActiveApp(User user);
+	String getMiniProgramMappedApp(String miniAppid);
 
 }

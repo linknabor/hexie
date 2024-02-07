@@ -49,7 +49,8 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private static final String JS_TOKEN = "JS_TOKEN";
     private static final String ACC_TOKEN = "ACCESS_TOKEN";
     private static final String KEY_APP_SYS = "APP_SYS_";
-    private static final String KEY_APPID_ACTIVE = "APPID_ACTIVE_";
+    private static final String KEY_APPID_ACTIVE = "APPID_ACTIVE_";	//key后面接公众号的APPID，value是当前起作用的公众号或者小程序的的appid
+    private static final String KEY_APP_MAPPING = "MP_MAPPING_";	//小程序对应的公众号，key后面接小程序APPID，value是对应公众号的APPID
 	private static Map<String, String> sysMap = new HashMap<>();
 	private static Map<String, SystemConfig> sysConfigParam = new HashMap<>();
     private static String REQUEST_URL;
@@ -372,6 +373,20 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		}
 		ActiveApp activeApp = new ActiveApp(activeAppid, activeOpenid);
 		return activeApp;
+	}
+	
+	/**
+	 * 获取小程序所对应的公众号，一旦对应，当前公众号用户将会与小程序用户合并
+	 * @param miniAppid
+	 * @return
+	 */
+	public String getMiniProgramMappedApp(String miniAppid) {
+		
+		String appid = "";
+		if (!StringUtils.isEmpty(miniAppid)) {
+			appid = getSysConfigByKey(KEY_APP_MAPPING + miniAppid);
+		}
+		return appid;
 	}
     
 }
