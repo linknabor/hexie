@@ -380,6 +380,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	 * @param miniAppid
 	 * @return
 	 */
+	@Override
 	public String getMiniProgramMappedApp(String miniAppid) {
 		
 		String appid = "";
