@@ -807,10 +807,9 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 			if (flag) {
-				BaseResult<HexieHouses> baseResult = wuyeUtil2.bindHouse4NewLionUser(user, mobile);
+				BaseResult<List<HexieHouse>> baseResult = wuyeUtil2.bindHouse4NewLionUser(user, mobile);
 				if (baseResult.isSuccess()) {
-					hexieHouses = baseResult.getData();
-					List<HexieHouse> houseList = hexieHouses.getHouses();
+					List<HexieHouse> houseList = baseResult.getData();
 					if (houseList != null && houseList.size() > 0) {
 						for (HexieHouse hexieHouse : houseList) {
 							HexieUser hexieUser = new HexieUser();
