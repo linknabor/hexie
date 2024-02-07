@@ -1144,10 +1144,10 @@ public class WuyeController extends BaseController {
 		
 		BaseResult<HexieHouses> baseResult = new BaseResult<>();
 		List<NewLionUser> newLionUserList = userService.getNewLionUserByMobile(mobile);
+		HexieHouses hexieHouses = new HexieHouses();
 		if (newLionUserList != null && !newLionUserList.isEmpty()) {
-			HexieHouses hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
-			baseResult.success(hexieHouses);
+			hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
 		}
-		return BaseResult.successResult(baseResult);
+		return BaseResult.successResult(hexieHouses);
 	} 
 }
