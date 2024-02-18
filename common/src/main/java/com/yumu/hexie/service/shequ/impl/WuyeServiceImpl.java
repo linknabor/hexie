@@ -39,7 +39,6 @@ import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
-import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -794,9 +793,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public HexieHouses bindHouse4NewLionUser(User user, String mobile) throws Exception {
+	public List<HexieHouse> bindHouse4NewLionUser(User user, String mobile) throws Exception {
 		
-		HexieHouses hexieHouses = null;
+		List<HexieHouse> hexieHouses = null;
 		List<NewLionUser> houList = newLionUserRepository.findByMobile(mobile);
 		if (houList != null) {
 			boolean flag = false;	//是否上线小区
@@ -809,9 +808,9 @@ public class WuyeServiceImpl implements WuyeService {
 			if (flag) {
 				BaseResult<List<HexieHouse>> baseResult = wuyeUtil2.bindHouse4NewLionUser(user, mobile);
 				if (baseResult.isSuccess()) {
-					List<HexieHouse> houseList = baseResult.getData();
-					if (houseList != null && houseList.size() > 0) {
-						for (HexieHouse hexieHouse : houseList) {
+					hexieHouses = baseResult.getData();
+					if (hexieHouses != null && hexieHouses.size() > 0) {
+						for (HexieHouse hexieHouse : hexieHouses) {
 							HexieUser hexieUser = new HexieUser();
 							BeanUtils.copyProperties(hexieHouse, hexieUser);
 							setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
