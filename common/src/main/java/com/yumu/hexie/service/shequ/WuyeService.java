@@ -420,7 +420,7 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception
 	 */
-	HexieHouses bindHouse4NewLionUser(User user, String mobile) throws Exception;
+	List<HexieHouse> bindHouse4NewLionUser(User user, String mobile) throws Exception;
 
 
 }

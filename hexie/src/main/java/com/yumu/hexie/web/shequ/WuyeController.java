@@ -47,7 +47,6 @@ import com.yumu.hexie.integration.wuye.resp.PayWaterListVO;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieHouse;
-import com.yumu.hexie.integration.wuye.vo.HexieHouses;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.InvoiceInfo;
@@ -1140,11 +1139,10 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/newlion/user/bind", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<HexieHouses> checkBindNewLionUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
+	public BaseResult<List<HexieHouse>> checkBindNewLionUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
 		
-		BaseResult<HexieHouses> baseResult = new BaseResult<>();
 		List<NewLionUser> newLionUserList = userService.getNewLionUserByMobile(mobile);
-		HexieHouses hexieHouses = new HexieHouses();
+		List<HexieHouse> hexieHouses = new ArrayList<>();
 		if (newLionUserList != null && !newLionUserList.isEmpty()) {
 			hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
 		}
