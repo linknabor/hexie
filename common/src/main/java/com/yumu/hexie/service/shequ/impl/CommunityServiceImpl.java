@@ -14,7 +14,6 @@ import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.model.ModelConstant;
@@ -95,6 +94,9 @@ public class CommunityServiceImpl implements CommunityService {
 		req.setOpenid(openid);
 		req.setAppid(appid);
 		req.setEx_source("01"); //公众号
+		if (appid.equals(user.getMiniAppId())) {	//如果是小程序用户，来源修改为小程序
+			req.setEx_source("05"); //小程序
+		}
 		req.setEx_group("2"); //默认建议
 
 		CommonResponse<Boolean> commonResponse = interactUtil.saveInteractInfo(user, req);
