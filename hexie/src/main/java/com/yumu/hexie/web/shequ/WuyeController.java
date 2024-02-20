@@ -114,7 +114,7 @@ public class WuyeController extends BaseController {
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user, 
 			@RequestParam(required = false) String sectId) throws Exception {
 		
-		log.info("user is : " + user);
+		log.info("hexiehouses, user is : " + user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
@@ -208,6 +208,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String stmtId, 
 			@RequestParam(required = false) String houseId) throws Exception {
 		
+		log.info("addHouse, user is : " + user);
 		HexieUser u = wuyeService.bindHouse(user, stmtId, houseId);
 		log.info("HexieUser u = " + u);
 		if (u != null) {
