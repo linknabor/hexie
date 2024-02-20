@@ -140,6 +140,9 @@ public class WuyeUtil {
 		if (StringUtils.isEmpty(unionid)) {
 			unionid = user.getUnionid();
 		}
+		if (StringUtils.isEmpty(unionid)) {
+			unionid = "";
+		}
 		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
 			openid = user.getMiniopenid();
 			appid = user.getMiniAppId();
