@@ -115,7 +115,7 @@ public class WuyeUtil2 {
 	private static final String H5_USER_LOGIN_URL = "alipayH5LoginSDO.do";	//h5用户登陆注册
 	private static final String QUERY_TRADE_INVOICE_URL = "queryInvoiceByTradeSDO.do";	//获取用户申请过的发票
 	private static final String NEWLION_USER_BIND_URL = "bindHouse4NewLionUserSDO.do";	//新郎恩存量用户绑定
-	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do?user_id=%s&mng_cell_id=%s&area=%s&openid=%s&appid=%s&mobile=%s"; // 无账单添加房子
+	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do"; // 无账单添加房子
 
 	/**
 	 * 标准版查询账单
