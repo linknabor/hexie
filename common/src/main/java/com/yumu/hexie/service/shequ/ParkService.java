@@ -27,4 +27,8 @@ public interface ParkService {
     WechatPayInfo getPrePaying(User user, PayUserCarInfo payUserCarInfo) throws Exception;
 
     PayDetail getPayDetailById(User user, String orderId) throws Exception;
+
+    //查询包月停车费账单
+    CarBillList getCarBillList(User user, PayUserCarInfo payUserCarInfo) throws Exception;
+
 }

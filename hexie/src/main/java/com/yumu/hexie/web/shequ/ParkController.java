@@ -142,5 +142,17 @@ public class ParkController extends BaseController {
         return BaseResult.successResult(payDetail);
     }
 
+    /**
+     * 根据车牌查询停车费账单
+     * @param user
+     * @param payUserCarInfo
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/getCarBill", method = RequestMethod.POST)
+    public BaseResult<CarBillList> getCarBill(@ModelAttribute(Constants.USER) User user, @RequestBody PayUserCarInfo payUserCarInfo) throws Exception {
+        CarBillList carBillList = parkService.getCarBillList(user, payUserCarInfo);
+        return BaseResult.successResult(carBillList);
+    }
 
 }

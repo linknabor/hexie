@@ -39,6 +39,8 @@ public class ParkUtil {
     private static final String QUERY_USER_PAYING_DETAIL_URL = "park/getPayingDetailSDO.do";
     private static final String GET_USER_PRE_PAY_URL = "park/getUserPrePaySDO.do";
     private static final String GET_PAY_DETAIL_URL = "park/getPayDetailByIdSDO.do";
+    private static final String GET_CAR_BILL_LIST_URL = "park/getBillCarSDO.do";
+
     /**
      * 查询用户车辆、停车场和规则信息
      * @param user
@@ -206,5 +208,23 @@ public class ParkUtil {
         map.put("order_id", orderId);
         TypeReference<CommonResponse<PayDetail>> typeReference = new TypeReference<CommonResponse<PayDetail>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
+    }
+
+    /**
+     * 根据车牌号查询停车费账单
+     * @param user
+     * @param payUserCarInfo
+     * @return
+     * @throws Exception
+     */
+    public CommonResponse<CarBillList> getCarBillList(User user, PayUserCarInfo payUserCarInfo) throws Exception {
+        String requestUrl = requestUtil.getRequestUrl(user, null);
+        requestUrl += GET_CAR_BILL_LIST_URL;
+
+        payUserCarInfo.setAppid(user.getAppId());
+        payUserCarInfo.setUser_id(String.valueOf(user.getId()));
+        payUserCarInfo.setOpenid(user.getOpenid());
+        TypeReference<CommonResponse<CarBillList>> typeReference = new TypeReference<CommonResponse<CarBillList>>(){};
+        return restUtil.exchangeOnUri(requestUrl, payUserCarInfo, typeReference);
     }
 }
