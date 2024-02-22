@@ -222,10 +222,8 @@ public class WuyeUtil2 {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
-		if (StringUtils.isEmpty(fromSys)) {
-			if ("_shwy".equals(user.getOriSys())) {
-				fromSys = user.getOriSys();
-			}
+		if ("_shwy".equals(user.getOriSys())) {
+			fromSys = user.getOriSys();
 		}
 		if (StringUtils.isEmpty(fromSys)) {
 			fromSys = sysName;
