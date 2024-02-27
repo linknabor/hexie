@@ -264,6 +264,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	@Override
 	public boolean isCardServiceAvailable (String appId){
 		
+		if (StringUtils.isEmpty(appId)) {	//小程序用户
+			return false;
+		}
 		String appIds = getSysConfigByKey("CARD_SERVICE_APPS");
 		boolean isAvailable = false;
 		if (!StringUtils.isEmpty(appIds)) {
@@ -281,6 +284,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	@Override
 	public boolean coronaPreventionAvailable (String appId){
 		
+		if (StringUtils.isEmpty(appId)) {	//小程序用户
+			return false;
+		}
+		
 		String appIds = getSysConfigByKey("CORONA_PREVENTION_APPS");
 		boolean isAvailable = false;
 		if (!StringUtils.isEmpty(appIds)) {
@@ -296,6 +303,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	 */
 	@Override
 	public boolean isDonghu (String appId){
+		
+		if (StringUtils.isEmpty(appId)) {	//小程序用户
+			return false;
+		}
 		
 		String appIds = getSysConfigByKey("DONGHU_LIKE_APPS");	//类似东湖这种性质的公众号列表
 		boolean isAvailable = false;
@@ -313,6 +324,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	@Override
 	public boolean registerCouponServiceAvailabe (String appId){
 		
+		if (StringUtils.isEmpty(appId)) {	//小程序用户
+			return false;
+		}
+		
 		String appIds = getSysConfigByKey("REGISTER_COUPON_SERVICE_APPS");	//开启注册发优惠券的APP列表
 		boolean isAvailable = false;
 		if (!StringUtils.isEmpty(appIds)) {
@@ -328,6 +343,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 	 */
 	@Override
 	public boolean isCardPayServiceAvailabe (String appId){
+		
+		if (StringUtils.isEmpty(appId)) {	//小程序用户
+			return false;
+		}
 		
 		String appIds = getSysConfigByKey("CARD_PAY_SERVICE_APPS");	//开启银行卡支付的公众号APP列表
 		boolean isAvailable = false;
