@@ -538,7 +538,8 @@ public class User extends BaseModel{
 				+ ", totalBind=" + totalBind + ", appId=" + appId + ", oriSys=" + oriSys + ", oriUserId=" + oriUserId
 				+ ", point=" + point + ", roleId=" + roleId + ", unionid=" + unionid + ", miniopenid=" + miniopenid
 				+ ", miniAppId=" + miniAppId + ", uniqueCode=" + uniqueCode + ", aliuserid=" + aliuserid + ", aliappid="
-				+ aliappid + "]";
+				+ aliappid + ", getId()=" + getId() + "]";
 	}
+
 	
 }

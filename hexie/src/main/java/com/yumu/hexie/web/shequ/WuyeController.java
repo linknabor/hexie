@@ -59,6 +59,7 @@ import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
+import com.yumu.hexie.model.user.NewLionUser;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
@@ -113,7 +114,7 @@ public class WuyeController extends BaseController {
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user, 
 			@RequestParam(required = false) String sectId) throws Exception {
 		
-		log.info("user is : " + user);
+		log.info("hexiehouses, user is : " + user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
@@ -207,6 +208,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String stmtId, 
 			@RequestParam(required = false) String houseId) throws Exception {
 		
+		log.info("addHouse, user is : " + user);
 		HexieUser u = wuyeService.bindHouse(user, stmtId, houseId);
 		log.info("HexieUser u = " + u);
 		if (u != null) {
@@ -1128,4 +1130,23 @@ public class WuyeController extends BaseController {
 		}
 		return BaseResult.successResult(wuyeId);
 	}
+	
+	/**
+	 * 为新郎恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/newlion/user/bind", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<List<HexieHouse>> checkBindNewLionUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
+		
+		List<NewLionUser> newLionUserList = userService.getNewLionUserByMobile(mobile);
+		List<HexieHouse> hexieHouses = new ArrayList<>();
+		if (newLionUserList != null && !newLionUserList.isEmpty()) {
+			hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
+		}
+		return BaseResult.successResult(hexieHouses);
+	} 
 }

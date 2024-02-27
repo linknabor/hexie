@@ -46,6 +46,7 @@ import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
+import com.yumu.hexie.integration.wuye.vo.HexieHouse;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.Message;
@@ -57,7 +58,9 @@ import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.vo.req.MessageReq;
@@ -78,6 +81,8 @@ public class WuyeUtil2 {
 	private RestUtil restUtil;
 	@Autowired
 	private RequestUtil requestUtil;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	private static final String QUICK_PAY_URL = "quickPaySDO.do"; // 快捷支付
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
@@ -109,6 +114,8 @@ public class WuyeUtil2 {
 	private static final String PUSH_USER_REGISTER_URL = "pushUserRegisterSDO.do";
 	private static final String H5_USER_LOGIN_URL = "alipayH5LoginSDO.do";	//h5用户登陆注册
 	private static final String QUERY_TRADE_INVOICE_URL = "queryInvoiceByTradeSDO.do";	//获取用户申请过的发票
+	private static final String NEWLION_USER_BIND_URL = "bindHouse4NewLionUserSDO.do";	//新郎恩存量用户绑定
+	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do"; // 无账单添加房子
 
 	/**
 	 * 标准版查询账单
@@ -215,10 +222,8 @@ public class WuyeUtil2 {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
-		if (StringUtils.isEmpty(fromSys)) {
-			if ("_shwy".equals(user.getOriSys())) {
-				fromSys = user.getOriSys();
-			}
+		if ("_shwy".equals(user.getOriSys())) {
+			fromSys = user.getOriSys();
 		}
 		if (StringUtils.isEmpty(fromSys)) {
 			fromSys = sysName;
@@ -909,6 +914,62 @@ public class WuyeUtil2 {
 		baseResult.setResult(hexieResponse.getResult());
 		return baseResult;
 
+	}
+	
+	
+	/**
+	 * 新朗恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<HexieHouse>> bindHouse4NewLionUser(User user, String mobile) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += NEWLION_USER_BIND_URL;
+		
+		Map<String, String> requestMap = new HashMap<>();
+		requestMap.put("user_id", user.getWuyeId());
+		requestMap.put("openid", user.getMiniopenid());	//西部用户取miniopenid
+		requestMap.put("appid", user.getMiniAppId());
+		requestMap.put("mobile", mobile);
+		TypeReference<CommonResponse<List<HexieHouse>>> typeReference = new TypeReference<CommonResponse<List<HexieHouse>>>(){};
+		CommonResponse<List<HexieHouse>> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
+		BaseResult<List<HexieHouse>> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		baseResult.setResult(hexieResponse.getResult());
+		return baseResult;
+
+	}
+	
+	/**
+	 * 无账单绑定房产
+	 * @param user
+	 * @param houseId
+	 * @param area
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<HexieUser> bindHouseNoStmt(User user, String houseId, String area) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += ADD_HOUSENOSTMT_URL;
+		
+		ActiveApp activeApp = systemConfigService.getActiveApp(user);
+		Map<String, String> requestMap = new HashMap<>();
+		requestMap.put("user_id", user.getWuyeId());
+		requestMap.put("mng_cell_id", houseId);
+		requestMap.put("area", area);
+		requestMap.put("appid", activeApp.getActiveAppid());
+		requestMap.put("openid", activeApp.getActiveOpenid());
+		requestMap.put("mobile", user.getTel());
+		
+		TypeReference<CommonResponse<HexieUser>> typeReference = new TypeReference<CommonResponse<HexieUser>>(){};
+		CommonResponse<HexieUser> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
+		BaseResult<HexieUser> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		baseResult.setResult(hexieResponse.getResult());
+		return baseResult;
 	}
 
 

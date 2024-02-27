@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.yumu.hexie.model.system.SystemConfig;
+import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
 
 /**
  * <pre>
@@ -34,5 +36,7 @@ public interface SystemConfigService {
 	boolean registerCouponServiceAvailabe(String appId);
 	boolean isCardPayServiceAvailabe(String appId);
 	List<SystemConfig> getAll();
+	ActiveApp getActiveApp(User user);
+	String getMiniProgramMappedApp(String miniAppid);
 
 }
