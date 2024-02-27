@@ -55,4 +55,14 @@ public class SaveCarInfo {
     public void setAppid(String appid) {
         this.appid = appid;
     }
+
+    @Override
+    public String toString() {
+        return "SaveCarInfo{" +
+                "carNo='" + carNo + '\'' +
+                ", checked='" + checked + '\'' +
+                ", user_id='" + user_id + '\'' +
+                ", appid='" + appid + '\'' +
+                '}';
+    }
 }

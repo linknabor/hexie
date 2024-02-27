@@ -7,7 +7,7 @@ package com.yumu.hexie.integration.park.resp;
  * @create 2021-08-30 16:12
  */
 public class PayingDetail {
-
+    private String record_id; //进出记录ID
     private String car_no; //车牌号
     private String in_time; //进场时间
     private String park_time; //停车时长
@@ -17,6 +17,14 @@ public class PayingDetail {
     private String cust_tel; //客服电话
     private String out_park_prompt; //出场提示语
     private String refresh_time; //刷新间隔
+
+    public String getRecord_id() {
+        return record_id;
+    }
+
+    public void setRecord_id(String record_id) {
+        this.record_id = record_id;
+    }
 
     public String getCar_no() {
         return car_no;
@@ -88,5 +96,21 @@ public class PayingDetail {
 
     public void setRefresh_time(String refresh_time) {
         this.refresh_time = refresh_time;
+    }
+
+    @Override
+    public String toString() {
+        return "PayingDetail{" +
+                "record_id='" + record_id + '\'' +
+                ", car_no='" + car_no + '\'' +
+                ", in_time='" + in_time + '\'' +
+                ", park_time='" + park_time + '\'' +
+                ", park_name='" + park_name + '\'' +
+                ", fee_amt='" + fee_amt + '\'' +
+                ", pay_prompt='" + pay_prompt + '\'' +
+                ", cust_tel='" + cust_tel + '\'' +
+                ", out_park_prompt='" + out_park_prompt + '\'' +
+                ", refresh_time='" + refresh_time + '\'' +
+                '}';
     }
 }
