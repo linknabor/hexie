@@ -46,6 +46,7 @@ import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
+import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.integration.wuye.vo.InvoiceDetail;
 import com.yumu.hexie.integration.wuye.vo.Message;
 import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
@@ -58,6 +59,7 @@ import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.vo.req.MessageReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
 
@@ -105,6 +107,8 @@ public class WuyeUtil2 {
 	private static final String QUERY_RECEIPT_URL = "receipt/getReceiptSDO.do";
 	private static final String QUERY_RECEIPT_LIST_URL = "receipt/getReceiptByUserSDO.do";
 	private static final String PUSH_USER_REGISTER_URL = "pushUserRegisterSDO.do";
+	private static final String H5_USER_LOGIN_URL = "alipayH5LoginSDO.do";	//h5用户登陆注册
+	private static final String QUERY_TRADE_INVOICE_URL = "queryInvoiceByTradeSDO.do";	//获取用户申请过的发票
 
 	/**
 	 * 标准版查询账单
@@ -211,6 +215,14 @@ public class WuyeUtil2 {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
+		if (StringUtils.isEmpty(fromSys)) {
+			if ("_shwy".equals(user.getOriSys())) {
+				fromSys = user.getOriSys();
+			}
+		}
+		if (StringUtils.isEmpty(fromSys)) {
+			fromSys = sysName;
+		}
 		String requestUrl = requestUtil.getRequestUrl(user, prepayRequestDTO.getRegionName());
 		requestUrl += WX_PAY_URL;
 		
@@ -218,6 +230,16 @@ public class WuyeUtil2 {
 		prepayRequest.setFromSys(fromSys);
 		prepayRequest.setAppid(user.getAppId());
 		prepayRequest.setPayee_openid(prepayRequestDTO.getPayee_openid());
+		if ("0".equals(prepayRequestDTO.getPayType())) {
+			prepayRequest.setOpenid(user.getOpenid());
+			prepayRequest.setAppid(user.getAppId());
+		} else if ("2".equals(prepayRequestDTO.getPayType())) {	//微信小程序支付
+			prepayRequest.setOpenid(user.getMiniopenid());
+			prepayRequest.setAppid(user.getMiniAppId());
+		} else if ("3".equals(prepayRequestDTO.getPayType())) {	//支付宝小程序支付
+			prepayRequest.setOpenid(user.getAliuserid());
+			prepayRequest.setAppid(user.getAliappid());
+		}
 
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
 		CommonResponse<WechatPayInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, prepayRequest, typeReference);
@@ -595,7 +617,7 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<CellListVO> getVagueSectByName(User user, String sectName, String regionName) throws Exception{
+	public BaseResult<CellListVO> getVagueSectByName(User user, String sectName, String regionName, String queryAppid) throws Exception{
 		
 		String requestUrl = requestUtil.getRequestUrl(user, regionName);
 		requestUrl += SECT_VAGUE_LIST_URL;
@@ -604,7 +626,14 @@ public class WuyeUtil2 {
 		querySectRequet.setSectName(sectName);
 		querySectRequet.setOpenid(user.getOpenid());
 		querySectRequet.setAppid(user.getAppId());
-		
+		querySectRequet.setQueryAppid(queryAppid);
+		if (!StringUtils.isEmpty(queryAppid)) {
+			String clientType = "0";
+			if (queryAppid.equals(user.getMiniAppId())) {
+				clientType = "1";
+			}
+			querySectRequet.setClientType(clientType);
+		}
 		TypeReference<CommonResponse<CellListVO>> typeReference = new TypeReference<CommonResponse<CellListVO>>(){};
 		CommonResponse<CellListVO> hexieResponse = restUtil.exchangeOnUri(requestUrl, querySectRequet, typeReference);
 		BaseResult<CellListVO> baseResult = new BaseResult<>();
@@ -649,6 +678,30 @@ public class WuyeUtil2 {
 		map.put("openid", user.getOpenid());
 		map.put("curr_page", currPage);
 		map.put("total_count", "1000");
+
+		TypeReference<CommonResponse<List<InvoiceDetail>>> typeReference = new TypeReference<CommonResponse<List<InvoiceDetail>>>(){};
+		CommonResponse<List<InvoiceDetail>> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<List<InvoiceDetail>> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 根据交易ID获取相关的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<InvoiceDetail>> queryInvoiceByTrade(User user, String tradeWaterId) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_TRADE_INVOICE_URL;
+		Map<String, String> map = new HashMap<>();
+		map.put("user_id", user.getWuyeId());
+		map.put("openid", user.getOpenid());
+		map.put("trade_water_id", tradeWaterId);
 
 		TypeReference<CommonResponse<List<InvoiceDetail>>> typeReference = new TypeReference<CommonResponse<List<InvoiceDetail>>>(){};
 		CommonResponse<List<InvoiceDetail>> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
@@ -838,5 +891,26 @@ public class WuyeUtil2 {
 		return baseResult;
 
 	}
+	
+	/**
+	 * 支付平台h5用户注册登陆
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<HexieUser> h5UserLogin(H5UserDTO aliUserDTO) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(new User(), "");
+		requestUrl += H5_USER_LOGIN_URL;
+		TypeReference<CommonResponse<HexieUser>> typeReference = new TypeReference<CommonResponse<HexieUser>>(){};
+		CommonResponse<HexieUser> hexieResponse = restUtil.exchangeOnUri(requestUrl, aliUserDTO, typeReference);
+		BaseResult<HexieUser> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		baseResult.setResult(hexieResponse.getResult());
+		return baseResult;
 
+	}
+
+
+	
 }

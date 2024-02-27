@@ -149,7 +149,14 @@ public class WuyeUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static BaseResult<HexieUser> userLogin(User user) {
-		String url = getRequestUri(user) + String.format(WXLOGIN_URL, user.getOpenid());
+		String openid = user.getOpenid();
+		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
+			openid = user.getMiniopenid();
+		}
+		if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
+			openid = user.getAliuserid();
+		}
+		String url = getRequestUri(user) + String.format(WXLOGIN_URL, openid);
 		return (BaseResult<HexieUser>)httpGet(url,HexieUser.class);
 	}
 	

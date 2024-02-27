@@ -419,9 +419,9 @@ public class GotongServiceImpl implements GotongService {
     }
 
     @Override
-    public void sendInteractNotification(InteractCommentNotice commentNotice) {
+    public WechatResponse sendInteractNotification(InteractCommentNotice commentNotice) {
         String accessToken = systemConfigService.queryWXAToken(commentNotice.getAppid());
-        templateMsgService.sendOpinionNotificationMessage(commentNotice, accessToken);
+        return templateMsgService.sendOpinionNotificationMessage(commentNotice, accessToken);
     }
 
     @Override

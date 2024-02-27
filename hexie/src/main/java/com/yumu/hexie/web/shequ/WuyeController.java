@@ -536,7 +536,7 @@ public class WuyeController extends BaseController {
 		boolean isCheck = smsService.checkVerificationCode(mobile, yzm);	//校验验证码
 		
 		User user;
-		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {	//如果手机号已经注册过，则不需要验证码
 			user = userService.multiFindByOpenId(openid);
 			if (user != null) {
 				if (user.getTel()!=null && user.getTel().equals(mobile)) {
@@ -563,7 +563,7 @@ public class WuyeController extends BaseController {
 				applicationReq.getCredit_code(), applicationReq.getTrade_water_id(), applicationReq.getOpenid());
 		
 		
-		if (!StringUtils.isEmpty(openid)) {
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {
 			wuyeService.registerAndBind(user, applicationReq.getTrade_water_id(), "5");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");
@@ -697,10 +697,10 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/getVagueSectByName", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<CellVO> getVagueSectByName(@ModelAttribute(Constants.USER) User user,
-			@RequestParam(required = false) String sect_name,
+			@RequestParam(required = false) String sect_name, @RequestParam(required = false) String queryAppid,
 			@RequestParam(required = false, value = "regionname") String regionName) throws Exception {
 
-		CellListVO cellMng = wuyeService.getVagueSectByName(user, sect_name, regionName);
+		CellListVO cellMng = wuyeService.getVagueSectByName(user, sect_name, regionName, queryAppid);
 		if (cellMng != null) {
 			return BaseResult.successResult(cellMng);
 		} else {
@@ -979,6 +979,15 @@ public class WuyeController extends BaseController {
 		List<InvoiceDetail> invoiceList = wuyeService.getInvoice(user, page);
 		return BaseResult.successResult(invoiceList);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/inovice", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<List<InvoiceDetail>> getInvoiceByTrade(@ModelAttribute(Constants.USER) User user, @RequestParam String tradeWaterId) throws Exception {
+		
+		List<InvoiceDetail> invoiceList = wuyeService.getInvoiceByTrade(user, tradeWaterId);
+		return BaseResult.successResult(invoiceList);
+	}
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getFeeSmsBill", method = RequestMethod.GET)
@@ -1024,7 +1033,7 @@ public class WuyeController extends BaseController {
 		boolean isCheck = smsService.checkVerificationCode(mobile, vericode);	//校验验证码
 		
 		User user;
-		if (!StringUtils.isEmpty(openid)) {	//如果手机号已经注册过，则不需要验证码
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {	//如果手机号已经注册过，则不需要验证码
 			user = userService.multiFindByOpenId(openid);
 			if (user != null) {
 				if (user.getTel()!=null && user.getTel().equals(mobile)) {
@@ -1049,7 +1058,7 @@ public class WuyeController extends BaseController {
 		
 		wuyeService.applyReceipt(user, receiptApplicationReq);	//申请电子收据
 		
-		if (!StringUtils.isEmpty(openid)) {
+		if (!StringUtils.isEmpty(openid) && !"0".equals(openid)) {
 			wuyeService.registerAndBind(user, receiptApplicationReq.getTradeWaterId(), "6");	//队列，异步执行
 		}
 		return BaseResult.successResult("succeeded");

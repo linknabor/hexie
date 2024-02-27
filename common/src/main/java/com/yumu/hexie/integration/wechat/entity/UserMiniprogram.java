@@ -9,6 +9,7 @@ public class UserMiniprogram implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -7475667531374306290L;
+	private String appid;	//小程序appid
 	private String openid;
 	@JsonProperty("session_key")
 	private String sessionKey;
@@ -16,6 +17,12 @@ public class UserMiniprogram implements Serializable {
 	private String errcode;
 	private String errmsg;
 	
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
 	public String getOpenid() {
 		return openid;
 	}
@@ -48,10 +55,8 @@ public class UserMiniprogram implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "UserMiniprogram [openid=" + openid + ", sessionKey=" + sessionKey + ", unionid=" + unionid
-				+ ", errcode=" + errcode + ", errmsg=" + errmsg + "]";
+		return "UserMiniprogram [appid=" + appid + ", openid=" + openid + ", sessionKey=" + sessionKey + ", unionid="
+				+ unionid + ", errcode=" + errcode + ", errmsg=" + errmsg + "]";
 	}
-	
-	
 
 }

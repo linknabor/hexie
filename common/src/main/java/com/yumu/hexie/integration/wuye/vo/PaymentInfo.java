@@ -27,6 +27,7 @@ public class PaymentInfo implements Serializable {
 	private String is_create_qrcode;
 	private String is_default_invoice; //是否强制开票
 	private String total_fee_price;
+	private String path; //催收上传的附件地址
 	
 	@Transient
 	public String getPaymethodStr(){
@@ -129,5 +130,13 @@ public class PaymentInfo implements Serializable {
 
 	public void setIs_default_invoice(String is_default_invoice) {
 		this.is_default_invoice = is_default_invoice;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
 	}
 }

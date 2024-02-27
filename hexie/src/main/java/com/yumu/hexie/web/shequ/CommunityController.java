@@ -66,7 +66,11 @@ public class CommunityController extends BaseController{
 	@RequestMapping(value = "/interact/getInteractType", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<Map<String, String>>> getInteractType(@ModelAttribute(Constants.USER)User user) throws Exception {
-		List<Map<String, String>> list = communityService.getInteractType(user);
+		String appid = user.getAppId();
+		if(StringUtils.isEmpty(appid)) {
+			appid = user.getMiniAppId();
+		}
+		List<Map<String, String>> list = communityService.getInteractType(user, appid);
 		return BaseResult.successResult(list);
 	}
 
@@ -78,9 +82,10 @@ public class CommunityController extends BaseController{
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value = "/interact/addInteract", method = RequestMethod.POST)
+	@RequestMapping(value = "/interact/addInteract", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public BaseResult<String> addThread(@ModelAttribute(Constants.USER)User user, @RequestBody SaveInteractInfoReq req) throws Exception{
+		
 		if(req.getEx_content().length()>200) {
 			return BaseResult.fail("发布信息内容超过200字。");
 		}

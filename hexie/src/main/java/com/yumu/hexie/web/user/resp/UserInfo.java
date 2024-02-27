@@ -98,6 +98,10 @@ public class UserInfo implements Serializable {
 	private String reqPath; //访问的地址
 	private OrgInfo orgInfo;
 	private String miniopenid;	//小程序openid
+	private String miniAppId;	//小程序appid
+	
+	private String aliuserid;
+	private String aliappid;
 	
 	public static class OrgInfo {
 		
@@ -527,7 +531,7 @@ public class UserInfo implements Serializable {
 	public void setRepairService(boolean repairService) {
 		this.repairService = repairService;
 	}
-  
+
 	public String getOpenid() {
 		return openid;
 	}
@@ -543,7 +547,7 @@ public class UserInfo implements Serializable {
 	public void setPermission(boolean permission) {
 		this.permission = permission;
 	}
-	
+
 	public String getReqPath() {
 		return reqPath;
 	}
@@ -609,6 +613,29 @@ public class UserInfo implements Serializable {
 	public void setMiniopenid(String miniopenid) {
 		this.miniopenid = miniopenid;
 	}
-
 	
+	public String getMiniAppId() {
+		return miniAppId;
+	}
+
+	public void setMiniAppId(String miniAppId) {
+		this.miniAppId = miniAppId;
+	}
+
+	public String getAliuserid() {
+		return aliuserid;
+	}
+
+	public void setAliuserid(String aliuserid) {
+		this.aliuserid = aliuserid;
+	}
+
+	public String getAliappid() {
+		return aliappid;
+	}
+
+	public void setAliappid(String aliappid) {
+		this.aliappid = aliappid;
+	}
+
 }

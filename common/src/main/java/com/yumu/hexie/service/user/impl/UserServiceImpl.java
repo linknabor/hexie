@@ -8,9 +8,11 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,13 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
-import com.alipay.api.request.AlipaySystemOauthTokenRequest;
-import com.alipay.api.response.AlipaySystemOauthTokenResponse;
+import com.alipay.api.internal.util.AlipayEncrypt;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
+import com.yumu.hexie.integration.alipay.AuthService;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
@@ -40,6 +39,7 @@ import com.yumu.hexie.integration.wechat.service.CardService;
 import com.yumu.hexie.integration.wechat.service.OAuthService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
+import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.integration.wuye.vo.HexieUser;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.card.WechatCard;
@@ -60,9 +60,11 @@ import com.yumu.hexie.service.coupon.CouponStrategy;
 import com.yumu.hexie.service.coupon.CouponStrategyFactory;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.page.PageConfigService;
+import com.yumu.hexie.service.user.AddressService;
 import com.yumu.hexie.service.user.PointService;
 import com.yumu.hexie.service.user.RegionService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 @Service("userService")
@@ -90,19 +92,20 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private RedisRepository redisRepository;
 	@Autowired
-	private AlipayClient alipayClient;
-	@Autowired
 	private RegionService regionService;
 	@Autowired
 	private PageConfigService pageConfigService;
 	@Autowired
 	private OrgOperatorRepository orgOperatorRepository;
-	
+	@Autowired
+	private AuthService authService;
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
+	@Autowired
+	private AddressService addressService;
+
 	@Value("${mainServer}")
 	private Boolean mainServer;
-	
-	@Value("${wechat.miniprogramAppId}")
-    private String miniprogramAppid;
 	
 	@Override
 	public User getById(long uId) {
@@ -449,6 +452,16 @@ public class UserServiceImpl implements UserService {
 		registerCouponStrategy.sendCoupon(user);
 		user.setRegisterDate(System.currentTimeMillis());
         save(user);
+
+		//把用户注册信息传入平台，目的是根据手机号绑定房子
+		try {
+			BaseResult<String> r = wuyeUtil2.pushUserRegisterUrl(user);
+			if ("99".equals(r.getResult())) {
+				logger.error(r.getMessage());
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(),e);
+		}
         return user;
 		
 	}
@@ -475,21 +488,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public AccessTokenOAuth getAlipayAuth(String code) {
 		
-		Assert.hasText(code, "code不能为空。");
-		AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
-		request.setCode(code);
-		request.setGrantType(ConstantAlipay.AUTHORIZATION_TYPE);
-		AccessTokenOAuth oAuth = new AccessTokenOAuth();
-		try {
-			logger.info("alipayClient: " + alipayClient);
-			logger.info("grantType: " + ConstantAlipay.AUTHORIZATION_TYPE);
-		    AlipaySystemOauthTokenResponse oauthTokenResponse = alipayClient.execute(request);
-		    oAuth.setOpenid(oauthTokenResponse.getUserId());
-		    oAuth.setAccessToken(oauthTokenResponse.getAccessToken());
-		} catch (AlipayApiException e) {
-			throw new BizValidateException(e.getMessage(), e);
-		}
-		return oAuth;
+		return getAlipayAuth(null, code);
+		
+	}
+		
+	@Override
+	public AccessTokenOAuth getAlipayAuth(String appid, String code) {
+		
+		return authService.getAlipayAuth(appid, code);
 		
 	}
 
@@ -559,6 +565,13 @@ public class UserServiceImpl implements UserService {
         Assert.hasText(code, "code不能为空。");
         return wechatCoreService.getMiniUserSessionKey(code);
     }
+	
+	@Override
+    public UserMiniprogram getWechatMiniUserSessionKey(String miniAppid, String code) throws Exception {
+		Assert.hasText(miniAppid, "miniappid不能为空。");
+		Assert.hasText(code, "code不能为空。");
+        return wechatCoreService.getMiniUserSessionKey(miniAppid, code);
+    }
 
     @Override
     @Transactional
@@ -581,16 +594,16 @@ public class UserServiceImpl implements UserService {
             userAccount.setOpenid("0");    //TODO
             userAccount.setUnionid(miniUser.getUnionid());
             userAccount.setMiniopenid(miniUser.getOpenid());
-            userAccount.setMiniAppId(miniprogramAppid);
+            userAccount.setMiniAppId(miniUser.getAppid());
             userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
         } else {
         	if(StringUtils.isEmpty(userAccount.getMiniopenid())) {
         		userAccount.setUnionid(miniUser.getUnionid());
                 userAccount.setMiniopenid(miniUser.getOpenid());
-                userAccount.setMiniAppId(miniprogramAppid);
+                userAccount.setMiniAppId(miniUser.getAppid());
         	}
         }
-        String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getUnionid();
+        String key = ModelConstant.KEY_USER_SESSION_KEY + userAccount.getMiniopenid();
         String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(miniUser.getSessionKey())) {
             redisTemplate.opsForValue().set(key, miniUser.getSessionKey(), 71, TimeUnit.HOURS);    //官方3天失效，也就是72小时
@@ -683,15 +696,37 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	public MiniUserPhone getMiniUserPhone(String code) {
+	public MiniUserPhone getMiniUserPhone(User user, String code) {
 		
 		Assert.hasText(code, "授权码不能为空。");
 		MiniUserPhone miniUserPhone = null;
 		try {
-			miniUserPhone = wechatCoreService.getMiniUserPhone(code);
+			miniUserPhone = wechatCoreService.getMiniUserPhone(user.getMiniAppId(), code);
 			if (!StringUtils.isEmpty(miniUserPhone.getErrorcode())) {
 				throw new BizValidateException(miniUserPhone.getErrmsg());
 			}
+			return miniUserPhone;
+			
+		} catch (Exception e) {
+			throw new BizValidateException(e.getMessage(), e);
+		}
+		
+	}
+	
+	/**
+	 * 获取小程序用户的手机号
+	 * @param code
+	 * @return
+	 */
+	@Override
+	public MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData) {
+		
+		Assert.hasText(encryptedData, "encryptedData不能为空。");
+		MiniUserPhone miniUserPhone = null;
+		try {
+			
+			String decrptyContent = AlipayEncrypt.decryptContent(encryptedData, "AES", "Csf90IejcIrzDVi3f2nSXw==", "utf8");
+			logger.info("decrptyContent: " + decrptyContent);
 			return miniUserPhone;
 			
 		} catch (Exception e) {
@@ -901,6 +936,143 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User getByMiniopenid(String miniopenid) {
 		return userRepository.findByMiniopenid(miniopenid);
+	}
+	
+	@Override
+    @Transactional
+    public User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth) {
+    	logger.info("accessTokenOAuth : " + accessTokenOAuth);
+        
+    	String userId = accessTokenOAuth.getOpenid();
+    	
+        User userAccount = null;
+        if (!StringUtils.isEmpty(userId)) {
+        	List<User> userList = userRepository.findByAliuserid(userId);
+        	if (userList!=null && !userList.isEmpty()) {
+        		if (userList.size() > 1) {
+        			for (User dbUser : userList) {
+    					if (!StringUtils.isEmpty(dbUser.getTel())) {
+    						userAccount = dbUser;
+    						break;
+    					}
+    				}
+				} else {
+					userAccount = userList.get(0);
+				}
+				
+			}
+		}
+        if (userAccount == null) {
+            userAccount = new User();
+            userAccount.setAliuserid(userId);
+            userAccount.setAppId(accessTokenOAuth.getAppid());
+            userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
+        } 
+        String key = ModelConstant.KEY_ALI_USER_AUTH_TOKEN + userId;
+        String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
+        if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(accessTokenOAuth.getAccessToken())) {
+            redisTemplate.opsForValue().set(key, accessTokenOAuth.getAccessToken(), 359, TimeUnit.HOURS);    //官方15天失效，也就是360小时
+        }
+        userRepository.save(userAccount);
+        return userAccount;
+    }
+	
+	@Override
+	public User getUserByAliUserId(String aliUserId) {
+		
+		if (StringUtils.isEmpty(aliUserId)) {
+			throw new BizValidateException("user_id不能为空。");
+		}
+		List<User> userList = userRepository.findByAliuserid(aliUserId);
+		User aliUser = null;
+		if (userList!=null && !userList.isEmpty()) {
+			aliUser = userList.get(0);
+		}
+		return aliUser;
+	}
+	
+	@Override
+	@Transactional
+	public User saveH5User(User user, H5UserDTO h5UserDTO) throws Exception {
+		
+		logger.info("saveH5User, h5UserDTO : " + h5UserDTO);
+		if (StringUtils.isEmpty(h5UserDTO.getUserId())) {
+			throw new BizValidateException("user_id不能为空。");
+		}
+		
+		if (StringUtils.isEmpty(h5UserDTO.getAppid())) {
+			throw new BizValidateException("appid不能为空。");
+		}
+		
+		if (StringUtils.isEmpty(h5UserDTO.getCellId())) {
+			throw new BizValidateException("cell_id不能为空。");
+		}
+		
+		if (user == null) {
+			user = new User();
+			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
+				user.setAliuserid(h5UserDTO.getUserId());
+				user.setAliappid(h5UserDTO.getAppid());
+			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
+				user.setMiniopenid(h5UserDTO.getUserId());
+				user.setMiniAppId(h5UserDTO.getAppid());
+//				user.setOpenid(h5UserDTO.getUserId());
+//				user.setAppId(h5UserDTO.getAppid());
+			}
+		}
+		user.setTel(h5UserDTO.getMobile());
+		
+		if (!"_shwy".equals(user.getOriSys())) {
+			Long auId = null;
+			if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
+				auId = Long.valueOf(h5UserDTO.getAuId());
+			}
+			user.setOriUserId(auId);
+			user.setOriSys("_shwy");
+		}
+		
+		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(h5UserDTO);
+		if (!baseResult.isSuccess()) {
+			if ("99".equals(baseResult.getResult())) {
+				throw new BizValidateException(baseResult.getMessage());
+			} else if ("199".equals(baseResult.getResult())) {
+				throw new BizValidateException(ModelConstant.EXCEPTION_BIZ_TYPE_H5LOGIN, 0l, baseResult.getMessage());
+			}
+		}
+		
+		HexieUser hexieUser = baseResult.getData();
+		HexieAddress hexieAddress = new HexieAddress();
+		BeanUtils.copyProperties(hexieUser, hexieAddress);
+		
+		addressService.updateDefaultAddress(user, hexieAddress);
+		Integer totalBind = user.getTotalBind();
+		if (totalBind == null) {
+			totalBind = 0;
+		}
+		if (!StringUtils.isEmpty(hexieUser.getTotal_bind())) {
+			if (hexieUser.getTotal_bind() > 0) {
+				totalBind = hexieUser.getTotal_bind();	//如果值不为空，说明是跑批程序返回回来的，直接取值即可，如果值是空，走下面的else累加即可
+			}
+		}
+		if (totalBind == 0) {
+			totalBind = totalBind + 1;
+		}
+		user.setTotalBind(totalBind);
+		user.setWuyeId(hexieUser.getUser_id());
+		user.setXiaoquName(hexieUser.getSect_name());
+		user.setProvince(hexieUser.getProvince_name());
+		user.setCity(hexieUser.getCity_name());
+		user.setCounty(hexieUser.getRegion_name());
+		user.setSectId(hexieUser.getSect_id());	
+		user.setCspId(hexieUser.getCsp_id());
+		user.setOfficeTel(hexieUser.getOffice_tel());
+		return userRepository.save(user);
+	}
+	
+	@Override
+	public List<User> getUserByOriSysAndOriUserId(String oriSys, Long oriUserId) {
+		
+		return userRepository.findByOriSysAndOriUserId(oriSys, oriUserId);
 	}
 
 }

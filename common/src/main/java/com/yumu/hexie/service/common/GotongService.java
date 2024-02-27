@@ -66,7 +66,7 @@ public interface GotongService {
 	void sendGroupSuccessNotification(NoticeRgroupSuccess noticeRgroupSuccess);
 
 	//物业意见回复通知
-	void sendInteractNotification(InteractCommentNotice commentNotice);
+	WechatResponse sendInteractNotification(InteractCommentNotice commentNotice);
 
 	//业主评价模板推送
 	void sendInteractGradeNotification(InteractCommentNotice notice);

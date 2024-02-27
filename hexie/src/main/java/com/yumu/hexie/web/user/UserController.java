@@ -54,6 +54,7 @@ import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
 import com.yumu.hexie.service.user.UserService;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 import com.yumu.hexie.vo.menu.GroupMenuInfo;
 import com.yumu.hexie.web.BaseController;
@@ -615,8 +616,13 @@ public class UserController extends BaseController{
 	    
 	    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
 	    
+	    String appid = user.getAppId();
+	    if (StringUtils.isEmpty(appid)) {
+			appid = user.getMiniAppId();
+		}
+	    
 		/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(user.getAppId(), ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
+		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(appid, ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
 		List<String> templateIds = new ArrayList<>();
 		for (MsgTemplate msgTemplate : msgTemplateListAll) {
 			templateIds.add(msgTemplate.getValue());
@@ -631,9 +637,9 @@ public class UserController extends BaseController{
 	    boolean repairService = paramService.repairServiceAvailable(user);
 	    userInfo.setRepairService(repairService);	//新版工单服务是否开通
 	    
-	    List<BottomIcon> iconList = pageConfigService.getBottomIcon(user.getAppId());
-	    List<BgImage> bgImageList = pageConfigService.getBgImage(user.getAppId());
-	    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(user.getAppId());
+	    List<BottomIcon> iconList = pageConfigService.getBottomIcon(appid);
+	    List<BgImage> bgImageList = pageConfigService.getBgImage(appid);
+	    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(appid);
 	    userInfo.setIconList(iconList);
 	    userInfo.setBgImageList(bgImageList);
 	    userInfo.setWuyeTabsList(tabsList);
@@ -650,13 +656,13 @@ public class UserController extends BaseController{
 	    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
 			}
 	    	if (menuList.isEmpty()) {
-	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 1);	//表示绑定了房屋的默认菜单
+	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 1);	//表示绑定了房屋的默认菜单
 			}
 	    	if (menuList.isEmpty()) {
 		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
 			}
 	    } else {	//未绑定房屋的
-	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getAppId(), 2);	//表示绑定了房屋的默认菜单
+	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 2);	//表示绑定了房屋的默认菜单
 	    	if (menuList.isEmpty()) {
 		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
 			}
@@ -670,13 +676,13 @@ public class UserController extends BaseController{
 			userInfo.setPoint(wechatCard.getBonus());
 		}
 	    
-	    QrCode qrCode = pageConfigService.getQrCode(user.getAppId());
+	    QrCode qrCode = pageConfigService.getQrCode(appid);
 	    String qrLink = "";
 	    if (qrCode != null) {
 	    	qrLink = qrCode.getQrLink();
 		}
 	    
-	    CsHotline csHotline = pageConfigService.getCsHotline(user.getAppId());
+	    CsHotline csHotline = pageConfigService.getCsHotline(appid);
 	    String hotline = "";
 	    if (csHotline != null) {
 	    	hotline = csHotline.getHotline();
@@ -685,10 +691,10 @@ public class UserController extends BaseController{
 	    userInfo.setQrCode(qrLink);
 	    userInfo.setCsHotline(hotline);
 	    userInfo.setCardStatus(wechatCard.getStatus());
-	    userInfo.setCardService(systemConfigService.isCardServiceAvailable(user.getAppId()));
-	    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(user.getAppId()));
-	    userInfo.setDonghu(systemConfigService.isDonghu(user.getAppId()));
-	    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(user.getAppId()));
+	    userInfo.setCardService(systemConfigService.isCardServiceAvailable(appid));
+	    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(appid));
+	    userInfo.setDonghu(systemConfigService.isDonghu(appid));
+	    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(appid));
 	    		    
 	    long endTime = System.currentTimeMillis();
 		log.info("switch sect :" + user.getName() + ", 耗时：" + ((endTime-beginTime)));
@@ -738,17 +744,67 @@ public class UserController extends BaseController{
         
         OrgOperator orgOperator = userService.getOrgOperator(user);
         UserInfo userInfo = new UserInfo(user, orgOperator);
+        
+        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
+	    userInfo.setMenuList(menuList);
 
         if (orgOperator != null) {
-        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
-            userInfo.setOrgMenuList(menuList);
+        	List<GroupMenuInfo> orgMenuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(orgMenuList);
 		}
-        userInfo.setReqPath(reqPath);
-        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
         userInfo.setPermission(true);
-        if (!isValid) {
-            throw new BizValidateException("没有访问权限");
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 小程序登录
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/miniprogram/login/v2/{appid}/{code}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> miniLogin(HttpSession session, @PathVariable String appid, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        User user = null;
+        if (!StringUtils.isEmpty(code)) {
+            if (user == null) {
+                if (userService.checkDuplicateLogin(session, code)) {
+                    throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+                }
+                UserMiniprogram miniUser = userService.getWechatMiniUserSessionKey(appid, code);
+
+                user = userService.saveMiniUserSessionKey(miniUser);
+                if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+                	userService.recacheMiniUser(user);
+                }
+            }
+            session.setAttribute(Constants.USER, user);
         }
+        if (user == null) {
+            return new BaseResult<UserInfo>().failMsg("用户不存在！");
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "login，耗时：" + ((endTime - beginTime) / 1000));
+
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> orgMenuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(orgMenuList);
+		}
+        
+        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
+	    userInfo.setMenuList(menuList);
+	    userInfo.setPermission(true);
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
@@ -765,7 +821,7 @@ public class UserController extends BaseController{
     @ResponseBody
     public BaseResult<UserInfo> getMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @PathVariable String code) throws Exception {
         long beginTime = System.currentTimeMillis();
-        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(code);
+        MiniUserPhone miniUserPhone = userService.getMiniUserPhone(user, code);
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
         if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
         	userService.recacheMiniUser(user);
@@ -806,6 +862,139 @@ public class UserController extends BaseController{
         BeanUtils.copyProperties(dbuser, user);
         request.getSession().setAttribute(Constants.USER, user);
         return new BaseResult<String>().success(Constants.PAGE_SUCCESS);
+    }
+    
+    /**
+     * 小程序登录
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/miniprogram/login/v2/{appid}/{code}", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> alipayMiniLogin(HttpSession session, @PathVariable String appid, @PathVariable String code, @RequestBody(required = false) String reqPath) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        User user = null;
+        if (!StringUtils.isEmpty(code)) {
+            if (user == null) {
+                if (userService.checkDuplicateLogin(session, code)) {
+                    throw new BizValidateException("正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+                }
+                AccessTokenOAuth userOauth = userService.getAlipayAuth(appid, code);
+                log.info("userOauth : " + userOauth);
+                user = userService.saveAlipayMiniUserToken(userOauth);
+                //TODO 看以后访问量要不要缓存用户
+            }
+            session.setAttribute(Constants.USER, user);
+        }
+        if (user == null) {
+            return new BaseResult<UserInfo>().failMsg("用户不存在！");
+        }
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "login，耗时：" + ((endTime - beginTime) / 1000));
+
+        UserInfo userInfo = new UserInfo(user);
+        userInfo.setReqPath(reqPath);
+        boolean isValid = userService.validateMiniPageAccess(user, reqPath);
+        userInfo.setPermission(true);
+        if (!isValid) {
+            throw new BizValidateException("没有访问权限");
+        }
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    /**
+     * 小程序获取用户手机
+     *
+     * @param session
+     * @param code
+     * @param reqPath
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/miniprogram/phoneNumber", method = RequestMethod.POST)
+    @ResponseBody
+    public BaseResult<UserInfo> getAlipayMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> dataMap) throws Exception {
+        long beginTime = System.currentTimeMillis();
+        String encryptedData = dataMap.get("encryptedData");
+        MiniUserPhone miniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
+        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
+        	userService.recacheMiniUser(user);
+        }
+        BeanUtils.copyProperties(savedUser, user);
+        request.getSession().setAttribute(Constants.USER, user);
+        long endTime = System.currentTimeMillis();
+        log.info("user:" + user.getName() + "getPhoneNumber，耗时：" + ((endTime - beginTime) / 1000));
+        String roleId = user.getRoleId();
+        if (StringUtils.isEmpty(roleId)) {
+            roleId = "99";
+        }
+        
+        OrgOperator orgOperator = userService.getOrgOperator(user);
+        UserInfo userInfo = new UserInfo(user, orgOperator);
+
+        if (orgOperator != null) {
+        	List<GroupMenuInfo> menuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+            userInfo.setOrgMenuList(menuList);
+		}
+        userInfo.setPermission(true);
+        return new BaseResult<UserInfo>().success(userInfo);
+    }
+    
+    @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<UserInfo> h5Login(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getUserId()) ) {
+			throw new BizValidateException("请传入支付宝用户user_id或微信用户openid");
+		}
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
+			throw new BizValidateException("请传入支付宝或微信appid");
+		}
+		
+		long beginTime = System.currentTimeMillis();
+    	log.info("h5Login : " + h5UserDTO);
+    	if (StringUtils.isEmpty(h5UserDTO.getClientType())) {
+			if (org.apache.commons.lang3.StringUtils.isNumeric(h5UserDTO.getUserId())) {
+				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
+			} else {
+				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_WECHAT);
+			}
+		}
+    	User userAccount = null;
+//    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
+//    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
+//    		if (userList != null && !userList.isEmpty() ) {
+//    			for (User user : userList) {
+//					if (h5UserDTO.getUserId().equals(user.getAliuserid()) || h5UserDTO.getUserId().equals(user.getOpenid())) {
+//						userAccount = user;
+//						break;
+//					}
+//				}
+//			}
+//		}
+    	if (userAccount == null) {
+    		if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
+				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
+			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
+				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
+//				userAccount = userService.multiFindByOpenId(h5UserDTO.getUserId());
+			}
+		}
+    	userAccount = userService.saveH5User(userAccount, h5UserDTO);
+    	
+		long endTime = System.currentTimeMillis();
+	    UserInfo userInfo = new UserInfo(userAccount);
+	    log.info("h5 user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
+	    
+	    session.setAttribute(Constants.USER, userAccount);
+	    return new BaseResult<UserInfo>().success(userInfo);
+
     }
     
         

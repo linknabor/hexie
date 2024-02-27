@@ -226,6 +226,10 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 								logger.error("require subscribe, 请联系系统管理员！");
 								isSuccess = true;
 							}
+							if (wechatResponse.getErrcode() == 48001) {
+								logger.error("api unauthorized, 请联系系统管理员！");
+								isSuccess = true;
+							}
 							if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
 	                        	isSuccess = true;	//未配置模板消息							
 	                        }
@@ -266,8 +270,17 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				
 				if (!isSuccess) {
-					logger.info("eventScanSubscribe queue consume failed !, repush into the queue. json : " + json);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_SUBSCRIBE_QUEUE, json);
+					if ("01".equals(type) || "02".equals(type)) {
+						String retryKey = ModelConstant.KEY_EVENT_TEMPLATE_MSG_RETRY + baseEventDTO.getEventKey();
+						Long retry = redisTemplate.opsForValue().increment(retryKey);
+						if (retry <= 5) {
+							logger.info("eventScanSubscribe queue consume failed !, repush into the queue. json : " + json);
+							redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_SUBSCRIBE_QUEUE, json);
+						} else {
+							logger.info("retry times reached max, will discard the event, event : " + baseEventDTO.getEventKey());
+							redisTemplate.delete(retryKey);
+						}
+					}
 				}
 
 			} catch (Exception e) {
@@ -347,9 +360,16 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 						if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
                         	isSuccess = true;
 						}
+						if (wechatResponse.getErrcode() == 48001) {
+							logger.error("api unauthorized, 请联系系统管理员！");
+							isSuccess = true;
+						}
 						if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                         	isSuccess = true;	//未配置模板消息
 						}
+						
+						logger.info("wechatResponse : " + wechatResponse);
+
 						
 					} else if ("02".equals(type)) {
 						
@@ -385,8 +405,17 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				}
 				
 				if (!isSuccess) {
-					logger.info("eventScan queue consume failed !, repush into the queue. json : " + json);
-					redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_QUEUE, json);
+					if ("01".equals(type) || "02".equals(type)) {
+						String retryKey = ModelConstant.KEY_EVENT_TEMPLATE_MSG_RETRY + baseEventDTO.getEventKey();
+						Long retry = redisTemplate.opsForValue().increment(retryKey);
+						if (retry <= 5) {
+							logger.info("eventScan queue consume failed !, repush into the queue. json : " + json);
+							redisTemplate.opsForList().rightPush(ModelConstant.KEY_EVENT_SCAN_QUEUE, json);
+						} else {
+							logger.info("retry times reached max, will discard the event, event : " + baseEventDTO.getEventKey());
+							redisTemplate.delete(retryKey);
+						}
+					}
 				}
 
 			} catch (Exception e) {

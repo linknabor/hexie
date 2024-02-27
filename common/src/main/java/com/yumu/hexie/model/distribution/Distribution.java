@@ -10,9 +10,12 @@ public class Distribution extends BaseModel{
 	private int regionType;//0 省 1 市 2县区  3全部
 	private long productId; //商品
 	private long productCategoryId;
+
     private String productName;//商品名称
     private String productPic;//商品图片
+    
 	private int status;//RULE_STATUS_ON
+
 	private String tagUrl;//右上角标签URL
 
 	public long getRegionId() {
@@ -79,4 +82,5 @@ public class Distribution extends BaseModel{
 		this.productCategoryId = productCategoryId;
 	}
 
+	
 }

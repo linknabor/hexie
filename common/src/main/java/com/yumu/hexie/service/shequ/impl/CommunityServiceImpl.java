@@ -12,10 +12,9 @@ import com.yumu.hexie.integration.interact.resp.InteractCommentResp;
 import com.yumu.hexie.integration.interact.resp.InteractInfoResp;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.model.ModelConstant;
@@ -66,8 +65,8 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_INTERACT_TYPE_CFG, key = "#user.appId")
-	public List<Map<String, String>> getInteractType(User user) throws Exception {
+	@CacheEvict(cacheNames = ModelConstant.KEY_INTERACT_TYPE_CFG, key = "#appid")
+	public List<Map<String, String>> getInteractType(User user, String appid) throws Exception {
 		CommonResponse<List<Map<String, String>>> commonResponse = interactUtil.getInteractType(user);
 		if (!"00".equals(commonResponse.getResult())) {
 			throw new BizValidateException(commonResponse.getErrMsg());
@@ -83,8 +82,15 @@ public class CommunityServiceImpl implements CommunityService {
 		req.setUser_name(currUser.getNickname());
 		req.setSect_id(currUser.getSectId());
 		req.setUser_mobile(currUser.getTel());
-		req.setOpenid(user.getOpenid());
-		req.setAppid(currUser.getAppId());
+		
+		String openid = user.getOpenid();
+		String appid = user.getAppId();
+		if (StringUtils.isEmpty(openid) || "0".equals(openid) || StringUtils.isEmpty(appid)) {
+			openid = user.getMiniopenid();
+			appid = user.getMiniAppId();
+		}
+		req.setOpenid(openid);
+		req.setAppid(appid);
 		req.setEx_source("01"); //公众号
 		req.setEx_group("2"); //默认建议
 

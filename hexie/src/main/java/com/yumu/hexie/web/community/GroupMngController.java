@@ -288,7 +288,7 @@ public class GroupMngController extends BaseController {
     @RequestMapping(value = "/getMiniQrCode", method = {RequestMethod.GET}, produces = MediaType.IMAGE_JPEG_VALUE)
     @ResponseBody
     public String getMiniQrCode(@ModelAttribute(Constants.USER) User user, @RequestParam() String path, @RequestParam() String param) throws Exception {
-        return wechatCoreService.getUnlimitedQrcode(path, param);
+        return wechatCoreService.getUnlimitedQrcode(user, path, param);
     }
 
     /**

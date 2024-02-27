@@ -25,7 +25,9 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_DELIVERY_MESSAGE = "deliveryMessageTemplate";	//商家订单发货提醒
 	public static final String TEMPLATE_TYPE_CUSTOMER_DELIVERY = "customerDeliveryTemplate";	//买家发货提醒
 	public static final String TEMPLATE_TYPE_BILL_PUSH = "billPushTemplate"; //物业账单通知
+	public static final String TEMPLATE_TYPE_BILL_PUSH2 = "billPushTemplate2"; //物业账单通知
 	public static final String TEMPLATE_TYPE_OPINION_NOTIFY = "sendOpinionNotificationMessageTemplate"; //业主意见回复通知
+	public static final String TEMPLATE_TYPE_OPINION_NOTIFY2 = "sendOpinionNotificationMessageTemplate2"; //业主意见回复通知
 	public static final String TEMPLATE_TYPE_OPINION_GRADE_NOTIFY = "sendOpinionGradeNotificationMsgTemplate"; //业主意见评价通知
 	public static final String TEMPLATE_TYPE_WORKORDER_NOTIFY = "workOrderNotificationTemplate";
 	public static final String TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER = "invoiceApplicationReminderTemplate";	//发票申请提醒
@@ -36,6 +38,7 @@ public class MsgCfg {
 	
 	public static final String TEMPLATE_TYPE_RECEIPT_APPLICATION_REMINDER = "receiptApplicationReminderTemplate";	//收据申请提醒
 	public static final String TEMPLATE_TYPE_RECEIPT_FINISH = "receiptFinishTemplate";	//收据下发提醒
+	public static final String TEMPLATE_TYPE_RECEIPT_FINISH2 = "receiptFinishTemplate2";	//收据下发提醒
 	public static final String TEMPLATE_TYPE_NOTICE_ARRIVAL = "noticeArrivalMessageTemplate";	//收据下发提醒
 	public static final String TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE = "groupSuccessMessageTemplate";	//团购成团提醒
 	public static final String TEMPLATE_TYPE_GROUP_START_MESSAGE = "groupStartMessageTemplate";	//开团提醒

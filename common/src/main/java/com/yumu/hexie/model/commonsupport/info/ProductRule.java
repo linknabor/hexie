@@ -10,7 +10,7 @@ public class ProductRule extends BaseModel {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7072087262127364609L;
+	private static final long serialVersionUID = -5644044378216460486L;
 	
 	private long productId;
 	private long ruleId;

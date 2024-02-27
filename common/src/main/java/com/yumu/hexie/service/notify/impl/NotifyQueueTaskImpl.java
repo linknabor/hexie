@@ -62,7 +62,6 @@ import com.yumu.hexie.service.eshop.PartnerService;
 import com.yumu.hexie.service.maintenance.MaintenanceService;
 import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
-import com.yumu.hexie.service.shequ.CommunityService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.UserNoticeService;
 
@@ -97,8 +96,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     private WechatMsgService wechatMsgService;
     @Autowired
     private NoticeService noticeService;
-    @Autowired
-    private CommunityService communityService;
     @Autowired
     private BizErrorRepository bizErrorRepository;
     @Autowired
@@ -194,7 +191,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                     User user = null;
                     String openid = openidMap.get("openid");
-                    if (StringUtils.isEmpty(openid)) {
+                    if (StringUtils.isEmpty(openid) || "0".equals(openid)) {
                         logger.warn("openid is empty, will skip. ");
                         continue;
                     }
@@ -978,7 +975,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 logger.info("start to consume invoice msg queue : " + in);
                 String openid = in.getOpenid();
-                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
+                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid) || "0".equals(openid)) {
                     logger.warn("openid is null, will skip.");
                     continue;
                 }
@@ -1009,9 +1006,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                             	isSuccess = true;
                             } else if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
                             	isSuccess = true;
+							} else if (wechatResponse.getErrcode() == 40003) {
+								isSuccess = true;	//invalid openid
+							} else if (wechatResponse.getErrcode() == 48001) {
+								isSuccess = true;
 							} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                             	isSuccess = true;	//未配置模板消息
-
 							}
                             if (isSuccess) {
                                 try {
@@ -1061,6 +1061,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 ReceiptNotification in = objectMapper.readValue(queue, new TypeReference<ReceiptNotification>() {});
+                logger.info("receiptNotification is : " + in);
                 String orderId = in.getTradeWaterId();	//交易流水号
                 String appid = in.getAppid();	//判断贵州还是上海
                 
@@ -1087,7 +1088,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 logger.info("start to consume receipt msg queue : " + in);
                 String openid = in.getOpenid();
-                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid)) {
+                if (StringUtils.isEmpty(openid) || "null".equalsIgnoreCase(openid) || "0".equals(openid)) {
                     logger.warn("openid is null, will skip.");
                     continue;
                 }
@@ -1108,9 +1109,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         	isSuccess = true;
                         } else if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
                         	isSuccess = true;
+                        } else if (wechatResponse.getErrcode() == 40003) {
+							isSuccess = true;	//invalid openid
+						} else if (wechatResponse.getErrcode() == 48001) {
+							isSuccess = true;
 						} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                         	isSuccess = true;	//未配置模板消息
-
 						}
                         if (isSuccess) {
                             try {
@@ -1131,10 +1135,18 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 }
                 if (!isSuccess) {
-                    redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+                    String retryKey = ModelConstant.KEY_EVENT_TEMPLATE_MSG_RETRY + sysSource + ":" +orderId;
+					Long retry = redisTemplate.opsForValue().increment(retryKey);
+					if (retry <= 5) {
+						logger.info(",sg4FinishReceipt queue consume failed !, repush into the queue. json : " + queue);
+						redisTemplate.opsForList().rightPush(ModelConstant.KEY_RECEIPT_NOTIFICATION_QUEUE, queue);
+					} else {
+						logger.info("retry times reached max, will discard the msg, orderId : " + orderId);
+						redisTemplate.delete(retryKey);
+					}
+                    
                 }
             
-                
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -1278,6 +1290,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 InteractCommentNotice commentNotice = objectMapper.readValue(str, InteractCommentNotice.class);
                 logger.info("strat to InteractCommentNotice queue : " + commentNotice);
+                
+                if (StringUtils.isEmpty(commentNotice.getAppid())) {
+					logger.warn("user appid is null, will skip noticing !");
+					continue;
+				}
 
                 //保存到通知表
                 //添加到消息中心
@@ -1302,8 +1319,40 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 boolean isSuccess = false;
                 try {
-                    gotongService.sendInteractNotification(commentNotice);
-                    isSuccess = true;
+                    WechatResponse wechatResponse = gotongService.sendInteractNotification(commentNotice);
+                    logger.info("wechatResponse : " + wechatResponse);
+					
+					if (wechatResponse.getErrcode() == 0) {
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 40037) {
+						logger.error("invalid template_id, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 45009) {
+						logger.error("reach max api daily quota limit, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 43004) {
+						logger.error("require subscribe, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
+                    	isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 48001) {
+						logger.error("api unauthorized, 请联系系统管理员！");
+						isSuccess = true;
+					}
+					if (wechatResponse.getErrcode() == 99998) {
+                    	isSuccess = true;	//appid为空
+					}
+					if (wechatResponse.getErrcode() == 99999) {
+                    	isSuccess = true;	//未配置模板消息
+					}
+					
+					logger.info("wechatResponse : " + wechatResponse);
+                    
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }

@@ -310,9 +310,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	//根据名称模糊查询合协社区小区列表
 	@Override
-	public CellListVO getVagueSectByName(User user, String sectName, String regionName) throws Exception {
+	public CellListVO getVagueSectByName(User user, String sectName, String regionName, String queryAppid) throws Exception {
 		
-		return wuyeUtil2.getVagueSectByName(user, sectName, regionName).getData();
+		return wuyeUtil2.getVagueSectByName(user, sectName, regionName, queryAppid).getData();
 	}
 
 	@Override
@@ -704,6 +704,19 @@ public class WuyeServiceImpl implements WuyeService {
 	public List<InvoiceDetail> getInvoice(User user, String currPage) throws Exception {
 		
 		return wuyeUtil2.queryInvoiceByUser(user, currPage).getData();
+		
+	}
+	
+	/**
+	 * 获取当前用户申请过的发票
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public List<InvoiceDetail> getInvoiceByTrade(User user, String tradeWaterId) throws Exception {
+		
+		return wuyeUtil2.queryInvoiceByTrade(user, tradeWaterId).getData();
 		
 	}
 	

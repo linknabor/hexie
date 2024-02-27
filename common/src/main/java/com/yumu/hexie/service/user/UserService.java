@@ -12,6 +12,7 @@ import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
 
 
@@ -48,11 +49,41 @@ public interface UserService {
 	void bindWuYeId(User user);
 	boolean checkDuplicateLogin(HttpSession httpSession, String code);
 	
-	//注册
+	/**
+	 * 用户注册
+	 * @param user
+	 * @return
+	 */
 	User simpleRegister(User user);
+	
+	/**
+	 * 微信获取用户授权token
+	 * @param code
+	 * @param appid
+	 * @return
+	 */
 	AccessTokenOAuth getAccessTokenOAuth(String code, String appid);
+	
+	/**
+	 * 支付宝获取用户授权
+	 * @param code
+	 * @return
+	 */
 	AccessTokenOAuth getAlipayAuth(String code);
-	//根据openid从数据库中获取缓存
+	
+	/**
+	 * 支付宝获取用户授权 
+	 * @param appid
+	 * @param code
+	 * @return
+	 */
+	AccessTokenOAuth getAlipayAuth(String appid, String code);
+	
+	/**
+	 * 根据openid从数据库中获取缓存
+	 * @param sessonUser
+	 * @return
+	 */
 	User getByOpenIdFromCache(User sessonUser);
 	
 	/**
@@ -78,12 +109,28 @@ public interface UserService {
 	User switchSect(User user, SwitchSectReq switchSectReq);
 	
 	/**
+	 * 获取物业id
+	 * @param user
+	 * @return 
+	 */
+	String bindWuYeIdSync(User user);
+
+	/**
 	 * 获取微信小程序用户登陆key
 	 * @param code
 	 * @return
 	 * @throws Exception
 	 */
 	UserMiniprogram getWechatMiniUserSessionKey(String code) throws Exception;
+	
+	/**
+	 * 获取微信小程序用户登陆key
+	 * @param miniAppid
+	 * @param code
+	 * @return
+	 * @throws Exception
+	 */
+	UserMiniprogram getWechatMiniUserSessionKey(String miniAppid, String code) throws Exception;
 	
 	/**
 	 * 通过unionid获取用户信息
@@ -125,7 +172,7 @@ public interface UserService {
 	 * @param code
 	 * @return
 	 */
-	MiniUserPhone getMiniUserPhone(String code);
+	MiniUserPhone getMiniUserPhone(User user, String code);
 	
 	/**
 	 * 保存小程序用户手机
@@ -151,13 +198,6 @@ public interface UserService {
 	boolean bindMiniUser(BaseEventDTO baseEventDTO);
 	
 	/**
-	 * 获取物业id
-	 * @param user
-	 * @return 
-	 */
-	String bindWuYeIdSync(User user);
-	
-	/**
 	 * 更新用户unionid
 	 * @param baseEventDTO
 	 * @return
@@ -170,5 +210,44 @@ public interface UserService {
 	 * @return
 	 */
 	User getByMiniopenid(String miniopenid);
+	
+	/**
+	 * 保存支付宝用户和authToken
+	 * @param accessTokenOAuth
+	 * @return
+	 */
+	User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth);
+	
+	/**
+	 * 获取支付宝用户手机
+	 * @param user
+	 * @param code
+	 * @return
+	 */
+	MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
+	
+	/**
+	 * 根据支付宝用户id获取用户
+	 * @param aliUserId
+	 * @return
+	 */
+	User getUserByAliUserId(String aliUserId);
+	
+	/**
+	 * 保存支付h5用户信息
+	 * @param user
+	 * @param aliUserDTO
+	 * @return
+	 * @throws Exception 
+	 */
+	User saveH5User(User user, H5UserDTO aliUserDTO) throws Exception;
+	
+	/**
+	 * 根据源系统查询用户信息
+	 * @param oriSys
+	 * @param oriUserId
+	 * @return
+	 */
+	List<User> getUserByOriSysAndOriUserId(String oriSys, Long oriUserId);
 
 }
