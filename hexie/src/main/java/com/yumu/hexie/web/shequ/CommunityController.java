@@ -200,19 +200,21 @@ public class CommunityController extends BaseController{
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/interact/upload", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<String> tradeList(@RequestParam(value = "picture", required = false) MultipartFile multiFile) throws Exception {
+	public BaseResult<String> interactUpload(@RequestParam(value = "picture", required = false) MultipartFile multiFile) throws Exception {
 		String imgUrl = "";
-		String fileName = multiFile.getOriginalFilename();
-		if(StringUtils.isNoneBlank(fileName)) {
-			String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
-			String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
-			String kzm = fileName.substring(fileName.lastIndexOf("."));
-			String key = currDate + "_" + currTime + "_" + kzm;
-			String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
-			PutExtra extra = new PutExtra();
-			PutRet putRet = IoApi.Put(uptoken, key, multiFile.getInputStream(), extra);
-			if (putRet.getException() == null) {
-				imgUrl = domain + key;
+		if (multiFile != null) {
+			String fileName = multiFile.getOriginalFilename();
+			if(StringUtils.isNoneBlank(fileName)) {
+				String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
+				String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
+				String kzm = fileName.substring(fileName.lastIndexOf("."));
+				String key = currDate + "_" + currTime + "_" + kzm;
+				String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
+				PutExtra extra = new PutExtra();
+				PutRet putRet = IoApi.Put(uptoken, key, multiFile.getInputStream(), extra);
+				if (putRet.getException() == null) {
+					imgUrl = domain + key;
+				}
 			}
 		}
 		return BaseResult.successResult(imgUrl);
