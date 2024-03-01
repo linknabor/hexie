@@ -1289,12 +1289,26 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 InteractCommentNotice commentNotice = objectMapper.readValue(str, InteractCommentNotice.class);
-                logger.info("strat to InteractCommentNotice queue : " + commentNotice);
+                logger.info("start to InteractCommentNotice queue : " + commentNotice);
                 
                 if (StringUtils.isEmpty(commentNotice.getAppid())) {
 					logger.warn("user appid is null, will skip noticing !");
 					continue;
 				}
+                
+                List<User> userList = userRepository.findByOpenid(commentNotice.getOpenid());
+                User user = null;
+                if (userList != null && !userList.isEmpty()) {
+                    user = userList.get(0);
+                } else {
+                	user = userRepository.findByMiniopenid(commentNotice.getOpenid());
+                }
+                if(user == null) {
+                	logger.warn("can't find user : " + commentNotice.getOpenid() + ", will skip noticing !");
+					continue;
+                }
+                commentNotice.setOpenid(user.getOpenid());
+                commentNotice.setAppid(user.getAppId());
 
                 //保存到通知表
                 //添加到消息中心
@@ -1385,7 +1399,21 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 InteractCommentNotice notice = objectMapper.readValue(str, InteractCommentNotice.class);
-                logger.info("strat to notifyInteractGrade queue : " + notice);
+                logger.info("start to notifyInteractGrade queue : " + notice);
+                
+                List<User> userList = userRepository.findByOpenid(notice.getOpenid());
+                User user = null;
+                if (userList != null && !userList.isEmpty()) {
+                    user = userList.get(0);
+                } else {
+                	user = userRepository.findByMiniopenid(notice.getOpenid());
+                }
+                if(user == null) {
+                	logger.warn("can't find user : " + notice.getOpenid() + ", will skip notifyInteractGrade !");
+					continue;
+                }
+                notice.setOpenid(user.getOpenid());
+                notice.setAppid(user.getAppId());
 
                 boolean isSuccess = false;
                 try {
