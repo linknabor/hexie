@@ -76,7 +76,7 @@ public class RgroupQueueTaskImp implements RgroupQueueTask {
 	}
 	
 	/**
-	 * 扫开票二维码关注事件
+	 * 查看小程序事件
 	 */
 	@SuppressWarnings("unchecked")
 	@Async("taskExecutor")

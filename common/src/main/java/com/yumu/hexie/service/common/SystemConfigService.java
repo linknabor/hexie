@@ -38,5 +38,6 @@ public interface SystemConfigService {
 	List<SystemConfig> getAll();
 	ActiveApp getActiveApp(User user);
 	String getMiniProgramMappedApp(String miniAppid);
+	boolean isMiniprogramAvailabe(String appId);
 
 }

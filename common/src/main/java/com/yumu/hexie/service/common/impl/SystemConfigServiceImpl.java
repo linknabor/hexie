@@ -358,6 +358,26 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 		return isAvailable;
 	}
 	
+	/**
+	 * 当前公众号是否关联了小程序
+	 */
+	@Override
+	public boolean isMiniprogramAvailabe (String appId){
+		
+		if (StringUtils.isEmpty(appId)) {	//小程序用户
+			return false;
+		}
+		
+		String appIds = getSysConfigByKey("MINIPROGRAM_SERVICE_APPS");
+		boolean isAvailable = false;
+		if (!StringUtils.isEmpty(appIds)) {
+			if (appIds.indexOf(appId) > -1) {
+				isAvailable = true;
+			}
+		}
+		return isAvailable;
+	}
+	
 	public static String getREQUEST_URL() {
 		return REQUEST_URL;
 	}
