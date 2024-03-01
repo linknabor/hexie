@@ -11,6 +11,9 @@ public class PaymentCellInfo implements Serializable {
 
 	private String cell_addr;
 	private String cnst_area;
+
+	private String cust_name;
+	private String car_no;
 	
 	public String getCell_addr() {
 		return cell_addr;
@@ -24,10 +27,30 @@ public class PaymentCellInfo implements Serializable {
 	public void setCnst_area(String cnst_area) {
 		this.cnst_area = cnst_area;
 	}
+
+	public String getCust_name() {
+		return cust_name;
+	}
+
+	public void setCust_name(String cust_name) {
+		this.cust_name = cust_name;
+	}
+
+	public String getCar_no() {
+		return car_no;
+	}
+
+	public void setCar_no(String car_no) {
+		this.car_no = car_no;
+	}
+
 	@Override
 	public String toString() {
-		return "PaymentCellInfo [cell_addr=" + cell_addr + ", cnst_area=" + cnst_area + "]";
+		return "PaymentCellInfo{" +
+				"cell_addr='" + cell_addr + '\'' +
+				", cnst_area='" + cnst_area + '\'' +
+				", cust_name='" + cust_name + '\'' +
+				", car_no='" + car_no + '\'' +
+				'}';
 	}
-	
-	
 }

@@ -1,12 +1,13 @@
 package com.yumu.hexie.service.shequ.impl;
 
+import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.park.ParkUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.*;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
-import com.yumu.hexie.model.extreinfo.CarInfo;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.ParkService;
 import com.yumu.hexie.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,17 @@ public class ParkServiceImpl implements ParkService {
     private UserService userService;
 
     @Override
-    public UserCarList getUserCar(User user) throws Exception {
+    public UserCarList getUserCar(User user, String parkId) throws Exception {
         User userDB = userService.getById(user.getId());
         if(userDB == null) {
             return null;
         }
-        return parkUtil.getUserCar(user).getData();
+        CommonResponse<UserCarList> commonResponse = parkUtil.getUserCar(user, parkId);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
@@ -50,7 +56,12 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        return parkUtil.getParkList(user, parkName).getData();
+        CommonResponse<List<ParkInfo>> commonResponse = parkUtil.getParkList(user, parkName);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
@@ -62,7 +73,12 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        return parkUtil.getCarList(user, carNo).getData();
+        CommonResponse<List<UserCarList.CarInfo>> commonResponse = parkUtil.getCarList(user, carNo);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
@@ -74,7 +90,12 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        return parkUtil.delCar(user, carNo).getData();
+        CommonResponse<Boolean> commonResponse = parkUtil.delCar(user, carNo);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
@@ -86,12 +107,22 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        return parkUtil.getParkPayList(user, carNo, currPage).getData();
+        CommonResponse<List<PayCarInfo>> commonResponse = parkUtil.getParkPayList(user, carNo, currPage);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
     public Boolean addUserCar(User user, SaveCarInfo saveCarInfo) throws Exception {
-        return parkUtil.addUserCar(user, saveCarInfo).getData();
+        CommonResponse<Boolean> commonResponse = parkUtil.addUserCar(user, saveCarInfo);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
@@ -103,16 +134,41 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        return parkUtil.getPayingDetail(user, carNo, parkId).getData();
+        CommonResponse<PayingDetail> commonResponse = parkUtil.getPayingDetail(user, carNo, parkId);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
     public WechatPayInfo getPrePaying(User user, PayUserCarInfo payUserCarInfo) throws Exception {
-        return parkUtil.getPrePaying(user, payUserCarInfo).getData();
+        CommonResponse<WechatPayInfo> commonResponse = parkUtil.getPrePaying(user, payUserCarInfo);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 
     @Override
     public PayDetail getPayDetailById(User user, String orderId) throws Exception {
-        return parkUtil.getPayDetailById(user, orderId).getData();
+        CommonResponse<PayDetail> commonResponse = parkUtil.getPayDetailById(user, orderId);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
+    }
+
+    @Override
+    public CarBillList getCarBillList(User user, PayUserCarInfo payUserCarInfo) throws Exception {
+        CommonResponse<CarBillList> commonResponse = parkUtil.getCarBillList(user, payUserCarInfo);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
     }
 }
