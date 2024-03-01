@@ -17,6 +17,7 @@ public class PayUserCarInfo {
     private String openid;
     private String car_no;
     private String park_id;
+    private String record_id;
 
     public String getAppid() {
         return appid;
@@ -63,5 +64,25 @@ public class PayUserCarInfo {
 
     public void setPark_id(String park_id) {
         this.park_id = park_id;
+    }
+
+    public String getRecord_id() {
+        return record_id;
+    }
+
+    public void setRecord_id(String record_id) {
+        this.record_id = record_id;
+    }
+
+    @Override
+    public String toString() {
+        return "PayUserCarInfo{" +
+                "appid='" + appid + '\'' +
+                ", user_id='" + user_id + '\'' +
+                ", openid='" + openid + '\'' +
+                ", car_no='" + car_no + '\'' +
+                ", park_id='" + park_id + '\'' +
+                ", record_id='" + record_id + '\'' +
+                '}';
     }
 }
