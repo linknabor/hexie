@@ -1,5 +1,7 @@
 package com.yumu.hexie.web.shequ;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,6 +65,7 @@ import com.yumu.hexie.model.user.NewLionUser;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.shequ.req.InvoiceApplicationReq;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
@@ -101,7 +104,7 @@ public class WuyeController extends BaseController {
 	private PointService pointService;
 	@Autowired
 	private BankCardService bankCardService;
-
+	
 	/**
 	 * 根据用户身份查询其所绑定的房屋
 	 *@param user
@@ -989,6 +992,47 @@ public class WuyeController extends BaseController {
 		
 		List<InvoiceDetail> invoiceList = wuyeService.getInvoiceByTrade(user, tradeWaterId);
 		return BaseResult.successResult(invoiceList);
+	}
+	
+	@RequestMapping(value = "/invoicePdf", method = RequestMethod.GET) 
+	@ResponseBody
+	public void getInvoicePdf(HttpServletResponse response, @RequestParam String pdfAddr) throws Exception {
+		
+		byte[] pdfBytes = wuyeService.getInvoicePdf(pdfAddr);
+	    OutputStream out = null;
+	    try {
+	        response.reset(); // 非常重要
+//	        if (flag) {
+//	            // 在线打开方式
+//	            URL u = new URL("file:///" + filePath);
+//	            String contentType = u.openConnection().getContentType();
+//	            response.setContentType(contentType);
+//	            response.setHeader("Content-Disposition", "inline;filename="
+//	                    + "操作手册V1.0.pdf");
+//	        } else {
+//	            
+//	        }
+	        //纯下载方式
+	        String fileName = Math.random() + "";
+            response.setContentType("application/pdf;charset=utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename="
+                    + fileName + ".pdf");
+	        out = response.getOutputStream();
+	        out.write(pdfBytes, 0, pdfBytes.length);
+	        out.flush();
+	        out.close();
+	    } catch (IOException e) {
+	    	throw new BizValidateException("pdf处理文件异常" + e);
+	    } finally {
+	        if (out != null) {
+	            try {
+	                out.close();
+	            } catch (IOException e) {
+	                log.error(e.getMessage(), e);
+	            }
+	        }
+	    }
+
 	}
 
 	@SuppressWarnings("unchecked")
