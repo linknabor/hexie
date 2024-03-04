@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.service.FileService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
@@ -106,6 +107,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private NewLionUserRepository newLionUserRepository;
+	
+	@Autowired
+	private FileService fileService;
 	
 	@Override
 	public HouseListVO queryHouse(User user, String sectId) {
@@ -715,9 +719,21 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Override
 	public List<InvoiceDetail> getInvoiceByTrade(User user, String tradeWaterId) throws Exception {
-		
 		return wuyeUtil2.queryInvoiceByTrade(user, tradeWaterId).getData();
-		
+	}
+	
+	/**
+	 * 获取远程pdf
+	 * @param remoteAddr
+	 * @return
+	 * @throws Exception 
+	 */
+	@Override
+	public byte[] getInvoicePdf(String remoteAddr) throws Exception {
+		if (StringUtils.isEmpty(remoteAddr)) {
+			throw new BizValidateException("未能获取到pdf文件，请稍后再试");
+		}
+		return fileService.downloadFileFromRemote(remoteAddr);
 	}
 	
 	/**

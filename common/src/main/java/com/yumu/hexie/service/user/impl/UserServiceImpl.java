@@ -835,8 +835,8 @@ public class UserServiceImpl implements UserService {
 		String openid = baseEventDTO.getOpenid();
 		String appid = baseEventDTO.getAppId();
 		
-		if (!ConstantWeChat.APPID.equals(appid)) {
-			logger.info("appid: " + appid + ", not hexie subscribe event, will skip. ");
+		if (!systemConfigService.isMiniprogramAvailabe(appid)) {
+			logger.info("appid: " + appid + ", not support app subscribe event, will skip. ");
 			return true;
 		}
 		
@@ -859,7 +859,7 @@ public class UserServiceImpl implements UserService {
 		User miniUser = getByUnionid(unionid);
 		if (miniUser == null) {
 			//如果数据库中没有有关联的用户，需要新建用户
-			logger.info("no hexie user, will create new user, user openid : " + openid);
+			logger.info("not support app user, will create new user, user openid : " + openid + ", appid : " + appid);
 			User newUser = new User();
 			newUser.setOpenid(openid);
 			newUser.setAppId(appid);
@@ -897,8 +897,8 @@ public class UserServiceImpl implements UserService {
 		String openid = baseEventDTO.getOpenid();
 		String appid = baseEventDTO.getAppId();
 		
-		if (!ConstantWeChat.APPID.equals(appid)) {
-			logger.info("appid: " + appid + ", not hexie viewMiniProgram event, will skip. ");
+		if (!systemConfigService.isMiniprogramAvailabe(appid)) {
+			logger.info("appid: " + appid + ", viewMiniProgram event does not support, will skip. ");
 			return true;
 		}
 		

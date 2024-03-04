@@ -421,5 +421,13 @@ public interface WuyeService {
 	 */
 	List<HexieHouse> bindHouse4NewLionUser(User user, String mobile) throws Exception;
 
+	/**
+	 * 获取远程服务器上的pdf
+	 * @param remoteAddr
+	 * @return
+	 * @throws Exception
+	 */
+	byte[] getInvoicePdf(String remoteAddr) throws Exception;
+
 
 }
