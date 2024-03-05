@@ -998,10 +998,11 @@ public class WuyeController extends BaseController {
 	@ResponseBody
 	public void getInvoicePdf(HttpServletResponse response, @RequestBody Map<String, String> requestMap) throws Exception {
 		
+		log.info("requestMap is : " + requestMap);
 		if (requestMap == null) {
 			return;
 		}
-		String pdfAddr = requestMap.get("requestMap");
+		String pdfAddr = requestMap.get("pdfAddr");
 		byte[] pdfBytes = wuyeService.getInvoicePdf(pdfAddr);
 	    OutputStream out = null;
 	    try {
