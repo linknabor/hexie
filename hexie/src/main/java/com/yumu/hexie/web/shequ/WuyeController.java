@@ -994,29 +994,29 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(invoiceList);
 	}
 	
-	@RequestMapping(value = "/invoicePdf", method = RequestMethod.GET) 
+	@RequestMapping(value = "/invoicePdf") 
 	@ResponseBody
-	public void getInvoicePdf(HttpServletResponse response, @RequestParam String pdfAddr) throws Exception {
+	public void getInvoicePdf(HttpServletResponse response, @RequestBody Map<String, String> requestMap) throws Exception {
 		
+		if (requestMap == null) {
+			return;
+		}
+		String pdfAddr = requestMap.get("requestMap");
 		byte[] pdfBytes = wuyeService.getInvoicePdf(pdfAddr);
 	    OutputStream out = null;
 	    try {
 	        response.reset(); // 非常重要
-//	        if (flag) {
-//	            // 在线打开方式
-//	            URL u = new URL("file:///" + filePath);
-//	            String contentType = u.openConnection().getContentType();
-//	            response.setContentType(contentType);
-//	            response.setHeader("Content-Disposition", "inline;filename="
-//	                    + "操作手册V1.0.pdf");
-//	        } else {
-//	            
-//	        }
+	        //在线打开
+//	        URL url = new URL(pdfAddr);
+//            String contentType = url.openConnection().getContentType();
+//            response.setContentType(contentType);
+
 	        //纯下载方式
 	        String fileName = Math.random() + "";
             response.setContentType("application/pdf;charset=utf-8");
             response.setHeader("Content-Disposition", "attachment;filename="
                     + fileName + ".pdf");
+            
 	        out = response.getOutputStream();
 	        out.write(pdfBytes, 0, pdfBytes.length);
 	        out.flush();
