@@ -1030,44 +1030,6 @@ public class WuyeController extends BaseController {
 	    }
 
 	}
-	
-	@RequestMapping(value = "/testInvoicePdf") 
-	public void testInvoicePdf(HttpServletResponse response) throws Exception {
-		
-		
-		String pdfAddr = "https://dppt.shanghai.chinatax.gov.cn:8443/kpfw/fpjfzz/v1/exportDzfpwjEwm?Wjgs=PDF&Jym=1A8B&Fphm=24312000000058651533&Kprq=20240304171600&Czsj=1709543762469";
-		byte[] pdfBytes = wuyeService.getInvoicePdf(pdfAddr);
-	    OutputStream out = null;
-	    try {
-//	        response.reset(); // 非常重要
-	        //在线打开
-//	        URL url = new URL(pdfAddr);
-//            String contentType = url.openConnection().getContentType();
-//            response.setContentType(contentType);
-
-	        //纯下载方式
-	        String fileName = System.currentTimeMillis() + "";
-            response.setContentType("application/pdf;charset=utf-8");
-            response.setHeader("Content-Disposition", "attachment;filename="
-                    + fileName + ".pdf");
-            
-	        out = response.getOutputStream();
-	        out.write(pdfBytes, 0, pdfBytes.length);
-	        out.flush();
-	        
-	    } catch (IOException e) {
-	    	throw new BizValidateException("pdf处理文件异常" + e);
-	    } finally {
-	        if (out != null) {
-	            try {
-	                out.close();
-	            } catch (IOException e) {
-	                log.error(e.getMessage(), e);
-	            }
-	        }
-	    }
-
-	}
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getFeeSmsBill", method = RequestMethod.GET)
