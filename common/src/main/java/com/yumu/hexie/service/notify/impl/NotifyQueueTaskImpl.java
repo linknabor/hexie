@@ -1309,6 +1309,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
                 commentNotice.setOpenid(user.getOpenid());
                 commentNotice.setAppid(user.getAppId());
+                commentNotice.setMiniOpenid(user.getMiniopenid());
+                commentNotice.setMiniAppid(user.getMiniAppId());
 
                 //保存到通知表
                 //添加到消息中心

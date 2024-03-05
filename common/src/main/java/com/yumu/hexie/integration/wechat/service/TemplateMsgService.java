@@ -26,6 +26,7 @@ import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
+import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -37,6 +38,7 @@ import com.yumu.hexie.model.market.ServiceOrder;
 import com.yumu.hexie.model.msgtemplate.MsgTemplate;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.billpush.vo.BillPushDetail;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.msgtemplate.WechatMsgService;
 import com.yumu.hexie.service.sales.req.NoticeRgroupSuccess;
 import com.yumu.hexie.vo.RgroupVO;
@@ -52,6 +54,8 @@ public class TemplateMsgService {
 	private WechatMsgService wechatMsgService;
 	@Value("${wechat.miniprogramAppId}")
     private String miniprogramAppid;
+	@Autowired
+	private SystemConfigService systemConfigService;
 	
 	/**
 	 * 模板消息发送
@@ -655,9 +659,23 @@ public class TemplateMsgService {
 			wechatResponse.setErrcode(99999);
 			wechatResponse.setErrmsg("99999:[业主意见回复]未配置模板消息");
 		} else {
-			String url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE);
-			url = AppUtil.addAppOnUrl(url, commentNotice.getAppid());
-			url = url.replaceAll("THREAD_ID", commentNotice.getInteractId());
+			
+			boolean userMiniPage = false;
+			String url = "";
+			if (!ConstantWeChat.APPID.equals(commentNotice.getAppid()) && 
+					systemConfigService.isMiniprogramAvailabe(commentNotice.getAppid()) && 
+					!StringUtils.isEmpty(commentNotice.getMiniAppid())) {
+				url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE_MINI);
+				if (!StringUtils.isEmpty(url)) {
+					userMiniPage = true;
+				}
+			}
+			if (!userMiniPage) {
+				url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE);
+				url = AppUtil.addAppOnUrl(url, commentNotice.getAppid());
+				url = url.replaceAll("THREAD_ID", commentNotice.getInteractId());
+			}
+			
 			int msgType = msgTemplate.getType();
 			if (msgType == 0) {
 				CommonVO2 vo = new CommonVO2();
@@ -671,7 +689,14 @@ public class TemplateMsgService {
 				TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
 				msg.setData(vo);
 				msg.setTemplate_id(msgTemplate.getValue());
-				msg.setUrl(url);
+				if (userMiniPage) {
+					MiniprogramVO miniVo = new MiniprogramVO();
+			        miniVo.setAppid(commentNotice.getMiniAppid());
+			        miniVo.setPagepath(url);
+			        msg.setMiniprogram(miniVo);
+				} else {
+					msg.setUrl(url);
+				}
 				msg.setTouser(commentNotice.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
 			} else if (msgType == 2) {
@@ -694,7 +719,14 @@ public class TemplateMsgService {
 				
 				TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
 				msg.setData(map);
-				msg.setUrl(url);
+				if (userMiniPage) {
+					MiniprogramVO miniVo = new MiniprogramVO();
+			        miniVo.setAppid(commentNotice.getMiniAppid());
+			        miniVo.setPagepath(url);
+			        msg.setMiniprogram(miniVo);
+				} else {
+					msg.setUrl(url);
+				}
 				msg.setTemplate_id(msgTemplate.getValue());
 				msg.setTouser(commentNotice.getOpenid());
 				wechatResponse = sendMsg(msg, accessToken);
