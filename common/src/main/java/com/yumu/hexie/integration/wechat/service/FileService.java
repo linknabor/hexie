@@ -107,6 +107,20 @@ public class FileService {
 		
 	}
 	
+	/**
+	 * 下载文件
+	 * @param mediaId
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
+	 */
+	public byte[] downloadFileFromRemote(String remoteUrl) throws Exception {
+		
+		TypeReference<CommonResponse<byte[]>> typeReference = new TypeReference<CommonResponse<byte[]>>(){};
+		CommonResponse<byte[]> response = restUtil.exchange4ResourceOnUri(remoteUrl, null, typeReference);
+		return response.getData();
+	}
+	
 	
 	
 }
