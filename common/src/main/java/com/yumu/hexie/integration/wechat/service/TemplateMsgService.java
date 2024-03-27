@@ -675,6 +675,7 @@ public class TemplateMsgService {
 				url = AppUtil.addAppOnUrl(url, commentNotice.getAppid());
 			}
 			url = url.replaceAll("THREAD_ID", commentNotice.getInteractId());
+      
 			int msgType = msgTemplate.getType();
 			if (msgType == 0) {
 				CommonVO2 vo = new CommonVO2();
