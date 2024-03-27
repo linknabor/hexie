@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -664,7 +665,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 		SCHEDULE_LOG.info("finish updating groupOwner info .");
 	}
 	
-	@Scheduled(cron = "10 */10 * * * ?")
+	@Scheduled(cron = "32 0 0 * * ?")
 	@Override
 	@Transactional
 	public void updatePageView() {
@@ -697,6 +698,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 			pageViewList.add(pageView);
 		}
 		pageViewRepository.saveAll(pageViewList);
+		redisTemplate.expire(cacheKey, 7, TimeUnit.DAYS);	//缓存数据7天后获取
 		SCHEDULE_LOG.info("finish updating pageView count .");
 	}
 	
