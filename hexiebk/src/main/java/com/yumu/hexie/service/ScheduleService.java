@@ -34,5 +34,7 @@ public interface ScheduleService {
 	void executeRgroupRuleTimeoutJob();
 	//16.团长数据固化
 	void updateGroupOwnerInfo();
+	//17.更新页面计数统计
+	void updatePageView();
 	
 }
