@@ -665,7 +665,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 		SCHEDULE_LOG.info("finish updating groupOwner info .");
 	}
 	
-	@Scheduled(cron = "32 0 0 * * ?")
+//	@Scheduled(cron = "32 0 0 * * ?")
+	@Scheduled(cron = "24 */5 * * * ?")
 	@Override
 	@Transactional
 	public void updatePageView() {
