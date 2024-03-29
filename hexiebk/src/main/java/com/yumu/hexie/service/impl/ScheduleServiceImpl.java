@@ -673,9 +673,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 		
 		SCHEDULE_LOG.info("start to update pageView count .");
 		String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
-		String lateDate = DateUtil.getNextDateByNum(currDate, -1);
+		String lastDate = DateUtil.getNextDateByNum(currDate, -1);
 		String appid = "wx47743d3c9b0c241c";	//TODO 先写死西部的小程序appid，因为当前只需要统计这一个
-		String cacheKey = ModelConstant.KEY_PAGE_VIEW_COUNT + appid + ":" + lateDate;
+		String cacheKey = ModelConstant.KEY_PAGE_VIEW_COUNT + appid + ":" + lastDate;
 		Map<Object, Object> pageMap = redisTemplate.opsForHash().entries(cacheKey);
 		Iterator<Map.Entry<Object, Object>> it = pageMap.entrySet().iterator();
 		
@@ -690,12 +690,18 @@ public class ScheduleServiceImpl implements ScheduleService {
 			} catch (Exception e) {
 				SCHEDULE_LOG.error(e.getMessage(), e);
 			}
-			
-			PageView pageView = new PageView();
-			pageView.setAppid(appid);
-			pageView.setCount(count);
-			pageView.setPage(page);
-			pageView.setCountDate(lateDate);
+			PageView pageView = pageViewRepository.findByAppidAndCountDateAndPage(appid, lastDate, page);
+			if (pageView == null) {
+				pageView = new PageView();
+				pageView.setAppid(appid);
+				pageView.setCount(count);
+				pageView.setPage(page);
+				pageView.setCountDate(lastDate);
+				
+			} else {
+				count += pageView.getCount();
+				pageView.setCount(count);
+			}
 			pageViewList.add(pageView);
 		}
 		pageViewRepository.saveAll(pageViewList);
