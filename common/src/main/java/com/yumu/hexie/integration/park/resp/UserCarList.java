@@ -31,6 +31,7 @@ public class UserCarList {
 
     public static class CarInfo {
         private String car_no;
+        private String is_default;
 
         public String getCar_no() {
             return car_no;
@@ -40,10 +41,19 @@ public class UserCarList {
             this.car_no = car_no;
         }
 
+        public String getIs_default() {
+            return is_default;
+        }
+
+        public void setIs_default(String is_default) {
+            this.is_default = is_default;
+        }
+
         @Override
         public String toString() {
             return "CarInfo{" +
-                    ", car_no='" + car_no + '\'' +
+                    "car_no='" + car_no + '\'' +
+                    ", is_default='" + is_default + '\'' +
                     '}';
         }
     }

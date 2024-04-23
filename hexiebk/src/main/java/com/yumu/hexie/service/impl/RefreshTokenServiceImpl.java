@@ -167,7 +167,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		}
         for (SystemConfig systemConfig : configList) {
         	String sysKey = systemConfig.getSysKey();
-        	if (sysKey.indexOf(MINI_APP_KEY_PREFIX) == -1) {
+        	if (!sysKey.startsWith(MINI_APP_KEY_PREFIX)) {
 				continue;
 			}
         	String miniAppid = sysKey.substring(sysKey.lastIndexOf("_")+1, sysKey.length());

@@ -64,6 +64,7 @@ public class MsgCfg {
 	public static final String URL_CUSTOMER_GROUP_DELIVERY = "customerGroupDeliveryUrl";
 	public static final String URL_WUYE_PAY = "wuyePayUrl"; //物业缴费页面
 	public static final String URL_OPINION_NOTICE = "sendOpinionUrl"; //业主意见回复通知
+	public static final String URL_OPINION_NOTICE_MINI = "sendOpinionUrl4Mini"; //业主意见回复通知
 	public static final String URL_OPINION_GRADE_NOTICE = "sendOpinionGradeUrl"; //业主意见完成评价统计
 	public static final String URL_WORK_ORDER_DETAIL = "workOrderDetail";	//工单明细页面
 	public static final String URL_INVOICE_APPLICATION_URL = "invoiceApplicationUrl";	//发票申请页面

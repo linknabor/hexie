@@ -1,5 +1,7 @@
 package com.yumu.hexie.web.shequ;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,9 +61,11 @@ import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
+import com.yumu.hexie.model.user.NewLionUser;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SmsService;
 import com.yumu.hexie.service.common.SystemConfigService;
+import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.WuyeService;
 import com.yumu.hexie.service.shequ.req.InvoiceApplicationReq;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
@@ -100,7 +104,7 @@ public class WuyeController extends BaseController {
 	private PointService pointService;
 	@Autowired
 	private BankCardService bankCardService;
-
+	
 	/**
 	 * 根据用户身份查询其所绑定的房屋
 	 *@param user
@@ -113,7 +117,7 @@ public class WuyeController extends BaseController {
 	public BaseResult<List<HexieHouse>> hexiehouses(@ModelAttribute(Constants.USER) User user, 
 			@RequestParam(required = false) String sectId) throws Exception {
 		
-		log.info("user is : " + user);
+		log.info("hexiehouses, user is : " + user);
 		if (StringUtil.isEmpty(user.getWuyeId())) {
 			return BaseResult.successResult(new ArrayList<HexieHouse>());
 		}
@@ -207,6 +211,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String stmtId, 
 			@RequestParam(required = false) String houseId) throws Exception {
 		
+		log.info("addHouse, user is : " + user);
 		HexieUser u = wuyeService.bindHouse(user, stmtId, houseId);
 		log.info("HexieUser u = " + u);
 		if (u != null) {
@@ -988,6 +993,43 @@ public class WuyeController extends BaseController {
 		List<InvoiceDetail> invoiceList = wuyeService.getInvoiceByTrade(user, tradeWaterId);
 		return BaseResult.successResult(invoiceList);
 	}
+	
+	@RequestMapping(value = "/invoicePdf") 
+	@ResponseBody
+	public void getInvoicePdf(HttpServletResponse response, @RequestParam String pdfAddr) throws Exception {
+		
+		byte[] pdfBytes = wuyeService.getInvoicePdf(pdfAddr);
+	    OutputStream out = null;
+	    try {
+//	        response.reset(); // 非常重要
+	        //在线打开
+//	        URL url = new URL(pdfAddr);
+//            String contentType = url.openConnection().getContentType();
+//            response.setContentType(contentType);
+
+	        //纯下载方式
+	        String fileName = System.currentTimeMillis() + "";
+            response.setContentType("application/pdf;charset=utf-8");
+            response.setHeader("Content-Disposition", "attachment;filename="
+                    + fileName + ".pdf");
+            
+	        out = response.getOutputStream();
+	        out.write(pdfBytes, 0, pdfBytes.length);
+	        out.flush();
+	        
+	    } catch (IOException e) {
+	    	throw new BizValidateException("pdf处理文件异常" + e);
+	    } finally {
+	        if (out != null) {
+	            try {
+	                out.close();
+	            } catch (IOException e) {
+	                log.error(e.getMessage(), e);
+	            }
+	        }
+	    }
+
+	}
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getFeeSmsBill", method = RequestMethod.GET)
@@ -1128,4 +1170,23 @@ public class WuyeController extends BaseController {
 		}
 		return BaseResult.successResult(wuyeId);
 	}
+	
+	/**
+	 * 为新郎恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/newlion/user/bind", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<List<HexieHouse>> checkBindNewLionUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
+		
+		List<NewLionUser> newLionUserList = userService.getNewLionUserByMobile(mobile);
+		List<HexieHouse> hexieHouses = new ArrayList<>();
+		if (newLionUserList != null && !newLionUserList.isEmpty()) {
+			hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
+		}
+		return BaseResult.successResult(hexieHouses);
+	} 
 }

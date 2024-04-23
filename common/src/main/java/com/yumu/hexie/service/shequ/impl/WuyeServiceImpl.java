@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
+import com.yumu.hexie.integration.wechat.service.FileService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
@@ -56,6 +57,8 @@ import com.yumu.hexie.model.promotion.coupon.CouponCombination;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.user.BankCard;
 import com.yumu.hexie.model.user.BankCardRepository;
+import com.yumu.hexie.model.user.NewLionUser;
+import com.yumu.hexie.model.user.NewLionUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
@@ -101,6 +104,12 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Autowired
 	private GotongService gotongService;
+	
+	@Autowired
+	private NewLionUserRepository newLionUserRepository;
+	
+	@Autowired
+	private FileService fileService;
 	
 	@Override
 	public HouseListVO queryHouse(User user, String sectId) {
@@ -173,11 +182,6 @@ public class WuyeServiceImpl implements WuyeService {
 		return WuyeUtil.getHouse(user, stmtId).getData();
 	}
 	
-	@Override
-	public HexieUser userLogin(User user) {
-		return WuyeUtil.userLogin(user).getData();
-	}
-
 	@Override
 	public PayWaterListVO queryPaymentList(User user, String startDate, String endDate) {
 		return WuyeUtil.queryPaymentList(user, startDate, endDate).getData();
@@ -316,9 +320,9 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public HexieUser bindHouseNoStmt(User user, String houseId, String area) {
+	public HexieUser bindHouseNoStmt(User user, String houseId, String area) throws Exception {
 		
-		BaseResult<HexieUser> r= WuyeUtil.bindHouseNoStmt(user, houseId, area);
+		BaseResult<HexieUser> r= wuyeUtil2.bindHouseNoStmt(user, houseId, area);
 		if("04".equals(r.getResult())){
 			throw new BizValidateException("当前用户已经认领该房屋!");
 		}
@@ -715,9 +719,21 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Override
 	public List<InvoiceDetail> getInvoiceByTrade(User user, String tradeWaterId) throws Exception {
-		
 		return wuyeUtil2.queryInvoiceByTrade(user, tradeWaterId).getData();
-		
+	}
+	
+	/**
+	 * 获取远程pdf
+	 * @param remoteAddr
+	 * @return
+	 * @throws Exception 
+	 */
+	@Override
+	public byte[] getInvoicePdf(String remoteAddr) throws Exception {
+		if (StringUtils.isEmpty(remoteAddr)) {
+			throw new BizValidateException("未能获取到pdf文件，请稍后再试");
+		}
+		return fileService.downloadFileFromRemote(remoteAddr);
 	}
 	
 	/**
@@ -791,5 +807,37 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.getReceiptList(user, page).getData();
 	}
+	
+	@Override
+	public List<HexieHouse> bindHouse4NewLionUser(User user, String mobile) throws Exception {
+		
+		List<HexieHouse> hexieHouses = null;
+		List<NewLionUser> houList = newLionUserRepository.findByMobile(mobile);
+		if (houList != null) {
+			boolean flag = false;	//是否上线小区
+			for (NewLionUser newLionUser : houList) {
+				if (!StringUtils.isEmpty(newLionUser.getFdSectId())) {
+					flag = true;
+					break;
+				}
+			}
+			if (flag) {
+				BaseResult<List<HexieHouse>> baseResult = wuyeUtil2.bindHouse4NewLionUser(user, mobile);
+				if (baseResult.isSuccess()) {
+					hexieHouses = baseResult.getData();
+					if (hexieHouses != null && hexieHouses.size() > 0) {
+						for (HexieHouse hexieHouse : hexieHouses) {
+							HexieUser hexieUser = new HexieUser();
+							BeanUtils.copyProperties(hexieHouse, hexieUser);
+							setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
+						}
+					}
+					
+				}
+			}
+		}
+		return hexieHouses;
+	}
+	
 
 }

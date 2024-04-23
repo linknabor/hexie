@@ -18,7 +18,9 @@ public class InteractCommentNotice {
     private String commentName;
     private String opinionDate;
     private String userName;
-
+    private String miniOpenid;
+    private String miniAppid;
+    
     public String getInteractId() {
         return interactId;
     }
@@ -107,20 +109,30 @@ public class InteractCommentNotice {
         this.userName = userName;
     }
 
-    @Override
-    public String toString() {
-        return "InteractCommentNotice{" +
-                "interactId='" + interactId + '\'' +
-                ", content='" + content + '\'' +
-                ", commentContent='" + commentContent + '\'' +
-                ", commentId='" + commentId + '\'' +
-                ", sectName='" + sectName + '\'' +
-                ", cellAddr='" + cellAddr + '\'' +
-                ", openid='" + openid + '\'' +
-                ", appid='" + appid + '\'' +
-                ", commentName='" + commentName + '\'' +
-                ", opinionDate='" + opinionDate + '\'' +
-                ", userName='" + userName + '\'' +
-                '}';
-    }
+	public String getMiniOpenid() {
+		return miniOpenid;
+	}
+
+	public void setMiniOpenid(String miniOpenid) {
+		this.miniOpenid = miniOpenid;
+	}
+
+	public String getMiniAppid() {
+		return miniAppid;
+	}
+
+	public void setMiniAppid(String miniAppid) {
+		this.miniAppid = miniAppid;
+	}
+
+	@Override
+	public String toString() {
+		return "InteractCommentNotice [interactId=" + interactId + ", content=" + content + ", commentContent="
+				+ commentContent + ", commentId=" + commentId + ", sectName=" + sectName + ", cellAddr=" + cellAddr
+				+ ", openid=" + openid + ", appid=" + appid + ", commentName=" + commentName + ", opinionDate="
+				+ opinionDate + ", userName=" + userName + ", miniOpenid=" + miniOpenid + ", miniAppid=" + miniAppid
+				+ "]";
+	}
+    
+    
 }

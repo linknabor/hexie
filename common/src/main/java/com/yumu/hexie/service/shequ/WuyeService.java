@@ -65,8 +65,9 @@ public interface WuyeService {
 	 * @param houseId
 	 * @param area
 	 * @return
+	 * @throws Exception 
 	 */
-	HexieUser bindHouseNoStmt(User user, String houseId, String area);
+	HexieUser bindHouseNoStmt(User user, String houseId, String area) throws Exception;
 
 	/**
 	 * 删除房产
@@ -84,12 +85,6 @@ public interface WuyeService {
 	 */
 	HexieHouse getHouse(User user, String stmtId);
 	
-	/**
-	 * 用户登录
-	 * @param user
-	 * @return
-	 */
-	HexieUser userLogin(User user);
 	/**
 	 * 缴费记录查询
 	 * @param user
@@ -416,6 +411,23 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	List<Receipt> getReceiptList(User user, String page) throws Exception;
+
+	/**
+	 * 新朗恩用户绑定房屋
+	 * @param user
+	 * @param mobile
+	 * @return
+	 * @throws Exception
+	 */
+	List<HexieHouse> bindHouse4NewLionUser(User user, String mobile) throws Exception;
+
+	/**
+	 * 获取远程服务器上的pdf
+	 * @param remoteAddr
+	 * @return
+	 * @throws Exception
+	 */
+	byte[] getInvoicePdf(String remoteAddr) throws Exception;
 
 
 }

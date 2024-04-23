@@ -50,6 +50,8 @@ import com.yumu.hexie.model.market.RgroupCart;
 import com.yumu.hexie.model.redis.Keys;
 import com.yumu.hexie.model.redis.RedisRepository;
 import com.yumu.hexie.model.user.MiniUserPageAccess;
+import com.yumu.hexie.model.user.NewLionUser;
+import com.yumu.hexie.model.user.NewLionUserRepository;
 import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.User;
@@ -103,6 +105,8 @@ public class UserServiceImpl implements UserService {
 	private WuyeUtil2 wuyeUtil2;
 	@Autowired
 	private AddressService addressService;
+	@Autowired
+	private NewLionUserRepository newLionUserRepository;
 
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -742,28 +746,39 @@ public class UserServiceImpl implements UserService {
 		String phone = miniUserPhone.getPhone_info().getPhoneNumber();
 		String purePhone = miniUserPhone.getPhone_info().getPurePhoneNumber();	//不带区号的手机号
 		User miniUser = getById(user.getId());
+		if (miniUser == null) {
+			miniUser = user;	//这个user是session缓存里的，一般从数据库里查询出来的miniUser不会为空，除非人为在后台数据库删除了用户数据，但没有删除用户缓存
+		}
         List<User> userList = getByTel(phone);	//根据手机号关联现有用户
         if (userList == null) {
         	userList = getByTel(purePhone);	//根据手机号关联现有用户
 		}
+        logger.info("user phone : " + phone);
         User userAccount = null;
-        if (userList != null && userList.size() > 0) {	//用手机号将小程序用户和公众号用户关联起来。如果存在一对多的情况，优先关联合协的用户。
-			if (userList.size() == 1) {
-				userAccount = userList.get(0);
-			} else {
-				for (User dbUser : userList) {
-					if (ConstantWeChat.APPID.equals(dbUser.getAppId())) {
-						userAccount = dbUser;
-						break;
-					}
+        if (userList != null && userList.size() > 0) {	//用手机号将小程序用户和公众号用户关联起来。
+        	for (User dbUser : userList) {
+				String appid = systemConfigService.getMiniProgramMappedApp(miniUser.getMiniAppId());	//获取小程序对应的公众号appid
+				if (StringUtils.isEmpty(appid)) {
+					continue;
+				}
+				if (StringUtils.isEmpty(dbUser.getAppId())) {
+					continue;
+				}
+				if (dbUser.getAppId().equals(appid)) {
+					userAccount = dbUser;
+					break;
 				}
 			}
 		}
 
         if (userAccount == null) {	//如果数据库中没有关联的用户，直接更新手机号
+        	logger.info("can't find phone user in db, will update. user:  " + miniUser);
         	userAccount = miniUser;
         	userAccount.setTel(phone);
         } else {	//如果数据库中有关联的用户，需要合并老记录
+        	logger.info("find phone user in db, will merge mini user to db user !");
+        	logger.info("mini user: " + miniUser);
+        	logger.info("db user: " + userAccount);
             userAccount.setUnionid(miniUser.getUnionid());
             userAccount.setMiniopenid(miniUser.getMiniopenid());
             userAccount.setMiniAppId(miniUser.getMiniAppId());
@@ -787,7 +802,6 @@ public class UserServiceImpl implements UserService {
         			redisRepository.setRgroupCart(cartKey, cart);
         		}
 			}
-            
         }
         userRepository.save(userAccount);
         return userAccount;
@@ -821,8 +835,8 @@ public class UserServiceImpl implements UserService {
 		String openid = baseEventDTO.getOpenid();
 		String appid = baseEventDTO.getAppId();
 		
-		if (!ConstantWeChat.APPID.equals(appid)) {
-			logger.info("appid: " + appid + ", not hexie subscribe event, will skip. ");
+		if (!systemConfigService.isMiniprogramAvailabe(appid)) {
+			logger.info("appid: " + appid + ", not support app subscribe event, will skip. ");
 			return true;
 		}
 		
@@ -845,7 +859,7 @@ public class UserServiceImpl implements UserService {
 		User miniUser = getByUnionid(unionid);
 		if (miniUser == null) {
 			//如果数据库中没有有关联的用户，需要新建用户
-			logger.info("no hexie user, will create new user, user openid : " + openid);
+			logger.info("not support app user, will create new user, user openid : " + openid + ", appid : " + appid);
 			User newUser = new User();
 			newUser.setOpenid(openid);
 			newUser.setAppId(appid);
@@ -883,8 +897,8 @@ public class UserServiceImpl implements UserService {
 		String openid = baseEventDTO.getOpenid();
 		String appid = baseEventDTO.getAppId();
 		
-		if (!ConstantWeChat.APPID.equals(appid)) {
-			logger.info("appid: " + appid + ", not hexie viewMiniProgram event, will skip. ");
+		if (!systemConfigService.isMiniprogramAvailabe(appid)) {
+			logger.info("appid: " + appid + ", viewMiniProgram event does not support, will skip. ");
 			return true;
 		}
 		
@@ -1073,6 +1087,16 @@ public class UserServiceImpl implements UserService {
 	public List<User> getUserByOriSysAndOriUserId(String oriSys, Long oriUserId) {
 		
 		return userRepository.findByOriSysAndOriUserId(oriSys, oriUserId);
+	}
+	
+	@Override
+	public List<NewLionUser> getNewLionUserByMobile(String mobile) {
+		
+		if (StringUtils.isEmpty(mobile)) {
+			throw new BizValidateException("用户手机号不能为空");
+		}
+		return newLionUserRepository.findByMobile(mobile);
+		
 	}
 
 }
