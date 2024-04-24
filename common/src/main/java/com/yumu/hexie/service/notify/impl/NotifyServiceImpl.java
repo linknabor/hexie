@@ -3,9 +3,13 @@ package com.yumu.hexie.service.notify.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.alibaba.fastjson.JSON;
+import com.yumu.hexie.integration.notify.*;
 import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
+import com.yumu.hexie.service.user.UserService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +22,8 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.RedisLock;
-import com.yumu.hexie.integration.notify.PartnerNotification;
-import com.yumu.hexie.integration.notify.PayNotification;
-import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
-import com.yumu.hexie.integration.notify.ConversionNotification;
-import com.yumu.hexie.integration.notify.InvoiceNotification;
 
-import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
@@ -50,6 +48,8 @@ public class NotifyServiceImpl implements NotifyService {
 	private BankCardRepository bankCardRepository;
 	@Autowired
 	private WuyeService wuyeService;
+	@Autowired
+	private UserService userService;
 	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
@@ -615,6 +615,62 @@ public class NotifyServiceImpl implements NotifyService {
 		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
 		String value = objectMapper.writeValueAsString(notice);
 		redisTemplate.opsForList().rightPush(ModelConstant.interactGradeNoticeQueue, value);
+	}
+
+	@Override
+	public void noticeUserBindHouseByCC(CcBindHouseNotification notice) throws Exception {
+		//1.通过传过来的小程序openid查询是否存在用户
+		String miniopenid = notice.getOpenid();
+		String unionid = notice.getUnionid();
+		User user = null;
+		if (!StringUtils.isEmpty(unionid)) {
+			List<User> list = userRepository.findByUnionid(unionid);
+			if (list!=null && list.size()>0) {
+				user = list.get(0);
+			}
+		}
+		if (user == null) {
+			if (!StringUtils.isEmpty(miniopenid)) {
+				user = userRepository.findByMiniopenid(miniopenid);
+			}
+		}
+
+		//2.新增或更新用户
+		if (user == null) {
+			user = new User();
+			user.setOpenid("0");    //TODO
+			user.setUnionid(notice.getUnionid());
+			user.setMiniopenid(notice.getOpenid());
+			user.setMiniAppId(notice.getAppid());
+			user.setCspId(notice.getCsp_id());
+			user.setSectId(notice.getSect_id());
+			user.setTel(notice.getPhone());
+			user.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
+		} else {
+			if(StringUtils.isEmpty(user.getMiniopenid())) {
+				user.setUnionid(notice.getUnionid());
+				user.setMiniopenid(notice.getOpenid());
+				user.setMiniAppId(notice.getAppid());
+				user.setCspId(notice.getCsp_id());
+				user.setSectId(notice.getSect_id());
+				user.setTel(notice.getPhone());
+			}
+		}
+		userRepository.save(user);
+
+		//3.生成wuyeId
+		if(StringUtils.isEmpty(user.getWuyeId())) {
+			userService.bindWuYeId(user);
+		}
+		//4.根据传过来的房屋，绑定/解绑房屋
+		String data_type = notice.getData_type();
+		if("1".equals(data_type)) { //新增绑定
+			wuyeService.bindHouseNoStmt(user, notice.getHouse_id(), notice.getArea());
+		} else if("2".equals(data_type)) { //解绑
+			wuyeService.deleteHouse(user, notice.getHouse_id());
+		} else {
+			log.error("data_type值不合法，本次不做绑房子操作");
+		}
 	}
 
 }
