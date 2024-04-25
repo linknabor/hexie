@@ -663,6 +663,7 @@ public class NotifyServiceImpl implements NotifyService {
 			userService.bindWuYeId(user);
 		}
 		//4.根据传过来的房屋，绑定/解绑房屋
+		user = userRepository.findById(user.getId());
 		String data_type = notice.getData_type();
 		if("1".equals(data_type)) { //新增绑定
 			wuyeService.bindHouseNoStmt(user, notice.getHouse_id(), notice.getArea());
