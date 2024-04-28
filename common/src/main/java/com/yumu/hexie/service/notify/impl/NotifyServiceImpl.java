@@ -660,7 +660,8 @@ public class NotifyServiceImpl implements NotifyService {
 
 		//3.生成wuyeId
 		if(StringUtils.isEmpty(user.getWuyeId())) {
-			userService.bindWuYeId(user);
+			String wuyeId = userService.bindWuYeIdSync(user);
+			user.setWuyeId(wuyeId);
 		}
 		//4.根据传过来的房屋，绑定/解绑房屋
 		String data_type = notice.getData_type();
