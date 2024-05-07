@@ -30,6 +30,7 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_OPINION_NOTIFY2 = "sendOpinionNotificationMessageTemplate2"; //业主意见回复通知
 	public static final String TEMPLATE_TYPE_OPINION_GRADE_NOTIFY = "sendOpinionGradeNotificationMsgTemplate"; //业主意见评价通知
 	public static final String TEMPLATE_TYPE_WORKORDER_NOTIFY = "workOrderNotificationTemplate";
+	public static final String TEMPLATE_TYPE_WORKORDER_NOTIFY2 = "workOrderNotificationTemplate2";
 	public static final String TEMPLATE_TYPE_INVOICE_APPLICATION_REMINDER = "invoiceApplicationReminderTemplate";	//发票申请提醒
 	public static final String TEMPLATE_TYPE_INVOICE_FINISH = "invoiceFinishTemplate";	//发票开具完成提醒
 	

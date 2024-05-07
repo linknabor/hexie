@@ -12,4 +12,6 @@ public interface MsgTempalateRepository extends JpaRepository<MsgTemplate, Long>
 	
 	List<MsgTemplate> findByAppidAndTypeAndBizType(String appid, int type, int bizType);
 	
+	List<MsgTemplate> findByAppidAndTypeInAndBizType(String appid, List<Integer> types, int bizType);
+	
 }
