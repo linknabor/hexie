@@ -195,14 +195,23 @@ public class MpSetupServiceImpl implements MpSetupService {
 		
 		String[]templateIds = mpSetupReq.getTemplateId();
 		String[]templateNames = mpSetupReq.getTemplateName();
+		String[]templateTypes = mpSetupReq.getTemplateType();
 		
-		List<MsgTemplate> templateList = msgTempalateRepository.findByAppidAndTypeAndBizType(appid, 0, 0);
+		List<Integer> typeList = new ArrayList<>();
+		typeList.add(0);
+		typeList.add(2);
+		List<MsgTemplate> templateList = msgTempalateRepository.findByAppidAndTypeInAndBizType(appid, typeList, 0);
 		if (templateList != null && !templateList.isEmpty()) {
 			msgTempalateRepository.deleteAll(templateList);
 		}
 		for (int i = 0; i < templateIds.length; i++) {
 			String templateName = templateNames[i].trim();
 			String templateId = templateIds[i].trim();
+			String type = templateTypes[i].trim();
+			Integer templateType = 2;
+			if(!StringUtils.isEmpty(type)) {
+				templateType = Integer.valueOf(type);
+			}
 			
 			if (StringUtils.isEmpty(templateName) || StringUtils.isEmpty(templateId)) {
 				continue;
@@ -215,7 +224,7 @@ public class MpSetupServiceImpl implements MpSetupService {
 			msgTemplate.setValue(templateId);
 			msgTemplate.setBizType(0);
 			msgTemplate.setSubscribeType(0);
-			msgTemplate.setType(0);
+			msgTemplate.setType(templateType);
 			msgTempalateRepository.save(msgTemplate);
 		}
 		List<Menu> menuList = menuRepository.findByAppidAndType(appid, "0");
@@ -372,12 +381,17 @@ public class MpSetupServiceImpl implements MpSetupService {
 		}
 		mpQueryResp.setAppMenu(menus);
 		
-		List<MsgTemplate> list = msgTempalateRepository.findByAppidAndTypeAndBizType(appid, 0, 0);
+//		List<MsgTemplate> list = msgTempalateRepository.findByAppidAndTypeAndBizType(appid, 0, 0);
+		List<Integer> typeList = new ArrayList<>();
+		typeList.add(0);
+		typeList.add(2);
+		List<MsgTemplate> list = msgTempalateRepository.findByAppidAndTypeInAndBizType(appid, typeList, 0);
 		List<MsgTemplateVO> templateVos = new ArrayList<>();
 		for (MsgTemplate msgTemplate : list) {
 			MsgTemplateVO vo = new MsgTemplateVO();
 			vo.setTemplateId(msgTemplate.getValue());
 			vo.setTemplateName(msgTemplate.getName());
+			vo.setType(msgTemplate.getType());
 			templateVos.add(vo);
 		}
 		mpQueryResp.setTemplates(templateVos);
