@@ -83,6 +83,15 @@ public class MpSetupServiceImpl implements MpSetupService {
 		templateMap.put("receiptFinishTemplate", "电子收据开具成功消息");
 		templateMap.put("payNotifyTemplate", "支付到账通知模板消息");
 		templateMap.put("workOrderNotificationTemplate", "工单模板消息");
+		
+		templateMap.put("messageTemplat2e", "类目模板-物业平台群发通知");
+		templateMap.put("billPushTemplate2", "类目模板-账单通知");
+		templateMap.put("sendOpinionNotificationMessageTemplate2", "类目模板-业主意见回复");
+		templateMap.put("invoiceApplicationReminderTemplate2", "类目模板-电子发票申请提醒");
+		templateMap.put("invoiceFinishTemplate2", "类目模板-电子发票开具完成");
+		templateMap.put("receiptFinishTemplate2", "类目模板-电子收据开具成功");
+		templateMap.put("payNotifyTemplate2", "类目模板-支付到账通知");
+		templateMap.put("workOrderNotificationTemplate2", "类目模板-通知业主工单进度");
 	}
 
 	@Transactional
