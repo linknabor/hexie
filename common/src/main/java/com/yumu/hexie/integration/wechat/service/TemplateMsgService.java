@@ -602,7 +602,7 @@ public class TemplateMsgService {
 				String amountStr = billPushDetail.getFeePrice();
 				amountStr = amountStr.replaceAll("元", "").replaceAll(" ", "");
 				amountStr = amountStr.trim();
-				dataMap.put("value", billPushDetail.getFeePrice());
+				dataMap.put("value", amountStr);
 				map.put("amount4", dataMap);
 				
 				dataMap = new HashMap<>();
