@@ -599,6 +599,9 @@ public class TemplateMsgService {
 				map.put("time7", dataMap);
 				
 				dataMap = new HashMap<>();
+				String amountStr = billPushDetail.getFeePrice();
+				amountStr = amountStr.replaceAll("元", "").replaceAll(" ", "");
+				amountStr = amountStr.trim();
 				dataMap.put("value", billPushDetail.getFeePrice());
 				map.put("amount4", dataMap);
 				
