@@ -6,7 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -21,6 +24,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
@@ -48,6 +52,8 @@ import com.yumu.hexie.model.payment.PaymentOrderRepository;
 import com.yumu.hexie.model.payment.RefundOrder;
 import com.yumu.hexie.model.payment.RefundOrderRepository;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
+import com.yumu.hexie.model.statistic.PageView;
+import com.yumu.hexie.model.statistic.PageViewRepository;
 import com.yumu.hexie.model.system.BizError;
 import com.yumu.hexie.model.system.BizErrorRepository;
 import com.yumu.hexie.model.user.Member;
@@ -129,6 +135,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
+	private PageViewRepository pageViewRepository;
 	
 	
 //	1. 订单超时
@@ -655,6 +663,50 @@ public class ScheduleServiceImpl implements ScheduleService {
 			
 		}
 		SCHEDULE_LOG.info("finish updating groupOwner info .");
+	}
+	
+	@Scheduled(cron = "32 0 0 * * ?")
+//	@Scheduled(cron = "24 */5 * * * ?")
+	@Override
+	@Transactional
+	public void updatePageView() {
+		
+		SCHEDULE_LOG.info("start to update pageView count .");
+		String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
+		String lastDate = DateUtil.getNextDateByNum(currDate, -1);
+		String appid = "wx47743d3c9b0c241c";	//TODO 先写死西部的小程序appid，因为当前只需要统计这一个
+		String cacheKey = ModelConstant.KEY_PAGE_VIEW_COUNT + appid + ":" + lastDate;
+		Map<Object, Object> pageMap = redisTemplate.opsForHash().entries(cacheKey);
+		Iterator<Map.Entry<Object, Object>> it = pageMap.entrySet().iterator();
+		
+		List<PageView> pageViewList = new ArrayList<>();
+		while(it.hasNext()) {
+			Map.Entry<Object, Object> entry = it.next();
+			String page = (String) entry.getKey();
+			String countStr = (String) entry.getValue();
+			Integer count = 0;
+			try {
+				count = Integer.valueOf(countStr);
+			} catch (Exception e) {
+				SCHEDULE_LOG.error(e.getMessage(), e);
+			}
+			PageView pageView = pageViewRepository.findByAppidAndCountDateAndPage(appid, lastDate, page);
+			if (pageView == null) {
+				pageView = new PageView();
+				pageView.setAppid(appid);
+				pageView.setCount(count);
+				pageView.setPage(page);
+				pageView.setCountDate(lastDate);
+				
+			} else {
+				count += pageView.getCount();
+				pageView.setCount(count);
+			}
+			pageViewList.add(pageView);
+		}
+		pageViewRepository.saveAll(pageViewList);
+		redisTemplate.expire(cacheKey, 7, TimeUnit.DAYS);	//缓存数据7天后获取
+		SCHEDULE_LOG.info("finish updating pageView count .");
 	}
 	
 }

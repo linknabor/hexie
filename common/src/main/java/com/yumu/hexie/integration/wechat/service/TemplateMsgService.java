@@ -599,7 +599,10 @@ public class TemplateMsgService {
 				map.put("time7", dataMap);
 				
 				dataMap = new HashMap<>();
-				dataMap.put("value", billPushDetail.getFeePrice());
+				String amountStr = billPushDetail.getFeePrice();
+				amountStr = amountStr.replaceAll("元", "").replaceAll(" ", "");
+				amountStr = amountStr.trim();
+				dataMap.put("value", amountStr);
 				map.put("amount4", dataMap);
 				
 				dataMap = new HashMap<>();
@@ -764,7 +767,7 @@ public class TemplateMsgService {
 	}
 
 	/**
-	 * 发送维修单信息给维修工
+	 * 发送维修单信息给业主
 	 * @param workOrderNotification
 	 * @param accessToken
 	 */
@@ -807,24 +810,59 @@ public class TemplateMsgService {
 			}
 		}
     	
-    	CommonVO vo = new CommonVO();
-    	vo.setFirst(new TemplateItem(title));
-    	vo.setKeyword1(new TemplateItem(workOrderNotification.getOrderId()));
-    	vo.setKeyword2(new TemplateItem(content));
-    	vo.setKeyword3(new TemplateItem(workOrderNotification.getOrderStatus()));
-    	vo.setKeyword4(new TemplateItem(operName));
-    	
-    	TemplateMsg<CommonVO> msg = new TemplateMsg<>();
-    	msg.setData(vo);
-    	msg.setTemplate_id(wechatMsgService.getTemplateByNameAndAppId(MsgCfg.TEMPLATE_TYPE_WORKORDER_NOTIFY, operator.getAppid()));
+    	MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_WORKORDER_NOTIFY, operator.getAppid());
+    	if (msgTemplate == null) {
+			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_WORKORDER_NOTIFY2, operator.getAppid());
+		}
+    	if (msgTemplate == null) {
+    		log.warn("[工单]未配置模板消息, appid : " + operator.getAppid());
+    		return;
+		}
     	String msgUrl = wechatMsgService.getMsgUrl(MsgCfg.URL_WORK_ORDER_DETAIL);
     	String url = msgUrl + workOrderNotification.getOrderId();
-    	msg.setUrl(AppUtil.addAppOnUrl(url, operator.getAppid()));
-		msg.setTouser(operator.getOpenid());
-    	sendMsg(msg, accessToken);
-    	
+    	String sendUrl = AppUtil.addAppOnUrl(url, operator.getAppid());
+    	if (msgTemplate.getType() == 0) {
+    		CommonVO vo = new CommonVO();
+        	vo.setFirst(new TemplateItem(title));
+        	vo.setKeyword1(new TemplateItem(workOrderNotification.getOrderId()));
+        	vo.setKeyword2(new TemplateItem(content));
+        	vo.setKeyword3(new TemplateItem(workOrderNotification.getOrderStatus()));
+        	vo.setKeyword4(new TemplateItem(operName));
+        	
+        	TemplateMsg<CommonVO> msg = new TemplateMsg<>();
+        	msg.setData(vo);
+        	msg.setTemplate_id(String.valueOf(msgTemplate.getId()));
+        	msg.setUrl(sendUrl);
+    		msg.setTouser(operator.getOpenid());
+        	sendMsg(msg, accessToken);
+		} else if (msgTemplate.getType() == 2) {
+			Map<String, Map<String, String>> map = new HashMap<>();
+			Map<String, String> dataMap = new HashMap<>();
+			dataMap.put("value", workOrderNotification.getOrderId());
+			map.put("character_string13", dataMap);
+			
+			dataMap = new HashMap<>();
+			dataMap.put("value", content);
+			map.put("thing11", dataMap);
+			
+			dataMap = new HashMap<>();
+			dataMap.put("value", workOrderNotification.getOrderStatus());
+			map.put("short_thing5", dataMap);
+			
+			dataMap = new HashMap<>();
+			dataMap.put("value", operName);
+			map.put("thing2", dataMap);
+			
+			TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
+			msg.setData(map);
+			msg.setUrl(sendUrl);	
+			msg.setTemplate_id(msgTemplate.getValue());
+			msg.setTouser(operator.getOpenid());
+			sendMsg(msg, accessToken);
+		} else {
+			log.warn("unknow msgTemplate type : " + msgTemplate.getType());
+		}
     }
-
 
 	/**
 	 * 发送电子发票申请模板消息

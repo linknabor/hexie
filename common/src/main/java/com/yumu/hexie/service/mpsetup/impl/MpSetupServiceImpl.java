@@ -83,6 +83,15 @@ public class MpSetupServiceImpl implements MpSetupService {
 		templateMap.put("receiptFinishTemplate", "电子收据开具成功消息");
 		templateMap.put("payNotifyTemplate", "支付到账通知模板消息");
 		templateMap.put("workOrderNotificationTemplate", "工单模板消息");
+		
+		templateMap.put("messageTemplat2e", "类目模板-物业平台群发通知");
+		templateMap.put("billPushTemplate2", "类目模板-账单通知");
+		templateMap.put("sendOpinionNotificationMessageTemplate2", "类目模板-业主意见回复");
+		templateMap.put("invoiceApplicationReminderTemplate2", "类目模板-电子发票申请提醒");
+		templateMap.put("invoiceFinishTemplate2", "类目模板-电子发票开具完成");
+		templateMap.put("receiptFinishTemplate2", "类目模板-电子收据开具成功");
+		templateMap.put("payNotifyTemplate2", "类目模板-支付到账通知");
+		templateMap.put("workOrderNotificationTemplate2", "类目模板-通知业主工单进度");
 	}
 
 	@Transactional
@@ -195,14 +204,23 @@ public class MpSetupServiceImpl implements MpSetupService {
 		
 		String[]templateIds = mpSetupReq.getTemplateId();
 		String[]templateNames = mpSetupReq.getTemplateName();
+		String[]templateTypes = mpSetupReq.getTemplateType();
 		
-		List<MsgTemplate> templateList = msgTempalateRepository.findByAppidAndTypeAndBizType(appid, 0, 0);
+		List<Integer> typeList = new ArrayList<>();
+		typeList.add(0);
+		typeList.add(2);
+		List<MsgTemplate> templateList = msgTempalateRepository.findByAppidAndTypeInAndBizType(appid, typeList, 0);
 		if (templateList != null && !templateList.isEmpty()) {
 			msgTempalateRepository.deleteAll(templateList);
 		}
 		for (int i = 0; i < templateIds.length; i++) {
 			String templateName = templateNames[i].trim();
 			String templateId = templateIds[i].trim();
+			String type = templateTypes[i].trim();
+			Integer templateType = 2;
+			if(!StringUtils.isEmpty(type)) {
+				templateType = Integer.valueOf(type);
+			}
 			
 			if (StringUtils.isEmpty(templateName) || StringUtils.isEmpty(templateId)) {
 				continue;
@@ -215,7 +233,7 @@ public class MpSetupServiceImpl implements MpSetupService {
 			msgTemplate.setValue(templateId);
 			msgTemplate.setBizType(0);
 			msgTemplate.setSubscribeType(0);
-			msgTemplate.setType(0);
+			msgTemplate.setType(templateType);
 			msgTempalateRepository.save(msgTemplate);
 		}
 		List<Menu> menuList = menuRepository.findByAppidAndType(appid, "0");
@@ -372,12 +390,17 @@ public class MpSetupServiceImpl implements MpSetupService {
 		}
 		mpQueryResp.setAppMenu(menus);
 		
-		List<MsgTemplate> list = msgTempalateRepository.findByAppidAndTypeAndBizType(appid, 0, 0);
+//		List<MsgTemplate> list = msgTempalateRepository.findByAppidAndTypeAndBizType(appid, 0, 0);
+		List<Integer> typeList = new ArrayList<>();
+		typeList.add(0);
+		typeList.add(2);
+		List<MsgTemplate> list = msgTempalateRepository.findByAppidAndTypeInAndBizType(appid, typeList, 0);
 		List<MsgTemplateVO> templateVos = new ArrayList<>();
 		for (MsgTemplate msgTemplate : list) {
 			MsgTemplateVO vo = new MsgTemplateVO();
 			vo.setTemplateId(msgTemplate.getValue());
 			vo.setTemplateName(msgTemplate.getName());
+			vo.setType(msgTemplate.getType());
 			templateVos.add(vo);
 		}
 		mpQueryResp.setTemplates(templateVos);

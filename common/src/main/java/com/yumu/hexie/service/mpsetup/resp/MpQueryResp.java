@@ -32,6 +32,7 @@ public class MpQueryResp implements Serializable {
 		private String templateName;
 		@JsonProperty("template_id")
 		private String templateId;
+		private Integer type;
 		
 		public String getTemplateName() {
 			return templateName;
@@ -45,9 +46,16 @@ public class MpQueryResp implements Serializable {
 		public void setTemplateId(String templateId) {
 			this.templateId = templateId;
 		}
+		public Integer getType() {
+			return type;
+		}
+		public void setType(Integer type) {
+			this.type = type;
+		}
 		@Override
 		public String toString() {
-			return "MsgTemplate [templateName=" + templateName + ", templateId=" + templateId + "]";
+			return "MsgTemplateVO [templateName=" + templateName + ", templateId=" + templateId + ", type=" + type
+					+ "]";
 		}
 		
 	}
