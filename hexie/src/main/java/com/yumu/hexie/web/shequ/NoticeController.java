@@ -46,6 +46,23 @@ public class NoticeController extends BaseController {
 		}
 		return BaseResult.successResult(noticeVoList);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/get/{appid}/{page}", method = RequestMethod.GET)
+	public BaseResult<List<NoticeVO>> getNotice(@ModelAttribute(Constants.USER)User user, @PathVariable String appid, @PathVariable int page) {
+		
+		List<Notice> noticeList = noticeService.getNoticeByAppid(user, appid, page);
+		List<NoticeVO> noticeVoList = new ArrayList<>(noticeList.size());
+		noticeList.forEach(notice->noticeVoList.add(new NoticeVO(notice, qiniuUtil)));
+
+		for(NoticeVO vo : noticeVoList) {
+			List<String> list = new ArrayList<>();
+			String[] msgs = vo.getTitle().split("\\|");
+			Collections.addAll(list, msgs);
+			vo.setShowMsg(list);
+		}
+		return BaseResult.successResult(noticeVoList);
+	}
 
 	@RequestMapping(value = "/addOutSidNotice", method = RequestMethod.POST)
 	public BaseResult<String> addOutSidNotice(@RequestBody CommunityRequest request) {
