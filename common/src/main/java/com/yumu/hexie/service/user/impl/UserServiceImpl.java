@@ -539,10 +539,15 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	
+	/**
+	 * @param user
+	 * @param openid 用于redisCache的key，不要移除这个参数
+	 * @param switchSectReq
+	 */
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
-	public User switchSect(User user, SwitchSectReq switchSectReq) {
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#openid")
+	public User switchSect(User user, String openid, SwitchSectReq switchSectReq) {
 		
 		User dbUser = userRepository.findById(user.getId());
 		if (!dbUser.getSectId().equals(switchSectReq.getSectId())) {

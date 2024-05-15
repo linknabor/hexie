@@ -16,6 +16,7 @@ public class SwitchSectReq implements Serializable {
 	private String sectName;
 	private String cspId;
 	private String officeTel;
+	private String appid;
 	
 	public String getProvince() {
 		return province;
@@ -59,12 +60,18 @@ public class SwitchSectReq implements Serializable {
 	public void setOfficeTel(String officeTel) {
 		this.officeTel = officeTel;
 	}
+	public String getAppid() {
+		return appid;
+	}
+	public void setAppid(String appid) {
+		this.appid = appid;
+	}
 	@Override
 	public String toString() {
 		return "SwitchSectReq [province=" + province + ", city=" + city + ", county=" + county + ", sectId=" + sectId
-				+ ", sectName=" + sectName + ", cspId=" + cspId + ", officeTel=" + officeTel + "]";
+				+ ", sectName=" + sectName + ", cspId=" + cspId + ", officeTel=" + officeTel + ", appid=" + appid + "]";
 	}
 	
-	
+
 
 }

@@ -610,91 +610,113 @@ public class UserController extends BaseController{
 			@RequestBody SwitchSectReq switchSectReq) throws Exception {
 		
 		long beginTime = System.currentTimeMillis();
-		User dbUser = userService.switchSect(user, switchSectReq);
+		String appid = user.getAppId();
+		String openid = user.getOpenid();
+	    String currAppid = switchSectReq.getAppid();
+	    boolean isMiniUser = false;
+	    if (!StringUtils.isEmpty(currAppid) && currAppid.equals(user.getMiniAppId())) {
+	    	appid = user.getMiniAppId();
+	    	openid = user.getMiniopenid();
+	    	isMiniUser = true;
+		}
+		User dbUser = userService.switchSect(user, openid, switchSectReq);
 		BeanUtils.copyProperties(dbUser, user);
 	    request.getSession().setAttribute(Constants.USER, user);
 	    
-	    OperatorDefinition odDefinition  = operatorService.defineOperator(user);
-	    
-	    String appid = user.getAppId();
-	    if (StringUtils.isEmpty(appid)) {
-			appid = user.getMiniAppId();
-		}
-	    
-		/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
-		List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(appid, ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
-		List<String> templateIds = new ArrayList<>();
-		for (MsgTemplate msgTemplate : msgTemplateListAll) {
-			templateIds.add(msgTemplate.getValue());
-		}
-	    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
-	    
-	    UserInfo userInfo = new UserInfo(user, odDefinition, templateIds);
+	    UserInfo userInfo = null;
+	    if (!isMiniUser) {
+	    	OperatorDefinition odDefinition  = operatorService.defineOperator(user);
+	    	/* 2021-02-23 工作人远弹出消息订阅的窗口 start */
+			List<MsgTemplate> msgTemplateListAll = wechatMsgService.getSubscribeMsgTemplate(appid, ModelConstant.MSG_TYPE_SUBSCRIBE_MSG, ModelConstant.SUBSCRIBE_MSG_TEMPLATE_BIZ_TYPE_OPERATOR);
+			List<String> templateIds = new ArrayList<>();
+			for (MsgTemplate msgTemplate : msgTemplateListAll) {
+				templateIds.add(msgTemplate.getValue());
+			}
+		    /* 2021-02-23 工作人远弹出消息订阅的窗口 end */
+		    
+		    userInfo = new UserInfo(user, odDefinition, templateIds);
 
-	    Map<String, String> paramMap = paramService.getWuyeParam(user);
-	    userInfo.setCfgParam(paramMap);
-	    
-	    boolean repairService = paramService.repairServiceAvailable(user);
-	    userInfo.setRepairService(repairService);	//新版工单服务是否开通
-	    
-	    List<BottomIcon> iconList = pageConfigService.getBottomIcon(appid);
-	    List<BgImage> bgImageList = pageConfigService.getBgImage(appid);
-	    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(appid);
-	    userInfo.setIconList(iconList);
-	    userInfo.setBgImageList(bgImageList);
-	    userInfo.setWuyeTabsList(tabsList);
-	    
-	    List<Menu> menuList = new ArrayList<>();
-	    /*
-	     * 取菜单顺序：
-	     * 1.绑定访问的用户，先取小区级别，没有取公司级别，公司级别没有的，取app级别的，再没有的，取默认菜单
-	     * 2.未绑定房屋的用户，取默认菜单
-	     */
-	    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
-	    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
-	    	if (menuList.isEmpty()) {
-	    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
+		    Map<String, String> paramMap = paramService.getWuyeParam(user);
+		    userInfo.setCfgParam(paramMap);
+		    
+		    boolean repairService = paramService.repairServiceAvailable(user);
+		    userInfo.setRepairService(repairService);	//新版工单服务是否开通
+		    
+		    List<BottomIcon> iconList = pageConfigService.getBottomIcon(appid);
+		    List<BgImage> bgImageList = pageConfigService.getBgImage(appid);
+		    List<WuyePayTabs> tabsList = pageConfigService.getWuyePayTabs(appid);
+		    userInfo.setIconList(iconList);
+		    userInfo.setBgImageList(bgImageList);
+		    userInfo.setWuyeTabsList(tabsList);
+		    List<Menu> menuList = new ArrayList<>();
+		    /*
+		     * 取菜单顺序：
+		     * 1.绑定访问的用户，先取小区级别，没有取公司级别，公司级别没有的，取app级别的，再没有的，取默认菜单
+		     * 2.未绑定房屋的用户，取默认菜单
+		     */
+		    if (!StringUtils.isEmpty(user.getSectId()) && !"0".equals(user.getSectId())) {	//绑定房屋的
+		    	menuList = pageConfigService.getMenuBySectId(user.getSectId());
+		    	if (menuList.isEmpty()) {
+		    		menuList = pageConfigService.getMenuByCspId(user.getCspId());
+				}
+		    	if (menuList.isEmpty()) {
+		    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 1);	//表示绑定了房屋的默认菜单
+				}
+		    	if (menuList.isEmpty()) {
+			    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
+				}
+		    } else {	//未绑定房屋的
+		    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 2);	//表示绑定了房屋的默认菜单
+		    	if (menuList.isEmpty()) {
+			    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
+				}
+		    }
+		    userInfo.setMenuList(menuList);
+		    
+		    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());	//TODO 缓存，主要是积分的变动频率。更新积分时需要刷新缓存
+		    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
+				//do nothing
+			}else {
+				userInfo.setPoint(wechatCard.getBonus());
 			}
-	    	if (menuList.isEmpty()) {
-	    		menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 1);	//表示绑定了房屋的默认菜单
+		    
+		    QrCode qrCode = pageConfigService.getQrCode(appid);
+		    String qrLink = "";
+		    if (qrCode != null) {
+		    	qrLink = qrCode.getQrLink();
 			}
-	    	if (menuList.isEmpty()) {
-		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(1);	//未绑定房屋的默认菜单(全局)
+		    
+		    CsHotline csHotline = pageConfigService.getCsHotline(appid);
+		    String hotline = "";
+		    if (csHotline != null) {
+		    	hotline = csHotline.getHotline();
 			}
-	    } else {	//未绑定房屋的
-	    	menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(appid, 2);	//表示绑定了房屋的默认菜单
-	    	if (menuList.isEmpty()) {
-		    	menuList = pageConfigService.getMenuByDefaultTypeLessThan(2);	//未绑定房屋的默认菜单(全局)
+		    
+		    userInfo.setQrCode(qrLink);
+		    userInfo.setCsHotline(hotline);
+		    userInfo.setCardStatus(wechatCard.getStatus());
+		    userInfo.setCardService(systemConfigService.isCardServiceAvailable(appid));
+		    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(appid));
+		    userInfo.setDonghu(systemConfigService.isDonghu(appid));
+		    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(appid));
+		} else {
+			String roleId = user.getRoleId();
+	        if (StringUtils.isEmpty(roleId)) {
+	            roleId = "99";
+	        }
+	        
+	        OrgOperator orgOperator = userService.getOrgOperator(user);
+	        userInfo = new UserInfo(user, orgOperator);
+	        if (orgOperator != null) {
+	        	List<GroupMenuInfo> orgMenuList = pageConfigService.getOrgMenu(roleId, orgOperator.getOrgType());
+	            userInfo.setOrgMenuList(orgMenuList);
 			}
-	    }
-	    userInfo.setMenuList(menuList);
-	    
-	    WechatCard wechatCard = wechatCardService.getWechatMemberCard(user.getOpenid());	//TODO 缓存，主要是积分的变动频率。更新积分时需要刷新缓存
-	    if (wechatCard == null || StringUtils.isEmpty(wechatCard.getCardCode())) {
-			//do nothing
-		}else {
-			userInfo.setPoint(wechatCard.getBonus());
+	        
+	        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
+		    userInfo.setMenuList(menuList);
+		    userInfo.setPermission(true);
 		}
-	    
-	    QrCode qrCode = pageConfigService.getQrCode(appid);
-	    String qrLink = "";
-	    if (qrCode != null) {
-	    	qrLink = qrCode.getQrLink();
-		}
-	    
-	    CsHotline csHotline = pageConfigService.getCsHotline(appid);
-	    String hotline = "";
-	    if (csHotline != null) {
-	    	hotline = csHotline.getHotline();
-		}
-	    
-	    userInfo.setQrCode(qrLink);
-	    userInfo.setCsHotline(hotline);
-	    userInfo.setCardStatus(wechatCard.getStatus());
-	    userInfo.setCardService(systemConfigService.isCardServiceAvailable(appid));
-	    userInfo.setCoronaPrevention(systemConfigService.coronaPreventionAvailable(appid));
-	    userInfo.setDonghu(systemConfigService.isDonghu(appid));
-	    userInfo.setCardPayService(systemConfigService.isCardPayServiceAvailabe(appid));
+	   
 	    		    
 	    long endTime = System.currentTimeMillis();
 		log.info("switch sect :" + user.getName() + ", 耗时：" + ((endTime-beginTime)));
