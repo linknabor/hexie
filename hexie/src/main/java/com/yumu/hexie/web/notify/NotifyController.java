@@ -3,6 +3,7 @@ package com.yumu.hexie.web.notify;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.notify.*;
 import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.yumu.hexie.common.Constants;
-import com.yumu.hexie.integration.notify.CommonNotificationResponse;
-import com.yumu.hexie.integration.notify.ConversionNotification;
-import com.yumu.hexie.integration.notify.InvoiceNotification;
 
-import com.yumu.hexie.integration.notify.PartnerNotification;
-import com.yumu.hexie.integration.notify.PayNotification;
-import com.yumu.hexie.integration.notify.ReceiptNotification;
-import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.web.BaseController;
@@ -154,5 +148,21 @@ public class NotifyController extends BaseController {
 		notifyService.noticeEvaluate(notice);
 		return "SUCCESS";
 	}
-	
+
+
+	/**
+	 * 接收servplat队列中从外部春川小程序上用户的绑定房屋数据
+	 * @param notice
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/servplat/cc/noticeBindHouse", method = RequestMethod.POST)
+	@ResponseBody
+	public String noticeCcBindHouse(@RequestBody CcBindHouseNotification notice) throws Exception {
+		log.info("cc noticeBindHouse notice:" + notice);
+		notifyService.noticeUserBindHouseByCC(notice);
+		return "SUCCESS";
+	}
+
+
 }

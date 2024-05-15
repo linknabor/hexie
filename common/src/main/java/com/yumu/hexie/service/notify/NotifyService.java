@@ -3,14 +3,9 @@ package com.yumu.hexie.service.notify;
 import java.util.List;
 import java.util.Map;
 
-import com.yumu.hexie.integration.notify.PartnerNotification;
-import com.yumu.hexie.integration.notify.PayNotification;
+import com.yumu.hexie.integration.notify.*;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
-import com.yumu.hexie.integration.notify.ReceiptNotification;
-import com.yumu.hexie.integration.notify.ConversionNotification;
-import com.yumu.hexie.integration.notify.InvoiceNotification;
 
-import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 
 public interface NotifyService {
@@ -47,4 +42,7 @@ public interface NotifyService {
 	void noticeComment(InteractCommentNotice notice) throws Exception;
 
 	void noticeEvaluate(InteractCommentNotice notice) throws Exception;
+
+	//从外部春川小程序上用户的绑定房屋数据
+	void noticeUserBindHouseByCC(CcBindHouseNotification notice) throws Exception;
 }
