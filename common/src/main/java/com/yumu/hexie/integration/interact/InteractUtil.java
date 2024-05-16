@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,8 +67,10 @@ public class InteractUtil {
     public CommonResponse<List<Map<String, String>>> getInteractType(User user) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, "");
         requestUrl += INTERACT_TYPE_URL;
+        Map<String, String> map = new HashMap<>();
+        map.put("cspId", user.getCspId());
         TypeReference<CommonResponse<List<Map<String, String>>>> typeReference = new TypeReference<CommonResponse<List<Map<String, String>>>>(){};
-        return restUtil.exchangeOnUri(requestUrl, null, typeReference);
+        return restUtil.exchangeOnUri(requestUrl, map, typeReference);
     }
 
     /**
