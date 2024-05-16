@@ -90,9 +90,9 @@ public class NoticeServiceImpl implements NoticeService {
 			appid = user.getMiniAppId();
 			openid = user.getMiniopenid();
 		}
-		if (StringUtils.isEmpty(appid) || StringUtils.isEmpty(openid) || "0".equals(openid)) {
-			
-		}
+		logger.info("currAppid : " + currAppid);
+		logger.info("appid : " + appid);
+		logger.info("openid : " + openid);
 		return noticeRepository.getNoticeList(ModelConstant.MESSAGE_STATUS_VALID, appid, sectId, openid, list, pageable);
 
 	}
