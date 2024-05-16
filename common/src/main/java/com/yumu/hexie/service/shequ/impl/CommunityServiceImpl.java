@@ -85,7 +85,11 @@ public class CommunityServiceImpl implements CommunityService {
 		req.setUser_head(currUser.getHeadimgurl());
 		req.setUser_id(String.valueOf(currUser.getId()));
 		req.setUser_name(currUser.getNickname());
-		req.setSect_id(currUser.getSectId());
+		String sectId = user.getSectId();
+		if (!StringUtils.isEmpty(req.getSect_id())) {
+			sectId = req.getSect_id();
+		}
+		req.setSect_id(sectId);
 		req.setUser_mobile(currUser.getTel());
 		
 		ActiveApp activeApp = systemConfigService.getActiveApp(currUser);
