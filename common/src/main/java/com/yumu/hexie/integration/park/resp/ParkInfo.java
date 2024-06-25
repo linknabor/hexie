@@ -15,6 +15,7 @@ public class ParkInfo {
     private String park_tel;
     private String cust_prompt;
     private String out_park_prompt;
+    private String allow_car_pay_type; //允许的停车场账单支付方式
     private List<RuleInfo> ruleList;
 
     public static class RuleInfo {
@@ -84,11 +85,33 @@ public class ParkInfo {
         this.out_park_prompt = out_park_prompt;
     }
 
+    public String getAllow_car_pay_type() {
+        return allow_car_pay_type;
+    }
+
+    public void setAllow_car_pay_type(String allow_car_pay_type) {
+        this.allow_car_pay_type = allow_car_pay_type;
+    }
+
     public List<RuleInfo> getRuleList() {
         return ruleList;
     }
 
     public void setRuleList(List<RuleInfo> ruleList) {
         this.ruleList = ruleList;
+    }
+
+    @Override
+    public String toString() {
+        return "ParkInfo{" +
+                "park_id='" + park_id + '\'' +
+                ", park_name='" + park_name + '\'' +
+                ", park_addr='" + park_addr + '\'' +
+                ", park_tel='" + park_tel + '\'' +
+                ", cust_prompt='" + cust_prompt + '\'' +
+                ", out_park_prompt='" + out_park_prompt + '\'' +
+                ", allow_car_pay_type='" + allow_car_pay_type + '\'' +
+                ", ruleList=" + ruleList +
+                '}';
     }
 }
