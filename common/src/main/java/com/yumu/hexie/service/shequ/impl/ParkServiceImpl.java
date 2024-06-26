@@ -99,15 +99,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<PayCarInfo> getParkPayList(User user, String carNo, String currPage) throws Exception {
-        if (!StringUtils.isEmpty(carNo)) {
-            try {
-                carNo = URLEncoder.encode(carNo,"GBK");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
-        CommonResponse<List<PayCarInfo>> commonResponse = parkUtil.getParkPayList(user, carNo, currPage);
+    public List<PayCarInfo> getParkPayList(User user) throws Exception {
+        CommonResponse<List<PayCarInfo>> commonResponse = parkUtil.getParkPayList(user);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {
