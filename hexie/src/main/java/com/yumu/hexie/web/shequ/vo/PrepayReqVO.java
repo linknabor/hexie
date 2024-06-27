@@ -64,8 +64,8 @@ public class PrepayReqVO implements Serializable {
 	private String cellId;	//催缴短信支付的房屋ID
 	private String batchNo;	//催缴短信批次号
 	private Boolean tpPrepay;	//是否第三方预支付
-	@JsonProperty("pay_scenarioss")
-	private String payScenarioss; //场景
+	@JsonProperty("pay_scenarios")
+	private String payScenarios; //场景
 
 	public String getBillId() {
 		return billId;
@@ -273,12 +273,12 @@ public class PrepayReqVO implements Serializable {
 		this.tpPrepay = tpPrepay;
 	}
 
-	public String getPayScenarioss() {
-		return payScenarioss;
+	public String getPayScenarios() {
+		return payScenarios;
 	}
 
-	public void setPayScenarioss(String payScenarioss) {
-		this.payScenarioss = payScenarioss;
+	public void setPayScenarios(String payScenarios) {
+		this.payScenarios = payScenarios;
 	}
 
 	@Override
@@ -317,7 +317,7 @@ public class PrepayReqVO implements Serializable {
 				", cellId='" + cellId + '\'' +
 				", batchNo='" + batchNo + '\'' +
 				", tpPrepay=" + tpPrepay +
-				", payScenarioss='" + payScenarioss + '\'' +
+				", payScenarios='" + payScenarios + '\'' +
 				'}';
 	}
 }
