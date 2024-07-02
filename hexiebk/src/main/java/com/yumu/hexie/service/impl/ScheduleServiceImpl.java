@@ -1,11 +1,14 @@
 package com.yumu.hexie.service.impl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +26,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
+import com.yumu.hexie.integration.beyondsoft.BeyondSoftUtil;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.model.ModelConstant;
@@ -54,8 +57,12 @@ import com.yumu.hexie.model.payment.RefundOrderRepository;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.statistic.PageView;
 import com.yumu.hexie.model.statistic.PageViewRepository;
+import com.yumu.hexie.model.statistic.StatisticData;
+import com.yumu.hexie.model.statistic.StatisticDataRepository;
 import com.yumu.hexie.model.system.BizError;
 import com.yumu.hexie.model.system.BizErrorRepository;
+import com.yumu.hexie.model.system.SystemConfig;
+import com.yumu.hexie.model.system.SystemConfigRepository;
 import com.yumu.hexie.model.user.Member;
 import com.yumu.hexie.model.user.MemberBill;
 import com.yumu.hexie.model.user.MemberBillRepository;
@@ -137,6 +144,12 @@ public class ScheduleServiceImpl implements ScheduleService {
 	private RedisTemplate<String, String> redisTemplate;
 	@Autowired
 	private PageViewRepository pageViewRepository;
+	@Autowired
+	private StatisticDataRepository statisticDataRepository;
+	@Autowired
+	private SystemConfigRepository systemConfigRepository;
+	@Autowired
+	private BeyondSoftUtil beyondSoftUtil;
 	
 	
 //	1. 订单超时
@@ -674,39 +687,204 @@ public class ScheduleServiceImpl implements ScheduleService {
 		SCHEDULE_LOG.info("start to update pageView count .");
 		String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
 		String lastDate = DateUtil.getNextDateByNum(currDate, -1);
-		String appid = "wx47743d3c9b0c241c";	//TODO 先写死西部的小程序appid，因为当前只需要统计这一个
-		String cacheKey = ModelConstant.KEY_PAGE_VIEW_COUNT + appid + ":" + lastDate;
-		Map<Object, Object> pageMap = redisTemplate.opsForHash().entries(cacheKey);
-		Iterator<Map.Entry<Object, Object>> it = pageMap.entrySet().iterator();
 		
-		List<PageView> pageViewList = new ArrayList<>();
-		while(it.hasNext()) {
-			Map.Entry<Object, Object> entry = it.next();
-			String page = (String) entry.getKey();
-			String countStr = (String) entry.getValue();
-			Integer count = 0;
-			try {
-				count = Integer.valueOf(countStr);
-			} catch (Exception e) {
-				SCHEDULE_LOG.error(e.getMessage(), e);
+		String[]appids = getBatchAppids();
+		for (String appid : appids) {
+			String cacheKey = ModelConstant.KEY_PAGE_VIEW_COUNT + appid + ":" + lastDate;
+			Map<Object, Object> pageMap = redisTemplate.opsForHash().entries(cacheKey);
+			Iterator<Map.Entry<Object, Object>> it = pageMap.entrySet().iterator();
+			
+			List<PageView> pageViewList = new ArrayList<>();
+			while(it.hasNext()) {
+				Map.Entry<Object, Object> entry = it.next();
+				String page = (String) entry.getKey();
+				String countStr = (String) entry.getValue();
+				Integer count = 0;
+				try {
+					count = Integer.valueOf(countStr);
+				} catch (Exception e) {
+					SCHEDULE_LOG.error(e.getMessage(), e);
+				}
+				PageView pageView = pageViewRepository.findByAppidAndCountDateAndPage(appid, lastDate, page);
+				if (pageView == null) {
+					pageView = new PageView();
+					pageView.setAppid(appid);
+					pageView.setCount(count);
+					pageView.setPage(page);
+					pageView.setCountDate(lastDate);
+					
+				} else {
+					count += pageView.getCount();
+					pageView.setCount(count);
+				}
+				pageViewList.add(pageView);
 			}
-			PageView pageView = pageViewRepository.findByAppidAndCountDateAndPage(appid, lastDate, page);
-			if (pageView == null) {
-				pageView = new PageView();
-				pageView.setAppid(appid);
-				pageView.setCount(count);
-				pageView.setPage(page);
-				pageView.setCountDate(lastDate);
-				
-			} else {
-				count += pageView.getCount();
-				pageView.setCount(count);
-			}
-			pageViewList.add(pageView);
+			pageViewRepository.saveAll(pageViewList);
+			redisTemplate.expire(cacheKey, 7, TimeUnit.DAYS);	//缓存数据7天后获取
 		}
-		pageViewRepository.saveAll(pageViewList);
-		redisTemplate.expire(cacheKey, 7, TimeUnit.DAYS);	//缓存数据7天后获取
 		SCHEDULE_LOG.info("finish updating pageView count .");
 	}
 	
+	@Scheduled(cron = "32 10 0 * * ?")
+//	@Scheduled(cron = "24 */5 * * * ?")
+	@Transactional
+	@Override
+	public void westDataBatch() {
+		
+		SCHEDULE_LOG.info("westDataBatch started .");
+		//1.处理点击量，只记录总数。每日只统计当天的，然后累加到总量。如果第一天上线总量是空的，则累计一下所有的
+		Date currDate = new Date();
+		String currDateStr = DateUtil.dtFormat(currDate, "yyyyMMdd");
+		String batchDateStr = DateUtil.getNextDateByNum(currDateStr, -1);
+		String[] appids = getBatchAppids();
+		String defaultBeginDate = "20240601";	//这个日期写死，因为之前统计点击数的功能没有上线。这个日期之后才有
+		for (String appid : appids) {
+			Integer totalClick = calcTotalClick(appid, batchDateStr, defaultBeginDate);
+			Integer totalRegister = calcTotalRegister(appid);
+			Integer totalBind = calcTotalBind(appid);
+			
+			StatisticData statisticData = new StatisticData();
+			statisticData.setAppid(appid);
+			statisticData.setRecordDate(currDateStr);
+			statisticData.setClickCount(totalClick);
+			statisticData.setRegisterCount(totalRegister);
+			statisticData.setBindCount(totalBind);
+			statisticDataRepository.save(statisticData);
+			
+		}
+		SCHEDULE_LOG.info("westDataBatch ended .");
+		
+	}
+	
+	/**
+	 * 计算总点击量
+	 * @param appid
+	 * @param endDateStr
+	 * @param defaultBeginDate
+	 */
+	private Integer calcTotalClick(String appid, String batchDateStr, String defaultBeginDate) {
+		String beginDateStr;
+		Integer totalCounts = 0;
+		Integer hisCounts = 0;
+		StatisticData lastDayData = statisticDataRepository.findByAppidAndRecordDate(appid, batchDateStr);
+		if (lastDayData == null) {
+			beginDateStr = defaultBeginDate;
+		} else {
+			beginDateStr = batchDateStr;
+			hisCounts = lastDayData.getClickCount();
+		}
+		List<Map<String, Object>> list = pageViewRepository.getPageViewByAppidAndDateBetween(appid, beginDateStr, batchDateStr);
+		Map <String, Object> map = new HashMap<>(); 
+		if (list != null && !list.isEmpty()) {
+			map = list.get(0);
+		}
+		try {
+			BigDecimal count = (BigDecimal) map.get("counts");
+			if (count == null) {
+				count = BigDecimal.ZERO;
+			}
+			totalCounts = count.intValue();
+		} catch (Exception e) {
+			SCHEDULE_LOG.error(e.getMessage(), e);
+		}
+		totalCounts += hisCounts;
+		return totalCounts;
+	}
+	
+	/**
+	 * 计算总注册用户数（有手机的）
+	 * @param appid
+	 * @param endDateStr
+	 * @param defaultBeginDate
+	 */
+	private Integer calcTotalRegister(String appid) {
+		Integer totalCounts = 0;
+		List<Map<String, Object>> list = userRepository.getTotalRegisterByMiniAppid(appid);
+		Map <String, Object> map = new HashMap<>(); 
+		if (list != null && !list.isEmpty()) {
+			map = list.get(0);
+		}
+		try {
+			BigInteger count = (BigInteger) map.get("counts");
+			if (count == null) {
+				count = BigInteger.ZERO;
+			}
+			totalCounts = count.intValue();
+		} catch (Exception e) {
+			SCHEDULE_LOG.error(e.getMessage(), e);
+		}
+		return totalCounts;
+	}
+	
+	/**
+	 * 计算总绑定房屋用户数
+	 * @param appid
+	 * @param endDateStr
+	 * @param defaultBeginDate
+	 */
+	private Integer calcTotalBind(String appid) {
+		Integer totalCounts = 0;
+		List<Map<String, Object>> list = userRepository.getTotalBindByMiniAppid(appid);
+		Map <String, Object> map = new HashMap<>(); 
+		if (list != null && !list.isEmpty()) {
+			map = list.get(0);
+		}
+		try {
+			BigInteger count = (BigInteger) map.get("counts");
+			if (count == null) {
+				count = BigInteger.ZERO;
+			}
+			totalCounts = count.intValue();
+		} catch (Exception e) {
+			SCHEDULE_LOG.error(e.getMessage(), e);
+		}
+		return totalCounts;
+	}
+	
+	@Scheduled(cron = "59 18 0 * * ?")
+	@Transactional
+	@Override
+	public void westData2Beyondsoft() {
+		
+		SCHEDULE_LOG.info("westData2Beyondsoft started .");
+		//1.处理点击量，只记录总数。每日只统计当天的，然后累加到总量。如果第一天上线总量是空的，则累计一下所有的
+		Date currDate = new Date();
+		String currDateStr = DateUtil.dtFormat(currDate, "yyyyMMdd");
+		String batchDateStr = DateUtil.getNextDateByNum(currDateStr, -1);
+		String[] appids = getBatchAppids();
+		for (String appid : appids) {
+			StatisticData lastDayData = statisticDataRepository.findByAppidAndRecordDate(appid, batchDateStr);
+			if (lastDayData == null) {
+				SCHEDULE_LOG.warn("no data to sync, batch date : " + batchDateStr);
+			} else {
+				try {
+					beyondSoftUtil.syncMiniProgramData(lastDayData);
+				} catch (Exception e) {
+					SCHEDULE_LOG.error(e.getMessage(), e);
+				}
+			}
+		}
+		SCHEDULE_LOG.info("westData2Beyondsoft ended .");
+	}
+	
+	private String[] getBatchAppids() {
+		String batchKey = "DATA_BATCH_APPIDS";
+		List<SystemConfig> configList = systemConfigRepository.findAllBySysKey(batchKey);
+		if (configList == null || configList.isEmpty()) {
+			SCHEDULE_LOG.warn("DATA_BATCH_APPIDS is empty, will skip ");
+			return new String[0];
+		}
+		SystemConfig systemConfig = configList.get(0);
+		if (systemConfig == null || StringUtils.isEmpty(systemConfig.getSysValue())) {
+			SCHEDULE_LOG.warn("DATA_BATCH_APPIDS is empty, will skip ");
+			return new String[0];
+		}
+		String batchAppidStr = systemConfig.getSysValue();
+		String[]appids = batchAppidStr.split(",");
+		return appids;
+	}
+	
+	public void getWestToken() {
+		
+	}
 }

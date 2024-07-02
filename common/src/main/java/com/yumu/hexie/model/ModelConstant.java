@@ -561,4 +561,5 @@ public class ModelConstant {
 	public static final String KEY_RGROUP_PUB_QUEUE = "queue:rgroup:pub";	//团购发布
 	
 	public static final String KEY_PAGE_VIEW_COUNT = "count:pageview:";	//页面计数统计，后面接appid:日期
+	public static final String BEYONDSOFT_TOKEN_WEST = "beyondsoft:west:token";
 }		
