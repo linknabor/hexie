@@ -859,6 +859,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 			} else {
 				try {
 					beyondSoftUtil.syncMiniProgramData(lastDayData);
+					SCHEDULE_LOG.info("westData2Beyondsoft syncMiniProgramData succeeded .");
 				} catch (Exception e) {
 					SCHEDULE_LOG.error(e.getMessage(), e);
 				}
