@@ -311,5 +311,44 @@ public class RestUtil {
 		byte[] result = respEntity.getBody();
 		return Base64.getEncoder().encodeToString(result);
 	}
+	
+	
+	/**
+	 * postByJson，可自定义header
+	 * @param <V>
+	 * @param requestUrl	请求链接
+	 * @param jsonObject	请继承wuyeRequest
+	 * @param typeReference	HexieResponse类型的子类
+	 * @return
+	 * @throws IOException
+	 * @throws JsonParseException
+	 * @throws JsonMappingException
+	 */
+	public <T, V> V postOnBodyWithHeader(String requestUrl, T jsonObject, TypeReference<V> typeReference, Map<String, String> reqHeader)
+			throws IOException, JsonParseException, JsonMappingException {
+		
+		HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        if (reqHeader!=null && !reqHeader.isEmpty()) {
+			Iterator<Map.Entry<String, String>> it = reqHeader.entrySet().iterator();
+			while(it.hasNext()) {
+				Map.Entry<String, String> entry = it.next();
+				headers.add(entry.getKey(), entry.getValue());
+			}
+		}
+        HttpEntity<Object> httpEntity = new HttpEntity<>(jsonObject, headers);
+        logger.info("requestUrl : " + requestUrl + ", param : " + jsonObject);
+        ResponseEntity<String> respEntity = restTemplate.exchange(requestUrl, HttpMethod.POST, httpEntity, String.class);
+        
+        logger.info("response : " + respEntity);
+        
+		if (!HttpStatus.OK.equals(respEntity.getStatusCode())) {
+			throw new BizValidateException("请求失败！ code : " + respEntity.getStatusCodeValue());
+		}
+		
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		V hexieResponse = objectMapper.readValue(respEntity.getBody(), typeReference);
+		return hexieResponse;
+	}
 
 }
