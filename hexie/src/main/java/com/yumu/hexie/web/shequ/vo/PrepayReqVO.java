@@ -64,6 +64,8 @@ public class PrepayReqVO implements Serializable {
 	private String cellId;	//催缴短信支付的房屋ID
 	private String batchNo;	//催缴短信批次号
 	private Boolean tpPrepay;	//是否第三方预支付
+	@JsonProperty("pay_scenarios")
+	private String payScenarios; //场景
 
 	public String getBillId() {
 		return billId;
@@ -270,21 +272,52 @@ public class PrepayReqVO implements Serializable {
 	public void setTpPrepay(Boolean tpPrepay) {
 		this.tpPrepay = tpPrepay;
 	}
-	
+
+	public String getPayScenarios() {
+		return payScenarios;
+	}
+
+	public void setPayScenarios(String payScenarios) {
+		this.payScenarios = payScenarios;
+	}
+
 	@Override
 	public String toString() {
-		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
-				+ couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitleType="
-				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", needInvoice="
-				+ needInvoice + ", invoiceType=" + invoiceType + ", regionName=" + regionName + ", payType=" + payType
-				+ ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo="
-				+ acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode
-				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
-				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
-				+ ", openid=" + openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", cellId=" + cellId
-				+ ", batchNo=" + batchNo + ", tpPrepay=" + tpPrepay + "]";
-
+		return "PrepayReqVO{" +
+				"billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", needInvoice='" + needInvoice + '\'' +
+				", invoiceType='" + invoiceType + '\'' +
+				", regionName='" + regionName + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", remember='" + remember + '\'' +
+				", cardId='" + cardId + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", openid='" + openid + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", cellId='" + cellId + '\'' +
+				", batchNo='" + batchNo + '\'' +
+				", tpPrepay=" + tpPrepay +
+				", payScenarios='" + payScenarios + '\'' +
+				'}';
 	}
-	
-	
 }

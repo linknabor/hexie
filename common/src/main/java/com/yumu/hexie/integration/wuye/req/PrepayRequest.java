@@ -113,6 +113,8 @@ public class PrepayRequest extends WuyeRequest {
 	private String cellId;	//房屋id
 	@JsonProperty("tp_prepay")
 	private Boolean tpPrepay;	//是否第三方预支付
+	@JsonProperty("pay_scenarios")
+	private String payScenarios; //场景
 
 	public String getCouponUnit() {
 		return couponUnit;
