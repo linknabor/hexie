@@ -6,6 +6,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -361,5 +364,30 @@ public class DateUtil {
         }
         return firstDate;
     }
+    
+    /**
+     * 获取两个日期之间的差值
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    public static int getDateDiff(String beginDate, String endDate) {
+    	
+    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+        // 解析日期字符串为 LocalDate 对象
+        LocalDate date1 = LocalDate.parse(beginDate, formatter);
+        LocalDate date2 = LocalDate.parse(endDate, formatter);
+        
+        // 计算日期之间的差值
+        Long daysDiff = ChronoUnit.DAYS.between(date1, date2);
+        return daysDiff.intValue();
+    }
+    
+    public static void main(String[] args) {
+		
+    	int diff = getDateDiff("20240701", "20240703");
+    	System.out.println(diff);
+	}
 
 }
