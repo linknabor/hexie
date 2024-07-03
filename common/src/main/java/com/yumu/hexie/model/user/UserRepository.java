@@ -1,6 +1,7 @@
 package com.yumu.hexie.model.user;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -108,4 +109,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public List<User> findByAliuserid(String aliuserid);
 	
 	public List<User> findByOriSysAndOriUserId(String oriSys, Long oriUserId);
+	
+	@Query(value = "select count(1) as counts from user where miniappid = ?1 and tel is not null group by appid ", nativeQuery = true)
+	public List<Map<String, Object>> getTotalRegisterByMiniAppid(String miniappid);
+	
+	@Query(value = "select count(1) as counts from user where miniappid = ?1 and ( sectId is not null or sectId <> '' ) ", nativeQuery = true)
+	public List<Map<String, Object>> getTotalBindByMiniAppid(String miniappid);
 }

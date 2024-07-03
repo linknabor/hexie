@@ -2,6 +2,8 @@ package com.yumu.hexie.model.statistic;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 import com.yumu.hexie.model.BaseModel;
 
@@ -11,6 +13,7 @@ import com.yumu.hexie.model.BaseModel;
  *
  */
 @Entity
+@Table(indexes= {@Index(columnList="countDate")})
 public class PageView extends BaseModel {
 
 	/**

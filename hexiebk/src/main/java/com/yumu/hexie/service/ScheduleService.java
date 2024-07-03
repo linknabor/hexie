@@ -36,5 +36,9 @@ public interface ScheduleService {
 	void updateGroupOwnerInfo();
 	//17.更新页面计数统计
 	void updatePageView();
+	//18.西部数据统计
+	void westDataBatch();
+	//19.西部数据同步给博彦
+	void westData2Beyondsoft();
 	
 }
