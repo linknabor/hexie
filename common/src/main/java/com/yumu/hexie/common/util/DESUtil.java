@@ -34,17 +34,4 @@ public class DESUtil {
         return hexString.toString();
     }
 
-	public static void main(String[] args) throws Exception {
-		
-		String data = "xibuprod";
-		String key = "70523a6315f9e192e7ab9d11ea2017e1";
-		
-		String encrypted = encryptByKey(key, data);
-		System.out.println(encrypted);
-		
-//		data = "12eddqsa!!ooo";
-//		encrypted = encryptByKey(data, key);
-//		System.out.println(encrypted);
-	}
-	
 }
