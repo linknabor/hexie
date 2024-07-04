@@ -110,7 +110,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	public List<User> findByOriSysAndOriUserId(String oriSys, Long oriUserId);
 	
-	@Query(value = "select count(1) as counts from user where miniappid = ?1 and tel is not null group by appid ", nativeQuery = true)
+	@Query(value = "select count(1) as counts from user where miniappid = ?1 and tel is not null group by miniappid ", nativeQuery = true)
 	public List<Map<String, Object>> getTotalRegisterByMiniAppid(String miniappid);
 	
 	@Query(value = "select count(1) as counts from user where miniappid = ?1 and ( sectId is not null or sectId <> '' ) ", nativeQuery = true)
