@@ -66,6 +66,7 @@ public class PrepayRequestDTO implements Serializable {
 	private Boolean tpPrepay;	//是否第三方预支付
 
 	private String payScenarios; //场景
+	private String parkName; //停车场名称
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -286,6 +287,14 @@ public class PrepayRequestDTO implements Serializable {
 		this.payScenarios = payScenarios;
 	}
 
+	public String getParkName() {
+		return parkName;
+	}
+
+	public void setParkName(String parkName) {
+		this.parkName = parkName;
+	}
+
 	@Override
 	public String toString() {
 		return "PrepayRequestDTO{" +
@@ -324,6 +333,7 @@ public class PrepayRequestDTO implements Serializable {
 				", batchNo='" + batchNo + '\'' +
 				", tpPrepay=" + tpPrepay +
 				", payScenarios='" + payScenarios + '\'' +
+				", parkName='" + parkName + '\'' +
 				'}';
 	}
 }

@@ -7,8 +7,8 @@ package com.yumu.hexie.integration.park.resp;
  * @create 2021-08-18 18:15
  */
 public class PayCarInfo {
-
-    private String trade_id;
+    private String data_type;
+    private String trade_water_id;
     private String start_date;
     private String end_date;
     private String park_name;
@@ -17,12 +17,20 @@ public class PayCarInfo {
     private String park_time;
     private String is_invoice;
 
-    public String getTrade_id() {
-        return trade_id;
+    public String getData_type() {
+        return data_type;
     }
 
-    public void setTrade_id(String trade_id) {
-        this.trade_id = trade_id;
+    public void setData_type(String data_type) {
+        this.data_type = data_type;
+    }
+
+    public String getTrade_water_id() {
+        return trade_water_id;
+    }
+
+    public void setTrade_water_id(String trade_water_id) {
+        this.trade_water_id = trade_water_id;
     }
 
     public String getStart_date() {
@@ -84,7 +92,8 @@ public class PayCarInfo {
     @Override
     public String toString() {
         return "PayCarInfo{" +
-                "trade_id='" + trade_id + '\'' +
+                "data_type='" + data_type + '\'' +
+                ", trade_water_id='" + trade_water_id + '\'' +
                 ", start_date='" + start_date + '\'' +
                 ", end_date='" + end_date + '\'' +
                 ", park_name='" + park_name + '\'' +

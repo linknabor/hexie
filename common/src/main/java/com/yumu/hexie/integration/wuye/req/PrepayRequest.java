@@ -115,6 +115,8 @@ public class PrepayRequest extends WuyeRequest {
 	private Boolean tpPrepay;	//是否第三方预支付
 	@JsonProperty("pay_scenarios")
 	private String payScenarios; //场景
+	@JsonProperty("park_name")
+	private String parkName; //停车场名称
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -329,6 +331,14 @@ public class PrepayRequest extends WuyeRequest {
 		this.payScenarios = payScenarios;
 	}
 
+	public String getParkName() {
+		return parkName;
+	}
+
+	public void setParkName(String parkName) {
+		this.parkName = parkName;
+	}
+
 	@Override
 	public String toString() {
 		return "PrepayRequest{" +
@@ -366,6 +376,7 @@ public class PrepayRequest extends WuyeRequest {
 				", cellId='" + cellId + '\'' +
 				", tpPrepay=" + tpPrepay +
 				", payScenarios='" + payScenarios + '\'' +
+				", parkName='" + parkName + '\'' +
 				'}';
 	}
 }

@@ -80,7 +80,6 @@ public class ParkController extends BaseController {
     /**
      * 获取缴费记录
      * @param user
-     * @param carNo
      * @return
      * @throws Exception
      */
