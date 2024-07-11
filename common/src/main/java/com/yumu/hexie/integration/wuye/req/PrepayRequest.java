@@ -43,6 +43,15 @@ public class PrepayRequest extends WuyeRequest {
 				throw new BizValidateException(e.getMessage(), e);	
 			}
 		}
+
+		if (!StringUtils.isEmpty(prepayRequestDTO.getParkName())) {
+			try {
+				//中文打码
+				this.parkName = URLEncoder.encode(prepayRequestDTO.getParkName(), "GBK");
+			} catch (UnsupportedEncodingException e) {
+				throw new BizValidateException(e.getMessage(), e);
+			}
+		}
 	}
 	
 	//公用参数
