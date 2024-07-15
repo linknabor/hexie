@@ -146,8 +146,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public PayDetail getPayDetailById(User user, String orderId) throws Exception {
-        CommonResponse<PayDetail> commonResponse = parkUtil.getPayDetailById(user, orderId);
+    public CarBillList getCarBillList(User user, PayUserCarInfo payUserCarInfo) throws Exception {
+        CommonResponse<CarBillList> commonResponse = parkUtil.getCarBillList(user, payUserCarInfo);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {
@@ -156,8 +156,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public CarBillList getCarBillList(User user, PayUserCarInfo payUserCarInfo) throws Exception {
-        CommonResponse<CarBillList> commonResponse = parkUtil.getCarBillList(user, payUserCarInfo);
+    public String getInvoiceQrCode(User user, String trade_water_id) throws Exception {
+        CommonResponse<String> commonResponse = parkUtil.getInvoiceQrCode(user, trade_water_id);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {

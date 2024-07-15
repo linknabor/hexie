@@ -129,19 +129,6 @@ public class ParkController extends BaseController {
     }
 
     /**
-     * 根据交易ID查询交易详情
-     * @param user
-     * @param orderId
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/getPayDetailById", method = RequestMethod.GET)
-    public BaseResult<PayDetail> getPayDetailById(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
-        PayDetail payDetail = parkService.getPayDetailById(user, orderId);
-        return BaseResult.successResult(payDetail);
-    }
-
-    /**
      * 根据车牌查询停车费账单
      * @param user
      * @param payUserCarInfo
@@ -152,6 +139,12 @@ public class ParkController extends BaseController {
     public BaseResult<CarBillList> getCarBill(@ModelAttribute(Constants.USER) User user, @RequestBody PayUserCarInfo payUserCarInfo) throws Exception {
         CarBillList carBillList = parkService.getCarBillList(user, payUserCarInfo);
         return BaseResult.successResult(carBillList);
+    }
+
+    @RequestMapping(value = "/getInvoiceQrCode", method = RequestMethod.GET)
+    public BaseResult<String> getInvoiceQrCode(@ModelAttribute(Constants.USER) User user, @RequestParam String trade_water_id) throws Exception {
+        String url = parkService.getInvoiceQrCode(user, trade_water_id);
+        return BaseResult.successResult(url);
     }
 
 }

@@ -15,7 +15,10 @@ public class PayCarInfo {
     private String car_no;
     private String pay_amt;
     private String park_time;
-    private String is_invoice;
+    private String invoice_no;
+    private String pdf_addr;
+    private String receipt_id;
+    private String allow_invoice; //是否允许开票
 
     public String getData_type() {
         return data_type;
@@ -81,12 +84,36 @@ public class PayCarInfo {
         this.park_time = park_time;
     }
 
-    public String getIs_invoice() {
-        return is_invoice;
+    public String getInvoice_no() {
+        return invoice_no;
     }
 
-    public void setIs_invoice(String is_invoice) {
-        this.is_invoice = is_invoice;
+    public void setInvoice_no(String invoice_no) {
+        this.invoice_no = invoice_no;
+    }
+
+    public String getPdf_addr() {
+        return pdf_addr;
+    }
+
+    public void setPdf_addr(String pdf_addr) {
+        this.pdf_addr = pdf_addr;
+    }
+
+    public String getReceipt_id() {
+        return receipt_id;
+    }
+
+    public void setReceipt_id(String receipt_id) {
+        this.receipt_id = receipt_id;
+    }
+
+    public String getAllow_invoice() {
+        return allow_invoice;
+    }
+
+    public void setAllow_invoice(String allow_invoice) {
+        this.allow_invoice = allow_invoice;
     }
 
     @Override
@@ -100,7 +127,10 @@ public class PayCarInfo {
                 ", car_no='" + car_no + '\'' +
                 ", pay_amt='" + pay_amt + '\'' +
                 ", park_time='" + park_time + '\'' +
-                ", is_invoice='" + is_invoice + '\'' +
+                ", invoice_no='" + invoice_no + '\'' +
+                ", pdf_addr='" + pdf_addr + '\'' +
+                ", receipt_id='" + receipt_id + '\'' +
+                ", allow_invoice='" + allow_invoice + '\'' +
                 '}';
     }
 }
