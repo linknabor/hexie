@@ -18,4 +18,6 @@ public interface NoticeService {
 
 	void saveNotice(Notice notice);
 
+	List<Notice> getNoticeByAppid(User user, String currAppid, int page);
+
 }

@@ -107,7 +107,7 @@ public interface UserService {
 	 * @param switchSectReq
 	 * @return 
 	 */
-	User switchSect(User user, SwitchSectReq switchSectReq);
+	User switchSect(User user, String openid, SwitchSectReq switchSectReq);
 	
 	/**
 	 * 获取物业id

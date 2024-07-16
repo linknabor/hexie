@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.notify.InvoiceNotification;
@@ -420,6 +421,11 @@ public class GotongServiceImpl implements GotongService {
 
     @Override
     public WechatResponse sendInteractNotification(InteractCommentNotice commentNotice) {
+        if(ObjectUtils.isEmpty(commentNotice.getAppid())) {
+            WechatResponse response = new WechatResponse();
+            response.setErrcode(99998);
+            return response;
+        }
         String accessToken = systemConfigService.queryWXAToken(commentNotice.getAppid());
         return templateMsgService.sendOpinionNotificationMessage(commentNotice, accessToken);
     }

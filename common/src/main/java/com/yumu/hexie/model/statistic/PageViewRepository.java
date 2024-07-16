@@ -12,4 +12,6 @@ public interface PageViewRepository extends JpaRepository<PageView, Long> {
 	public List<Map<String, Object>> getPageViewByAppidAndDateBetween(String appid, String startDate, String endDate);
 	
 	public PageView findByAppidAndCountDateAndPage(String appid, String countDate, String page);
+	
+	public List<PageView> findByAppidAndCountDate(String appid, String countDate);
 }

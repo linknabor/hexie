@@ -539,10 +539,15 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	
+	/**
+	 * @param user
+	 * @param openid 用于redisCache的key，不要移除这个参数
+	 * @param switchSectReq
+	 */
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
-	public User switchSect(User user, SwitchSectReq switchSectReq) {
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#openid")
+	public User switchSect(User user, String openid, SwitchSectReq switchSectReq) {
 		
 		User dbUser = userRepository.findById(user.getId());
 		if (!dbUser.getSectId().equals(switchSectReq.getSectId())) {
@@ -903,46 +908,52 @@ public class UserServiceImpl implements UserService {
 		}
 		
 		User user = multiFindByOpenId(openid);
-		if (user != null) {	
-			//未查询到用户存在两种情况：1.用户未没有产生小程序用户，2用户产生了小程序用户，但未和公众号openid关联上
-			UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
-			if (userWeiXin == null) {
-				logger.warn("can't find user from wechat, openid : " + openid);
-				return true;
-			}
-			String unionid = userWeiXin.getUnionid();	//这里只对合协的用户有效，因为只有合协公众号的用户跟小程序共享unionid。其他公众号的用户，关注需要关注合协新产生一个用户
-			if (StringUtils.isEmpty(unionid)) {
-				logger.warn("user does not have unionid, openid : " + openid + ", appid : " + appid);
-				return true;
-			}
-			User unionUser = getByUnionid(unionid);
-			if (unionUser != null) {
-				logger.warn("user unionid exists. will skip .");
-				return true;
-			}
+		logger.info("findByOpenid user : " + user);
+		//未查询到用户存在两种情况：1.用户未没有产生小程序用户，2用户产生了小程序用户，但未和公众号openid关联上
+		UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
+		if (userWeiXin == null) {
+			logger.warn("can't find user from wechat, openid : " + openid);
+			return true;
+		}
+		String unionid = userWeiXin.getUnionid();	//不是每个公众号都会返回unionid的，只有在共享平台绑定过的才有
+		logger.info("updateUserUnionid, unionid : " + unionid);
+		if (user != null && StringUtils.isEmpty(user.getUnionid()) && !StringUtils.isEmpty(unionid)) {	
 			user.setUnionid(unionid);
 	        userRepository.save(user);
-		} else {
-//			UserWeiXin userWeiXin = com.yumu.hexie.integration.wechat.service.UserService.getUserInfo(openid, systemConfigService.queryWXAToken(appid));
-//			if (userWeiXin == null) {
-//				logger.warn("can't find user from wechat, openid : " + openid);
-//				return true;
-//			}
-//			String unionid = userWeiXin.getUnionid();
-//			user = new User();
-//			user.setOpenid(openid);
-//			user.setAppId(appid);
-//			user.setAge(20);
-//			user.setCityId(0l);
-//			user.setCountyId(0l);
-//			user.setCurrentAddrId(0l);
-//			user.setProvinceId(0l);
-//			user.setXiaoquId(0);
-//			user.setStatus(0);
-//			user.setRegisterDate(System.currentTimeMillis());
-//			user.setNewRegiste(false);
-//			user.setUnionid(unionid);
-//			simpleRegister(user);
+		}
+		boolean needCreate = false;
+		if (user == null) {
+			if (!StringUtils.isEmpty(unionid)) {
+				User unionUser = getByUnionid(unionid);
+				logger.info("updateUserUnionid, unionUser : " + user);
+				if (unionUser != null) {
+					if (StringUtils.isEmpty(unionUser.getOpenid()) || StringUtils.isEmpty(unionUser.getAppId())) {
+						unionUser.setOpenid(openid);
+						unionUser.setAppId(appid);
+						userRepository.save(unionUser);
+					}
+				} else {
+					needCreate = true;
+				}
+			} else {
+				needCreate = true;
+			}
+			if (needCreate) {
+				user = new User();
+				user.setOpenid(openid);
+				user.setAppId(appid);
+				user.setAge(20);
+				user.setCityId(0l);
+				user.setCountyId(0l);
+				user.setCurrentAddrId(0l);
+				user.setProvinceId(0l);
+				user.setXiaoquId(0);
+				user.setStatus(0);
+				user.setRegisterDate(System.currentTimeMillis());
+				user.setNewRegiste(false);
+				user.setUnionid(unionid);
+				simpleRegister(user);
+			}
 		}
 		return true;
 	}

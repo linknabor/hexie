@@ -61,6 +61,41 @@ public class NoticeServiceImpl implements NoticeService {
 		return noticeRepository.getNoticeList(ModelConstant.MESSAGE_STATUS_VALID, appid, sectId, openid, list, pageable);
 
 	}
+	
+	@Override
+	public List<Notice> getNoticeByAppid(User user, String currAppid, int page) {
+		
+		String sectId = user.getSectId();
+		if (StringUtils.isEmpty(user.getSectId())) {
+			sectId = "0";
+		}
+		Sort sort = Sort.by(Direction.DESC, "top", "createDate");
+		Pageable pageable = PageRequest.of(page, PAGE_SIZE, sort);
+
+		List<Integer> list = new ArrayList<>();
+		list.add(ModelConstant.NOTICE_TYPE2_NOTIFICATIONS);
+		list.add(ModelConstant.NOTICE_TYPE2_BIll);
+		list.add(ModelConstant.NOTICE_TYPE2_ARREARS_BILL);
+		list.add(ModelConstant.NOTICE_TYPE2_THREAD);
+		list.add(ModelConstant.NOTICE_TYPE2_ORDER);
+		String appid = "";
+		String openid = "";
+		if (StringUtils.isEmpty(currAppid)) {
+			appid = user.getMiniAppId();
+			openid = user.getMiniopenid();
+		} else if (currAppid.equals(user.getAppId())) {
+			appid = user.getAppId();
+			openid = user.getOpenid();
+		} else if (currAppid.equals(user.getMiniAppId())) {
+			appid = user.getMiniAppId();
+			openid = user.getMiniopenid();
+		}
+		logger.info("currAppid : " + currAppid);
+		logger.info("appid : " + appid);
+		logger.info("openid : " + openid);
+		return noticeRepository.getNoticeList(ModelConstant.MESSAGE_STATUS_VALID, appid, sectId, openid, list, pageable);
+
+	}
 
 	@Override
 	@Transactional

@@ -296,7 +296,11 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	public InvoiceInfo getInvoiceByTradeId(String trade_water_id) {
-		return WuyeUtil.getInvoiceInfo(trade_water_id).getData();
+		BaseResult<InvoiceInfo> baseResult = WuyeUtil.getInvoiceInfo(trade_water_id);
+		if (!"00".equals(baseResult.getResult())) {
+			throw new BizValidateException(baseResult.getMessage());
+		}
+		return baseResult.getData();
 	}
 	
 	@Override
