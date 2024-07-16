@@ -18,7 +18,9 @@ public class PayUserCarInfo {
     private String car_no;
     private String park_id;
     private String record_id;
-
+    private String query_type; //查询方式，1.按账单查询 2.按月数查询
+    private int pay_months = 0; //缴月份数
+    private String pay_scenarios; //支付场景
     public String getAppid() {
         return appid;
     }
@@ -74,6 +76,30 @@ public class PayUserCarInfo {
         this.record_id = record_id;
     }
 
+    public String getQuery_type() {
+        return query_type;
+    }
+
+    public void setQuery_type(String query_type) {
+        this.query_type = query_type;
+    }
+
+    public int getPay_months() {
+        return pay_months;
+    }
+
+    public void setPay_months(int pay_months) {
+        this.pay_months = pay_months;
+    }
+
+    public String getPay_scenarios() {
+        return pay_scenarios;
+    }
+
+    public void setPay_scenarios(String pay_scenarios) {
+        this.pay_scenarios = pay_scenarios;
+    }
+
     @Override
     public String toString() {
         return "PayUserCarInfo{" +
@@ -83,6 +109,9 @@ public class PayUserCarInfo {
                 ", car_no='" + car_no + '\'' +
                 ", park_id='" + park_id + '\'' +
                 ", record_id='" + record_id + '\'' +
+                ", query_type='" + query_type + '\'' +
+                ", pay_months=" + pay_months +
+                ", pay_scenarios='" + pay_scenarios + '\'' +
                 '}';
     }
 }

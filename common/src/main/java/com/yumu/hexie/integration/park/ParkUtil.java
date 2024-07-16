@@ -38,8 +38,9 @@ public class ParkUtil {
     private static final String ADD_USER_CAR_URL = "park/addUserCarSDO.do";
     private static final String QUERY_USER_PAYING_DETAIL_URL = "park/getPayingDetailSDO.do";
     private static final String GET_USER_PRE_PAY_URL = "park/getUserPrePaySDO.do";
-    private static final String GET_PAY_DETAIL_URL = "park/getPayDetailByIdSDO.do";
     private static final String GET_CAR_BILL_LIST_URL = "park/getBillCarSDO.do";
+
+    private static final String GET_INVOICE_QRCODE_URL = "park/getInvoiceQrcodeSDO.do";
 
     /**
      * 查询用户车辆、停车场和规则信息
@@ -55,6 +56,7 @@ public class ParkUtil {
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", String.valueOf(user.getAppId()));
         map.put("park_id", parkId);
+        map.put("wuye_id", user.getWuyeId());
 
         TypeReference<CommonResponse<UserCarList>> typeReference = new TypeReference<CommonResponse<UserCarList>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
@@ -122,16 +124,14 @@ public class ParkUtil {
      * @return
      * @throws Exception
      */
-    public CommonResponse<List<PayCarInfo>> getParkPayList(User user, String carNo, String currPage) throws Exception {
+    public CommonResponse<List<PayCarInfo>> getParkPayList(User user) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAY_CAR_LIST_URL;
 
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", user.getAppId());
-        map.put("carNo", carNo);
-        map.put("curr_page", currPage);
-        map.put("total_count", "99999");
+        map.put("wuye_id", user.getWuyeId());
 
         TypeReference<CommonResponse<List<PayCarInfo>>> typeReference = new TypeReference<CommonResponse<List<PayCarInfo>>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
@@ -193,24 +193,6 @@ public class ParkUtil {
     }
 
     /**
-     * 根据交易ID查询交易详情
-     * @param user
-     * @return
-     * @throws Exception
-     */
-    public CommonResponse<PayDetail> getPayDetailById(User user, String orderId) throws Exception {
-        String requestUrl = requestUtil.getRequestUrl(user, null);
-        requestUrl += GET_PAY_DETAIL_URL;
-
-        Map<String, String> map = new HashMap<>();
-        map.put("appid", user.getAppId());
-        map.put("user_id", String.valueOf(user.getId()));
-        map.put("order_id", orderId);
-        TypeReference<CommonResponse<PayDetail>> typeReference = new TypeReference<CommonResponse<PayDetail>>(){};
-        return restUtil.exchangeOnUri(requestUrl, map, typeReference);
-    }
-
-    /**
      * 根据车牌号查询停车费账单
      * @param user
      * @param payUserCarInfo
@@ -226,5 +208,17 @@ public class ParkUtil {
         payUserCarInfo.setOpenid(user.getOpenid());
         TypeReference<CommonResponse<CarBillList>> typeReference = new TypeReference<CommonResponse<CarBillList>>(){};
         return restUtil.exchangeOnUri(requestUrl, payUserCarInfo, typeReference);
+    }
+
+    public CommonResponse<String> getInvoiceQrCode(User user, String trade_water_id) throws Exception {
+        String requestUrl = requestUtil.getRequestUrl(user, null);
+        requestUrl += GET_INVOICE_QRCODE_URL;
+
+        Map<String, String> map = new HashMap<>();
+        map.put("trade_water_id", trade_water_id);
+        map.put("user_id", String.valueOf(user.getId()));
+        map.put("wuye_id", user.getWuyeId());
+        TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+        return restUtil.exchangeOnUri(requestUrl, map, typeReference);
     }
 }
