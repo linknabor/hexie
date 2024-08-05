@@ -580,12 +580,10 @@ public class UserController extends BaseController{
 				AccessTokenOAuth userOauth = userService.getAlipayAuth(vo.getAppid(), vo.getCode());
 				userAccount = userService.saveAlipayMiniUserToken(userOauth);
 			} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(vo.getSourceType())) {
-				UserWeiXin weixinUser;
-				if (StringUtils.isEmpty(vo.getAppid())) {
-					weixinUser = userService.getOrSubscibeUserByCode(vo.getCode());
-				} else {
-					weixinUser = userService.getTpSubscibeUserByCode(vo.getCode(), vo.getAppid());
-				}
+				AccessTokenOAuth oAuth = userService.getAccessTokenOAuth(vo.getCode(), vo.getAppid());
+				UserWeiXin weixinUser = new UserWeiXin();
+				weixinUser.setOpenid(oAuth.getOpenid());
+				weixinUser.setUnionid(oAuth.getUnionid());
 				userAccount = userService.updateUserLoginInfo(weixinUser, vo.getAppid());
 			} else {
 				return new BaseResult<UserInfo>().failMsg("不支持的授权方式，请使用微信或支付宝");
