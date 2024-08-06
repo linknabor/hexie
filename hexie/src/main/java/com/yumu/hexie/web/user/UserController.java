@@ -577,7 +577,7 @@ public class UserController extends BaseController{
 				throw new BizValidateException(599, 0, "正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
 			}
 			if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(vo.getSourceType())) {
-				AccessTokenOAuth userOauth = userService.getAlipayAuth(vo.getAppid(), vo.getCode());
+				AccessTokenOAuth userOauth = userService.getAlipayAuth(vo.getCode());
 				userAccount = userService.saveAlipayMiniUserToken(userOauth);
 			} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(vo.getSourceType())) {
 				AccessTokenOAuth oAuth = userService.getAccessTokenOAuth(vo.getCode(), vo.getAppid());
