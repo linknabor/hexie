@@ -140,17 +140,21 @@ public class ParkServiceImpl implements ParkService {
 
     @Override
     public WechatPayInfo getPrePaying(User user, PayUserCarInfo payUserCarInfo) throws Exception {
-        payUserCarInfo.setUser_id(String.valueOf(user.getId()));
+        User userDB = userService.getById(user.getId());
+        if(userDB == null) {
+            return null;
+        }
+        payUserCarInfo.setUser_id(String.valueOf(userDB.getId()));
         if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(payUserCarInfo.getScanChannel())) {
-            payUserCarInfo.setAppid(user.getAliappid());
-            payUserCarInfo.setOpenid(user.getAliuserid());
+            payUserCarInfo.setAppid(userDB.getAliappid());
+            payUserCarInfo.setOpenid(userDB.getAliuserid());
         } else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(payUserCarInfo.getScanChannel())) {
-            payUserCarInfo.setAppid(user.getAppId());
-            payUserCarInfo.setOpenid(user.getOpenid());
+            payUserCarInfo.setAppid(userDB.getAppId());
+            payUserCarInfo.setOpenid(userDB.getOpenid());
         } else {
             throw new BizValidateException("不支持当前支付渠道");
         }
-        CommonResponse<WechatPayInfo> commonResponse = parkUtil.getPrePaying(user, payUserCarInfo);
+        CommonResponse<WechatPayInfo> commonResponse = parkUtil.getPrePaying(userDB, payUserCarInfo);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {

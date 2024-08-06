@@ -578,6 +578,9 @@ public class UserController extends BaseController{
 			}
 			if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(vo.getSourceType())) {
 				AccessTokenOAuth userOauth = userService.getAlipayAuth(vo.getCode());
+				if(StringUtils.isEmpty(userOauth.getAppid())) {
+					userOauth.setAppid(vo.getAppid());
+				}
 				userAccount = userService.saveAlipayMiniUserToken(userOauth);
 			} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(vo.getSourceType())) {
 				AccessTokenOAuth oAuth = userService.getAccessTokenOAuth(vo.getCode(), vo.getAppid());
@@ -588,7 +591,6 @@ public class UserController extends BaseController{
 			} else {
 				return new BaseResult<UserInfo>().failMsg("不支持的授权方式，请使用微信或支付宝");
 			}
-			session.setAttribute(Constants.USER, userAccount);
 		} else {
 			return new BaseResult<UserInfo>().failMsg("授权失败，请刷新重试！");
 		}
