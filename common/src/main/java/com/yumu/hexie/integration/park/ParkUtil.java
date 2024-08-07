@@ -44,6 +44,13 @@ public class ParkUtil {
 
     private static final String GET_INVOICE_QRCODE_URL = "park/getInvoiceQrcodeSDO.do";
 
+    private String getAppid(User user) {
+        String appid = user.getAppId();
+        if(StringUtils.isEmpty(user.getOpenid())) {
+            appid = ConstantAlipay.APPID;
+        }
+        return appid;
+    }
     /**
      * 查询用户车辆、停车场和规则信息
      * @param user
@@ -54,11 +61,10 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_PARK_MORE_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())? ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("park_id", parkId);
-        map.put("appid", appid);
+        map.put("appid", getAppid(user));
         TypeReference<CommonResponse<UserCarList>> typeReference = new TypeReference<CommonResponse<UserCarList>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
     }
@@ -91,10 +97,9 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_CAR_LIST_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
-        map.put("appid", appid);
+        map.put("appid", getAppid(user));
         map.put("carNo", carNo);
 
         TypeReference<CommonResponse<List<UserCarList.CarInfo>>> typeReference = new TypeReference<CommonResponse<List<UserCarList.CarInfo>>>(){};
@@ -111,10 +116,9 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += DEL_USER_CAR_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
-        map.put("appid", appid);
+        map.put("appid", getAppid(user));
         map.put("carNo", carNo);
 
         TypeReference<CommonResponse<Boolean>> typeReference = new TypeReference<CommonResponse<Boolean>>(){};
@@ -132,7 +136,7 @@ public class ParkUtil {
         requestUrl += QUERY_USER_PAY_CAR_LIST_URL;
         String appid = user.getAppId();
         String openid = user.getOpenid();
-        if(StringUtils.isEmpty(appid)) {
+        if(StringUtils.isEmpty(openid)) {
             appid = ConstantAlipay.APPID;
             openid = user.getAliuserid();
         }
@@ -155,9 +159,8 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += ADD_USER_CAR_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         saveCarInfo.setUser_id(String.valueOf(user.getId()));
-        saveCarInfo.setAppid(appid);
+        saveCarInfo.setAppid(getAppid(user));
 
         TypeReference<CommonResponse<Boolean>> typeReference = new TypeReference<CommonResponse<Boolean>>(){};
         return restUtil.exchangeOnUri(requestUrl, saveCarInfo, typeReference);
@@ -173,10 +176,9 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAYING_DETAIL_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
-        map.put("appid", appid);
+        map.put("appid", getAppid(user));
         map.put("parkId", parkId);
         map.put("carNo", carNo);
 

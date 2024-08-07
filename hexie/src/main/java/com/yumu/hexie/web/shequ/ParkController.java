@@ -9,10 +9,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.shequ.ParkService;
 import com.yumu.hexie.web.BaseController;
 import com.yumu.hexie.web.BaseResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -25,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/park")
 public class ParkController extends BaseController {
-    private static final Logger log = LoggerFactory.getLogger(ParkController.class);
     @Autowired
     private ParkService parkService;
 
@@ -88,8 +84,6 @@ public class ParkController extends BaseController {
      */
     @RequestMapping(value = "/getParkPayList", method = RequestMethod.GET)
     public BaseResult<List<PayCarInfo>> getParkPayList(@ModelAttribute(Constants.USER) User user) throws Exception {
-        log.info("getParkPayList user: " + user);
-        log.info("getParkPayList user: " + StringUtils.isEmpty(user.getAppId()));
         List<PayCarInfo> parkInfos = parkService.getParkPayList(user);
         return BaseResult.successResult(parkInfos);
     }
