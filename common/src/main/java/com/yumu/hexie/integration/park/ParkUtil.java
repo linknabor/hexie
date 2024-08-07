@@ -135,6 +135,7 @@ public class ParkUtil {
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", appid);
+        map.put("wuye_id", user.getWuyeId());
 
         TypeReference<CommonResponse<List<PayCarInfo>>> typeReference = new TypeReference<CommonResponse<List<PayCarInfo>>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
