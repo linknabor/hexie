@@ -130,12 +130,16 @@ public class ParkUtil {
     public CommonResponse<List<PayCarInfo>> getParkPayList(User user) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAY_CAR_LIST_URL;
-
-        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
+        String appid = user.getAppId();
+        String openid = user.getOpenid();
+        if(StringUtils.isEmpty(appid)) {
+            appid = ConstantAlipay.APPID;
+            openid = user.getAliuserid();
+        }
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", appid);
-        map.put("wuye_id", user.getWuyeId());
+        map.put("openid", openid);
 
         TypeReference<CommonResponse<List<PayCarInfo>>> typeReference = new TypeReference<CommonResponse<List<PayCarInfo>>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);
