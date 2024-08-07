@@ -7,10 +7,9 @@ import com.yumu.hexie.integration.common.RestUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.*;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
-import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.service.exception.BizValidateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -55,7 +54,7 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_PARK_MORE_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?user.getAliappid():user.getAppId();
+        String appid = StringUtils.isEmpty(user.getAppId())? ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("park_id", parkId);
@@ -92,7 +91,7 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_CAR_LIST_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?user.getAliappid():user.getAppId();
+        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", appid);
@@ -112,7 +111,7 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += DEL_USER_CAR_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?user.getAliappid():user.getAppId();
+        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", appid);
@@ -132,7 +131,7 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAY_CAR_LIST_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?user.getAliappid():user.getAppId();
+        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", appid);
@@ -151,7 +150,7 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += ADD_USER_CAR_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?user.getAliappid():user.getAppId();
+        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         saveCarInfo.setUser_id(String.valueOf(user.getId()));
         saveCarInfo.setAppid(appid);
 
@@ -169,7 +168,7 @@ public class ParkUtil {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAYING_DETAIL_URL;
 
-        String appid = StringUtils.isEmpty(user.getAppId())?user.getAliappid():user.getAppId();
+        String appid = StringUtils.isEmpty(user.getAppId())?ConstantAlipay.APPID:user.getAppId();
         Map<String, String> map = new HashMap<>();
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", appid);
