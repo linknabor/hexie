@@ -22,6 +22,7 @@ public class PayUserCarInfo {
     private String query_type; //查询方式，1.按账单查询 2.按月数查询
     private int pay_months = 0; //缴月份数
     private String pay_scenarios; //支付场景
+    private String device_order_id; //道闸订单号
 
     public String getScanChannel() {
         return scanChannel;
@@ -110,6 +111,14 @@ public class PayUserCarInfo {
         this.pay_scenarios = pay_scenarios;
     }
 
+    public String getDevice_order_id() {
+        return device_order_id;
+    }
+
+    public void setDevice_order_id(String device_order_id) {
+        this.device_order_id = device_order_id;
+    }
+
     @Override
     public String toString() {
         return "PayUserCarInfo{" +
@@ -123,6 +132,7 @@ public class PayUserCarInfo {
                 ", query_type='" + query_type + '\'' +
                 ", pay_months=" + pay_months +
                 ", pay_scenarios='" + pay_scenarios + '\'' +
+                ", device_order_id='" + device_order_id + '\'' +
                 '}';
     }
 }
