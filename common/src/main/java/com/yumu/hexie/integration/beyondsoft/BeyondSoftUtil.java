@@ -81,8 +81,8 @@ public class BeyondSoftUtil {
 		}
 		Map<String, String> headerMap = new HashMap<>();
 		headerMap.put("Authorization", "bearer " + accessToken);
-		TypeReference<BeyondSoftResp<Map<String, String>>> typeReference = new TypeReference<BeyondSoftResp<Map<String,String>>>() {};
-		BeyondSoftResp<Map<String, String>> byResp = restUtil.postOnBodyWithHeader(requestUrl, jsonMap, typeReference, headerMap);
+		TypeReference<BeyondSoftResp<Map<String, Object>>> typeReference = new TypeReference<BeyondSoftResp<Map<String,Object>>>() {};
+		BeyondSoftResp<Map<String, Object>> byResp = restUtil.postOnBodyWithHeader(requestUrl, jsonMap, typeReference, headerMap);
 		if (!"200".equals(byResp.getCode())) {
 			log.error(byResp.getMsg());
 			throw new BizValidateException(byResp.getMsg());

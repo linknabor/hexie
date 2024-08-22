@@ -686,43 +686,64 @@ public class ScheduleServiceImpl implements ScheduleService {
 		
 		SCHEDULE_LOG.info("start to update pageView count .");
 		String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
-		String lastDate = DateUtil.getNextDateByNum(currDate, -1);
-		
+		String initDate = "20240624";
+		String beginDate = DateUtil.getNextDateByNum(currDate, -1);
+		String endDate = DateUtil.getNextDateByNum(currDate, -1);
 		String[]appids = getBatchAppids();
 		for (String appid : appids) {
-			String cacheKey = ModelConstant.KEY_PAGE_VIEW_COUNT + appid + ":" + lastDate;
-			Map<Object, Object> pageMap = redisTemplate.opsForHash().entries(cacheKey);
-			Iterator<Map.Entry<Object, Object>> it = pageMap.entrySet().iterator();
 			
-			List<PageView> pageViewList = new ArrayList<>();
-			while(it.hasNext()) {
-				Map.Entry<Object, Object> entry = it.next();
-				String page = (String) entry.getKey();
-				String countStr = (String) entry.getValue();
-				Integer count = 0;
-				try {
-					count = Integer.valueOf(countStr);
-				} catch (Exception e) {
-					SCHEDULE_LOG.error(e.getMessage(), e);
-				}
-				PageView pageView = pageViewRepository.findByAppidAndCountDateAndPage(appid, lastDate, page);
-				if (pageView == null) {
-					pageView = new PageView();
-					pageView.setAppid(appid);
-					pageView.setCount(count);
-					pageView.setPage(page);
-					pageView.setCountDate(lastDate);
-					
-				} else {
-					count += pageView.getCount();
-					pageView.setCount(count);
-				}
-				pageViewList.add(pageView);
+			List<PageView> recordList = pageViewRepository.findByAppidAndCountDate(appid, initDate);
+			if (recordList == null || recordList.isEmpty()) {
+				beginDate = initDate;
 			}
-			pageViewRepository.saveAll(pageViewList);
-			redisTemplate.expire(cacheKey, 7, TimeUnit.DAYS);	//缓存数据7天后获取
+			while(DateUtil.getDateDiff(beginDate, endDate) >= 0) {
+				persistCache(beginDate, appid);
+				beginDate = DateUtil.getNextDateByNum(beginDate, 1);
+			}
 		}
 		SCHEDULE_LOG.info("finish updating pageView count .");
+	}
+	
+	/**
+	 * redis 缓存固化到标
+	 * @param lastDate	缓存日期
+	 * @param appid
+	 */
+	private void persistCache(String recordDate, String appid) {
+		String cacheKey = ModelConstant.KEY_PAGE_VIEW_COUNT + appid + ":" + recordDate;
+		Map<Object, Object> pageMap = redisTemplate.opsForHash().entries(cacheKey);
+		if (pageMap == null) {
+			return;
+		}
+		Iterator<Map.Entry<Object, Object>> it = pageMap.entrySet().iterator();
+		List<PageView> pageViewList = new ArrayList<>();
+		while(it.hasNext()) {
+			Map.Entry<Object, Object> entry = it.next();
+			String page = (String) entry.getKey();
+			String countStr = (String) entry.getValue();
+			Integer count = 0;
+			try {
+				count = Integer.valueOf(countStr);
+			} catch (Exception e) {
+				SCHEDULE_LOG.error(e.getMessage(), e);
+			}
+			PageView pageView = pageViewRepository.findByAppidAndCountDateAndPage(appid, recordDate, page);
+			if (pageView == null) {
+				pageView = new PageView();
+				pageView.setAppid(appid);
+				pageView.setCount(count);
+				pageView.setPage(page);
+				pageView.setCountDate(recordDate);
+				pageViewList.add(pageView);
+			} else {
+				if (count > pageView.getCount()) {
+					pageView.setCount(count);
+					pageViewList.add(pageView);
+				}
+			}
+		}
+		pageViewRepository.saveAll(pageViewList);
+		redisTemplate.expire(cacheKey, 30, TimeUnit.DAYS);	//缓存数据30天后获取
 	}
 	
 	@Scheduled(cron = "32 10 0 * * ?")
@@ -737,15 +758,21 @@ public class ScheduleServiceImpl implements ScheduleService {
 		String currDateStr = DateUtil.dtFormat(currDate, "yyyyMMdd");
 		String batchDateStr = DateUtil.getNextDateByNum(currDateStr, -1);
 		String[] appids = getBatchAppids();
-		String defaultBeginDate = "20240601";	//这个日期写死，因为之前统计点击数的功能没有上线。这个日期之后才有
+		String initDate = "20240624";	//这个日期写死，因为之前统计点击数的功能没有上线。这个日期之后才有
 		for (String appid : appids) {
-			Integer totalClick = calcTotalClick(appid, batchDateStr, defaultBeginDate);
+			
+			
+			StatisticData statisticData = statisticDataRepository.findByAppidAndRecordDate(appid, batchDateStr);	//如果今天已经跑过批量，那再跑的时候更新该条记录
+			if (statisticData == null) {
+				statisticData = new StatisticData();
+				statisticData.setAppid(appid);
+				statisticData.setRecordDate(batchDateStr);
+			}
+			
+			Integer totalClick = calcTotalClick(appid, batchDateStr, initDate);
 			Integer totalRegister = calcTotalRegister(appid);
 			Integer totalBind = calcTotalBind(appid);
 			
-			StatisticData statisticData = new StatisticData();
-			statisticData.setAppid(appid);
-			statisticData.setRecordDate(currDateStr);
 			statisticData.setClickCount(totalClick);
 			statisticData.setRegisterCount(totalRegister);
 			statisticData.setBindCount(totalBind);
@@ -762,13 +789,14 @@ public class ScheduleServiceImpl implements ScheduleService {
 	 * @param endDateStr
 	 * @param defaultBeginDate
 	 */
-	private Integer calcTotalClick(String appid, String batchDateStr, String defaultBeginDate) {
+	private Integer calcTotalClick(String appid, String batchDateStr, String initDate) {
 		String beginDateStr;
 		Integer totalCounts = 0;
 		Integer hisCounts = 0;
-		StatisticData lastDayData = statisticDataRepository.findByAppidAndRecordDate(appid, batchDateStr);
+		String lastDateStr = DateUtil.getNextDateByNum(batchDateStr, -1);
+		StatisticData lastDayData = statisticDataRepository.findByAppidAndRecordDate(appid, lastDateStr);
 		if (lastDayData == null) {
-			beginDateStr = defaultBeginDate;
+			beginDateStr = initDate;
 		} else {
 			beginDateStr = batchDateStr;
 			hisCounts = lastDayData.getClickCount();
@@ -853,12 +881,13 @@ public class ScheduleServiceImpl implements ScheduleService {
 		String batchDateStr = DateUtil.getNextDateByNum(currDateStr, -1);
 		String[] appids = getBatchAppids();
 		for (String appid : appids) {
-			StatisticData lastDayData = statisticDataRepository.findByAppidAndRecordDate(appid, batchDateStr);
-			if (lastDayData == null) {
+			StatisticData batchData = statisticDataRepository.findByAppidAndRecordDate(appid, batchDateStr);
+			if (batchData == null) {
 				SCHEDULE_LOG.warn("no data to sync, batch date : " + batchDateStr);
 			} else {
 				try {
-					beyondSoftUtil.syncMiniProgramData(lastDayData);
+					beyondSoftUtil.syncMiniProgramData(batchData);
+					SCHEDULE_LOG.info("westData2Beyondsoft syncMiniProgramData succeeded .");
 				} catch (Exception e) {
 					SCHEDULE_LOG.error(e.getMessage(), e);
 				}
