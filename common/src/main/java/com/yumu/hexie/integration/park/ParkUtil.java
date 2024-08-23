@@ -172,7 +172,7 @@ public class ParkUtil {
      * @return
      * @throws Exception
      */
-    public CommonResponse<PayingDetail> getPayingDetail(User user, String carNo, String parkId) throws Exception {
+    public CommonResponse<PayingDetail> getPayingDetail(User user, String carNo, String parkId, String channelId) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAYING_DETAIL_URL;
 
@@ -181,6 +181,7 @@ public class ParkUtil {
         map.put("appid", getAppid(user));
         map.put("parkId", parkId);
         map.put("carNo", carNo);
+        map.put("channelId", channelId);
 
         TypeReference<CommonResponse<PayingDetail>> typeReference = new TypeReference<CommonResponse<PayingDetail>>(){};
         return restUtil.exchangeOnUri(requestUrl, map, typeReference);

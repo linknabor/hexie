@@ -18,6 +18,7 @@ public class PayUserCarInfo {
     private String openid;
     private String car_no;
     private String park_id;
+    private String channel_id;
     private String record_id;
     private String query_type; //查询方式，1.按账单查询 2.按月数查询
     private int pay_months = 0; //缴月份数
@@ -79,6 +80,14 @@ public class PayUserCarInfo {
         this.park_id = park_id;
     }
 
+    public String getChannel_id() {
+        return channel_id;
+    }
+
+    public void setChannel_id(String channel_id) {
+        this.channel_id = channel_id;
+    }
+
     public String getRecord_id() {
         return record_id;
     }
@@ -128,6 +137,7 @@ public class PayUserCarInfo {
                 ", openid='" + openid + '\'' +
                 ", car_no='" + car_no + '\'' +
                 ", park_id='" + park_id + '\'' +
+                ", channel_id='" + channel_id + '\'' +
                 ", record_id='" + record_id + '\'' +
                 ", query_type='" + query_type + '\'' +
                 ", pay_months=" + pay_months +
