@@ -291,7 +291,7 @@ public class WuyeServiceImpl implements WuyeService {
 			throw new BizValidateException("网络异常，请刷新后重试。");
 		}
 		
-		redisTemplate.opsForValue().setIfAbsent(key, "1", 30, TimeUnit.DAYS);
+		redisTemplate.opsForValue().setIfAbsent(key, "1", 1, TimeUnit.DAYS);
 	}
 
 	@Override
