@@ -68,6 +68,7 @@ public class PrepayReqVO implements Serializable {
 	private String payScenarios; //场景
 	@JsonProperty("park_name")
 	private String parkName; //停车场名称
+	private String scanChannel; //1支付宝H5 3微信公众号
 
 	public String getBillId() {
 		return billId;
@@ -291,6 +292,14 @@ public class PrepayReqVO implements Serializable {
 		this.parkName = parkName;
 	}
 
+	public String getScanChannel() {
+		return scanChannel;
+	}
+
+	public void setScanChannel(String scanChannel) {
+		this.scanChannel = scanChannel;
+	}
+
 	@Override
 	public String toString() {
 		return "PrepayReqVO{" +
@@ -329,6 +338,7 @@ public class PrepayReqVO implements Serializable {
 				", tpPrepay=" + tpPrepay +
 				", payScenarios='" + payScenarios + '\'' +
 				", parkName='" + parkName + '\'' +
+				", scanChannel='" + scanChannel + '\'' +
 				'}';
 	}
 }

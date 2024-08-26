@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
+import com.yumu.hexie.model.ModelConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -381,17 +383,23 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getPrePayInfo4Qrcode", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
+	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@ModelAttribute(Constants.USER) User user, @RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
 		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
-		
-		User user = new User();
-		dto.setUser(user);
-		user.setAppId(prepayReqVo.getAppid());
-		user.setOpenid(prepayReqVo.getOpenid());
-		
+		User newUser = new User();
+		if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(prepayReqVo.getScanChannel())) {
+			newUser.setAppId(ConstantAlipay.APPID);
+			newUser.setOpenid(user.getAliuserid());
+		} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(prepayReqVo.getScanChannel())) {
+			newUser.setAppId(user.getAppId());
+			newUser.setOpenid(user.getOpenid());
+		} else {
+			newUser.setAppId(prepayReqVo.getAppid());
+			newUser.setOpenid(prepayReqVo.getOpenid());
+		}
+		dto.setUser(newUser);
 		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
 		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);

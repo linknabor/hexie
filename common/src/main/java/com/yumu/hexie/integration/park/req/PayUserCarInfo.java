@@ -12,15 +12,27 @@ import java.net.URLEncoder;
  * @create 2021-08-30 16:30
  */
 public class PayUserCarInfo {
+    private String scanChannel;
     private String appid;
     private String user_id;
     private String openid;
     private String car_no;
     private String park_id;
+    private String channel_id;
     private String record_id;
     private String query_type; //查询方式，1.按账单查询 2.按月数查询
     private int pay_months = 0; //缴月份数
     private String pay_scenarios; //支付场景
+    private String device_order_id; //道闸订单号
+
+    public String getScanChannel() {
+        return scanChannel;
+    }
+
+    public void setScanChannel(String scanChannel) {
+        this.scanChannel = scanChannel;
+    }
+
     public String getAppid() {
         return appid;
     }
@@ -68,6 +80,14 @@ public class PayUserCarInfo {
         this.park_id = park_id;
     }
 
+    public String getChannel_id() {
+        return channel_id;
+    }
+
+    public void setChannel_id(String channel_id) {
+        this.channel_id = channel_id;
+    }
+
     public String getRecord_id() {
         return record_id;
     }
@@ -100,18 +120,29 @@ public class PayUserCarInfo {
         this.pay_scenarios = pay_scenarios;
     }
 
+    public String getDevice_order_id() {
+        return device_order_id;
+    }
+
+    public void setDevice_order_id(String device_order_id) {
+        this.device_order_id = device_order_id;
+    }
+
     @Override
     public String toString() {
         return "PayUserCarInfo{" +
-                "appid='" + appid + '\'' +
+                "scanChannel='" + scanChannel + '\'' +
+                ", appid='" + appid + '\'' +
                 ", user_id='" + user_id + '\'' +
                 ", openid='" + openid + '\'' +
                 ", car_no='" + car_no + '\'' +
                 ", park_id='" + park_id + '\'' +
+                ", channel_id='" + channel_id + '\'' +
                 ", record_id='" + record_id + '\'' +
                 ", query_type='" + query_type + '\'' +
                 ", pay_months=" + pay_months +
                 ", pay_scenarios='" + pay_scenarios + '\'' +
+                ", device_order_id='" + device_order_id + '\'' +
                 '}';
     }
 }
