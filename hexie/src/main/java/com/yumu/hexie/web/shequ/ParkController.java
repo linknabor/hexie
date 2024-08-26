@@ -22,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/park")
 public class ParkController extends BaseController {
-
     @Autowired
     private ParkService parkService;
 
@@ -110,8 +109,9 @@ public class ParkController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(value = "/getPayingDetail", method = RequestMethod.GET)
-    public BaseResult<PayingDetail> getPayingDetail(@ModelAttribute(Constants.USER) User user, @RequestParam String carNo, @RequestParam String parkId) throws Exception {
-        PayingDetail payingDetail = parkService.getPayingDetail(user, carNo, parkId);
+    public BaseResult<PayingDetail> getPayingDetail(@ModelAttribute(Constants.USER) User user, @RequestParam String carNo,
+                                                    @RequestParam String parkId, @RequestParam String channelId) throws Exception {
+        PayingDetail payingDetail = parkService.getPayingDetail(user, carNo, parkId, channelId);
         return BaseResult.successResult(payingDetail);
     }
 

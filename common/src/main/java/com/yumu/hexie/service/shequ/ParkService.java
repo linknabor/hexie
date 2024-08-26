@@ -22,7 +22,7 @@ public interface ParkService {
 
     Boolean addUserCar(User user, SaveCarInfo saveCarInfo) throws Exception;
 
-    PayingDetail getPayingDetail(User user, String carNo, String parkId) throws Exception;
+    PayingDetail getPayingDetail(User user, String carNo, String parkId, String channelId) throws Exception;
 
     WechatPayInfo getPrePaying(User user, PayUserCarInfo payUserCarInfo) throws Exception;
 
