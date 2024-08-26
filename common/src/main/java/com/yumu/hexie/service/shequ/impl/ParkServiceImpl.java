@@ -5,6 +5,7 @@ import com.yumu.hexie.integration.park.ParkUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.*;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
@@ -147,6 +148,9 @@ public class ParkServiceImpl implements ParkService {
         payUserCarInfo.setUser_id(String.valueOf(userDB.getId()));
         if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(payUserCarInfo.getScanChannel())) {
             payUserCarInfo.setAppid(userDB.getAliappid());
+            if(StringUtils.isEmpty(userDB.getOpenid())) {
+                payUserCarInfo.setAppid(ConstantAlipay.APPID);
+            }
             payUserCarInfo.setOpenid(userDB.getAliuserid());
         } else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(payUserCarInfo.getScanChannel())) {
             payUserCarInfo.setAppid(userDB.getAppId());
