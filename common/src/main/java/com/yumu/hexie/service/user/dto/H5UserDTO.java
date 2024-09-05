@@ -21,6 +21,9 @@ public class H5UserDTO implements Serializable {
 	private String auId;	//房地局系统用户id
 	@JsonProperty("client_type")
 	private String clientType;	//终端类型,1支付宝用户，2微信用户
+	@JsonProperty("hou_no")
+	private String houNo;	//户号
+	private String from;	//来自那个平台,_shwy或者_lifepay
 	
 	public String getAppid() {
 		return appid;
@@ -58,10 +61,22 @@ public class H5UserDTO implements Serializable {
 	public void setClientType(String clientType) {
 		this.clientType = clientType;
 	}
+	public String getHouNo() {
+		return houNo;
+	}
+	public void setHouNo(String houNo) {
+		this.houNo = houNo;
+	}
+	public String getFrom() {
+		return from;
+	}
+	public void setFrom(String from) {
+		this.from = from;
+	}
 	@Override
 	public String toString() {
 		return "H5UserDTO [appid=" + appid + ", userId=" + userId + ", cellId=" + cellId + ", mobile=" + mobile
-				+ ", auId=" + auId + ", clientType=" + clientType + "]";
+				+ ", auId=" + auId + ", clientType=" + clientType + ", houNo=" + houNo + ", from=" + from + "]";
 	}
 	
 }

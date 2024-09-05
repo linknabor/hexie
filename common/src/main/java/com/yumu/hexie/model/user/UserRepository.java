@@ -106,7 +106,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	public User findByAppIdAndUniqueCode(String appid, String uniqueCode);
 	
+	@Deprecated
 	public List<User> findByAliuserid(String aliuserid);
+	
+	public List<User> findByAliuseridAndAliappid(String aliuserid, String aliappid);
 	
 	public List<User> findByOriSysAndOriUserId(String oriSys, Long oriUserId);
 	

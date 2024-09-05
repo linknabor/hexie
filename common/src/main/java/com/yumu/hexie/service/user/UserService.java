@@ -228,11 +228,11 @@ public interface UserService {
 	MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
 	
 	/**
-	 * 根据支付宝用户id获取用户
+	 * 根据支付宝用户id和支付宝appid获取用户
 	 * @param aliUserId
 	 * @return
 	 */
-	User getUserByAliUserId(String aliUserId);
+	User getUserByAliUserIdAndAliAppid(String aliUserId, String appid);
 	
 	/**
 	 * 保存支付h5用户信息
@@ -257,5 +257,6 @@ public interface UserService {
 	 * @return
 	 */
 	List<NewLionUser> getNewLionUserByMobile(String mobile);
+	
 
 }

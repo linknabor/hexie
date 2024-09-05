@@ -201,6 +201,13 @@ public interface WuyeService {
 	void setDefaultAddress(User user, HexieUser u);
 	
 	/**
+	 * 无openid的用户使用此函数
+	 * @param user
+	 * @param u
+	 */
+	void setDefaultAddressWithoutOpenid(User user, HexieUser u);
+	
+	/**
 	 * 标准版账单记录
 	 * @param user
 	 * @param startDate
@@ -428,6 +435,7 @@ public interface WuyeService {
 	 * @throws Exception
 	 */
 	byte[] getInvoicePdf(String remoteAddr) throws Exception;
+
 
 
 }

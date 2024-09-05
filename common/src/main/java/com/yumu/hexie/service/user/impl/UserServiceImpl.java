@@ -311,7 +311,8 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null")
+	//condition = "#user.openid != null && #user.openid != '0'"
 	public String bindWuYeIdSync(User user) {
 		 //绑定物业信息
 		String wuyeId = "";
@@ -963,57 +964,56 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByMiniopenid(miniopenid);
 	}
 	
+	/**
+	 * 新增阿里用户，并更新缓存
+	 */
 	@Override
     @Transactional
+    @CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#appid+'_'+#userid")
     public User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth) {
     	logger.info("accessTokenOAuth : " + accessTokenOAuth);
         
     	String userId = accessTokenOAuth.getOpenid();
-    	
-        User userAccount = null;
-        if (!StringUtils.isEmpty(userId)) {
-        	List<User> userList = userRepository.findByAliuserid(userId);
-        	if (userList!=null && !userList.isEmpty()) {
-        		if (userList.size() > 1) {
-        			for (User dbUser : userList) {
-    					if (!StringUtils.isEmpty(dbUser.getTel())) {
-    						userAccount = dbUser;
-    						break;
-    					}
-    				}
-				} else {
-					userAccount = userList.get(0);
-				}
-				
-			}
-		}
-        if (userAccount == null) {
-            userAccount = new User();
-            userAccount.setAliuserid(userId);
-            userAccount.setAppId(accessTokenOAuth.getAppid());
-            userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
-        } 
+    	User userAccount = new User();
+    	userAccount.setAliuserid(userId);
+        userAccount.setAliappid(accessTokenOAuth.getAppid());
+        userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
+        userRepository.save(userAccount);
         String key = ModelConstant.KEY_ALI_USER_AUTH_TOKEN + userId;
         String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(accessTokenOAuth.getAccessToken())) {
             redisTemplate.opsForValue().set(key, accessTokenOAuth.getAccessToken(), 359, TimeUnit.HOURS);    //官方15天失效，也就是360小时
         }
-        userRepository.save(userAccount);
         return userAccount;
     }
 	
+//	@Override
+//	public User getUserByAliUserId(String aliUserId) {
+//		
+//		if (StringUtils.isEmpty(aliUserId)) {
+//			throw new BizValidateException("user_id不能为空。");
+//		}
+//		List<User> userList = userRepository.findByAliuserid(aliUserId);
+//		return userList.stream().findFirst().orElse(null);
+//	}
+	
+	/**
+	 * 根据支付用应用appid和支付宝用户user_id查询用户
+	 * @param aliUserId 支付宝用户id
+	 * @param appid 支付宝应用id
+	 */
 	@Override
-	public User getUserByAliUserId(String aliUserId) {
+	@Cacheable(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#appid+'_'+#aliUserId", unless = "#result == null")
+	public User getUserByAliUserIdAndAliAppid(String aliUserId, String appid) {
 		
 		if (StringUtils.isEmpty(aliUserId)) {
 			throw new BizValidateException("user_id不能为空。");
 		}
-		List<User> userList = userRepository.findByAliuserid(aliUserId);
-		User aliUser = null;
-		if (userList!=null && !userList.isEmpty()) {
-			aliUser = userList.get(0);
+		if (StringUtils.isEmpty(appid)) {
+			throw new BizValidateException("appid不能为空。");
 		}
-		return aliUser;
+		List<User> userList = userRepository.findByAliuseridAndAliappid(aliUserId, appid);
+		return userList.stream().findFirst().orElse(null);
 	}
 	
 	@Override
@@ -1029,8 +1029,12 @@ public class UserServiceImpl implements UserService {
 			throw new BizValidateException("appid不能为空。");
 		}
 		
-		if (StringUtils.isEmpty(h5UserDTO.getCellId())) {
+		if (!ModelConstant.KEY_USER_SYS_LIFEPAY.equals(h5UserDTO.getFrom()) && StringUtils.isEmpty(h5UserDTO.getCellId())) {
 			throw new BizValidateException("cell_id不能为空。");
+		}
+		
+		if (ModelConstant.KEY_USER_SYS_LIFEPAY.equals(h5UserDTO.getFrom()) && StringUtils.isEmpty(h5UserDTO.getHouNo())) {
+			throw new BizValidateException("户号不能为空。");
 		}
 		
 		if (user == null) {
@@ -1047,15 +1051,18 @@ public class UserServiceImpl implements UserService {
 		}
 		user.setTel(h5UserDTO.getMobile());
 		
-		if (!"_shwy".equals(user.getOriSys())) {
-			Long auId = null;
-			if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
-				auId = Long.valueOf(h5UserDTO.getAuId());
+		if (ModelConstant.KEY_USER_SYS_SHWY.equals(h5UserDTO.getFrom())) {
+			if (!ModelConstant.KEY_USER_SYS_SHWY.equals(user.getOriSys())) {
+				Long auId = null;
+				if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
+					auId = Long.valueOf(h5UserDTO.getAuId());
+				}
+				user.setOriUserId(auId);
+				user.setOriSys(ModelConstant.KEY_USER_SYS_SHWY);
 			}
-			user.setOriUserId(auId);
-			user.setOriSys("_shwy");
+		} else if (ModelConstant.KEY_USER_SYS_LIFEPAY.equals(h5UserDTO.getFrom())) {
+			user.setOriSys(ModelConstant.KEY_USER_SYS_LIFEPAY);
 		}
-		
 		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(h5UserDTO);
 		if (!baseResult.isSuccess()) {
 			if ("99".equals(baseResult.getResult())) {
