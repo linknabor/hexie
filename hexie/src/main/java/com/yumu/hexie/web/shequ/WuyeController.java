@@ -243,10 +243,13 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String area) throws Exception {
 		
 		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
-		log.info("HexieUser : " + u);
+		log.info("HexieUser:{}, user: {}", u, user);
 		if (u != null) {
-			log.info("user : " + user);
-			wuyeService.setDefaultAddress(user, u);
+			if (!StringUtils.isEmpty(user.getOpenid())) {
+				wuyeService.setDefaultAddress(user, u);
+			} else {
+				wuyeService.setDefaultAddressWithoutOpenid(user, u);
+			}
 			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			}
