@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.service.wdwechat.WdService;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone.PhoneInfo;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
@@ -944,7 +946,11 @@ public class UserController extends BaseController{
     public BaseResult<UserInfo> getAlipayMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> dataMap) throws Exception {
         long beginTime = System.currentTimeMillis();
         String encryptedData = dataMap.get("encryptedData");
-        MiniUserPhone miniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        AliMiniUserPhone aliMiniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        MiniUserPhone miniUserPhone = new MiniUserPhone();
+        MiniUserPhone.PhoneInfo phoneInfo = new PhoneInfo();
+        phoneInfo.setPhoneNumber(aliMiniUserPhone.getMobile());
+        miniUserPhone.setPhone_info(phoneInfo);
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
         if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
         	userService.recacheMiniUser(user);

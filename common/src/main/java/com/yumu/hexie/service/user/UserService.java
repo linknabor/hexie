@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
@@ -225,7 +226,7 @@ public interface UserService {
 	 * @param code
 	 * @return
 	 */
-	MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
+	AliMiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
 	
 	/**
 	 * 根据支付宝用户id和支付宝appid获取用户

@@ -26,8 +26,10 @@ import org.springframework.util.StringUtils;
 
 import com.alipay.api.internal.util.AlipayEncrypt;
 import com.yumu.hexie.common.util.AppUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.alipay.AuthService;
+import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
@@ -729,16 +731,18 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	public MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData) {
+	public AliMiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData) {
 		
 		Assert.hasText(encryptedData, "encryptedData不能为空。");
-		MiniUserPhone miniUserPhone = null;
+		AliMiniUserPhone aliMiniUserPhone = null;
 		try {
-			
 			String decrptyContent = AlipayEncrypt.decryptContent(encryptedData, "AES", "Csf90IejcIrzDVi3f2nSXw==", "utf8");
 			logger.info("decrptyContent: " + decrptyContent);
-			return miniUserPhone;
-			
+			aliMiniUserPhone =  JacksonJsonUtil.getMapperInstance(false).readValue(decrptyContent, AliMiniUserPhone.class);
+			if (!StringUtils.isEmpty(aliMiniUserPhone.getSubCode())) {
+				throw new BizValidateException(aliMiniUserPhone.getSubMsg());
+			}
+			return aliMiniUserPhone;
 		} catch (Exception e) {
 			throw new BizValidateException(e.getMessage(), e);
 		}
