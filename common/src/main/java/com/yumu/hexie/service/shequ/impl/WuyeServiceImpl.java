@@ -352,23 +352,8 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null")
 	public void setDefaultAddress(User user, HexieUser u) {
-		setDefaultAdressAllMatch(user, u);
-	}
-	
-	/**
-	 * 适用于非公众号的H5用户，或者阿里小程序用户
-	 * @param user 公众号用户user
-	 * @param u 用户绑定房屋的信息
-	 */
-	@Override
-	@Transactional
-	public void setDefaultAddressWithoutOpenid(User user, HexieUser u) {
-		setDefaultAdressAllMatch(user, u);
-	}
-	
-	public void setDefaultAdressAllMatch(User user, HexieUser u) {
 		
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
@@ -396,7 +381,7 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setOfficeTel(u.getOffice_tel());
 		userRepository.save(user);
 	}
-
+	
 	@Override
 	public BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String regionName) throws Exception {
 		
@@ -861,6 +846,5 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		return hexieHouses;
 	}
-	
 
 }
