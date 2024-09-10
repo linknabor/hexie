@@ -245,11 +245,7 @@ public class WuyeController extends BaseController {
 		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
 		log.info("HexieUser:{}, user: {}", u, user);
 		if (u != null) {
-			if (!StringUtils.isEmpty(user.getOpenid())) {
-				wuyeService.setDefaultAddress(user, u);
-			} else {
-				wuyeService.setDefaultAddressWithoutOpenid(user, u);
-			}
+			wuyeService.setDefaultAddress(user, u);
 			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
 			}
