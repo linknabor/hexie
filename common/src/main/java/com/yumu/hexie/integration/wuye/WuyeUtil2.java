@@ -117,6 +117,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_TRADE_INVOICE_URL = "queryInvoiceByTradeSDO.do";	//获取用户申请过的发票
 	private static final String NEWLION_USER_BIND_URL = "bindHouse4NewLionUserSDO.do";	//新郎恩存量用户绑定
 	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do"; // 无账单添加房子
+	private static final String QUERY_HOUSE_BY_ID_URL = "getHouseByIdSDO.do";	//根据房屋ID查询业主已经绑定的房屋信息
 
 	/**
 	 * 标准版查询账单
@@ -973,6 +974,32 @@ public class WuyeUtil2 {
 		return baseResult;
 	}
 
-
+	/**
+	 * 根据房屋ID查找房屋
+	 * @param user
+	 * @param startDate
+	 * @param endDate
+	 * @param houseId
+	 * @param regionName
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<HexieUser> queryHouseById(User user, String houseId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_HOUSE_BY_ID_URL;
+		
+		Map<String, String> requestMap = new HashMap<>();
+		requestMap.put("user_id", user.getWuyeId());
+		requestMap.put("house_id", houseId);
+		
+		TypeReference<CommonResponse<HexieUser>> typeReference = new TypeReference<CommonResponse<HexieUser>>(){};
+		CommonResponse<HexieUser> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
+		BaseResult<HexieUser> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
 	
 }

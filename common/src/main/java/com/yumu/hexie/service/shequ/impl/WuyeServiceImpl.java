@@ -846,5 +846,10 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		return hexieHouses;
 	}
+	
+	@Override
+	public HexieUser queryHouseById(User user, String houseId) throws Exception {
+		return wuyeUtil2.queryHouseById(user, houseId).getData();
+	}
 
 }
