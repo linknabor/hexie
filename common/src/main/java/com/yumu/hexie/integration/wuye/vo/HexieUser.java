@@ -41,7 +41,7 @@ public class HexieUser implements Serializable {
 	private Integer total_bind = 0;
 	
 	private String ver_no;	//户号
-	private String owenr_name;	//绑定房屋的业主名称
+	private String owner_name;	//绑定房屋的业主名称
 	private String community_id;	//支付宝小区编号
 	private String out_bill_url;	//支付宝小程序账单缴费地址
 	
@@ -189,11 +189,11 @@ public class HexieUser implements Serializable {
 	public void setVer_no(String ver_no) {
 		this.ver_no = ver_no;
 	}
-	public String getOwenr_name() {
-		return owenr_name;
+	public String getOwner_name() {
+		return owner_name;
 	}
-	public void setOwenr_name(String owenr_name) {
-		this.owenr_name = owenr_name;
+	public void setOwner_name(String owner_name) {
+		this.owner_name = owner_name;
 	}
 	public String getCommunity_id() {
 		return community_id;
@@ -217,7 +217,7 @@ public class HexieUser implements Serializable {
 				+ ", province_name=" + province_name + ", city_id=" + city_id + ", city_name=" + city_name
 				+ ", region_id=" + region_id + ", region_name=" + region_name + ", sect_addr=" + sect_addr
 				+ ", sect_id=" + sect_id + ", csp_id=" + csp_id + ", center_id=" + center_id + ", total_bind="
-				+ total_bind + ", ver_no=" + ver_no + ", owenr_name=" + owenr_name + ", community_id=" + community_id
+				+ total_bind + ", ver_no=" + ver_no + ", owner_name=" + owner_name + ", community_id=" + community_id
 				+ ", out_bill_url=" + out_bill_url + "]";
 	}
 	
