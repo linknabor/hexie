@@ -328,19 +328,19 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		BaseResult<HexieUser> r= wuyeUtil2.bindHouseNoStmt(user, houseId, area);
 		if("04".equals(r.getResult())){
-			throw new BizValidateException("当前用户已经认领该房屋!");
+			throw new BizValidateException(4, "当前用户已经认领该房屋!");
 		}
 		if ("05".equals(r.getResult())) {
-			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
+			throw new BizValidateException(5, "用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
 		}
 		if("01".equals(r.getResult())) {
-			throw new BizValidateException("账户不存在！");
+			throw new BizValidateException(1, "账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+			throw new BizValidateException(6, "面积验证错误，允许误差在±1平方米以内。");
 		}
 		if("02".equals(r.getResult())) {
-			throw new BizValidateException("房屋不存在！");
+			throw new BizValidateException(2, "房屋不存在！");
 		}
 		return r.getData();
 	}
@@ -412,19 +412,19 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		BaseResult<HexieUser> r = WuyeUtil.bindHouse(user, stmtId, houseId);
 		if("04".equals(r.getResult())){
-			throw new BizValidateException("当前用户已经认领该房屋!");
+			throw new BizValidateException(4, "当前用户已经认领该房屋!");
 		}
 		if ("05".equals(r.getResult())) {
-			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
+			throw new BizValidateException(5, "用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
 		}
 		if("01".equals(r.getResult())) {
-			throw new BizValidateException("账户不存在！");
+			throw new BizValidateException(1, "账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+			throw new BizValidateException(6, "面积验证错误，允许误差在±1平方米以内。");
 		}
 		if("02".equals(r.getResult())) {
-			throw new BizValidateException("房屋不存在！");
+			throw new BizValidateException(2, "房屋不存在！");
 		}
 		return r.getData();
 	}

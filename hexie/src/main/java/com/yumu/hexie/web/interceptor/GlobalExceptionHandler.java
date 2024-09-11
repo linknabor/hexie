@@ -47,7 +47,7 @@ public class GlobalExceptionHandler<T> {
         LOGGER.error("请求的链接：" + req.getRequestURI());
         LOGGER.error(e.getMessage(), e);
     	if(e instanceof BizValidateException) {
-    		return BaseResult.fail(e.getMessage());
+    		return BaseResult.fail(((BizValidateException) e).getErrCode(), e.getMessage());
     	}
         if (e instanceof HttpRequestMethodNotSupportedException)
             return BaseResult.fail(localizeErrorMessage("http.method.notsupport"));
