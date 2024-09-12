@@ -58,6 +58,7 @@ import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
+import com.yumu.hexie.integration.wuye.vo.SectInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
@@ -1202,5 +1203,20 @@ public class WuyeController extends BaseController {
 			@PathVariable String houseId) throws Exception {
 		HexieUser listVo = wuyeService.queryHouseById(user, houseId);
 		return BaseResult.successResult(listVo);
+	}
+	
+	/**
+	 * 根据ID查询小区
+	 *@param user
+	 *@param sectId 小区ID
+	 */
+	/***************** [BEGIN]房产 ********************/
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/mySect/{sectId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<SectInfo> getSectById(@ModelAttribute(Constants.USER) User user, 
+			@PathVariable String sectId) throws Exception {
+		SectInfo sectInfo = wuyeService.querySectById(user, sectId);
+		return BaseResult.successResult(sectInfo);
 	}
 }
