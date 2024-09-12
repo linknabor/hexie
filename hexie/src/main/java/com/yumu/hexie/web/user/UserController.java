@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
 import com.yumu.hexie.service.user.dto.H5AuthorizeVo;
 import com.yumu.hexie.service.wdwechat.WdService;
@@ -32,6 +33,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone.PhoneInfo;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
@@ -913,8 +915,10 @@ public class UserController extends BaseController{
                 }
                 AccessTokenOAuth userOauth = userService.getAlipayAuth(appid, code);
                 log.info("userOauth : " + userOauth);
+                user = userService.getUserByAliUserIdAndAliAppid(userOauth.getOpenid(), userOauth.getAppid());
+                if (user == null) {
                 user = userService.saveAlipayMiniUserToken(userOauth);
-                //TODO 看以后访问量要不要缓存用户
+            }
             }
             session.setAttribute(Constants.USER, user);
         }
@@ -948,7 +952,11 @@ public class UserController extends BaseController{
     public BaseResult<UserInfo> getAlipayMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> dataMap) throws Exception {
         long beginTime = System.currentTimeMillis();
         String encryptedData = dataMap.get("encryptedData");
-        MiniUserPhone miniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        AliMiniUserPhone aliMiniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        MiniUserPhone miniUserPhone = new MiniUserPhone();
+        MiniUserPhone.PhoneInfo phoneInfo = new PhoneInfo();
+        phoneInfo.setPhoneNumber(aliMiniUserPhone.getMobile());
+        miniUserPhone.setPhone_info(phoneInfo);
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
         if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
         	userService.recacheMiniUser(user);
@@ -973,6 +981,13 @@ public class UserController extends BaseController{
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
+    /**
+     * 上海物业小程序缴费用户登陆
+     * @param session
+     * @param h5UserDTO
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<UserInfo> h5Login(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
@@ -994,6 +1009,7 @@ public class UserController extends BaseController{
 				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_MINNI);
 			}
 		}
+    	h5UserDTO.setFrom(ModelConstant.KEY_USER_SYS_SHWY);
     	User userAccount = null;
 //    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
 //    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
@@ -1008,7 +1024,8 @@ public class UserController extends BaseController{
 //		}
     	if (userAccount == null) {
     		if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
-				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
+//				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
+				userAccount = userService.getUserByAliUserIdAndAliAppid(h5UserDTO.getUserId(), h5UserDTO.getAppid());
 			} else if (ModelConstant.H5_USER_TYPE_MINNI.equals(h5UserDTO.getClientType())) {
 				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
 //				userAccount = userService.multiFindByOpenId(h5UserDTO.getUserId());
@@ -1025,6 +1042,40 @@ public class UserController extends BaseController{
 
     }
     
+    /**
+     * 支付宝生活缴费用户登陆
+     * @param session
+     * @param h5UserDTO
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/lifepay/login", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<UserInfo> lifepayLogin(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
         
+    	if (StringUtils.isEmpty(h5UserDTO.getUserId()) ) {
+			throw new BizValidateException("请传入支付宝用户user_id");
+		}
+        
+    	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
+			throw new BizValidateException("请传入支付宝appid");
+}
+		
+		long beginTime = System.currentTimeMillis();
+    	log.info("lifepayLogin : " + h5UserDTO);
+		h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
+		h5UserDTO.setFrom(ModelConstant.KEY_USER_SYS_LIFEPAY);
+		
+    	User userAccount = userService.getUserByAliUserIdAndAliAppid(h5UserDTO.getUserId(), h5UserDTO.getAppid());
+    	userAccount = userService.saveH5User(userAccount, h5UserDTO);
+    	
+		long endTime = System.currentTimeMillis();
+	    UserInfo userInfo = new UserInfo(userAccount);
+	    log.info("lifepay user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
+	    
+	    session.setAttribute(Constants.USER, userAccount);
+	    return new BaseResult<UserInfo>().success(userInfo);
+
+    }
         
 }

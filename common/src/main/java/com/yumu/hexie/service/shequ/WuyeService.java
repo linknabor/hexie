@@ -429,5 +429,13 @@ public interface WuyeService {
 	 */
 	byte[] getInvoicePdf(String remoteAddr) throws Exception;
 
+	/**
+	 * 根据房屋ID获取业主已经绑定的房屋
+	 * @param user
+	 * @param cellId
+	 * @return
+	 * @throws Exception 
+	 */
+	HexieUser queryHouseById(User user, String houseId) throws Exception;
 
 }

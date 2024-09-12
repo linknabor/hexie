@@ -243,9 +243,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String area) throws Exception {
 		
 		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
-		log.info("HexieUser : " + u);
+		log.info("HexieUser:{}, user: {}", u, user);
 		if (u != null) {
-			log.info("user : " + user);
 			wuyeService.setDefaultAddress(user, u);
 			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
@@ -1196,5 +1195,20 @@ public class WuyeController extends BaseController {
 			hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
 		}
 		return BaseResult.successResult(hexieHouses);
-	} 
+	}
+	
+	/**
+	 * 根据用户身份查询其所绑定的房屋
+	 *@param user
+	 *@param houseId 已经绑定了的房屋ID
+	 */
+	/***************** [BEGIN]房产 ********************/
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/myHouse/{houseId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<HexieUser> getHouseById(@ModelAttribute(Constants.USER) User user, 
+			@PathVariable String houseId) throws Exception {
+		HexieUser listVo = wuyeService.queryHouseById(user, houseId);
+		return BaseResult.successResult(listVo);
+	}
 }
