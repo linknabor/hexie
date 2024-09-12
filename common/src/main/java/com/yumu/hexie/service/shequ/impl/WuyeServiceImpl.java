@@ -48,6 +48,7 @@ import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
+import com.yumu.hexie.integration.wuye.vo.SectInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -852,4 +853,10 @@ public class WuyeServiceImpl implements WuyeService {
 		return wuyeUtil2.queryHouseById(user, houseId).getData();
 	}
 
+	@Override
+	public SectInfo querySectById(User user, String sectId) throws Exception {
+		return wuyeUtil2.querySectById(user, sectId).getData();
+	}
+
+	
 }
