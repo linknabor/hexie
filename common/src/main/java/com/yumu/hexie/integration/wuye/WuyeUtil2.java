@@ -637,6 +637,8 @@ public class WuyeUtil2 {
 			String clientType = "0";
 			if (queryAppid.equals(user.getMiniAppId())) {
 				clientType = "1";
+			} else if (queryAppid.equals(user.getAliappid())) {
+				clientType = "4";
 			}
 			querySectRequet.setClientType(clientType);
 		}
