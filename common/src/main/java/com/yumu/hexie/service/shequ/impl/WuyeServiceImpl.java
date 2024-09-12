@@ -319,7 +319,7 @@ public class WuyeServiceImpl implements WuyeService {
 	//根据名称模糊查询合协社区小区列表
 	@Override
 	public CellListVO getVagueSectByName(User user, String sectName, String regionName, String queryAppid) throws Exception {
-		
+		log.info("getVagueSectByName, session user : {}", user);
 		return wuyeUtil2.getVagueSectByName(user, sectName, regionName, queryAppid).getData();
 	}
 
