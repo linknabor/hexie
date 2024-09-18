@@ -1064,7 +1064,10 @@ public class UserController extends BaseController{
     	log.info("lifepayLogin user in session :" + sessionUser);
     	if (sessionUser != null) {
 			if (!sessionUser.getAliappid().equals(h5UserDTO.getAppid())) {
+				session.setMaxInactiveInterval(1);
 				session.removeAttribute(Constants.USER);
+				session.invalidate();
+				throw new BizValidateException(65, "clear user cache!");
 			}
 		}
 		long beginTime = System.currentTimeMillis();
