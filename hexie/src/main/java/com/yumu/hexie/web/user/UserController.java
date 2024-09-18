@@ -1060,6 +1060,8 @@ public class UserController extends BaseController{
     	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
 			throw new BizValidateException("请传入支付宝appid");
 		}
+    	User sessionUser = (User) session.getAttribute(Constants.USER);
+    	log.info("user in session :" + sessionUser);
 		
 		long beginTime = System.currentTimeMillis();
     	log.info("lifepayLogin : " + h5UserDTO);
