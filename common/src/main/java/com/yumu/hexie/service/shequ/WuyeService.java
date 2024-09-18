@@ -23,6 +23,7 @@ import com.yumu.hexie.integration.wuye.vo.PaymentInfo;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
+import com.yumu.hexie.integration.wuye.vo.SectInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
 import com.yumu.hexie.model.promotion.coupon.CouponCombination;
@@ -429,5 +430,22 @@ public interface WuyeService {
 	 */
 	byte[] getInvoicePdf(String remoteAddr) throws Exception;
 
+	/**
+	 * 根据房屋ID获取业主已经绑定的房屋
+	 * @param user
+	 * @param cellId
+	 * @return
+	 * @throws Exception 
+	 */
+	HexieUser queryHouseById(User user, String houseId) throws Exception;
+	
+	/**
+	 * 根据小区ID获取小区信息
+	 * @param user
+	 * @param cellId
+	 * @return
+	 * @throws Exception 
+	 */
+	SectInfo querySectById(User user, String sectId) throws Exception;
 
 }

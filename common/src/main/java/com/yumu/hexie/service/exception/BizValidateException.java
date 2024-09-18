@@ -9,6 +9,7 @@ public class BizValidateException extends RuntimeException {
 	private int bizType;//内部订单，文章，预约单,现金券
 	private long bizId;//业务ID
 	private int level = ModelConstant.EXCEPTION_LEVEL_INFO;
+	private int errCode = 0;	//错误码
 
 	public BizValidateException(int bizType,long bizId,String msg){
 		this.message = msg;
@@ -23,9 +24,16 @@ public class BizValidateException extends RuntimeException {
 	}
 	
 	public BizValidateException(){}
+	
 	public BizValidateException(String msg){
 		this.message = msg;
 	}
+	
+	public BizValidateException(int errCode, String msg){
+		this.errCode = errCode;
+		this.message = msg;
+	}
+	
 	public BizValidateException(String msg, Throwable cause){
 		super(msg, cause);
 		this.message = msg;
@@ -51,18 +59,21 @@ public class BizValidateException extends RuntimeException {
 	public void setBizId(long bizId) {
 		this.bizId = bizId;
 	}
-
 	public int getLevel() {
 		return level;
 	}
-
 	public BizValidateException setError() {
 		this.level = ModelConstant.EXCEPTION_LEVEL_ERROR;
 		return this;
 	}
-
 	public void setLevel(int level) {
 		this.level = level;
+	}
+	public int getErrCode() {
+		return errCode;
+	}
+	public void setErrCode(int errCode) {
+		this.errCode = errCode;
 	}
 	
 }

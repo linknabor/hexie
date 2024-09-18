@@ -48,6 +48,7 @@ import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.QrCodePayService.PayCfg;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
+import com.yumu.hexie.integration.wuye.vo.SectInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.event.dto.BaseEventDTO;
@@ -319,7 +320,7 @@ public class WuyeServiceImpl implements WuyeService {
 	//根据名称模糊查询合协社区小区列表
 	@Override
 	public CellListVO getVagueSectByName(User user, String sectName, String regionName, String queryAppid) throws Exception {
-		
+		log.info("getVagueSectByName, session user : {}", user);
 		return wuyeUtil2.getVagueSectByName(user, sectName, regionName, queryAppid).getData();
 	}
 
@@ -328,28 +329,33 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		BaseResult<HexieUser> r= wuyeUtil2.bindHouseNoStmt(user, houseId, area);
 		if("04".equals(r.getResult())){
-			throw new BizValidateException("当前用户已经认领该房屋!");
+			throw new BizValidateException(4, "当前用户已经认领该房屋!");
 		}
 		if ("05".equals(r.getResult())) {
-			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
+			throw new BizValidateException(5, "用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
 		}
 		if("01".equals(r.getResult())) {
-			throw new BizValidateException("账户不存在！");
+			throw new BizValidateException(1, "账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+			throw new BizValidateException(6, "面积验证错误，允许误差在±1平方米以内。");
 		}
 		if("02".equals(r.getResult())) {
-			throw new BizValidateException("房屋不存在！");
+			throw new BizValidateException(2, "房屋不存在！");
 		}
 		return r.getData();
 	}
 
+	/**
+	 * 这种情况需要user中有openid，适合公众号的用户
+	 * @param user 公众号用户user
+	 * @param u 用户绑定房屋的信息
+	 */
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null")
 	public void setDefaultAddress(User user, HexieUser u) {
-
+		
 		HexieAddress hexieAddress = new HexieAddress();
 		BeanUtils.copyProperties(u, hexieAddress);
 		
@@ -375,9 +381,8 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setCspId(u.getCsp_id());
 		user.setOfficeTel(u.getOffice_tel());
 		userRepository.save(user);
-		
 	}
-
+	
 	@Override
 	public BillListVO queryBillListStd(User user, String startDate, String endDate, String house_id, String regionName) throws Exception {
 		
@@ -408,19 +413,19 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		BaseResult<HexieUser> r = WuyeUtil.bindHouse(user, stmtId, houseId);
 		if("04".equals(r.getResult())){
-			throw new BizValidateException("当前用户已经认领该房屋!");
+			throw new BizValidateException(4, "当前用户已经认领该房屋!");
 		}
 		if ("05".equals(r.getResult())) {
-			throw new BizValidateException("用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
+			throw new BizValidateException(5, "用户当前绑定房屋与已绑定房屋不属于同个小区，暂不支持此功能。");
 		}
 		if("01".equals(r.getResult())) {
-			throw new BizValidateException("账户不存在！");
+			throw new BizValidateException(1, "账户不存在！");
 		}
 		if("06".equals(r.getResult())) {
-			throw new BizValidateException("面积验证错误，允许误差在±1平方米以内。");
+			throw new BizValidateException(6, "面积验证错误，允许误差在±1平方米以内。");
 		}
 		if("02".equals(r.getResult())) {
-			throw new BizValidateException("房屋不存在！");
+			throw new BizValidateException(2, "房屋不存在！");
 		}
 		return r.getData();
 	}
@@ -843,5 +848,15 @@ public class WuyeServiceImpl implements WuyeService {
 		return hexieHouses;
 	}
 	
+	@Override
+	public HexieUser queryHouseById(User user, String houseId) throws Exception {
+		return wuyeUtil2.queryHouseById(user, houseId).getData();
+	}
 
+	@Override
+	public SectInfo querySectById(User user, String sectId) throws Exception {
+		return wuyeUtil2.querySectById(user, sectId).getData();
+	}
+
+	
 }

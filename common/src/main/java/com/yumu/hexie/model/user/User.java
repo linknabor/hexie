@@ -6,6 +6,8 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.Index;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -14,6 +16,9 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.model.BaseModel;
 
 @Entity
+@Table(indexes= {
+		@Index(name = "idx_aliuserid_aliappid", columnList = "aliuserid, aliappid", unique = true), 
+		@Index(name = "idx_tel", columnList = "tel", unique = false)})
 public class User extends BaseModel{
 
 	private static final long serialVersionUID = 4808669460780339640L;
