@@ -1068,7 +1068,8 @@ public class UserController extends BaseController{
 		
     	User userAccount = userService.getUserByAliUserIdAndAliAppid(h5UserDTO.getUserId(), h5UserDTO.getAppid());
     	userAccount = userService.saveH5User(userAccount, h5UserDTO);
-    	
+    	log.info("lifepayLogin userId:{}, wuyeId:{}, aliuserid:{}, aliappid: {}", 
+    			userAccount.getId(), userAccount.getWuyeId(), userAccount.getAliuserid(), userAccount.getAliappid());
 		long endTime = System.currentTimeMillis();
 	    UserInfo userInfo = new UserInfo(userAccount);
 	    log.info("lifepay user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
