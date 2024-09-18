@@ -65,6 +65,9 @@ public class PrepayRequestDTO implements Serializable {
 	
 	private Boolean tpPrepay;	//是否第三方预支付
 
+	private String payScenarios; //场景
+	private String parkName; //停车场名称
+
 	public String getCouponUnit() {
 		return couponUnit;
 	}
@@ -275,21 +278,62 @@ public class PrepayRequestDTO implements Serializable {
 	public void setTpPrepay(Boolean tpPrepay) {
 		this.tpPrepay = tpPrepay;
 	}
-	
+
+	public String getPayScenarios() {
+		return payScenarios;
+	}
+
+	public void setPayScenarios(String payScenarios) {
+		this.payScenarios = payScenarios;
+	}
+
+	public String getParkName() {
+		return parkName;
+	}
+
+	public void setParkName(String parkName) {
+		this.parkName = parkName;
+	}
+
 	@Override
 	public String toString() {
-		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
-				+ ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitle=" + invoiceTitle
-				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", needInvoice="
-				+ needInvoice + ", invoiceType=" + invoiceType + ", regionUrl=" + regionUrl + ", regionName="
-				+ regionName + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType + ", customerName="
-				+ customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo="
-				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", remember=" + remember
-				+ ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType + ", reductionAmt="
-				+ reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + ", appid=" + appid
-				+ ", payee_openid=" + payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo + ", tpPrepay="
-				+ tpPrepay + "]";
+		return "PrepayRequestDTO{" +
+				"user=" + user +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", needInvoice='" + needInvoice + '\'' +
+				", invoiceType='" + invoiceType + '\'' +
+				", regionUrl='" + regionUrl + '\'' +
+				", regionName='" + regionName + '\'' +
+				", billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", remember='" + remember + '\'' +
+				", cardId='" + cardId + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", cellId='" + cellId + '\'' +
+				", batchNo='" + batchNo + '\'' +
+				", tpPrepay=" + tpPrepay +
+				", payScenarios='" + payScenarios + '\'' +
+				", parkName='" + parkName + '\'' +
+				'}';
 	}
-	
-	
 }

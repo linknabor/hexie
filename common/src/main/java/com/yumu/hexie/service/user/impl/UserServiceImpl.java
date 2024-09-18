@@ -1057,7 +1057,7 @@ public class UserServiceImpl implements UserService {
 			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
 				user.setAliuserid(h5UserDTO.getUserId());
 				user.setAliappid(h5UserDTO.getAppid());
-			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
+			} else if (ModelConstant.H5_USER_TYPE_MINNI.equals(h5UserDTO.getClientType())) {
 				user.setMiniopenid(h5UserDTO.getUserId());
 				user.setMiniAppId(h5UserDTO.getAppid());
 //				user.setOpenid(h5UserDTO.getUserId());

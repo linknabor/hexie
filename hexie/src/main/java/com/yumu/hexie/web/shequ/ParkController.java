@@ -22,7 +22,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/park")
 public class ParkController extends BaseController {
-
     @Autowired
     private ParkService parkService;
 
@@ -80,13 +79,12 @@ public class ParkController extends BaseController {
     /**
      * 获取缴费记录
      * @param user
-     * @param carNo
      * @return
      * @throws Exception
      */
     @RequestMapping(value = "/getParkPayList", method = RequestMethod.GET)
-    public BaseResult<List<PayCarInfo>> getParkPayList(@ModelAttribute(Constants.USER) User user, @RequestParam(required = false) String carNo, @RequestParam(required = false) String currPage) throws Exception {
-        List<PayCarInfo> parkInfos = parkService.getParkPayList(user, carNo, currPage);
+    public BaseResult<List<PayCarInfo>> getParkPayList(@ModelAttribute(Constants.USER) User user) throws Exception {
+        List<PayCarInfo> parkInfos = parkService.getParkPayList(user);
         return BaseResult.successResult(parkInfos);
     }
 
@@ -111,8 +109,9 @@ public class ParkController extends BaseController {
      * @throws Exception
      */
     @RequestMapping(value = "/getPayingDetail", method = RequestMethod.GET)
-    public BaseResult<PayingDetail> getPayingDetail(@ModelAttribute(Constants.USER) User user, @RequestParam String carNo, @RequestParam String parkId) throws Exception {
-        PayingDetail payingDetail = parkService.getPayingDetail(user, carNo, parkId);
+    public BaseResult<PayingDetail> getPayingDetail(@ModelAttribute(Constants.USER) User user, @RequestParam String carNo,
+                                                    @RequestParam String parkId, @RequestParam String channelId) throws Exception {
+        PayingDetail payingDetail = parkService.getPayingDetail(user, carNo, parkId, channelId);
         return BaseResult.successResult(payingDetail);
     }
 
@@ -130,19 +129,6 @@ public class ParkController extends BaseController {
     }
 
     /**
-     * 根据交易ID查询交易详情
-     * @param user
-     * @param orderId
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/getPayDetailById", method = RequestMethod.GET)
-    public BaseResult<PayDetail> getPayDetailById(@ModelAttribute(Constants.USER) User user, @RequestParam String orderId) throws Exception {
-        PayDetail payDetail = parkService.getPayDetailById(user, orderId);
-        return BaseResult.successResult(payDetail);
-    }
-
-    /**
      * 根据车牌查询停车费账单
      * @param user
      * @param payUserCarInfo
@@ -153,6 +139,12 @@ public class ParkController extends BaseController {
     public BaseResult<CarBillList> getCarBill(@ModelAttribute(Constants.USER) User user, @RequestBody PayUserCarInfo payUserCarInfo) throws Exception {
         CarBillList carBillList = parkService.getCarBillList(user, payUserCarInfo);
         return BaseResult.successResult(carBillList);
+    }
+
+    @RequestMapping(value = "/getInvoiceQrCode", method = RequestMethod.GET)
+    public BaseResult<String> getInvoiceQrCode(@ModelAttribute(Constants.USER) User user, @RequestParam String trade_water_id) throws Exception {
+        String url = parkService.getInvoiceQrCode(user, trade_water_id);
+        return BaseResult.successResult(url);
     }
 
 }
