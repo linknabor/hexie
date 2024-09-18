@@ -952,8 +952,8 @@ public class UserController extends BaseController{
         phoneInfo.setPhoneNumber(aliMiniUserPhone.getMobile());
         miniUserPhone.setPhone_info(phoneInfo);
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
-        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
-        	userService.recacheMiniUser(user);
+        if (!StringUtils.isEmpty(user.getAliappid()) && !StringUtils.isEmpty(user.getAliuserid())) {
+        	userService.recacheAliMiniUser(user);
         }
         BeanUtils.copyProperties(savedUser, user);
         request.getSession().setAttribute(Constants.USER, user);
