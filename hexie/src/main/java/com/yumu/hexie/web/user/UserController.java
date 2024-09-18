@@ -999,7 +999,16 @@ public class UserController extends BaseController{
     	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
 			throw new BizValidateException("请传入支付宝或微信appid");
 		}
-		
+    	User sessionUser = (User) session.getAttribute(Constants.USER);
+    	log.info("shwyLogin user in session :" + sessionUser);
+    	if (sessionUser != null) {
+			if (!sessionUser.getAliappid().equals(h5UserDTO.getAppid())) {
+				session.setMaxInactiveInterval(1);
+				session.removeAttribute(Constants.USER);
+				session.invalidate();
+				throw new BizValidateException(65, "clear user cache!");
+			}
+		}
 		long beginTime = System.currentTimeMillis();
     	log.info("h5Login : " + h5UserDTO);
     	if (StringUtils.isEmpty(h5UserDTO.getClientType())) {
