@@ -43,6 +43,15 @@ public class PrepayRequest extends WuyeRequest {
 				throw new BizValidateException(e.getMessage(), e);	
 			}
 		}
+
+		if (!StringUtils.isEmpty(prepayRequestDTO.getParkName())) {
+			try {
+				//中文打码
+				this.parkName = URLEncoder.encode(prepayRequestDTO.getParkName(), "GBK");
+			} catch (UnsupportedEncodingException e) {
+				throw new BizValidateException(e.getMessage(), e);
+			}
+		}
 	}
 	
 	//公用参数
@@ -113,6 +122,10 @@ public class PrepayRequest extends WuyeRequest {
 	private String cellId;	//房屋id
 	@JsonProperty("tp_prepay")
 	private Boolean tpPrepay;	//是否第三方预支付
+	@JsonProperty("pay_scenarios")
+	private String payScenarios; //场景
+	@JsonProperty("park_name")
+	private String parkName; //停车场名称
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -318,20 +331,61 @@ public class PrepayRequest extends WuyeRequest {
 	public void setTpPrepay(Boolean tpPrepay) {
 		this.tpPrepay = tpPrepay;
 	}
-	
+
+	public String getPayScenarios() {
+		return payScenarios;
+	}
+
+	public void setPayScenarios(String payScenarios) {
+		this.payScenarios = payScenarios;
+	}
+
+	public String getParkName() {
+		return parkName;
+	}
+
+	public void setParkName(String parkName) {
+		this.parkName = parkName;
+	}
+
 	@Override
 	public String toString() {
-		return "PrepayRequest [wuyeId=" + wuyeId + ", fromSys=" + fromSys + ", couponUnit=" + couponUnit
-				+ ", couponNum=" + couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", openid="
-				+ openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", mobile=" + mobile
-				+ ", invoiceTitle=" + invoiceTitle + ", invoiceTitleType=" + invoiceTitleType + ", creditCode="
-				+ creditCode + ", needInvoice=" + needInvoice + ", invoiceType=" + invoiceType + ", billId=" + billId
-				+ ", stmtId=" + stmtId + ", payType=" + payType + ", customerName=" + customerName + ", certType="
-				+ certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo=" + phoneNo + ", quickToken="
-				+ quickToken + ", veriCode=" + veriCode + ", orderNo=" + orderNo + ", ruleType=" + ruleType
-				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
-				+ ", batchNo=" + batchNo + ", cellId=" + cellId + ", tpPrepay=" + tpPrepay + "]";
+		return "PrepayRequest{" +
+				"wuyeId='" + wuyeId + '\'' +
+				", fromSys='" + fromSys + '\'' +
+				", couponUnit='" + couponUnit + '\'' +
+				", couponNum='" + couponNum + '\'' +
+				", couponId='" + couponId + '\'' +
+				", reduceAmt='" + reduceAmt + '\'' +
+				", openid='" + openid + '\'' +
+				", appid='" + appid + '\'' +
+				", payee_openid='" + payee_openid + '\'' +
+				", mobile='" + mobile + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				", needInvoice='" + needInvoice + '\'' +
+				", invoiceType='" + invoiceType + '\'' +
+				", billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", customerName='" + customerName + '\'' +
+				", certType='" + certType + '\'' +
+				", certId='" + certId + '\'' +
+				", acctNo='" + acctNo + '\'' +
+				", phoneNo='" + phoneNo + '\'' +
+				", quickToken='" + quickToken + '\'' +
+				", veriCode='" + veriCode + '\'' +
+				", orderNo='" + orderNo + '\'' +
+				", ruleType='" + ruleType + '\'' +
+				", reductionAmt='" + reductionAmt + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", batchNo='" + batchNo + '\'' +
+				", cellId='" + cellId + '\'' +
+				", tpPrepay=" + tpPrepay +
+				", payScenarios='" + payScenarios + '\'' +
+				", parkName='" + parkName + '\'' +
+				'}';
 	}
-	
-	
 }

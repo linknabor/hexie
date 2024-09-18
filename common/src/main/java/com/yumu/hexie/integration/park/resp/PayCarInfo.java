@@ -7,22 +7,33 @@ package com.yumu.hexie.integration.park.resp;
  * @create 2021-08-18 18:15
  */
 public class PayCarInfo {
-
-    private String trade_id;
+    private String data_type;
+    private String trade_water_id;
     private String start_date;
     private String end_date;
     private String park_name;
     private String car_no;
     private String pay_amt;
     private String park_time;
-    private String is_invoice;
+    private String invoice_no;
+    private String pdf_addr;
+    private String receipt_id;
+    private String allow_invoice; //是否允许开票
 
-    public String getTrade_id() {
-        return trade_id;
+    public String getData_type() {
+        return data_type;
     }
 
-    public void setTrade_id(String trade_id) {
-        this.trade_id = trade_id;
+    public void setData_type(String data_type) {
+        this.data_type = data_type;
+    }
+
+    public String getTrade_water_id() {
+        return trade_water_id;
+    }
+
+    public void setTrade_water_id(String trade_water_id) {
+        this.trade_water_id = trade_water_id;
     }
 
     public String getStart_date() {
@@ -73,25 +84,53 @@ public class PayCarInfo {
         this.park_time = park_time;
     }
 
-    public String getIs_invoice() {
-        return is_invoice;
+    public String getInvoice_no() {
+        return invoice_no;
     }
 
-    public void setIs_invoice(String is_invoice) {
-        this.is_invoice = is_invoice;
+    public void setInvoice_no(String invoice_no) {
+        this.invoice_no = invoice_no;
+    }
+
+    public String getPdf_addr() {
+        return pdf_addr;
+    }
+
+    public void setPdf_addr(String pdf_addr) {
+        this.pdf_addr = pdf_addr;
+    }
+
+    public String getReceipt_id() {
+        return receipt_id;
+    }
+
+    public void setReceipt_id(String receipt_id) {
+        this.receipt_id = receipt_id;
+    }
+
+    public String getAllow_invoice() {
+        return allow_invoice;
+    }
+
+    public void setAllow_invoice(String allow_invoice) {
+        this.allow_invoice = allow_invoice;
     }
 
     @Override
     public String toString() {
         return "PayCarInfo{" +
-                "trade_id='" + trade_id + '\'' +
+                "data_type='" + data_type + '\'' +
+                ", trade_water_id='" + trade_water_id + '\'' +
                 ", start_date='" + start_date + '\'' +
                 ", end_date='" + end_date + '\'' +
                 ", park_name='" + park_name + '\'' +
                 ", car_no='" + car_no + '\'' +
                 ", pay_amt='" + pay_amt + '\'' +
                 ", park_time='" + park_time + '\'' +
-                ", is_invoice='" + is_invoice + '\'' +
+                ", invoice_no='" + invoice_no + '\'' +
+                ", pdf_addr='" + pdf_addr + '\'' +
+                ", receipt_id='" + receipt_id + '\'' +
+                ", allow_invoice='" + allow_invoice + '\'' +
                 '}';
     }
 }

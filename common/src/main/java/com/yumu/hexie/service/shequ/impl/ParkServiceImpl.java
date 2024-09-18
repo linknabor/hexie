@@ -5,7 +5,9 @@ import com.yumu.hexie.integration.park.ParkUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.*;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
+import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.exception.BizValidateException;
 import com.yumu.hexie.service.shequ.ParkService;
@@ -16,7 +18,9 @@ import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 描述:
@@ -39,7 +43,7 @@ public class ParkServiceImpl implements ParkService {
         if(userDB == null) {
             return null;
         }
-        CommonResponse<UserCarList> commonResponse = parkUtil.getUserCar(user, parkId);
+        CommonResponse<UserCarList> commonResponse = parkUtil.getUserCar(userDB, parkId);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {
@@ -99,15 +103,8 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public List<PayCarInfo> getParkPayList(User user, String carNo, String currPage) throws Exception {
-        if (!StringUtils.isEmpty(carNo)) {
-            try {
-                carNo = URLEncoder.encode(carNo,"GBK");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
-        CommonResponse<List<PayCarInfo>> commonResponse = parkUtil.getParkPayList(user, carNo, currPage);
+    public List<PayCarInfo> getParkPayList(User user) throws Exception {
+        CommonResponse<List<PayCarInfo>> commonResponse = parkUtil.getParkPayList(user);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {
@@ -126,7 +123,7 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public PayingDetail getPayingDetail(User user, String carNo, String parkId) throws Exception {
+    public PayingDetail getPayingDetail(User user, String carNo, String parkId, String channelId) throws Exception {
         if (!StringUtils.isEmpty(carNo)) {
             try {
                 carNo = URLEncoder.encode(carNo,"GBK");
@@ -134,7 +131,7 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        CommonResponse<PayingDetail> commonResponse = parkUtil.getPayingDetail(user, carNo, parkId);
+        CommonResponse<PayingDetail> commonResponse = parkUtil.getPayingDetail(user, carNo, parkId, channelId);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {
@@ -144,17 +141,24 @@ public class ParkServiceImpl implements ParkService {
 
     @Override
     public WechatPayInfo getPrePaying(User user, PayUserCarInfo payUserCarInfo) throws Exception {
-        CommonResponse<WechatPayInfo> commonResponse = parkUtil.getPrePaying(user, payUserCarInfo);
-        if("99".equals(commonResponse.getResult())) {
-            throw new BizValidateException(commonResponse.getErrMsg());
-        } else {
-            return commonResponse.getData();
+        User userDB = userService.getById(user.getId());
+        if(userDB == null) {
+            return null;
         }
-    }
-
-    @Override
-    public PayDetail getPayDetailById(User user, String orderId) throws Exception {
-        CommonResponse<PayDetail> commonResponse = parkUtil.getPayDetailById(user, orderId);
+        payUserCarInfo.setUser_id(String.valueOf(userDB.getId()));
+        if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(payUserCarInfo.getScanChannel())) {
+            payUserCarInfo.setAppid(userDB.getAliappid());
+            if(StringUtils.isEmpty(userDB.getOpenid())) {
+                payUserCarInfo.setAppid(ConstantAlipay.APPID);
+            }
+            payUserCarInfo.setOpenid(userDB.getAliuserid());
+        } else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(payUserCarInfo.getScanChannel())) {
+            payUserCarInfo.setAppid(userDB.getAppId());
+            payUserCarInfo.setOpenid(userDB.getOpenid());
+        } else {
+            throw new BizValidateException("不支持当前支付渠道");
+        }
+        CommonResponse<WechatPayInfo> commonResponse = parkUtil.getPrePaying(userDB, payUserCarInfo);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {
@@ -165,6 +169,16 @@ public class ParkServiceImpl implements ParkService {
     @Override
     public CarBillList getCarBillList(User user, PayUserCarInfo payUserCarInfo) throws Exception {
         CommonResponse<CarBillList> commonResponse = parkUtil.getCarBillList(user, payUserCarInfo);
+        if("99".equals(commonResponse.getResult())) {
+            throw new BizValidateException(commonResponse.getErrMsg());
+        } else {
+            return commonResponse.getData();
+        }
+    }
+
+    @Override
+    public String getInvoiceQrCode(User user, String trade_water_id) throws Exception {
+        CommonResponse<String> commonResponse = parkUtil.getInvoiceQrCode(user, trade_water_id);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {

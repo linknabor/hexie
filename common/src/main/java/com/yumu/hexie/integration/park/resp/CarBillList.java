@@ -10,17 +10,14 @@ import java.util.List;
  */
 public class CarBillList {
 
-    private List<CarBillInfo> car_bill_info;
+    private List<CarBillInfo> bills;
     private String permit_skip_car_pay;
     private String reduce_mode;
 
     static class CarBillInfo {
         private String bill_id;
-        private String is_onlinepay;
-        private String pay_status;
         private String service_fee_name;
         private String pay_cell_addr;
-        private String pay_mng_cell_id;
         private String service_fee_cycle;
         private String fee_price;
 
@@ -30,22 +27,6 @@ public class CarBillList {
 
         public void setBill_id(String bill_id) {
             this.bill_id = bill_id;
-        }
-
-        public String getIs_onlinepay() {
-            return is_onlinepay;
-        }
-
-        public void setIs_onlinepay(String is_onlinepay) {
-            this.is_onlinepay = is_onlinepay;
-        }
-
-        public String getPay_status() {
-            return pay_status;
-        }
-
-        public void setPay_status(String pay_status) {
-            this.pay_status = pay_status;
         }
 
         public String getService_fee_name() {
@@ -62,14 +43,6 @@ public class CarBillList {
 
         public void setPay_cell_addr(String pay_cell_addr) {
             this.pay_cell_addr = pay_cell_addr;
-        }
-
-        public String getPay_mng_cell_id() {
-            return pay_mng_cell_id;
-        }
-
-        public void setPay_mng_cell_id(String pay_mng_cell_id) {
-            this.pay_mng_cell_id = pay_mng_cell_id;
         }
 
         public String getService_fee_cycle() {
@@ -92,23 +65,20 @@ public class CarBillList {
         public String toString() {
             return "CarBillInfo{" +
                     "bill_id='" + bill_id + '\'' +
-                    ", is_onlinepay='" + is_onlinepay + '\'' +
-                    ", pay_status='" + pay_status + '\'' +
                     ", service_fee_name='" + service_fee_name + '\'' +
                     ", pay_cell_addr='" + pay_cell_addr + '\'' +
-                    ", pay_mng_cell_id='" + pay_mng_cell_id + '\'' +
                     ", service_fee_cycle='" + service_fee_cycle + '\'' +
                     ", fee_price='" + fee_price + '\'' +
                     '}';
         }
     }
 
-    public List<CarBillInfo> getCar_bill_info() {
-        return car_bill_info;
+    public List<CarBillInfo> getBills() {
+        return bills;
     }
 
-    public void setCar_bill_info(List<CarBillInfo> car_bill_info) {
-        this.car_bill_info = car_bill_info;
+    public void setBills(List<CarBillInfo> bills) {
+        this.bills = bills;
     }
 
     public String getPermit_skip_car_pay() {
@@ -130,7 +100,7 @@ public class CarBillList {
     @Override
     public String toString() {
         return "CarBillList{" +
-                "car_bill_info=" + car_bill_info +
+                "bills=" + bills +
                 ", permit_skip_car_pay='" + permit_skip_car_pay + '\'' +
                 ", reduce_mode='" + reduce_mode + '\'' +
                 '}';
