@@ -1061,8 +1061,12 @@ public class UserController extends BaseController{
 			throw new BizValidateException("请传入支付宝appid");
 		}
     	User sessionUser = (User) session.getAttribute(Constants.USER);
-    	log.info("user in session :" + sessionUser);
-		
+    	log.info("lifepayLogin user in session :" + sessionUser);
+    	if (sessionUser != null) {
+			if (!sessionUser.getAliappid().equals(h5UserDTO.getAppid())) {
+				session.removeAttribute(Constants.USER);
+			}
+		}
 		long beginTime = System.currentTimeMillis();
     	log.info("lifepayLogin : " + h5UserDTO);
 		h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
