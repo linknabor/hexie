@@ -155,6 +155,12 @@ public interface UserService {
 	void recacheMiniUser(User user);
 	
 	/**
+	 * 缓存支付宝小程序用户
+	 * @param user
+	 */
+	void recacheAliMiniUser(User user);
+	
+	/**
 	 * 验证小程序菜单访问权限
 	 * @param user
 	 * @param page

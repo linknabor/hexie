@@ -634,6 +634,17 @@ public class UserServiceImpl implements UserService {
 	public void recacheMiniUser(User user) {
 		
 	}
+	
+	/**
+	 * 重新缓存user，如果用户在建立小程序用户之前，已经有了公众号用户
+	 * @param user
+	 * @return
+	 */
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.aliappid+'_'+#user.aliuserid")
+	public void recacheAliMiniUser(User user) {
+		
+	}
 
 
     @Override
