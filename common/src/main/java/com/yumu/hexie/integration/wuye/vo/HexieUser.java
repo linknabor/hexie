@@ -40,6 +40,11 @@ public class HexieUser implements Serializable {
 	private String center_id;//中心管理id
 	private Integer total_bind = 0;
 	
+	private String ver_no;	//户号
+	private String owner_name;	//绑定房屋的业主名称
+	private String community_id;	//支付宝小区编号
+	private String out_bill_url;	//支付宝小程序账单缴费地址
+	
 	public String getSect_id() {
 		return sect_id;
 	}
@@ -178,6 +183,31 @@ public class HexieUser implements Serializable {
 	public void setCell_id(String cell_id) {
 		this.cell_id = cell_id;
 	}
+	public String getVer_no() {
+		return ver_no;
+	}
+	public void setVer_no(String ver_no) {
+		this.ver_no = ver_no;
+	}
+	public String getOwner_name() {
+		return owner_name;
+	}
+	public void setOwner_name(String owner_name) {
+		this.owner_name = owner_name;
+	}
+	public String getCommunity_id() {
+		return community_id;
+	}
+	public void setCommunity_id(String community_id) {
+		this.community_id = community_id;
+	}
+	public String getOut_bill_url() {
+		return out_bill_url;
+	}
+	public void setOut_bill_url(String out_bill_url) {
+		this.out_bill_url = out_bill_url;
+	}
+	
 	@Override
 	public String toString() {
 		return "HexieUser [user_id=" + user_id + ", user_name=" + user_name + ", user_head=" + user_head + ", user_sex="
@@ -187,7 +217,8 @@ public class HexieUser implements Serializable {
 				+ ", province_name=" + province_name + ", city_id=" + city_id + ", city_name=" + city_name
 				+ ", region_id=" + region_id + ", region_name=" + region_name + ", sect_addr=" + sect_addr
 				+ ", sect_id=" + sect_id + ", csp_id=" + csp_id + ", center_id=" + center_id + ", total_bind="
-				+ total_bind + "]";
+				+ total_bind + ", ver_no=" + ver_no + ", owner_name=" + owner_name + ", community_id=" + community_id
+				+ ", out_bill_url=" + out_bill_url + "]";
 	}
 	
 }

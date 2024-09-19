@@ -461,12 +461,13 @@ public class ModelConstant {
 	
 	public static final String KEY_USER_COUPON_SEED = "user:gaiedCouponSeed:";	//用户已领过的红包种子
 	
-	public static final String KEY_USER_CACHED = "user:cached";
+	public static final String KEY_USER_CACHED = "user:cached";	//微信用户后面接openid,支付宝用户，后面接appid_userid
 	public static final String KEY_USER_SERVE_ROLE = "user:servRole";	//用户服务类型
 	public static final String KEY_USER_SUBSCRIBE_MSG_TEMPLATE = "user:subscribeMsgTemplate";	//用户订阅过的消息模板
 	
-	public static final String H5_USER_TYPE_ALIPAY = "1";
-	public static final String H5_USER_TYPE_WECHAT = "2";
+	public static final String H5_USER_TYPE_ALIPAY = "1"; //支付宝
+	public static final String H5_USER_TYPE_MINNI = "2"; //微信小程序
+	public static final String H5_USER_TYPE_WECHAT = "3"; //微信公众号
 	
 	public static final int EVOUCHER_TYPE_VERIFICATION = 0;	//核销券
 	public static final int EVOUCHER_TYPE_PROMOTION = 1;	//推广券码
@@ -562,4 +563,7 @@ public class ModelConstant {
 	
 	public static final String KEY_PAGE_VIEW_COUNT = "count:pageview:";	//页面计数统计，后面接appid:日期
 	public static final String BEYONDSOFT_TOKEN_WEST = "beyondsoft:west:token";
+	
+	public static final String KEY_USER_SYS_SHWY = "_shwy";	//上海物业
+	public static final String KEY_USER_SYS_LIFEPAY = "_lifepay";	//支付宝生活缴费
 }		

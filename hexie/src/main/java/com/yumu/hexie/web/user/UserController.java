@@ -7,7 +7,9 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
 import com.yumu.hexie.integration.wechat.constant.ConstantWd;
+import com.yumu.hexie.service.user.dto.H5AuthorizeVo;
 import com.yumu.hexie.service.wdwechat.WdService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
+import com.yumu.hexie.integration.wechat.entity.MiniUserPhone.PhoneInfo;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
 import com.yumu.hexie.integration.wechat.entity.user.UserWeiXin;
 import com.yumu.hexie.model.ModelConstant;
@@ -558,42 +561,47 @@ public class UserController extends BaseController{
    		
     	 
     }
-    
-    
-    /**
-     * 静默授权获取用户openid
-     * @param code
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/authorize/{code}/{appid}", method = RequestMethod.POST)
+
+
+	/**
+	 * 静默授权获取用户openid
+	 * @param session
+	 * @param vo
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/h5/authorize", method = RequestMethod.POST)
 	@ResponseBody
-    public BaseResult<Map<String, String>> authorize(@PathVariable String code, @PathVariable String appid) throws Exception {
-		
-		Map<String, String> map = new HashMap<>();
-		if (StringUtil.isNotEmpty(code)) {
-			AccessTokenOAuth oauth = userService.getAccessTokenOAuth(code, appid);
-	    	map.put("openid", oauth.getOpenid());
+    public BaseResult<UserInfo> authorize(HttpSession session, @RequestBody H5AuthorizeVo vo) throws Exception {
+		User userAccount;
+		if(!StringUtils.isEmpty(vo.getCode())) {
+			if (userService.checkDuplicateLogin(session, vo.getCode())) {
+				throw new BizValidateException(599, 0, "正在登陆中，请耐心等待。如较长时间无响应，请刷新重试。");
+			}
+			if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(vo.getSourceType())) {
+				AccessTokenOAuth userOauth = userService.getAlipayAuth(vo.getCode());
+				if(StringUtils.isEmpty(userOauth.getAppid())) {
+					userOauth.setAppid(vo.getAppid());
+				}
+				userAccount = userService.saveAlipayMiniUserToken(userOauth);
+			} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(vo.getSourceType())) {
+				AccessTokenOAuth oAuth = userService.getAccessTokenOAuth(vo.getCode(), vo.getAppid());
+				UserWeiXin weixinUser = new UserWeiXin();
+				weixinUser.setOpenid(oAuth.getOpenid());
+				weixinUser.setUnionid(oAuth.getUnionid());
+				userAccount = userService.updateUserLoginInfo(weixinUser, vo.getAppid());
+			} else {
+				return new BaseResult<UserInfo>().failMsg("不支持的授权方式，请使用微信或支付宝");
+			}
+		} else {
+			return new BaseResult<UserInfo>().failMsg("授权失败，请刷新重试！");
 		}
-		return new BaseResult<Map<String, String>>().success(map);
-    }
-    
-    /**
-     * 静默授权获取用户openid-alipay
-     * @param code
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "/authorizeAlipay/{code}", method = RequestMethod.POST)
-	@ResponseBody
-    public BaseResult<Map<String, String>> authorizeAlipay(@PathVariable String code) throws Exception {
-		
-		Map<String, String> map = new HashMap<>();
-		if (StringUtil.isNotEmpty(code)) {
-			AccessTokenOAuth oauth = userService.getAlipayAuth(code);
-	    	map.put("userid", oauth.getOpenid());
+		if(userAccount == null) {
+			return new BaseResult<UserInfo>().failMsg("用户不存在！");
 		}
-		return new BaseResult<Map<String, String>>().success(map);
+		UserInfo userInfo = new UserInfo(userAccount);
+		session.setAttribute(Constants.USER, userAccount);
+		return new BaseResult<UserInfo>().success(userInfo);
     }
 
 	/**
@@ -907,8 +915,10 @@ public class UserController extends BaseController{
                 }
                 AccessTokenOAuth userOauth = userService.getAlipayAuth(appid, code);
                 log.info("userOauth : " + userOauth);
-                user = userService.saveAlipayMiniUserToken(userOauth);
-                //TODO 看以后访问量要不要缓存用户
+                user = userService.getUserByAliUserIdAndAliAppid(userOauth.getOpenid(), userOauth.getAppid());
+                if (user == null) {
+                	user = userService.saveAlipayMiniUserToken(userOauth);
+				}
             }
             session.setAttribute(Constants.USER, user);
         }
@@ -942,10 +952,14 @@ public class UserController extends BaseController{
     public BaseResult<UserInfo> getAlipayMiniUserPhone(HttpServletRequest request, @ModelAttribute(Constants.USER)User user, @RequestBody Map<String, String> dataMap) throws Exception {
         long beginTime = System.currentTimeMillis();
         String encryptedData = dataMap.get("encryptedData");
-        MiniUserPhone miniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        AliMiniUserPhone aliMiniUserPhone = userService.getAlipayMiniUserPhone(user, encryptedData);
+        MiniUserPhone miniUserPhone = new MiniUserPhone();
+        MiniUserPhone.PhoneInfo phoneInfo = new PhoneInfo();
+        phoneInfo.setPhoneNumber(aliMiniUserPhone.getMobile());
+        miniUserPhone.setPhone_info(phoneInfo);
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
-        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
-        	userService.recacheMiniUser(user);
+        if (!StringUtils.isEmpty(user.getAliappid()) && !StringUtils.isEmpty(user.getAliuserid())) {
+        	userService.recacheAliMiniUser(user);
         }
         BeanUtils.copyProperties(savedUser, user);
         request.getSession().setAttribute(Constants.USER, user);
@@ -967,6 +981,13 @@ public class UserController extends BaseController{
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
+    /**
+     * 上海物业小程序缴费用户登陆
+     * @param session
+     * @param h5UserDTO
+     * @return
+     * @throws Exception
+     */
     @RequestMapping(value = "/alipay/h5/login", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<UserInfo> h5Login(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
@@ -978,16 +999,26 @@ public class UserController extends BaseController{
     	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
 			throw new BizValidateException("请传入支付宝或微信appid");
 		}
-		
+    	User sessionUser = (User) session.getAttribute(Constants.USER);
+    	log.info("shwyLogin user in session :" + sessionUser);
+    	if (sessionUser != null) {
+			if (!sessionUser.getAliappid().equals(h5UserDTO.getAppid())) {
+				session.setMaxInactiveInterval(1);
+				session.removeAttribute(Constants.USER);
+				session.invalidate();
+				throw new BizValidateException(65, "clear user cache!");
+			}
+		}
 		long beginTime = System.currentTimeMillis();
     	log.info("h5Login : " + h5UserDTO);
     	if (StringUtils.isEmpty(h5UserDTO.getClientType())) {
 			if (org.apache.commons.lang3.StringUtils.isNumeric(h5UserDTO.getUserId())) {
 				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
 			} else {
-				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_WECHAT);
+				h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_MINNI);
 			}
 		}
+    	h5UserDTO.setFrom(ModelConstant.KEY_USER_SYS_SHWY);
     	User userAccount = null;
 //    	if (!StringUtils.isEmpty(h5UserDTO.getAuId()) && !"987654102".equals(h5UserDTO.getAuId())) {	//987654102 for test
 //    		List<User> userList = userService.getUserByOriSysAndOriUserId("_shwy", Long.valueOf(h5UserDTO.getAuId()));
@@ -1002,7 +1033,8 @@ public class UserController extends BaseController{
 //		}
     	if (userAccount == null) {
     		if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
-				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
+//				userAccount = userService.getUserByAliUserId(h5UserDTO.getUserId());
+				userAccount = userService.getUserByAliUserIdAndAliAppid(h5UserDTO.getUserId(), h5UserDTO.getAppid());
 			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
 				userAccount = userService.getByMiniopenid(h5UserDTO.getUserId());
 //				userAccount = userService.multiFindByOpenId(h5UserDTO.getUserId());
@@ -1019,6 +1051,50 @@ public class UserController extends BaseController{
 
     }
     
-        
+    /**
+     * 支付宝生活缴费用户登陆
+     * @param session
+     * @param h5UserDTO
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/lifepay/login", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<UserInfo> lifepayLogin(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getUserId()) ) {
+			throw new BizValidateException("请传入支付宝用户user_id");
+		}
+    	
+    	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
+			throw new BizValidateException("请传入支付宝appid");
+		}
+    	User sessionUser = (User) session.getAttribute(Constants.USER);
+    	log.info("lifepayLogin user in session :" + sessionUser);
+    	if (sessionUser != null) {
+			if (!sessionUser.getAliappid().equals(h5UserDTO.getAppid())) {
+				session.setMaxInactiveInterval(1);
+				session.removeAttribute(Constants.USER);
+				session.invalidate();
+				throw new BizValidateException(65, "clear user cache!");
+			}
+		}
+		long beginTime = System.currentTimeMillis();
+    	log.info("lifepayLogin : " + h5UserDTO);
+		h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
+		h5UserDTO.setFrom(ModelConstant.KEY_USER_SYS_LIFEPAY);
+		
+    	User userAccount = userService.getUserByAliUserIdAndAliAppid(h5UserDTO.getUserId(), h5UserDTO.getAppid());
+    	userAccount = userService.saveH5User(userAccount, h5UserDTO);
+    	log.info("lifepayLogin userId:{}, wuyeId:{}, aliuserid:{}, aliappid: {}", 
+    			userAccount.getId(), userAccount.getWuyeId(), userAccount.getAliuserid(), userAccount.getAliappid());
+		long endTime = System.currentTimeMillis();
+	    UserInfo userInfo = new UserInfo(userAccount);
+	    log.info("lifepay user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));
+	    
+	    session.setAttribute(Constants.USER, userAccount);
+	    return new BaseResult<UserInfo>().success(userInfo);
+
+    }
         
 }

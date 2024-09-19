@@ -26,8 +26,10 @@ import org.springframework.util.StringUtils;
 
 import com.alipay.api.internal.util.AlipayEncrypt;
 import com.yumu.hexie.common.util.AppUtil;
+import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.alipay.AuthService;
+import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
@@ -311,7 +313,8 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null")
+	//condition = "#user.openid != null && #user.openid != '0'"
 	public String bindWuYeIdSync(User user) {
 		 //绑定物业信息
 		String wuyeId = "";
@@ -631,6 +634,17 @@ public class UserServiceImpl implements UserService {
 	public void recacheMiniUser(User user) {
 		
 	}
+	
+	/**
+	 * 重新缓存user，如果用户在建立小程序用户之前，已经有了公众号用户
+	 * @param user
+	 * @return
+	 */
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.aliappid+'_'+#user.aliuserid")
+	public void recacheAliMiniUser(User user) {
+		
+	}
 
 
     @Override
@@ -728,16 +742,18 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	public MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData) {
+	public AliMiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData) {
 		
 		Assert.hasText(encryptedData, "encryptedData不能为空。");
-		MiniUserPhone miniUserPhone = null;
+		AliMiniUserPhone aliMiniUserPhone = null;
 		try {
-			
 			String decrptyContent = AlipayEncrypt.decryptContent(encryptedData, "AES", "Csf90IejcIrzDVi3f2nSXw==", "utf8");
 			logger.info("decrptyContent: " + decrptyContent);
-			return miniUserPhone;
-			
+			aliMiniUserPhone =  JacksonJsonUtil.getMapperInstance(false).readValue(decrptyContent, AliMiniUserPhone.class);
+			if (!StringUtils.isEmpty(aliMiniUserPhone.getSubCode())) {
+				throw new BizValidateException(aliMiniUserPhone.getSubMsg());
+			}
+			return aliMiniUserPhone;
 		} catch (Exception e) {
 			throw new BizValidateException(e.getMessage(), e);
 		}
@@ -963,57 +979,56 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findByMiniopenid(miniopenid);
 	}
 	
+	/**
+	 * 新增阿里用户，并更新缓存
+	 */
 	@Override
     @Transactional
+    @CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#appid+'_'+#userid")
     public User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth) {
     	logger.info("accessTokenOAuth : " + accessTokenOAuth);
         
     	String userId = accessTokenOAuth.getOpenid();
-    	
-        User userAccount = null;
-        if (!StringUtils.isEmpty(userId)) {
-        	List<User> userList = userRepository.findByAliuserid(userId);
-        	if (userList!=null && !userList.isEmpty()) {
-        		if (userList.size() > 1) {
-        			for (User dbUser : userList) {
-    					if (!StringUtils.isEmpty(dbUser.getTel())) {
-    						userAccount = dbUser;
-    						break;
-    					}
-    				}
-				} else {
-					userAccount = userList.get(0);
-				}
-				
-			}
-		}
-        if (userAccount == null) {
-            userAccount = new User();
-            userAccount.setAliuserid(userId);
-            userAccount.setAppId(accessTokenOAuth.getAppid());
-            userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
-        } 
+    	User userAccount = new User();
+    	userAccount.setAliuserid(userId);
+        userAccount.setAliappid(accessTokenOAuth.getAppid());
+        userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
+        userRepository.save(userAccount);
         String key = ModelConstant.KEY_ALI_USER_AUTH_TOKEN + userId;
         String savedSessionKey = (String) redisTemplate.opsForValue().get(key);
         if (StringUtils.isEmpty(savedSessionKey) || !savedSessionKey.equals(accessTokenOAuth.getAccessToken())) {
             redisTemplate.opsForValue().set(key, accessTokenOAuth.getAccessToken(), 359, TimeUnit.HOURS);    //官方15天失效，也就是360小时
         }
-        userRepository.save(userAccount);
         return userAccount;
     }
 	
+//	@Override
+//	public User getUserByAliUserId(String aliUserId) {
+//		
+//		if (StringUtils.isEmpty(aliUserId)) {
+//			throw new BizValidateException("user_id不能为空。");
+//		}
+//		List<User> userList = userRepository.findByAliuserid(aliUserId);
+//		return userList.stream().findFirst().orElse(null);
+//	}
+	
+	/**
+	 * 根据支付用应用appid和支付宝用户user_id查询用户
+	 * @param aliUserId 支付宝用户id
+	 * @param appid 支付宝应用id
+	 */
 	@Override
-	public User getUserByAliUserId(String aliUserId) {
+	@Cacheable(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#appid+'_'+#aliUserId", unless = "#result == null")
+	public User getUserByAliUserIdAndAliAppid(String aliUserId, String appid) {
 		
 		if (StringUtils.isEmpty(aliUserId)) {
 			throw new BizValidateException("user_id不能为空。");
 		}
-		List<User> userList = userRepository.findByAliuserid(aliUserId);
-		User aliUser = null;
-		if (userList!=null && !userList.isEmpty()) {
-			aliUser = userList.get(0);
+		if (StringUtils.isEmpty(appid)) {
+			throw new BizValidateException("appid不能为空。");
 		}
-		return aliUser;
+		List<User> userList = userRepository.findByAliuseridAndAliappid(aliUserId, appid);
+		return userList.stream().findFirst().orElse(null);
 	}
 	
 	@Override
@@ -1029,8 +1044,12 @@ public class UserServiceImpl implements UserService {
 			throw new BizValidateException("appid不能为空。");
 		}
 		
-		if (StringUtils.isEmpty(h5UserDTO.getCellId())) {
+		if (!ModelConstant.KEY_USER_SYS_LIFEPAY.equals(h5UserDTO.getFrom()) && StringUtils.isEmpty(h5UserDTO.getCellId())) {
 			throw new BizValidateException("cell_id不能为空。");
+		}
+		
+		if (ModelConstant.KEY_USER_SYS_LIFEPAY.equals(h5UserDTO.getFrom()) && StringUtils.isEmpty(h5UserDTO.getHouNo())) {
+			throw new BizValidateException("户号不能为空。");
 		}
 		
 		if (user == null) {
@@ -1038,24 +1057,27 @@ public class UserServiceImpl implements UserService {
 			if (ModelConstant.H5_USER_TYPE_ALIPAY.equals(h5UserDTO.getClientType())) {
 				user.setAliuserid(h5UserDTO.getUserId());
 				user.setAliappid(h5UserDTO.getAppid());
-			} else if (ModelConstant.H5_USER_TYPE_WECHAT.equals(h5UserDTO.getClientType())) {
+			} else if (ModelConstant.H5_USER_TYPE_MINNI.equals(h5UserDTO.getClientType())) {
 				user.setMiniopenid(h5UserDTO.getUserId());
 				user.setMiniAppId(h5UserDTO.getAppid());
 //				user.setOpenid(h5UserDTO.getUserId());
 //				user.setAppId(h5UserDTO.getAppid());
 			}
 		}
-		user.setTel(h5UserDTO.getMobile());
 		
-		if (!"_shwy".equals(user.getOriSys())) {
-			Long auId = null;
-			if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
-				auId = Long.valueOf(h5UserDTO.getAuId());
+		if (ModelConstant.KEY_USER_SYS_SHWY.equals(h5UserDTO.getFrom())) {
+			if (!ModelConstant.KEY_USER_SYS_SHWY.equals(user.getOriSys())) {
+				Long auId = null;
+				if (!StringUtils.isEmpty(h5UserDTO.getAuId())) {
+					auId = Long.valueOf(h5UserDTO.getAuId());
+				}
+				user.setOriUserId(auId);
+				user.setOriSys(ModelConstant.KEY_USER_SYS_SHWY);
 			}
-			user.setOriUserId(auId);
-			user.setOriSys("_shwy");
+			user.setTel(h5UserDTO.getMobile());
+		} else if (ModelConstant.KEY_USER_SYS_LIFEPAY.equals(h5UserDTO.getFrom())) {
+			user.setOriSys(ModelConstant.KEY_USER_SYS_LIFEPAY);
 		}
-		
 		BaseResult<HexieUser> baseResult = wuyeUtil2.h5UserLogin(h5UserDTO);
 		if (!baseResult.isSuccess()) {
 			if ("99".equals(baseResult.getResult())) {

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
 import com.yumu.hexie.integration.wechat.entity.UserMiniprogram;
@@ -154,6 +155,12 @@ public interface UserService {
 	void recacheMiniUser(User user);
 	
 	/**
+	 * 缓存支付宝小程序用户
+	 * @param user
+	 */
+	void recacheAliMiniUser(User user);
+	
+	/**
 	 * 验证小程序菜单访问权限
 	 * @param user
 	 * @param page
@@ -225,14 +232,14 @@ public interface UserService {
 	 * @param code
 	 * @return
 	 */
-	MiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
+	AliMiniUserPhone getAlipayMiniUserPhone(User user, String encryptedData);
 	
 	/**
-	 * 根据支付宝用户id获取用户
+	 * 根据支付宝用户id和支付宝appid获取用户
 	 * @param aliUserId
 	 * @return
 	 */
-	User getUserByAliUserId(String aliUserId);
+	User getUserByAliUserIdAndAliAppid(String aliUserId, String appid);
 	
 	/**
 	 * 保存支付h5用户信息
@@ -257,5 +264,6 @@ public interface UserService {
 	 * @return
 	 */
 	List<NewLionUser> getNewLionUserByMobile(String mobile);
+	
 
 }

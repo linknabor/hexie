@@ -12,11 +12,14 @@ public class PayingDetail {
     private String in_time; //进场时间
     private String park_time; //停车时长
     private String park_name; //停车场名称
+    private String tot_amt; //总应收金额
     private String fee_amt; //应付金额
+    private String already_amt; //已付金额
     private String pay_prompt; //支付提示语
     private String cust_tel; //客服电话
     private String out_park_prompt; //出场提示语
     private String refresh_time; //刷新间隔
+    private String device_order_id; //道闸订单号
 
     public String getRecord_id() {
         return record_id;
@@ -58,12 +61,28 @@ public class PayingDetail {
         this.park_name = park_name;
     }
 
+    public String getTot_amt() {
+        return tot_amt;
+    }
+
+    public void setTot_amt(String tot_amt) {
+        this.tot_amt = tot_amt;
+    }
+
     public String getFee_amt() {
         return fee_amt;
     }
 
     public void setFee_amt(String fee_amt) {
         this.fee_amt = fee_amt;
+    }
+
+    public String getAlready_amt() {
+        return already_amt;
+    }
+
+    public void setAlready_amt(String already_amt) {
+        this.already_amt = already_amt;
     }
 
     public String getPay_prompt() {
@@ -98,6 +117,14 @@ public class PayingDetail {
         this.refresh_time = refresh_time;
     }
 
+    public String getDevice_order_id() {
+        return device_order_id;
+    }
+
+    public void setDevice_order_id(String device_order_id) {
+        this.device_order_id = device_order_id;
+    }
+
     @Override
     public String toString() {
         return "PayingDetail{" +
@@ -106,11 +133,14 @@ public class PayingDetail {
                 ", in_time='" + in_time + '\'' +
                 ", park_time='" + park_time + '\'' +
                 ", park_name='" + park_name + '\'' +
+                ", tot_amt='" + tot_amt + '\'' +
                 ", fee_amt='" + fee_amt + '\'' +
+                ", already_amt='" + already_amt + '\'' +
                 ", pay_prompt='" + pay_prompt + '\'' +
                 ", cust_tel='" + cust_tel + '\'' +
                 ", out_park_prompt='" + out_park_prompt + '\'' +
                 ", refresh_time='" + refresh_time + '\'' +
+                ", device_order_id='" + device_order_id + '\'' +
                 '}';
     }
 }

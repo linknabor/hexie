@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
+import com.yumu.hexie.model.ModelConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -58,6 +60,7 @@ import com.yumu.hexie.integration.wuye.vo.QrCodePayService;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfo.Receipt;
 import com.yumu.hexie.integration.wuye.vo.ReceiptInfoVO;
+import com.yumu.hexie.integration.wuye.vo.SectInfo;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.promotion.coupon.Coupon;
 import com.yumu.hexie.model.user.BankCard;
@@ -241,9 +244,8 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String area) throws Exception {
 		
 		HexieUser u = wuyeService.bindHouseNoStmt(user, houseId, area);
-		log.info("HexieUser : " + u);
+		log.info("HexieUser:{}, user: {}", u, user);
 		if (u != null) {
-			log.info("user : " + user);
 			wuyeService.setDefaultAddress(user, u);
 			if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 				pointService.updatePoint(user, "1000", "zhima-house-" + user.getId() + "-" + houseId);
@@ -304,6 +306,7 @@ public class WuyeController extends BaseController {
 			@RequestParam(required = false) String sect_id, @RequestParam(required = false) String regionname)
 			throws Exception {
 		
+		log.info("user in session :" + user);
 		BillListVO listVo = wuyeService.queryBillList(user, payStatus, startDate, endDate, currentPage,
 				totalCount, house_id, sect_id, regionname);
 		if (listVo != null && listVo.getBill_info() != null) {
@@ -381,17 +384,23 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/getPrePayInfo4Qrcode", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@RequestBody PrepayReqVO prepayReqVo) throws Exception {
+	public BaseResult<WechatPayInfo> getPrePayInfo4Qrcode(@ModelAttribute(Constants.USER) User user, @RequestBody PrepayReqVO prepayReqVo) throws Exception {
 		
 		log.info("getPrePayInfo4Qrcode prepayReqVo : " + prepayReqVo);
 		PrepayRequestDTO dto = new PrepayRequestDTO();
 		BeanUtils.copyProperties(prepayReqVo, dto);
-		
-		User user = new User();
-		dto.setUser(user);
-		user.setAppId(prepayReqVo.getAppid());
-		user.setOpenid(prepayReqVo.getOpenid());
-		
+		User newUser = new User();
+		if(ModelConstant.H5_USER_TYPE_ALIPAY.equals(prepayReqVo.getScanChannel())) {
+			newUser.setAppId(ConstantAlipay.APPID);
+			newUser.setOpenid(user.getAliuserid());
+		} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(prepayReqVo.getScanChannel())) {
+			newUser.setAppId(user.getAppId());
+			newUser.setOpenid(user.getOpenid());
+		} else {
+			newUser.setAppId(prepayReqVo.getAppid());
+			newUser.setOpenid(prepayReqVo.getOpenid());
+		}
+		dto.setUser(newUser);
 		log.info("getPrePayInfo4Qrcode prepayRequestDTO : " + dto);
 		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
@@ -1188,5 +1197,35 @@ public class WuyeController extends BaseController {
 			hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
 		}
 		return BaseResult.successResult(hexieHouses);
-	} 
+	}
+	
+	/**
+	 * 根据用户身份查询其所绑定的房屋
+	 *@param user
+	 *@param houseId 已经绑定了的房屋ID
+	 */
+	/***************** [BEGIN]房产 ********************/
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/myHouse/{houseId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<HexieUser> getHouseById(@ModelAttribute(Constants.USER) User user, 
+			@PathVariable String houseId) throws Exception {
+		HexieUser listVo = wuyeService.queryHouseById(user, houseId);
+		return BaseResult.successResult(listVo);
+	}
+	
+	/**
+	 * 根据ID查询小区
+	 *@param user
+	 *@param sectId 小区ID
+	 */
+	/***************** [BEGIN]房产 ********************/
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/mySect/{sectId}", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResult<SectInfo> getSectById(@ModelAttribute(Constants.USER) User user, 
+			@PathVariable String sectId) throws Exception {
+		SectInfo sectInfo = wuyeService.querySectById(user, sectId);
+		return BaseResult.successResult(sectInfo);
+	}
 }
