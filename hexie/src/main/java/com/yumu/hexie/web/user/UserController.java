@@ -958,8 +958,8 @@ public class UserController extends BaseController{
         phoneInfo.setPhoneNumber(aliMiniUserPhone.getMobile());
         miniUserPhone.setPhone_info(phoneInfo);
         User savedUser = userService.saveMiniUserPhone(user, miniUserPhone);
-        if (!StringUtils.isEmpty(user.getOpenid()) && !"0".equals(user.getOpenid())) {
-        	userService.recacheMiniUser(user);
+        if (!StringUtils.isEmpty(user.getAliappid()) && !StringUtils.isEmpty(user.getAliuserid())) {
+        	userService.recacheAliMiniUser(user);
         }
         BeanUtils.copyProperties(savedUser, user);
         request.getSession().setAttribute(Constants.USER, user);
@@ -999,7 +999,16 @@ public class UserController extends BaseController{
     	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
 			throw new BizValidateException("请传入支付宝或微信appid");
 		}
-		
+    	User sessionUser = (User) session.getAttribute(Constants.USER);
+    	log.info("shwyLogin user in session :" + sessionUser);
+    	if (sessionUser != null) {
+			if (!sessionUser.getAliappid().equals(h5UserDTO.getAppid())) {
+				session.setMaxInactiveInterval(1);
+				session.removeAttribute(Constants.USER);
+				session.invalidate();
+				throw new BizValidateException(65, "clear user cache!");
+			}
+		}
 		long beginTime = System.currentTimeMillis();
     	log.info("h5Login : " + h5UserDTO);
     	if (StringUtils.isEmpty(h5UserDTO.getClientType())) {
@@ -1060,7 +1069,16 @@ public class UserController extends BaseController{
     	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
 			throw new BizValidateException("请传入支付宝appid");
 }
-		
+    	User sessionUser = (User) session.getAttribute(Constants.USER);
+    	log.info("lifepayLogin user in session :" + sessionUser);
+    	if (sessionUser != null) {
+			if (!sessionUser.getAliappid().equals(h5UserDTO.getAppid())) {
+				session.setMaxInactiveInterval(1);
+				session.removeAttribute(Constants.USER);
+				session.invalidate();
+				throw new BizValidateException(65, "clear user cache!");
+			}
+		}
 		long beginTime = System.currentTimeMillis();
     	log.info("lifepayLogin : " + h5UserDTO);
 		h5UserDTO.setClientType(ModelConstant.H5_USER_TYPE_ALIPAY);
@@ -1068,7 +1086,8 @@ public class UserController extends BaseController{
 		
     	User userAccount = userService.getUserByAliUserIdAndAliAppid(h5UserDTO.getUserId(), h5UserDTO.getAppid());
     	userAccount = userService.saveH5User(userAccount, h5UserDTO);
-    	
+    	log.info("lifepayLogin userId:{}, wuyeId:{}, aliuserid:{}, aliappid: {}", 
+    			userAccount.getId(), userAccount.getWuyeId(), userAccount.getAliuserid(), userAccount.getAliappid());
 		long endTime = System.currentTimeMillis();
 	    UserInfo userInfo = new UserInfo(userAccount);
 	    log.info("lifepay user:" + h5UserDTO.getUserId() + "login，耗时：" + ((endTime-beginTime)/1000));

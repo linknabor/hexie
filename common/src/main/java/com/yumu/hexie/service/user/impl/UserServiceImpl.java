@@ -634,6 +634,17 @@ public class UserServiceImpl implements UserService {
 	public void recacheMiniUser(User user) {
 		
 	}
+	
+	/**
+	 * 重新缓存user，如果用户在建立小程序用户之前，已经有了公众号用户
+	 * @param user
+	 * @return
+	 */
+	@Override
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.aliappid+'_'+#user.aliuserid")
+	public void recacheAliMiniUser(User user) {
+		
+	}
 
 
     @Override
@@ -1053,7 +1064,6 @@ public class UserServiceImpl implements UserService {
 //				user.setAppId(h5UserDTO.getAppid());
 			}
 		}
-		user.setTel(h5UserDTO.getMobile());
 		
 		if (ModelConstant.KEY_USER_SYS_SHWY.equals(h5UserDTO.getFrom())) {
 			if (!ModelConstant.KEY_USER_SYS_SHWY.equals(user.getOriSys())) {
@@ -1064,6 +1074,7 @@ public class UserServiceImpl implements UserService {
 				user.setOriUserId(auId);
 				user.setOriSys(ModelConstant.KEY_USER_SYS_SHWY);
 			}
+			user.setTel(h5UserDTO.getMobile());
 		} else if (ModelConstant.KEY_USER_SYS_LIFEPAY.equals(h5UserDTO.getFrom())) {
 			user.setOriSys(ModelConstant.KEY_USER_SYS_LIFEPAY);
 		}

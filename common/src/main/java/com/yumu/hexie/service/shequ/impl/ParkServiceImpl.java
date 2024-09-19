@@ -5,6 +5,7 @@ import com.yumu.hexie.integration.park.ParkUtil;
 import com.yumu.hexie.integration.park.req.PayUserCarInfo;
 import com.yumu.hexie.integration.park.req.SaveCarInfo;
 import com.yumu.hexie.integration.park.resp.*;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wuye.vo.WechatPayInfo;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.User;
