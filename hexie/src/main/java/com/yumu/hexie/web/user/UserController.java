@@ -583,7 +583,10 @@ public class UserController extends BaseController{
 				if(StringUtils.isEmpty(userOauth.getAppid())) {
 					userOauth.setAppid(vo.getAppid());
 				}
-				userAccount = userService.saveAlipayMiniUserToken(userOauth);
+				userAccount = userService.getUserByAliUserIdAndAliAppid(userOauth.getOpenid(), userOauth.getAppid());
+				if (userAccount == null) {
+					userAccount = userService.saveAlipayMiniUserToken(userOauth);
+				}
 			} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(vo.getSourceType())) {
 				AccessTokenOAuth oAuth = userService.getAccessTokenOAuth(vo.getCode(), vo.getAppid());
 				UserWeiXin weixinUser = new UserWeiXin();
