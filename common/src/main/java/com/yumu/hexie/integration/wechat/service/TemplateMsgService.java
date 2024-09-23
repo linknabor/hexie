@@ -705,7 +705,13 @@ public class TemplateMsgService {
 			} else if (msgType == 2) {
 				Map<String, Map<String, String>> map = new HashMap<>();
 				Map<String, String> dataMap = new HashMap<>();
-				dataMap.put("value", commentNotice.getContent());
+				String content = commentNotice.getContent();
+				if(!StringUtils.isEmpty(content)) {
+					if(content.length() > 20) {
+						content = content.substring(0, 15) + "...";
+					}
+				}
+				dataMap.put("value", content);
 				map.put("thing3", dataMap);
 				
 				dataMap = new HashMap<>();
@@ -713,7 +719,13 @@ public class TemplateMsgService {
 				map.put("time4", dataMap);
 				
 				dataMap = new HashMap<>();
-				dataMap.put("value", commentNotice.getCommentName());
+				String commentName = commentNotice.getCommentName();
+				if(!StringUtils.isEmpty(commentName)) {
+					if(commentName.length() > 20) {
+						commentName = commentName.substring(0, 15) + "...";
+					}
+				}
+				dataMap.put("value", commentName);
 				map.put("thing1", dataMap);
 				
 				dataMap = new HashMap<>();
