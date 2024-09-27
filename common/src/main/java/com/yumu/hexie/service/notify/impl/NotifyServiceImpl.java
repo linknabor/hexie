@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -645,6 +646,8 @@ public class NotifyServiceImpl implements NotifyService {
 			user.setCspId(notice.getCsp_id());
 			user.setSectId(notice.getSect_id());
 			user.setTel(notice.getPhone());
+			user.setXiaoquName(notice.getSect_name());
+			user.setRegisterDate(System.currentTimeMillis());
 			user.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 		} else {
 			if(StringUtils.isEmpty(user.getMiniopenid())) {
@@ -654,9 +657,11 @@ public class NotifyServiceImpl implements NotifyService {
 				user.setCspId(notice.getCsp_id());
 				user.setSectId(notice.getSect_id());
 				user.setTel(notice.getPhone());
+				user.setRegisterDate(System.currentTimeMillis());
+				user.setXiaoquName(notice.getSect_name());
 			}
 		}
-		userRepository.save(user);
+		saveOutSidUser(user);
 
 		//3.生成wuyeId
 		if(StringUtils.isEmpty(user.getWuyeId())) {
@@ -672,6 +677,11 @@ public class NotifyServiceImpl implements NotifyService {
 		} else {
 			log.error("data_type值不合法，本次不做绑房子操作");
 		}
+	}
+
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	public void saveOutSidUser(User user) {
+		userRepository.save(user);
 	}
 
 }

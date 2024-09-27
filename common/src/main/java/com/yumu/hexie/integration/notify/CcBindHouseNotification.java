@@ -20,6 +20,7 @@ public class CcBindHouseNotification implements Serializable {
     private String house_id;
     private String area;
     private String data_type;
+    private String sect_name;
 
     public String getAppid() {
         return appid;
@@ -101,6 +102,14 @@ public class CcBindHouseNotification implements Serializable {
         this.data_type = data_type;
     }
 
+    public String getSect_name() {
+        return sect_name;
+    }
+
+    public void setSect_name(String sect_name) {
+        this.sect_name = sect_name;
+    }
+
     @Override
     public String toString() {
         return "CcBindHouseNotification{" +
@@ -114,6 +123,7 @@ public class CcBindHouseNotification implements Serializable {
                 ", house_id='" + house_id + '\'' +
                 ", area='" + area + '\'' +
                 ", data_type='" + data_type + '\'' +
+                ", sect_name='" + sect_name + '\'' +
                 '}';
     }
 }
