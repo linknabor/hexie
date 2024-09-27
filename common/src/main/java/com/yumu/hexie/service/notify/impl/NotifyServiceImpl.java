@@ -645,6 +645,8 @@ public class NotifyServiceImpl implements NotifyService {
 			user.setCspId(notice.getCsp_id());
 			user.setSectId(notice.getSect_id());
 			user.setTel(notice.getPhone());
+			user.setXiaoquName(notice.getSect_name());
+			user.setRegisterDate(System.currentTimeMillis());
 			user.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 		} else {
 			if(StringUtils.isEmpty(user.getMiniopenid())) {
@@ -654,6 +656,8 @@ public class NotifyServiceImpl implements NotifyService {
 				user.setCspId(notice.getCsp_id());
 				user.setSectId(notice.getSect_id());
 				user.setTel(notice.getPhone());
+				user.setRegisterDate(System.currentTimeMillis());
+				user.setXiaoquName(notice.getSect_name());
 			}
 		}
 		userRepository.save(user);
