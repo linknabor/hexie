@@ -583,7 +583,10 @@ public class UserController extends BaseController{
 				if(StringUtils.isEmpty(userOauth.getAppid())) {
 					userOauth.setAppid(vo.getAppid());
 				}
-				userAccount = userService.saveAlipayMiniUserToken(userOauth);
+				userAccount = userService.getUserByAliUserIdAndAliAppid(userOauth.getOpenid(), userOauth.getAppid());
+				if (userAccount == null) {
+					userAccount = userService.saveAlipayMiniUserToken(userOauth);
+				}
 			} else if(ModelConstant.H5_USER_TYPE_WECHAT.equals(vo.getSourceType())) {
 				AccessTokenOAuth oAuth = userService.getAccessTokenOAuth(vo.getCode(), vo.getAppid());
 				UserWeiXin weixinUser = new UserWeiXin();
@@ -602,6 +605,24 @@ public class UserController extends BaseController{
 		UserInfo userInfo = new UserInfo(userAccount);
 		session.setAttribute(Constants.USER, userAccount);
 		return new BaseResult<UserInfo>().success(userInfo);
+    }
+	
+	/**
+     * 静默授权获取用户openid-alipay
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/authorizeAlipay/{code}", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<Map<String, String>> authorizeAlipay(@PathVariable String code) throws Exception {
+		
+		Map<String, String> map = new HashMap<>();
+		if (StringUtil.isNotEmpty(code)) {
+			AccessTokenOAuth oauth = userService.getAlipayAuth(code);
+	    	map.put("userid", oauth.getOpenid());
+		}
+		return new BaseResult<Map<String, String>>().success(map);
     }
 
 	/**

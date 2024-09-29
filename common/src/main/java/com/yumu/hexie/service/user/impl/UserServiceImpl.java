@@ -984,7 +984,6 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
     @Transactional
-    @CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#appid+'_'+#userid")
     public User saveAlipayMiniUserToken(AccessTokenOAuth accessTokenOAuth) {
     	logger.info("accessTokenOAuth : " + accessTokenOAuth);
         
