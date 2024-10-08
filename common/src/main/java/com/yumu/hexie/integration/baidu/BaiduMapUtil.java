@@ -20,9 +20,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.baidu.resp.GeoCodeRespV2;
+import com.yumu.hexie.integration.baidu.resp.GeoCodeRespV2.GeoCodeResult;
 
 @Component
 public class BaiduMapUtil {
@@ -31,6 +34,9 @@ public class BaiduMapUtil {
 	
 	private static final String OUTPUT = "json";
 
+	private static final String REVERSE_GEOCODE_V2 = "http://api.map.baidu.com/geocoder/v2/";
+	private static final String REVERSE_GEOCODE_V3 = "https://api.map.baidu.com/reverse_geocoding/v3/";
+	
 	@Value("${baidu.map.key}")
 	private String baiduMapKey;
 	
@@ -74,12 +80,31 @@ public class BaiduMapUtil {
 	}
 	
 	/**
-	 * 通过坐标获取市
+	 * 通过经纬度获取地址v2
 	 */
 	public String findByBaiduGetCity(String coordinate) {
+		String city = "";
+		if(StringUtils.isEmpty(coordinate)) {
+			return city;
+		}
+		GeoCodeRespV2 geoCodeRespV2 = getLocationByCoordinateV2(coordinate);
+		if (geoCodeRespV2 == null) {
+			return city;
+		}
+		GeoCodeResult geoResult = geoCodeRespV2.getResult();
+		if (geoResult != null && geoResult.getAddressComponent() != null) {
+			city = geoResult.getAddressComponent().getProvince();
+		}
+		return city;
+	}
+	
+	/**
+	 * 通过经纬度获取地址v2
+	 */
+	public GeoCodeRespV2 getLocationByCoordinateV2(String coordinate) {
 		
 		if(StringUtils.isEmpty(coordinate)) {
-			return "";
+			return null;
 		}
 		String[] coors = coordinate.split(",");
 		String lng = coors[0];
@@ -92,23 +117,56 @@ public class BaiduMapUtil {
 		paramsMap.add("output", OUTPUT);
 		paramsMap.add("ak", baiduMapKey);
 		
-		String requestUrl = "http://api.map.baidu.com/geocoder/v2/";
+		String requestUrl = REVERSE_GEOCODE_V2;
 		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(requestUrl);
 		URI uri = builder.queryParams(paramsMap).build().encode().toUri();
-		logger.info("baiduMap util, request url : " + requestUrl + "param : " + paramsMap);
+		logger.info("baidu map geocode v2, request url : " + requestUrl + "param : " + paramsMap);
 		ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, null, String.class);
-		logger.info("baiduMap util, response : " + response);
+		logger.info("baidu map geocode v2, response : " + response);
+		
+		GeoCodeRespV2 geoCodeRespV2 = null;
+		if (HttpStatus.OK == response.getStatusCode()) {
+			try {
+				String str = response.getBody();
+				TypeReference<GeoCodeRespV2> typeReference = new TypeReference<GeoCodeRespV2>() {};
+				geoCodeRespV2 = JacksonJsonUtil.getMapperInstance(false).readValue(str, typeReference);
+			} catch (Exception e) {
+				logger.error(e.getMessage(),e);
+			}
+		}
+		return geoCodeRespV2;
+	}
+	
+	/**
+	 * 通过经纬度获取地址v3
+	 */
+	public String getLocationByCoordinateV3(String coordinate) {
+		
+		if(StringUtils.isEmpty(coordinate)) {
+			return "";
+		}
+		String[] coors = coordinate.split(",");
+		String lng = coors[0];
+		String lat = coors[1];
+		coordinate = lat+","+lng;
+		LinkedMultiValueMap<String, String> paramsMap = new LinkedMultiValueMap<String, String>();
+		paramsMap.add("location", coordinate);//lat<纬度>,lng<经度>
+		paramsMap.add("extensions_poi", "1");
+		paramsMap.add("output", OUTPUT);
+		paramsMap.add("ak", baiduMapKey);
+		
+		String requestUrl = REVERSE_GEOCODE_V3;
+		UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(requestUrl);
+		URI uri = builder.queryParams(paramsMap).build().encode().toUri();
+		logger.info("baidu map geocode v3, request url : " + requestUrl + "param : " + paramsMap);
+		ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, null, String.class);
+		logger.info("baidu map geocode v3, response : " + response);
 		
 		String city = "";
 		if (HttpStatus.OK == response.getStatusCode()) {
 			try {
 				String str = response.getBody();
-				ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
-				@SuppressWarnings("unchecked")
-				LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, ?>>> map = objectMapper.readValue(str, LinkedHashMap.class);
-				LinkedHashMap<String, LinkedHashMap<String, ?>> mapResult = map.get("result");
-				city = (String) mapResult.get("addressComponent").get("province");
-				
+				logger.info("v3 response : " + str);
 			} catch (Exception e) {
 				logger.error(e.getMessage(),e);
 			}
