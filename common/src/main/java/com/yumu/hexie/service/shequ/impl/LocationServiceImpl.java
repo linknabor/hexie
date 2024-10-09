@@ -16,11 +16,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
+import com.yumu.hexie.integration.baidu.resp.GeoCodeRespV2;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.baidu.vo.RegionVo.RegionSelection;
+import com.yumu.hexie.integration.wuye.WuyeUtil2;
+import com.yumu.hexie.integration.wuye.resp.RadiusSect;
 import com.yumu.hexie.model.region.RegionUrl;
 import com.yumu.hexie.model.region.RegionUrlRepository;
+import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.shequ.LocationService;
+import com.yumu.hexie.service.shequ.req.RadiusSectReq;
+import com.yumu.hexie.service.shequ.vo.LocationVO;
 
 @Service
 public class LocationServiceImpl implements LocationService {
@@ -38,9 +44,10 @@ public class LocationServiceImpl implements LocationService {
 	
 	@Autowired
 	private BaiduMapUtil baiduMapUtil;
-	
 	@Autowired
 	private RegionUrlRepository regionUrlRepository;
+	@Autowired
+	private WuyeUtil2 wuyeUtil2;
 	
 	@PostConstruct
 	public void initRegionUrlCache() {
@@ -73,8 +80,8 @@ public class LocationServiceImpl implements LocationService {
 		
 		RegionVo vo = new RegionVo();
 		if (!StringUtils.isEmpty(coordinate)) {
-			coordinate = baiduMapUtil.findByCoordinateGetBaidu(coordinate);
-			String name = baiduMapUtil.findByBaiduGetCity(coordinate);
+			String bdCoordinate = convertWGS842Bd(coordinate);
+			String name = baiduMapUtil.findByBaiduGetCity(bdCoordinate);
 			logger.info("坐标:" + coordinate + ", 对应地址："+name);
 			vo = getRegionUrlFromCache(name);
 		}
@@ -122,7 +129,60 @@ public class LocationServiceImpl implements LocationService {
 		return codeUrlMap;
 	}
 	
+	/**
+	 * 根据用户地理位置获取附近的小区
+	 * @param coordinate
+	 * @throws Exception 
+	 */
+	@Override
+	public List<RadiusSect> querySectNearby(User user, RadiusSectReq radiusSectReq) throws Exception {
 	
+		//先将WGS84转换百度地图坐标系
+		String converted = convertWGS842Bd(radiusSectReq.getCoordinate());	
+		radiusSectReq.setBdCoordinate(converted);
+		return wuyeUtil2.querySectNearby(user, radiusSectReq).getData();
+	}
 	
+	/**
+	 * 将WGS84坐标系转换成BD09II
+	 * @return
+	 */
+	private String convertWGS842Bd(String wgsCoordinate) {
+		return baiduMapUtil.findByCoordinateGetBaidu(wgsCoordinate);
+	}
+	
+	/**
+	 * 获取用户当前位置信息和附近小区信息
+	 * @param user
+	 * @param radiusSectReq
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	public LocationVO getLocationInfo(User user, RadiusSectReq radiusSectReq) throws Exception {
+		
+		//先将WGS84转换百度地图坐标系
+		String bdCoordinate = convertWGS842Bd(radiusSectReq.getCoordinate());
+		bdCoordinate = "121.387456,31.25103";	//TODO for test
+		radiusSectReq.setBdCoordinate(bdCoordinate);
+		//获取附近小区
+		List<RadiusSect> sectList = wuyeUtil2.querySectNearby(user, radiusSectReq).getData();
+		GeoCodeRespV2 geoCodeResp = baiduMapUtil.getLocationByCoordinateV2(bdCoordinate);
+		String province = "";
+		String formattedAddress = "";
+		if (geoCodeResp != null) {
+			if (geoCodeResp.getResult().getAddressComponent() != null) {
+				province = geoCodeResp.getResult().getAddressComponent().getProvince();
+			}
+			formattedAddress = geoCodeResp.getResult().getFormatted_address();
+		}
+		RegionVo regionVo = getRegionUrlFromCache(province);
+		LocationVO locationVO = new LocationVO();
+		locationVO.setProvince(regionVo.getAddress());
+		locationVO.setProvinceAbbr(regionVo.getShowAddress());
+		locationVO.setSectList(sectList);
+		locationVO.setFormattedAddress(formattedAddress);
+		return locationVO;
+	}
 
 }

@@ -80,7 +80,7 @@ public class BaiduMapUtil {
 	}
 	
 	/**
-	 * 通过经纬度获取地址v2
+	 * 通过经纬度获取所在省份
 	 */
 	public String findByBaiduGetCity(String coordinate) {
 		String city = "";
