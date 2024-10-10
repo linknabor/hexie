@@ -257,8 +257,7 @@ public class UserController extends BaseController{
 //					httpSession.removeAttribute(Constants.USER);
 					httpSession.invalidate();
 					Thread.sleep(1500l);
-					httpSession = request.getSession(true);
-					log.info("httpSession : {}", httpSession );
+					log.info("sessionId after invalidated : {}", httpSession!=null?httpSession.getId():"");
 				}
 				return new BaseResult<UserInfo>().success(null);
 			}
