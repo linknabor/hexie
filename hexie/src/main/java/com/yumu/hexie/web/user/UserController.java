@@ -252,10 +252,15 @@ public class UserController extends BaseController{
 				log.error("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
 				HttpSession httpSession = request.getSession(false);
 				if (httpSession != null) {
-					log.error("will invalidate current session !");
+					log.info("will invalidate current session, sessionId : " + httpSession.getId());
 					httpSession.setMaxInactiveInterval(1);
 					httpSession.removeAttribute(Constants.USER);
 					httpSession.invalidate();
+					Thread.sleep(1500l);
+					log.info("httpSession : {}", httpSession );
+					if (httpSession != null) {
+						log.info("httpSession id : {}", httpSession.getId());
+					}
 				}
 				return new BaseResult<UserInfo>().success(null);
 			}
