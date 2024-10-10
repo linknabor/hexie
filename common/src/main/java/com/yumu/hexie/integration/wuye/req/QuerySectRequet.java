@@ -69,6 +69,13 @@ public class QuerySectRequet extends WuyeRequest {
 		return province;
 	}
 	public void setProvince(String province) {
+		if (!StringUtils.isEmpty(province)) {
+			try {
+				province = URLEncoder.encode(province, "GBK");
+			} catch (UnsupportedEncodingException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
 		this.province = province;
 	}
 	@Override
