@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.baidu.resp;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class GeoCodeRespV2 implements Serializable {
 
@@ -37,6 +38,7 @@ public class GeoCodeRespV2 implements Serializable {
 		private String business;	//坐标所在商圈信息，如 "人民大学,中关村,苏州街"。最多返回3个。
 		private AddressComponent addressComponent;	//行政区划
 		private String sematic_description;	//当前位置结合POI的语义化结果描述。需设置extensions_poi=1才能返回。
+		private List<GeoCodePois> pois;
 		
 		public GeoCodeLocation getLocation() {
 			return location;
@@ -80,7 +82,12 @@ public class GeoCodeRespV2 implements Serializable {
 		public void setAddressComponent(AddressComponent addressComponent) {
 			this.addressComponent = addressComponent;
 		}
-		
+		public List<GeoCodePois> getPois() {
+			return pois;
+		}
+		public void setPois(List<GeoCodePois> pois) {
+			this.pois = pois;
+		}
 	}
 	
 	public static class GeoCodeLocation {
@@ -216,6 +223,38 @@ public class GeoCodeRespV2 implements Serializable {
 		}
 		public void setDistance(String distance) {
 			this.distance = distance;
+		}
+	}
+	
+	public static class GeoCodePois {
+		private String addr;	//浦东张江新区学林路36弄11号楼
+		private String direction;	//内
+		private String distance;
+		private String name;	//博彦科技(上海)大楼
+		
+		public String getAddr() {
+			return addr;
+		}
+		public void setAddr(String addr) {
+			this.addr = addr;
+		}
+		public String getDirection() {
+			return direction;
+		}
+		public void setDirection(String direction) {
+			this.direction = direction;
+		}
+		public String getDistance() {
+			return distance;
+		}
+		public void setDistance(String distance) {
+			this.distance = distance;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 	

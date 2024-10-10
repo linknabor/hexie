@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.shequ.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.resp.GeoCodeRespV2;
+import com.yumu.hexie.integration.baidu.resp.GeoCodeRespV2.GeoCodePois;
 import com.yumu.hexie.integration.baidu.vo.RegionVo;
 import com.yumu.hexie.integration.baidu.vo.RegionVo.RegionSelection;
 import com.yumu.hexie.integration.wuye.WuyeUtil2;
@@ -168,19 +170,34 @@ public class LocationServiceImpl implements LocationService {
 		List<RadiusSect> sectList = wuyeUtil2.querySectNearby(user, radiusSectReq).getData();
 		GeoCodeRespV2 geoCodeResp = baiduMapUtil.getLocationByCoordinateV2(bdCoordinate);
 		String province = "";
-		String formattedAddress = "";
+		String addr = "";
+		String addrName = "";
 		if (geoCodeResp != null) {
 			if (geoCodeResp.getResult().getAddressComponent() != null) {
 				province = geoCodeResp.getResult().getAddressComponent().getProvince();
 			}
-			formattedAddress = geoCodeResp.getResult().getFormatted_address();
+			if (geoCodeResp.getResult().getPois() != null) {
+				List<GeoCodePois> poisList = geoCodeResp.getResult().getPois();
+				if (poisList != null) {
+					GeoCodePois geoCodePois = poisList.stream()
+							.sorted(Comparator.comparingInt(pois -> Integer.valueOf(StringUtils.isEmpty(pois.getDistance())?"9999":pois.getDistance())))
+							.findFirst()
+							.orElse(new GeoCodePois());
+					
+					if (!StringUtils.isEmpty(geoCodePois.getAddr())) {
+						addr = geoCodePois.getAddr();
+						addrName = geoCodePois.getName();
+					}
+				}
+			}
 		}
 		RegionVo regionVo = getRegionUrlFromCache(province);
 		LocationVO locationVO = new LocationVO();
 		locationVO.setProvince(regionVo.getAddress());
 		locationVO.setProvinceAbbr(regionVo.getShowAddress());
 		locationVO.setSectList(sectList);
-		locationVO.setFormattedAddress(formattedAddress);
+		locationVO.setCurrentAddr(addr);
+		locationVO.setCurrentName(addrName);
 		return locationVO;
 	}
 
