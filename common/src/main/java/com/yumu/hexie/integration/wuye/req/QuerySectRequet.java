@@ -26,6 +26,7 @@ public class QuerySectRequet extends WuyeRequest {
 	private String queryAppid;
 	@JsonProperty("client_type")
 	private String clientType;
+	private String province;
 	
 	public String getSectName() {
 		return sectName;
@@ -64,10 +65,16 @@ public class QuerySectRequet extends WuyeRequest {
 	public void setClientType(String clientType) {
 		this.clientType = clientType;
 	}
+	public String getProvince() {
+		return province;
+	}
+	public void setProvince(String province) {
+		this.province = province;
+	}
 	@Override
 	public String toString() {
 		return "QuerySectRequet [logger=" + logger + ", sectName=" + sectName + ", openid=" + openid + ", appid="
-				+ appid + ", queryAppid=" + queryAppid + ", clientType=" + clientType + "]";
+				+ appid + ", queryAppid=" + queryAppid + ", clientType=" + clientType + ", province=" + province + "]";
 	}
 	
 }

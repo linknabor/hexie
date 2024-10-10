@@ -638,6 +638,7 @@ public class WuyeUtil2 {
 		querySectRequet.setOpenid(user.getOpenid());
 		querySectRequet.setAppid(user.getAppId());
 		querySectRequet.setQueryAppid(queryAppid);
+		querySectRequet.setProvince(regionName);
 		if (!StringUtils.isEmpty(queryAppid)) {
 			String clientType = "0";
 			if (queryAppid.equals(user.getMiniAppId())) {

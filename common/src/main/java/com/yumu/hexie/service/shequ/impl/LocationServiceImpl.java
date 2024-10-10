@@ -163,7 +163,6 @@ public class LocationServiceImpl implements LocationService {
 		
 		//先将WGS84转换百度地图坐标系
 		String bdCoordinate = convertWGS842Bd(radiusSectReq.getCoordinate());
-		bdCoordinate = "121.387456,31.25103";	//TODO for test
 		radiusSectReq.setBdCoordinate(bdCoordinate);
 		//获取附近小区
 		List<RadiusSect> sectList = wuyeUtil2.querySectNearby(user, radiusSectReq).getData();
