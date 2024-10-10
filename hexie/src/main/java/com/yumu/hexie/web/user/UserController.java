@@ -253,14 +253,12 @@ public class UserController extends BaseController{
 				HttpSession httpSession = request.getSession(false);
 				if (httpSession != null) {
 					log.info("will invalidate current session, sessionId : " + httpSession.getId());
-					httpSession.setMaxInactiveInterval(1);
-					httpSession.removeAttribute(Constants.USER);
+//					httpSession.setMaxInactiveInterval(1);
+//					httpSession.removeAttribute(Constants.USER);
 					httpSession.invalidate();
 					Thread.sleep(1500l);
+					httpSession = request.getSession(true);
 					log.info("httpSession : {}", httpSession );
-					if (httpSession != null) {
-						log.info("httpSession id : {}", httpSession.getId());
-					}
 				}
 				return new BaseResult<UserInfo>().success(null);
 			}
