@@ -28,7 +28,7 @@ public class HttpSessionConfig {
 				cookieSerializer.setUseHttpOnlyCookie(false);
 				cookieSerializer.setSameSite("None");
 				cookieSerializer.setCookiePath("/");
-				cookieSerializer.setUseSecureCookie(true);
+				cookieSerializer.setUseSecureCookie(false);
 			}
 			return cookieSerializer;
 		}
