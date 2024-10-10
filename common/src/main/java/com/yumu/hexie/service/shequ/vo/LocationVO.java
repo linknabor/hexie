@@ -15,7 +15,8 @@ public class LocationVO implements Serializable {
 	private List<RadiusSect> sectList;
 	private String province;	//省份
 	private String provinceAbbr;	//省份缩写
-	private String formattedAddress;	//格式化后的地址
+	private String currentAddr;	//当前地址
+	private String currentName;	//当前地址名称
 	
 	public List<RadiusSect> getSectList() {
 		return sectList;
@@ -35,17 +36,21 @@ public class LocationVO implements Serializable {
 	public void setProvinceAbbr(String provinceAbbr) {
 		this.provinceAbbr = provinceAbbr;
 	}
-	public String getFormattedAddress() {
-		return formattedAddress;
+	public String getCurrentAddr() {
+		return currentAddr;
 	}
-	public void setFormattedAddress(String formattedAddress) {
-		this.formattedAddress = formattedAddress;
+	public void setCurrentAddr(String currentAddr) {
+		this.currentAddr = currentAddr;
+	}
+	public String getCurrentName() {
+		return currentName;
+	}
+	public void setCurrentName(String currentName) {
+		this.currentName = currentName;
 	}
 	@Override
 	public String toString() {
 		return "LocationVO [sectList=" + sectList + ", province=" + province + ", provinceAbbr=" + provinceAbbr
-				+ ", formattedAddress=" + formattedAddress + "]";
+				+ ", currentAddr=" + currentAddr + ", currentName=" + currentName + "]";
 	}
-	
-	
 }
