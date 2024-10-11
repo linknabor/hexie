@@ -103,7 +103,6 @@ public class UserController extends BaseController{
 		long beginTime = System.currentTimeMillis();
 		User dbUser = null;
 		try {
-
 			String oriApp = request.getParameter("oriApp");
 			if (StringUtil.isEmpty(oriApp)) {
 				oriApp = ConstantWeChat.APPID;
@@ -249,12 +248,15 @@ public class UserController extends BaseController{
 
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-				log.error("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
-				HttpSession httpSession = request.getSession(false);
+				log.info("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
+				HttpSession httpSession = request.getSession();
 				if (httpSession != null) {
 					log.info("will invalidate current session, sessionId : " + httpSession.getId());
-//					httpSession.setMaxInactiveInterval(1);
+					//sessionAttr:sessionUser
 					httpSession.removeAttribute(Constants.USER);
+					//below for debug
+					User sessionUser = (User) httpSession.getAttribute(Constants.USER);
+					log.info("sessionUser : {}", sessionUser);
 					httpSession.invalidate();
 					Thread.sleep(1000l);
 				}
