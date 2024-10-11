@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
 		if (userAccount == null) {	//如果是空，根据unionid再查一遍
 			if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
 				List<User> users = getUsersByUnionid(weixinUser.getUnionid());
-				userAccount = users.stream().filter(u -> !StringUtils.isEmpty(u.getMiniopenid())).findFirst().orElse(null);
+				userAccount = users.stream().filter(u -> !StringUtils.isEmpty(u.getMiniopenid()) && StringUtils.isEmpty(u.getAppId())).findFirst().orElse(null);
 			}
 		}
 		if (userAccount == null) {
@@ -201,7 +201,9 @@ public class UserServiceImpl implements UserService {
 			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 
 		} else {
-			if (StringUtils.isEmpty(userAccount.getOpenid()) || "0".equals(userAccount.getOpenid())) {
+			if (StringUtils.isEmpty(userAccount.getAppId())) {
+				String appid = StringUtils.isEmpty(oriApp)?ConstantWeChat.APPID:oriApp;
+				userAccount.setAppId(appid);
 				userAccount.setOpenid(weixinUser.getOpenid());	//如果小程序用户先创建，这个用户是没有openid的，后续从公众号登陆进来要更新openid
 				userAccount.setName(weixinUser.getNickname());
 				userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
@@ -227,15 +229,6 @@ public class UserServiceImpl implements UserService {
 		}
 		if (!StringUtils.isEmpty(weixinUser.getUnionid()) && StringUtils.isEmpty(userAccount.getUnionid())) {
 			userAccount.setUnionid(weixinUser.getUnionid());
-		}
-
-		// 更新用户appId
-		if (StringUtils.isEmpty(userAccount.getAppId())) {
-			if (StringUtils.isEmpty(oriApp)) {
-				userAccount.setAppId(ConstantWeChat.APPID); // 合协用户填这个
-			} else {
-				userAccount.setAppId(oriApp); // 其他系统用户填自己的appId
-			}
 		}
 		
 		//关联用户会员卡信息
