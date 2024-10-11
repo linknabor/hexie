@@ -117,7 +117,6 @@ public class UserController extends BaseController{
 					dbUser = null;
 				}
 			}
-			
 			log.info("user in db :" + dbUser);
 			if(dbUser != null){
 				
@@ -254,9 +253,6 @@ public class UserController extends BaseController{
 					log.info("will invalidate current session, sessionId : " + httpSession.getId());
 					//sessionAttr:sessionUser
 					httpSession.removeAttribute(Constants.USER);
-					//below for debug
-					User sessionUser = (User) httpSession.getAttribute(Constants.USER);
-					log.info("sessionUser : {}", sessionUser);
 					httpSession.invalidate();
 					Thread.sleep(1000l);
 				}
