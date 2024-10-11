@@ -180,7 +180,7 @@ public class UserServiceImpl implements UserService {
 		if (userAccount == null) {	//如果是空，根据unionid再查一遍
 			if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
 				List<User> users = getUsersByUnionid(weixinUser.getUnionid());
-				userAccount = users.stream().filter(u -> u.getOpenid().equals(weixinUser.getOpenid())).findFirst().orElse(null);
+				userAccount = users.stream().filter(u -> !StringUtils.isEmpty(u.getMiniopenid())).findFirst().orElse(null);
 			}
 		}
 		if (userAccount == null) {
@@ -201,8 +201,8 @@ public class UserServiceImpl implements UserService {
 			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 
 		} else {
-
-			if (StringUtil.isEmpty(userAccount.getNickname())) {
+			if (StringUtils.isEmpty(userAccount.getOpenid())) {
+				userAccount.setOpenid(weixinUser.getOpenid());	//如果小程序用户先创建，这个用户是没有openid的，后续从公众号登陆进来要更新openid
 				userAccount.setName(weixinUser.getNickname());
 				userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
 				userAccount.setNickname(weixinUser.getNickname());
@@ -213,20 +213,20 @@ public class UserServiceImpl implements UserService {
 					userAccount.setCity(weixinUser.getCity());
 				}
 				userAccount.setLanguage(weixinUser.getLanguage());
-				if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
-					userAccount.setUnionid(weixinUser.getUnionid());
-				}
 				// 从网页进入时下面两个值为空
 				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 				userAccount.setSubscribe(weixinUser.getSubscribe());
-				if (StringUtils.isEmpty(userAccount.getOpenid())) {
-					userAccount.setOpenid(weixinUser.getOpenid());	//如果小程序用户先创建，这个用户是没有openid的，后续从公众号登陆进来要更新openid
-				}
-
-			} else if (weixinUser.getSubscribe() != null && weixinUser.getSubscribe() != userAccount.getSubscribe()) {
+				
+			}
+		}
+		if (weixinUser.getOpenid().equals(userAccount.getOpenid())) {
+			if(weixinUser.getSubscribe() != null && weixinUser.getSubscribe() != userAccount.getSubscribe()) {
 				userAccount.setSubscribe(weixinUser.getSubscribe());
 				userAccount.setSubscribe_time(weixinUser.getSubscribe_time());
 			}
+		}
+		if (!StringUtils.isEmpty(weixinUser.getUnionid()) && StringUtils.isEmpty(userAccount.getUnionid())) {
+			userAccount.setUnionid(weixinUser.getUnionid());
 		}
 
 		// 更新用户appId
