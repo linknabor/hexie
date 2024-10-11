@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	@Cacheable(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#sessonUser.openid", unless = "#result == null")
+	@Cacheable(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#sessonUser.openid", unless = "#dbUser == null")
 	public User getByOpenIdFromCache(User sessonUser) {
 		
 		User dbUser = null;
@@ -167,9 +167,12 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
+	/**
+	 * 这个函数只有公众号或者h5用户调用，只根据openid判断，没有判断miniopenid,小程序用户不要调用
+	 */
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#weixinUser.openid")
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#weixinUser.openid", condition = "#weixinUser.openid != null")
 	public User updateUserLoginInfo(UserWeiXin weixinUser, String oriApp) {
 
 		String openId = weixinUser.getOpenid();
@@ -177,6 +180,11 @@ public class UserServiceImpl implements UserService {
 		if (userAccount == null) {	//如果是空，根据unionid再差一遍
 			if (!StringUtils.isEmpty(weixinUser.getUnionid())) {
 				userAccount = getByUnionid(weixinUser.getUnionid());
+				if (userAccount != null) {
+					if (!userAccount.getOpenid().equals(weixinUser.getOpenid())) {
+						userAccount = null;
+					}
+				}
 			}
 		}
 
@@ -650,10 +658,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getByUnionid(String unionid) {
     	List<User> list = userRepository.findByUnionid(unionid);
-    	User user = null;
-    	if (list!=null && list.size()>0) {
-    		user = list.get(0);
-		}
+    	User user = list.stream().findFirst().orElse(null);
         return user;
     }
 
