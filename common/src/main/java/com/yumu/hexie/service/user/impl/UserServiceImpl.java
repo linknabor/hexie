@@ -860,7 +860,7 @@ public class UserServiceImpl implements UserService {
 
 	/**
 	 * 通过微信关注事件，绑定小程序用户
-	 * 1.已经关注过合协的用户，并且已经形成用户的，则关联小程序用户（如果小程序用户存在）
+	 * 1.小程序用户已存在，但公众号用户不存在的（没有openid或者openid为0的），需要将公众号用户的openid和appid更新到该小程序用户上
 	 * 2.新关注用户，在user表中并未形成数据的，这里需要新建一个
 	 */
 	@Override
@@ -892,7 +892,7 @@ public class UserServiceImpl implements UserService {
 			return true;
 		}
 		List<User> users = getUsersByUnionid(unionid);
-		User dbUser = users.stream().findFirst().orElse(null);	//取第一条，小程序一对多个公众号的情况仅限测试环境和我家大楼。我家大楼公众号上的挂的小程序是合协的
+		User dbUser = users.stream().filter(u -> !StringUtils.isEmpty(u.getMiniopenid()) && StringUtils.isEmpty(u.getAppId())).findFirst().orElse(null);
 		if (dbUser == null) {
 			//如果数据库中没有有关联的用户，需要新建用户
 			logger.info("no related wechat user, will create new user, user openid : " + openid + ", appid : " + appid);
@@ -954,14 +954,12 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			if (!StringUtils.isEmpty(unionid)) {
 				List<User> users = getUsersByUnionid(unionid);
-				User unionUser = users.stream().filter(u -> StringUtils.isEmpty(u.getAppId())).findFirst().orElse(null);
-				if (!users.isEmpty()) {
-					if (unionUser != null) {
-						logger.info("updateUserUnionid, unionUser : " + unionUser);
-						unionUser.setOpenid(openid);
-						unionUser.setAppId(appid);
-						userRepository.save(unionUser);
-					}
+				User unionUser = users.stream().filter(u -> !StringUtils.isEmpty(u.getMiniopenid()) && StringUtils.isEmpty(u.getAppId())).findFirst().orElse(null);
+				if (unionUser != null) {
+					logger.info("updateUserUnionid, unionUser : " + unionUser);
+					unionUser.setOpenid(openid);
+					unionUser.setAppId(appid);
+					userRepository.save(unionUser);
 				} else {
 					needCreate = true;
 				}
