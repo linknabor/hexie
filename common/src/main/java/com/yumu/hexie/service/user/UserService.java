@@ -142,6 +142,13 @@ public interface UserService {
 	User getByUnionid(String unionid);
 	
 	/**
+	 * 通过unionid获取用户信息
+	 * @param unionid
+	 * @return
+	 */
+	List<User> getUsersByUnionid(String unionid);
+	
+	/**
 	 * 保存小程序用户sessionKey
 	 * @param miniUser
 	 * @return
