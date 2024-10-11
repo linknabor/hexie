@@ -201,7 +201,7 @@ public class UserServiceImpl implements UserService {
 			userAccount.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
 
 		} else {
-			if (StringUtils.isEmpty(userAccount.getOpenid())) {
+			if (StringUtils.isEmpty(userAccount.getOpenid()) || "0".equals(userAccount.getAppId())) {
 				userAccount.setOpenid(weixinUser.getOpenid());	//如果小程序用户先创建，这个用户是没有openid的，后续从公众号登陆进来要更新openid
 				userAccount.setName(weixinUser.getNickname());
 				userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
