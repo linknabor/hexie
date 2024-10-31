@@ -103,7 +103,6 @@ public class UserController extends BaseController{
 		long beginTime = System.currentTimeMillis();
 		User dbUser = null;
 		try {
-
 			String oriApp = request.getParameter("oriApp");
 			if (StringUtil.isEmpty(oriApp)) {
 				oriApp = ConstantWeChat.APPID;
@@ -118,7 +117,6 @@ public class UserController extends BaseController{
 					dbUser = null;
 				}
 			}
-			
 			log.info("user in db :" + dbUser);
 			if(dbUser != null){
 				
@@ -249,13 +247,14 @@ public class UserController extends BaseController{
 
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-				log.error("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
-				HttpSession httpSession = request.getSession(false);
+				log.info("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
+				HttpSession httpSession = request.getSession();
 				if (httpSession != null) {
-					log.error("will invalidate current session !");
-					httpSession.setMaxInactiveInterval(1);
+					log.info("will invalidate current session, sessionId : " + httpSession.getId());
+					//sessionAttr:sessionUser
 					httpSession.removeAttribute(Constants.USER);
 					httpSession.invalidate();
+					Thread.sleep(1000l);
 				}
 				return new BaseResult<UserInfo>().success(null);
 			}
@@ -605,6 +604,24 @@ public class UserController extends BaseController{
 		UserInfo userInfo = new UserInfo(userAccount);
 		session.setAttribute(Constants.USER, userAccount);
 		return new BaseResult<UserInfo>().success(userInfo);
+    }
+	
+	/**
+     * 静默授权获取用户openid-alipay
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/authorizeAlipay/{code}", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<Map<String, String>> authorizeAlipay(@PathVariable String code) throws Exception {
+		
+		Map<String, String> map = new HashMap<>();
+		if (StringUtil.isNotEmpty(code)) {
+			AccessTokenOAuth oauth = userService.getAlipayAuth(code);
+	    	map.put("userid", oauth.getOpenid());
+		}
+		return new BaseResult<Map<String, String>>().success(map);
     }
 
 	/**

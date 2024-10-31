@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +43,7 @@ import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
+import com.yumu.hexie.integration.wuye.resp.RadiusSect;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
@@ -63,6 +63,7 @@ import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
+import com.yumu.hexie.service.shequ.req.RadiusSectReq;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
 import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.vo.req.MessageReq;
@@ -120,6 +121,7 @@ public class WuyeUtil2 {
 	private static final String ADD_HOUSENOSTMT_URL = "addHouseNoStmtSDO.do"; // 无账单添加房子
 	private static final String QUERY_HOUSE_BY_ID_URL = "getHouseByIdSDO.do";	//根据房屋ID查询业主已经绑定的房屋信息
 	private static final String QUERY_SECT_BY_ID_URL = "getSectByIdSDO.do";	//获取小区信息
+	private static final String QUERY_SECT_NEARBY = "getSectNearbySDO.do";	//获取附近的小区
 
 	/**
 	 * 标准版查询账单
@@ -636,6 +638,7 @@ public class WuyeUtil2 {
 		querySectRequet.setOpenid(user.getOpenid());
 		querySectRequet.setAppid(user.getAppId());
 		querySectRequet.setQueryAppid(queryAppid);
+		querySectRequet.setProvince(regionName);
 		if (!StringUtils.isEmpty(queryAppid)) {
 			String clientType = "0";
 			if (queryAppid.equals(user.getMiniAppId())) {
@@ -1027,6 +1030,31 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<SectInfo>> typeReference = new TypeReference<CommonResponse<SectInfo>>(){};
 		CommonResponse<SectInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
 		BaseResult<SectInfo> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 根据小区ID获取小区信息
+	 * @param user
+	 * @param coordinate 经度,维度
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<RadiusSect>> querySectNearby(User user, RadiusSectReq radiusSectReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_SECT_NEARBY;
+		
+		Map<String, String> reqMap = new HashMap<>();
+		reqMap.put("appid", radiusSectReq.getAppid());
+		reqMap.put("coordinate", radiusSectReq.getBdCoordinate());
+		
+		TypeReference<CommonResponse<List<RadiusSect>>> typeReference = new TypeReference<CommonResponse<List<RadiusSect>>>(){};
+		CommonResponse<List<RadiusSect>> hexieResponse = restUtil.exchangeOnUri(requestUrl, reqMap, typeReference);
+		BaseResult<List<RadiusSect>> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
