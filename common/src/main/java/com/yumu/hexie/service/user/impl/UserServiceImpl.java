@@ -185,6 +185,8 @@ public class UserServiceImpl implements UserService {
 		}
 		if (userAccount == null) {
 			userAccount = new User();
+			String appid = StringUtils.isEmpty(oriApp)?ConstantWeChat.APPID:oriApp;
+			userAccount.setAppId(appid);
 			userAccount.setOpenid(weixinUser.getOpenid());
 			userAccount.setName(weixinUser.getNickname());
 			userAccount.setHeadimgurl(weixinUser.getHeadimgurl());
