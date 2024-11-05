@@ -403,7 +403,7 @@ public class WuyeUtil {
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static BaseResult httpGet(String reqUrl, Class c){
+	private static BaseResult  httpGet(String reqUrl, Class c){
 		
 		HttpGet get = new HttpGet(reqUrl);
 		get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36");
@@ -416,7 +416,7 @@ public class WuyeUtil {
 			Log.error("REQ:" + reqUrl);
 			resp = MyHttpClient.getStringFromResponse(MyHttpClient.execute(get),"GBK");
 
-			if(reqUrl.indexOf("wechatPayRequestSDO.do")>=0) {
+			if(reqUrl.contains("wechatPayRequestSDO.do")) {
 				resp = resp.replace("package", "packageValue");
 				Map respMap = JacksonJsonUtil.json2map(resp);
 				String result = (String)respMap.get("result");
@@ -427,7 +427,7 @@ public class WuyeUtil {
 				}
 			}
 			
-			if(reqUrl.indexOf("otherWechatPayRequestSDO.do")>=0) {
+			if(reqUrl.contains("otherWechatPayRequestSDO.do")) {
 				resp = resp.replace("package", "packageValue");
 				Map respMap = JacksonJsonUtil.json2map(resp);
 				String result = (String)respMap.get("result");
@@ -438,7 +438,7 @@ public class WuyeUtil {
 				}
 			}
 			
-			if (reqUrl.indexOf("wechatPayQuerySDO.do")>=0) {
+			if (reqUrl.contains("wechatPayQuerySDO.do")) {
 				Map respMap = JacksonJsonUtil.json2map(resp);
 				String result = (String)respMap.get("result");
 				if (!"00".equals(result)) {
@@ -447,7 +447,7 @@ public class WuyeUtil {
 					throw new BizValidateException(err_code+", " +err_msg);
 				}
 			}
-			if (reqUrl.indexOf("getInvoiceInfoSDO.do")>=0) {
+			if (reqUrl.contains("getInvoiceInfoSDO.do")) {
 				Map respMap = JacksonJsonUtil.json2map(resp);
 				String result = (String)respMap.get("result");
 				if (!"00".equals(result)) {
@@ -458,13 +458,13 @@ public class WuyeUtil {
 			}
 			
 			Log.error("RESP:" + resp);
-			BaseResult v =jsonToBeanResult(resp, c);
-			return v;
+			return jsonToBeanResult(resp, c);
 		} catch (Exception e) {
 			Log.error("err msg :" + e.getMessage());
 		}
 		BaseResult r= new BaseResult();
 		r.setResult("99");
+		r.setMessage(err_msg);
 		r.setData(err_msg);
 		return r;
 	}
