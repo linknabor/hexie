@@ -36,7 +36,7 @@ public class PrepayReqVO implements Serializable {
 	@JsonProperty("regionname")
 	private String regionName;
 	
-	private String payType;	//支付类型，0微信支付，1银行卡支付
+	private String payType;	//支付类型，0微信支付，1银行卡支付,2wechatMini,3alipayMini,4alipayShareToken
 	
 	//银行卡支付参数
 	private String customerName;	//持卡人姓名
@@ -69,6 +69,7 @@ public class PrepayReqVO implements Serializable {
 	@JsonProperty("park_name")
 	private String parkName; //停车场名称
 	private String scanChannel; //1支付宝H5 3微信公众号
+	private String channelInfo;	//吱口令渠道信息
 
 	public String getBillId() {
 		return billId;
@@ -299,46 +300,27 @@ public class PrepayReqVO implements Serializable {
 	public void setScanChannel(String scanChannel) {
 		this.scanChannel = scanChannel;
 	}
-
+	
+	public String getChannelInfo() {
+		return channelInfo;
+	}
+	
+	public void setChannelInfo(String channelInfo) {
+		this.channelInfo = channelInfo;
+	}
 	@Override
 	public String toString() {
-		return "PrepayReqVO{" +
-				"billId='" + billId + '\'' +
-				", stmtId='" + stmtId + '\'' +
-				", couponUnit='" + couponUnit + '\'' +
-				", couponNum='" + couponNum + '\'' +
-				", couponId='" + couponId + '\'' +
-				", reduceAmt='" + reduceAmt + '\'' +
-				", invoiceTitleType='" + invoiceTitleType + '\'' +
-				", creditCode='" + creditCode + '\'' +
-				", invoiceTitle='" + invoiceTitle + '\'' +
-				", needInvoice='" + needInvoice + '\'' +
-				", invoiceType='" + invoiceType + '\'' +
-				", regionName='" + regionName + '\'' +
-				", payType='" + payType + '\'' +
-				", customerName='" + customerName + '\'' +
-				", certType='" + certType + '\'' +
-				", certId='" + certId + '\'' +
-				", acctNo='" + acctNo + '\'' +
-				", phoneNo='" + phoneNo + '\'' +
-				", quickToken='" + quickToken + '\'' +
-				", veriCode='" + veriCode + '\'' +
-				", remember='" + remember + '\'' +
-				", cardId='" + cardId + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", ruleType='" + ruleType + '\'' +
-				", reductionAmt='" + reductionAmt + '\'' +
-				", payFeeType='" + payFeeType + '\'' +
-				", isQrcode='" + isQrcode + '\'' +
-				", openid='" + openid + '\'' +
-				", appid='" + appid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				", cellId='" + cellId + '\'' +
-				", batchNo='" + batchNo + '\'' +
-				", tpPrepay=" + tpPrepay +
-				", payScenarios='" + payScenarios + '\'' +
-				", parkName='" + parkName + '\'' +
-				", scanChannel='" + scanChannel + '\'' +
-				'}';
+		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
+				+ couponNum + ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitleType="
+				+ invoiceTitleType + ", creditCode=" + creditCode + ", invoiceTitle=" + invoiceTitle + ", needInvoice="
+				+ needInvoice + ", invoiceType=" + invoiceType + ", regionName=" + regionName + ", payType=" + payType
+				+ ", customerName=" + customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo="
+				+ acctNo + ", phoneNo=" + phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode
+				+ ", remember=" + remember + ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType
+				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
+				+ ", openid=" + openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", cellId=" + cellId
+				+ ", batchNo=" + batchNo + ", tpPrepay=" + tpPrepay + ", payScenarios=" + payScenarios + ", parkName="
+				+ parkName + ", scanChannel=" + scanChannel + ", channelInfo=" + channelInfo + "]";
 	}
+	
 }
