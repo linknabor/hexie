@@ -256,7 +256,7 @@ public class WuyeUtil2 {
 			prepayRequest.setAppid(user.getAliappid());
 		} else if ("4".equals(prepayRequestDTO.getPayType())) {	//支付宝吱口令
 //			prepayRequest.setOpenid(user.getAliuserid());
-			prepayRequest.setAppid(ConstantAlipay.APPID);
+			prepayRequest.setAppid("2021001161682727");
 		}
 
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
