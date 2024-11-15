@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.service.FileService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -861,6 +862,9 @@ public class WuyeServiceImpl implements WuyeService {
 	
 	@Override
 	public AlipayMarketingConsult queryAlipayMarketingConsult(User user, QueryAlipayConsultRequest queryAlipayConsultRequest) throws Exception {
+		if (StringUtils.isEmpty(queryAlipayConsultRequest.getAliAppId())) {
+			queryAlipayConsultRequest.setAliAppId(ConstantAlipay.APPID);
+		}
 		return wuyeUtil2.queryAlipayMarketingConsult(user, queryAlipayConsultRequest).getData();
 	}
 

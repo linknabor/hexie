@@ -1238,7 +1238,7 @@ public class WuyeController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/alipay/marketingConsult", method = RequestMethod.POST)
 	@ResponseBody
-	public BaseResult<AlipayMarketingConsult> getSectById(@ModelAttribute(Constants.USER) User user, 
+	public BaseResult<AlipayMarketingConsult> getMarketingConsult(@ModelAttribute(Constants.USER) User user, 
 			@RequestBody QueryAlipayConsultRequest queryReq) throws Exception {
 		AlipayMarketingConsult marketingConsult = wuyeService.queryAlipayMarketingConsult(user, queryReq);
 		return BaseResult.successResult(marketingConsult);
