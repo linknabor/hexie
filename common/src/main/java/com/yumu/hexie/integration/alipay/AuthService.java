@@ -93,4 +93,10 @@ public class AuthService {
 		return oAuth;
 		
 	}
+
+	public static Map<String, AlipayClient> getClientMap() {
+		return clientMap;
+	}
+
+	
 }

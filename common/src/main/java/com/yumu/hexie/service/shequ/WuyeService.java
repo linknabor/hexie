@@ -8,6 +8,8 @@ import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
+import com.yumu.hexie.integration.wuye.req.QueryAlipayConsultRequest;
+import com.yumu.hexie.integration.wuye.resp.AlipayMarketingConsult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -447,5 +449,16 @@ public interface WuyeService {
 	 * @throws Exception 
 	 */
 	SectInfo querySectById(User user, String sectId) throws Exception;
+
+
+	/**
+	 * 获取支付宝优惠资讯
+	 * @param user
+	 * @param queryAlipayConsultRequest
+	 * @return
+	 * @throws Exception
+	 */
+	AlipayMarketingConsult queryAlipayMarketingConsult(User user, QueryAlipayConsultRequest queryAlipayConsultRequest)
+			throws Exception;
 
 }

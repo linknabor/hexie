@@ -42,6 +42,8 @@ import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
+import com.yumu.hexie.integration.wuye.req.QueryAlipayConsultRequest;
+import com.yumu.hexie.integration.wuye.resp.AlipayMarketingConsult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -1219,7 +1221,6 @@ public class WuyeController extends BaseController {
 	 *@param user
 	 *@param sectId 小区ID
 	 */
-	/***************** [BEGIN]房产 ********************/
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/mySect/{sectId}", method = RequestMethod.GET)
 	@ResponseBody
@@ -1228,4 +1229,19 @@ public class WuyeController extends BaseController {
 		SectInfo sectInfo = wuyeService.querySectById(user, sectId);
 		return BaseResult.successResult(sectInfo);
 	}
+	
+	/**
+	 * 获取支付宝优惠资讯
+	 *@param user
+	 *@param sectId 小区ID
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/alipay/marketingConsult", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<AlipayMarketingConsult> getSectById(@ModelAttribute(Constants.USER) User user, 
+			@RequestBody QueryAlipayConsultRequest queryReq) throws Exception {
+		AlipayMarketingConsult marketingConsult = wuyeService.queryAlipayMarketingConsult(user, queryReq);
+		return BaseResult.successResult(marketingConsult);
+	}
+	
 }
