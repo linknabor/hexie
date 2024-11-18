@@ -11,6 +11,7 @@ public class AlipayMarketingConsult implements Serializable {
 	
 	private String channel_operation_info;
 	private String order_id;
+	private String consult_msg;
 	
 	public String getChannel_operation_info() {
 		return channel_operation_info;
@@ -23,6 +24,12 @@ public class AlipayMarketingConsult implements Serializable {
 	}
 	public void setOrder_id(String order_id) {
 		this.order_id = order_id;
+	}
+	public String getConsult_msg() {
+		return consult_msg;
+	}
+	public void setConsult_msg(String consult_msg) {
+		this.consult_msg = consult_msg;
 	}
 	
 }
