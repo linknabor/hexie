@@ -209,7 +209,7 @@ public class CommunityController extends BaseController{
 			String fileName = multiFile.getOriginalFilename();
 			log.info("interactUpload, file name : " + fileName);
 			if(StringUtils.isNoneBlank(fileName)) {
-				long timestamp = System.nanoTime();
+				long timestamp = System.currentTimeMillis();
 				String kzm = fileName.substring(fileName.lastIndexOf("."));
 				String key = timestamp + "_" + kzm;
 				String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
