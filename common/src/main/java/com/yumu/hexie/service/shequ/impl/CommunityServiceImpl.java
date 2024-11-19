@@ -102,7 +102,7 @@ public class CommunityServiceImpl implements CommunityService {
 			req.setEx_source("05"); //小程序
 		}
 		if (appid.equals(user.getAliappid())) {
-			req.setEx_content("08");
+			req.setEx_source("08");
 		}
 		req.setEx_group("2"); //默认建议
 
