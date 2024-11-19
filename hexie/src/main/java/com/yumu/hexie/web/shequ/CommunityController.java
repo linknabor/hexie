@@ -207,6 +207,7 @@ public class CommunityController extends BaseController{
 		String imgUrl = "";
 		if (multiFile != null) {
 			String fileName = multiFile.getOriginalFilename();
+			log.info("fileName : " + fileName);
 			if(StringUtils.isNoneBlank(fileName)) {
 				String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
 				String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");

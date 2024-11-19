@@ -101,6 +101,9 @@ public class CommunityServiceImpl implements CommunityService {
 		if (appid.equals(user.getMiniAppId())) {	//如果是小程序用户，来源修改为小程序
 			req.setEx_source("05"); //小程序
 		}
+		if (appid.equals(user.getAliappid())) {
+			req.setEx_content("08");
+		}
 		req.setEx_group("2"); //默认建议
 
 		CommonResponse<Boolean> commonResponse = interactUtil.saveInteractInfo(user, req);
