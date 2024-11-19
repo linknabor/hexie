@@ -70,6 +70,9 @@ public class CommunityController extends BaseController{
 		if(StringUtils.isEmpty(appid)) {
 			appid = user.getMiniAppId();
 		}
+		if(StringUtils.isEmpty(appid)) {
+			appid = user.getAliappid();
+		}
 		List<Map<String, String>> list = communityService.getInteractType(user, appid);
 		return BaseResult.successResult(list);
 	}

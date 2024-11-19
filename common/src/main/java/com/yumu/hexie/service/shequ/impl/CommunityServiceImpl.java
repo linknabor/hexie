@@ -70,7 +70,6 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_INTERACT_TYPE_CFG, key = "#appid")
 	public List<Map<String, String>> getInteractType(User user, String appid) throws Exception {
 		CommonResponse<List<Map<String, String>>> commonResponse = interactUtil.getInteractType(user);
 		if (!"00".equals(commonResponse.getResult())) {
