@@ -207,12 +207,11 @@ public class CommunityController extends BaseController{
 		String imgUrl = "";
 		if (multiFile != null) {
 			String fileName = multiFile.getOriginalFilename();
+			log.info("interactUpload, file name : " + fileName);
 			if(StringUtils.isNoneBlank(fileName)) {
-				String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
-				String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
+				long timestamp = System.nanoTime();
 				String kzm = fileName.substring(fileName.lastIndexOf("."));
-				String key = currDate + "_" + currTime + "_" + kzm;
-				log.info("interactUpload, file key : " + key);
+				String key = timestamp + "_" + kzm;
 				String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
 				PutExtra extra = new PutExtra();
 				PutRet putRet = IoApi.Put(uptoken, key, multiFile.getInputStream(), extra);
