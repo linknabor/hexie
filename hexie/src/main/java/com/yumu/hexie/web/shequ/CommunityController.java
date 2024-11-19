@@ -210,7 +210,7 @@ public class CommunityController extends BaseController{
 			log.info("interactUpload, file name : " + fileName);
 			if(StringUtils.isNoneBlank(fileName)) {
 				long timestamp = System.currentTimeMillis();
-				String kzm = fileName.substring(fileName.lastIndexOf("."));
+				String kzm = fileName.substring(0, fileName.lastIndexOf("."));
 				String key = timestamp + "_" + kzm;
 				String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
 				PutExtra extra = new PutExtra();
@@ -222,5 +222,5 @@ public class CommunityController extends BaseController{
 		}
 		return BaseResult.successResult(imgUrl);
 	}
-
-}
+	
+	}
