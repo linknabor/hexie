@@ -127,6 +127,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_SECT_NEARBY = "getSectNearbySDO.do";	//获取附近的小区
 	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
 
+
 	/**
 	 * 标准版查询账单
 	 * @param user

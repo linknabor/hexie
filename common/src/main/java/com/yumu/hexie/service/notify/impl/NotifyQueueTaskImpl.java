@@ -1366,6 +1366,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					if (wechatResponse.getErrcode() == 99999) {
                     	isSuccess = true;	//未配置模板消息
 					}
+                    if (wechatResponse.getErrcode() == 47003) {
+                        isSuccess = true;	//字段内容错误
+                    }
 					
 					logger.info("wechatResponse : " + wechatResponse);
                     
