@@ -70,7 +70,6 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_INTERACT_TYPE_CFG, key = "#appid")
 	public List<Map<String, String>> getInteractType(User user, String appid) throws Exception {
 		CommonResponse<List<Map<String, String>>> commonResponse = interactUtil.getInteractType(user);
 		if (!"00".equals(commonResponse.getResult())) {
@@ -101,6 +100,9 @@ public class CommunityServiceImpl implements CommunityService {
 		req.setEx_source("01"); //公众号
 		if (appid.equals(user.getMiniAppId())) {	//如果是小程序用户，来源修改为小程序
 			req.setEx_source("05"); //小程序
+		}
+		if (appid.equals(user.getAliappid())) {
+			req.setEx_source("08");
 		}
 		req.setEx_group("2"); //默认建议
 

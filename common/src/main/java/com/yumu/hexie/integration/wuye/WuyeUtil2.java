@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -32,6 +33,7 @@ import com.yumu.hexie.integration.wuye.req.PaySmsCodeRequest;
 import com.yumu.hexie.integration.wuye.req.PrepayRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodePayServiceRequest;
 import com.yumu.hexie.integration.wuye.req.QrCodeRequest;
+import com.yumu.hexie.integration.wuye.req.QueryAlipayConsultRequest;
 import com.yumu.hexie.integration.wuye.req.QueryCellRequest;
 import com.yumu.hexie.integration.wuye.req.QueryEReceiptRequest;
 import com.yumu.hexie.integration.wuye.req.QueryOrderRequest;
@@ -39,6 +41,7 @@ import com.yumu.hexie.integration.wuye.req.QuerySectRequet;
 import com.yumu.hexie.integration.wuye.req.QuickPayRequest;
 import com.yumu.hexie.integration.wuye.req.SignInOutRequest;
 import com.yumu.hexie.integration.wuye.req.WuyeParamRequest;
+import com.yumu.hexie.integration.wuye.resp.AlipayMarketingConsult;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
@@ -122,6 +125,8 @@ public class WuyeUtil2 {
 	private static final String QUERY_HOUSE_BY_ID_URL = "getHouseByIdSDO.do";	//根据房屋ID查询业主已经绑定的房屋信息
 	private static final String QUERY_SECT_BY_ID_URL = "getSectByIdSDO.do";	//获取小区信息
 	private static final String QUERY_SECT_NEARBY = "getSectNearbySDO.do";	//获取附近的小区
+	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
+
 
 	/**
 	 * 标准版查询账单
@@ -250,6 +255,9 @@ public class WuyeUtil2 {
 		} else if ("3".equals(prepayRequestDTO.getPayType())) {	//支付宝小程序支付
 			prepayRequest.setOpenid(user.getAliuserid());
 			prepayRequest.setAppid(user.getAliappid());
+		} else if ("4".equals(prepayRequestDTO.getPayType())) {	//支付宝吱口令
+//			prepayRequest.setOpenid(user.getAliuserid());
+			prepayRequest.setAppid("2021001161682727");
 		}
 
 		TypeReference<CommonResponse<WechatPayInfo>> typeReference = new TypeReference<CommonResponse<WechatPayInfo>>(){};
@@ -1055,6 +1063,31 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<List<RadiusSect>>> typeReference = new TypeReference<CommonResponse<List<RadiusSect>>>(){};
 		CommonResponse<List<RadiusSect>> hexieResponse = restUtil.exchangeOnUri(requestUrl, reqMap, typeReference);
 		BaseResult<List<RadiusSect>> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 获取吱口令优惠资讯
+	 * @param user
+	 * @param startDate
+	 * @param endDate
+	 * @param houseId
+	 * @param regionName
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<AlipayMarketingConsult> queryAlipayMarketingConsult(User user, QueryAlipayConsultRequest queryAlipayConsultRequest) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_MARKETING_CONSULT;
+		
+		queryAlipayConsultRequest.setAliUserId(user.getWuyeId());	//用合协用户的wuyeId
+		TypeReference<CommonResponse<AlipayMarketingConsult>> typeReference = new TypeReference<CommonResponse<AlipayMarketingConsult>>(){};
+		CommonResponse<AlipayMarketingConsult> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryAlipayConsultRequest, typeReference);
+		BaseResult<AlipayMarketingConsult> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;

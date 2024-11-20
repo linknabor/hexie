@@ -70,6 +70,9 @@ public class CommunityController extends BaseController{
 		if(StringUtils.isEmpty(appid)) {
 			appid = user.getMiniAppId();
 		}
+		if(StringUtils.isEmpty(appid)) {
+			appid = user.getAliappid();
+		}
 		List<Map<String, String>> list = communityService.getInteractType(user, appid);
 		return BaseResult.successResult(list);
 	}
@@ -204,11 +207,11 @@ public class CommunityController extends BaseController{
 		String imgUrl = "";
 		if (multiFile != null) {
 			String fileName = multiFile.getOriginalFilename();
+			log.info("interactUpload, file name : " + fileName);
 			if(StringUtils.isNoneBlank(fileName)) {
-				String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
-				String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
-				String kzm = fileName.substring(fileName.lastIndexOf("."));
-				String key = currDate + "_" + currTime + "_" + kzm;
+				long timestamp = System.currentTimeMillis();
+				String kzm = fileName.substring(0, fileName.lastIndexOf("."));
+				String key = timestamp + "_" + kzm;
 				String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
 				PutExtra extra = new PutExtra();
 				PutRet putRet = IoApi.Put(uptoken, key, multiFile.getInputStream(), extra);
@@ -219,5 +222,5 @@ public class CommunityController extends BaseController{
 		}
 		return BaseResult.successResult(imgUrl);
 	}
-
-}
+	
+	}

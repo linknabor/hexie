@@ -410,6 +410,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 				activeOpenid = user.getMiniopenid();
 			}
 		}
+		if (StringUtils.isEmpty(activeOpenid)) {
+			activeOpenid = user.getAliuserid();
+			activeAppid = user.getAliappid();
+		}
 		ActiveApp activeApp = new ActiveApp(activeAppid, activeOpenid);
 		return activeApp;
 	}

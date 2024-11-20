@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.service.FileService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -30,6 +31,8 @@ import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
+import com.yumu.hexie.integration.wuye.req.QueryAlipayConsultRequest;
+import com.yumu.hexie.integration.wuye.resp.AlipayMarketingConsult;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -219,7 +222,6 @@ public class WuyeServiceImpl implements WuyeService {
 			User currUser = userRepository.findById(user.getId());
 			prepayRequestDTO.setUser(currUser);
 		}
-		
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
@@ -857,6 +859,13 @@ public class WuyeServiceImpl implements WuyeService {
 	public SectInfo querySectById(User user, String sectId) throws Exception {
 		return wuyeUtil2.querySectById(user, sectId).getData();
 	}
-
 	
+	@Override
+	public AlipayMarketingConsult queryAlipayMarketingConsult(User user, QueryAlipayConsultRequest queryAlipayConsultRequest) throws Exception {
+		if (StringUtils.isEmpty(queryAlipayConsultRequest.getAliAppId())) {
+			queryAlipayConsultRequest.setAliAppId(ConstantAlipay.APPID);
+		}
+		return wuyeUtil2.queryAlipayMarketingConsult(user, queryAlipayConsultRequest).getData();
+	}
+
 }

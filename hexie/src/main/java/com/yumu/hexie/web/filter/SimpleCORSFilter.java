@@ -60,6 +60,9 @@ public class SimpleCORSFilter implements Filter {
         if (testMode) {
             String originHeader = request.getHeader("Origin");
             response.setHeader("Access-Control-Allow-Origin", originHeader);
+            if ("http://127.0.0.1".equals(originHeader) || "http://localhost".equals(originHeader)) {
+            	response.setHeader("Access-Control-Allow-Credentials", "true");
+			}
 		}
 //        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
