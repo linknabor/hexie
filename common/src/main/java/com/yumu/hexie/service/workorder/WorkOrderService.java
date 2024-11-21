@@ -16,6 +16,6 @@ public interface WorkOrderService {
 
 	void reverseOrder(User user, String orderId, String reason) throws Exception;
 
-	WorkOrderServiceVO getService(User user) throws Exception;
+	WorkOrderServiceVO getService(User user, String sectId) throws Exception;
 
 }

@@ -56,12 +56,12 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 	 * @throws Exception 
 	 */
 	@Override
-	public WorkOrderServiceVO getService(User user) throws Exception {
+	public WorkOrderServiceVO getService(User user, String sectId) throws Exception {
 		
-		if (StringUtil.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) {
+		if (StringUtil.isEmpty(user.getSectId()) || "0".equals(user.getSectId()) || StringUtil.isEmpty(sectId)) {
 			throw new BizValidateException("您暂未绑定房屋，请前往“我是业主”进行操作！");
 		}
-		CommonResponse<WorkOrderServiceVO> commonResponse =	workOrderUtil.getService(user);
+		CommonResponse<WorkOrderServiceVO> commonResponse =	workOrderUtil.getService(user, sectId);
 		if (!"00".equals(commonResponse.getResult())) {
 			throw new BizValidateException(commonResponse.getErrMsg());
 		}

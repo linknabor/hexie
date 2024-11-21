@@ -3,6 +3,7 @@ package com.yumu.hexie.web.shequ;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.inject.Inject;
 import com.yumu.hexie.integration.interact.req.InteractReq;
@@ -211,7 +212,10 @@ public class CommunityController extends BaseController{
 			if(StringUtils.isNoneBlank(fileName)) {
 				long timestamp = System.currentTimeMillis();
 				String kzm = fileName.substring(0, fileName.lastIndexOf("."));
-				String key = timestamp + "_" + kzm;
+				Random random = new Random();
+	            int r = random.nextInt();
+	            String key = timestamp + "_" + r + "_" + kzm;
+				
 				String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
 				PutExtra extra = new PutExtra();
 				PutRet putRet = IoApi.Put(uptoken, key, multiFile.getInputStream(), extra);

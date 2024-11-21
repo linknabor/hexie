@@ -126,10 +126,11 @@ public class WorkOrderUtil {
 	 * 1)如果在接单时间内，则返回房屋地址
 	 * 2)如果超出接单时间，则返回报修电话
 	 * @param user
+	 * @param sectId
 	 * @return
 	 * @throws Exception 
 	 */
-	public CommonResponse<WorkOrderServiceVO> getService(User user) throws Exception {
+	public CommonResponse<WorkOrderServiceVO> getService(User user, String sectId) throws Exception {
 		
 		String requestUrl = requestUtil.getRequestUrl(user, null);
 		requestUrl += QUERY_SERVICE_URL;
@@ -141,7 +142,7 @@ public class WorkOrderUtil {
 		}
 		Map<String, String> request = new HashMap<>();
 		request.put("user_id", user.getWuyeId());
-		request.put("sect_id", user.getSectId());
+		request.put("sect_id", StringUtils.isEmpty(sectId)?user.getSectId():sectId);
 		request.put("city_db", city_db);
 		
 		TypeReference<CommonResponse<WorkOrderServiceVO>> typeReference = new TypeReference<CommonResponse<WorkOrderServiceVO>>(){};
