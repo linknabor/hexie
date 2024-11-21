@@ -60,6 +60,9 @@ public class WorkOrderUtil {
 		if (StringUtils.isEmpty(name)) {
 			name = user.getName();
 		}
+		if (StringUtils.isEmpty(name)) {
+			name = user.getTel();
+		}
 		ActiveApp activeApp = systemConfigService.getActiveApp(user);
 		request.setCreator(name);
 		request.setCreatorAppid(activeApp.getActiveAppid());
