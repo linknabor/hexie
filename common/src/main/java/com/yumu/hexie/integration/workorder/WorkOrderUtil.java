@@ -20,7 +20,9 @@ import com.yumu.hexie.integration.workorder.resp.OrderDetailVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrderServiceVO;
 import com.yumu.hexie.integration.workorder.resp.WorkOrdersVO;
 import com.yumu.hexie.model.user.User;
+import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
+import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
 import com.yumu.hexie.service.workorder.req.WorkOrderReq;
 
 @Service
@@ -32,6 +34,9 @@ public class WorkOrderUtil {
 	private RestUtil restUtil;
 	@Autowired
 	private RequestUtil requestUtil;
+	@Autowired
+	private SystemConfigService systemConfigService;
+	
 	
 	private static final String ORDER_DETAIL_URL = "workorder/getOrderDetailSDO.do";
 	private static final String ADD_WORKORDER_URL = "workorder/addOrderSDO.do";//合协社区物业缴费的小区级联 模糊查询小区
@@ -55,10 +60,11 @@ public class WorkOrderUtil {
 		if (StringUtils.isEmpty(name)) {
 			name = user.getName();
 		}
+		ActiveApp activeApp = systemConfigService.getActiveApp(user);
 		request.setCreator(name);
-		request.setCreatorAppid(user.getAppId());
+		request.setCreatorAppid(activeApp.getActiveAppid());
 		request.setCreatorContact(user.getTel());
-		request.setCreatorOpenid(user.getOpenid());
+		request.setCreatorOpenid(activeApp.getActiveOpenid());
 		request.setCreatorUserId(String.valueOf(user.getId()));
 		request.setWuyeId(user.getWuyeId());
 		request.setCspId(user.getCspId());

@@ -20,6 +20,10 @@ public class WorkOrderReq implements Serializable {
 	private String address;	//维修地址,公共部位填写
 	private String addressId;	//维修地址id,入室
 	private String content;	//维修内容
+	//小程序用
+	private String imagesStr;	//逗号分隔
+	
+	//公众号用
 	private MultipartFile[]fileList;	//上传的图片流
 	@JsonIgnore
 	private List<String> images;	//七牛图片链接
@@ -66,11 +70,17 @@ public class WorkOrderReq implements Serializable {
 	public void setAcceptType(String acceptType) {
 		this.acceptType = acceptType;
 	}
+	public String getImagesStr() {
+		return imagesStr;
+	}
+	public void setImagesStr(String imagesStr) {
+		this.imagesStr = imagesStr;
+	}
 	@Override
 	public String toString() {
 		return "WorkOrderReq [acceptType=" + acceptType + ", distType=" + distType + ", address=" + address
-				+ ", addressId=" + addressId + ", content=" + content + ", fileList=" + Arrays.toString(fileList)
-				+ ", images=" + images + "]";
+				+ ", addressId=" + addressId + ", content=" + content + ", imagesStr=" + imagesStr + ", fileList="
+				+ Arrays.toString(fileList) + ", images=" + images + "]";
 	}
 	
 }
