@@ -70,9 +70,12 @@ public class WorkOrderUtil {
 		request.setCreatorOpenid(activeApp.getActiveOpenid());
 		request.setCreatorUserId(String.valueOf(user.getId()));
 		request.setWuyeId(user.getWuyeId());
+		String sectId = workOrderReq.getSectId();
+		if (StringUtils.isEmpty(sectId)) {
+			sectId = user.getSectId();
+		}
+		request.setSectId(sectId);
 		request.setCspId(user.getCspId());
-		request.setSectId(user.getSectId());
-		
 		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
 		CommonResponse<String> hexieResponse = restUtil.exchangeOnBody(requestUrl, request, typeReference);
 		return hexieResponse;

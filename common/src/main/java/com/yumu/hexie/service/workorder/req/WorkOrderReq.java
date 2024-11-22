@@ -15,6 +15,7 @@ public class WorkOrderReq implements Serializable {
 	 */
 	private static final long serialVersionUID = 1282969012458023843L;
 	
+	private String sectId;	//页面选择的小区ID，如果为空，则取user的sectId
 	private String acceptType;	//接派单类型
 	private String distType;	//维修区域类型，0公共，1入室
 	private String address;	//维修地址,公共部位填写
@@ -76,11 +77,17 @@ public class WorkOrderReq implements Serializable {
 	public void setImagesStr(String imagesStr) {
 		this.imagesStr = imagesStr;
 	}
+	public String getSectId() {
+		return sectId;
+	}
+	public void setSectId(String sectId) {
+		this.sectId = sectId;
+	}
 	@Override
 	public String toString() {
-		return "WorkOrderReq [acceptType=" + acceptType + ", distType=" + distType + ", address=" + address
-				+ ", addressId=" + addressId + ", content=" + content + ", imagesStr=" + imagesStr + ", fileList="
-				+ Arrays.toString(fileList) + ", images=" + images + "]";
+		return "WorkOrderReq [sectId=" + sectId + ", acceptType=" + acceptType + ", distType=" + distType + ", address="
+				+ address + ", addressId=" + addressId + ", content=" + content + ", imagesStr=" + imagesStr
+				+ ", fileList=" + Arrays.toString(fileList) + ", images=" + images + "]";
 	}
 	
 }

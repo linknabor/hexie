@@ -122,7 +122,7 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
+	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null && #user.openid != ''")
 	public boolean deleteHouse(User user, String houseId) {
 		
 		BaseResult<HouseListVO> result = WuyeUtil.deleteHouse(user, houseId);
