@@ -56,6 +56,8 @@ import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
+import com.yumu.hexie.service.subscribemsg.AliSubscribeMsgService;
+import com.yumu.hexie.service.subscribemsg.dto.SubscribeReq;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
@@ -92,6 +94,8 @@ public class UserController extends BaseController{
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private WdService wdService;
+	@Autowired
+	private AliSubscribeMsgService aliSubscribeMsgService;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -1116,5 +1120,22 @@ public class UserController extends BaseController{
 	    return new BaseResult<UserInfo>().success(userInfo);
 
     }
-        
+
+    /**
+     * 支付宝生活缴费用户订阅消息
+     * @param session
+     * @param h5UserDTO
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/lifepay/subscribe", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<String> lifepayLogin(@ModelAttribute(Constants.USER)User user) throws Exception {
+    	SubscribeReq subscribeReq = new SubscribeReq();
+    	subscribeReq.setUser(user);
+    	subscribeReq.setSubscribe(1);
+    	aliSubscribeMsgService.addSubscribe(subscribeReq);
+	    return new BaseResult<String>().success("");
+
+    }
 }
