@@ -5,8 +5,10 @@ import com.yumu.hexie.model.user.User;
 public interface CacheService {
 	
 	
-	void clearUserCache(User user);
+	String getCacheKey(User user);
 
-	void delCache(String key);
+	void clearUserCache(String key);
+
+	
 
 }
