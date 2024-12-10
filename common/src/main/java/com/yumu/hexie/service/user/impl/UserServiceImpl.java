@@ -331,7 +331,7 @@ public class UserServiceImpl implements UserService {
         		}
     		}
     		//清除用户缓存
-    		cacheService.clearUserCache(user);
+    		cacheService.clearUserCache(cacheService.getCacheKey(user));
     		
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
@@ -646,7 +646,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public void recacheMiniUser(User user) {
-		cacheService.clearUserCache(user);
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 	
 	/**
@@ -656,7 +656,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public void recacheAliMiniUser(User user) {
-		cacheService.clearUserCache(user);
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 
 

@@ -181,7 +181,7 @@ public class WuyeServiceImpl implements WuyeService {
 		}
 		
 		//清空用户缓存
-		cacheService.clearUserCache(user);
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 		
 		return result.isSuccess();
 	}
@@ -350,7 +350,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if("02".equals(r.getResult())) {
 			throw new BizValidateException(2, "房屋不存在！");
 		}
-		cacheService.clearUserCache(user);
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 		return r.getData();
 	}
 
@@ -390,7 +390,7 @@ public class WuyeServiceImpl implements WuyeService {
 		userRepository.save(user);
 		
 		//清空用户缓存
-		cacheService.clearUserCache(user);
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 	
 	@Override
@@ -849,6 +849,8 @@ public class WuyeServiceImpl implements WuyeService {
 							HexieUser hexieUser = new HexieUser();
 							BeanUtils.copyProperties(hexieHouse, hexieUser);
 							setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
+							//里面的清除缓存不会生效，在外面调一下
+							cacheService.clearUserCache(cacheService.getCacheKey(user));
 						}
 					}
 					
