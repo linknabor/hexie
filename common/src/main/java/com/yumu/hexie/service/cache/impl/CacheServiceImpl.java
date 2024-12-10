@@ -1,5 +1,7 @@
 package com.yumu.hexie.service.cache.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -10,6 +12,8 @@ import com.yumu.hexie.service.cache.CacheService;
 
 @Service
 public class CacheServiceImpl implements CacheService {
+	
+	private static Logger log = LoggerFactory.getLogger(CacheServiceImpl.class);
 
 	@Override
 	public void clearUserCache(User user) {
@@ -26,6 +30,7 @@ public class CacheServiceImpl implements CacheService {
 			clearKey = user.getMiniopenid();
 		}
 		if (!StringUtils.isEmpty(clearKey)) {
+			log.info("will clear user cache, cacheKey : " + clearKey);
 			delCache(clearKey);
 		}
 	}
