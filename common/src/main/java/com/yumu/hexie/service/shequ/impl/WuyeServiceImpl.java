@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -65,6 +64,7 @@ import com.yumu.hexie.model.user.NewLionUser;
 import com.yumu.hexie.model.user.NewLionUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.cache.CacheService;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -115,6 +115,9 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private FileService fileService;
 	
+	@Autowired
+	private CacheService cacheService;
+	
 	@Override
 	public HouseListVO queryHouse(User user, String sectId) {
 		return WuyeUtil.queryHouse(user, sectId).getData();
@@ -122,7 +125,6 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null && #user.openid != ''")
 	public boolean deleteHouse(User user, String houseId) {
 		
 		BaseResult<HouseListVO> result = WuyeUtil.deleteHouse(user, houseId);
@@ -174,10 +176,13 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 			
-			
 		} else {
 			throw new BizValidateException("解绑房屋失败。");
 		}
+		
+		//清空用户缓存
+		cacheService.clearUserCache(user);
+		
 		return result.isSuccess();
 	}
 	
@@ -345,6 +350,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if("02".equals(r.getResult())) {
 			throw new BizValidateException(2, "房屋不存在！");
 		}
+		cacheService.clearUserCache(user);
 		return r.getData();
 	}
 
@@ -355,7 +361,6 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null")
 	public void setDefaultAddress(User user, HexieUser u) {
 		
 		HexieAddress hexieAddress = new HexieAddress();
@@ -383,6 +388,9 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setCspId(u.getCsp_id());
 		user.setOfficeTel(u.getOffice_tel());
 		userRepository.save(user);
+		
+		//清空用户缓存
+		cacheService.clearUserCache(user);
 	}
 	
 	@Override
