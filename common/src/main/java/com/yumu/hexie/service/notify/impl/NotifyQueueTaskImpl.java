@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yumu.hexie.common.util.AliUserUtil;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.RedisLock;
@@ -35,12 +36,13 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.alipay.service.AliTemplateMsgService;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
 import com.yumu.hexie.integration.notify.ConversionNotification;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
-
+import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.PartnerNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.ReceiptNotification;
@@ -102,6 +104,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     private RegionRepository regionRepository;
     @Autowired
     private UserNoticeService userNoticeService;
+    @Autowired
+    private AliTemplateMsgService aliTemplateMsgService;
     
     /**
      * 异步发送到账模板消息
@@ -832,7 +836,21 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 boolean isSuccess = false;
                 try {
                     logger.info("send workorder msg async, workorder : " + won);
-                    isSuccess = gotongService.sendWorkOrderNotification(won);
+                    List<Operator> operList = won.getOperatorList();
+            		if (operList == null || operList.isEmpty()) {
+            			logger.info("workorder oper is empty, will skip .");
+            			isSuccess = false;
+            		} else {
+            			Operator operator = operList.get(0);
+            			//理论上应该用aliMsgService实现gotongService的接口，但是这样改动太大，所有调用地方都要改一遍，如果以后支付宝接口多了，可以这么实现 TODO
+            			if (AliUserUtil.isAliUser(operator.getOpenid())) {
+            				aliTemplateMsgService.sendWorkOrderMsg(won);
+            				isSuccess = true;
+						} else {
+							isSuccess = gotongService.sendWorkOrderNotification(won);
+						}
+                        
+            		}
 
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);

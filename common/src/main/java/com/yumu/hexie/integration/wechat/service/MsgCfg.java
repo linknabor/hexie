@@ -68,6 +68,7 @@ public class MsgCfg {
 	public static final String URL_OPINION_NOTICE_MINI = "sendOpinionUrl4Mini"; //业主意见回复通知
 	public static final String URL_OPINION_GRADE_NOTICE = "sendOpinionGradeUrl"; //业主意见完成评价统计
 	public static final String URL_WORK_ORDER_DETAIL = "workOrderDetail";	//工单明细页面
+	public static final String URL_WORK_ORDER_DETAIL_ALI_MINI = "workOrderDetail4AliMini";	//工单明细页面
 	public static final String URL_INVOICE_APPLICATION_URL = "invoiceApplicationUrl";	//发票申请页面
 	public static final String URL_RECEIPT_APPLICATION_URL = "receiptApplicationUrl";	//电子收据申请页面
 	public static final String URL_RECEIPT_VIEW_URL = "receiptViewUrl";	//电子收据详情页面

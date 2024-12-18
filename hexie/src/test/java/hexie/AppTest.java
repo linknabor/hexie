@@ -1,6 +1,8 @@
 package hexie;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,20 +24,25 @@ import org.springframework.util.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
-import com.alipay.api.domain.AlipayTradePrecreateModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradePrecreateRequest;
 import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yumu.hexie.common.config.AppConfig;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.alipay.service.AliTemplateMsgService;
 import com.yumu.hexie.integration.baidu.BaiduMapUtil;
 import com.yumu.hexie.integration.baidu.resp.GeoCodeRespV2;
 import com.yumu.hexie.integration.beyondsoft.BeyondSoftUtil;
 import com.yumu.hexie.integration.beyondsoft.resp.BeyondSoftToken;
+import com.yumu.hexie.integration.notify.Operator;
+import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.cache.CacheService;
+import com.yumu.hexie.service.notify.NotifyService;
+import com.yumu.hexie.service.user.UserService;
 
 import hexie.CreateCommReq.CommunityPropertyCompany;
 import hexie.CreateCommReq.CommunityService;
@@ -298,4 +305,76 @@ public class AppTest extends TestCase {
 		log.info("dbUser : {}", dbUser );
 	}
 	
+	@Resource
+	private CacheService cacheService;
+	
+	@Test
+	public void testClearCache() {
+		User user = new User();
+		user.setAliappid("2021004116648237");
+		user.setAliuserid("2088312129787880");
+//		cacheService.clearUserCache(user);
+	}
+	
+	@Resource
+	private UserService userService;
+	
+	@Test
+	public void testCacheable() {
+		userService.getUserByAliUserIdAndAliAppid("2088312129787880", "2021004116648237");
+		
+	}
+	
+	@Resource
+	private AliTemplateMsgService aliTemplateMsgService;
+	
+	@Test
+	public void testAliMsg() throws UnsupportedEncodingException {
+		WorkOrderNotification workOrderNotification = new WorkOrderNotification();
+		Operator operator = new Operator();
+		operator.setAppid("2021004116648237");
+//		operator.setAppid("2021001161682727");
+//		operator.setOpenid("2088402083298963");
+		operator.setOpenid("2088312129787880");
+		List<Operator> opList = new ArrayList<>();
+		opList.add(operator);
+		workOrderNotification.setOperatorList(opList);
+		workOrderNotification.setContent("");
+		workOrderNotification.setOperation("05");
+		workOrderNotification.setOrderType("维修工单");
+		workOrderNotification.setContent("320-201的车辆占用主干道需要挪车");
+		workOrderNotification.setOrderStatus("已受理");
+		aliTemplateMsgService.sendWorkOrderMsg(workOrderNotification);
+	}
+	
+	
+	@Test
+	public void testAliMsg2() {
+		
+		WorkOrderNotification woNotification = new WorkOrderNotification();
+		woNotification.setOrderId("241211100742675709");
+		woNotification.setOrderType("维修");
+		woNotification.setOrderStatus("已完工");
+		woNotification.setOperateDate("2024-12-02 08:35:59");
+		woNotification.setSectName("音乐广场");
+		woNotification.setContent("12号楼底层0304电梯厅照明三个筒灯己坏二个，已有几个月了，请尽快修复！！！");
+		woNotification.setServeAddress("12号楼底层0304室电梯厅照明己坏了二只，己有几个月了，请尽快修复！！！");
+		woNotification.setOrderSource("公众号");
+		woNotification.setDistType("公共");
+		woNotification.setReason("工单完工");
+		woNotification.setAcceptor("王仁林");
+		woNotification.setFinisher("王仁林");
+		woNotification.setOperation("07");
+		
+		List<Operator> opList = new ArrayList<>();
+		
+		Operator operator = new Operator();
+		operator.setAppid("2021004116648237");
+		operator.setOpenid("2088312129787880");
+//		operator.setOpenid("2088402083298963");
+		
+		opList.add(operator);
+		woNotification.setOperatorList(opList);
+		aliTemplateMsgService.sendWorkOrderMsg(woNotification);
+	}
 }
