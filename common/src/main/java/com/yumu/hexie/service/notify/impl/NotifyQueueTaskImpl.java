@@ -14,6 +14,7 @@ import com.yumu.hexie.common.util.AliUserUtil;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.RedisLock;
+import com.yumu.hexie.integration.notify.*;
 import com.yumu.hexie.integration.wechat.service.MsgCfg;
 import com.yumu.hexie.integration.wuye.req.CommunityRequest;
 import com.yumu.hexie.model.distribution.region.Region;
@@ -40,13 +41,8 @@ import com.yumu.hexie.integration.alipay.service.AliTemplateMsgService;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO;
 import com.yumu.hexie.integration.customservice.dto.ServiceCfgDTO.ServiceCfg;
 import com.yumu.hexie.integration.eshop.vo.QueryRgroupsVO;
-import com.yumu.hexie.integration.notify.ConversionNotification;
-import com.yumu.hexie.integration.notify.InvoiceNotification;
-import com.yumu.hexie.integration.notify.Operator;
-import com.yumu.hexie.integration.notify.PartnerNotification;
+
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
-import com.yumu.hexie.integration.notify.ReceiptNotification;
-import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.community.Notice;
@@ -1355,41 +1351,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 try {
                     WechatResponse wechatResponse = gotongService.sendInteractNotification(commentNotice);
                     logger.info("wechatResponse : " + wechatResponse);
-					
-					if (wechatResponse.getErrcode() == 0) {
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 40037) {
-						logger.error("invalid template_id, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 45009) {
-						logger.error("reach max api daily quota limit, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 43004) {
-						logger.error("require subscribe, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
-                    	isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 48001) {
-						logger.error("api unauthorized, 请联系系统管理员！");
-						isSuccess = true;
-					}
-					if (wechatResponse.getErrcode() == 99998) {
-                    	isSuccess = true;	//appid为空
-					}
-					if (wechatResponse.getErrcode() == 99999) {
-                    	isSuccess = true;	//未配置模板消息
-					}
-                    if (wechatResponse.getErrcode() == 47003) {
-                        isSuccess = true;	//字段内容错误
-                    }
-					
-					logger.info("wechatResponse : " + wechatResponse);
-                    
+                    isSuccess = checkErrCode(wechatResponse);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }
@@ -1423,17 +1385,17 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
                 InteractCommentNotice notice = objectMapper.readValue(str, InteractCommentNotice.class);
                 logger.info("start to notifyInteractGrade queue : " + notice);
-                
+
                 List<User> userList = userRepository.findByOpenid(notice.getOpenid());
                 User user = null;
                 if (userList != null && !userList.isEmpty()) {
                     user = userList.get(0);
                 } else {
-                	user = userRepository.findByMiniopenid(notice.getOpenid());
+                    user = userRepository.findByMiniopenid(notice.getOpenid());
                 }
                 if(user == null) {
-                	logger.warn("can't find user : " + notice.getOpenid() + ", will skip notifyInteractGrade !");
-					continue;
+                    logger.warn("can't find user : " + notice.getOpenid() + ", will skip notifyInteractGrade !");
+                    continue;
                 }
                 notice.setOpenid(user.getOpenid());
                 notice.setAppid(user.getAppId());
@@ -1454,6 +1416,97 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 logger.error(e.getMessage(), e);
             }
         }
+    }
+
+    //装修登记审核结果通知
+    @Override
+    @Async("taskExecutor")
+    public void notifyRenovation() {
+        while (true) {
+            try {
+                if (!maintenanceService.isQueueSwitchOn()) {
+                    logger.info("queue switch off ! ");
+                    Thread.sleep(60000);
+                    continue;
+                }
+                String str = redisTemplate.opsForList().leftPop(ModelConstant.renovationNoticeQueue, 10, TimeUnit.SECONDS);
+                if (StringUtils.isEmpty(str)) {
+                    logger.info("queue str is empty, will skip !");
+                    continue;
+                }
+                ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+                RenovationNotification notice = objectMapper.readValue(str, RenovationNotification.class);
+                logger.info("start to renovationNotification queue : " + notice);
+
+                User user = null;
+                if(!StringUtils.isEmpty(notice.getOpenid())) {
+                    List<User> userList = userRepository.findByOpenid(notice.getOpenid());
+                    if (userList != null && !userList.isEmpty()) {
+                        user = userList.get(0);
+                    } else {
+                        user = userRepository.findByMiniopenid(notice.getOpenid());
+                    }
+                }
+                if(user == null) {
+                    logger.warn("can't find user : " + notice.getOpenid() + ", will skip renovationNotification !");
+                    continue;
+                }
+                notice.setAppid(user.getAppId());
+                notice.setOpenid(user.getOpenid());
+                notice.setMiniAppid(user.getMiniAppId());
+                notice.setMiniOpenid(user.getMiniopenid());
+
+                boolean isSuccess = false;
+                try {
+                    WechatResponse wechatResponse = gotongService.sendRenovationNotification(notice);
+                    isSuccess = checkErrCode(wechatResponse);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+                if (!isSuccess) {
+                    logger.info("notifyRenovation failed !, repush into the queue. : " + str);
+                    redisTemplate.opsForList().rightPush(ModelConstant.renovationNoticeQueue, str);
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    private boolean checkErrCode(WechatResponse wechatResponse) {
+        boolean isSuccess = false;
+        if (wechatResponse.getErrcode() == 0) {
+            isSuccess = true;
+        }
+        if (wechatResponse.getErrcode() == 40037) {
+            logger.error("invalid template_id, 请联系系统管理员！");
+            isSuccess = true;
+        }
+        if (wechatResponse.getErrcode() == 45009) {
+            logger.error("reach max api daily quota limit, 请联系系统管理员！");
+            isSuccess = true;
+        }
+        if (wechatResponse.getErrcode() == 43004) {
+            logger.error("require subscribe, 请联系系统管理员！");
+            isSuccess = true;
+        }
+        if (wechatResponse.getErrcode() == 43101) {	//user refuse to accept the msg
+            isSuccess = true;
+        }
+        if (wechatResponse.getErrcode() == 48001) {
+            logger.error("api unauthorized, 请联系系统管理员！");
+            isSuccess = true;
+        }
+        if (wechatResponse.getErrcode() == 99998) {
+            isSuccess = true;	//appid为空
+        }
+        if (wechatResponse.getErrcode() == 99999) {
+            isSuccess = true;	//未配置模板消息
+        }
+        if (wechatResponse.getErrcode() == 47003) {
+            isSuccess = true;	//字段内容错误
+        }
+        return isSuccess;
     }
 
 }

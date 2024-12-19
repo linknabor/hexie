@@ -75,7 +75,7 @@ public class MsgCfg {
 	public static final String URL_GROUP_SUCCESS = "groupSuccessUrl";
 	public static final String URL_LEADER_GROUP_START = "leaderGroupStartUrl";
 	public static final String URL_REGION_GROUP_START = "regionGroupStartUrl";
-	
+	public static final String URL_RENOVATION_NOTICE_MINI = "sendRenovationUrl4Mini"; //装修登记详情页
 	//订阅消息
 	public static String SUBSCRIBE_MSG = "https://api.weixin.qq.com/cgi-bin/message/subscribe/bizsend?access_token=ACCESS_TOKEN";
 	public static final String TEMPLATE_TYPE_SUBSCRIBE_PAY_NOTIFY = "payNotifySubscribeTemplate";

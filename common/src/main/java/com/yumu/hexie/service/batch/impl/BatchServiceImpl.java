@@ -152,7 +152,8 @@ public class BatchServiceImpl implements BatchService {
 		notifyQueueTask.notifyGroupSuccess();
 		notifyQueueTask.notifyInteractComment();
 		notifyQueueTask.notifyInteractGrade();
-		
+		notifyQueueTask.notifyRenovation();
+
 		rgroupQueueTask.groupPubPush();
 		rgroupQueueTask.eventViewMiniprogram();
 		

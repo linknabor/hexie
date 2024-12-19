@@ -61,7 +61,8 @@ public class ParamController extends BaseController {
 			return;
 		}
 		
-		if (!ModelConstant.PARA_TYPE_CSP.equals(type)) {
+		if (!ModelConstant.PARA_TYPE_CSP.equals(type)
+				&& !ModelConstant.PARA_TYPE_SECT.equals(type)) {
 			return;
 		}
 		User user = new User();
