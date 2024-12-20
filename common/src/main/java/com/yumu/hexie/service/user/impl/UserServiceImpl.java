@@ -28,8 +28,8 @@ import com.alipay.api.internal.util.AlipayEncrypt;
 import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.alipay.AuthService;
 import com.yumu.hexie.integration.alipay.entity.AliMiniUserPhone;
+import com.yumu.hexie.integration.alipay.service.AuthService;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.AccessTokenOAuth;
 import com.yumu.hexie.integration.wechat.entity.MiniUserPhone;
@@ -58,6 +58,7 @@ import com.yumu.hexie.model.user.OrgOperator;
 import com.yumu.hexie.model.user.OrgOperatorRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.cache.CacheService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.common.WechatCoreService;
 import com.yumu.hexie.service.coupon.CouponStrategy;
@@ -109,6 +110,8 @@ public class UserServiceImpl implements UserService {
 	private AddressService addressService;
 	@Autowired
 	private NewLionUserRepository newLionUserRepository;
+	@Autowired
+	private CacheService cacheService;
 
 	@Value("${mainServer}")
 	private Boolean mainServer;
@@ -311,8 +314,6 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null")
-	//condition = "#user.openid != null && #user.openid != '0'"
 	public String bindWuYeIdSync(User user) {
 		 //绑定物业信息
 		String wuyeId = "";
@@ -329,13 +330,15 @@ public class UserServiceImpl implements UserService {
 					}
         		}
     		}
+    		//清除用户缓存
+    		cacheService.clearUserCache(cacheService.getCacheKey(user));
+    		
 		} catch (Exception e) {
 			logger.error(e.getMessage(),e);
 		}
     	return wuyeId;
 	}
 	
-
 	@Override
 	public UserWeiXin getOrSubscibeUserByOpenId(String appId, String openid) {
 
@@ -642,9 +645,8 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public void recacheMiniUser(User user) {
-		
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 	
 	/**
@@ -653,9 +655,8 @@ public class UserServiceImpl implements UserService {
 	 * @return
 	 */
 	@Override
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.aliappid+'_'+#user.aliuserid")
 	public void recacheAliMiniUser(User user) {
-		
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 
 

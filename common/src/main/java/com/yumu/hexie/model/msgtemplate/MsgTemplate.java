@@ -16,7 +16,7 @@ public class MsgTemplate extends BaseModel {
 	private String appid;
 	private String value;
 	private int status;	//0禁用，1可用
-	private int type;	//0模板消息用的模板，1订阅消息用的模板
+	private int type;	//0微信模板消息，1微信订阅消息,2微信类目模板消息,11支付宝订阅消息
 	private int bizType;//0普通用户用的模板，1工作人员用模板
 	private int subscribeType;	//订阅类型，2为一次性订阅，3为长期订阅
 	private String remark;	//备注

@@ -23,6 +23,7 @@ public class WorkOrderNotification implements Serializable {
 	private String acceptor;
 	private String rejector;	//拒绝人
 	private String finisher;	//完工人
+	private String cityCode;	//城市行政区划编码, https://www.mca.gov.cn/mzsj/xzqh/2020/20201201.html
 	
 	private String operation;	//01创建 03受理05接单07完工
 	private List<Operator> operatorList;
@@ -140,15 +141,20 @@ public class WorkOrderNotification implements Serializable {
 	public void setFinisher(String finisher) {
 		this.finisher = finisher;
 	}
+	public String getCityCode() {
+		return cityCode;
+	}
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
+	}
 	@Override
 	public String toString() {
 		return "WorkOrderNotification [orderId=" + orderId + ", orderType=" + orderType + ", orderStatus=" + orderStatus
 				+ ", operateDate=" + operateDate + ", sectName=" + sectName + ", content=" + content + ", serveAddress="
 				+ serveAddress + ", orderSource=" + orderSource + ", distType=" + distType + ", reason=" + reason
-				+ ", acceptor=" + acceptor + ", rejector=" + rejector + ", finisher=" + finisher + ", operation="
-				+ operation + ", operatorList=" + operatorList + ", corpid=" + corpid + ", agentId=" + agentId
-				+ ", timestamp=" + timestamp + "]";
+				+ ", acceptor=" + acceptor + ", rejector=" + rejector + ", finisher=" + finisher + ", cityCode="
+				+ cityCode + ", operation=" + operation + ", operatorList=" + operatorList + ", corpid=" + corpid
+				+ ", agentId=" + agentId + ", timestamp=" + timestamp + "]";
 	}
-	
 	
 }

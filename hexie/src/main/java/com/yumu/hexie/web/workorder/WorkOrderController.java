@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yumu.hexie.common.Constants;
@@ -110,13 +111,14 @@ public class WorkOrderController extends BaseController {
 	/**
 	 * 获取工单服务（如果用户当前所在小区支持工单服务，则显示该用户绑定的房屋，否则）
 	 * @param user
+	 * @param sectId 可选，如果用户页面没选房子，则取用户默认绑定房子所在小区
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/service", method = RequestMethod.GET)
-	public BaseResult<WorkOrderServiceVO> queryService(@ModelAttribute(name = Constants.USER) User user) throws Exception {
+	public BaseResult<WorkOrderServiceVO> queryService(@ModelAttribute(name = Constants.USER) User user, @RequestParam(required = false) String sectId) throws Exception {
 		
-		WorkOrderServiceVO workOrderServiceVO = workOrderService.getService(user);
+		WorkOrderServiceVO workOrderServiceVO = workOrderService.getService(user, sectId);
 		return BaseResult.successResult(workOrderServiceVO);
 	}
 	

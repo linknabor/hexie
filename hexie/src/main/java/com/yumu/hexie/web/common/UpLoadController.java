@@ -1,7 +1,6 @@
 package com.yumu.hexie.web.common;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -20,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.qiniu.api.io.IoApi;
 import com.qiniu.api.io.PutExtra;
 import com.qiniu.api.io.PutRet;
-import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.integration.qiniu.util.QiniuUtil;
 import com.yumu.hexie.web.BaseResult;
 
@@ -55,14 +53,11 @@ public class UpLoadController {
         log.error(multiFile.getOriginalFilename());
         String fileName = multiFile.getOriginalFilename();
         if(StringUtils.isNoneBlank(fileName)) {
-            String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
-            String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
-            String kzm = fileName.substring(fileName.lastIndexOf("."));
-
+            long timestamp = System.currentTimeMillis();
+            String kzm = fileName.substring(0, fileName.lastIndexOf("."));
             Random random = new Random();
             int r = random.nextInt();
-
-            String key = currDate + "_" + currTime + "_" + r + "_" + kzm;
+            String key = timestamp + "_" + r + "_" + kzm;
 
             log.error("key:" + key);
             log.error("kzm:" + kzm);
@@ -93,13 +88,12 @@ public class UpLoadController {
         for(MultipartFile multiFile : multiFiles ) {
             String fileName = multiFile.getOriginalFilename();
             if(StringUtils.isNoneBlank(fileName)) {
-                String currDate = DateUtil.dtFormat(new Date(), "yyyyMMdd");
-                String currTime = DateUtil.dtFormat(new Date().getTime(), "HHMMss");
-                String kzm = fileName.substring(fileName.lastIndexOf("."));
+            	long timestamp = System.currentTimeMillis();
+                String kzm = fileName.substring(0, fileName.lastIndexOf("."));
 
                 Random random = new Random();
                 int r = random.nextInt();
-                String key = currDate + "_" + currTime + "_" + r + "_" + kzm;
+                String key = timestamp + "_" + r + "_" + kzm;
                 String uptoken = qiniuUtil.getUpToken();    //获取qiniu上传文件的token
                 PutExtra extra = new PutExtra();
                 PutRet putRet = IoApi.Put(uptoken, key, multiFile.getInputStream(), extra);
