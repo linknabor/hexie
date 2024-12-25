@@ -43,7 +43,8 @@ public class MsgCfg {
 	public static final String TEMPLATE_TYPE_NOTICE_ARRIVAL = "noticeArrivalMessageTemplate";	//收据下发提醒
 	public static final String TEMPLATE_TYPE_GROUP_SUCCESS_MESSAGE = "groupSuccessMessageTemplate";	//团购成团提醒
 	public static final String TEMPLATE_TYPE_GROUP_START_MESSAGE = "groupStartMessageTemplate";	//开团提醒
-	
+
+	public static final String TEMPLATE_TYPE_RENOVATION_NOTIFY = "renovationNotificationMessageTemplate"; //装修登记审核通知
 	public static final String URL_SUCCESS = "successUrl";
 	public static final String URL_REG_SUCCESS = "regSuccessUrl";
 	public static final String URL_YUYUE_NOTICE = "yuyueNotice";

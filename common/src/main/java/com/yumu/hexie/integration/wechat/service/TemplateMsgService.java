@@ -1430,16 +1430,12 @@ public class TemplateMsgService {
 			return wechatResponse;
 		}
 
-		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_OPINION_NOTIFY, notice.getAppid());
-		if (msgTemplate == null) {
-			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_OPINION_NOTIFY2, notice.getAppid());
-		}
+		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RENOVATION_NOTIFY, notice.getAppid());
 		if (msgTemplate == null) {
 			wechatResponse = new WechatResponse();
 			wechatResponse.setErrcode(99999);
 			wechatResponse.setErrmsg("99999:[装修登记审核通知]未配置模板消息");
 		} else {
-
 			boolean userMiniPage = false;
 			String url = "";
 			if (!ConstantWeChat.APPID.equals(notice.getAppid()) &&
@@ -1450,63 +1446,30 @@ public class TemplateMsgService {
 					userMiniPage = true;
 				}
 			}
-			if (!userMiniPage) {
-				url = wechatMsgService.getMsgUrl(MsgCfg.URL_OPINION_NOTICE);
-				url = AppUtil.addAppOnUrl(url, notice.getAppid());
+			if (StringUtils.isEmpty(url)) {
+				wechatResponse = new WechatResponse();
+				wechatResponse.setErrcode(99999);
+				wechatResponse.setErrmsg("99999:[装修登记审核通知]未配置跳转连接");
+				return wechatResponse;
 			}
 			url = url.replaceAll("Id", notice.getRegisterId());
 
 			int msgType = msgTemplate.getType();
-			if (msgType == 0) {
-				CommonVO2 vo = new CommonVO2();
-				vo.setFirst(new TemplateItem("装修申请审批结果通知。"));
-				vo.setKeyword1(new TemplateItem(notice.getStatus()));
-				vo.setKeyword2(new TemplateItem(notice.getCellAddr()));
-				vo.setKeyword3(new TemplateItem(notice.getContent()));
-				vo.setRemark(new TemplateItem("点击查看详情"));
-
-				TemplateMsg<CommonVO2> msg = new TemplateMsg<>();
-				msg.setData(vo);
-				msg.setTemplate_id(msgTemplate.getValue());
-				if (userMiniPage) {
-					MiniprogramVO miniVo = new MiniprogramVO();
-					miniVo.setAppid(notice.getMiniAppid());
-					miniVo.setPagepath(url);
-					msg.setMiniprogram(miniVo);
-				} else {
-					msg.setUrl(url);
-				}
-				msg.setTouser(notice.getOpenid());
-				wechatResponse = sendMsg(msg, accessToken);
-			} else if (msgType == 2) {
+			if (msgType == 2) {
 				Map<String, Map<String, String>> map = new HashMap<>();
 				Map<String, String> dataMap = new HashMap<>();
-				String content = notice.getContent();
-				if(!StringUtils.isEmpty(content)) {
-					if(content.length() > 20) {
-						content = content.substring(0, 15) + "...";
-					}
-				}
-				dataMap.put("value", content);
-				map.put("thing3", dataMap);
+				dataMap.put("value", notice.getStatus());
+				map.put("const2", dataMap);
 
-//				dataMap = new HashMap<>();
-//				dataMap.put("value", commentNotice.getOpinionDate());
-//				map.put("time4", dataMap);
-//
-//				dataMap = new HashMap<>();
-//				String commentName = commentNotice.getCommentName();
-//				if(!StringUtils.isEmpty(commentName)) {
-//					if(commentName.length() > 20) {
-//						commentName = commentName.substring(0, 15) + "...";
-//					}
-//				}
-//				dataMap.put("value", commentName);
-//				map.put("thing1", dataMap);
-//
-//				dataMap = new HashMap<>();
-//				dataMap.put("value", "-");
-//				map.put("phone_number2", dataMap);
+				String desc = notice.getCellAddr();
+				if (desc.length() > 16) {
+					desc = "..." + desc.substring(desc.length()- 16);
+				}
+				desc = desc.trim();
+
+				dataMap = new HashMap<>();
+				dataMap.put("value", desc);
+				map.put("thing1", dataMap);
 
 				TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
 				msg.setData(map);
