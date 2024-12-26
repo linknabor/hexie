@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.assertj.core.util.Arrays;
 import org.springframework.util.StringUtils;
 
@@ -13,6 +14,8 @@ public class CellVO {
 	private String name;
 	private String version;
 	private String tel;
+	@JsonProperty("cust_name")
+	private String custName; //业主名称
 	private String qrCodeOper;	//是否为二维码收费工作人员, 0否1是
 
 	private List<Object> telList;
@@ -55,6 +58,15 @@ public class CellVO {
 			this.telList.add(this.tel);
 		}
 	}
+
+	public String getCustName() {
+		return custName;
+	}
+
+	public void setCustName(String custName) {
+		this.custName = custName;
+	}
+
 	public List<Object> getTelList() {
 		return telList;
 	}

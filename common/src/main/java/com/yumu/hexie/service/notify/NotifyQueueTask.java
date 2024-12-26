@@ -36,4 +36,6 @@ public interface NotifyQueueTask {
 
 	void notifyInteractGrade();
 
+	void notifyRenovation();
+
 }

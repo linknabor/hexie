@@ -18,8 +18,8 @@ import com.yumu.hexie.model.user.User;
 public class WuyeParamService {
 	
 	private final static Logger logger = LoggerFactory.getLogger(WuyeParamService.class);
-	public final static String PARAM_NAMES = "ONLINE_REPAIR,ONLINE_SUGGESTION,ONLINE_MESSAGE,CORONA_PREVENTION_MODE";
-
+	public final static String PARAM_CSP_NAMES = "ONLINE_REPAIR,ONLINE_SUGGESTION,ONLINE_MESSAGE,CORONA_PREVENTION_MODE";
+	public final static String PARAM_SECT_NAMES = "ALLOW_RENOVATION_REGISTER";
 	
 	@Autowired
 	private WuyeUtil2 wuyeUtil2;
@@ -27,18 +27,22 @@ public class WuyeParamService {
 	/**
 	 * 缓存物业公司参数到redis中，如果失败重新请求，总共请求3次
 	 */
-	@Cacheable(cacheNames = ModelConstant.KEY_WUYE_PARAM_CFG, key = "#user.cspId", unless = "#result == null")
-	public Map<String, String> cacheWuyeParam(User user, String type) {
+	@Cacheable(cacheNames = ModelConstant.KEY_WUYE_PARAM_CFG, key = "#infoId", unless = "#result == null")
+	public Map<String, String> cacheWuyeParam(User user, String infoId, String type) {
 
 		try {
-			BaseResult<HexieConfig> baseResult = wuyeUtil2.queryServiceCfg(user, type, PARAM_NAMES);
+			String param = PARAM_CSP_NAMES;
+			if(ModelConstant.PARA_TYPE_SECT.equals(type)) {
+				param = PARAM_SECT_NAMES;
+			}
+			BaseResult<HexieConfig> baseResult = wuyeUtil2.queryServiceCfg(user, type, param);
 			HexieConfig hexieConfig = baseResult.getData();
 			if (hexieConfig == null ) {
-				logger.error("未查询到参数：" + PARAM_NAMES);
+				logger.error("未查询到参数：" + param);
 				return null;
 			}
 			if (hexieConfig.getParamMap().isEmpty()) {
-				logger.error("未查询到参数：" + PARAM_NAMES);
+				logger.error("未查询到参数：" + param);
 				return null;
 			}
 			return hexieConfig.getParamMap();
