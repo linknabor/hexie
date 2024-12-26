@@ -56,6 +56,8 @@ import com.yumu.hexie.service.o2o.OperatorDefinition;
 import com.yumu.hexie.service.o2o.OperatorService;
 import com.yumu.hexie.service.page.PageConfigService;
 import com.yumu.hexie.service.shequ.ParamService;
+import com.yumu.hexie.service.subscribemsg.AliSubscribeMsgService;
+import com.yumu.hexie.service.subscribemsg.dto.SubscribeReq;
 import com.yumu.hexie.service.user.UserService;
 import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.service.user.req.SwitchSectReq;
@@ -92,6 +94,8 @@ public class UserController extends BaseController{
 	private StringRedisTemplate stringRedisTemplate;
 	@Autowired
 	private WdService wdService;
+	@Autowired
+	private AliSubscribeMsgService aliSubscribeMsgService;
 
     @Value(value = "${testMode}")
     private Boolean testMode;
@@ -103,7 +107,6 @@ public class UserController extends BaseController{
 		long beginTime = System.currentTimeMillis();
 		User dbUser = null;
 		try {
-
 			String oriApp = request.getParameter("oriApp");
 			if (StringUtil.isEmpty(oriApp)) {
 				oriApp = ConstantWeChat.APPID;
@@ -118,7 +121,6 @@ public class UserController extends BaseController{
 					dbUser = null;
 				}
 			}
-			
 			log.info("user in db :" + dbUser);
 			if(dbUser != null){
 				
@@ -249,13 +251,14 @@ public class UserController extends BaseController{
 
 			    return new BaseResult<UserInfo>().success(userInfo);
 			} else {
-				log.error("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
-				HttpSession httpSession = request.getSession(false);
+				log.info("current user id in session is not the same with the id in database. user : " + user + ", sessionId: " + request.getSession().getId());
+				HttpSession httpSession = request.getSession();
 				if (httpSession != null) {
-					log.error("will invalidate current session !");
-					httpSession.setMaxInactiveInterval(1);
+					log.info("will invalidate current session, sessionId : " + httpSession.getId());
+					//sessionAttr:sessionUser
 					httpSession.removeAttribute(Constants.USER);
 					httpSession.invalidate();
+					Thread.sleep(1000l);
 				}
 				return new BaseResult<UserInfo>().success(null);
 			}
@@ -605,6 +608,24 @@ public class UserController extends BaseController{
 		UserInfo userInfo = new UserInfo(userAccount);
 		session.setAttribute(Constants.USER, userAccount);
 		return new BaseResult<UserInfo>().success(userInfo);
+    }
+	
+	/**
+     * 静默授权获取用户openid-alipay
+     * @param code
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/authorizeAlipay/{code}", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<Map<String, String>> authorizeAlipay(@PathVariable String code) throws Exception {
+		
+		Map<String, String> map = new HashMap<>();
+		if (StringUtil.isNotEmpty(code)) {
+			AccessTokenOAuth oauth = userService.getAlipayAuth(code);
+	    	map.put("userid", oauth.getOpenid());
+		}
+		return new BaseResult<Map<String, String>>().success(map);
     }
 
 	/**
@@ -1099,5 +1120,22 @@ public class UserController extends BaseController{
 	    return new BaseResult<UserInfo>().success(userInfo);
 
     }
-        
+
+    /**
+     * 支付宝生活缴费用户订阅消息
+     * @param session
+     * @param h5UserDTO
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/alipay/lifepay/subscribe", method = RequestMethod.POST)
+	@ResponseBody
+    public BaseResult<String> lifepayLogin(@ModelAttribute(Constants.USER)User user) throws Exception {
+    	SubscribeReq subscribeReq = new SubscribeReq();
+    	subscribeReq.setUser(user);
+    	subscribeReq.setSubscribe(1);
+    	aliSubscribeMsgService.addSubscribe(subscribeReq);
+	    return new BaseResult<String>().success("");
+
+    }
 }

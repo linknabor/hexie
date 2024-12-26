@@ -67,6 +67,8 @@ public class PrepayRequestDTO implements Serializable {
 
 	private String payScenarios; //场景
 	private String parkName; //停车场名称
+	
+	private String channelInfo;	//吱口令渠道信息
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -294,46 +296,29 @@ public class PrepayRequestDTO implements Serializable {
 	public void setParkName(String parkName) {
 		this.parkName = parkName;
 	}
-
+	
+	public String getChannelInfo() {
+		return channelInfo;
+	}
+	
+	public void setChannelInfo(String channelInfo) {
+		this.channelInfo = channelInfo;
+	}
+	
 	@Override
 	public String toString() {
-		return "PrepayRequestDTO{" +
-				"user=" + user +
-				", couponUnit='" + couponUnit + '\'' +
-				", couponNum='" + couponNum + '\'' +
-				", couponId='" + couponId + '\'' +
-				", reduceAmt='" + reduceAmt + '\'' +
-				", invoiceTitle='" + invoiceTitle + '\'' +
-				", invoiceTitleType='" + invoiceTitleType + '\'' +
-				", creditCode='" + creditCode + '\'' +
-				", needInvoice='" + needInvoice + '\'' +
-				", invoiceType='" + invoiceType + '\'' +
-				", regionUrl='" + regionUrl + '\'' +
-				", regionName='" + regionName + '\'' +
-				", billId='" + billId + '\'' +
-				", stmtId='" + stmtId + '\'' +
-				", payType='" + payType + '\'' +
-				", customerName='" + customerName + '\'' +
-				", certType='" + certType + '\'' +
-				", certId='" + certId + '\'' +
-				", acctNo='" + acctNo + '\'' +
-				", phoneNo='" + phoneNo + '\'' +
-				", quickToken='" + quickToken + '\'' +
-				", veriCode='" + veriCode + '\'' +
-				", remember='" + remember + '\'' +
-				", cardId='" + cardId + '\'' +
-				", orderNo='" + orderNo + '\'' +
-				", ruleType='" + ruleType + '\'' +
-				", reductionAmt='" + reductionAmt + '\'' +
-				", payFeeType='" + payFeeType + '\'' +
-				", isQrcode='" + isQrcode + '\'' +
-				", appid='" + appid + '\'' +
-				", payee_openid='" + payee_openid + '\'' +
-				", cellId='" + cellId + '\'' +
-				", batchNo='" + batchNo + '\'' +
-				", tpPrepay=" + tpPrepay +
-				", payScenarios='" + payScenarios + '\'' +
-				", parkName='" + parkName + '\'' +
-				'}';
+		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
+				+ ", couponId=" + couponId + ", reduceAmt=" + reduceAmt + ", invoiceTitle=" + invoiceTitle
+				+ ", invoiceTitleType=" + invoiceTitleType + ", creditCode=" + creditCode + ", needInvoice="
+				+ needInvoice + ", invoiceType=" + invoiceType + ", regionUrl=" + regionUrl + ", regionName="
+				+ regionName + ", billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType + ", customerName="
+				+ customerName + ", certType=" + certType + ", certId=" + certId + ", acctNo=" + acctNo + ", phoneNo="
+				+ phoneNo + ", quickToken=" + quickToken + ", veriCode=" + veriCode + ", remember=" + remember
+				+ ", cardId=" + cardId + ", orderNo=" + orderNo + ", ruleType=" + ruleType + ", reductionAmt="
+				+ reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + ", appid=" + appid
+				+ ", payee_openid=" + payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo + ", tpPrepay="
+				+ tpPrepay + ", payScenarios=" + payScenarios + ", parkName=" + parkName + ", channelInfo="
+				+ channelInfo + "]";
 	}
+
 }

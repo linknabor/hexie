@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -21,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yumu.hexie.common.util.JacksonJsonUtil;
+import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.service.FileService;
 import com.yumu.hexie.integration.wuye.WuyeUtil;
@@ -30,6 +30,8 @@ import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
 import com.yumu.hexie.integration.wuye.dto.PrepayRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.SignInOutDTO;
+import com.yumu.hexie.integration.wuye.req.QueryAlipayConsultRequest;
+import com.yumu.hexie.integration.wuye.resp.AlipayMarketingConsult;
 import com.yumu.hexie.integration.wuye.resp.BaseResult;
 import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.BillStartDate;
@@ -62,6 +64,7 @@ import com.yumu.hexie.model.user.NewLionUser;
 import com.yumu.hexie.model.user.NewLionUserRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.cache.CacheService;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.exception.BizValidateException;
@@ -112,6 +115,9 @@ public class WuyeServiceImpl implements WuyeService {
 	@Autowired
 	private FileService fileService;
 	
+	@Autowired
+	private CacheService cacheService;
+	
 	@Override
 	public HouseListVO queryHouse(User user, String sectId) {
 		return WuyeUtil.queryHouse(user, sectId).getData();
@@ -119,7 +125,6 @@ public class WuyeServiceImpl implements WuyeService {
 
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
 	public boolean deleteHouse(User user, String houseId) {
 		
 		BaseResult<HouseListVO> result = WuyeUtil.deleteHouse(user, houseId);
@@ -171,10 +176,13 @@ public class WuyeServiceImpl implements WuyeService {
 				}
 			}
 			
-			
 		} else {
 			throw new BizValidateException("解绑房屋失败。");
 		}
+		
+		//清空用户缓存
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
+		
 		return result.isSuccess();
 	}
 	
@@ -219,7 +227,6 @@ public class WuyeServiceImpl implements WuyeService {
 			User currUser = userRepository.findById(user.getId());
 			prepayRequestDTO.setUser(currUser);
 		}
-		
 		if ("1".equals(prepayRequestDTO.getPayType())) {	//银行卡支付
 			String remerber = prepayRequestDTO.getRemember();
 			if ("1".equals(remerber)) {	//新卡， 需要记住卡号的情况
@@ -343,6 +350,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if("02".equals(r.getResult())) {
 			throw new BizValidateException(2, "房屋不存在！");
 		}
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 		return r.getData();
 	}
 
@@ -353,7 +361,6 @@ public class WuyeServiceImpl implements WuyeService {
 	 */
 	@Override
 	@Transactional
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid", condition = "#user.openid != null")
 	public void setDefaultAddress(User user, HexieUser u) {
 		
 		HexieAddress hexieAddress = new HexieAddress();
@@ -381,6 +388,9 @@ public class WuyeServiceImpl implements WuyeService {
 		user.setCspId(u.getCsp_id());
 		user.setOfficeTel(u.getOffice_tel());
 		userRepository.save(user);
+		
+		//清空用户缓存
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 	
 	@Override
@@ -839,6 +849,8 @@ public class WuyeServiceImpl implements WuyeService {
 							HexieUser hexieUser = new HexieUser();
 							BeanUtils.copyProperties(hexieHouse, hexieUser);
 							setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
+							//里面的清除缓存不会生效，在外面调一下
+							cacheService.clearUserCache(cacheService.getCacheKey(user));
 						}
 					}
 					
@@ -857,6 +869,13 @@ public class WuyeServiceImpl implements WuyeService {
 	public SectInfo querySectById(User user, String sectId) throws Exception {
 		return wuyeUtil2.querySectById(user, sectId).getData();
 	}
-
 	
+	@Override
+	public AlipayMarketingConsult queryAlipayMarketingConsult(User user, QueryAlipayConsultRequest queryAlipayConsultRequest) throws Exception {
+		if (StringUtils.isEmpty(queryAlipayConsultRequest.getAliAppId())) {
+			queryAlipayConsultRequest.setAliAppId(ConstantAlipay.APPID);
+		}
+		return wuyeUtil2.queryAlipayMarketingConsult(user, queryAlipayConsultRequest).getData();
+	}
+
 }

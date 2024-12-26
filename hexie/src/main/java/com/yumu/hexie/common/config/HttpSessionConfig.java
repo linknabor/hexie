@@ -24,12 +24,12 @@ public class HttpSessionConfig {
 		@Bean
 		public CookieSerializer httpSessionIdResolver() {
 			DefaultCookieSerializer cookieSerializer = new DefaultCookieSerializer();
-			if (testMode) {
-				cookieSerializer.setUseHttpOnlyCookie(false);
-				cookieSerializer.setSameSite("None");
-				cookieSerializer.setCookiePath("/");
-				cookieSerializer.setUseSecureCookie(true);
-			}
+//			if (testMode) {
+//				cookieSerializer.setUseHttpOnlyCookie(false);
+//				cookieSerializer.setSameSite("None");
+//				cookieSerializer.setCookiePath("/");
+//				cookieSerializer.setUseSecureCookie(false);
+//			}
 			return cookieSerializer;
 		}
 	}

@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +28,7 @@ import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.user.BankCardRepository;
 import com.yumu.hexie.model.user.User;
 import com.yumu.hexie.model.user.UserRepository;
+import com.yumu.hexie.service.cache.CacheService;
 import com.yumu.hexie.service.common.SystemConfigService;
 import com.yumu.hexie.service.notify.NotifyService;
 import com.yumu.hexie.service.shequ.WuyeService;
@@ -54,6 +54,8 @@ public class NotifyServiceImpl implements NotifyService {
 	@Autowired
 	@Qualifier("stringRedisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
+	@Autowired
+	private CacheService cacheService;
 
 	/**
 	 * 	1.优惠券核销
@@ -661,7 +663,7 @@ public class NotifyServiceImpl implements NotifyService {
 				user.setXiaoquName(notice.getSect_name());
 			}
 		}
-		saveOutSidUser(user);
+		userRepository.save(user);
 
 		//3.生成wuyeId
 		if(StringUtils.isEmpty(user.getWuyeId())) {
@@ -677,11 +679,8 @@ public class NotifyServiceImpl implements NotifyService {
 		} else {
 			log.error("data_type值不合法，本次不做绑房子操作");
 		}
-	}
-
-	@CacheEvict(cacheNames = ModelConstant.KEY_USER_CACHED, key = "#user.openid")
-	public void saveOutSidUser(User user) {
-		userRepository.save(user);
+		//清缓存
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 
 }

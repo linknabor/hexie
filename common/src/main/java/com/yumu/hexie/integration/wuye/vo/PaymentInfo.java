@@ -13,6 +13,7 @@ public class PaymentInfo implements Serializable {
 	private static final long serialVersionUID = 1176023527465139811L;
 	private String tran_time;;
 	private String bill_tran_amt;
+	private String sect_id;
 	private String sect_name;
 	private String office_tel;
 	private String csp_name;
@@ -28,6 +29,7 @@ public class PaymentInfo implements Serializable {
 	private String is_default_invoice; //是否强制开票
 	private String total_fee_price;
 	private String path; //催收上传的附件地址
+	private String share_token_service;	//支付宝优惠资讯
 	
 	@Transient
 	public String getPaymethodStr(){
@@ -123,20 +125,31 @@ public class PaymentInfo implements Serializable {
 	public void setOffice_tel(String office_tel) {
 		this.office_tel = office_tel;
 	}
-
 	public String getIs_default_invoice() {
 		return is_default_invoice;
 	}
-
 	public void setIs_default_invoice(String is_default_invoice) {
 		this.is_default_invoice = is_default_invoice;
 	}
-
 	public String getPath() {
 		return path;
 	}
-
 	public void setPath(String path) {
 		this.path = path;
 	}
+	public String getSect_id() {
+		return sect_id;
+	}
+	public void setSect_id(String sect_id) {
+		this.sect_id = sect_id;
+	}
+	public String getShare_token_service() {
+		return share_token_service;
+	}
+	public void setShare_token_service(String share_token_service) {
+		this.share_token_service = share_token_service;
+	}
+	
+	
+	
 }

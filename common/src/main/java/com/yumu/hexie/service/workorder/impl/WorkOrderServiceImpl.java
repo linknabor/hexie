@@ -2,6 +2,7 @@ package com.yumu.hexie.service.workorder.impl;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.qiniu.api.io.IoApi;
@@ -56,12 +58,12 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 	 * @throws Exception 
 	 */
 	@Override
-	public WorkOrderServiceVO getService(User user) throws Exception {
+	public WorkOrderServiceVO getService(User user, String sectId) throws Exception {
 		
 		if (StringUtil.isEmpty(user.getSectId()) || "0".equals(user.getSectId())) {
 			throw new BizValidateException("您暂未绑定房屋，请前往“我是业主”进行操作！");
 		}
-		CommonResponse<WorkOrderServiceVO> commonResponse =	workOrderUtil.getService(user);
+		CommonResponse<WorkOrderServiceVO> commonResponse =	workOrderUtil.getService(user, sectId);
 		if (!"00".equals(commonResponse.getResult())) {
 			throw new BizValidateException(commonResponse.getErrMsg());
 		}
@@ -81,7 +83,16 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 		
 		List<File> fileList = convertMultipartFiles(workOrderReq.getFileList());
 		List<String> imgPathList = uploadFiles(fileList);
-		workOrderReq.setImages(imgPathList);
+		if (imgPathList != null) {
+			workOrderReq.setImages(imgPathList);
+		}
+		if (!StringUtils.isEmpty(workOrderReq.getImagesStr())) {
+			String[]imgArr = workOrderReq.getImagesStr().split(",");
+			if (imgArr != null) {
+				imgPathList = Arrays.asList(imgArr);
+				workOrderReq.setImages(imgPathList);
+			}
+		}
 		CommonResponse<String> commonResponse =	workOrderUtil.addWorkOrder(user, workOrderReq);
 		if (!"00".equals(commonResponse.getResult())) {
 			throw new BizValidateException(commonResponse.getErrMsg());

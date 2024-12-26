@@ -28,6 +28,8 @@ public class Discounts implements Serializable {
 	private String image;	//is_qrcode =1时有，图片的BASE64串
 	@JsonProperty("sect_name")
 	private String sectName;
+	@JsonProperty("sect_id")
+	private String sectId;
 	@JsonProperty("cycle_arrs")
 	private List<Cycles> cycleList;
 	/*2020-07 添加 end*/
@@ -144,6 +146,22 @@ public class Discounts implements Serializable {
 	public void setImage(String image) {
 		this.image = image;
 	}
-	
 
+	public String getSectName() {
+		return sectName;
+	}
+
+	public void setSectName(String sectName) {
+		this.sectName = sectName;
+	}
+
+	public String getSectId() {
+		return sectId;
+	}
+
+	public void setSectId(String sectId) {
+		this.sectId = sectId;
+	}
+	
+	
 }
