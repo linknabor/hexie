@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
-import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -232,6 +231,9 @@ public class WuyeUtil2 {
 		if (!StringUtils.isEmpty(appid)) {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
+		}
+		if ("2".equals(prepayRequestDTO.getPayType())) {
+			fromSys = SystemConfigServiceImpl.getSysMap().get(user.getMiniAppId());
 		}
 		if ("_shwy".equals(user.getOriSys())) {
 			fromSys = user.getOriSys();
