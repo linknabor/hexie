@@ -151,7 +151,7 @@ public class AddressController extends BaseController{
 		}
 		Address addr = addressService.addAddress(address);
 		//本方法内调用无法异步
-//		addressService.fillAmapInfo(addr);
+		addressService.fillAmapInfo(addr);
 		userService.getById(user.getId());
 		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			pointService.updatePoint(user, "50", "zhima-address-"+user.getId()+"-"+address.getId());
@@ -214,14 +214,14 @@ public class AddressController extends BaseController{
 	@RequestMapping(value = "/amap/{city}/{keyword}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAmapYuntuLocal(@PathVariable String city,@PathVariable String keyword){
-		return BaseResult.successResult(null);
+		return BaseResult.successResult(addressService.queryAmapYuntuLocal(city, keyword));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/amap/{longitude}/{latitude}/around/", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<List<AmapAddress>> queryAround(@PathVariable double longitude, @PathVariable double latitude){
-		return BaseResult.successResult(null);
+		return BaseResult.successResult(addressService.queryAroundByCoordinate(longitude, latitude));
 	}
 	
 	@SuppressWarnings({ "unchecked", "static-access" })
