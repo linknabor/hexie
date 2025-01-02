@@ -8,30 +8,22 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.common.util.JacksonJsonUtil;
 import com.yumu.hexie.common.util.StringUtil;
-import com.yumu.hexie.integration.amap.AmapUtil;
-import com.yumu.hexie.integration.amap.req.DataCreateReq;
-import com.yumu.hexie.integration.amap.resp.DataCreateResp;
 import com.yumu.hexie.integration.eshop.resp.RgroupRegionsVO;
 import com.yumu.hexie.integration.eshop.service.EshopUtil;
 import com.yumu.hexie.integration.wuye.vo.HexieAddress;
 import com.yumu.hexie.model.ModelConstant;
 import com.yumu.hexie.model.distribution.RgroupAreaItem;
 import com.yumu.hexie.model.distribution.RgroupAreaItemRepository;
-import com.yumu.hexie.model.distribution.region.AmapAddress;
-import com.yumu.hexie.model.distribution.region.AmapAddressRepository;
 import com.yumu.hexie.model.distribution.region.City;
 import com.yumu.hexie.model.distribution.region.CityRepository;
 import com.yumu.hexie.model.distribution.region.County;
@@ -62,8 +54,6 @@ public class AddressServiceImpl implements AddressService {
     private UserRepository userRepository;
     @Inject
     private AddressRepository addressRepository;
-    @Inject
-    private AmapAddressRepository amapAddressRepository;
     @Autowired
     private RegionRepository regionRepository;
     @Autowired
@@ -237,58 +227,7 @@ public class AddressServiceImpl implements AddressService {
         }
         return null;
     }
-    @Async
-    public void fillAmapInfo(Address address) {
-        log.error("高德地图插入数据！AddressId:" + address.getId());
-        AmapAddress amapAddr = null;
-        if(address.getAmapId()!=null&&address.getAmapId()!=0){
-           amapAddr = AmapUtil.dataSearchId(address.getAmapId());
-        }
-        if(amapAddr == null&&StringUtil.isNotEmpty(address.getXiaoquName())) {
-            DataCreateReq req = new DataCreateReq(address.getXiaoquName(), null, null,
-                    address.getCity()+address.getCounty()+address.getAmapDetailAddr(),
-                    address.getCity(), address.getCounty(),address.getAmapDetailAddr());
-            DataCreateResp resp = AmapUtil.dataManageDataCreate(req);
-            if(resp == null || !resp.isSuccess()){
-                String errorMsg = "";
-                try {
-                    errorMsg = "req:"+JacksonJsonUtil.beanToJson(req) + "\n\n";
-                    errorMsg = "resp:"+JacksonJsonUtil.beanToJson(resp);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                log.error("高德地图插入数据失败！" + errorMsg);
-                return;
-            }
-            try {
-                Thread.sleep(5000);//等待地图经纬度生成及索引创建
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            amapAddr = AmapUtil.dataSearchId(resp.get_id());
-            if(amapAddr != null) {
-                amapAddressRepository.save(amapAddr);
-            }
-        }
-        
-        if(amapAddr!=null && amapAddr.getLocation()!=null){
-            address = addressRepository.findById(address.getId());
-            address.initAmapInfo(amapAddr);
-
-            addressRepository.save(address);
-            
-            Region xiaoqu = regionRepository.findById(address.getXiaoquId());
-            if(xiaoqu != null && Math.abs(xiaoqu.getLatitude()) < 0.1) {
-                xiaoqu.setLongitude(address.getLongitude());
-                xiaoqu.setLatitude(address.getLatitude());
-                xiaoqu.setAmapId(address.getAmapId());
-                regionRepository.save(xiaoqu);
-            }
-            log.error("高德地图更新成功！AmapId:" + address.getAmapId());
-        } else {
-            log.error("高德地图更新失败！AddressId:" + address.getId());
-        }
-    }
+   
     @Override
     public Address configDefaultAddress(User user, long addressId) {
         log.error("设置用户默认地址[0]" + user.getId() + "--" + user.getCurrentAddrId() + "--" + addressId);
@@ -351,21 +290,10 @@ public class AddressServiceImpl implements AddressService {
         return regionRepository.findAllByRegionTypeAndParentId(type, regionId);
     }
     @Override
-    public List<AmapAddress> queryAmapYuntuLocal(String city, String keyword) {
-        return AmapUtil.dataSearchLocal(city, keyword);
-    }
-    @Override
     public Address queryAddressById(long id) {
         return addressRepository.findById(id);
     }
     
-    /** 
-     * 根据坐标查找周围10个小区
-     */
-    @Override
-    public List<AmapAddress> queryAroundByCoordinate(double longitude, double latitude) {
-        return AmapUtil.queryAroundByCoordinate(longitude, latitude);
-    }
     @Override
     public Address queryDefaultAddress(User user) {
         if(user.getCurrentAddrId() > 0) {
@@ -622,5 +550,5 @@ public class AddressServiceImpl implements AddressService {
 		bf.deleteCharAt(bf.length()-1);
 		return eshopUtil.querySectInfo(user, bf.toString());
 	}
-	
+
 }

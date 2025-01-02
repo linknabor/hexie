@@ -37,11 +37,6 @@ public interface AddressService {
 
 	 List<Region> queryRegions(int type,long regionId);
 
-	 void fillAmapInfo(Address address);
-	 List<AmapAddress> queryAmapYuntuLocal(String city, String keyword) ;
-
-	 List<AmapAddress> queryAroundByCoordinate(double longitude, double latitude);
-
 	 List<Address> getAddressByuserIdAndAddress(long id, String cell_addr);
 
 	 List<Address> getAddressByMain(long id,boolean main);
