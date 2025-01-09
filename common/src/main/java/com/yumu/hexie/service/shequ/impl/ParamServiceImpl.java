@@ -63,6 +63,8 @@ public class ParamServiceImpl implements ParamService {
 		}
 		if (ModelConstant.PARA_TYPE_CSP.equals(type)) {
 			wuyeParamService.clearWuyeCache(user.getCspId(), type);
+		} else if (ModelConstant.PARA_TYPE_SECT.equals(type)) {
+			wuyeParamService.clearWuyeCache(user.getSectId(), type);
 		}
 		return checkAndGetParam(user);
 	}
@@ -77,10 +79,17 @@ public class ParamServiceImpl implements ParamService {
 		
 		Map<String, String> paramMap = null;
 		String cspId = user.getCspId();
-		if (StringUtil.isEmpty(cspId) || "0".equals(cspId)) {
-			//do nothing
-		} else {
-			paramMap = wuyeParamService.cacheWuyeParam(user, ModelConstant.PARA_TYPE_CSP);
+		if (!StringUtil.isEmpty(cspId) && !"0".equals(cspId)) {
+			paramMap = wuyeParamService.cacheWuyeParam(user, user.getCspId(), ModelConstant.PARA_TYPE_CSP);
+		}
+		String sectId = user.getSectId();
+		if (!StringUtil.isEmpty(sectId) && !"0".equals(sectId)) {
+			Map<String, String> sectMap = wuyeParamService.cacheWuyeParam(user, user.getSectId(), ModelConstant.PARA_TYPE_SECT);
+			if(paramMap == null) {
+				paramMap = sectMap;
+			} else {
+				paramMap.putAll(sectMap);
+			}
 		}
 		if (paramMap == null) {
 			paramMap = new HashMap<>();

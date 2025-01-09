@@ -356,7 +356,8 @@ public class ModelConstant {
 	//评论或者投诉
 	public static final int HAOJIAAN_COMMPENT_STATUS_COMMENT = 1;//评论
 	public static final int HAOJIAAN_COMMPENT_STATUS_COMPLAIN = 2;//投诉
-	
+
+	public static final String PARA_TYPE_SECT = "1";
 	public static final String PARA_TYPE_CSP = "2";
 	
 	public static final String KEY_TYPE_BOTTOM_ICON = "cfg:page:bottomIcon";	//底部图标缓存key
@@ -508,7 +509,7 @@ public class ModelConstant {
 	public static final String interactReplyNoticeQueue = "queue:interact:replyToHx"; //业主意见物业回复的通知给用户
 	public static final String interactGradeNoticeQueue = "queue:interact:grade"; //投诉建议处理结果评价
 	//
-
+	public static final String renovationNoticeQueue = "queue:notify:renovation"; //装修登记审核结果通知给业主
 	public static final String KEY_DELIVERY_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:deliveryReceiver"; //电商接单人推送
 	public static final String KEY_SERVICE_OPERATOR_NOTICE_MSG_QUEUE = "queue:eshop:serviceReceiver"; //服务接单人推送
 	public static final String KEY_RGROUP_SUCCESS_NOTICE_MSG_QUEUE = "queue:notify:rgroup:groupSuccess"; //成团提醒。发给团长

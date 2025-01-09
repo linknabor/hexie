@@ -3,6 +3,7 @@ package com.yumu.hexie.service.common;
 import com.yumu.hexie.integration.notify.InvoiceNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
 import com.yumu.hexie.integration.notify.ReceiptNotification;
+import com.yumu.hexie.integration.notify.RenovationNotification;
 import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.card.dto.EventSubscribeDTO;
@@ -70,4 +71,6 @@ public interface GotongService {
 
 	//业主评价模板推送
 	void sendInteractGradeNotification(InteractCommentNotice notice);
+
+	WechatResponse sendRenovationNotification(RenovationNotification notice);
 }

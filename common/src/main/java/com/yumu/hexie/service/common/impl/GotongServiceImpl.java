@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.yumu.hexie.integration.notify.*;
 import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import com.yumu.hexie.integration.notify.InvoiceNotification;
-import com.yumu.hexie.integration.notify.Operator;
-import com.yumu.hexie.integration.notify.ReceiptNotification;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
-import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.integration.wechat.entity.customer.Article;
@@ -434,6 +431,17 @@ public class GotongServiceImpl implements GotongService {
     public void sendInteractGradeNotification(InteractCommentNotice notice) {
         String accessToken = systemConfigService.queryWXAToken(notice.getAppid());
         templateMsgService.sendOpinionGradeNotificationMsg(notice, accessToken);
+    }
+
+    @Override
+    public WechatResponse sendRenovationNotification(RenovationNotification notice) {
+        if(ObjectUtils.isEmpty(notice.getAppid())) {
+            WechatResponse response = new WechatResponse();
+            response.setErrcode(99998);
+            return response;
+        }
+        String accessToken = systemConfigService.queryWXAToken(notice.getAppid());
+        return templateMsgService.sendRenovationNotificationMessage(notice, accessToken);
     }
 
 }
