@@ -164,5 +164,19 @@ public class NotifyController extends BaseController {
 		return "SUCCESS";
 	}
 
+	/**
+	 * 装修登记审核结果通知给业主
+	 * @param notice
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/servplat/noticeRenovation", method = RequestMethod.POST)
+	@ResponseBody
+	public String noticeRenovation(@RequestBody RenovationNotification notice) throws Exception {
+		log.info("noticeRenovation notice:" + notice);
+		notifyService.noticeRenovation(notice);
+		return "SUCCESS";
+	}
+
 
 }

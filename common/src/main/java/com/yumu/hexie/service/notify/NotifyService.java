@@ -45,4 +45,7 @@ public interface NotifyService {
 
 	//从外部春川小程序上用户的绑定房屋数据
 	void noticeUserBindHouseByCC(CcBindHouseNotification notice) throws Exception;
+
+	//装修登记审核结果通知给业主
+	void noticeRenovation(RenovationNotification notice) throws Exception;
 }

@@ -497,12 +497,15 @@ public class WuyeUtil2 {
 		requestUrl += SYNC_SERVICE_CFG_URL;
 		
 		WuyeParamRequest wuyeParamRequest = new WuyeParamRequest();
-		if (ModelConstant.PARA_TYPE_CSP.equals(type)) {
+		if (ModelConstant.PARA_TYPE_SECT.equals(type)) {
 			wuyeParamRequest.setType(type);
+			wuyeParamRequest.setInfoId(user.getSectId());
+		} else if(ModelConstant.PARA_TYPE_CSP.equals(type)) {
+			wuyeParamRequest.setType(type);
+			wuyeParamRequest.setInfoId(user.getCspId());
 		} else {
-			wuyeParamRequest.setType(type);	//TODO 默认给个值，以后有小区参数再改
+			wuyeParamRequest.setType("000"); //TODO 默认给个值，以后有其他参数再改
 		}
-		wuyeParamRequest.setInfoId(user.getCspId());
 		wuyeParamRequest.setParaName(paraName);
 		
 		TypeReference<CommonResponse<HexieConfig>> typeReference = new TypeReference<CommonResponse<HexieConfig>>(){};
