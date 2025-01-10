@@ -67,8 +67,11 @@ public class ParamController extends BaseController {
 		}
 		User user = new User();
 		user.setOriSys(oriSys);
-		user.setCspId(infoId);
-		
+		if(ModelConstant.PARA_TYPE_CSP.equals(type)) {
+			user.setCspId(infoId);
+		} else {
+			user.setSectId(infoId);
+		}
 		paramService.getWuyeParamAsync(user, type);
 		response.getWriter().print("ok");
 	}
