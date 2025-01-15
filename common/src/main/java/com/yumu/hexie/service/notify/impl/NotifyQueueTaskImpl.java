@@ -1506,6 +1506,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
         if (wechatResponse.getErrcode() == 47003) {
             isSuccess = true;	//字段内容错误
         }
+        if (wechatResponse.getErrcode() == 40165) {
+            isSuccess = true;	//跳转链接错误
+        }
         return isSuccess;
     }
 
