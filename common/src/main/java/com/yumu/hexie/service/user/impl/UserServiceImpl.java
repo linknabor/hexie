@@ -592,6 +592,7 @@ public class UserServiceImpl implements UserService {
     	logger.info("miniUser : " + miniUser);
         String unionid = miniUser.getUnionid();	
         String miniopenid = miniUser.getOpenid();
+        String miniappid = miniUser.getAppid();
         User userAccount = null;
         List<User> users = null;
         if (!StringUtils.isEmpty(unionid)) {
@@ -620,7 +621,8 @@ public class UserServiceImpl implements UserService {
         	if (users.size() == 1) {
         		userAccount = users.get(0);
 			} else {
-				userAccount = users.stream().filter(u -> u.getAppId().equals(ConstantWeChat.APPID)).findFirst().orElse(null);
+				//判断登录小程序用户的小程序appid是否和库里的相同
+				userAccount = users.stream().filter(u -> miniappid.equals(u.getMiniAppId())).findFirst().orElse(null);
 				if (userAccount == null) {
 					userAccount = users.stream().findFirst().orElse(null);
 				}
