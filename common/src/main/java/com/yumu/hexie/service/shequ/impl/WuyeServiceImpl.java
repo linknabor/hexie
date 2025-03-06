@@ -835,7 +835,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if (houList != null) {
 			boolean flag = false;	//是否上线小区
 			for (NewLionUser newLionUser : houList) {
-				if (!StringUtils.isEmpty(newLionUser.getFdSectId())) {
+				if (!StringUtils.isEmpty(newLionUser.getSectId())) {
 					flag = true;
 					break;
 				}
