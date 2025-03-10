@@ -1452,7 +1452,7 @@ public class TemplateMsgService {
 				wechatResponse.setErrmsg("99999:[装修登记审核通知]未配置跳转连接");
 				return wechatResponse;
 			}
-			url = url.replaceAll("Id", notice.getRegisterId());
+			url = url.replaceAll("Id", "=" + notice.getRegisterId());
 
 			int msgType = msgTemplate.getType();
 			if (msgType == 2) {
