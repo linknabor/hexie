@@ -375,6 +375,14 @@ public class WuyeController extends BaseController {
 		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
 	}
+
+	@RequestMapping(value = "/getPayMapping/{payKey}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> getPayMapping(@ModelAttribute(Constants.USER) User user, @PathVariable String payKey) throws Exception {
+		log.info("payKey : " + payKey);
+		Object obj = wuyeService.getPayMappingInfo(user, payKey);
+		return BaseResult.successResult(obj);
+	}
 	
 	/**
 	 * 创建交易，获取预支付ID
