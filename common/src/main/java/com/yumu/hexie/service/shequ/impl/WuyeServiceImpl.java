@@ -134,15 +134,10 @@ public class WuyeServiceImpl implements WuyeService {
 			HouseListVO houseListVO = result.getData();
 			if (houseListVO!=null) {
 				totalBind = houseListVO.getHou_info().size();
-				if (totalBind < 0) {
-					totalBind = 0;
-				}
-			} else {
-				totalBind = 0;
 			}
 			
 			if (totalBind == 0) {
-				user.setXiaoquId(0l);
+				user.setXiaoquId(0L);
 				user.setXiaoquName("");
 				user.setProvince("");
 				user.setCity("");
@@ -398,12 +393,13 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.queryBillList(user, startDate, endDate, house_id, regionName).getData();
 	}
-	
+
 	/**
 	 * 通过物业交易ID异步绑定房屋
-	 * @param bindSwitch
 	 * @param user
-	 * @param tradeWaterId
+	 * @param house_id
+	 * @param regionName
+	 * @return
 	 */
 	@Override
 	public BillStartDate getBillStartDateSDO(User user, String house_id, String regionName) {
@@ -528,25 +524,18 @@ public class WuyeServiceImpl implements WuyeService {
 	@Async
 	@Override
 	public void addCouponsFromSeed(User user, List<CouponCombination> list) {
-
 		try {
-
-			for (int i = 0; i < list.size(); i++) {
-				couponService.addCouponFromSeed(list.get(i).getSeedStr(), user);
+			for (CouponCombination couponCombination : list) {
+				couponService.addCouponFromSeed(couponCombination.getSeedStr(), user);
 			}
-
 		} catch (Exception e) {
-
 			log.error("add Coupons for wuye Pay : " + e.getMessage());
 		}
-
 	}
 
 	@Override
 	public Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
-		
-		Discounts discountDetail = wuyeUtil2.getDiscounts(discountViewRequestDTO).getData();
-		return discountDetail;
+		return wuyeUtil2.getDiscounts(discountViewRequestDTO).getData();
 	
 	}
 	
@@ -585,7 +574,7 @@ public class WuyeServiceImpl implements WuyeService {
 			log.error(e.getMessage(), e);
 		}
 		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_SERVICE, user.getId());
-		ServiceOperator serviceOperator = null;
+		ServiceOperator serviceOperator;
 		List<PayCfg> serviceList = new ArrayList<>();
 		if (ops!=null && !ops.isEmpty()) {
 			log.info("ops count : " + ops.size());
@@ -806,13 +795,13 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public ReceiptInfo getReceipt(String appid, String receiptId) throws Exception {
 		
-		String region = "";
+		String region;
 		String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
 		String sysSource = "_sh";
 		if ("_guizhou".equals(userSysCode)) {
 			sysSource = "_guizhou";
 		}
-		if ("guizhou".equals(sysSource)) {
+		if ("_guizhou".equals(sysSource)) {
 			region = "贵州省";
 		} else {
 			region = "";
@@ -876,6 +865,11 @@ public class WuyeServiceImpl implements WuyeService {
 			queryAlipayConsultRequest.setAliAppId(ConstantAlipay.APPID);
 		}
 		return wuyeUtil2.queryAlipayMarketingConsult(user, queryAlipayConsultRequest).getData();
+	}
+
+	@Override
+	public Object getPayMappingInfo(User user, String payKey) throws Exception {
+		return wuyeUtil2.getPayMapping(user, payKey).getData();
 	}
 
 }
