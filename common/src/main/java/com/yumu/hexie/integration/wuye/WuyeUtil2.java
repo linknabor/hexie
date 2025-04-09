@@ -126,6 +126,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_SECT_NEARBY = "getSectNearbySDO.do";	//获取附近的小区
 	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
 
+	private static final String QUERY_PAY_MAPPING = "getPayMappingSDO.do";	//获取扫二维码缴管理费时，码上带的参数对照
 
 	/**
 	 * 标准版查询账单
@@ -921,7 +922,7 @@ public class WuyeUtil2 {
 	
 	/**
 	 * 支付平台h5用户注册登陆
-	 * @param user
+	 * @param aliUserDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -997,10 +998,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据房屋ID查找房屋
 	 * @param user
-	 * @param startDate
-	 * @param endDate
 	 * @param houseId
-	 * @param regionName
 	 * @return
 	 * @throws Exception
 	 */
@@ -1025,10 +1023,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据小区ID获取小区信息
 	 * @param user
-	 * @param startDate
-	 * @param endDate
-	 * @param houseId
-	 * @param regionName
+	 * @param sectId
 	 * @return
 	 * @throws Exception
 	 */
@@ -1052,7 +1047,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据小区ID获取小区信息
 	 * @param user
-	 * @param coordinate 经度,维度
+	 * @param radiusSectReq 经度,维度
 	 * @return
 	 * @throws Exception
 	 */
@@ -1077,10 +1072,7 @@ public class WuyeUtil2 {
 	/**
 	 * 获取吱口令优惠资讯
 	 * @param user
-	 * @param startDate
-	 * @param endDate
-	 * @param houseId
-	 * @param regionName
+	 * @param queryAlipayConsultRequest
 	 * @return
 	 * @throws Exception
 	 */
@@ -1097,6 +1089,29 @@ public class WuyeUtil2 {
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
 		
+	}
+
+	/**
+	 * 获取扫二维码缴管理费时，二维码上的参数对照
+	 * @param user
+	 * @param payKey
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<Object> getPayMapping(User user, String payKey) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_PAY_MAPPING;
+
+		Map<String, String> map = new HashMap<>();
+		map.put("payKey", payKey);
+
+		TypeReference<CommonResponse<Object>> typeReference = new TypeReference<CommonResponse<Object>>(){};
+		CommonResponse<Object> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<Object> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
 	}
 	
 }

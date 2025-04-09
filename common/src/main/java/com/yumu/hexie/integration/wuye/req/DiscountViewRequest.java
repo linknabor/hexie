@@ -28,6 +28,7 @@ public class DiscountViewRequest extends WuyeRequest {
 	@JsonProperty("is_qrcode")
 	private String isQrcode;
 	/*2020-07 添加 end*/
+	private String payKey; //存放扫二维码支付的账单对照ID，拿这个ID到redis去取
 	
 	public DiscountViewRequest() {
 		super();
@@ -80,11 +81,26 @@ public class DiscountViewRequest extends WuyeRequest {
 	public void setIsQrcode(String isQrcode) {
 		this.isQrcode = isQrcode;
 	}
+
+	public String getPayKey() {
+		return payKey;
+	}
+
+	public void setPayKey(String payKey) {
+		this.payKey = payKey;
+	}
+
 	@Override
 	public String toString() {
-		return "DiscountViewRequest [wuyeId=" + wuyeId + ", billId=" + billId + ", stmtId=" + stmtId + ", payType="
-				+ payType + ", payFeeType=" + payFeeType + ", appid=" + appid + ", isQrcode=" + isQrcode + "]";
+		return "DiscountViewRequest{" +
+				"wuyeId='" + wuyeId + '\'' +
+				", billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", appid='" + appid + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", payKey='" + payKey + '\'' +
+				'}';
 	}
-	
-
 }

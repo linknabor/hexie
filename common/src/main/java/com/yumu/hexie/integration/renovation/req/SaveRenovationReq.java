@@ -12,6 +12,7 @@ public class SaveRenovationReq {
     private String openid;
     private String appid;
     private String attachment_urls;
+    private String cust_tel;
 
     public String getRegister_id() {
         return register_id;
@@ -53,6 +54,14 @@ public class SaveRenovationReq {
         this.attachment_urls = attachment_urls;
     }
 
+    public String getCust_tel() {
+        return cust_tel;
+    }
+
+    public void setCust_tel(String cust_tel) {
+        this.cust_tel = cust_tel;
+    }
+
     @Override
     public String toString() {
         return "SaveRenovationReq{" +
@@ -61,6 +70,7 @@ public class SaveRenovationReq {
                 ", openid='" + openid + '\'' +
                 ", appid='" + appid + '\'' +
                 ", attachment_urls='" + attachment_urls + '\'' +
+                ", cust_tel='" + cust_tel + '\'' +
                 '}';
     }
 }
