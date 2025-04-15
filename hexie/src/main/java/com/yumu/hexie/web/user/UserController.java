@@ -747,6 +747,9 @@ public class UserController extends BaseController{
 	        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
 		    userInfo.setMenuList(menuList);
 		    userInfo.setPermission(true);
+
+			Map<String, String> paramMap = paramService.getWuyeParam(user);
+			userInfo.setCfgParam(paramMap);
 		}
 	   
 	    		    
