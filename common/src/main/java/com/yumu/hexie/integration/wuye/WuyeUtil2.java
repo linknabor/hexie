@@ -46,6 +46,7 @@ import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.resp.RadiusSect;
+import com.yumu.hexie.integration.wuye.resp.UserAccessSpotResp;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
@@ -67,6 +68,7 @@ import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
 import com.yumu.hexie.service.shequ.req.RadiusSectReq;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
+import com.yumu.hexie.service.shequ.req.UserAccessRecordReq;
 import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.vo.req.MessageReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
@@ -125,6 +127,8 @@ public class WuyeUtil2 {
 	private static final String QUERY_SECT_BY_ID_URL = "getSectByIdSDO.do";	//获取小区信息
 	private static final String QUERY_SECT_NEARBY = "getSectNearbySDO.do";	//获取附近的小区
 	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
+	private static final String QUERY_ACCESS_SPOT = "useraccess/getSpotSDO.do";	//获取门禁点信息
+	private static final String SAVE_USER_ACCESS_RECORD = "useraccess/saveRecordSDO.do";	//保存用户门禁登记记录
 
 
 	/**
@@ -1090,6 +1094,53 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<AlipayMarketingConsult>> typeReference = new TypeReference<CommonResponse<AlipayMarketingConsult>>(){};
 		CommonResponse<AlipayMarketingConsult> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryAlipayConsultRequest, typeReference);
 		BaseResult<AlipayMarketingConsult> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 获取门禁点信息
+	 * @param spotId
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<UserAccessSpotResp> getAccessSpot(User user, String spotId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_ACCESS_SPOT;
+		
+		Map<String, String> reqMap = new HashMap<>();
+		reqMap.put("spotId", spotId);
+		
+		TypeReference<CommonResponse<UserAccessSpotResp>> typeReference = new TypeReference<CommonResponse<UserAccessSpotResp>>(){};
+		CommonResponse<UserAccessSpotResp> hexieResponse = restUtil.exchangeOnUri(requestUrl, reqMap, typeReference);
+		BaseResult<UserAccessSpotResp> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 保存用户门禁记录
+	 * @param user
+	 * @param startDate
+	 * @param endDate
+	 * @param houseId
+	 * @param regionName
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> saveUserAccessRecord(User user, UserAccessRecordReq saveAccessRecordReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += SAVE_USER_ACCESS_RECORD;
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnBody(requestUrl, saveAccessRecordReq, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
