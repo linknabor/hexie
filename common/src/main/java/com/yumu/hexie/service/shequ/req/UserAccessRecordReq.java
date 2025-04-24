@@ -20,6 +20,7 @@ public class UserAccessRecordReq implements Serializable {
 	private String role;	//访客角色
 	private String accessDevice;
 	private String accessIp;
+	private String adminCode;	//城市国标码
 	
 	public String getSpotId() {
 		return spotId;
@@ -86,6 +87,12 @@ public class UserAccessRecordReq implements Serializable {
 	}
 	public void setAppid(String appid) {
 		this.appid = appid;
+	}
+	public String getAdminCode() {
+		return adminCode;
+	}
+	public void setAdminCode(String adminCode) {
+		this.adminCode = adminCode;
 	}
 	
 }
