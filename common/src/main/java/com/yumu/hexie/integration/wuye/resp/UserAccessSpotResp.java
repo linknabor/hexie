@@ -17,6 +17,9 @@ public class UserAccessSpotResp implements Serializable{
 	private String spotName;
 	@JsonProperty("sect_id")
 	private String sectId;
+	@JsonProperty("admin_code")
+	
+	private String adminCode;
 	
 	public String getSpotId() {
 		return spotId;
@@ -35,6 +38,12 @@ public class UserAccessSpotResp implements Serializable{
 	}
 	public void setSectId(String sectId) {
 		this.sectId = sectId;
+	}
+	public String getAdminCode() {
+		return adminCode;
+	}
+	public void setAdminCode(String adminCode) {
+		this.adminCode = adminCode;
 	}
 	
 }
