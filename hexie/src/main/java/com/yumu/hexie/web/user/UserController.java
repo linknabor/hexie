@@ -380,7 +380,7 @@ public class UserController extends BaseController{
 			}
 		}
 		log.info("getyzm request ip : " + requestIp);
-		log.info("getyzm request mobile: " + requestIp);
+		log.info("getyzm request mobile: " + yzm.getMobile());
 		log.info("getyzm request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
 		String token = request.getHeader("Access-Control-Allow-Token");
 		if (StringUtils.isEmpty(token)) {
