@@ -461,4 +461,14 @@ public interface WuyeService {
 	AlipayMarketingConsult queryAlipayMarketingConsult(User user, QueryAlipayConsultRequest queryAlipayConsultRequest)
 			throws Exception;
 
+	/**
+	 * 为春川用户绑定已经绑定过的房子
+	 * @param user
+	 * @param mobile
+	 * @param wuyeIds
+	 * @return
+	 * @throws Exception
+	 */
+	List<HexieHouse> bindHouse4ChunChuanUser(User user, String mobile, List<String> wuyeIds) throws Exception;
+
 }

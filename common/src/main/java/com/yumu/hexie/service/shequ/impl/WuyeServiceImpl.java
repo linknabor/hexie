@@ -861,6 +861,26 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
+	public List<HexieHouse> bindHouse4ChunChuanUser(User user, String mobile, List<String> wuyeIds) throws Exception {
+		
+		List<HexieHouse> hexieHouses = null;
+		BaseResult<List<HexieHouse>> baseResult = wuyeUtil2.bindHouse4NewLionUser(user, mobile);
+		if (baseResult.isSuccess()) {
+			hexieHouses = baseResult.getData();
+			if (hexieHouses != null && hexieHouses.size() > 0) {
+				for (HexieHouse hexieHouse : hexieHouses) {
+					HexieUser hexieUser = new HexieUser();
+					BeanUtils.copyProperties(hexieHouse, hexieUser);
+					setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
+					//里面的清除缓存不会生效，在外面调一下
+					cacheService.clearUserCache(cacheService.getCacheKey(user));
+				}
+			}
+		}
+		return hexieHouses;
+	}
+	
+	@Override
 	public HexieUser queryHouseById(User user, String houseId) throws Exception {
 		return wuyeUtil2.queryHouseById(user, houseId).getData();
 	}

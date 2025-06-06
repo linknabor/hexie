@@ -272,5 +272,12 @@ public interface UserService {
 	 */
 	List<NewLionUser> getNewLionUserByMobile(String mobile);
 	
+	/**
+	 * 根据手机号查询春川之前绑定过的用户
+	 * @param mobile
+	 * @return
+	 */
+	List<User> getChunChuanUserByMobile(String mobile);
+	
 
 }

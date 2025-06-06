@@ -129,6 +129,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
 	private static final String QUERY_ACCESS_SPOT = "useraccess/getSpotSDO.do";	//获取门禁点信息
 	private static final String SAVE_USER_ACCESS_RECORD = "useraccess/saveRecordSDO.do";	//保存用户门禁登记记录
+	private static final String CHUNCHUAN_USER_BIND_URL = "bindHouse4ChunchuanUserSDO.do";	//新郎恩存量用户绑定
 
 
 	/**
@@ -955,6 +956,32 @@ public class WuyeUtil2 {
 		requestMap.put("openid", user.getMiniopenid());	//西部用户取miniopenid
 		requestMap.put("appid", user.getMiniAppId());
 		requestMap.put("mobile", mobile);
+		TypeReference<CommonResponse<List<HexieHouse>>> typeReference = new TypeReference<CommonResponse<List<HexieHouse>>>(){};
+		CommonResponse<List<HexieHouse>> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
+		BaseResult<List<HexieHouse>> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		baseResult.setResult(hexieResponse.getResult());
+		return baseResult;
+
+	}
+	
+	/**
+	 * 新朗恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<HexieHouse>> bindHouse4ChunchuanUser(User user, String mobile, String wuyeIds) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += CHUNCHUAN_USER_BIND_URL;
+		
+		Map<String, String> requestMap = new HashMap<>();
+		requestMap.put("user_id", user.getWuyeId());
+		requestMap.put("openid", user.getMiniopenid());	//西部用户取miniopenid
+		requestMap.put("appid", user.getMiniAppId());
+		requestMap.put("mobile", mobile);
+		requestMap.put("wuyeIds", wuyeIds);
 		TypeReference<CommonResponse<List<HexieHouse>>> typeReference = new TypeReference<CommonResponse<List<HexieHouse>>>(){};
 		CommonResponse<List<HexieHouse>> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
 		BaseResult<List<HexieHouse>> baseResult = new BaseResult<>();

@@ -6,8 +6,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -1197,6 +1199,32 @@ public class WuyeController extends BaseController {
 		List<HexieHouse> hexieHouses = new ArrayList<>();
 		if (newLionUserList != null && !newLionUserList.isEmpty()) {
 			hexieHouses = wuyeService.bindHouse4NewLionUser(user, mobile);
+		}
+		return BaseResult.successResult(hexieHouses);
+	}
+	
+	/**
+	 * 为春川恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/chunchuan/user/bind", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<List<HexieHouse>> checkBindChunchuanUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
+		
+		List<User> oldUserList = userService.getChunChuanUserByMobile(mobile);
+		String currMiniAppid = user.getMiniAppId();
+		Set<String> userSet = new HashSet<>();
+		for (User oldUser : oldUserList) {
+			if (!StringUtils.isEmpty(oldUser.getMiniAppId())) {
+				userSet.add(oldUser.getWuyeId());
+			}
+		}
+		List<HexieHouse> hexieHouses = new ArrayList<>();
+		if (!userSet.isEmpty()) {
+			hexieHouses = wuyeService.bindHouse4ChunChuanUser(user, mobile, new ArrayList<>(userSet));
 		}
 		return BaseResult.successResult(hexieHouses);
 	}
