@@ -861,10 +861,17 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
-	public List<HexieHouse> bindHouse4ChunChuanUser(User user, String mobile, List<String> wuyeIds) throws Exception {
+	public List<HexieHouse> bindHouse4ChunChuanUser(User user, String mobile, List<String> wuyeIdList) throws Exception {
 		
+		StringBuffer bf = new StringBuffer();
+		for (String wuyeId : wuyeIdList) {
+			bf.append(wuyeId).append(",");
+		}
+		if (bf.length() > 1) {
+			bf.deleteCharAt(bf.length()-1);
+		}
 		List<HexieHouse> hexieHouses = null;
-		BaseResult<List<HexieHouse>> baseResult = wuyeUtil2.bindHouse4NewLionUser(user, mobile);
+		BaseResult<List<HexieHouse>> baseResult = wuyeUtil2.bindHouse4ChunchuanUser(user, mobile, bf.toString());
 		if (baseResult.isSuccess()) {
 			hexieHouses = baseResult.getData();
 			if (hexieHouses != null && hexieHouses.size() > 0) {
