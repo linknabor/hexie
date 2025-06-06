@@ -633,8 +633,18 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 		}
 		if (user == null) {
-			if (!StringUtils.isEmpty(miniopenid)) {
-				user = userRepository.findByMiniopenid(miniopenid);
+			//春川换了appid，这里兼容老用户，先拿老的appid去查，如果能查到，把老用户的miniappid和miniopenid更掉
+			if("wxde89512c4cbfdad9".equals(notice.getAppid())) {
+				String ori_appid = "wx0c81e6687f6f5e43";
+				List<User> list = userRepository.findByTelAndMiniAppId(notice.getPhone(), ori_appid);
+				if (list!=null && list.size()>0) {
+					user = list.get(0);
+				}
+			}
+			if(user == null) {
+				if (!StringUtils.isEmpty(miniopenid)) {
+					user = userRepository.findByMiniopenid(miniopenid);
+				}
 			}
 		}
 
@@ -642,27 +652,16 @@ public class NotifyServiceImpl implements NotifyService {
 		if (user == null) {
 			user = new User();
 			user.setOpenid("0");    //TODO
-			user.setUnionid(notice.getUnionid());
-			user.setMiniopenid(notice.getOpenid());
-			user.setMiniAppId(notice.getAppid());
-			user.setCspId(notice.getCsp_id());
-			user.setSectId(notice.getSect_id());
-			user.setTel(notice.getPhone());
-			user.setXiaoquName(notice.getSect_name());
-			user.setRegisterDate(System.currentTimeMillis());
 			user.setShareCode(DigestUtils.md5Hex("UID[" + UUID.randomUUID() + "]"));
-		} else {
-			if(StringUtils.isEmpty(user.getMiniopenid())) {
-				user.setUnionid(notice.getUnionid());
-				user.setMiniopenid(notice.getOpenid());
-				user.setMiniAppId(notice.getAppid());
-				user.setCspId(notice.getCsp_id());
-				user.setSectId(notice.getSect_id());
-				user.setTel(notice.getPhone());
-				user.setRegisterDate(System.currentTimeMillis());
-				user.setXiaoquName(notice.getSect_name());
-			}
 		}
+		user.setMiniAppId(notice.getAppid());
+		user.setMiniopenid(notice.getOpenid());
+		user.setUnionid(notice.getUnionid());
+		user.setCspId(notice.getCsp_id());
+		user.setSectId(notice.getSect_id());
+		user.setTel(notice.getPhone());
+		user.setRegisterDate(System.currentTimeMillis());
+		user.setXiaoquName(notice.getSect_name());
 		userRepository.save(user);
 
 		//3.生成wuyeId
