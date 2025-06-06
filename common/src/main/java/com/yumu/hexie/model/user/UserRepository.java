@@ -104,6 +104,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	public List<User> findByTelAndAppId(String tel, String appid);
 
+	public List<User> findByTelAndMiniAppId(String tel, String miniappid);
+
 	public User findByAppIdAndUniqueCode(String appid, String uniqueCode);
 	
 	@Deprecated
