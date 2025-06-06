@@ -457,4 +457,14 @@ public interface WuyeService {
 
 	//获取扫二维码支付时，二维码上参数的对照信息
 	Object getPayMappingInfo(User user, String payKey) throws Exception;
+	/**
+	 * 为春川用户绑定已经绑定过的房子
+	 * @param user
+	 * @param mobile
+	 * @param wuyeIds
+	 * @return
+	 * @throws Exception
+	 */
+	List<HexieHouse> bindHouse4ChunChuanUser(User user, String mobile, List<String> wuyeIds) throws Exception;
+
 }
