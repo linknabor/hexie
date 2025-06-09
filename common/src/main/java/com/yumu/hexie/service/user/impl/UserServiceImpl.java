@@ -1147,5 +1147,15 @@ public class UserServiceImpl implements UserService {
 		return newLionUserRepository.findByMobile(mobile);
 		
 	}
+	
+	@Override
+	public List<User> getChunChuanUserByMobile(String mobile) {
+		
+		if (StringUtils.isEmpty(mobile)) {
+			throw new BizValidateException("用户手机号不能为空");
+		}
+		return userRepository.findByTel(mobile);
+		
+	}
 
 }
