@@ -1223,10 +1223,11 @@ public class WuyeController extends BaseController {
 	public BaseResult<List<HexieHouse>> checkBindChunchuanUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
 		
 		List<User> oldUserList = userService.getChunChuanUserByMobile(mobile);
-		String currMiniAppid = user.getMiniAppId();
 		Set<String> userSet = new HashSet<>();
 		for (User oldUser : oldUserList) {
-			if (!StringUtils.isEmpty(oldUser.getMiniAppId())) {
+			if ("wx0c81e6687f6f5e43".equals(oldUser.getMiniAppId())	//老春川 
+					|| "wxde89512c4cbfdad9".equals(oldUser.getMiniAppId())	//新春川 
+					|| "wx944c12478a484646".equals(oldUser.getAppId())) {	//春川公众号
 				userSet.add(oldUser.getWuyeId());
 			}
 		}
