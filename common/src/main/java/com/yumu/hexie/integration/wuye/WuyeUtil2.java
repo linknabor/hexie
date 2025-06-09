@@ -129,7 +129,7 @@ public class WuyeUtil2 {
 	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
 	private static final String QUERY_ACCESS_SPOT = "useraccess/getSpotSDO.do";	//获取门禁点信息
 	private static final String SAVE_USER_ACCESS_RECORD = "useraccess/saveRecordSDO.do";	//保存用户门禁登记记录
-	private static final String CHUNCHUAN_USER_BIND_URL = "bindHouse4ChunchuanUserSDO.do";	//新郎恩存量用户绑定
+	private static final String CHUNCHUAN_USER_BIND_URL = "bindHouse4ChunchuanUserSDO.do";	//春川存量用户绑定
 
 	private static final String QUERY_PAY_MAPPING = "getPayMappingSDO.do";	//获取扫二维码缴管理费时，码上带的参数对照
 
