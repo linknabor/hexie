@@ -683,4 +683,15 @@ public class NotifyServiceImpl implements NotifyService {
 		cacheService.clearUserCache(cacheService.getCacheKey(user));
 	}
 
+	@Override
+	public void noticeRenovation(RenovationNotification notice) throws Exception {
+		if(notice == null) {
+			log.error("推送内容为空");
+			return;
+		}
+		ObjectMapper objectMapper = JacksonJsonUtil.getMapperInstance(false);
+		String value = objectMapper.writeValueAsString(notice);
+		redisTemplate.opsForList().rightPush(ModelConstant.renovationNoticeQueue, value);
+	}
+
 }

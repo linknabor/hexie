@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.yumu.hexie.integration.notify.*;
 import com.yumu.hexie.integration.wechat.entity.templatemsg.*;
 import com.yumu.hexie.service.shequ.vo.InteractCommentNotice;
 import org.slf4j.Logger;
@@ -21,11 +22,7 @@ import com.yumu.hexie.common.util.AppUtil;
 import com.yumu.hexie.common.util.DateUtil;
 import com.yumu.hexie.common.util.StringUtil;
 import com.yumu.hexie.integration.common.RestUtil;
-import com.yumu.hexie.integration.notify.InvoiceNotification;
-import com.yumu.hexie.integration.notify.Operator;
 import com.yumu.hexie.integration.notify.PayNotification.AccountNotification;
-import com.yumu.hexie.integration.notify.ReceiptNotification;
-import com.yumu.hexie.integration.notify.WorkOrderNotification;
 import com.yumu.hexie.integration.wechat.constant.ConstantWeChat;
 import com.yumu.hexie.integration.wechat.entity.common.WechatResponse;
 import com.yumu.hexie.model.ModelConstant;
@@ -557,7 +554,7 @@ public class TemplateMsgService {
 		if (msgTemplate == null) {
 			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_BILL_PUSH2, appId);
 		}
-		WechatResponse wechatResponse = null;
+		WechatResponse wechatResponse;
 		if (msgTemplate == null) {
 			wechatResponse = new WechatResponse();
 			wechatResponse.setErrcode(99999);
@@ -645,7 +642,7 @@ public class TemplateMsgService {
 	public WechatResponse sendOpinionNotificationMessage(InteractCommentNotice commentNotice, String accessToken) {
 		
 		
-		WechatResponse wechatResponse = null;
+		WechatResponse wechatResponse;
 		if (StringUtils.isEmpty(commentNotice.getAppid()) || StringUtils.isEmpty(commentNotice.getInteractId())) {
 			wechatResponse = new WechatResponse();
 			wechatResponse.setErrcode(99998);
@@ -889,13 +886,13 @@ public class TemplateMsgService {
     	if (!eventKey.startsWith("01") && !eventKey.startsWith("qrscene_01")) {	//01表示扫二维码开票的场景
 			return wechatResponse;
 		}
-    	String[]eventKeyArr = eventKey.split("\\|");
-    	if (eventKeyArr == null || eventKeyArr.length < 4) {
+    	String[] eventKeyArr = eventKey.split("\\|");
+    	if (eventKeyArr.length < 4) {
 			return wechatResponse;
 		}
-    	String tradeWaterId = "";
-    	String tranAmt = ""; 
-    	String shopName = "";
+    	String tradeWaterId;
+    	String tranAmt;
+    	String shopName;
     	try {
 			tradeWaterId = eventKeyArr[1];
 			tranAmt = eventKeyArr[2];
@@ -1134,7 +1131,7 @@ public class TemplateMsgService {
 	public WechatResponse sendFinishReceiveMessage(ReceiptNotification receiptNotification, String accessToken) {
 		
 		log.info("sendFinishReceiveMessage : " + receiptNotification);
-		WechatResponse wechatResponse = null;
+		WechatResponse wechatResponse;
 		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RECEIPT_FINISH, receiptNotification.getAppid());
 		if (msgTemplate == null) {
 			msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RECEIPT_FINISH2, receiptNotification.getAppid());
@@ -1423,5 +1420,78 @@ public class TemplateMsgService {
         sendMsg(msg, accessToken);
 
     }
+
+	public WechatResponse sendRenovationNotificationMessage(RenovationNotification notice, String accessToken) {
+		WechatResponse wechatResponse;
+		if (StringUtils.isEmpty(notice.getAppid())) {
+			wechatResponse = new WechatResponse();
+			wechatResponse.setErrcode(99998);
+			wechatResponse.setErrmsg("appid不能为空");
+			return wechatResponse;
+		}
+
+		MsgTemplate msgTemplate = wechatMsgService.getTemplateByNameAndAppIdV2(MsgCfg.TEMPLATE_TYPE_RENOVATION_NOTIFY, notice.getAppid());
+		if (msgTemplate == null) {
+			wechatResponse = new WechatResponse();
+			wechatResponse.setErrcode(99999);
+			wechatResponse.setErrmsg("99999:[装修登记审核通知]未配置模板消息");
+		} else {
+			boolean userMiniPage = false;
+			String url = "";
+			if (!ConstantWeChat.APPID.equals(notice.getAppid()) &&
+					systemConfigService.isMiniprogramAvailabe(notice.getAppid()) &&
+					!StringUtils.isEmpty(notice.getMiniAppid())) {
+				url = wechatMsgService.getMsgUrl(MsgCfg.URL_RENOVATION_NOTICE_MINI);
+				if (!StringUtils.isEmpty(url)) {
+					userMiniPage = true;
+				}
+			}
+			if (StringUtils.isEmpty(url)) {
+				wechatResponse = new WechatResponse();
+				wechatResponse.setErrcode(99999);
+				wechatResponse.setErrmsg("99999:[装修登记审核通知]未配置跳转连接");
+				return wechatResponse;
+			}
+			url = url.replaceAll("=Id", "=" + notice.getRegisterId());
+
+			int msgType = msgTemplate.getType();
+			if (msgType == 2) {
+				Map<String, Map<String, String>> map = new HashMap<>();
+				Map<String, String> dataMap = new HashMap<>();
+				dataMap.put("value", notice.getStatus());
+				map.put("const2", dataMap);
+
+				String desc = notice.getCellAddr();
+				if (desc.length() > 16) {
+					desc = "..." + desc.substring(desc.length()- 16);
+				}
+				desc = desc.trim();
+
+				dataMap = new HashMap<>();
+				dataMap.put("value", desc);
+				map.put("thing1", dataMap);
+
+				TemplateMsg<Map<String, Map<String, String>>> msg = new TemplateMsg<>();
+				msg.setData(map);
+				if (userMiniPage) {
+					MiniprogramVO miniVo = new MiniprogramVO();
+					miniVo.setAppid(notice.getMiniAppid());
+					miniVo.setPagepath(url);
+					msg.setMiniprogram(miniVo);
+				} else {
+					msg.setUrl(url);
+				}
+				msg.setTemplate_id(msgTemplate.getValue());
+				msg.setTouser(notice.getOpenid());
+				wechatResponse = sendMsg(msg, accessToken);
+			} else {
+				log.info("unknow msgTemplate type : " + msgType);
+				wechatResponse = new WechatResponse();
+				wechatResponse.setErrcode(99999);
+				wechatResponse.setErrmsg("未知的模板消息类型： " + msgType);
+			}
+		}
+		return wechatResponse;
+	}
 
 }

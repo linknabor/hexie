@@ -747,6 +747,9 @@ public class UserController extends BaseController{
 	        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
 		    userInfo.setMenuList(menuList);
 		    userInfo.setPermission(true);
+
+			Map<String, String> paramMap = paramService.getWuyeParam(user);
+			userInfo.setCfgParam(paramMap);
 		}
 	   
 	    		    
@@ -859,6 +862,10 @@ public class UserController extends BaseController{
         List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
 	    userInfo.setMenuList(menuList);
 	    userInfo.setPermission(true);
+
+		Map<String, String> paramMap = paramService.getWuyeParam(user);
+		userInfo.setCfgParam(paramMap);
+
         return new BaseResult<UserInfo>().success(userInfo);
     }
     
@@ -941,8 +948,8 @@ public class UserController extends BaseController{
                 log.info("userOauth : " + userOauth);
                 user = userService.getUserByAliUserIdAndAliAppid(userOauth.getOpenid(), userOauth.getAppid());
                 if (user == null) {
-                	user = userService.saveAlipayMiniUserToken(userOauth);
-				}
+                user = userService.saveAlipayMiniUserToken(userOauth);
+            }
             }
             session.setAttribute(Constants.USER, user);
         }
@@ -1085,14 +1092,14 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/alipay/lifepay/login", method = RequestMethod.POST)
 	@ResponseBody
     public BaseResult<UserInfo> lifepayLogin(HttpSession session, @RequestBody(required = false) H5UserDTO h5UserDTO) throws Exception {
-    	
+        
     	if (StringUtils.isEmpty(h5UserDTO.getUserId()) ) {
 			throw new BizValidateException("请传入支付宝用户user_id");
 		}
-    	
+        
     	if (StringUtils.isEmpty(h5UserDTO.getAppid()) ) {
 			throw new BizValidateException("请传入支付宝appid");
-		}
+}
     	User sessionUser = (User) session.getAttribute(Constants.USER);
     	log.info("lifepayLogin user in session :" + sessionUser);
     	if (sessionUser != null) {

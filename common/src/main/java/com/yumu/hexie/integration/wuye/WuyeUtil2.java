@@ -129,8 +129,10 @@ public class WuyeUtil2 {
 	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
 	private static final String QUERY_ACCESS_SPOT = "useraccess/getSpotSDO.do";	//获取门禁点信息
 	private static final String SAVE_USER_ACCESS_RECORD = "useraccess/saveRecordSDO.do";	//保存用户门禁登记记录
-	private static final String CHUNCHUAN_USER_BIND_URL = "bindHouse4ChunchuanUserSDO.do";	//新郎恩存量用户绑定
+	private static final String CHUNCHUAN_USER_BIND_URL = "bindHouse4ChunchuanUserSDO.do";	//春川存量用户绑定
 
+
+	private static final String QUERY_PAY_MAPPING = "getPayMappingSDO.do";	//获取扫二维码缴管理费时，码上带的参数对照
 
 	/**
 	 * 标准版查询账单
@@ -504,12 +506,15 @@ public class WuyeUtil2 {
 		requestUrl += SYNC_SERVICE_CFG_URL;
 		
 		WuyeParamRequest wuyeParamRequest = new WuyeParamRequest();
-		if (ModelConstant.PARA_TYPE_CSP.equals(type)) {
+		if (ModelConstant.PARA_TYPE_SECT.equals(type)) {
 			wuyeParamRequest.setType(type);
+			wuyeParamRequest.setInfoId(user.getSectId());
+		} else if(ModelConstant.PARA_TYPE_CSP.equals(type)) {
+			wuyeParamRequest.setType(type);
+			wuyeParamRequest.setInfoId(user.getCspId());
 		} else {
-			wuyeParamRequest.setType(type);	//TODO 默认给个值，以后有小区参数再改
+			wuyeParamRequest.setType("000"); //TODO 默认给个值，以后有其他参数再改
 		}
-		wuyeParamRequest.setInfoId(user.getCspId());
 		wuyeParamRequest.setParaName(paraName);
 		
 		TypeReference<CommonResponse<HexieConfig>> typeReference = new TypeReference<CommonResponse<HexieConfig>>(){};
@@ -923,7 +928,7 @@ public class WuyeUtil2 {
 	
 	/**
 	 * 支付平台h5用户注册登陆
-	 * @param user
+	 * @param aliUserDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -1025,10 +1030,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据房屋ID查找房屋
 	 * @param user
-	 * @param startDate
-	 * @param endDate
 	 * @param houseId
-	 * @param regionName
 	 * @return
 	 * @throws Exception
 	 */
@@ -1053,10 +1055,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据小区ID获取小区信息
 	 * @param user
-	 * @param startDate
-	 * @param endDate
-	 * @param houseId
-	 * @param regionName
+	 * @param sectId
 	 * @return
 	 * @throws Exception
 	 */
@@ -1080,7 +1079,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据小区ID获取小区信息
 	 * @param user
-	 * @param coordinate 经度,维度
+	 * @param radiusSectReq 经度,维度
 	 * @return
 	 * @throws Exception
 	 */
@@ -1105,10 +1104,7 @@ public class WuyeUtil2 {
 	/**
 	 * 获取吱口令优惠资讯
 	 * @param user
-	 * @param startDate
-	 * @param endDate
-	 * @param houseId
-	 * @param regionName
+	 * @param queryAlipayConsultRequest
 	 * @return
 	 * @throws Exception
 	 */
@@ -1121,6 +1117,76 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<AlipayMarketingConsult>> typeReference = new TypeReference<CommonResponse<AlipayMarketingConsult>>(){};
 		CommonResponse<AlipayMarketingConsult> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryAlipayConsultRequest, typeReference);
 		BaseResult<AlipayMarketingConsult> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+
+	/**
+	 * 获取扫二维码缴管理费时，二维码上的参数对照
+	 * @param user
+	 * @param payKey
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<Object> getPayMapping(User user, String payKey) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_PAY_MAPPING;
+
+		Map<String, String> map = new HashMap<>();
+		map.put("payKey", payKey);
+
+		TypeReference<CommonResponse<Object>> typeReference = new TypeReference<CommonResponse<Object>>(){};
+		CommonResponse<Object> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<Object> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+	}
+	
+	/**
+	 * 获取门禁点信息
+	 * @param spotId
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<UserAccessSpotResp> getAccessSpot(User user, String spotId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_ACCESS_SPOT;
+		
+		Map<String, String> reqMap = new HashMap<>();
+		reqMap.put("spotId", spotId);
+		
+		TypeReference<CommonResponse<UserAccessSpotResp>> typeReference = new TypeReference<CommonResponse<UserAccessSpotResp>>(){};
+		CommonResponse<UserAccessSpotResp> hexieResponse = restUtil.exchangeOnUri(requestUrl, reqMap, typeReference);
+		BaseResult<UserAccessSpotResp> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 保存用户门禁记录
+	 * @param user
+	 * @param startDate
+	 * @param endDate
+	 * @param houseId
+	 * @param regionName
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> saveUserAccessRecord(User user, UserAccessRecordReq saveAccessRecordReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += SAVE_USER_ACCESS_RECORD;
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnBody(requestUrl, saveAccessRecordReq, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;
