@@ -442,7 +442,7 @@ public interface WuyeService {
 	 * @return
 	 * @throws Exception 
 	 */
-	SectInfo querySectById(User user, String sectId) throws Exception;
+	SectInfo querySectById(User user, String sectId, String clientType) throws Exception;
 
 
 	/**

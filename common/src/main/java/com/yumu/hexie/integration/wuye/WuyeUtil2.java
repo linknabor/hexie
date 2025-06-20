@@ -1062,13 +1062,14 @@ public class WuyeUtil2 {
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<SectInfo> querySectById(User user, String sectId) throws Exception {
+	public BaseResult<SectInfo> querySectById(User user, String sectId, String clientType) throws Exception {
 		
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += QUERY_SECT_BY_ID_URL;
 		
 		Map<String, String> requestMap = new HashMap<>();
 		requestMap.put("sect_id", sectId);
+		requestMap.put("client_type", clientType);
 		
 		TypeReference<CommonResponse<SectInfo>> typeReference = new TypeReference<CommonResponse<SectInfo>>(){};
 		CommonResponse<SectInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
