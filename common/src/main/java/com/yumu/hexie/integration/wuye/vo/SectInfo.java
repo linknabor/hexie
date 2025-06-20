@@ -13,6 +13,7 @@ public class SectInfo implements Serializable {
 	private String sect_id;
 	private String sect_name;
 	private String sect_addr;
+	private String province_name;
 	private Map<String, String> sect_params;
 	
 	public String getSect_id() {
@@ -38,6 +39,12 @@ public class SectInfo implements Serializable {
 	}
 	public void setSect_params(Map<String, String> sect_params) {
 		this.sect_params = sect_params;
+	}
+	public String getProvince_name() {
+		return province_name;
+	}
+	public void setProvince_name(String province_name) {
+		this.province_name = province_name;
 	}
 	@Override
 	public String toString() {

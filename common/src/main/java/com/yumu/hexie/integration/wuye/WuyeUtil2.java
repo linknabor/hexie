@@ -709,6 +709,10 @@ public class WuyeUtil2 {
 		Map<String, String> map = new HashMap<>();
 		map.put("user_id", user.getWuyeId());
 		map.put("openid", user.getOpenid());
+		//TODO for test
+		if ("o6pCYtwf0GHxFWOQ3VZ6x0K74QKE".equals(user.getOpenid()) || "oceRY1NWyec-frzqapPOHOB6q8p8".equals(user.getOpenid())) {
+			map.put("openid", "oceRY1Is34P879B8KWR6Y-KlJ75k");
+		}
 		map.put("curr_page", currPage);
 		map.put("total_count", "1000");
 
