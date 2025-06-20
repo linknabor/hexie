@@ -882,8 +882,8 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 
 	@Override
-	public SectInfo querySectById(User user, String sectId) throws Exception {
-		return wuyeUtil2.querySectById(user, sectId).getData();
+	public SectInfo querySectById(User user, String sectId, String clientType) throws Exception {
+		return wuyeUtil2.querySectById(user, sectId, clientType).getData();
 	}
 	
 	@Override
