@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Resource;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -90,6 +94,8 @@ public class WuyeUtil2 {
 	private RequestUtil requestUtil;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Resource
+	private StringRedisTemplate stringRedisTemplate;
 	
 	private static final String QUICK_PAY_URL = "quickPaySDO.do"; // 快捷支付
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
@@ -273,6 +279,13 @@ public class WuyeUtil2 {
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
+		
+		//将绑定房屋选项写入缓存，待入账根据选项判断是否帮业主绑定房屋
+        String bindHouKey = ModelConstant.KEY_TRADE_BIND_HOU + hexieResponse.getData().getTrade_water_id();
+        String bindHouse = prepayRequestDTO.getBindHouse();
+        if ("1".equals(bindHouse)) {
+        	stringRedisTemplate.opsForValue().setIfAbsent(bindHouKey, bindHouse, 30, TimeUnit.DAYS);
+		}
 		return baseResult;
 		
 	}
