@@ -89,7 +89,6 @@ public class NotifyServiceImpl implements NotifyService {
 			}else {
 				user = userList.get(0);
 			}
-
 		}
 		
 		if (user != null) {
@@ -109,9 +108,14 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 			//4.绑定所缴纳物业费的房屋
 			if ("0".equals(payNotification.getTranType())) {	//0管理费， 1其他收费
-				wuyeService.bindHouseByTradeAsync(payNotification.getBindSwitch(), user, payNotification.getOrderId(), "4");
+				
+				//将绑定房屋选项写入缓存，待入账根据选项判断是否帮业主绑定房屋
+		        String bindHouKey = ModelConstant.KEY_TRADE_BIND_HOU + payNotification.getOrderId();
+		        String bindHouse = redisTemplate.opsForValue().get(bindHouKey);
+		        if ("1".equals(bindHouse)) {
+		        	wuyeService.bindHouseByTradeAsync(bindHouse, user, payNotification.getOrderId(), "4");
+				}
 			}
-			
 		}
 		
 		//5.通知物业相关人员，收费到账
@@ -643,7 +647,7 @@ public class NotifyServiceImpl implements NotifyService {
 			}
 			if(user == null) {
 				if (!StringUtils.isEmpty(miniopenid)) {
-					user = userRepository.findByMiniopenid(miniopenid);
+					user = userService.getByMiniopenid(miniopenid);
 				}
 			}
 		}

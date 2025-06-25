@@ -371,6 +371,5 @@ public class PrepayRequest extends WuyeRequest {
 				+ ", batchNo=" + batchNo + ", cellId=" + cellId + ", tpPrepay=" + tpPrepay + ", payScenarios="
 				+ payScenarios + ", parkName=" + parkName + ", channelInfo=" + channelInfo + "]";
 	}
-
 	
 }
