@@ -11,5 +11,7 @@ public interface BatchService {
 	void bindHouseBatch(String appId);
 
 	void bindHouseZeroSect();
+
+	void delDuplicateUser();
 	
 }

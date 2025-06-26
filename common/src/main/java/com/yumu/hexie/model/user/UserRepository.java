@@ -122,5 +122,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	public List<Map<String, Object>> getTotalBindByMiniAppid(String miniappid);
 	
 	@Query(value = "SELECT miniopenid, miniAppId from user where miniopenid is not null GROUP BY miniopenid HAVING count(1) > 1 ", nativeQuery = true)
-	public List<User> getDuplicatedUser();
+	public List<Map<String, Object>> getDuplicatedMiniUser();
 }
