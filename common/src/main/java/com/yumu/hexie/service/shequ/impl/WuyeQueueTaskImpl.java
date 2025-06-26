@@ -90,6 +90,7 @@ public class WuyeQueueTaskImpl implements WuyeQueueTask {
 				while(!isSuccess && totalFailed < 3) {
 					
 					BaseResult<HexieHouses> baseResult = WuyeUtil.bindByTrade(user, queue.getTradeWaterId(), queue.getBindType());
+					logger.info("bindHouseByTrade, tradeWaterId : " + queue.getTradeWaterId() + ", bind response : " + baseResult);
 					if (baseResult.isSuccess()) {
 						HexieHouses hexieHouses = baseResult.getData();
 						List<HexieHouse> houseList = hexieHouses.getHouses();
