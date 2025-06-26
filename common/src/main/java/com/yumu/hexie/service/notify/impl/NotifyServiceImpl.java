@@ -111,7 +111,7 @@ public class NotifyServiceImpl implements NotifyService {
 				//将绑定房屋选项写入缓存，待入账根据选项判断是否帮业主绑定房屋
 		        String bindHouKey = ModelConstant.KEY_TRADE_BIND_HOU + payNotification.getOrderId();
 		        String bindHouse = redisTemplate.opsForValue().get(bindHouKey);
-		        log.info("bindHouse : " + bindHouse);
+		        log.info("tradeWaterId : " + tradeWaterId + ", +bindHouse : " + bindHouse);
 		        if ("1".equals(bindHouse)) {
 		        	wuyeService.bindHouseByTradeAsync(bindHouse, user, payNotification.getOrderId(), "4");
 				}
