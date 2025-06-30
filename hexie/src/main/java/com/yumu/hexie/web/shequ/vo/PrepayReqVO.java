@@ -70,6 +70,8 @@ public class PrepayReqVO implements Serializable {
 	private String parkName; //停车场名称
 	private String scanChannel; //1支付宝H5 3微信公众号
 	private String channelInfo;	//吱口令渠道信息
+	
+	private String bindHouse;	//是否绑定房屋，0否1是
 
 	public String getBillId() {
 		return billId;
@@ -308,6 +310,14 @@ public class PrepayReqVO implements Serializable {
 	public void setChannelInfo(String channelInfo) {
 		this.channelInfo = channelInfo;
 	}
+	
+	public String getBindHouse() {
+		return bindHouse;
+	}
+	
+	public void setBindHouse(String bindHouse) {
+		this.bindHouse = bindHouse;
+	}
 	@Override
 	public String toString() {
 		return "PrepayReqVO [billId=" + billId + ", stmtId=" + stmtId + ", couponUnit=" + couponUnit + ", couponNum="
@@ -320,7 +330,8 @@ public class PrepayReqVO implements Serializable {
 				+ ", reductionAmt=" + reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode
 				+ ", openid=" + openid + ", appid=" + appid + ", payee_openid=" + payee_openid + ", cellId=" + cellId
 				+ ", batchNo=" + batchNo + ", tpPrepay=" + tpPrepay + ", payScenarios=" + payScenarios + ", parkName="
-				+ parkName + ", scanChannel=" + scanChannel + ", channelInfo=" + channelInfo + "]";
+				+ parkName + ", scanChannel=" + scanChannel + ", channelInfo=" + channelInfo + ", bindHouse="
+				+ bindHouse + "]";
 	}
 	
 }

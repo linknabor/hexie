@@ -1262,8 +1262,8 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/mySect/{sectId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<SectInfo> getSectById(@ModelAttribute(Constants.USER) User user, 
-			@PathVariable String sectId) throws Exception {
-		SectInfo sectInfo = wuyeService.querySectById(user, sectId);
+			@PathVariable String sectId, @RequestParam(required = false) String clientType) throws Exception {
+		SectInfo sectInfo = wuyeService.querySectById(user, sectId, clientType);
 		return BaseResult.successResult(sectInfo);
 	}
 	

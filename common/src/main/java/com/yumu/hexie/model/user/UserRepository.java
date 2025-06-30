@@ -100,7 +100,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	public List<User> findByCspIdAndWuyeIdIn(String cspId, List<String> wuyeIds);
 	
-	public User findByMiniopenid(String miniopenid);
+	public List<User> findByMiniopenid(String miniopenid);
 
 	public List<User> findByTelAndAppId(String tel, String appid);
 
@@ -120,4 +120,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	
 	@Query(value = "select count(1) as counts from user where miniappid = ?1 and ( sectId is not null or sectId <> '' ) ", nativeQuery = true)
 	public List<Map<String, Object>> getTotalBindByMiniAppid(String miniappid);
+	
+	@Query(value = "SELECT miniopenid, miniAppId from user where miniopenid is not null GROUP BY miniopenid HAVING count(1) > 1 ", nativeQuery = true)
+	public List<Map<String, Object>> getDuplicatedMiniUser();
 }

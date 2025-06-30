@@ -113,7 +113,6 @@ public class BatchController extends BaseController {
 	
 	/**
 	 * 手工修复绑定房屋sectId为0的情况
-	 * @param tradeWaterId
 	 * @param code
 	 * @return
 	 */
@@ -131,6 +130,22 @@ public class BatchController extends BaseController {
 		
 	}
 	
-
+	/**
+	 * 删除重复用户
+	 * @param code
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/delDuplicateMiniUser", method = RequestMethod.GET)
+	public BaseResult<String> delDuplicateMiniUser( @RequestParam String code){
+		
+		if ("hexieCode".equals(code)) {
+			batchService.delDuplicateUser();
+			return BaseResult.successResult("success");
+		} else {
+			return BaseResult.fail("unkown request !");
+		}
+		
+	}
 
 }

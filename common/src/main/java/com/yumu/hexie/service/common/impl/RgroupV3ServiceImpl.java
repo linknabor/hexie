@@ -1536,7 +1536,7 @@ public class RgroupV3ServiceImpl implements RgroupV3Service {
 				sendUserList.add(miniOpenid);
 				User sendUser = userService.getByMiniopenid(miniOpenid);
 				String accessToken = "";
-				if (!StringUtils.isEmpty(sendUser.getAppId())) {
+				if (sendUser != null && !StringUtils.isEmpty(sendUser.getAppId())) {
 					accessToken = systemConfigService.queryWXAToken(sendUser.getAppId());
 				}
 				if (StringUtils.isEmpty(accessToken)) {

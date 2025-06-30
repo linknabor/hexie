@@ -69,6 +69,7 @@ public class PrepayRequestDTO implements Serializable {
 	private String parkName; //停车场名称
 	
 	private String channelInfo;	//吱口令渠道信息
+	private String bindHouse;	//是否绑定房屋，0否1是
 
 	public String getCouponUnit() {
 		return couponUnit;
@@ -305,6 +306,14 @@ public class PrepayRequestDTO implements Serializable {
 		this.channelInfo = channelInfo;
 	}
 	
+	public String getBindHouse() {
+		return bindHouse;
+	}
+	
+	public void setBindHouse(String bindHouse) {
+		this.bindHouse = bindHouse;
+	}
+	
 	@Override
 	public String toString() {
 		return "PrepayRequestDTO [user=" + user + ", couponUnit=" + couponUnit + ", couponNum=" + couponNum
@@ -318,7 +327,8 @@ public class PrepayRequestDTO implements Serializable {
 				+ reductionAmt + ", payFeeType=" + payFeeType + ", isQrcode=" + isQrcode + ", appid=" + appid
 				+ ", payee_openid=" + payee_openid + ", cellId=" + cellId + ", batchNo=" + batchNo + ", tpPrepay="
 				+ tpPrepay + ", payScenarios=" + payScenarios + ", parkName=" + parkName + ", channelInfo="
-				+ channelInfo + "]";
+				+ channelInfo + ", bindHouse=" + bindHouse + "]";
 	}
-
+	
+	
 }
