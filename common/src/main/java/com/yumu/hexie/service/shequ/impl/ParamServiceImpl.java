@@ -88,7 +88,9 @@ public class ParamServiceImpl implements ParamService {
 			if(paramMap == null) {
 				paramMap = sectMap;
 			} else {
-				paramMap.putAll(sectMap);
+				if (sectMap != null) {
+					paramMap.putAll(sectMap);
+				}
 			}
 		}
 		if (paramMap == null) {
