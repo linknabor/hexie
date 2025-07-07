@@ -110,8 +110,8 @@ public class ParkController extends BaseController {
      */
     @RequestMapping(value = "/getPayingDetail", method = RequestMethod.GET)
     public BaseResult<PayingDetail> getPayingDetail(@ModelAttribute(Constants.USER) User user, @RequestParam String carNo,
-                                                    @RequestParam String parkId, @RequestParam String channelId) throws Exception {
-        PayingDetail payingDetail = parkService.getPayingDetail(user, carNo, parkId, channelId);
+                                                    @RequestParam String parkId, @RequestParam String parkCode, @RequestParam String channelId) throws Exception {
+        PayingDetail payingDetail = parkService.getPayingDetail(user, carNo, parkId, parkCode, channelId);
         return BaseResult.successResult(payingDetail);
     }
 
