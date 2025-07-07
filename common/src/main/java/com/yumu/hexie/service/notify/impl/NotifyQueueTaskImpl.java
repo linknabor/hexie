@@ -53,7 +53,6 @@ import com.yumu.hexie.model.market.ServiceOrderRepository;
 import com.yumu.hexie.model.system.BizError;
 import com.yumu.hexie.model.system.BizErrorRepository;
 import com.yumu.hexie.model.user.User;
-import com.yumu.hexie.model.user.UserRepository;
 import com.yumu.hexie.service.common.GotongService;
 import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.eshop.PartnerService;
@@ -62,6 +61,7 @@ import com.yumu.hexie.service.notify.NotifyQueueTask;
 import com.yumu.hexie.service.sales.BaseOrderService;
 import com.yumu.hexie.service.user.CouponService;
 import com.yumu.hexie.service.user.UserNoticeService;
+import com.yumu.hexie.service.user.UserService;
 
 @Service
 public class NotifyQueueTaskImpl implements NotifyQueueTask {
@@ -76,8 +76,6 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     private RedisTemplate<String, String> staffclientStringRedisTemplate;
     @Autowired
     private MaintenanceService maintenanceService;
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private GotongService gotongService;
     @Autowired
@@ -102,6 +100,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
     private UserNoticeService userNoticeService;
     @Autowired
     private AliTemplateMsgService aliTemplateMsgService;
+    @Autowired
+    private UserService userService;
     
     /**
      * 异步发送到账模板消息
@@ -195,7 +195,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         logger.warn("openid is empty, will skip. ");
                         continue;
                     }
-                    List<User> userList = userRepository.findByOpenid(openid);
+                    List<User> userList = userService.getByOpenId(openid);
                     if (userList != null && !userList.isEmpty()) {
                         user = userList.get(0);
                     } else {
@@ -767,11 +767,9 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         logger.warn("wuyeId is empty, will skip. ");
                         continue;
                     }
-                    List<User> userList = userRepository.findByWuyeId(wuyeId);
-                    if (userList != null && !userList.isEmpty()) {
-                        user = userList.get(0);
-                    } else {
-                        logger.warn("can not find user, wuyeId : " + wuyeId);
+                    user = userService.findwuyeId(wuyeId);
+                    if (user == null) {
+                    	logger.warn("can not find user, wuyeId : " + wuyeId);
                     }
                     if (user != null) {
                         try {
@@ -995,7 +993,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 }
 
                 User user = null;
-                List<User> userList = userRepository.findByOpenid(openid);
+                List<User> userList = userService.getByOpenId(openid);
                 if (userList != null && !userList.isEmpty()) {
                     user = userList.get(0);
                 } else {
@@ -1023,6 +1021,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 							} else if (wechatResponse.getErrcode() == 40003) {
 								isSuccess = true;	//invalid openid
 							} else if (wechatResponse.getErrcode() == 48001) {
+								isSuccess = true;
+							} else if (wechatResponse.getErrcode() == 47003){
 								isSuccess = true;
 							} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                             	isSuccess = true;	//未配置模板消息
@@ -1126,6 +1126,8 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                         } else if (wechatResponse.getErrcode() == 40003) {
 							isSuccess = true;	//invalid openid
 						} else if (wechatResponse.getErrcode() == 48001) {
+							isSuccess = true;
+						} else if (wechatResponse.getErrcode() == 47003){
 							isSuccess = true;
 						} else if (wechatResponse.getErrcode() == 99999) {	//user refuse to accept the msg
                         	isSuccess = true;	//未配置模板消息
@@ -1254,7 +1256,7 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 
                 Date pubDate = new Date();
                 for (long userId : noticeRgroupSuccess.getOpers()) {
-                    User sendUser = userRepository.findById(userId);
+                    User sendUser = userService.getById(userId);
                     
                     Notice notice = new Notice();
                     notice.setNoticeType(ModelConstant.NOTICE_TYPE2_RGROUP);
@@ -1310,12 +1312,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 					continue;
 				}
                 
-                List<User> userList = userRepository.findByOpenid(commentNotice.getOpenid());
+                List<User> userList = userService.getByOpenId(commentNotice.getOpenid());
                 User user = null;
                 if (userList != null && !userList.isEmpty()) {
                     user = userList.get(0);
                 } else {
-                	user = userRepository.findByMiniopenid(commentNotice.getOpenid());
+                	user = userService.getByMiniopenid(commentNotice.getOpenid());
                 }
                 if(user == null) {
                 	logger.warn("can't find user : " + commentNotice.getOpenid() + ", will skip noticing !");
@@ -1386,12 +1388,12 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
                 InteractCommentNotice notice = objectMapper.readValue(str, InteractCommentNotice.class);
                 logger.info("start to notifyInteractGrade queue : " + notice);
 
-                List<User> userList = userRepository.findByOpenid(notice.getOpenid());
+                List<User> userList = userService.getByOpenId(notice.getOpenid());
                 User user = null;
                 if (userList != null && !userList.isEmpty()) {
                     user = userList.get(0);
                 } else {
-                    user = userRepository.findByMiniopenid(notice.getOpenid());
+                    user = userService.getByMiniopenid(notice.getOpenid());
                 }
                 if(user == null) {
                     logger.warn("can't find user : " + notice.getOpenid() + ", will skip notifyInteractGrade !");
@@ -1440,11 +1442,11 @@ public class NotifyQueueTaskImpl implements NotifyQueueTask {
 
                 User user = null;
                 if(!StringUtils.isEmpty(notice.getOpenid())) {
-                    List<User> userList = userRepository.findByOpenid(notice.getOpenid());
+                    List<User> userList = userService.getByOpenId(notice.getOpenid());
                     if (userList != null && !userList.isEmpty()) {
                         user = userList.get(0);
                     } else {
-                        user = userRepository.findByMiniopenid(notice.getOpenid());
+                        user = userService.getByMiniopenid(notice.getOpenid());
                     }
                 }
                 if(user == null) {

@@ -145,7 +145,6 @@ public interface WuyeService {
 
 	/**
 	 * 更新电子发票抬头信息
-	 * @param user
 	 * @param mobile
 	 * @param invoice_title
 	 * @param invoice_title_type
@@ -157,7 +156,6 @@ public interface WuyeService {
 
 	/**
 	 * 根据交易号获取对应房子的发票信息
-	 * @param user
 	 * @param trade_water_id
 	 * @return
 	 */
@@ -176,23 +174,21 @@ public interface WuyeService {
 
 	/**
 	 * 根据数据类型查询指定的合协社区物业单元信息
-	 * @param user
-	 * @param sect_id
-	 * @param build_id
-	 * @param unit_id
-	 * @param data_type
+	 * @param getCellDTO
 	 * @return
 	 * @throws Exception 
 	 */
 	CellListVO querySectHeXieList(GetCellDTO getCellDTO) throws Exception;
-	
-	
+
+
 	/**
 	 * 根据名称模糊查询合协社区小区列表
 	 * @param user
-	 * @param sect_name
+	 * @param sectName
+	 * @param regionName
+	 * @param queryAppid
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	CellListVO getVagueSectByName(User user, String sectName, String regionName, String queryAppid) throws Exception;
 
@@ -209,7 +205,6 @@ public interface WuyeService {
 	 * @param startDate
 	 * @param endDate
 	 * @param house_id
-	 * @param sect_id
 	 * @param regionname
 	 * @return
 	 * @throws Exception 
@@ -218,7 +213,7 @@ public interface WuyeService {
 
 	/**
 	 * 获取无账单开始日期
-	 * @param userId
+	 * @param user
 	 * @param house_id
 	 * @param regionname
 	 * @return
@@ -250,7 +245,7 @@ public interface WuyeService {
 
 	/**
 	 * 获取支付的优惠明细
-	 * @param prepayRequestDTO
+	 * @param discountViewRequestDTO
 	 * @throws Exception 
 	 */
 	Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception;
@@ -267,8 +262,7 @@ public interface WuyeService {
 	/**
 	 * 获取绑卡支付的短信验证码
 	 * @param user
-	 * @param orderNo
-	 * @param mobile
+	 * @param cardId
 	 * @return
 	 * @throws Exception
 	 */
@@ -408,8 +402,8 @@ public interface WuyeService {
 	
 	/**
 	 * 获取电子收据
-	 * @param sys
-	 * @param receiptId
+	 * @param user
+	 * @param page
 	 * @return
 	 * @throws Exception
 	 */
@@ -435,7 +429,7 @@ public interface WuyeService {
 	/**
 	 * 根据房屋ID获取业主已经绑定的房屋
 	 * @param user
-	 * @param cellId
+	 * @param houseId
 	 * @return
 	 * @throws Exception 
 	 */
@@ -444,11 +438,11 @@ public interface WuyeService {
 	/**
 	 * 根据小区ID获取小区信息
 	 * @param user
-	 * @param cellId
+	 * @param sectId
 	 * @return
 	 * @throws Exception 
 	 */
-	SectInfo querySectById(User user, String sectId) throws Exception;
+	SectInfo querySectById(User user, String sectId, String clientType) throws Exception;
 
 
 	/**
@@ -460,5 +454,18 @@ public interface WuyeService {
 	 */
 	AlipayMarketingConsult queryAlipayMarketingConsult(User user, QueryAlipayConsultRequest queryAlipayConsultRequest)
 			throws Exception;
+
+	/**
+	 * 为春川用户绑定已经绑定过的房子
+	 * @param user
+	 * @param mobile
+	 * @param wuyeIds
+	 * @return
+	 * @throws Exception
+	 */
+	List<HexieHouse> bindHouse4ChunChuanUser(User user, String mobile, List<String> wuyeIds) throws Exception;
+
+	//获取扫二维码支付时，二维码上参数的对照信息
+	Object getPayMappingInfo(User user, String payKey) throws Exception;
 
 }

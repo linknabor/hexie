@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Resource;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -17,7 +21,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.yumu.hexie.integration.common.CommonResponse;
 import com.yumu.hexie.integration.common.RequestUtil;
 import com.yumu.hexie.integration.common.RestUtil;
-import com.yumu.hexie.integration.wechat.constant.ConstantAlipay;
 import com.yumu.hexie.integration.wuye.dto.DiscountViewRequestDTO;
 import com.yumu.hexie.integration.wuye.dto.GetCellDTO;
 import com.yumu.hexie.integration.wuye.dto.OtherPayDTO;
@@ -47,6 +50,7 @@ import com.yumu.hexie.integration.wuye.resp.BillListVO;
 import com.yumu.hexie.integration.wuye.resp.CellListVO;
 import com.yumu.hexie.integration.wuye.resp.MpQrCodeParam;
 import com.yumu.hexie.integration.wuye.resp.RadiusSect;
+import com.yumu.hexie.integration.wuye.resp.UserAccessSpotResp;
 import com.yumu.hexie.integration.wuye.vo.Discounts;
 import com.yumu.hexie.integration.wuye.vo.EReceipt;
 import com.yumu.hexie.integration.wuye.vo.HexieConfig;
@@ -68,6 +72,7 @@ import com.yumu.hexie.service.common.impl.SystemConfigServiceImpl;
 import com.yumu.hexie.service.common.pojo.dto.ActiveApp;
 import com.yumu.hexie.service.shequ.req.RadiusSectReq;
 import com.yumu.hexie.service.shequ.req.ReceiptApplicationReq;
+import com.yumu.hexie.service.shequ.req.UserAccessRecordReq;
 import com.yumu.hexie.service.user.dto.H5UserDTO;
 import com.yumu.hexie.vo.req.MessageReq;
 import com.yumu.hexie.vo.req.QueryFeeSmsBillReq;
@@ -89,6 +94,8 @@ public class WuyeUtil2 {
 	private RequestUtil requestUtil;
 	@Autowired
 	private SystemConfigService systemConfigService;
+	@Resource
+	private StringRedisTemplate stringRedisTemplate;
 	
 	private static final String QUICK_PAY_URL = "quickPaySDO.do"; // 快捷支付
 	private static final String WX_PAY_URL = "wechatPayRequestSDO.do"; // 微信支付请求
@@ -126,7 +133,12 @@ public class WuyeUtil2 {
 	private static final String QUERY_SECT_BY_ID_URL = "getSectByIdSDO.do";	//获取小区信息
 	private static final String QUERY_SECT_NEARBY = "getSectNearbySDO.do";	//获取附近的小区
 	private static final String QUERY_MARKETING_CONSULT = "alipay/getMarketingConsultSDO.do";	//获取支付宝优惠资讯
+	private static final String QUERY_ACCESS_SPOT = "useraccess/getSpotSDO.do";	//获取门禁点信息
+	private static final String SAVE_USER_ACCESS_RECORD = "useraccess/saveRecordSDO.do";	//保存用户门禁登记记录
+	private static final String CHUNCHUAN_USER_BIND_URL = "bindHouse4ChunchuanUserSDO.do";	//春川存量用户绑定
 
+
+	private static final String QUERY_PAY_MAPPING = "getPayMappingSDO.do";	//获取扫二维码缴管理费时，码上带的参数对照
 
 	/**
 	 * 标准版查询账单
@@ -233,6 +245,9 @@ public class WuyeUtil2 {
 			//TODO 下面静态引用以后改注入
 			fromSys = SystemConfigServiceImpl.getSysMap().get(appid);
 		}
+		if ("2".equals(prepayRequestDTO.getPayType())) {
+			fromSys = SystemConfigServiceImpl.getSysMap().get(user.getMiniAppId());
+		}
 		if ("_shwy".equals(user.getOriSys())) {
 			fromSys = user.getOriSys();
 		}
@@ -265,6 +280,13 @@ public class WuyeUtil2 {
 		BaseResult<WechatPayInfo> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
+		
+		//将绑定房屋选项写入缓存，待入账根据选项判断是否帮业主绑定房屋
+        String bindHouKey = ModelConstant.KEY_TRADE_BIND_HOU + hexieResponse.getData().getTrade_water_id();
+        String bindHouse = prepayRequestDTO.getBindHouse();
+        if ("1".equals(bindHouse)) {
+        	stringRedisTemplate.opsForValue().setIfAbsent(bindHouKey, bindHouse, 30, TimeUnit.DAYS);
+		}
 		return baseResult;
 		
 	}
@@ -701,6 +723,10 @@ public class WuyeUtil2 {
 		Map<String, String> map = new HashMap<>();
 		map.put("user_id", user.getWuyeId());
 		map.put("openid", user.getOpenid());
+		//TODO for test
+		if ("o6pCYtwf0GHxFWOQ3VZ6x0K74QKE".equals(user.getOpenid()) || "oceRY1NWyec-frzqapPOHOB6q8p8".equals(user.getOpenid())) {
+			map.put("openid", "oceRY1Is34P879B8KWR6Y-KlJ75k");
+		}
 		map.put("curr_page", currPage);
 		map.put("total_count", "1000");
 
@@ -919,7 +945,7 @@ public class WuyeUtil2 {
 	
 	/**
 	 * 支付平台h5用户注册登陆
-	 * @param user
+	 * @param aliUserDTO
 	 * @return
 	 * @throws Exception
 	 */
@@ -963,6 +989,32 @@ public class WuyeUtil2 {
 	}
 	
 	/**
+	 * 新朗恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<List<HexieHouse>> bindHouse4ChunchuanUser(User user, String mobile, String wuyeIds) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += CHUNCHUAN_USER_BIND_URL;
+		
+		Map<String, String> requestMap = new HashMap<>();
+		requestMap.put("user_id", user.getWuyeId());
+		requestMap.put("openid", user.getMiniopenid());	//西部用户取miniopenid
+		requestMap.put("appid", user.getMiniAppId());
+		requestMap.put("mobile", mobile);
+		requestMap.put("wuyeIds", wuyeIds);
+		TypeReference<CommonResponse<List<HexieHouse>>> typeReference = new TypeReference<CommonResponse<List<HexieHouse>>>(){};
+		CommonResponse<List<HexieHouse>> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
+		BaseResult<List<HexieHouse>> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		baseResult.setResult(hexieResponse.getResult());
+		return baseResult;
+
+	}
+	
+	/**
 	 * 无账单绑定房产
 	 * @param user
 	 * @param houseId
@@ -995,10 +1047,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据房屋ID查找房屋
 	 * @param user
-	 * @param startDate
-	 * @param endDate
 	 * @param houseId
-	 * @param regionName
 	 * @return
 	 * @throws Exception
 	 */
@@ -1023,20 +1072,18 @@ public class WuyeUtil2 {
 	/**
 	 * 根据小区ID获取小区信息
 	 * @param user
-	 * @param startDate
-	 * @param endDate
-	 * @param houseId
-	 * @param regionName
+	 * @param sectId
 	 * @return
 	 * @throws Exception
 	 */
-	public BaseResult<SectInfo> querySectById(User user, String sectId) throws Exception {
+	public BaseResult<SectInfo> querySectById(User user, String sectId, String clientType) throws Exception {
 		
 		String requestUrl = requestUtil.getRequestUrl(user, "");
 		requestUrl += QUERY_SECT_BY_ID_URL;
 		
 		Map<String, String> requestMap = new HashMap<>();
 		requestMap.put("sect_id", sectId);
+		requestMap.put("client_type", clientType);
 		
 		TypeReference<CommonResponse<SectInfo>> typeReference = new TypeReference<CommonResponse<SectInfo>>(){};
 		CommonResponse<SectInfo> hexieResponse = restUtil.exchangeOnUri(requestUrl, requestMap, typeReference);
@@ -1050,7 +1097,7 @@ public class WuyeUtil2 {
 	/**
 	 * 根据小区ID获取小区信息
 	 * @param user
-	 * @param coordinate 经度,维度
+	 * @param radiusSectReq 经度,维度
 	 * @return
 	 * @throws Exception
 	 */
@@ -1075,10 +1122,7 @@ public class WuyeUtil2 {
 	/**
 	 * 获取吱口令优惠资讯
 	 * @param user
-	 * @param startDate
-	 * @param endDate
-	 * @param houseId
-	 * @param regionName
+	 * @param queryAlipayConsultRequest
 	 * @return
 	 * @throws Exception
 	 */
@@ -1091,6 +1135,76 @@ public class WuyeUtil2 {
 		TypeReference<CommonResponse<AlipayMarketingConsult>> typeReference = new TypeReference<CommonResponse<AlipayMarketingConsult>>(){};
 		CommonResponse<AlipayMarketingConsult> hexieResponse = restUtil.exchangeOnUri(requestUrl, queryAlipayConsultRequest, typeReference);
 		BaseResult<AlipayMarketingConsult> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+
+	/**
+	 * 获取扫二维码缴管理费时，二维码上的参数对照
+	 * @param user
+	 * @param payKey
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<Object> getPayMapping(User user, String payKey) throws Exception {
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_PAY_MAPPING;
+
+		Map<String, String> map = new HashMap<>();
+		map.put("payKey", payKey);
+
+		TypeReference<CommonResponse<Object>> typeReference = new TypeReference<CommonResponse<Object>>(){};
+		CommonResponse<Object> hexieResponse = restUtil.exchangeOnUri(requestUrl, map, typeReference);
+		BaseResult<Object> baseResult = new BaseResult<>();
+		baseResult.setResult(hexieResponse.getResult());
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+	}
+	
+	/**
+	 * 获取门禁点信息
+	 * @param spotId
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<UserAccessSpotResp> getAccessSpot(User user, String spotId) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += QUERY_ACCESS_SPOT;
+		
+		Map<String, String> reqMap = new HashMap<>();
+		reqMap.put("spotId", spotId);
+		
+		TypeReference<CommonResponse<UserAccessSpotResp>> typeReference = new TypeReference<CommonResponse<UserAccessSpotResp>>(){};
+		CommonResponse<UserAccessSpotResp> hexieResponse = restUtil.exchangeOnUri(requestUrl, reqMap, typeReference);
+		BaseResult<UserAccessSpotResp> baseResult = new BaseResult<>();
+		baseResult.setData(hexieResponse.getData());
+		baseResult.setMessage(hexieResponse.getErrMsg());
+		return baseResult;
+		
+	}
+	
+	/**
+	 * 保存用户门禁记录
+	 * @param user
+	 * @param startDate
+	 * @param endDate
+	 * @param houseId
+	 * @param regionName
+	 * @return
+	 * @throws Exception
+	 */
+	public BaseResult<String> saveUserAccessRecord(User user, UserAccessRecordReq saveAccessRecordReq) throws Exception {
+		
+		String requestUrl = requestUtil.getRequestUrl(user, "");
+		requestUrl += SAVE_USER_ACCESS_RECORD;
+		
+		TypeReference<CommonResponse<String>> typeReference = new TypeReference<CommonResponse<String>>(){};
+		CommonResponse<String> hexieResponse = restUtil.exchangeOnBody(requestUrl, saveAccessRecordReq, typeReference);
+		BaseResult<String> baseResult = new BaseResult<>();
 		baseResult.setData(hexieResponse.getData());
 		baseResult.setMessage(hexieResponse.getErrMsg());
 		return baseResult;

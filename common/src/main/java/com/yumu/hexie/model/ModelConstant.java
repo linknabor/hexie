@@ -566,4 +566,6 @@ public class ModelConstant {
 	
 	public static final String KEY_USER_SYS_SHWY = "_shwy";	//上海物业
 	public static final String KEY_USER_SYS_LIFEPAY = "_lifepay";	//支付宝生活缴费
+	
+	public static final String KEY_TRADE_BIND_HOU = "trade:bindHou:";	//后面接tradeWaterId
 }		

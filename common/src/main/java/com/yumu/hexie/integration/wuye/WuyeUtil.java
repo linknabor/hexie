@@ -40,7 +40,7 @@ public class WuyeUtil {
 	private static final String ADD_HOUSE_URL = "addHouseSDO.do?user_id=%s&stmt_id=%s&mng_cell_id=%s&openid=%s&appid=%s&mobile=%s"; // 添加房子
 	private static final String SYS_ADD_HOUSE_URL = "billSaveHoseSDO.do?user_id=%s&stmt_id=%s&house_id=%s"; // 扫一扫（添加房子）
 	private static final String DEL_HOUSE_URL = "delHouseSDO.do?user_id=%s&mng_cell_id=%s&openid=%s&appid=%s&mobile=%s"; // 删除房子
-	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&house_id=%s&sect_id=%s"; // 获取账单列表
+	private static final String BILL_LIST_URL = "getBillListMSDO.do?user_id=%s&pay_status=%s&startDate=%s&endDate=%s&curr_page=%s&total_count=%s&page_size=%s&house_id=%s&sect_id=%s"; // 获取账单列表
 	private static final String PAY_RECORD_URL = "payMentRecordSDO.do?user_id=%s&startDate=%s&endDate=%s"; // 获取支付记录列表
 	private static final String PAY_INFO_URL = "payMentRecordInfoSDO.do?user_id=%s&trade_water_id=%s"; // 获取支付记录详情
 	private static final String WXLOGIN_URL = "weixinLoginSDO.do?weixin_id=%s&appid=%s&unionid=%s"; // 登录验证（微信登录）
@@ -205,7 +205,8 @@ public class WuyeUtil {
 		if (StringUtils.isEmpty(regionurl)) {
 			regionurl = getRequestUri(user);
 		}
-		String url = regionurl + String.format(BILL_LIST_URL,user.getWuyeId(),payStatus,startDate,endDate,currentPage,totalCount,house_id,sect_id);
+		String defaultPageSize = "20";
+		String url = regionurl + String.format(BILL_LIST_URL,user.getWuyeId(),payStatus,startDate,endDate,currentPage,totalCount,defaultPageSize,house_id,sect_id);
 		return (BaseResult<BillListVO>)httpGet(url,BillListVO.class);
 	}
 	

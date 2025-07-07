@@ -134,15 +134,10 @@ public class WuyeServiceImpl implements WuyeService {
 			HouseListVO houseListVO = result.getData();
 			if (houseListVO!=null) {
 				totalBind = houseListVO.getHou_info().size();
-				if (totalBind < 0) {
-					totalBind = 0;
-				}
-			} else {
-				totalBind = 0;
 			}
 			
 			if (totalBind == 0) {
-				user.setXiaoquId(0l);
+				user.setXiaoquId(0L);
 				user.setXiaoquName("");
 				user.setProvince("");
 				user.setCity("");
@@ -398,12 +393,13 @@ public class WuyeServiceImpl implements WuyeService {
 		
 		return wuyeUtil2.queryBillList(user, startDate, endDate, house_id, regionName).getData();
 	}
-	
+
 	/**
 	 * 通过物业交易ID异步绑定房屋
-	 * @param bindSwitch
 	 * @param user
-	 * @param tradeWaterId
+	 * @param house_id
+	 * @param regionName
+	 * @return
 	 */
 	@Override
 	public BillStartDate getBillStartDateSDO(User user, String house_id, String regionName) {
@@ -528,25 +524,18 @@ public class WuyeServiceImpl implements WuyeService {
 	@Async
 	@Override
 	public void addCouponsFromSeed(User user, List<CouponCombination> list) {
-
 		try {
-
-			for (int i = 0; i < list.size(); i++) {
-				couponService.addCouponFromSeed(list.get(i).getSeedStr(), user);
+			for (CouponCombination couponCombination : list) {
+				couponService.addCouponFromSeed(couponCombination.getSeedStr(), user);
 			}
-
 		} catch (Exception e) {
-
 			log.error("add Coupons for wuye Pay : " + e.getMessage());
 		}
-
 	}
 
 	@Override
 	public Discounts getDiscounts(DiscountViewRequestDTO discountViewRequestDTO) throws Exception {
-		
-		Discounts discountDetail = wuyeUtil2.getDiscounts(discountViewRequestDTO).getData();
-		return discountDetail;
+		return wuyeUtil2.getDiscounts(discountViewRequestDTO).getData();
 	
 	}
 	
@@ -585,7 +574,7 @@ public class WuyeServiceImpl implements WuyeService {
 			log.error(e.getMessage(), e);
 		}
 		List<ServiceOperator> ops = serviceOperatorRepository.findByTypeAndUserId(ModelConstant.SERVICE_OPER_TYPE_SERVICE, user.getId());
-		ServiceOperator serviceOperator = null;
+		ServiceOperator serviceOperator;
 		List<PayCfg> serviceList = new ArrayList<>();
 		if (ops!=null && !ops.isEmpty()) {
 			log.info("ops count : " + ops.size());
@@ -806,13 +795,13 @@ public class WuyeServiceImpl implements WuyeService {
 	@Override
 	public ReceiptInfo getReceipt(String appid, String receiptId) throws Exception {
 		
-		String region = "";
+		String region;
 		String userSysCode = SystemConfigServiceImpl.getSysMap().get(appid);	//是否_guizhou
 		String sysSource = "_sh";
 		if ("_guizhou".equals(userSysCode)) {
 			sysSource = "_guizhou";
 		}
-		if ("guizhou".equals(sysSource)) {
+		if ("_guizhou".equals(sysSource)) {
 			region = "贵州省";
 		} else {
 			region = "";
@@ -835,7 +824,7 @@ public class WuyeServiceImpl implements WuyeService {
 		if (houList != null) {
 			boolean flag = false;	//是否上线小区
 			for (NewLionUser newLionUser : houList) {
-				if (!StringUtils.isEmpty(newLionUser.getFdSectId())) {
+				if (!StringUtils.isEmpty(newLionUser.getSectId())) {
 					flag = true;
 					break;
 				}
@@ -861,13 +850,40 @@ public class WuyeServiceImpl implements WuyeService {
 	}
 	
 	@Override
+	public List<HexieHouse> bindHouse4ChunChuanUser(User user, String mobile, List<String> wuyeIdList) throws Exception {
+		
+		StringBuffer bf = new StringBuffer();
+		for (String wuyeId : wuyeIdList) {
+			bf.append(wuyeId).append(",");
+		}
+		if (bf.length() > 1) {
+			bf.deleteCharAt(bf.length()-1);
+		}
+		List<HexieHouse> hexieHouses = null;
+		BaseResult<List<HexieHouse>> baseResult = wuyeUtil2.bindHouse4ChunchuanUser(user, mobile, bf.toString());
+		if (baseResult.isSuccess()) {
+			hexieHouses = baseResult.getData();
+			if (hexieHouses != null && hexieHouses.size() > 0) {
+				for (HexieHouse hexieHouse : hexieHouses) {
+					HexieUser hexieUser = new HexieUser();
+					BeanUtils.copyProperties(hexieHouse, hexieUser);
+					setDefaultAddress(user, hexieUser);	//里面已经开了事务，外面不需要。跨类调，事务生效
+					//里面的清除缓存不会生效，在外面调一下
+					cacheService.clearUserCache(cacheService.getCacheKey(user));
+				}
+			}
+		}
+		return hexieHouses;
+	}
+	
+	@Override
 	public HexieUser queryHouseById(User user, String houseId) throws Exception {
 		return wuyeUtil2.queryHouseById(user, houseId).getData();
 	}
 
 	@Override
-	public SectInfo querySectById(User user, String sectId) throws Exception {
-		return wuyeUtil2.querySectById(user, sectId).getData();
+	public SectInfo querySectById(User user, String sectId, String clientType) throws Exception {
+		return wuyeUtil2.querySectById(user, sectId, clientType).getData();
 	}
 	
 	@Override
@@ -876,6 +892,11 @@ public class WuyeServiceImpl implements WuyeService {
 			queryAlipayConsultRequest.setAliAppId(ConstantAlipay.APPID);
 		}
 		return wuyeUtil2.queryAlipayMarketingConsult(user, queryAlipayConsultRequest).getData();
+	}
+
+	@Override
+	public Object getPayMappingInfo(User user, String payKey) throws Exception {
+		return wuyeUtil2.getPayMapping(user, payKey).getData();
 	}
 
 }

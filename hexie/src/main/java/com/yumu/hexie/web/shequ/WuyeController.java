@@ -6,8 +6,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -374,6 +376,14 @@ public class WuyeController extends BaseController {
 		log.info("prepayRequestDTO : " + dto);
 		WechatPayInfo result = wuyeService.getPrePayInfo(dto);
 		return BaseResult.successResult(result);
+	}
+
+	@RequestMapping(value = "/getPayMapping/{payKey}", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<Object> getPayMapping(@ModelAttribute(Constants.USER) User user, @PathVariable String payKey) throws Exception {
+		log.info("payKey : " + payKey);
+		Object obj = wuyeService.getPayMappingInfo(user, payKey);
+		return BaseResult.successResult(obj);
 	}
 	
 	/**
@@ -1202,6 +1212,33 @@ public class WuyeController extends BaseController {
 	}
 	
 	/**
+	 * 为春川恩用户绑定房屋
+	 * @param user
+	 * @return
+	 * @throws Exception 
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/chunchuan/user/bind", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<List<HexieHouse>> checkBindChunchuanUser(HttpServletRequest request, @ModelAttribute(Constants.USER) User user, @RequestParam String mobile) throws Exception {
+		
+		List<User> oldUserList = userService.getChunChuanUserByMobile(mobile);
+		Set<String> userSet = new HashSet<>();
+		for (User oldUser : oldUserList) {
+			if ("wx0c81e6687f6f5e43".equals(oldUser.getMiniAppId())	//老春川 
+					|| "wxde89512c4cbfdad9".equals(oldUser.getMiniAppId())	//新春川 
+					|| "wx944c12478a484646".equals(oldUser.getAppId())) {	//春川公众号
+				userSet.add(oldUser.getWuyeId());
+			}
+		}
+		List<HexieHouse> hexieHouses = new ArrayList<>();
+		if (!userSet.isEmpty()) {
+			hexieHouses = wuyeService.bindHouse4ChunChuanUser(user, mobile, new ArrayList<>(userSet));
+		}
+		return BaseResult.successResult(hexieHouses);
+	}
+	
+	/**
 	 * 根据用户身份查询其所绑定的房屋
 	 *@param user
 	 *@param houseId 已经绑定了的房屋ID
@@ -1225,8 +1262,8 @@ public class WuyeController extends BaseController {
 	@RequestMapping(value = "/mySect/{sectId}", method = RequestMethod.GET)
 	@ResponseBody
 	public BaseResult<SectInfo> getSectById(@ModelAttribute(Constants.USER) User user, 
-			@PathVariable String sectId) throws Exception {
-		SectInfo sectInfo = wuyeService.querySectById(user, sectId);
+			@PathVariable String sectId, @RequestParam(required = false) String clientType) throws Exception {
+		SectInfo sectInfo = wuyeService.querySectById(user, sectId, clientType);
 		return BaseResult.successResult(sectInfo);
 	}
 	

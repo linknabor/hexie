@@ -16,7 +16,8 @@ public class DiscountViewReqVO implements Serializable {
 	private String payType;		//0微信,1卡
 	private String payFeeType;	//01管理费，02停车费
 	private String regionName;	//定位地区
-	
+
+	private String payKey; //存放扫二维码支付的账单对照ID，拿这个ID到redis去取
 	/*2020-07 添加 begin*/
 	private String isQrcode;
 	
@@ -82,13 +83,28 @@ public class DiscountViewReqVO implements Serializable {
 	public void setCreditCode(String creditCode) {
 		this.creditCode = creditCode;
 	}
+
+	public String getPayKey() {
+		return payKey;
+	}
+
+	public void setPayKey(String payKey) {
+		this.payKey = payKey;
+	}
+
 	@Override
 	public String toString() {
-		return "DiscountViewReqVO [billId=" + billId + ", stmtId=" + stmtId + ", payType=" + payType + ", payFeeType="
-				+ payFeeType + ", regionName=" + regionName + ", isQrcode=" + isQrcode + ", invoiceTitleType="
-				+ invoiceTitleType + ", invoiceTitle=" + invoiceTitle + ", creditCode=" + creditCode + "]";
+		return "DiscountViewReqVO{" +
+				"billId='" + billId + '\'' +
+				", stmtId='" + stmtId + '\'' +
+				", payType='" + payType + '\'' +
+				", payFeeType='" + payFeeType + '\'' +
+				", regionName='" + regionName + '\'' +
+				", payKey='" + payKey + '\'' +
+				", isQrcode='" + isQrcode + '\'' +
+				", invoiceTitleType='" + invoiceTitleType + '\'' +
+				", invoiceTitle='" + invoiceTitle + '\'' +
+				", creditCode='" + creditCode + '\'' +
+				'}';
 	}
-	
-	
-	
 }

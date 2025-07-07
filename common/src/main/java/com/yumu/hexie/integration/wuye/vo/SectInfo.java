@@ -1,6 +1,7 @@
 package com.yumu.hexie.integration.wuye.vo;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class SectInfo implements Serializable {
 
@@ -12,6 +13,8 @@ public class SectInfo implements Serializable {
 	private String sect_id;
 	private String sect_name;
 	private String sect_addr;
+	private String province_name;
+	private Map<String, String> sect_params;
 	
 	public String getSect_id() {
 		return sect_id;
@@ -31,9 +34,23 @@ public class SectInfo implements Serializable {
 	public void setSect_addr(String sect_addr) {
 		this.sect_addr = sect_addr;
 	}
+	public Map<String, String> getSect_params() {
+		return sect_params;
+	}
+	public void setSect_params(Map<String, String> sect_params) {
+		this.sect_params = sect_params;
+	}
+	public String getProvince_name() {
+		return province_name;
+	}
+	public void setProvince_name(String province_name) {
+		this.province_name = province_name;
+	}
 	@Override
 	public String toString() {
-		return "SectInfo [sect_id=" + sect_id + ", sect_name=" + sect_name + ", sect_addr=" + sect_addr + "]";
+		return "SectInfo [sect_id=" + sect_id + ", sect_name=" + sect_name + ", sect_addr=" + sect_addr
+				+ ", sect_params=" + sect_params + "]";
 	}
+	
 	
 }

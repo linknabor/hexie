@@ -171,7 +171,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 				continue;
 			}
         	String miniAppid = sysKey.substring(sysKey.lastIndexOf("_")+1, sysKey.length());
-    		String appSecret = systemConfigService.getSysConfigByKey(sysKey);
+    		String appSecret = systemConfig.getSysValue();
             
             logger.info("--------------------refresh mini token, appid : " + miniAppid + "[B]-------------------");
             String tokenKey = ModelConstant.KEY_MINI_ACCESS_TOKEN + miniAppid;

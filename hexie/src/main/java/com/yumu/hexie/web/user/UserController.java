@@ -380,7 +380,7 @@ public class UserController extends BaseController{
 			}
 		}
 		log.info("getyzm request ip : " + requestIp);
-		log.info("getyzm request mobile: " + requestIp);
+		log.info("getyzm request mobile: " + yzm.getMobile());
 		log.info("getyzm request header [Access-Control-Allow-Token]: " + request.getHeader("Access-Control-Allow-Token"));
 		String token = request.getHeader("Access-Control-Allow-Token");
 		if (StringUtils.isEmpty(token)) {
@@ -747,6 +747,9 @@ public class UserController extends BaseController{
 	        List<Menu> menuList = pageConfigService.getMenuByAppidAndDefaultTypeLessThan(user.getMiniAppId(), 2);	//表示绑定了房屋的默认菜单
 		    userInfo.setMenuList(menuList);
 		    userInfo.setPermission(true);
+
+			Map<String, String> paramMap = paramService.getWuyeParam(user);
+			userInfo.setCfgParam(paramMap);
 		}
 	   
 	    		    

@@ -24,7 +24,6 @@ public class PayNotification implements Serializable {
 	@JsonProperty("integral")
 	private String points;
 	private String tranType;
-	private String bindSwitch = "1";
 	
 	@JsonProperty("account_notify")
 	private AccountNotification accountNotification;	//入账通知
@@ -256,14 +255,6 @@ public class PayNotification implements Serializable {
 		this.tranType = tranType;
 	}
 
-	public String getBindSwitch() {
-		return bindSwitch;
-	}
-
-	public void setBindSwitch(String bindSwitch) {
-		this.bindSwitch = bindSwitch;
-	}
-
 	public AccountNotification getAccountNotification() {
 		return accountNotification;
 	}
@@ -282,10 +273,9 @@ public class PayNotification implements Serializable {
 
 	@Override
 	public String toString() {
-		return "PayNotifyDTO [orderId=" + orderId + ", cardNo=" + cardNo + ", quickToken=" + quickToken + ", wuyeId="
-				+ wuyeId + ", couponId=" + couponId + ", points=" + points + ", bindSwitch=" + bindSwitch
-				+ ", accountNotify=" + accountNotification + ", serviceNotify=" + serviceNotification + "]";
+		return "PayNotification [orderId=" + orderId + ", cardNo=" + cardNo + ", quickToken=" + quickToken + ", wuyeId="
+				+ wuyeId + ", couponId=" + couponId + ", points=" + points + ", tranType=" + tranType
+				+ ", accountNotification=" + accountNotification + ", serviceNotification=" + serviceNotification + "]";
 	}
 
-	
 }

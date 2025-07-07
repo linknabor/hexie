@@ -592,6 +592,7 @@ public class UserServiceImpl implements UserService {
     	logger.info("miniUser : " + miniUser);
         String unionid = miniUser.getUnionid();	
         String miniopenid = miniUser.getOpenid();
+        String miniappid = miniUser.getAppid();
         User userAccount = null;
         List<User> users = null;
         if (!StringUtils.isEmpty(unionid)) {
@@ -620,7 +621,8 @@ public class UserServiceImpl implements UserService {
         	if (users.size() == 1) {
         		userAccount = users.get(0);
 			} else {
-				userAccount = users.stream().filter(u -> u.getAppId().equals(ConstantWeChat.APPID)).findFirst().orElse(null);
+				//判断登录小程序用户的小程序appid是否和库里的相同
+				userAccount = users.stream().filter(u -> miniappid.equals(u.getMiniAppId())).findFirst().orElse(null);
 				if (userAccount == null) {
 					userAccount = users.stream().findFirst().orElse(null);
 				}
@@ -991,7 +993,59 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public User getByMiniopenid(String miniopenid) {
-		return userRepository.findByMiniopenid(miniopenid);
+		User retUser = null;
+		List<User> userList = userRepository.findByMiniopenid(miniopenid);
+		if (userList != null) {
+			if (userList.size() == 1) {
+				retUser = userList.get(0);
+			} else if (userList.size() == 2) {
+				logger.warn("user size larger than 1, miniopenid : " + miniopenid);
+				retUser = compareUser(userList.get(0), userList.get(1));
+			} else {
+				logger.warn("user size larger than 2, miniopenid : " + miniopenid);
+				retUser = compareUser(userList.get(0), userList.get(1));
+			}
+		}
+		return retUser;
+	}
+	
+	/**
+	 * 用户多条的情况下获取规则
+	 * @param user1
+	 * @param user2
+	 * @return
+	 */
+	private User compareUser(User user1, User user2) {
+		User retUser = null;
+		if (!StringUtils.isEmpty(user1.getTel()) && StringUtils.isEmpty(user2.getTel())) {
+			retUser = user1;
+		} else if (StringUtils.isEmpty(user1.getTel()) && !StringUtils.isEmpty(user2.getTel())) {
+			retUser = user2;
+		} else if (!StringUtils.isEmpty(user1.getTel()) && !StringUtils.isEmpty(user2.getTel())) {
+			if (!StringUtils.isEmpty(user1.getOpenid()) && !"0".equals(user1.getOpenid()) && 
+					!StringUtils.isEmpty(user2.getOpenid()) && !"0".equals(user2.getOpenid())) {
+				if (!StringUtils.isEmpty(user1.getSectId()) && !"0".equals(user1.getSectId())) {
+					retUser = user1;
+				} 
+				if (!StringUtils.isEmpty(user2.getSectId()) && !"0".equals(user2.getSectId())) {
+					retUser = user2;
+				}
+			} else  if (!StringUtils.isEmpty(user1.getOpenid()) && !"0".equals(user1.getOpenid())) {
+				retUser = user1;
+			} else if (!StringUtils.isEmpty(user2.getOpenid()) && !"0".equals(user2.getOpenid())) {
+				retUser = user2;
+			} else {
+				retUser = user1;	//都有手机号，都有openid的情况下，并且都绑定过房子的情况下，随机取第一条
+			}
+		}
+		if (retUser == null) {
+			if (!StringUtils.isEmpty(user1.getWuyeId())) {
+				retUser = user1;
+			} else if (!StringUtils.isEmpty(user2.getWuyeId())) {
+				retUser = user2;
+			}
+		}
+		return retUser;
 	}
 	
 	/**
@@ -1143,6 +1197,16 @@ public class UserServiceImpl implements UserService {
 			throw new BizValidateException("用户手机号不能为空");
 		}
 		return newLionUserRepository.findByMobile(mobile);
+		
+	}
+	
+	@Override
+	public List<User> getChunChuanUserByMobile(String mobile) {
+		
+		if (StringUtils.isEmpty(mobile)) {
+			throw new BizValidateException("用户手机号不能为空");
+		}
+		return userRepository.findByTel(mobile);
 		
 	}
 

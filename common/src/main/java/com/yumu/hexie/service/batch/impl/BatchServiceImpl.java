@@ -1,6 +1,7 @@
 package com.yumu.hexie.service.batch.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -305,6 +306,43 @@ public class BatchServiceImpl implements BatchService {
 					
 				}
 			}
+		}
+		
+	}
+	
+	/**
+	 * 补sectId不为空但为零的情况
+	 */
+	@Override
+	public void delDuplicateUser() {
+
+		List<Map<String, Object>> userList = userRepository.getDuplicatedMiniUser();
+		if (userList == null || userList.isEmpty()) {
+			logger.info("find no duplicate user !");
+			return;
+		}
+		
+		for (Map<String, Object> userMap : userList) {
+			String miniopenid = (String) userMap.get("miniopenid");
+			List<User> duplicatedUsers = userRepository.findByMiniopenid(miniopenid);
+			int delCount = 0;
+			//第一轮，先删除没有手机号并且wuyeId的用户
+			for (User duplicatedUser : duplicatedUsers) {
+				if (StringUtils.isEmpty(duplicatedUser.getTel()) && StringUtils.isEmpty(duplicatedUser.getWuyeId())) {
+					userRepository.delete(duplicatedUser);
+					delCount++;
+				}
+			}
+			if (delCount == 0) {
+				//第二轮。如果第一轮没有删除任何用户，在本轮删除openid为空或者为0的用户
+				for (User duplicatedUser : duplicatedUsers) {
+					if (StringUtils.isEmpty(duplicatedUser.getOpenid()) || "0".equals(duplicatedUser.getOpenid())) {
+						userRepository.delete(duplicatedUser);
+						delCount++;
+					}
+				}
+			}
+			
 		}
 		
 	}
