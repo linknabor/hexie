@@ -123,7 +123,7 @@ public class ParkServiceImpl implements ParkService {
     }
 
     @Override
-    public PayingDetail getPayingDetail(User user, String carNo, String parkId, String channelId) throws Exception {
+    public PayingDetail getPayingDetail(User user, String carNo, String parkId, String parkCode, String channelId) throws Exception {
         if (!StringUtils.isEmpty(carNo)) {
             try {
                 carNo = URLEncoder.encode(carNo,"GBK");
@@ -131,7 +131,7 @@ public class ParkServiceImpl implements ParkService {
                 e.printStackTrace();
             }
         }
-        CommonResponse<PayingDetail> commonResponse = parkUtil.getPayingDetail(user, carNo, parkId, channelId);
+        CommonResponse<PayingDetail> commonResponse = parkUtil.getPayingDetail(user, carNo, parkId, parkCode, channelId);
         if("99".equals(commonResponse.getResult())) {
             throw new BizValidateException(commonResponse.getErrMsg());
         } else {
