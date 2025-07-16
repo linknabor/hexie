@@ -995,7 +995,7 @@ public class UserServiceImpl implements UserService {
 	public User getByMiniopenid(String miniopenid) {
 		User retUser = null;
 		List<User> userList = userRepository.findByMiniopenid(miniopenid);
-		if (userList != null) {
+		if (userList != null && !userList.isEmpty()) {
 			if (userList.size() == 1) {
 				retUser = userList.get(0);
 			} else if (userList.size() == 2) {
