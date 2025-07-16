@@ -1281,4 +1281,22 @@ public class WuyeController extends BaseController {
 		return BaseResult.successResult(marketingConsult);
 	}
 	
+	/**
+	 * 更新用户手机号
+	 *@param user
+	 *@param sectId 小区ID
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/bindPhone", method = RequestMethod.POST)
+	@ResponseBody
+	public BaseResult<String> bindPhone(HttpServletRequest request,  @ModelAttribute(Constants.USER) User user, 
+			@RequestBody Map<String, String> map) throws Exception {
+		String mobile = map.get("mobile");
+		if (!StringUtils.isEmpty(mobile)) {
+			userService.bindPhone(user, mobile);
+		}
+		return BaseResult.successResult(Constants.PAGE_SUCCESS);
+	}
+	
+	
 }

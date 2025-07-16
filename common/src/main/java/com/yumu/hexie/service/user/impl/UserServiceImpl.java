@@ -289,6 +289,8 @@ public class UserServiceImpl implements UserService {
 		if (!systemConfigService.isCardServiceAvailable(user.getAppId())) {
 			pointService.updatePoint(user, "100", "zm-binding-" + user.getId());
 		}
+		//清缓存
+		cacheService.clearUserCache(cacheService.getCacheKey(user));
 		return userRepository.save(user);
 	}
 	
