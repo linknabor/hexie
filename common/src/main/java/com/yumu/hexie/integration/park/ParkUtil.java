@@ -172,7 +172,7 @@ public class ParkUtil {
      * @return
      * @throws Exception
      */
-    public CommonResponse<PayingDetail> getPayingDetail(User user, String carNo, String parkId, String channelId) throws Exception {
+    public CommonResponse<PayingDetail> getPayingDetail(User user, String carNo, String parkId, String parkCode, String channelId) throws Exception {
         String requestUrl = requestUtil.getRequestUrl(user, null);
         requestUrl += QUERY_USER_PAYING_DETAIL_URL;
 
@@ -180,6 +180,7 @@ public class ParkUtil {
         map.put("user_id", String.valueOf(user.getId()));
         map.put("appid", getAppid(user));
         map.put("parkId", parkId);
+        map.put("parkCode", parkCode);
         map.put("carNo", carNo);
         map.put("channelId", channelId);
 
